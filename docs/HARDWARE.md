@@ -38,4 +38,10 @@ Il nome del driver Windows della grafica integrata riporta UHD 610, ma il chip e
 - Capacità e contenuti del Samsung 960 EVO prima dell'installazione.
 - Chiavetta USB vuota per l'installer.
 
-Non sono ancora stati verificati avvio, Metal, audio, autonomia, sospensione o HDMI sul dispositivo. Nessun voto di compatibilità totale è assegnato prima delle prove.
+La Recovery ha raggiunto l'interfaccia grafica. Metal, audio, autonomia, sospensione e HDMI restano da verificare sul dispositivo. Nessun voto di compatibilità totale è assegnato prima delle prove.
+
+## Esito della prima prova della Recovery
+
+Il 13 ottobre 2026 è stato riferito il raggiungimento della selezione della lingua e il funzionamento di mouse, tastiera e Wi-Fi nella Recovery. Non è stato specificato se il mouse indicato sia il touchpad o un dispositivo USB: il touchpad ELAN resta da verificare separatamente.
+
+L'esito è stato comunicato dopo la proposta del test `-igfxvesa`. I boot-args effettivi non sono stati raccolti, quindi non si attribuisce ancora il risultato con certezza a quel parametro. La comparsa della Recovery non dimostra l'accelerazione Metal, né la compatibilità completa del sistema installato. Modello e capacità del 960 EVO devono essere verificati in Utility Disco prima di inizializzarlo.
