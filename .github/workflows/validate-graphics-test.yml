@@ -1,0 +1,51 @@
+name: Test grafico reversibile
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/test_graphics.py'
+      - 'tools/check_graphics_test.py'
+      - 'tools/*GRAFICA.cmd'
+      - 'docs/TEST-GRAFICA.md'
+      - '.github/workflows/validate-graphics-test.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Crea la configurazione di riferimento
+        run: python3 tools/build_efi.py --output build/graphics-validation
+      - name: Verifica modifica reversibile e ocvalidate
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+          validator = next(Path('build/graphics-validation/upstream/OpenCore').rglob('ocvalidate.linux'))
+          subprocess.run(['python3', 'tools/check_graphics_test.py',
+                          'build/graphics-validation/bundle/EFI/OC/config.plist',
+                          '--ocvalidate', str(validator)], check=True)
+          PY
+      - name: Crea pacchetto del test
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+          with zipfile.ZipFile('build/S540-test-grafica.zip', 'w', zipfile.ZIP_DEFLATED) as z:
+              for name in ['TEST-GRAFICA.cmd', 'RIPRISTINA-GRAFICA.cmd']:
+                  z.write(Path('tools')/name, name)
+              z.write('tools/test_graphics.py', 'tools/test_graphics.py')
+              z.write('docs/TEST-GRAFICA.md', 'LEGGIMI.md')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: S540-test-grafica
+          path: build/S540-test-grafica.zip
+          if-no-files-found: error
+          retention-days: 30

@@ -2,14 +2,14 @@
 
 Obiettivo: preparare OpenCore per macOS Tahoe 26 su Lenovo IdeaPad S540-15IWL GTX.
 
-**Stato: ACPI e mappa USB verificate; prima EFI assemblata e controllata tramite GitHub Actions. Avvio sul portatile ancora da provare.**
+**Stato: prima EFI validata; i primi tentativi su HDD USB hanno avviato il kernel e i servizi della Recovery, ma non hanno mostrato l'interfaccia grafica. Diagnostica in corso.**
 Sequoia 15 resta un'alternativa da valutare se le prove con Tahoe evidenziano problemi.
 
 ## Cosa fare adesso
 
 Il dump disponibile contiene una DSDT e tutte le 12 SSDT enumerate da Windows. Le 20 tabelle ACPI utili raccolte hanno lunghezza, checksum e SHA-256 validi. Non occorre ripetere la raccolta.
 
-Il prossimo passo è il [primo avvio dalla chiavetta](docs/PRIMO-AVVIO.md). Scarica il pacchetto da **Actions → EFI per la prima prova → ultima esecuzione riuscita → Artifacts**. Il **Samsung 960 EVO** sarà esterno su **USB-C**. La mappa fornita contiene 9 porte; la velocità USB 3 del box resta da verificare con il cavo definitivo.
+Il prossimo passo per il blocco riscontrato è il [test grafico reversibile](docs/TEST-GRAFICA.md). Le istruzioni generali restano in [primo avvio](docs/PRIMO-AVVIO.md). Scarica il pacchetto da **Actions → EFI per la prima prova → ultima esecuzione riuscita → Artifacts**. Il **Samsung 960 EVO** sarà esterno su **USB-C**. La mappa fornita contiene 9 porte; la velocità USB 3 del box resta da verificare con il cavo definitivo.
 
 Le patch sono descritte in [docs/ANALISI-ACPI.md](docs/ANALISI-ACPI.md). I sorgenti sono in `acpi/source`, le versioni compilate in `acpi/compiled`. Compilazione e checksum non sostituiscono un avvio sul portatile.
 
