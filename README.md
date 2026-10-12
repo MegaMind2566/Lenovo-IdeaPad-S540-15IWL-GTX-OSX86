@@ -1,15 +1,19 @@
 # Lenovo IdeaPad S540-15IWL GTX — progetto Hackintosh
 
-Obiettivo: preparare OpenCore per macOS Tahoe 26 su Lenovo IdeaPad S540-15IWL GTX.
+Obiettivo: usare macOS Tahoe 26 su Lenovo IdeaPad S540-15IWL GTX e completare le prove di tutti i componenti. La compatibilità completa è un obiettivo da verificare sul dispositivo.
 
-**Stato: Recovery avviata; mouse, tastiera, Wi-Fi e rilevamento del 960 EVO confermati nella prova. Installazione e accelerazione Intel ancora da verificare.**
+**Stato: Recovery avviata; mouse, tastiera, Wi-Fi e rilevamento del 960 EVO confermati nella prova. Installazione di Tahoe in corso sul volume esterno «Macintosh SSD»; desktop e accelerazione Intel ancora da verificare.**
 Sequoia 15 resta un'alternativa da valutare se le prove con Tahoe evidenziano problemi.
 
 ## Cosa fare adesso
 
 Il dump disponibile contiene una DSDT e tutte le 12 SSDT enumerate da Windows. Le 20 tabelle ACPI utili raccolte hanno lunghezza, checksum e SHA-256 validi. Non occorre ripetere la raccolta.
 
-Il prossimo passo è l'[installazione sul 960 EVO esterno](docs/INSTALLAZIONE.md). Il mancato rilevamento del disco è stato risolto reinserendo l'M.2, che si era sganciato nel box. Il [test grafico reversibile](docs/TEST-GRAFICA.md) resta una prova temporanea senza accelerazione Intel; i boot-args effettivamente attivi non sono ancora stati raccolti. Le istruzioni generali restano in [primo avvio](docs/PRIMO-AVVIO.md). Scarica il pacchetto da **Actions → EFI per la prima prova → ultima esecuzione riuscita → Artifacts**. Il **Samsung 960 EVO** sarà esterno su **USB-C**. La mappa fornita contiene 9 porte; la velocità USB 3 del box resta da verificare con il cavo definitivo.
+Completa l'[installazione sul 960 EVO esterno](docs/INSTALLAZIONE.md) con la EFI che ha avviato la Recovery. Dopo il primo desktop segui la [verifica della grafica Intel](docs/GRAFICA-INTEL.md). Il [test grafico reversibile](docs/TEST-GRAFICA.md) resta una prova temporanea senza accelerazione Intel; i boot-args effettivamente attivi non sono ancora stati raccolti.
+
+La [roadmap hardware](docs/ROADMAP.md) mantiene aperto il port NVIDIA come progetto di ricerca dopo la stabilizzazione Intel. Riporta anche audio, Bluetooth, USB, autonomia, sospensione e uscite video, con criteri distinti per confermare il funzionamento.
+
+Il mancato rilevamento del 960 EVO è stato risolto reinserendo l'M.2 nel box. Il disco resta esterno su **USB-C**. La mappa fornita contiene 9 porte; la velocità USB 3 del box resta da verificare con il cavo definitivo. Per una nuova preparazione sono disponibili le istruzioni di [primo avvio](docs/PRIMO-AVVIO.md) e il pacchetto in **Actions → EFI per la prima prova → ultima esecuzione riuscita → Artifacts**.
 
 Le patch sono descritte in [docs/ANALISI-ACPI.md](docs/ANALISI-ACPI.md). I sorgenti sono in `acpi/source`, le versioni compilate in `acpi/compiled`. Compilazione e checksum non sostituiscono un avvio sul portatile.
 
@@ -39,9 +43,9 @@ Se lo strumento ACPI non è scaricabile o non funziona, usa le API di Windows co
 
 ## Prima dell'installazione
 
-Il disco indicato per macOS è un Samsung 960 EVO su USB-C. La prima EFI blocca il driver NVMe nativo in macOS per escludere il PM981a interno. Il blocco riguarda tutti gli NVMe interni: deve essere rimosso se in futuro il 960 EVO verrà montato internamente.
+Il disco indicato per macOS è un Samsung 960 EVO su USB-C. La prima EFI contiene un tentativo di blocco del driver NVMe nativo per escludere il PM981a interno. Il disco interno è comunque comparso nella Recovery: l'esclusione non è confermata. Rimane al suo posto per Windows. Se il 960 EVO verrà montato internamente, la configurazione NVMe dovrà essere riesaminata prima dell'avvio.
 
-Servirà inoltre una chiavetta USB vuota per l'installer. Preparazione della chiavetta e installazione saranno passaggi successivi; questo programma non li esegue.
+Per questa prova OpenCore e Recovery sono sull'HDD USB già preparato. Il programma di raccolta non prepara il supporto e non esegue l'installazione.
 
 ## Percorso di lavoro
 
@@ -51,7 +55,7 @@ Servirà inoltre una chiavetta USB vuota per l'installer. Preparazione della chi
 4. Avvio dell'installer ufficiale Apple e primo avvio di macOS.
 5. Prove di grafica, audio, Wi-Fi, Bluetooth, USB, batteria, luminosità e sospensione.
 
-La GTX 1650 non dispone di driver per macOS. Anche l'uscita HDMI potrebbe restare inutilizzabile: il precedente progetto per questo modello la indica non funzionante.
+La GTX 1650 non dispone di un driver macOS utilizzabile nella EFI attuale. Il port dei driver Linux resta nella [roadmap](docs/ROADMAP.md#ricerca-nvidia). Anche l'uscita HDMI richiede una prova e la verifica del percorso hardware: il precedente progetto per questo modello la indica non funzionante.
 
 Il riepilogo dei componenti verificati è in [docs/HARDWARE.md](docs/HARDWARE.md).
 

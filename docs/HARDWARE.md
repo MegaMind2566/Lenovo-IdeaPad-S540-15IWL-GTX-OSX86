@@ -9,14 +9,14 @@ Report ricevuto il 12 ottobre 2026. Sono riportati solo i dati utili al progetto
 | BIOS | BWCN19WW, 26 maggio 2021 | UEFI presente; Secure Boot disabilitato nel report |
 | CPU | Intel Core i7-8565U, Whiskey Lake-U, 4 core / 8 thread | Base adatta al tentativo |
 | RAM | 12 GB DDR4-2400, moduli da 8 e 4 GB | Sufficiente per la prima prova |
-| iGPU | Intel UHD 620, PCI 8086:3EA0 | Accelerazione da configurare e verificare |
-| dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91 | Nessun driver macOS; spegnimento da adattare alle ACPI |
+| iGPU | Intel UHD 620, PCI 8086:3EA0 | Configurazione iniziale presente; verifica Metal come prossimo passo |
+| dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91 | Driver disabilitato nella EFI; port Linux mantenuto nella roadmap; spegnimento elettrico da verificare |
 | Schermo | BOE NV156FHM-N61, 1920×1080 | Luminosità e collegamento da verificare |
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Famiglia PM981a problematica; non assunta compatibile |
-| Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | Supportata da OpenIntelWireless; versione driver da scegliere |
+| Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | Funzionamento riferito nella Recovery con itlwm; sistema installato da provare |
 | Bluetooth | Intel, USB 8087:0AAA | Firmware e funzionamento su Tahoe da verificare |
 | Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Codec confermato dal dump Windows; audio analogico Tahoe da ripristinare e verificare |
-| Tastiera | PS/2 | Driver da configurare |
+| Tastiera | PS/2 | Funzionamento riferito nella Recovery con VoodooPS2 |
 | Touchpad | ELAN0662, I2C HID; controller Intel 8086:9DE8 | Percorso confermato: `_SB.PCI0.I2C0.TPD0`; funzionamento da provare |
 | Lettore SD | O2Micro SD Host Controller | Supporto da verificare; diverso dal lettore del progetto lucatek |
 | Webcam | TwinHan Integrated Camera USB | Da provare dopo la mappatura USB |
@@ -30,21 +30,21 @@ Il nome del driver Windows della grafica integrata riporta UHD 610, ma il chip e
 - Touchpad ELAN0662 sul percorso `_SB.PCI0.I2C0.TPD0`.
 - dGPU: `_SB.PCI0.RP05.PXSX`; metodo nativo `_OFF` presente nella SSDT9.
 - NVMe interno: PCI `PciRoot(0x0)/Pci(0x1D,0x0)/Pci(0x0,0x0)`, coerente con `_SB.PCI0.RP09.PXSX`.
-- Samsung 960 EVO per la prova di macOS: collegamento esterno USB-C confermato; capacità da rilevare prima di inizializzarlo.
+- Samsung 960 EVO per la prova di macOS: collegamento esterno USB-C confermato; capacità non riportata nella documentazione ricevuta.
 
 ## Dati ancora necessari
 
 - Velocità SuperSpeed e reversibilità della USB-C: mappa a 9 porte ricevuta e verificata.
-- Capacità e contenuti del Samsung 960 EVO prima dell'installazione.
-- Chiavetta USB vuota per l'installer.
+- Boot-args effettivi e report della grafica dal sistema installato.
+- Esiti delle prove dei componenti nella [roadmap](ROADMAP.md).
 
-La Recovery ha raggiunto l'interfaccia grafica. Metal, audio, autonomia, sospensione e HDMI restano da verificare sul dispositivo. Nessun voto di compatibilità totale è assegnato prima delle prove.
+La Recovery ha raggiunto l'interfaccia grafica e l'installazione di Tahoe è stata avviata sul volume esterno «Macintosh SSD». Il primo desktop non è ancora confermato. Metal, audio, autonomia, sospensione e HDMI restano da verificare sul dispositivo. Nessun voto di compatibilità totale è assegnato prima delle prove.
 
 ## Esito della prima prova della Recovery
 
 Il 13 ottobre 2026 è stato riferito il raggiungimento della selezione della lingua e il funzionamento di mouse, tastiera e Wi-Fi nella Recovery. Non è stato specificato se il mouse indicato sia il touchpad o un dispositivo USB: il touchpad ELAN resta da verificare separatamente.
 
-L'esito è stato comunicato dopo la proposta del test `-igfxvesa`. I boot-args effettivi non sono stati raccolti, quindi non si attribuisce ancora il risultato con certezza a quel parametro. La comparsa della Recovery non dimostra l'accelerazione Metal, né la compatibilità completa del sistema installato. Modello e capacità del 960 EVO devono essere verificati in Utility Disco prima di inizializzarlo.
+L'esito è stato comunicato dopo la proposta del test `-igfxvesa`. I boot-args effettivi non sono stati raccolti, quindi non si attribuisce ancora il risultato con certezza a quel parametro. La comparsa della Recovery non dimostra l'accelerazione Metal, né la compatibilità completa del sistema installato. La [verifica Intel](GRAFICA-INTEL.md) parte da questi dati dopo l'installazione.
 
 ## Rilevamento del disco esterno e preferenza per l'interno
 

@@ -2,6 +2,8 @@
 
 La Recovery ha raggiunto la schermata grafica e sono stati riferiti funzionamento di mouse, tastiera, Wi-Fi e rilevamento del 960 EVO. Il modulo M.2 nel box era sganciato ed è stato reinserito. Per l'installazione mantieni porta e cavo con cui il disco ora viene rilevato.
 
+Nella prova del 13 ottobre 2026 l'installer mostra **macOS Tahoe** e la destinazione **Macintosh SSD**. L'installazione è già in corso: le istruzioni di inizializzazione qui sotto servono per una nuova preparazione, non vanno ripetute durante questa prova.
+
 ## Inizializzazione e avvio dell'installazione
 
 1. Nella schermata delle Utility verifica che la voce dell'installer indichi macOS Tahoe. Se riporta un'altra versione, raccogli il nome della versione prima di procedere.
@@ -13,13 +15,13 @@ La Recovery ha raggiunto la schermata grafica e sono stati riferiti funzionament
 
 ## Riavvii
 
-L'installazione può riavviare il computer più volte. Ogni volta usa OpenCore dall'HDD di avvio già preparato. Quando compare **macOS Installer**, scegli quella voce per continuare. Al termine scegli il volume **macOS**. Non ripartire dalla Recovery a ogni riavvio.
+L'installazione può riavviare il computer più volte. Ogni volta usa OpenCore dall'HDD di avvio già preparato. Quando compare **macOS Installer**, scegli quella voce per continuare. Al termine scegli il volume con il nome assegnato: **Macintosh SSD** nella prova attuale, **macOS** nell'esempio di preparazione. Non ripartire dalla Recovery a ogni riavvio.
 
 Se le voci del menu sono diverse o l'installer mostra un errore, raccogli una foto leggibile prima di cambiare la configurazione. Non rimuovere i dischi durante l'installazione.
 
 ## Dopo il primo desktop
 
-Mantieni la EFI attuale durante l'installazione. L'eventuale opzione di test `-igfxvesa` è temporanea: il raggiungimento della Recovery non conferma l'accelerazione Intel. Dopo il primo desktop saranno verificati Metal, audio, luminosità, batteria e sospensione. OpenCore resterà inizialmente sull'HDD di avvio; il trasferimento della EFI sull'SSD esterno verrà eseguito dopo la prova del sistema installato.
+Mantieni la EFI attuale durante l'installazione. L'eventuale opzione di test `-igfxvesa` è temporanea: il raggiungimento della Recovery non conferma l'accelerazione Intel. Dopo il primo desktop segui la [verifica Intel](GRAFICA-INTEL.md), poi le prove nella [roadmap hardware](ROADMAP.md). OpenCore resterà inizialmente sull'HDD di avvio; il trasferimento della EFI sull'SSD esterno verrà eseguito dopo la prova del sistema installato.
 
 Il disco Windows interno rimane al suo posto, secondo la preferenza espressa. Il rilevamento nella Recovery non conferma l'efficacia del blocco NVMe della configurazione iniziale né la stabilità sotto carico.
 

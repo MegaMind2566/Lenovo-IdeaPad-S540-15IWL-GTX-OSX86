@@ -44,7 +44,7 @@ Invia l'esito e una foto leggibile dell'ultima schermata se l'avvio si blocca. I
 
 ## Disco interno e limiti
 
-La configurazione blocca l'avvio di `com.apple.iokit.IONVMeFamily` in macOS. Il PM981a interno è l'unico dispositivo NVMe nativo rilevato; il 960 EVO collegato tramite USB usa lo stack USB. **Il blocco vale per tutti i dischi NVMe nativi**: se il 960 EVO verrà montato internamente, questa configurazione dovrà essere modificata prima dell'avvio. Non viene modificato il firmware del disco.
+La configurazione contiene un tentativo di blocco di `com.apple.iokit.IONVMeFamily` in macOS. Il PM981a interno è comunque stato riferito visibile nella Recovery: l'esclusione non è confermata. Il 960 EVO collegato tramite USB usa lo stack USB. Se verrà montato internamente, la configurazione NVMe dovrà essere riesaminata prima dell'avvio. Il disco Windows resta al suo posto; il firmware del disco non viene modificato.
 
 Avvia Windows direttamente dal menu Lenovo durante le prove. L'uscita HDMI, l'audio analogico su Tahoe, la sospensione, la luminosità, il Bluetooth e l'autonomia sono ancora da verificare o completare.
 
