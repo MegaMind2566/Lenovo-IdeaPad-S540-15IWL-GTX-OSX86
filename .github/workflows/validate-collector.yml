@@ -1,0 +1,44 @@
+name: Controllo raccolta Windows
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Controlla sintassi PowerShell 5.1
+        shell: powershell
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $env:GITHUB_WORKSPACE 'tools\Raccogli-Dati.ps1'), [ref]$tokens, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) { $errors | Format-List; throw 'Sintassi PowerShell non valida' }
+      - name: Prova raccolta sul runner Windows
+        shell: powershell
+        run: |
+          & .\tools\Raccogli-Dati.ps1 -OutputRoot (Join-Path $env:RUNNER_TEMP 'lenovo-collector') -SkipToolDownload -NoOpenFolder
+          if ($LASTEXITCODE -ne 0) { throw 'Raccolta fallita' }
+      - name: Verifica archivio e dati esportati
+        shell: powershell
+        run: |
+          $root = Join-Path $env:RUNNER_TEMP 'lenovo-collector'
+          $zip = Get-ChildItem $root -Filter '*.zip' | Select-Object -First 1
+          if (-not $zip -or $zip.Length -eq 0) { throw 'ZIP assente' }
+          $unpacked = Join-Path $env:RUNNER_TEMP 'lenovo-collector-verifica'
+          Expand-Archive -LiteralPath $zip.FullName -DestinationPath $unpacked
+          $statusFile = Get-ChildItem $unpacked -Filter 'stato-raccolta.json' -Recurse | Select-Object -First 1
+          $status = Get-Content $statusFile.FullName -Raw | ConvertFrom-Json
+          if ($status.SchemaVersion -ne 1 -or $status.DeviceCount -le 0) { throw 'Inventario non valido' }
+          if (-not (Get-ChildItem $unpacked -Filter 'sistema.json' -Recurse)) { throw 'Dati sistema assenti' }
+          if (-not (Get-ChildItem $unpacked -Filter 'dispositivi.csv' -Recurse)) { throw 'CSV assente' }
+          if (Get-ChildItem $unpacked -Include 'MSDM*','SLIC*' -File -Recurse) { throw 'Tabella non prevista nello ZIP' }
+          Write-Host ('ZIP verificato; dispositivi: ' + $status.DeviceCount + '; stato: ' + $status.CollectionStatus)
