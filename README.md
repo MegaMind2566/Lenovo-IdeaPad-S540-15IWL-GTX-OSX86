@@ -1,6 +1,6 @@
 # Lenovo IdeaPad S540-15IWL GTX — progetto Hackintosh
 
-Obiettivo: preparare OpenCore per macOS Tahoe 26 sul Lenovo di Andrea.
+Obiettivo: preparare OpenCore per macOS Tahoe 26 su Lenovo IdeaPad S540-15IWL GTX.
 
 **Stato: raccolta dati. Non c'è ancora una EFI pronta da installare.**
 Sequoia 15 resta un'alternativa da valutare se le prove con Tahoe evidenziano problemi.
