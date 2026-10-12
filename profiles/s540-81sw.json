@@ -6,7 +6,7 @@
   "model": "Lenovo IdeaPad S540-15IWL GTX (81SW)",
   "bios": "BWCN19WW",
   "macos_target_drive": "Samsung 960 EVO",
-  "target_drive_connection": "not yet confirmed",
+  "target_drive_connection": "external USB-C",
   "acpi_paths": {
     "cpu": "\\_SB.PR00",
     "embedded_controller": "\\_SB.PCI0.LPCB.H_EC",
@@ -26,12 +26,30 @@
     "bluetooth": "8087:0AAA"
   },
   "acpi_add": [
-    {"path": "SSDT-PLUG.aml", "enabled": true},
-    {"path": "SSDT-EC-USBX.aml", "enabled": true},
-    {"path": "SSDT-PNLF.aml", "enabled": true},
-    {"path": "SSDT-RTC-ENABLE.aml", "enabled": true},
-    {"path": "SSDT-XOSI.aml", "enabled": true},
-    {"path": "SSDT-DGPU-OFF.aml", "enabled": false}
+    {
+      "path": "SSDT-PLUG.aml",
+      "enabled": true
+    },
+    {
+      "path": "SSDT-EC-USBX.aml",
+      "enabled": true
+    },
+    {
+      "path": "SSDT-PNLF.aml",
+      "enabled": true
+    },
+    {
+      "path": "SSDT-RTC-ENABLE.aml",
+      "enabled": true
+    },
+    {
+      "path": "SSDT-XOSI.aml",
+      "enabled": true
+    },
+    {
+      "path": "SSDT-DGPU-OFF.aml",
+      "enabled": false
+    }
   ],
   "oem_acpi_patch": {
     "comment": "OEM _OSI calls to Darwin-aware XOSI",
@@ -44,7 +62,31 @@
     "device-id_hex": "9b3e0000"
   },
   "gpu_boot_argument": "-wegnoegpu",
-  "internal_pm981a_handling": "Only exclude RP09 when the 960 EVO is external and the PM981a remains installed. Never mask RP09 if the 960 EVO replaces it.",
-  "missing_before_installer": ["USB port map", "960 EVO connection and capacity", "empty USB installer drive"],
-  "runtime_tests_pending": ["boot", "Metal", "audio", "brightness", "touchpad", "wifi", "bluetooth", "sleep", "battery"]
+  "internal_pm981a_handling": "External USB-C target confirmed. Exclude the internal PM981a from macOS on RP09. Revisit this exclusion if the 960 EVO is later installed internally.",
+  "missing_before_installer": [
+    "USB port map including the actual 960 EVO USB-C connection",
+    "verify destination drive capacity and contents before installation",
+    "empty USB installer drive"
+  ],
+  "runtime_tests_pending": [
+    "boot",
+    "Metal",
+    "audio",
+    "brightness",
+    "touchpad",
+    "wifi",
+    "bluetooth",
+    "sleep",
+    "battery"
+  ],
+  "storage_plan": {
+    "target_model": "Samsung 960 EVO",
+    "transport": "USB",
+    "connector": "USB-C",
+    "internal_device_model": "Samsung PM981a (MZVLB512HBJQ-000L2)",
+    "internal_device_acpi_path": "\\_SB.PCI0.RP09.PXSX",
+    "internal_device_pci_path": "PciRoot(0x0)/Pci(0x1D,0x0)/Pci(0x0,0x0)",
+    "internal_device_action": "exclude from macOS in the future EFI configuration",
+    "installation_actions_executed": false
+  }
 }

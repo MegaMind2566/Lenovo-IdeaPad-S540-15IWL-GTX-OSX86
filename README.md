@@ -9,7 +9,7 @@ Sequoia 15 resta un'alternativa da valutare se le prove con Tahoe evidenziano pr
 
 Il dump disponibile contiene una DSDT e tutte le 12 SSDT enumerate da Windows. Le 20 tabelle ACPI utili raccolte hanno lunghezza, checksum e SHA-256 validi. Non occorre ripetere la raccolta.
 
-Il prossimo passo è la [mappatura USB da Windows](docs/MAPPATURA-USB.md). Serve inoltre confermare come sarà collegato il **Samsung 960 EVO** destinato a macOS: box USB esterno oppure sostituzione dell'NVMe interno.
+Il prossimo passo è la [mappatura USB da Windows](docs/MAPPATURA-USB.md). Il **Samsung 960 EVO** destinato a macOS sarà esterno, collegato tramite **USB-C**. Durante la mappatura occorre provare anche il disco sulla porta e con il cavo che verranno usati per l'installazione.
 
 Le patch sono descritte in [docs/ANALISI-ACPI.md](docs/ANALISI-ACPI.md). I sorgenti sono in `acpi/source`, le versioni compilate in `acpi/compiled`. Compilazione e checksum non sostituiscono un avvio sul portatile.
 
