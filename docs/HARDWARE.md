@@ -45,3 +45,9 @@ La Recovery ha raggiunto l'interfaccia grafica. Metal, audio, autonomia, sospens
 Il 13 ottobre 2026 è stato riferito il raggiungimento della selezione della lingua e il funzionamento di mouse, tastiera e Wi-Fi nella Recovery. Non è stato specificato se il mouse indicato sia il touchpad o un dispositivo USB: il touchpad ELAN resta da verificare separatamente.
 
 L'esito è stato comunicato dopo la proposta del test `-igfxvesa`. I boot-args effettivi non sono stati raccolti, quindi non si attribuisce ancora il risultato con certezza a quel parametro. La comparsa della Recovery non dimostra l'accelerazione Metal, né la compatibilità completa del sistema installato. Modello e capacità del 960 EVO devono essere verificati in Utility Disco prima di inizializzarlo.
+
+## Rilevamento del disco esterno e preferenza per l'interno
+
+Il 960 EVO non compariva perché il modulo M.2 si era sganciato nel box. Dopo averlo reinserito è stato riferito il rilevamento del disco. Questo esito risolve il problema di rilevamento osservato; non conferma ancora la velocità SuperSpeed né entrambe le orientazioni della USB-C.
+
+Il disco interno è stato riferito visibile nella Recovery: l'esclusione tramite blocco del driver NVMe non è risultata verificata in questa prova. È stato richiesto di lasciare il disco Windows al suo posto e procedere sul 960 EVO esterno. Nessuna inizializzazione o modifica delle partizioni del disco interno è stata eseguita. Le prove successive valuteranno eventuali problemi di stabilità.
