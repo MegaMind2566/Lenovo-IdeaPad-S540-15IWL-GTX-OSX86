@@ -32,4 +32,4 @@ Il nome del driver Windows della grafica integrata riporta UHD 610, ma il chip e
 - Mappa USB del dispositivo: la sola lista dei controller Windows non la sostituisce.
 - Disponibilità e modello dell'SSD su cui provare macOS.
 
-Non sono ancora stati verificati avvio, Metal, audio, autonomia, sospensione o HDMI sul Lenovo di Andrea. Nessun voto di compatibilità totale è assegnato prima delle prove.
+Non sono ancora stati verificati avvio, Metal, audio, autonomia, sospensione o HDMI sul dispositivo. Nessun voto di compatibilità totale è assegnato prima delle prove.
