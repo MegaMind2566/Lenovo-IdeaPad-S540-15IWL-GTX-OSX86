@@ -7,3 +7,4 @@ errore-avvio.txt
 *.htm
 EFI/
 __pycache__/
+build/

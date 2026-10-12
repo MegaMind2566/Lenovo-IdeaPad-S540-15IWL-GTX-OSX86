@@ -1,0 +1,37 @@
+name: Controllo patch ACPI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'acpi/**'
+      - 'profiles/**'
+      - 'tools/build_acpi.py'
+      - '.github/workflows/validate-acpi.yml'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  acpi:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Installa compilatore ACPI
+        run: sudo apt-get update && sudo apt-get install -y acpica-tools
+      - name: Compila e verifica AML
+        run: python3 tools/build_acpi.py
+      - name: Verifica riferimenti del profilo
+        run: |
+          python3 - <<'PY'
+          import json, pathlib
+          profile = json.loads(pathlib.Path('profiles/s540-81sw.json').read_text())
+          for table in profile['acpi_add']:
+              path = pathlib.Path('build/acpi') / table['path']
+              assert path.is_file(), path
+          assert not profile['acpi_add'][-1]['enabled'], 'dGPU power-off must remain optional until tested'
+          print('Profile references verified')
+          PY

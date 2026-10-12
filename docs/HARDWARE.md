@@ -5,7 +5,7 @@ Report ricevuto il 12 ottobre 2026. Sono riportati solo i dati utili al progetto
 | Voce | Dato rilevato | Stato per macOS |
 |---|---|---|
 | Modello | Lenovo IdeaPad S540-15IWL GTX, famiglia 81SW | Configurazione da costruire sul dispositivo |
-| Scheda madre | Lenovo LNVNB161216 | ACPI mancanti |
+| Scheda madre | Lenovo LNVNB161216 | DSDT e 12 SSDT analizzate |
 | BIOS | BWCN19WW, 26 maggio 2021 | UEFI presente; Secure Boot disabilitato nel report |
 | CPU | Intel Core i7-8565U, Whiskey Lake-U, 4 core / 8 thread | Base adatta al tentativo |
 | RAM | 12 GB DDR4-2400, moduli da 8 e 4 GB | Sufficiente per la prima prova |
@@ -15,21 +15,27 @@ Report ricevuto il 12 ottobre 2026. Sono riportati solo i dati utili al progetto
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Famiglia PM981a problematica; non assunta compatibile |
 | Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | Supportata da OpenIntelWireless; versione driver da scegliere |
 | Bluetooth | Intel, USB 8087:0AAA | Firmware e funzionamento su Tahoe da verificare |
-| Controller audio | Intel cAVS, PCI 8086:9DC8 | Codec analogico non identificato nel report |
+| Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Codec confermato dal dump Windows; audio analogico Tahoe da ripristinare e verificare |
 | Tastiera | PS/2 | Driver da configurare |
-| Touchpad | Dispositivo HID I2C; controller Intel 8086:9DE8 | Identificativo del touchpad da raccogliere |
+| Touchpad | ELAN0662, I2C HID; controller Intel 8086:9DE8 | Percorso confermato: `_SB.PCI0.I2C0.TPD0`; funzionamento da provare |
 | Lettore SD | O2Micro SD Host Controller | Supporto da verificare; diverso dal lettore del progetto lucatek |
 | Webcam | TwinHan Integrated Camera USB | Da provare dopo la mappatura USB |
 
 Il nome del driver Windows della grafica integrata riporta UHD 610, ma il chip e l'ID PCI del report identificano UHD 620. La configurazione sarà basata sul chip reale.
 
+## Dati acquisiti dopo il report
+
+- Una DSDT, 12 SSDT e 7 altre tabelle utili: tutte verificate per lunghezza, checksum e SHA-256.
+- Audio Realtek ALC257 su Intel SST, `INTELAUDIO\\FUNC_01&VEN_10EC&DEV_0257`.
+- Touchpad ELAN0662 sul percorso `_SB.PCI0.I2C0.TPD0`.
+- dGPU: `_SB.PCI0.RP05.PXSX`; metodo nativo `_OFF` presente nella SSDT9.
+- NVMe interno: PCI `PciRoot(0x0)/Pci(0x1D,0x0)/Pci(0x0,0x0)`, coerente con `_SB.PCI0.RP09.PXSX`.
+- Samsung 960 EVO indicato come disco per la prova di macOS. Collegamento e capacità non ancora confermati.
+
 ## Dati ancora necessari
 
-- DSDT e tutte le SSDT disponibili, con verifica di integrità.
-- ID del codec audio analogico e relativi dispositivi Intel SST/HD Audio.
-- ID ACPI/HID del touchpad e modalità di collegamento.
-- Percorsi ACPI effettivi di dGPU e NVMe, ricavati dai dump.
 - Mappa USB del dispositivo: la sola lista dei controller Windows non la sostituisce.
-- Disponibilità e modello dell'SSD su cui provare macOS.
+- Collegamento del Samsung 960 EVO, capacità e disponibilità per l'installazione.
+- Chiavetta USB vuota per l'installer.
 
 Non sono ancora stati verificati avvio, Metal, audio, autonomia, sospensione o HDMI sul dispositivo. Nessun voto di compatibilità totale è assegnato prima delle prove.

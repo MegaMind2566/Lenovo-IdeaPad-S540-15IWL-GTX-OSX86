@@ -176,9 +176,10 @@ public static class LenovoFirmwareReader {
             Push-Location $scratch
             try {
                 $proc = Start-Process -FilePath $tool -ArgumentList '-b' -WorkingDirectory $scratch -PassThru -NoNewWindow -RedirectStandardOutput (Join-Path $scratch 'output.txt') -RedirectStandardError (Join-Path $scratch 'error.txt')
+                $processHandle = $proc.Handle
                 if (-not $proc.WaitForExit(60000)) { $proc.Kill(); throw 'Lo strumento ACPI non ha terminato entro 60 secondi.' }
                 $proc.WaitForExit()
-                if ($proc.ExitCode -ne 0) { Add-CollectionWarning ('acpidump ha restituito il codice ' + $proc.ExitCode + '; verifico i file disponibili.') }
+                if ($null -ne $proc.ExitCode -and $proc.ExitCode -ne 0) { Add-CollectionWarning ('acpidump ha restituito il codice ' + $proc.ExitCode + '; verifico i file disponibili.') }
                 if (-not (Get-ChildItem -LiteralPath $scratch -Filter 'dsdt*.dat')) {
                     $proc = Start-Process -FilePath $tool -ArgumentList '-b -n DSDT' -WorkingDirectory $scratch -PassThru -NoNewWindow -RedirectStandardOutput (Join-Path $scratch 'dsdt-output.txt') -RedirectStandardError (Join-Path $scratch 'dsdt-error.txt')
                     if (-not $proc.WaitForExit(30000)) { $proc.Kill(); throw 'Lettura DSDT oltre il tempo previsto.' }

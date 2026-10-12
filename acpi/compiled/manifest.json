@@ -1,0 +1,41 @@
+{
+  "compiler": "Intel ACPI Component Architecture\nASL+ Optimizing Compiler/Disassembler version 20240927\nCopyright (c) 2000 - 2023 Intel Corporation",
+  "tables": [
+    {
+      "file": "SSDT-DGPU-OFF.aml",
+      "length": 195,
+      "sha256": "c3461738bf4828c2a962ca8a923671bbc61ec0e3687884773ea6bada70da53a6",
+      "source_sha256": "77f9d94a697af907e5be5c6a88d3d748f1d0164efbf860944338e85c36bb8391"
+    },
+    {
+      "file": "SSDT-EC-USBX.aml",
+      "length": 302,
+      "sha256": "5b1e48ad65e2340bcec423a63390a7192a62c8e09948c15c936f27691f836547",
+      "source_sha256": "687bbf24a76cf2795309be197573d165c66001537595981aba17f2484b9063ef"
+    },
+    {
+      "file": "SSDT-PLUG.aml",
+      "length": 119,
+      "sha256": "5013c1c18b16d0165d27bd05df484f93ba721537c0a5b25195de2a46c597ef09",
+      "source_sha256": "36ef78147da0afe30d9c5b1f9cfafb6644c4632d588f95d5ea6cd149f51b3a86"
+    },
+    {
+      "file": "SSDT-PNLF.aml",
+      "length": 142,
+      "sha256": "b2707c4ff2f4dcd69434fa433113680b230eac9b8415098829ded018d0a9ad88",
+      "source_sha256": "a31f64df1d4886ebf39e7dde028a86b5efc34152294aecb1988e7b362605e955"
+    },
+    {
+      "file": "SSDT-RTC-ENABLE.aml",
+      "length": 76,
+      "sha256": "4e710f4bc2fb7d888cdfa7c91e5d4e1fa291919d98bfa7d1338863368169ea52",
+      "source_sha256": "f5a82b0e61c1336cea10d17051d35e6ca798f9b9f2eedd0824a4050ef9a56384"
+    },
+    {
+      "file": "SSDT-XOSI.aml",
+      "length": 272,
+      "sha256": "163dec5b9f386ffac8d55f81ca180e8c204162a8585f2d576b9c4d05edfb74f9",
+      "source_sha256": "0bf61ca4f660f804ad3256aa6ab368058c1831e6a5b9e5a91c935ffeccd706ab"
+    }
+  ]
+}

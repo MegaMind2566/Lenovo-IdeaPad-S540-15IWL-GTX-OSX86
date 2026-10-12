@@ -2,10 +2,18 @@
 
 Obiettivo: preparare OpenCore per macOS Tahoe 26 su Lenovo IdeaPad S540-15IWL GTX.
 
-**Stato: raccolta dati. Non c'è ancora una EFI pronta da installare.**
+**Stato: dump analizzato e sei patch ACPI compilate. EFI da completare prima dell'installazione.**
 Sequoia 15 resta un'alternativa da valutare se le prove con Tahoe evidenziano problemi.
 
 ## Cosa fare adesso
+
+Il dump disponibile contiene una DSDT e tutte le 12 SSDT enumerate da Windows. Le 20 tabelle ACPI utili raccolte hanno lunghezza, checksum e SHA-256 validi. Non occorre ripetere la raccolta.
+
+Il prossimo passo è la [mappatura USB da Windows](docs/MAPPATURA-USB.md). Serve inoltre confermare come sarà collegato il **Samsung 960 EVO** destinato a macOS: box USB esterno oppure sostituzione dell'NVMe interno.
+
+Le patch sono descritte in [docs/ANALISI-ACPI.md](docs/ANALISI-ACPI.md). I sorgenti sono in `acpi/source`, le versioni compilate in `acpi/compiled`. Compilazione e checksum non sostituiscono un avvio sul portatile.
+
+### Per una nuova raccolta
 
 1. Su GitHub premi **Code → Download ZIP**.
 2. Estrai tutto lo ZIP in una cartella normale. Non avviare i file dentro lo ZIP.
@@ -31,7 +39,7 @@ Se lo strumento ACPI non è scaricabile o non funziona, usa le API di Windows co
 
 ## Prima dell'installazione
 
-Occorre decidere dove installare macOS: SSD esterno oppure altro SSD interno compatibile. Il Samsung PM981a del report è un punto critico. Un eventuale avvio esterno richiede anche di escludere da macOS l'NVMe interno problematico con una patch adatta alle ACPI del portatile.
+Il disco indicato per macOS è un Samsung 960 EVO. Il Samsung PM981a attualmente nel portatile rimane un punto critico se non viene rimosso. Un eventuale avvio esterno richiede anche di escludere da macOS l'NVMe interno problematico. Se il 960 EVO sostituisce l'NVMe interno, il relativo percorso PCI non deve essere escluso.
 
 Servirà inoltre una chiavetta USB vuota per l'installer. Preparazione della chiavetta e installazione saranno passaggi successivi; questo programma non li esegue.
 

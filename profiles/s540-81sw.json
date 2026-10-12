@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "status": "ACPI compiled; bootable EFI not assembled yet",
+  "target_macos": "Tahoe 26",
+  "fallback_macos": "Sequoia 15",
+  "model": "Lenovo IdeaPad S540-15IWL GTX (81SW)",
+  "bios": "BWCN19WW",
+  "macos_target_drive": "Samsung 960 EVO",
+  "target_drive_connection": "not yet confirmed",
+  "acpi_paths": {
+    "cpu": "\\_SB.PR00",
+    "embedded_controller": "\\_SB.PCI0.LPCB.H_EC",
+    "integrated_gpu": "\\_SB.PCI0.GFX0",
+    "discrete_gpu": "\\_SB.PCI0.RP05.PXSX",
+    "discrete_gpu_off": "\\_SB.PCI0.RP05.PXSX._OFF",
+    "internal_nvme": "\\_SB.PCI0.RP09.PXSX",
+    "trackpad": "\\_SB.PCI0.I2C0.TPD0",
+    "gpio": "\\_SB.PCI0.GPI0",
+    "rtc": "\\_SB.PCI0.LPCB.RTC"
+  },
+  "devices": {
+    "igpu": "8086:3EA0",
+    "audio": "Realtek ALC257 (10EC:0257)",
+    "trackpad": "ELAN0662 I2C HID",
+    "wifi": "Intel AC 9560",
+    "bluetooth": "8087:0AAA"
+  },
+  "acpi_add": [
+    {"path": "SSDT-PLUG.aml", "enabled": true},
+    {"path": "SSDT-EC-USBX.aml", "enabled": true},
+    {"path": "SSDT-PNLF.aml", "enabled": true},
+    {"path": "SSDT-RTC-ENABLE.aml", "enabled": true},
+    {"path": "SSDT-XOSI.aml", "enabled": true},
+    {"path": "SSDT-DGPU-OFF.aml", "enabled": false}
+  ],
+  "oem_acpi_patch": {
+    "comment": "OEM _OSI calls to Darwin-aware XOSI",
+    "find_hex": "5f4f5349",
+    "replace_hex": "584f5349"
+  },
+  "initial_igpu_properties": {
+    "pci_path": "PciRoot(0x0)/Pci(0x2,0x0)",
+    "AAPL,ig-platform-id_hex": "00009b3e",
+    "device-id_hex": "9b3e0000"
+  },
+  "gpu_boot_argument": "-wegnoegpu",
+  "internal_pm981a_handling": "Only exclude RP09 when the 960 EVO is external and the PM981a remains installed. Never mask RP09 if the 960 EVO replaces it.",
+  "missing_before_installer": ["USB port map", "960 EVO connection and capacity", "empty USB installer drive"],
+  "runtime_tests_pending": ["boot", "Metal", "audio", "brightness", "touchpad", "wifi", "bluetooth", "sleep", "battery"]
+}
