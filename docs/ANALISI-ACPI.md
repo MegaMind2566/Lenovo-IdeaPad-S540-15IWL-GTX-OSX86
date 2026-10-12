@@ -39,3 +39,7 @@ I sorgenti sono in `acpi/source`. Il comando `python tools/build_acpi.py --iasl 
 Le copie in `acpi/compiled` sono state prodotte con iASL 20240927. Il controllo automatico ricompila i sorgenti con il compilatore dell'ambiente CI e controlla nuovamente i risultati.
 
 Non viene ricaricata in OpenCore la DSDT originale. Questi file sono patch supplementari; la configurazione completa, i driver, i kext e la mappa USB devono ancora essere assemblati e verificati prima di creare l'installer.
+
+## Configurazione iniziale del disco USB-C
+
+Il collegamento esterno del 960 EVO è confermato. La prima EFI blocca l'avvio del driver `com.apple.iokit.IONVMeFamily` con strategia `Disable`, mantenendo le informazioni sulle dipendenze. Il PM981a è l'unico NVMe nativo rilevato; il disco esterno usa lo stack USB. Il blocco vale per tutti gli NVMe nativi e va rimosso prima di montare il 960 EVO internamente. Percorsi ACPI e PCI del PM981a restano documentati per un'eventuale revisione. Il risultato è da verificare nel primo avvio.

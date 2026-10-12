@@ -1,0 +1,37 @@
+name: EFI per la prima prova
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'acpi/**'
+      - 'usb/**'
+      - 'profiles/**'
+      - 'tools/build_efi.py'
+      - 'tools/configure_wifi.py'
+      - 'tools/*RECOVERY.cmd'
+      - 'tools/*WIFI.cmd'
+      - 'docs/PRIMO-AVVIO.md'
+      - '.github/workflows/build-efi.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  assemble:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assembla e valida EFI
+        run: python3 tools/build_efi.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: S540-81SW-Tahoe-prima-prova
+          path: |
+            build/efi/S540-81SW-Tahoe-prima-prova.zip
+            build/efi/manifest.json
+            build/efi/ocvalidate.txt
+          if-no-files-found: error
+          retention-days: 30

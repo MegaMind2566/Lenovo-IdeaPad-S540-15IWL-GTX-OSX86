@@ -17,3 +17,23 @@ Se il programma segnala un errore o non è chiaro quali porte scegliere, fornire
 La mappa deve rispettare il limite di 15 porte per controller di macOS. Il limite si applica alle porte logiche, quindi una presa USB 3 può contare come due porte. La selezione verrà verificata prima dell'integrazione in OpenCore.
 
 Fonte: [USBToolBox — documentazione ufficiale](https://github.com/USBToolBox/tool).
+
+## Mappa ricevuta e verificata
+
+La `UTBMap.kext` fornita coincide con le 9 porte selezionate in `usb.json`, sul controller `XHC` PCI `8086:9DED`. Il plist originale è conservato in `usb/UTBMap.kext`; il riepilogo privo di seriali e percorsi Windows è in `usb/ports.json`. Il JSON grezzo non viene aggiunto alla repository.
+
+| Nome nella mappa | Porta controller | Tipo | Uso |
+|---|---:|---:|---|
+| HS01 | 1 | 9 | USB-C USB 2 |
+| HS02 | 2 | 255 | Fingerprint interno |
+| HS03 | 4 | 255 | Webcam interna |
+| HS04 | 6 | 3 | USB-A USB 2 |
+| HS05 | 7 | 3 | USB-A USB 2 |
+| HS06 | 10 | 255 | Bluetooth interno |
+| SS01 | 13 | 3 | USB-A SuperSpeed |
+| SS02 | 14 | 3 | USB-A SuperSpeed |
+| SS03 | 15 | 9 | USB-C SuperSpeed |
+
+`HS03` indica qui la porta fisica 4: i nomi sono etichette generate dal programma; il campo binario `port` contiene il numero effettivo. I dispositivi interni sono marcati `255`, le USB-A `3` e la USB-C `9` (con switch).
+
+Il box RTL9210 è stato osservato a velocità USB 2 sulla porta 1. La porta SuperSpeed 15 è selezionata ma non contiene un dispositivo registrato. La mappa è utilizzabile per il primo test; velocità USB 3 e funzionamento nelle due orientazioni USB-C richiedono ancora una prova con box e cavo definitivi.

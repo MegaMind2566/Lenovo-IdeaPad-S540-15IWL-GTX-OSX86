@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "assets": [
+    {
+      "id": "OpenCore",
+      "repository": "acidanthera/OpenCorePkg",
+      "version": "1.0.8",
+      "filename": "OpenCore-1.0.8-DEBUG.zip",
+      "url": "https://github.com/acidanthera/OpenCorePkg/releases/download/1.0.8/OpenCore-1.0.8-DEBUG.zip",
+      "size": 11931199,
+      "sha256": "3f5f42b85703cf2c08e8dcd9245a52fb4326c9f4ef335c75b49f516cbbe131c6"
+    },
+    {
+      "id": "Lilu",
+      "repository": "acidanthera/Lilu",
+      "version": "1.7.2",
+      "filename": "Lilu-1.7.2-RELEASE.zip",
+      "url": "https://github.com/acidanthera/Lilu/releases/download/1.7.2/Lilu-1.7.2-RELEASE.zip",
+      "size": 781360,
+      "sha256": "53967d7dcfaab01023a33df2e969a89522f13d6654a6a56ac4711b62dabf3ab8"
+    },
+    {
+      "id": "WhateverGreen",
+      "repository": "acidanthera/WhateverGreen",
+      "version": "1.7.1",
+      "filename": "WhateverGreen-1.7.1-RELEASE.zip",
+      "url": "https://github.com/acidanthera/WhateverGreen/releases/download/1.7.1/WhateverGreen-1.7.1-RELEASE.zip",
+      "size": 567275,
+      "sha256": "1bfdd2d40290ecce237606db121cbc01d7041179f03394bd59660a2ed52e5c95"
+    },
+    {
+      "id": "VirtualSMC",
+      "repository": "acidanthera/VirtualSMC",
+      "version": "1.3.8",
+      "filename": "VirtualSMC-1.3.8-RELEASE.zip",
+      "url": "https://github.com/acidanthera/VirtualSMC/releases/download/1.3.8/VirtualSMC-1.3.8-RELEASE.zip",
+      "size": 1400933,
+      "sha256": "2e29a8aaf91b4eb0bcdf5913ed17e70f5cf76531122acd4132eff7813a54de8b"
+    },
+    {
+      "id": "RestrictEvents",
+      "repository": "acidanthera/RestrictEvents",
+      "version": "1.1.6",
+      "filename": "RestrictEvents-1.1.6-RELEASE.zip",
+      "url": "https://github.com/acidanthera/RestrictEvents/releases/download/1.1.6/RestrictEvents-1.1.6-RELEASE.zip",
+      "size": 109908,
+      "sha256": "98170dfae195ddd28b5d95e3f040125a13ca783bcb9bd1e5b8c588e217b14ee6"
+    },
+    {
+      "id": "VoodooPS2",
+      "repository": "acidanthera/VoodooPS2",
+      "version": "2.3.7",
+      "filename": "VoodooPS2Controller-2.3.7-RELEASE.zip",
+      "url": "https://github.com/acidanthera/VoodooPS2/releases/download/2.3.7/VoodooPS2Controller-2.3.7-RELEASE.zip",
+      "size": 632757,
+      "sha256": null
+    },
+    {
+      "id": "VoodooI2C",
+      "repository": "VoodooI2C/VoodooI2C",
+      "version": "v2.9.1",
+      "filename": "VoodooI2C-2.9.1-RELEASE.zip",
+      "url": "https://github.com/VoodooI2C/VoodooI2C/releases/download/v2.9.1/VoodooI2C-2.9.1-RELEASE.zip",
+      "size": 1338392,
+      "sha256": null
+    },
+    {
+      "id": "USBToolBox",
+      "repository": "USBToolBox/kext",
+      "version": "1.2.0",
+      "filename": "USBToolBox-1.2.0-RELEASE.zip",
+      "url": "https://github.com/USBToolBox/kext/releases/download/1.2.0/USBToolBox-1.2.0-RELEASE.zip",
+      "size": 60756,
+      "sha256": "c315a3a5acfd496dd97d0d19b4fbd1d487103d2fd541c5651583d4c9cebcfe07"
+    },
+    {
+      "id": "itlwm",
+      "repository": "OpenIntelWireless/itlwm",
+      "version": "v2.3.0",
+      "filename": "itlwm_v2.3.0_stable.kext.zip",
+      "url": "https://github.com/OpenIntelWireless/itlwm/releases/download/v2.3.0/itlwm_v2.3.0_stable.kext.zip",
+      "size": 15094333,
+      "sha256": null
+    },
+    {
+      "id": "IntelBluetooth",
+      "repository": "OpenIntelWireless/IntelBluetoothFirmware",
+      "version": "v2.4.0",
+      "filename": "IntelBluetooth-v2.4.0.zip",
+      "url": "https://github.com/OpenIntelWireless/IntelBluetoothFirmware/releases/download/v2.4.0/IntelBluetooth-v2.4.0.zip",
+      "size": 11440164,
+      "sha256": null
+    },
+    {
+      "id": "BrcmPatchRAM",
+      "repository": "acidanthera/BrcmPatchRAM",
+      "version": "2.7.2",
+      "filename": "BrcmPatchRAM-2.7.2-RELEASE.zip",
+      "url": "https://github.com/acidanthera/BrcmPatchRAM/releases/download/2.7.2/BrcmPatchRAM-2.7.2-RELEASE.zip",
+      "size": 5422378,
+      "sha256": "e1c1c55347526d031a8ae2fdd1f52efa3019161e497fb38e1cfa809752f8af21"
+    },
+    {
+      "id": "AppleALC",
+      "repository": "acidanthera/AppleALC",
+      "version": "1.9.8",
+      "filename": "AppleALC-1.9.8-RELEASE.zip",
+      "url": "https://github.com/acidanthera/AppleALC/releases/download/1.9.8/AppleALC-1.9.8-RELEASE.zip",
+      "size": 3780656,
+      "sha256": "d4d36cd2da7863cf7cbfcb0892d45c08457f4f4ddd065a073dd010e46bd63bcb"
+    },
+    {
+      "id": "HfsPlus",
+      "repository": "acidanthera/OcBinaryData",
+      "version": "32500d5e3313f11cad00351ba1c6f9a4aa6cb0f7",
+      "filename": "HfsPlus.efi",
+      "url": "https://raw.githubusercontent.com/acidanthera/OcBinaryData/32500d5e3313f11cad00351ba1c6f9a4aa6cb0f7/Drivers/HfsPlus.efi",
+      "size": 37892,
+      "sha256": "a55b5fff36578864ba6792c4c6369c71f6f35b61dd5a853ddf8583cd36c31d8f"
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "controller_acpi_path": "\\_SB.PCI0.XHC",
+  "controller_pci_path": "PciRoot(0x0)/Pci(0x14,0x0)",
+  "controller_pci_id": "8086:9DED",
+  "selected_port_count": 9,
+  "info_plist_sha256": "98548b9dc9ebd7d0606342bccdbbac7e50b3604bf5718c050bce220af78b21f3",
+  "ports": [
+    {
+      "name": "HS01",
+      "port": 1,
+      "connector": 9,
+      "description": "USB-C USB 2"
+    },
+    {
+      "name": "HS02",
+      "port": 2,
+      "connector": 255,
+      "description": "Fingerprint interno"
+    },
+    {
+      "name": "HS03",
+      "port": 4,
+      "connector": 255,
+      "description": "Webcam interna"
+    },
+    {
+      "name": "HS04",
+      "port": 6,
+      "connector": 3,
+      "description": "USB-A USB 2"
+    },
+    {
+      "name": "HS05",
+      "port": 7,
+      "connector": 3,
+      "description": "USB-A USB 2"
+    },
+    {
+      "name": "HS06",
+      "port": 10,
+      "connector": 255,
+      "description": "Bluetooth interno"
+    },
+    {
+      "name": "SS01",
+      "port": 13,
+      "connector": 3,
+      "description": "USB-A SuperSpeed"
+    },
+    {
+      "name": "SS02",
+      "port": 14,
+      "connector": 3,
+      "description": "USB-A SuperSpeed"
+    },
+    {
+      "name": "SS03",
+      "port": 15,
+      "connector": 9,
+      "description": "USB-C SuperSpeed"
+    }
+  ],
+  "usb_c_superspeed_observed": false,
+  "usb_c_observation": "RTL9210 bridge VID_0BDA:PID_9210 observed at USB 2 on port 1. SuperSpeed port 15 selected with no recorded device. Both orientations need physical verification."
+}

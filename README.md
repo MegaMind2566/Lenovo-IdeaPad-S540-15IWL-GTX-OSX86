@@ -2,14 +2,14 @@
 
 Obiettivo: preparare OpenCore per macOS Tahoe 26 su Lenovo IdeaPad S540-15IWL GTX.
 
-**Stato: dump analizzato e sei patch ACPI compilate. EFI da completare prima dell'installazione.**
+**Stato: ACPI e mappa USB verificate; prima EFI assemblata e controllata tramite GitHub Actions. Avvio sul portatile ancora da provare.**
 Sequoia 15 resta un'alternativa da valutare se le prove con Tahoe evidenziano problemi.
 
 ## Cosa fare adesso
 
 Il dump disponibile contiene una DSDT e tutte le 12 SSDT enumerate da Windows. Le 20 tabelle ACPI utili raccolte hanno lunghezza, checksum e SHA-256 validi. Non occorre ripetere la raccolta.
 
-Il prossimo passo è la [mappatura USB da Windows](docs/MAPPATURA-USB.md). Il **Samsung 960 EVO** destinato a macOS sarà esterno, collegato tramite **USB-C**. Durante la mappatura occorre provare anche il disco sulla porta e con il cavo che verranno usati per l'installazione.
+Il prossimo passo è il [primo avvio dalla chiavetta](docs/PRIMO-AVVIO.md). Scarica il pacchetto da **Actions → EFI per la prima prova → ultima esecuzione riuscita → Artifacts**. Il **Samsung 960 EVO** sarà esterno su **USB-C**. La mappa fornita contiene 9 porte; la velocità USB 3 del box resta da verificare con il cavo definitivo.
 
 Le patch sono descritte in [docs/ANALISI-ACPI.md](docs/ANALISI-ACPI.md). I sorgenti sono in `acpi/source`, le versioni compilate in `acpi/compiled`. Compilazione e checksum non sostituiscono un avvio sul portatile.
 
@@ -39,7 +39,7 @@ Se lo strumento ACPI non è scaricabile o non funziona, usa le API di Windows co
 
 ## Prima dell'installazione
 
-Il disco indicato per macOS è un Samsung 960 EVO. Il Samsung PM981a attualmente nel portatile rimane un punto critico se non viene rimosso. Un eventuale avvio esterno richiede anche di escludere da macOS l'NVMe interno problematico. Se il 960 EVO sostituisce l'NVMe interno, il relativo percorso PCI non deve essere escluso.
+Il disco indicato per macOS è un Samsung 960 EVO su USB-C. La prima EFI blocca il driver NVMe nativo in macOS per escludere il PM981a interno. Il blocco riguarda tutti gli NVMe interni: deve essere rimosso se in futuro il 960 EVO verrà montato internamente.
 
 Servirà inoltre una chiavetta USB vuota per l'installer. Preparazione della chiavetta e installazione saranno passaggi successivi; questo programma non li esegue.
 
@@ -47,7 +47,7 @@ Servirà inoltre una chiavetta USB vuota per l'installer. Preparazione della chi
 
 1. Raccolta e verifica ACPI, codec audio e touchpad.
 2. Scelta del disco di prova e mappatura USB.
-3. Configurazione OpenCore per UHD 620, gestione CPU, batteria e spegnimento della NVIDIA solo in macOS.
+3. Configurazione OpenCore per UHD 620, gestione CPU, batteria e disabilitazione del driver NVIDIA. Spegnimento elettrico della dGPU da provare separatamente.
 4. Avvio dell'installer ufficiale Apple e primo avvio di macOS.
 5. Prove di grafica, audio, Wi-Fi, Bluetooth, USB, batteria, luminosità e sospensione.
 

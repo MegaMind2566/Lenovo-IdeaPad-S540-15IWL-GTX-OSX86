@@ -30,12 +30,12 @@ Il nome del driver Windows della grafica integrata riporta UHD 610, ma il chip e
 - Touchpad ELAN0662 sul percorso `_SB.PCI0.I2C0.TPD0`.
 - dGPU: `_SB.PCI0.RP05.PXSX`; metodo nativo `_OFF` presente nella SSDT9.
 - NVMe interno: PCI `PciRoot(0x0)/Pci(0x1D,0x0)/Pci(0x0,0x0)`, coerente con `_SB.PCI0.RP09.PXSX`.
-- Samsung 960 EVO indicato come disco per la prova di macOS. Collegamento e capacità non ancora confermati.
+- Samsung 960 EVO per la prova di macOS: collegamento esterno USB-C confermato; capacità da rilevare prima di inizializzarlo.
 
 ## Dati ancora necessari
 
-- Mappa USB del dispositivo: la sola lista dei controller Windows non la sostituisce.
-- Collegamento del Samsung 960 EVO, capacità e disponibilità per l'installazione.
+- Velocità SuperSpeed e reversibilità della USB-C: mappa a 9 porte ricevuta e verificata.
+- Capacità e contenuti del Samsung 960 EVO prima dell'installazione.
 - Chiavetta USB vuota per l'installer.
 
 Non sono ancora stati verificati avvio, Metal, audio, autonomia, sospensione o HDMI sul dispositivo. Nessun voto di compatibilità totale è assegnato prima delle prove.

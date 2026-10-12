@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "ACPI compiled; bootable EFI not assembled yet",
+  "status": "Initial EFI assembly configured; static CI validation and hardware boot pending",
   "target_macos": "Tahoe 26",
   "fallback_macos": "Sequoia 15",
   "model": "Lenovo IdeaPad S540-15IWL GTX (81SW)",
@@ -62,9 +62,9 @@
     "device-id_hex": "9b3e0000"
   },
   "gpu_boot_argument": "-wegnoegpu",
-  "internal_pm981a_handling": "External USB-C target confirmed. Exclude the internal PM981a from macOS on RP09. Revisit this exclusion if the 960 EVO is later installed internally.",
+  "internal_pm981a_handling": "Native NVMe driver blocked in macOS. USB-C 960 EVO uses USB storage stack. Remove block before any future internal NVMe installation.",
   "missing_before_installer": [
-    "USB port map including the actual 960 EVO USB-C connection",
+    "verify 960 EVO USB 3 connection and both USB-C orientations",
     "verify destination drive capacity and contents before installation",
     "empty USB installer drive"
   ],
@@ -86,7 +86,60 @@
     "internal_device_model": "Samsung PM981a (MZVLB512HBJQ-000L2)",
     "internal_device_acpi_path": "\\_SB.PCI0.RP09.PXSX",
     "internal_device_pci_path": "PciRoot(0x0)/Pci(0x1D,0x0)/Pci(0x0,0x0)",
-    "internal_device_action": "exclude from macOS in the future EFI configuration",
+    "internal_device_action": "Disable com.apple.iokit.IONVMeFamily startup in macOS for this USB-only profile; all native NVMe drives are excluded",
     "installation_actions_executed": false
-  }
+  },
+  "usb_map": {
+    "path": "usb/UTBMap.kext",
+    "selected_port_count": 9,
+    "ports": [
+      {
+        "name": "HS01",
+        "port": 1,
+        "connector": 9
+      },
+      {
+        "name": "HS02",
+        "port": 2,
+        "connector": 255
+      },
+      {
+        "name": "HS03",
+        "port": 4,
+        "connector": 255
+      },
+      {
+        "name": "HS04",
+        "port": 6,
+        "connector": 3
+      },
+      {
+        "name": "HS05",
+        "port": 7,
+        "connector": 3
+      },
+      {
+        "name": "HS06",
+        "port": 10,
+        "connector": 255
+      },
+      {
+        "name": "SS01",
+        "port": 13,
+        "connector": 3
+      },
+      {
+        "name": "SS02",
+        "port": 14,
+        "connector": 3
+      },
+      {
+        "name": "SS03",
+        "port": 15,
+        "connector": 9
+      }
+    ],
+    "usb_c_superspeed_observed": false
+  },
+  "smbios": "MacBookPro16,2"
 }
