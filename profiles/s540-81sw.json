@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "Initial EFI assembly configured; static CI validation and hardware boot pending",
+  "status": "Initial EFI assembled and ocvalidate passed; hardware boot not tested",
   "target_macos": "Tahoe 26",
   "fallback_macos": "Sequoia 15",
   "model": "Lenovo IdeaPad S540-15IWL GTX (81SW)",
@@ -141,5 +141,11 @@
     ],
     "usb_c_superspeed_observed": false
   },
-  "smbios": "MacBookPro16,2"
+  "smbios": "MacBookPro16,2",
+  "static_validation": {
+    "opencore_version": "1.0.8",
+    "ocvalidate_issues": 0,
+    "initial_workflow_run": 38315466442,
+    "all_upstream_assets_sha256_pinned": true
+  }
 }

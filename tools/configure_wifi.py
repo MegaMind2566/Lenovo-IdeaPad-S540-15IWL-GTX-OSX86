@@ -11,7 +11,7 @@ def main():
     if not path.is_file():
         raise SystemExit('Estrai prima tutto il pacchetto EFI in una cartella normale.')
     print('Inserisci la rete da usare durante la Recovery. I dati restano su questo PC.')
-    ssid = input('Nome esatto della rete (SSID): ').strip()
+    ssid = input('Nome esatto della rete (SSID): ')
     if not ssid:
         raise SystemExit('SSID vuoto: nessuna modifica.')
     password = getpass.getpass('Password Wi-Fi (non viene mostrata): ')

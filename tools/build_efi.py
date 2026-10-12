@@ -129,7 +129,16 @@ def kernel_entries(kext_dir):
                         'MaxKernel': '24.99.99' if path.name == 'AppleALC.kext' else '25.99.99',
                         'MinKernel': '24.0.0', 'PlistPath': 'Contents/Info.plist'})
 
-    for identifier in sorted(by_id):
+    # These service providers have runtime clients in addition to their link
+    # dependencies. Preserve their recommended order before the satellite kexts.
+    preferred = ['Lilu.kext', 'VirtualSMC.kext', 'SMCProcessor.kext', 'SMCBatteryManager.kext',
+                 'WhateverGreen.kext', 'RestrictEvents.kext', 'AppleALC.kext',
+                 'USBToolBox.kext', 'UTBMap.kext', 'VoodooInput.kext', 'VoodooI2CServices.kext',
+                 'VoodooGPIO.kext', 'VoodooI2C.kext', 'VoodooI2CHID.kext',
+                 'VoodooPS2Controller.kext', 'VoodooPS2Keyboard.kext',
+                 'IntelBluetoothFirmware.kext', 'IntelBTPatcher.kext', 'BlueToolFixup.kext', 'itlwm.kext']
+    priority = {name: index for index, name in enumerate(preferred)}
+    for identifier in sorted(by_id, key=lambda k: (priority.get(by_id[k][0].name, 100), k)):
         visit(identifier)
     return ordered
 
