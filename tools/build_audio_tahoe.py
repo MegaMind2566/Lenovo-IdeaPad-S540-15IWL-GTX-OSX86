@@ -53,7 +53,7 @@ def load_payload(archive, lock):
 
 
 def write_entry(target, name, data):
-    entry = zipfile.ZipInfo('S540-audio-Tahoe/' + name, (1980, 1, 1, 0, 0, 0))
+    entry = zipfile.ZipInfo('S540-audio-Tahoe-v2/' + name, (1980, 1, 1, 0, 0, 0))
     entry.create_system = 3
     mode = 0o755 if name.endswith(('.command', '.sh')) or name.endswith('/MacOS/VoodooHDA') else 0o644
     entry.external_attr = (0o100000 | mode) << 16
@@ -95,7 +95,7 @@ def main():
         'RIPRISTINA-AUDIO.command documenta e gestisce il ritorno alla configurazione precedente.\n'
         'Il pacchetto non contiene EFI personali, Wi-Fi, SMBIOS o log.\n'
     ).encode()
-    archive = output/'S540-audio-Tahoe.zip'
+    archive = output/'S540-audio-Tahoe-v2.zip'
     with zipfile.ZipFile(archive, 'w') as target:
         for name, data in sorted(entries.items()):
             write_entry(target, name, data)
@@ -105,7 +105,7 @@ def main():
         if len(target.namelist()) != len(entries):
             raise ValueError('Unexpected package entry count')
         for name, data in entries.items():
-            if target.read('S540-audio-Tahoe/' + name) != data:
+            if target.read('S540-audio-Tahoe-v2/' + name) != data:
                 raise ValueError('Final package differs from verified source: ' + name)
     print(archive)
     print('SHA-256:', hashlib.sha256(archive.read_bytes()).hexdigest())

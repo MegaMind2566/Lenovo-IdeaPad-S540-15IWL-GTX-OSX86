@@ -38,7 +38,7 @@ native() {
     case "$(/usr/bin/uname -r)" in 25.*) ;; *) fail 'Questa prova richiede macOS Tahoe (Darwin 25).';; esac
     [ -d /System/Volumes/Data ] && [ -d /Users ] || fail 'Esegui il comando dal desktop Tahoe, non dalla Recovery.'
     [ "$(/usr/bin/id -u)" -ne 0 ] || fail 'Apri il comando dal tuo account. La password viene richiesta solo quando serve.'
-    for command in plutil shasum ditto codesign kmutil sudo; do
+    for command in plutil shasum ditto codesign kmutil sudo base64; do
         [ -x "/usr/bin/$command" ] || fail "Manca il comando macOS $command."
     done
     for path in "$BOOTROOT" "$BOOTROOT/EFI" "$OC" "$OC/Kexts" "$CONFIG"; do ordinary "$path"; done
@@ -90,12 +90,25 @@ validate_baseline() {
     [ "$(readkey "$file" "Kernel.Add.$lilu.Enabled")" = true ] || fail 'Lilu deve essere abilitato.'
     [ "$(readkey "$OC/Kexts/Lilu.kext/Contents/Info.plist" CFBundleVersion)" = 1.7.2 ] || fail 'La versione Lilu non coincide.'
 }
+accepted_original_sip() {
+    case "$1" in AAAAAA==|ZwIAAA==) return 0;; *) fail 'Il SIP iniziale non è uno dei due stati verificati (00000000 o 67020000).';; esac
+}
 derive_states() {
-    local before=$1 prepared=$2 restored=$3 args
+    local before=$1 prepared=$2 restored=$3 original_sip=$4 args i=0 value
+    accepted_original_sip "$original_sip"
     validate_baseline "$before"
+    if [ "$original_sip" != AAAAAA== ]; then
+        [ "$(readkey "$before" NVRAM.WriteFlash)" = true ] || fail 'Serve WriteFlash attivo per conservare il SIP originale dopo il ripristino.'
+        [ "$(readkey "$before" NVRAM.LegacyOverwrite)" = false ] || fail 'La NVRAM legacy potrebbe sovrascrivere il SIP originale: nessuna modifica.'
+        while value=$(readkey "$before" "$DELETE.$i"); do
+            [ "$value" != csr-active-config ] || fail 'Il config originale cancella il SIP a ogni avvio: non è possibile conservare il SIP attivo originale senza cambiare quel config.'
+            i=$((i+1))
+        done
+    fi
     /bin/cp -p "$before" "$prepared"
     /bin/cp -p "$before" "$restored"
     /usr/bin/plutil -replace "$SIP" -data AwAAAA== "$prepared"
+    /usr/bin/plutil -replace "$SIP" -data "$original_sip" "$restored"
     /usr/bin/plutil -replace "Kernel.Add.$ALC.Enabled" -bool false "$prepared"
     args=$(readkey "$before" "$ARGS")
     /usr/bin/plutil -replace "$ARGS" -string "$args voodoo-layout-id=11" "$prepared"
@@ -134,14 +147,21 @@ load_backup() {
     local f
     ordinary "$BACKUP"; no_links "$BACKUP"
     for f in before prepared restore-sip state; do ordinary "$BACKUP/$f.plist"; /usr/bin/plutil -lint "$BACKUP/$f.plist" >/dev/null; done
-    [ "$(readkey "$BACKUP/state.plist" Format)" = 1 ] || fail 'Formato backup sconosciuto.'
+    case "$(readkey "$BACKUP/state.plist" Format)" in
+        2) ;;
+        1) fail 'Backup audio versione 1: nessuna modifica. Usa il pacchetto originale per ripristinare quella prova.';;
+        *) fail 'Formato backup sconosciuto.';;
+    esac
+    ORIGINAL_SIP=$(readkey "$BACKUP/state.plist" OriginalSip) || fail 'Il backup non contiene il SIP originale.'
+    accepted_original_sip "$ORIGINAL_SIP"
+    /usr/bin/plutil -extract OriginalSip xml1 -o - "$BACKUP/state.plist" | /usr/bin/grep -q '<data>' || fail 'Il SIP originale salvato deve essere Data.'
     case "$(readkey "$BACKUP/state.plist" Phase)" in prepared|copying|installed|removal-pending|removal-requested|sip-pending|complete) ;; *) fail 'Fase del backup sconosciuta.';; esac
     for f in before prepared restore-sip; do
         [ "$(hash "$BACKUP/$f.plist")" = "$(readkey "$BACKUP/state.plist" "$f")" ] || fail 'Backup audio modificato.'
     done
     [ "$(kext_tree_hash)" = "$(readkey "$BACKUP/state.plist" EFI-Kexts)" ] || fail 'I kext della EFI sono cambiati dopo la prova.'
     /bin/mkdir -p "$TEMP/derived"
-    derive_states "$BACKUP/before.plist" "$TEMP/derived/prepared.plist" "$TEMP/derived/restore-sip.plist"
+    derive_states "$BACKUP/before.plist" "$TEMP/derived/prepared.plist" "$TEMP/derived/restore-sip.plist" "$ORIGINAL_SIP"
     /usr/bin/cmp -s "$TEMP/derived/prepared.plist" "$BACKUP/prepared.plist" || fail 'Lo snapshot preparato non è la modifica prevista.'
     /usr/bin/cmp -s "$TEMP/derived/restore-sip.plist" "$BACKUP/restore-sip.plist" || fail 'Lo snapshot SIP non è la modifica prevista.'
     PHASE=$(readkey "$BACKUP/state.plist" Phase)
@@ -152,8 +172,16 @@ load_backup() {
     case "$CURRENT" in "$BEFORE"|"$PREPARED"|"$RESTORE_SIP") ;; *) fail 'Il config è stato modificato dopo la prova. Nessuna sovrascrittura.';; esac
 }
 active_sip() {
-    /usr/sbin/nvram -x csr-active-config > "$TEMP/nvram.plist" 2>/dev/null || return 1
-    readkey "$TEMP/nvram.plist" csr-active-config
+    local value normalized length
+    /usr/sbin/nvram -x csr-active-config > "$TEMP/nvram.plist" || fail 'Impossibile leggere csr-active-config dalla NVRAM.'
+    /usr/bin/plutil -lint "$TEMP/nvram.plist" >/dev/null || fail 'La lettura NVRAM non è un plist valido.'
+    /usr/bin/plutil -extract csr-active-config xml1 -o - "$TEMP/nvram.plist" | /usr/bin/grep -q '<data>' || fail 'csr-active-config attivo non è Data.'
+    value=$(readkey "$TEMP/nvram.plist" csr-active-config | /usr/bin/tr -d '[:space:]') || fail 'Impossibile estrarre il SIP attivo.'
+    printf '%s' "$value" | /usr/bin/base64 -D > "$TEMP/sip.bin" || fail 'Il SIP attivo non è Base64 valido.'
+    length=$(/usr/bin/wc -c < "$TEMP/sip.bin" | /usr/bin/tr -d '[:space:]')
+    [ "$length" = 4 ] || fail 'csr-active-config attivo deve contenere esattamente quattro byte.'
+    normalized=$(/usr/bin/base64 < "$TEMP/sip.bin" | /usr/bin/tr -d '[:space:]') || fail 'Impossibile normalizzare il SIP attivo.'
+    printf '%s\n' "$normalized"
 }
 require_sip3() {
     [ "$(active_sip)" = AwAAAA== ] || fail 'Riavvia con la EFI preparata: il SIP attivo deve essere 03000000.'
@@ -211,7 +239,7 @@ prepare() {
         load_backup
         [ "$PHASE" = prepared ] || fail 'Esiste già una prova audio in altra fase.'
         if [ "$CURRENT" = "$BEFORE" ]; then
-            [ "$(active_sip)" = AAAAAA== ] || fail 'Lo stato SIP non coincide con il config iniziale.'
+            [ "$(active_sip)" = "$ORIGINAL_SIP" ] || fail 'Lo stato SIP non coincide con quello salvato prima della prova.'
             atomic_config "$BACKUP/prepared.plist" "$CURRENT"
         elif [ "$CURRENT" != "$PREPARED" ]; then
             fail 'Esiste già uno stato di ripristino SIP.'
@@ -219,8 +247,9 @@ prepare() {
         echo 'Preparazione già presente. Riavvia, poi apri INSTALLA-AUDIO.command.'; return
     fi
     validate_baseline "$CONFIG"
-    [ "$(active_sip)" = AAAAAA== ] || fail 'Il SIP attivo non coincide con la configurazione iniziale.'
-    derive_states "$CONFIG" "$TEMP/prepared.plist" "$TEMP/restore-sip.plist"
+    ORIGINAL_SIP=$(active_sip)
+    accepted_original_sip "$ORIGINAL_SIP"
+    derive_states "$CONFIG" "$TEMP/prepared.plist" "$TEMP/restore-sip.plist" "$ORIGINAL_SIP"
     CURRENT=$(hash "$CONFIG")
     local final_backup=$BACKUP
     DRAFT=$(/usr/bin/mktemp -d "$OC/.backup-audio.XXXXXX")
@@ -230,7 +259,8 @@ prepare() {
     /bin/cp -p "$TEMP/restore-sip.plist" "$BACKUP/restore-sip.plist"
     cat > "$BACKUP/state.plist" <<STATE
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict>
-<key>Format</key><string>1</string><key>Phase</key><string>prepared</string>
+<key>Format</key><string>2</string><key>Phase</key><string>prepared</string>
+<key>OriginalSip</key><data>$ORIGINAL_SIP</data>
 <key>before</key><string>$(hash "$BACKUP/before.plist")</string>
 <key>prepared</key><string>$(hash "$BACKUP/prepared.plist")</string>
 <key>restore-sip</key><string>$(hash "$BACKUP/restore-sip.plist")</string>
@@ -240,6 +270,7 @@ STATE
     /usr/bin/plutil -lint "$BACKUP/state.plist" >/dev/null
     load_backup
     [ "$(hash "$CONFIG")" = "$CURRENT" ] || fail 'Il config è cambiato durante la preparazione.'
+    [ "$(active_sip)" = "$ORIGINAL_SIP" ] || fail 'Il SIP attivo è cambiato durante la preparazione.'
     /bin/mv "$DRAFT" "$final_backup"
     DRAFT=
     BACKUP=$final_backup
@@ -294,7 +325,7 @@ restore() {
                 restore; return
             fi
             if [ "$CURRENT" = "$BEFORE" ]; then
-                [ "$(active_sip)" = AAAAAA== ] || fail 'Riavvia con la configurazione SIP originale prima di completare il ripristino.'
+                [ "$(active_sip)" = "$ORIGINAL_SIP" ] || fail 'Riavvia prima di completare: il SIP deve coincidere con lo stato originale salvato.'
                 [ ! -e "$DRIVER" ] && [ ! -L "$DRIVER" ] || fail 'È presente un driver non registrato.'
                 loaded_voodoo && fail 'VoodooHDA risulta ancora caricato.'
                 state_set Phase complete
@@ -363,13 +394,13 @@ restore() {
             ;;
         sip-pending)
             if [ "$CURRENT" = "$BEFORE" ]; then
-                [ "$(active_sip)" = AAAAAA== ] || fail 'Il SIP originale non è ancora attivo.'
+                [ "$(active_sip)" = "$ORIGINAL_SIP" ] || fail 'Il SIP originale salvato non è ancora attivo.'
                 loaded_voodoo && fail 'VoodooHDA risulta ancora caricato.'
                 state_set Phase complete
                 echo 'Config originale già ripristinato byte per byte.'; return
             fi
             [ "$CURRENT" = "$RESTORE_SIP" ] || fail 'Il config di ripristino SIP non coincide.'
-            [ "$(active_sip)" = AAAAAA== ] || fail 'Riavvia prima di terminare: il SIP attivo deve essere 00000000.'
+            [ "$(active_sip)" = "$ORIGINAL_SIP" ] || fail 'Riavvia prima di terminare: il SIP attivo deve coincidere con quello originale salvato.'
             loaded_voodoo && fail 'VoodooHDA risulta ancora caricato.'
             atomic_config "$BACKUP/before.plist" "$CURRENT"
             state_set Phase complete
@@ -377,6 +408,7 @@ restore() {
             ;;
         complete)
             [ "$CURRENT" = "$BEFORE" ] || fail 'Il config è cambiato dopo il ripristino.'
+            [ "$(active_sip)" = "$ORIGINAL_SIP" ] || fail 'Il SIP attivo è cambiato dopo il ripristino.'
             echo 'Ripristino già completato. Nessuna modifica.'
             ;;
         *) fail 'Fase del backup sconosciuta.';;
