@@ -1,0 +1,54 @@
+name: Build microphone audio driver
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/build-audio-microphone.yml
+      - patches/audio-microphone/**
+      - tools/build_audio_microphone.py
+      - tools/test_audio_microphone_patch.*
+      - tools/microphone_driver_test.sh
+      - INSTALLA-MICROFONO.command
+      - ANNULLA-MICROFONO.command
+      - VERIFICA-MICROFONO.command
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15-intel
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: CloverHackyColor/VoodooHDA
+          ref: 8c7e8e2ce6de0a917be663a3192857955288c937
+          path: build-src/VoodooHDA
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: joevt/MacKernelSDK
+          ref: bfbfbe4cf35979f33ded6c7a8761eb1df091fb39
+          path: build-src/MacKernelSDK
+          persist-credentials: false
+      - name: Verify pinned source and SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = x86_64
+          test "$(git -C build-src/VoodooHDA rev-parse HEAD)" = 8c7e8e2ce6de0a917be663a3192857955288c937
+          test "$(git -C build-src/MacKernelSDK rev-parse HEAD)" = bfbfbe4cf35979f33ded6c7a8761eb1df091fb39
+      - name: Check native kernel build baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -project build-src/VoodooHDA/tranc/VoodooHDA_BS.xcodeproj -target VoodooHDA -configuration Release ARCHS=x86_64 ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO LLVM_LTO=NO CONFIGURATION_BUILD_DIR="$RUNNER_TEMP/audio-baseline" build > "$RUNNER_TEMP/audio-baseline-build.log" 2>&1 || { tail -100 "$RUNNER_TEMP/audio-baseline-build.log"; exit 1; }
+          test "$(lipo -archs "$RUNNER_TEMP/audio-baseline/VoodooHDA.kext/Contents/MacOS/VoodooHDA")" = x86_64
+          codesign --force --sign - "$RUNNER_TEMP/audio-baseline/VoodooHDA.kext"
+          codesign --verify --strict "$RUNNER_TEMP/audio-baseline/VoodooHDA.kext"
