@@ -22,6 +22,8 @@ Sono cambiate soltanto le due proprietà Intel. Il backup è identico byte per b
 
 Entrambi i profili dichiarano 58 MB di memoria stolen. La prova non cambia DVMT, non aggiunge patch di memoria o connettori e non dimostra l'accelerazione. Se l'interfaccia parte, verificare [Intel e Metal](GRAFICA-INTEL.md). Dopo gli ulteriori tentativi riferiti senza interfaccia, la [verifica ACPI](VERIFICA-PATCH-ACPI.md) non ha trovato una patch incoerente; gli ultimi tracev3 sono vuoti. Il passo successivo è la [traccia diretta Intel](TRACCIA-INTEL.md), conservando la coppia corrente. La fine del log OpenCore a EXITBS:START non localizza lo stallo successivo.
 
+La nuova raccolta della traccia conferma la coppia Whiskey Lake nei config e contiene il driver effettivo. Gli indirizzi del panic identificano un requisito stolen superiore alla memoria calcolata dal firmware. È stata quindi preparata la [prova memoria](TEST-MEMORIA-INTEL.md), mantenendo questa stessa coppia GPU.
+
 
 ## Log ricevuto dopo la consegna della prova: 173430
 

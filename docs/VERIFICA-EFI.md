@@ -6,7 +6,7 @@ Verifica del 13 ottobre 2026. Sono stati letti lo ZIP completo della prima conse
 
 Non sono stati trovati file mancanti, versioni OpenCore mischiate, eseguibili di architettura errata, dipendenze di kext fuori ordine o SSDT con checksum errato. La EFI consegnata contiene 55 file, circa 35,75 MB. I 55 SHA-256 corrispondono al manifest. I due ZIP della consegna superano la verifica CRC.
 
-È stato scaricato ocvalidate dalla release ufficiale OpenCore 1.0.8 DEBUG. Dimensione e SHA-256 dell'archivio coincidono con quelli pubblicati nella release. Il programma è stato eseguito nuovamente su entrambi i config disponibili:
+È stato scaricato ocvalidate dalla release ufficiale OpenCore 1.0.8 DEBUG. Dimensione e SHA-256 dell'archivio coincidono con quelli pubblicati nella release. Il programma è stato eseguito sui config disponibili e su quelli generati per le prove:
 
 | Config verificato | Risultato ocvalidate 1.0.8 |
 |---|---|
@@ -14,6 +14,8 @@ Non sono stati trovati file mancanti, versioni OpenCore mischiate, eseguibili di
 | File preparato per la coppia Whiskey Lake | No issues found, codice di uscita 0 |
 | Traccia diretta Intel, avvio normale | No issues found, codice di uscita 0 |
 | Traccia diretta Intel, Recovery VESA senza dump automatici | No issues found, codice di uscita 0 |
+| Prova memoria Intel, avvio normale | No issues found, codice di uscita 0 |
+| Prova memoria Intel, Recovery VESA | No issues found, codice di uscita 0 |
 
 La validazione certifica la struttura e le regole controllate dal programma, non il funzionamento dell'accelerazione sul dispositivo.
 
@@ -68,7 +70,7 @@ AppleALC non viene applicato a Tahoe dal limite di versione. Il Bluetooth con il
 
 Il log OpenCore 173430 mostra la stessa sequenza del precedente 170413, senza nuovi errori e con i boot-args normali. Dopo il tentativo viene riferito testo fermo con IOVersatile e un secondo messaggio non trascritto completamente. Nel precedente archivio unificato, agli errori IOVersatile seguivano eventi di WindowServer in esecuzione e Language Chooser attivo; entrambi quegli avvii usavano VESA. Non è una prova della causa del nuovo stallo.
 
-La nuova coppia Intel non ha prodotto un'interfaccia visibile nella prova riferita. Nell'ultima raccolta i dodici tracev3 nuovi sono vuoti e i cinque non vuoti coincidono con quelli già analizzati. Le nuove registrazioni timesync confermano altri avvii, ma non aggiungono i messaggi del driver. La [traccia diretta Intel](TRACCIA-INTEL.md) evita di ripetere la stessa raccolta e usa DEBUG delle versioni già presenti, con backup e ripristino dei soli file coinvolti. La coerenza statica della EFI non certifica l'accelerazione.
+La nuova coppia Intel non ha prodotto un'interfaccia visibile nella prova riferita. Nell'ultima raccolta unificata i dodici tracev3 nuovi sono vuoti e i cinque non vuoti coincidono con quelli già analizzati. Le nuove registrazioni timesync confermano altri avvii, ma non aggiungono i messaggi del driver. La successiva [traccia diretta Intel](TRACCIA-INTEL.md) ha prodotto il dump del driver: correlando gli indirizzi del panic, è stato identificato il controllo della memoria stolen insufficiente. La [prova memoria](TEST-MEMORIA-INTEL.md) riduce il requisito framebuffer con tre proprietà documentate. La coerenza statica della EFI non certifica l'accelerazione; l'esito sul dispositivo resta da verificare.
 
 ## Riordino del disco di avvio
 

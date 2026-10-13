@@ -2,18 +2,18 @@
 
 Obiettivo: usare macOS Tahoe 26 su Lenovo IdeaPad S540-15IWL GTX e completare le prove di tutti i componenti. La compatibilità completa è un obiettivo da verificare sul dispositivo.
 
-**Stato: Recovery avviata; mouse, tastiera, Wi-Fi e rilevamento del 960 EVO confermati nella prova. Con IntelBTPatcher escluso è stato superato il panic USB/Bluetooth in un tentativo; l'interfaccia non è ancora stata raggiunta. L'ultima prova riferita resta su righe di testo. Desktop, accelerazione Intel e funzionamento Bluetooth ancora da verificare.**
+**Stato: Recovery avviata; mouse, tastiera, Wi-Fi e rilevamento del 960 EVO confermati nella prova. IntelBTPatcher resta escluso dopo il panic Bluetooth. Il nuovo panic Intel è stato identificato nel controllo della memoria stolen: il requisito framebuffer supera il valore calcolato dal driver. La prova memoria è pronta; desktop, Metal e gli altri componenti restano da verificare sul portatile.**
 Sequoia 15 resta un'alternativa da valutare se le prove con Tahoe evidenziano problemi.
 
 ## Cosa fare adesso
 
 La [verifica completa della EFI e dei config](docs/VERIFICA-EFI.md) non ha trovato file mancanti, versioni OpenCore mischiate o dipendenze incoerenti. Tutti i 55 file della consegna corrispondono al manifest; ocvalidate 1.0.8 è stato eseguito nuovamente sul config allegato e su quello della prova Whiskey Lake, senza problemi. La EFI consegnata è già compatta. I file correnti del disco restano al loro posto, inclusa l'eventuale configurazione Wi-Fi successiva alla consegna.
 
-Dopo la consegna della [prova Whiskey Lake](docs/TEST-WHISKEY-LAKE.md) viene riferito testo fermo con IOVersatile e un secondo messaggio non trascritto interamente. Il log 173430 conferma i parametri normali, Lilu e WhateverGreen iniettati e IntelBTPatcher escluso; non contiene gli eventi successivi di macOS né stampa i valori Intel. Non viene aggiunta un'altra patch sulla base di quella riga. Il precedente archivio unificato descrive solo avvii VESA: manca ancora il runtime della prova normale per spiegare lo stallo.
+Il nuovo archivio della traccia diretta contiene il driver AppleIntelCFLGraphicsFramebuffer e i config esatti: la coppia Whiskey Lake è applicata. La correlazione degli indirizzi del panic con il dump identifica l'asserzione minStolenSize <= fStolenMemorySize. Il profilo richiede 58 MB, superiori alla memoria calcolata dal driver. La [prova memoria Intel](docs/TEST-MEMORIA-INTEL.md) applica patch-enable, stolenmem 19 MB e fbmem 9 MB, conservando la coppia GPU e tutte le altre impostazioni. Non è una conferma dell'avvio completo.
 
-I vecchi log sono già stati eliminati direttamente. La priorità è diagnosticare lo stallo dell'avvio normale: usare **S540-recupero-avvio-normale.zip**, con la [procedura dedicata](docs/RECUPERO-AVVIO-NORMALE.md). PREPARA-RECOVERY-LOG.cmd salva il config attuale e aggiunge soltanto VESA per l'accesso Recovery. Non chiede di ripetere il test bloccato prima della raccolta e conserva tutte le altre impostazioni, incluso IntelBTPatcher escluso.
+Il passo attuale è **S540-memoria-Intel.zip** e **TEST-MEMORIA-INTEL.cmd**. Il programma esce dalla precedente traccia con ripristino verificato dei kext originali, salva un backup separato e prepara l'avvio normale con la patch memoria. RECOVERY-MEMORIA-INTEL.cmd aggiunge VESA mantenendo la patch; RIPRISTINA-MEMORIA-INTEL.cmd annulla la prova. Le procedure precedenti di raccolta sono conservate per consultazione.
 
-Il collector unificato v4 raccoglie report, diagnostics e uuidtext dal Data del Samsung, più il backup esatto del config del tentativo normale quando presente. Prosegue anche se du manca. Dopo la copia si allega DIAGNOSI-MACOS-….zip; RIPRISTINA-PROVA-INTEL.cmd ripristina byte per byte lo stato precedente alla preparazione. Il confronto dei nuovi dati deve distinguere l'avvio normale dagli avvii VESA e dalla Recovery.
+La [verifica delle patch ACPI](docs/VERIFICA-PATCH-ACPI.md) non ha trovato un errore statico nei percorsi GPU, XOSI, PNLF, EC, RTC o PLUG. Il dump della [traccia diretta](docs/TRACCIA-INTEL.md) ha fornito la nuova evidenza runtime necessaria per intervenire sulla memoria. Il test non modifica DSDT, BIOS, connettori o VRAM dichiarata.
 
 Il dump ACPI contiene DSDT e tutte le 12 SSDT enumerate da Windows; le 20 tabelle utili hanno lunghezza, checksum e SHA-256 validi. Non occorre ripetere la raccolta. Il Samsung 960 EVO esterno è stato rilevato dopo aver reinserito l'M.2 nel box; la velocità USB 3 resta da verificare. Windows sul PM981a interno rimane al suo posto.
 

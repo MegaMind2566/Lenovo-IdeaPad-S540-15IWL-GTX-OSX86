@@ -152,6 +152,12 @@ if [ "$intel" -eq 1 ]; then
     fi
     copy_item "$bundle_root/EFI/OC/backup-traccia-intel" 'TracciaIntel/backup-traccia-intel'
     copy_item "$bundle_root/EFI/OC/config.plist" 'TracciaIntel/config-recovery.plist'
+    if [ -f "$bundle_root/EFI/OC/config.before-intel-memory.plist" ]; then
+        mkdir "$work/TracciaIntel/Memoria"
+        for name in config.before-intel-memory.plist config.before-intel-memory.json config.intel-memory.normal.plist config.intel-memory.recovery.plist; do
+            copy_item "$bundle_root/EFI/OC/$name" "TracciaIntel/Memoria/$name"
+        done
+    fi
 fi
 
 # The dedicated Recovery preparation saves the exact normal-boot config.
