@@ -56,7 +56,18 @@ Entrambi i nuovi log OpenCore del 13 ottobre 2026 selezionano Machintosh SSD sul
 
 I file terminano a EXITBS:START alle 17:01:41 e 17:04:18 secondo l'orologio del booter. Non contengono gli eventi successivi di macOS: questa fine del log non localizza lo stallo. La rimozione manuale è effettiva per entrambi i tentativi. I messaggi NVRAM sul valore già presente sono coerenti con boot-args identici a quelli desiderati.
 
-Il precedente ZIP unificato conteneva avvii con VESA e non documenta il funzionamento Intel di questi tentativi. Ora manca il config.plist modificato per leggere i valori grafici e serviranno gli eventi persistiti del nuovo avvio. Non viene ripetuta la rimozione del parametro già assente.
+Il precedente ZIP unificato conteneva avvii con VESA e non documenta il funzionamento Intel di questi tentativi. Il config.plist è stato successivamente ricevuto e controllato, come descritto sotto. Restano necessari gli eventi persistiti di un avvio normale per verificare l'acceleratore. Non viene ripetuta la rimozione del parametro già assente.
+
+## Configurazione ricevuta e prova Whiskey Lake
+
+Il file si apre correttamente come plist. Il confronto con la configurazione di riferimento mostra solo IntelBTPatcher disabilitato; gli altri valori sono conservati. Le proprietà Intel sono entrambe Data di quattro byte: AAPL,ig-platform-id `00009B3E` e device-id `9B3E0000`, sul percorso PciRoot(0x0)/Pci(0x2,0x0). La struttura e i tipi statici sono stati confrontati con Sample.plist ufficiale OpenCore 1.0.8; ocvalidate non è stato eseguito.
+
+Il profilo attuale è mobile e non è privo di connettori. La guida Dortania Coffee/Whiskey Lake lo propone per UHD 620. Il manuale di WhateverGreen 1.7.1 indica invece per UHD 620 Whiskey Lake il fake device-id `A53E0000` e il framebuffer portatile predefinito 0x3EA50009, che si scrive come Data `0900A53E`.
+
+Dopo i due tentativi normali è stata preparata una prova di questa coppia specifica, cambiando soltanto quei due valori. Il pacchetto privato contiene il config di prova e un backup identico, byte per byte, a quello ricevuto. Parsing del plist, confronto delle sole due modifiche e CRC dello ZIP sono verificati; il risultato sul portatile non è ancora disponibile. Il config completo e il backup non vengono pubblicati nel repository.
+
+La [procedura](TEST-WHISKEY-LAKE.md) conserva boot-args, stato Bluetooth e identità della macchina. Entrambi i framebuffer dichiarano 58 MB di memoria stolen: questo test non risolve né accerta un eventuale limite DVMT. Non vengono aggiunte patch di memoria o connettori in assenza di una diagnosi. Se il risultato non cambia, la raccolta successiva deve includere gli eventi del test normale e di questa prova, da distinguere per avvio.
+
 
 ## Riferimenti
 
