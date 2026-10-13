@@ -35,7 +35,7 @@ Dopo la prova v3 è stato riferito un esito positivo: riproduzione audio, regola
 
 ## Acquisizione voce e guadagno: 14 ottobre 2026
 
-Nella prova video Photo Booth è stato riferito che la voce si sente, insieme all'immagine della webcam. Il guadagno microfono è eccessivo: si sta regolando il livello d'ingresso nelle impostazioni macOS per ripetere la registrazione. L'acquisizione audio è presente, ma il risultato dopo la regolazione è ancora atteso. Non viene applicata una nuova patch al driver; equalizzazione e tasti funzione restano rinviati.
+Nella prova video Photo Booth è stato riferito che la voce si sente, insieme all'immagine della webcam. Il guadagno microfono è eccessivo: la regolazione nelle impostazioni passa bruscamente da troppo alto a troppo basso. L'acquisizione audio è presente; sono da verificare ingresso selezionato e controlli IOAudio. Nel sorgente fissato, VolumeChangeFix aggiorna tutti i mixer anche quando varia l'ingresso: è una possibile causa, da distinguere dall'effettiva configurazione degli amplificatori sul portatile. Non viene applicata una nuova patch al driver; equalizzazione e tasti funzione restano rinviati.
 
 ## Equalizzazione da rivedere piu avanti
 

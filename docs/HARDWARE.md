@@ -68,7 +68,7 @@ Lo stato Bluetooth è On, FirmwareLoaded è Yes e il trasporto è connesso; Blue
 
 ## Webcam e acquisizione voce: 14 ottobre 2026
 
-Nella prova proposta con Photo Booth è stato riferito che l'immagine è visibile e la voce viene registrata. Il guadagno microfono risulta troppo alto: è in corso la regolazione nelle impostazioni di macOS e una nuova registrazione. La webcam è quindi funzionante nella prova; il livello dell'ingresso audio non è ancora confermato corretto. Non sono applicate modifiche ai driver.
+Nella prova proposta con Photo Booth è stato riferito che l'immagine è visibile e la voce viene registrata. Il guadagno microfono risulta troppo alto: la successiva regolazione passa bruscamente da troppo alto a troppo basso. Sono da verificare ingresso selezionato e controlli del mixer prima di una modifica. La webcam è quindi funzionante nella prova; il livello dell'ingresso audio non è ancora confermato corretto. Non sono applicate modifiche ai driver.
 
 ## Batteria e contatori di stop: 13 ottobre 2026
 
