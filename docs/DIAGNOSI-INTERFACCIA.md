@@ -8,14 +8,14 @@ La prima raccolta non contiene nuovi report che spieghino lo schermo nero. Anche
 
 ## Passaggi
 
-1. In Windows estrai la versione aggiornata di **S540-diagnosi-interfaccia.zip** nella radice dell'HDD di OpenCore, sostituendo i due file della raccolta precedente. Devono risultare `RACCOGLI-LOG-MACOS.command` accanto a `EFI` e `tools/collect_gui_logs.sh` nella stessa cartella `tools`.
+1. In Windows estrai **S540-diagnosi-unified-v2.zip** nella radice dell'HDD di OpenCore. Devono risultare `RACCOGLI-UNIFIED.command` e la cartella `diagnosi-unified` accanto a `EFI`. Il pacchetto usa nomi distinti e contiene il collector aggiornato nella nuova cartella; la modalità unificata è già attiva nel launcher.
 2. Conserva la configurazione che ha aperto la Recovery: VESA temporaneo e IntelBTPatcher escluso. Se sei tornato alla prova Intel normale, sullo stesso HDD esegui **RIPRISTINA-INTEL.cmd**. Non ripeterlo se il ripristino è già stato applicato. Se segnala backup mancante o modifiche successive, conserva l'errore senza sostituire il config.
 3. Avvia lo stesso OpenCore e scegli **Recovery 26.7.1**, presente nel menu registrato dai nuovi log. Serve la Recovery per leggere i report salvati sul Samsung. Se questa voce non apre le Utility, è presente anche la Recovery originale dell'HDD sotto il nome **240 GB**; seleziona la voce con l'icona Recovery.
 4. In **Utility Disco → Vista → Mostra tutti i dispositivi**, individua il Samsung esterno e il suo volume **Data/Dati**. Montalo se necessario. Il nome atteso è **Machintosh SSD - Data**; verifica che sia il volume Data del Samsung, della stessa installazione di Machintosh SSD.
 5. Apri **Utility → Terminale** dal menu superiore ed esegui:
 
 ```bash
-bash /Volumes/*/RACCOGLI-LOG-MACOS.command --unified
+bash "/Volumes/240 GB/RACCOGLI-UNIFIED.command"
 ```
 
 6. Attendi la copia e la creazione dello ZIP; i log unificati possono occupare molto più spazio della prima raccolta. Il programma stampa il percorso di **DIAGNOSI-MACOS-….zip**, salvato sull'HDD di OpenCore. Torna in Windows e allega quello ZIP.
@@ -23,10 +23,12 @@ bash /Volumes/*/RACCOGLI-LOG-MACOS.command --unified
 Il programma riconosce automaticamente i nomi `Machintosh SSD - Data` e `Machintosh SSD - Dati`, solo se trova la struttura prevista di un volume Data. Questi controlli non verificano il gruppo APFS: la scelta del Samsung va controllata in Utility Disco. Non monta o sblocca volumi automaticamente. Se il nome è diverso, usa il percorso esatto come argomento, per esempio:
 
 ```bash
-bash /Volumes/*/RACCOGLI-LOG-MACOS.command --unified "/Volumes/NOME ESATTO DEL VOLUME DATA"
+bash "/Volumes/240 GB/RACCOGLI-UNIFIED.command" "/Volumes/NOME ESATTO DEL VOLUME DATA"
 ```
 
-Se ci sono più copie del launcher su dischi diversi, usa il percorso esatto del launcher sull'HDD invece dell'asterisco. Se la raccolta si ferma, fotografa il messaggio del Terminale. Le copie incomplete vengono indicate nel riepilogo dello ZIP. Il programma legge il volume Data montato sotto `/Volumes` e scrive la raccolta sull'HDD contenente il pacchetto; rifiuta una destinazione dentro Data e un'origine nel sistema Recovery. Per `--unified` verifica lo spazio per conservare cartella e ZIP, stimando due volte la dimensione dei log più un margine. Non modifica EFI, boot-args, firme o impostazioni del sistema.
+Il comando usa il percorso preciso dell'HDD già osservato, `240 GB`. Se cambia il nome dell'HDD, sostituiscilo con quello presente in `/Volumes`. Evita il wildcard del launcher quando ci sono più copie su dischi diversi: diventerebbero argomenti aggiuntivi. Se la raccolta si ferma, fotografa il messaggio del Terminale. Le copie incomplete vengono indicate nel riepilogo dello ZIP. Il programma legge il volume Data montato sotto `/Volumes` e scrive la raccolta sull'HDD contenente il pacchetto; rifiuta una destinazione dentro Data e un'origine nel sistema Recovery. Per `--unified` verifica lo spazio per conservare cartella e ZIP, stimando due volte la dimensione dei log più un margine. Non modifica EFI, boot-args, firme o impostazioni del sistema.
+
+All'avvio deve comparire **Raccolta unificata v2: diagnostics + uuidtext**. La sequenza precedente (errore sul volume con `--unified` da solo, seguito da "Indica al massimo il percorso del volume Data" aggiungendo il percorso) è compatibile con il vecchio collector, che accetta un solo argomento e non riconosce l'opzione. Non identifica un problema del disco. Le fotografie dei controlli confermano la presenza di Library, Users e private/var nel Data; i due primi controlli manuali avevano errori nel percorso. Il nuovo nome del launcher e la cartella distinta consentono di usare la versione aggiornata senza dipendere dalla sostituzione del vecchio script.
 
 ## Limiti e ritorno alla prova normale
 
