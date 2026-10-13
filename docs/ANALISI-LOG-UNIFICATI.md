@@ -42,6 +42,14 @@ Dopo l'esito "Prova Intel attivata", controllare che sia elencata la rimozione d
 
 Se il programma segnala che i parametri sono già assenti o rifiuta il backup, conservare il messaggio: va verificata la EFI effettivamente usata prima di fare altri cambiamenti. Se lo schermo resta nero dopo una rimozione riuscita, serve il log OpenCore di quel tentativo e una nuova raccolta dei dati unificati. I log precedenti restano sul Data: il confronto va fatto per avvio e boot-args, non assumendo che tutto lo ZIP descriva l'ultima prova.
 
+## Prova successiva dopo la modifica manuale
+
+È stata riferita la rimozione manuale di `-igfxvesa` dal config.plist. La fotografia del nuovo tentativo mostra il caricamento delle collezioni di estensioni e gli errori ripetuti di dipendenze di com.apple.driver.IOVersatile, con codice `0xdc00800e`. DockChannelSerial riporta `has crashed 0 time(s)`. Non è visibile una riga di panic né sono mostrati i boot-args effettivi.
+
+Lo stesso errore IOVersatile era già presente nell'archivio precedente, con VESA attivo, prima dell'avvio di WindowServer. In quel campione DockChannelSerial registrava anche l'avvio riuscito. L'ultima riga della fotografia non identifica quindi da sola il punto che impedisce l'interfaccia. L'errore non è una nuova prova di corruzione o di fallimento Intel.
+
+Per il prossimo confronto servono il log OpenCore appena creato da questo tentativo e il config.plist modificato. Prima di interpretare una nuova raccolta occorre confermare l'assenza runtime di VESA. Non viene applicato un blocco IOVersatile o un nuovo parametro grafico in base alla sola fotografia.
+
 ## Riferimenti
 
 - [Mandiant: release ufficiale 0.7.0](https://github.com/mandiant/macos-UnifiedLogs/releases/tag/v0.7.0).
