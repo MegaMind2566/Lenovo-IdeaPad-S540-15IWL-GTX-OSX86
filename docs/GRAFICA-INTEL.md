@@ -1,53 +1,53 @@
 # Verifica della grafica Intel dopo l'installazione
 
-La UHD 620 è il primo obiettivo dopo il desktop. La EFI contiene già Lilu, WhateverGreen e le proprietà iniziali `AAPL,ig-platform-id=00009B3E` e `device-id=9B3E0000`. Il test `-igfxvesa` disabilita l'accelerazione Intel. Il [log delle 02:45](ANALISI-LOG-AVVIO.md) conferma che in quel tentativo erano attivi `-igfxvesa` e `-x`. Lo stato di un eventuale avvio successivo ai ripristini resta da verificare.
+## Esito sul dispositivo: 13 ottobre 2026
 
-Una fotografia successiva documenta un panic USB/Bluetooth con `bluetoothd` e IntelBTPatcher 2.4 nella traccia, senza `-x` e con `-igfxvesa` ancora presente. Con il patcher escluso è stato poi superato il panic, ma rimane lo schermo nero con il puntatore. I boot-args di questo nuovo tentativo non sono stati raccolti. Usa **TEST-INTEL.cmd** sulla EFI attuale: controlla e rimuove solo i due flag diagnostici, preservando l'esclusione Bluetooth. Se sono già assenti, raccogli il messaggio e il log nuovo. La causa della mancata interfaccia non è ancora identificata.
+Con la [correzione della memoria framebuffer](TEST-MEMORIA-INTEL.md), Tahoe ha raggiunto la configurazione iniziale e il desktop sul Samsung 960 EVO esterno. Il successivo campione powermetrics rileva IntelAccelerator e boot-args senza `-igfxvesa` né `-x`. Il report system_profiler conferma:
 
-Completa prima l'installazione sul 960 EVO. Mantieni OpenCore sull'HDD di avvio finché il sistema non è stato verificato.
+| Voce | Risultato |
+|---|---|
+| GPU esposta | Intel UHD Graphics 620 |
+| Device ID esposto | `0x3ea5`, coerente con la configurazione Whiskey Lake |
+| Memoria grafica | Dinamica e condivisa, massimo 1536 MB |
+| Supporto Metal | Metal 3 |
+| Pannello interno | Online, principale, 1920×1080 |
+| Profondità framebuffer | ARGB8888 a 24 bit |
 
-## 1. Leggi lo stato dal primo desktop
+Questi dati confermano il desktop con il driver acceleratore Intel caricato e Metal esposto. Non completano le prove di stabilità, carico Metal, decodifica video, luminosità, sospensione o uscite esterne. L'identificativo PCI fisico rilevato da Windows resta `8086:3EA0`; `0x3ea5` è quello esposto dalla configurazione macOS.
 
-Apri Terminale in macOS ed esegui questi due comandi. Leggono informazioni; non modificano la EFI.
+La configurazione applicata conserva `AAPL,ig-platform-id=0900A53E` e `device-id=A53E0000`, con `framebuffer-patch-enable=01000000`, `framebuffer-stolenmem=00003001` e `framebuffer-fbmem=00009000`. Le tre proprietà sono Data di quattro byte. Non sono state aggiunte altre patch dopo la comparsa del desktop.
+
+Prima della configurazione iniziale il pannello è rimasto temporaneamente nero, poi l'interfaccia è comparsa senza una nuova modifica della EFI. Non si aggiunge una patch della retroilluminazione sulla sola base di quell'attesa.
+
+## Conservare la EFI funzionante
+
+Prima delle prove successive, creare una copia privata dell'intera cartella EFI corrente sull'HDD OpenCore, inclusi i backup della correzione memoria. Con il volume di avvio montato come `240 GB`, da Terminale:
+
+```sh
+ditto -c -k --keepParent "/Volumes/240 GB/EFI" "$HOME/Desktop/EFI-Tahoe-Metal3-$(date +%Y%m%d-%H%M%S).zip"
+```
+
+Il comando crea un archivio sul Desktop; va eseguito sul portatile. Se il volume non è montato con quel nome, individuare prima la cartella EFI in Finder. L'archivio contiene configurazione personale e profilo Wi-Fi: conservarlo privatamente, senza aggiungerlo alla repository. La EFI resta sull'HDD finché l'avvio dal Samsung non sarà preparato e verificato separatamente.
+
+## Prove ancora da completare
+
+1. Riavvio e spegnimento ripetibili con questa stessa EFI, annotando eventuali attese del pannello.
+2. Uso del desktop e un carico che utilizzi Metal, senza blocchi o artefatti.
+3. Regolazione della luminosità e ripresa del pannello dopo la sospensione.
+4. Decodifica video e monitor esterni, come prove distinte.
+
+Il campione powermetrics di circa un secondo riporta 50 °C per la CPU e basso consumo stimato del pacchetto Intel. Non misura la temperatura o il consumo della NVIDIA e non verifica il comportamento prolungato di CPU e ventole. La voce `2Slices on: 100%` indica la permanenza nello stato con due slice attive, non un utilizzo GPU del 100%.
+
+Le altre funzioni restano nella [roadmap hardware](ROADMAP.md). Per una nuova verifica dello stato, questi comandi leggono informazioni senza modificare la EFI:
 
 ```sh
 sysctl -n kern.bootargs
 system_profiler SPDisplaysDataType
 ```
 
-Raccogli soltanto questi risultati. Non occorre inviare l'intera EFI, gli identificativi SMBIOS o il plist di itlwm che contiene il profilo Wi-Fi.
-
-In alternativa, per il report grafico apri **Impostazioni di Sistema → Generali → Info → Resoconto di sistema → Grafica/Monitor**. La presenza del desktop o un valore di memoria video, da soli, non dimostrano l'accelerazione. Servono il supporto Metal indicato nel report e una prova del suo funzionamento.
-
-## 2. Se è presente `-igfxvesa`
-
-Dopo aver raccolto lo stato, si può provare la configurazione accelerata già preparata:
-
-1. Avvia Windows dal menu Lenovo.
-2. Se sono stati applicati entrambi i test, avvia prima **RIPRISTINA-AVVIO.cmd** e poi **RIPRISTINA-GRAFICA.cmd** sullo stesso HDD di OpenCore. Se è presente solo il test grafico, usa il secondo. I file devono stare accanto a `EFI`, con i rispettivi script nella cartella `tools`. Se **TEST-INTEL.cmd** ha già rimosso i due parametri, questa sequenza non serve.
-3. Attendi il messaggio di ripristino riuscito. Lo script usa `EFI/OC/config.before-graphics-test.plist` e conserva gli identificativi della configurazione originale.
-4. Riavvia dallo stesso OpenCore e scegli il volume esterno di macOS, indicato come **Machintosh SSD** nel log ricevuto. La comparsa del nome non certifica il completamento dell'installazione.
-5. Rileggi i due comandi e verifica Metal.
-
-Se manca il backup o lo script segnala ulteriori modifiche, raccogli il messaggio prima di procedere. Non sostituire il plist con quello di una nuova build: gli identificativi generati potrebbero essere diversi.
-
-Se l'avvio accelerato si blocca, torna a Windows e riapplica **TEST-GRAFICA.cmd** sullo stesso HDD. Dopo il ritorno al desktop raccogli la foto del blocco e i dati del tentativo. Si analizzano poi DVMT, framebuffer e proprietà della UHD 620 in base all'errore osservato.
-
-## 3. Se `-igfxvesa` è già assente
-
-Non eseguire il ripristino solo perché l'interfaccia sembra lenta. Il report determina se Metal viene esposto. Se manca, si verificano il caricamento di Lilu/WhateverGreen, le proprietà grafiche applicate e i log. Non si aggiungono correzioni della memoria framebuffer senza dati sul problema.
-
-## Criteri per completare questa fase
-
-- Supporto Metal rilevato sul dispositivo Intel e verificato con un carico grafico che lo usa.
-- Avvio ripetibile con accelerazione, alla risoluzione nativa del pannello.
-- Nessun blocco o artefatto durante le prove del desktop e del carico grafico.
-- Regolazione della luminosità e ripresa del display dopo la sospensione, da verificare nelle prove hardware successive.
-
-Questa fase non conferma automaticamente decodifica video hardware, uscita HDMI o funzionamento della NVIDIA. Sono prove distinte nella [roadmap](ROADMAP.md).
-
 ## Riferimenti
 
 - [WhateverGreen 1.7.1: opzioni Intel, incluso -igfxvesa](https://github.com/acidanthera/WhateverGreen/blob/1.7.1/README.md#intel-hd-graphics)
 - [Apple: Resoconto di sistema su Tahoe](https://support.apple.com/guide/system-information/welcome/11.0/mac/26)
+- [Apple: creazione di un archivio ZIP con ditto](https://developer.apple.com/documentation/xcode/packaging-mac-software-for-distribution)
 - [Dortania: grafica Intel sui portatili Coffee Lake / Whiskey Lake](https://dortania.github.io/OpenCore-Install-Guide/config-laptop.plist/coffee-lake.html#deviceproperties)

@@ -2,9 +2,15 @@
 
 Il panic ricevuto dopo la traccia diretta è stato localizzato nel driver AppleIntelCFLGraphicsFramebuffer effettivamente caricato. Il requisito minimo di memoria stolen supera quello che il driver calcola dal firmware. Questa prova riduce il requisito con proprietà WhateverGreen documentate, conservando la coppia Whiskey Lake già applicata.
 
-## Evidenza dal dump
+## Esito sul dispositivo: 13 ottobre 2026
 
-L'archivio contiene il dump Mach-O del driver e i config originali, della prova normale e della Recovery. Gli hash dei config e dei due kext originali sono validi. La coppia `0900A53E` / `A53E0000` è presente in tutti i config. Quello normale non contiene VESA né proprietà di memoria framebuffer. Il config Recovery attuale coincide byte per byte con lo snapshot previsto.
+Dopo l'applicazione della correzione sono state raggiunte la configurazione iniziale e la scrivania di Tahoe. Il pannello temporaneamente nero ha poi mostrato l'interfaccia senza altre modifiche della EFI. Il campione powermetrics rileva IntelAccelerator e boot-args senza VESA né modalità sicura; system_profiler espone Metal 3, memoria grafica condivisa dinamica fino a 1536 MB e pannello interno online a 1920×1080. L'identificativo esposto `0x3ea5` è coerente con la coppia Whiskey Lake applicata.
+
+Il precedente blocco nel controllo della memoria framebuffer è stato superato nell'avvio osservato. Carico Metal prolungato, avvii ripetuti, luminosità, sospensione e altre funzioni hardware restano da verificare. Conservare la EFI corrente prima di ulteriori prove, come descritto in [GRAFICA-INTEL.md](GRAFICA-INTEL.md).
+
+## Evidenza dal dump precedente alla correzione
+
+L'archivio contiene il dump Mach-O del driver e i config originali, della prova normale e della Recovery. Gli hash dei config e dei due kext originali sono validi. La coppia `0900A53E` / `A53E0000` è presente in tutti i config. Quello normale non contiene VESA né proprietà di memoria framebuffer. Il config Recovery contenuto in quell'archivio coincide byte per byte con lo snapshot previsto.
 
 La prima riga del panic non è visibile nella foto, ma il dump permette di ricostruirne la causa attraverso entrambi gli indirizzi di ritorno:
 
@@ -19,7 +25,7 @@ Il profilo WHL nel dump dichiara 57 MB stolen e 1 MB di riserva nel calcolo del 
 
 L'uptime della foto è circa 51,098 secondi. La lettura precedente di cinque secondi era errata. Il file del driver è presente; il log Lilu previsto dopo 60 secondi è assente. I report non contengono un nuovo panic completo.
 
-## Modifica proposta
+## Correzione applicata
 
 In `DeviceProperties/Add/PciRoot(0x0)/Pci(0x2,0x0)` vengono aggiunte esclusivamente queste proprietà Data di quattro byte:
 
@@ -31,7 +37,9 @@ In `DeviceProperties/Add/PciRoot(0x0)/Pci(0x2,0x0)` vengono aggiunte esclusivame
 
 È la combinazione prevista dalla guida Coffee Lake/Whiskey Lake per una memoria preallocata limitata. Il test normale rimuove VESA e modalità sicura. Non cambia platform-id, device-id, ACPI, connettori, unifiedmem, identità, Bluetooth, Wi-Fi o impostazioni Booter. Non scrive i registri del BIOS e non cambia l'allocazione firmware: riduce il requisito del driver.
 
-## Applicazione
+## Applicazione e ripristino
+
+La procedura seguente documenta gli strumenti usati. Non occorre riapplicarla alla EFI che ha già raggiunto il desktop con Metal 3 esposto.
 
 1. Da Windows estrarre **S540-memoria-Intel.zip** nella radice dell'HDD OpenCore, accanto a EFI. Accettare la sostituzione degli strumenti inclusi.
 2. Eseguire **TEST-MEMORIA-INTEL.cmd**. Se trova la precedente traccia valida, il programma ripristina automaticamente Lilu, WhateverGreen e il config originali, poi salva un backup separato e applica la prova memoria. Non occorre ripristinare manualmente la traccia prima di questo comando.
@@ -43,11 +51,11 @@ I vecchi comandi della traccia restano riferiti al loro backup precedente. Per q
 
 Il backup è `EFI/OC/config.before-intel-memory.plist`, con un manifest JSON e i due snapshot `config.intel-memory.normal.plist` / `config.intel-memory.recovery.plist`. Conservare questi quattro file. Il collector li include quando presenti; l'eventuale dump framebuffer precedente resta un dato della vecchia traccia. Inoltre WhateverGreen scrive il dump prima delle patch, quindi una tabella originale nel file non dimostra che una patch successiva sia stata ignorata.
 
-La correzione è giustificata dal panic specifico. Il suo esito fisico e l'eventuale presenza di problemi successivi restano da verificare sul portatile.
+La correzione è giustificata dal panic specifico e l'avvio del desktop con l'acceleratore Intel è ora confermato sul portatile. Le prove successive valuteranno la stabilità e le funzioni ancora aperte.
 
 ## Verifica dello strumento
 
-Sono passati nove gruppi di prove su applicazione, autorestore della traccia, conservazione degli altri campi, Recovery, ripristino esatto, modifiche successive, backup incompleti/alterati e guasto della scrittura. Una prova separata sulla copia della EFI consegnata, con i backup e il config Recovery dell'ultimo archivio, ha verificato l'intero passaggio DEBUG → kext originali → patch memoria. I config normale e Recovery generati superano ocvalidate 1.0.8; il ripristino restituisce i byte esatti del config e dei kext pre-traccia. Il collector copia anche tutti e quattro i file privati della prova memoria. I test sono stati eseguiti in Linux; i launcher Windows e l'avvio fisico restano da eseguire sul portatile.
+Sono passati nove gruppi di prove su applicazione, autorestore della traccia, conservazione degli altri campi, Recovery, ripristino esatto, modifiche successive, backup incompleti/alterati e guasto della scrittura. Una prova separata sulla copia della EFI consegnata, con i backup e il config Recovery dell'ultimo archivio, ha verificato l'intero passaggio DEBUG → kext originali → patch memoria. I config normale e Recovery generati superano ocvalidate 1.0.8; il ripristino restituisce i byte esatti del config e dei kext pre-traccia. Il collector copia anche tutti e quattro i file privati della prova memoria. I test automatici sono stati eseguiti in Linux. Successivamente è stato riferito l'esito della prova sul portatile: configurazione iniziale, desktop e Metal 3 esposto. Il lancio dei programmi Windows non è stato eseguito direttamente nell'ambiente di verifica.
 
 ## Riferimenti primari
 

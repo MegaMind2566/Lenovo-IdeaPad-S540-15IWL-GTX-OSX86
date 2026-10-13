@@ -2,22 +2,22 @@
 
 Obiettivo: usare macOS Tahoe 26 su Lenovo IdeaPad S540-15IWL GTX e completare le prove di tutti i componenti. La compatibilità completa è un obiettivo da verificare sul dispositivo.
 
-**Stato: Recovery avviata; mouse, tastiera, Wi-Fi e rilevamento del 960 EVO confermati nella prova. IntelBTPatcher resta escluso dopo il panic Bluetooth. Il nuovo panic Intel è stato identificato nel controllo della memoria stolen: il requisito framebuffer supera il valore calcolato dal driver. La prova memoria è pronta; desktop, Metal e gli altri componenti restano da verificare sul portatile.**
+**Stato al 13 ottobre 2026: Tahoe raggiunge il desktop sul Samsung 960 EVO esterno dopo la correzione della memoria framebuffer. IntelAccelerator è rilevato; il report grafico espone Metal 3, memoria condivisa dinamica fino a 1536 MB e pannello interno online a 1920×1080. IntelBTPatcher resta escluso dopo il panic Bluetooth. Stabilità prolungata e altre funzioni hardware restano da verificare.**
 Sequoia 15 resta un'alternativa da valutare se le prove con Tahoe evidenziano problemi.
 
 ## Cosa fare adesso
 
 La [verifica completa della EFI e dei config](docs/VERIFICA-EFI.md) non ha trovato file mancanti, versioni OpenCore mischiate o dipendenze incoerenti. Tutti i 55 file della consegna corrispondono al manifest; ocvalidate 1.0.8 è stato eseguito nuovamente sul config allegato e su quello della prova Whiskey Lake, senza problemi. La EFI consegnata è già compatta. I file correnti del disco restano al loro posto, inclusa l'eventuale configurazione Wi-Fi successiva alla consegna.
 
-Il nuovo archivio della traccia diretta contiene il driver AppleIntelCFLGraphicsFramebuffer e i config esatti: la coppia Whiskey Lake è applicata. La correlazione degli indirizzi del panic con il dump identifica l'asserzione minStolenSize <= fStolenMemorySize. Il profilo richiede 58 MB, superiori alla memoria calcolata dal driver. La [prova memoria Intel](docs/TEST-MEMORIA-INTEL.md) applica patch-enable, stolenmem 19 MB e fbmem 9 MB, conservando la coppia GPU e tutte le altre impostazioni. Non è una conferma dell'avvio completo.
+La correlazione degli indirizzi del panic con il dump di AppleIntelCFLGraphicsFramebuffer ha identificato l'asserzione minStolenSize <= fStolenMemorySize: il profilo richiedeva 58 MB, superiori alla memoria calcolata dal driver. La [correzione memoria Intel](docs/TEST-MEMORIA-INTEL.md) applica patch-enable, stolenmem 19 MB e fbmem 9 MB, conservando la coppia Whiskey Lake e tutte le altre impostazioni. Dopo questa correzione sono stati raggiunti la configurazione iniziale e il desktop, con Metal 3 esposto.
 
-Il passo attuale è **S540-memoria-Intel.zip** e **TEST-MEMORIA-INTEL.cmd**. Il programma esce dalla precedente traccia con ripristino verificato dei kext originali, salva un backup separato e prepara l'avvio normale con la patch memoria. RECOVERY-MEMORIA-INTEL.cmd aggiunge VESA mantenendo la patch; RIPRISTINA-MEMORIA-INTEL.cmd annulla la prova. Le procedure precedenti di raccolta sono conservate per consultazione.
+Il prossimo passo è salvare una copia privata dell'intera EFI funzionante, poi verificare avvii ripetuti e componenti seguendo [GRAFICA-INTEL.md](docs/GRAFICA-INTEL.md). La EFI resta invariata durante queste verifiche. **S540-memoria-Intel.zip** contiene gli strumenti già usati: TEST-MEMORIA-INTEL.cmd prepara la correzione, RECOVERY-MEMORIA-INTEL.cmd aggiunge VESA mantenendola e RIPRISTINA-MEMORIA-INTEL.cmd annulla la prova. Non occorre riapplicarli al sistema che ha già raggiunto il desktop. Le procedure precedenti di raccolta sono conservate per consultazione.
 
 La [verifica delle patch ACPI](docs/VERIFICA-PATCH-ACPI.md) non ha trovato un errore statico nei percorsi GPU, XOSI, PNLF, EC, RTC o PLUG. Il dump della [traccia diretta](docs/TRACCIA-INTEL.md) ha fornito la nuova evidenza runtime necessaria per intervenire sulla memoria. Il test non modifica DSDT, BIOS, connettori o VRAM dichiarata.
 
 Il dump ACPI contiene DSDT e tutte le 12 SSDT enumerate da Windows; le 20 tabelle utili hanno lunghezza, checksum e SHA-256 validi. Non occorre ripetere la raccolta. Il Samsung 960 EVO esterno è stato rilevato dopo aver reinserito l'M.2 nel box; la velocità USB 3 resta da verificare. Windows sul PM981a interno rimane al suo posto.
 
-La [roadmap hardware](docs/ROADMAP.md) mantiene aperto il port NVIDIA dopo la stabilizzazione Intel. Desktop, Metal, audio, Bluetooth, touchpad, autonomia e sospensione richiedono prove sul portatile. I sorgenti ACPI sono in acpi/source, le versioni compilate in acpi/compiled; [l'analisi](docs/ANALISI-ACPI.md) descrive il loro scopo.
+La [roadmap hardware](docs/ROADMAP.md) mantiene aperto il port NVIDIA dopo la stabilizzazione Intel. Desktop e Metal 3 esposto sono confermati; carico grafico prolungato, audio, Bluetooth, touchpad, autonomia e sospensione richiedono ancora prove sul portatile. I sorgenti ACPI sono in acpi/source, le versioni compilate in acpi/compiled; [l'analisi](docs/ANALISI-ACPI.md) descrive il loro scopo.
 
 ### Per una nuova raccolta
 

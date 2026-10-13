@@ -4,14 +4,14 @@ Report ricevuto il 12 ottobre 2026. Sono riportati solo i dati utili al progetto
 
 | Voce | Dato rilevato | Stato per macOS |
 |---|---|---|
-| Modello | Lenovo IdeaPad S540-15IWL GTX, famiglia 81SW | Configurazione da costruire sul dispositivo |
+| Modello | Lenovo IdeaPad S540-15IWL GTX, famiglia 81SW | Tahoe avviato al desktop sul 960 EVO esterno |
 | Scheda madre | Lenovo LNVNB161216 | DSDT e 12 SSDT analizzate |
 | BIOS | BWCN19WW, 26 maggio 2021 | UEFI presente; Secure Boot disabilitato nel report |
 | CPU | Intel Core i7-8565U, Whiskey Lake-U, 4 core / 8 thread | Base adatta al tentativo |
 | RAM | 12 GB DDR4-2400, moduli da 8 e 4 GB | Sufficiente per la prima prova |
-| iGPU | Intel UHD 620, PCI 8086:3EA0 | Configurazione iniziale presente; verifica Metal come prossimo passo |
+| iGPU | Intel UHD 620, PCI 8086:3EA0 | IntelAccelerator rilevato e Metal 3 esposto; carico prolungato da provare |
 | dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91 | Driver disabilitato nella EFI; port Linux mantenuto nella roadmap; spegnimento elettrico da verificare |
-| Schermo | BOE NV156FHM-N61, 1920×1080 | Luminosità e collegamento da verificare |
+| Schermo | BOE NV156FHM-N61, 1920×1080 | Pannello interno online alla risoluzione nativa; luminosità e ripresa da verificare |
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Famiglia PM981a problematica; non assunta compatibile |
 | Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | Funzionamento riferito nella Recovery con itlwm; sistema installato da provare |
 | Bluetooth | Intel, USB 8087:0AAA | Panic superato in una prova con IntelBTPatcher escluso; funzionalità Bluetooth e versione aggiornata da verificare |
@@ -35,10 +35,17 @@ Il nome del driver Windows della grafica integrata riporta UHD 610, ma il chip e
 ## Dati ancora necessari
 
 - Velocità SuperSpeed e reversibilità della USB-C: mappa a 9 porte ricevuta e verificata.
-- Boot-args di un avvio successivo ai ripristini e report della grafica dal sistema installato. Il log delle 02:45 conferma entrambi i parametri diagnostici in quel tentativo.
 - Esiti delle prove dei componenti nella [roadmap](ROADMAP.md).
 
-La Recovery ha raggiunto l'interfaccia grafica e l'installazione di Tahoe è stata avviata sul volume esterno «Machintosh SSD». Il primo desktop non è ancora confermato. Metal, audio, autonomia, sospensione e HDMI restano da verificare sul dispositivo. Nessun voto di compatibilità totale è assegnato prima delle prove.
+Tahoe ha raggiunto il desktop sul Samsung 960 EVO esterno dopo la correzione della memoria framebuffer. IntelAccelerator e Metal 3 esposto sono confermati; carico grafico prolungato, audio, autonomia, sospensione e HDMI restano da verificare. Nessun voto di compatibilità totale è assegnato prima delle prove.
+
+## Desktop e grafica Intel: 13 ottobre 2026
+
+Il report grafico del sistema installato espone UHD 620 con device-id `0x3ea5`, Metal 3 e memoria grafica condivisa dinamica fino a 1536 MB. Il pannello interno è online a 1920×1080. Il campione powermetrics rileva IntelAccelerator e boot-args senza `-igfxvesa` né `-x`. La correzione e i limiti delle verifiche sono documentati in [TEST-MEMORIA-INTEL.md](TEST-MEMORIA-INTEL.md) e [GRAFICA-INTEL.md](GRAFICA-INTEL.md).
+
+Un campione di circa un secondo riporta 50 °C per la CPU e 0,98 W stimati per il pacchetto Intel. È una misura istantanea: non verifica la NVIDIA, le ventole o l'autonomia. Lo spegnimento elettrico della dGPU resta aperto.
+
+Le sezioni successive descrivono i tentativi precedenti al raggiungimento del desktop.
 
 ## Esito della prima prova della Recovery
 
@@ -54,7 +61,7 @@ Il disco interno è stato riferito visibile nella Recovery: l'esclusione tramite
 
 ## Log OpenCore delle 02:45
 
-Il log del 13 ottobre 2026 conferma la selezione del volume USB esterno, con nome **Machintosh SSD**, e la presenza di `-igfxvesa` e `-x`. OpenCore riporta l'iniezione riuscita di Lilu 1.7.2 e WhateverGreen 1.7.1 e l'impostazione delle proprietà Intel. Il log non conferma l'inizializzazione dei driver nel kernel o Metal. Il primo desktop resta da raggiungere.
+Il log del 13 ottobre 2026 conferma la selezione del volume USB esterno, con nome **Machintosh SSD**, e la presenza di `-igfxvesa` e `-x`. OpenCore riporta l'iniezione riuscita di Lilu 1.7.2 e WhateverGreen 1.7.1 e l'impostazione delle proprietà Intel. Il log non conferma l'inizializzazione dei driver nel kernel o Metal. In quel tentativo il desktop non era ancora stato raggiunto.
 
 L'[analisi del log](ANALISI-LOG-AVVIO.md) riporta anche il percorso Apple con immagine BaseSystem, l'assenza della tabella MAT e i limiti del blocco NVMe. Il file originale e gli identificativi SMBIOS non vengono aggiunti alla repository.
 
@@ -62,8 +69,8 @@ L'[analisi del log](ANALISI-LOG-AVVIO.md) riporta anche il percorso Apple con im
 
 La fotografia ricevuta successivamente mostra un vero panic con processo `bluetoothd`, estensioni IOUSBHostFamily e IntelBTPatcher 2.4 nella traccia, Darwin 25.6.0 e build macOS 25G241. Nei boot-args visibili manca `-x`, mentre rimane `-igfxvesa`. L'intestazione del panic è fuori dall'inquadratura, quindi la causa precisa resta da confermare.
 
-La [prova Bluetooth](TEST-BLUETOOTH.md) esclude solo IntelBTPatcher dalla EFI attuale. La versione 2.4 precede la correzione ufficiale della gestione del descrittore di memoria USB per Sequoia e successivi; il builder la esclude dalle nuove EFI. Il firmware Intel, BlueToolFixup e itlwm restano presenti. La prova sul portatile ha superato il panic e raggiunto uno schermo nero con il puntatore. È stata riferita attività del disco, senza comparsa di finestre. Il log di questo tentativo è stato ricevuto: conferma `-igfxvesa` attivo e `-x` assente. Non contiene l'iniezione di IntelBTPatcher; firmware Intel e BlueToolFixup sono ancora iniettati. L'iniezione di Lilu/WhateverGreen riesce, ma non dimostra l'inizializzazione della grafica nel kernel. Due log successivi, `103339` e `103615`, confermano la rimozione di VESA e dell'avvio sicuro mantenendo IntelBTPatcher escluso. Una nuova foto mostra lo stallo sul testo con errori di servizi, firme del codice e DriverKit, senza una riga di panic. Il caricamento di Lilu/WhateverGreen non prova Metal. Il prossimo dato necessario è la [raccolta dei report del sistema da Recovery](DIAGNOSI-INTERFACCIA.md). Il confronto con una build aggiornata del patcher e le funzioni Bluetooth restano da verificare.
+La [prova Bluetooth](TEST-BLUETOOTH.md) esclude solo IntelBTPatcher dalla EFI attuale. La versione 2.4 precede la correzione ufficiale della gestione del descrittore di memoria USB per Sequoia e successivi; il builder la esclude dalle nuove EFI. Il firmware Intel, BlueToolFixup e itlwm restano presenti. La prova sul portatile ha superato il panic e raggiunto uno schermo nero con il puntatore. È stata riferita attività del disco, senza comparsa di finestre. Il log di questo tentativo è stato ricevuto: conferma `-igfxvesa` attivo e `-x` assente. Non contiene l'iniezione di IntelBTPatcher; firmware Intel e BlueToolFixup sono ancora iniettati. L'iniezione di Lilu/WhateverGreen riesce, ma non dimostra l'inizializzazione della grafica nel kernel. Due log successivi, `103339` e `103615`, confermano la rimozione di VESA e dell'avvio sicuro mantenendo IntelBTPatcher escluso. Una nuova foto mostra lo stallo sul testo con errori di servizi, firme del codice e DriverKit, senza una riga di panic. Il caricamento di Lilu/WhateverGreen non prova Metal. La successiva [raccolta dei report del sistema da Recovery](DIAGNOSI-INTERFACCIA.md) ha preceduto la diagnosi del panic Intel e la correzione memoria. Il confronto con una build aggiornata del patcher e le funzioni Bluetooth restano da verificare.
 
 ## Prima raccolta dei report in Recovery
 
-La Recovery ha aperto l'interfaccia e il Terminale e ha letto Machintosh SSD - Data. Il report APFS mostra un container da 249.8 GB sul supporto esterno, il volume System sigillato e Data montato senza FileVault. La raccolta contiene un vecchio panic Bluetooth e i log dell'installazione, che arriva al benvenuto Hello; la configurazione iniziale resta da completare. Non è una verifica di Metal o del funzionamento del Bluetooth.
+La Recovery ha aperto l'interfaccia e il Terminale e ha letto Machintosh SSD - Data. Il report APFS mostra un container da 249.8 GB sul supporto esterno, il volume System sigillato e Data montato senza FileVault. La raccolta contiene un vecchio panic Bluetooth e i log dell'installazione, che arriva al benvenuto Hello; in quella raccolta la configurazione iniziale non era ancora completata. Non è una verifica di Metal o del funzionamento del Bluetooth.

@@ -4,8 +4,8 @@ Obiettivo: rendere utilizzabili tutti i componenti del Lenovo IdeaPad S540-15IWL
 
 ## Ordine delle prove
 
-1. Completare l'installazione sul 960 EVO esterno e raggiungere il desktop.
-2. Verificare e completare l'accelerazione della UHD 620 seguendo [GRAFICA-INTEL.md](GRAFICA-INTEL.md).
+1. Conservare una copia privata della EFI corrente: il desktop di Tahoe sul 960 EVO esterno è stato raggiunto.
+2. Completare le prove di stabilità della UHD 620 seguendo [GRAFICA-INTEL.md](GRAFICA-INTEL.md); IntelAccelerator e Metal 3 esposto sono già confermati.
 3. Verificare periferiche, rete, USB e audio nel sistema installato.
 4. Completare luminosità, gestione energetica, sospensione e riavvii.
 5. Trasferire la EFI corrente sul 960 EVO e provare l'avvio senza l'HDD, conservando il supporto già funzionante come ripiego.
@@ -15,18 +15,18 @@ Obiettivo: rendere utilizzabili tutti i componenti del Lenovo IdeaPad S540-15IWL
 
 | Componente | Stato attuale | Prova necessaria |
 |---|---|---|
-| Avvio Tahoe | Installazione in corso su «Macintosh SSD» | Desktop, spegnimento e riavvio ripetibili |
-| Intel UHD 620 | Configurazione iniziale presente; boot-args da raccogliere | Metal funzionante, risoluzione nativa, assenza di artefatti |
+| Avvio Tahoe | Configurazione iniziale e desktop raggiunti sul 960 EVO esterno | Spegnimento e riavvio ripetibili |
+| Intel UHD 620 | IntelAccelerator rilevato, Metal 3 esposto, memoria condivisa fino a 1536 MB; avvio senza VESA | Carico Metal e uso prolungato senza blocchi o artefatti |
 | Tastiera | Funziona nella Recovery | Uso nel sistema installato e tasti funzione |
 | Touchpad ELAN | Driver presenti; il «mouse» riferito non identifica il dispositivo | Puntamento, clic, scorrimento e gesti |
 | Wi-Fi Intel AC9560 | Funziona nella Recovery con itlwm | Connessione, trasferimenti e riconnessione dopo sospensione |
-| Bluetooth Intel | Panic USB/Bluetooth con IntelBTPatcher 2.4; [prova di esclusione](TEST-BLUETOOTH.md) pronta; sorgente aggiornato da verificare | Avvio senza panic, confronto con patcher aggiornato, associazione e uso di una periferica, riconnessione dopo sospensione |
+| Bluetooth Intel | Panic superato con IntelBTPatcher 2.4 escluso; funzionalità non ancora provata | Confronto con patcher aggiornato, associazione e uso di una periferica, riconnessione dopo sospensione |
 | Audio ALC257 | Audio analogico su Tahoe da completare | Altoparlanti, cuffie, microfono e commutazione delle uscite |
 | USB-A e USB-C | Mappa a 9 porte verificata; 960 EVO rilevato | USB 2/3, entrambe le orientazioni USB-C e riconnessione |
-| Samsung 960 EVO esterno | Box ripristinato; installazione in corso | Uso prolungato senza disconnessioni e ripresa dalla sospensione |
+| Samsung 960 EVO esterno | Box ripristinato; Tahoe avviato al desktop | Uso prolungato senza disconnessioni e ripresa dalla sospensione |
 | NVMe PM981a interno | Visibile nella Recovery; mantenuto per Windows | Verificare eventuali effetti sulla stabilità di macOS |
-| Display e luminosità | Interfaccia Recovery visibile | Risoluzione, regolazione luminosità e ripresa del pannello |
-| CPU, batteria e ventole | Driver e ACPI iniziali presenti | Letture coerenti, gestione frequenze, temperature e autonomia |
+| Display e luminosità | Pannello interno online a 1920×1080 nel sistema installato | Regolazione luminosità e ripresa del pannello |
+| CPU, batteria e ventole | Campione istantaneo: CPU 50 °C, frequenza media circa 1,17 GHz, pacchetto Intel stimato 0,98 W; telemetria SMC parziale | Letture coerenti, frequenze e temperature nel tempo, ventole, stato dGPU e autonomia |
 | Sospensione | Non provata | Chiusura coperchio, risveglio e recupero delle periferiche |
 | Webcam | Porta interna mappata; non provata | Acquisizione video e ripresa dopo sospensione |
 | Lettore SD O2Micro | Identificato; supporto da valutare | Driver applicabile e lettura di una scheda |
