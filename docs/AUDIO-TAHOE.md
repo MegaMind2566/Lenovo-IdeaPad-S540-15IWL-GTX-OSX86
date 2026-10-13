@@ -33,6 +33,10 @@ La coppia Whiskey Lake e le tre proprietà della correzione memoria restano inva
 
 Dopo la prova v3 è stato riferito un esito positivo: riproduzione audio, regolazione graduale e tasti F1–F3 funzionano. Il problema della variazione udibile soltanto a zero/muto è quindi risolto nella prova sul portatile. Si conserva questa configurazione. Il nuovo output tecnico della verifica non è stato allegato; non si estende l'esito automaticamente a jack, microfono o sospensione.
 
+## Acquisizione voce e guadagno: 14 ottobre 2026
+
+Nella prova video Photo Booth è stato riferito che la voce si sente, insieme all'immagine della webcam. Il guadagno microfono è eccessivo: si sta regolando il livello d'ingresso nelle impostazioni macOS per ripetere la registrazione. L'acquisizione audio è presente, ma il risultato dopo la regolazione è ancora atteso. Non viene applicata una nuova patch al driver; equalizzazione e tasti funzione restano rinviati.
+
 ## Equalizzazione da rivedere piu avanti
 
 È richiesto un affinamento dell'equalizzazione, da affrontare più avanti. L'attività resta nella roadmap come prova separata della timbrica; non vengono aggiunte ora modifiche a mixer, amplificazione o driver.

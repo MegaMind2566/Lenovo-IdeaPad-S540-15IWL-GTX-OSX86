@@ -11,7 +11,7 @@ Obiettivo: rendere utilizzabili tutti i componenti del Lenovo IdeaPad S540-15IWL
 5. Trasferire la EFI corrente sul 960 EVO e provare l'avvio senza l'HDD, conservando il supporto già funzionante come ripiego.
 6. Avviare la ricerca NVIDIA e verificare le uscite video secondo il percorso hardware rilevato.
 
-Priorità aggiornate il 13 ottobre 2026: il pannello spento all'avvio è **risolto nella prova con -igfxblr, attesa da circa due minuti a zero**. Si conserva la EFI corrente. Il 14 ottobre 2026 è stato confermato anche il funzionamento con cuffie Bluetooth e di HeliPort. Prossimi controlli: webcam e microfono interno; le verifiche di velocità rete e riconnessione restano aperte. Il percorso è in [AVVIO-RETE.md](AVVIO-RETE.md). Batteria e contatori sono [archiviati](BATTERIA-SOSPENSIONE.md); le altre prove di sospensione sono rinviate, insieme al blocco tasti funzione e all'equalizzazione già annotati.
+Priorità aggiornate il 13 ottobre 2026: il pannello spento all'avvio è **risolto nella prova con -igfxblr, attesa da circa due minuti a zero**. Si conserva la EFI corrente. Il 14 ottobre 2026 è stato confermato anche il funzionamento con cuffie Bluetooth e di HeliPort. La prova Photo Booth mostra immagine e registra la voce; il guadagno microfono è eccessivo e la regolazione nelle impostazioni è in corso. Velocità rete e riconnessione restano aperte. Il percorso è in [AVVIO-RETE.md](AVVIO-RETE.md). Batteria e contatori sono [archiviati](BATTERIA-SOSPENSIONE.md); le altre prove di sospensione sono rinviate, insieme al blocco tasti funzione e all'equalizzazione già annotati.
 
 ## Stato e criteri
 
@@ -23,14 +23,14 @@ Priorità aggiornate il 13 ottobre 2026: il pannello spento all'avvio è **risol
 | Touchpad ELAN | Driver presenti; il «mouse» riferito non identifica il dispositivo | Puntamento, clic, scorrimento e gesti |
 | Wi-Fi Intel AC9560 | itlwm 2.3.0 caricato, Ethernet su en0 previsto dal driver; HeliPort riferito funzionante | Velocità, cambio rete e riconnessione; integrazione Wi-Fi nativa Tahoe separata |
 | Bluetooth Intel | Funzionamento con cuffie confermato; firmware caricato, NVRAM corretta, IntelBTPatcher 2.4 escluso | Microfono delle cuffie e riconnessione da provare; conservare i driver attuali |
-| Audio ALC257 | Riproduzione, volume graduale e tasti F1–F3 confermati dopo la correzione v3 | Equalizzazione da affinare più avanti; cuffie/jack, microfono, commutazione e ripresa da documentare |
+| Audio ALC257 | Riproduzione, volume graduale e F1–F3 confermati; voce acquisita nella prova video, guadagno microfono eccessivo | Verificare nuova registrazione dopo regolazione ingresso; equalizzazione rinviata, jack e ripresa da documentare |
 | USB-A e USB-C | Mappa a 9 porte verificata; 960 EVO rilevato | USB 2/3, entrambe le orientazioni USB-C e riconnessione |
 | Samsung 960 EVO esterno | Box ripristinato; Tahoe avviato al desktop | Uso prolungato senza disconnessioni e ripresa dalla sospensione |
 | NVMe PM981a interno | Visibile nella Recovery; mantenuto per Windows | Verificare eventuali effetti sulla stabilità di macOS |
 | Display e luminosità | Pannello interno 1920×1080 e cursore luminosità funzionanti; F11/F12 non funzionano nella prova riferita | F11/F12 rinviati al blocco tasti funzione; ripresa del pannello da provare |
 | CPU, batteria e ventole | X86PlatformPlugin attivo; riposo 45–46 °C e 0,80–0,95 W Intel stimati; ventola silenziosa. Batteria rilevata al 100% su AC. Telemetria SMC parziale | Temperature sotto carico, stato dGPU, passaggio a batteria e autonomia |
 | Sospensione | pmset registra Sleep Count 1, User Wake Count 1 e Dark Wake Count 0; [dati conservati](BATTERIA-SOSPENSIONE.md) | Prove rinviate: recupero periferiche, coperchio e stop prolungato restano da verificare |
-| Webcam | Porta interna mappata; non provata | Acquisizione video e ripresa dopo sospensione |
+| Webcam | Immagine presente nella prova Photo Booth del 14 ottobre 2026 | Uso prolungato e ripresa da verificare |
 | Lettore SD O2Micro | Identificato; supporto da valutare | Driver applicabile e lettura di una scheda |
 | Lettore impronte | Porta USB interna mappata; supporto da valutare | Valutare driver e integrazione con macOS |
 | HDMI e video USB-C | Funzionamento e percorso non verificati | Individuare la GPU collegata a ciascuna uscita e provare monitor esterno |

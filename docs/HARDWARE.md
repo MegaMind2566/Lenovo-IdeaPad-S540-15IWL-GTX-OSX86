@@ -15,11 +15,11 @@ Report ricevuto il 12 ottobre 2026. Sono riportati solo i dati utili al progetto
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Famiglia PM981a problematica; non assunta compatibile |
 | Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | itlwm 2.3.0 caricato e HeliPort riferito funzionante; Ethernet è previsto dal driver; velocità e riconnessione da provare |
 | Bluetooth | Intel, USB 8087:0AAA | Funzionamento con cuffie confermato; firmware caricato, NVRAM corretta e IntelBTPatcher escluso; microfono delle cuffie e riconnessione da provare |
-| Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Riproduzione, volume graduale e tasti F1–F3 confermati con VoodooHDA 3.6.8 e correzione v3; equalizzazione rinviata, jack e microfono da documentare |
+| Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Riproduzione, volume graduale e tasti F1–F3 confermati con VoodooHDA 3.6.8 e correzione v3; voce acquisita nella prova video con guadagno eccessivo da regolare; equalizzazione rinviata, jack da documentare |
 | Tastiera | PS/2 | Funzionamento riferito nella Recovery con VoodooPS2 |
 | Touchpad | ELAN0662, I2C HID; controller Intel 8086:9DE8 | Percorso confermato: `_SB.PCI0.I2C0.TPD0`; funzionamento da provare |
 | Lettore SD | O2Micro SD Host Controller | Supporto da verificare; diverso dal lettore del progetto lucatek |
-| Webcam | TwinHan Integrated Camera USB | Da provare dopo la mappatura USB |
+| Webcam | TwinHan Integrated Camera USB | Immagine presente nella prova Photo Booth; uso prolungato e ripresa da verificare |
 
 Il nome del driver Windows della grafica integrata riporta UHD 610, ma il chip e l'ID PCI del report identificano UHD 620. La configurazione sarà basata sul chip reale.
 
@@ -65,6 +65,10 @@ Il report contiene ancora Invalid key detected e non riporta RPM delle ventole: 
 La prova del solo `-igfxblr` ha eliminato il nero all'avvio nell'esito riferito: da circa due minuti a zero. Si conserva la configurazione, mantenendo memoria Intel, audio e SIP. Il report precedente al test mostra lo stesso UUID framebuffer e Loginwindow pronto circa 31,3 secondi dopo il kernel. La [diagnosi](AVVIO-RETE.md) distingue il ritardo del pannello dal tempo di avvio del sistema.
 
 Lo stato Bluetooth è On, FirmwareLoaded è Yes e il trasporto è connesso; BlueToolFixup 2.7.2 e IntelBluetoothFirmware 2.4 sono caricati, IntelBTPatcher è assente. Le due variabili NVRAM richieste sono presenti con i valori corretti: un byte zero e quattordici byte zero. Lo stack avvia la scansione e riceve dispositivi BLE. Il 14 ottobre 2026 è stato riferito il funzionamento con cuffie Bluetooth, insieme al funzionamento di HeliPort per la gestione delle reti Wi-Fi. Si conservano i driver e la NVRAM attuali. Questo esito non verifica il microfono delle cuffie, il microfono interno ALC257, il jack analogico o la riconnessione dopo stop.
+
+## Webcam e acquisizione voce: 14 ottobre 2026
+
+Nella prova proposta con Photo Booth è stato riferito che l'immagine è visibile e la voce viene registrata. Il guadagno microfono risulta troppo alto: è in corso la regolazione nelle impostazioni di macOS e una nuova registrazione. La webcam è quindi funzionante nella prova; il livello dell'ingresso audio non è ancora confermato corretto. Non sono applicate modifiche ai driver.
 
 ## Batteria e contatori di stop: 13 ottobre 2026
 
