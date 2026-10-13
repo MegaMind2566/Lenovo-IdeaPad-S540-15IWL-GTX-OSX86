@@ -39,6 +39,8 @@ Nella prova video Photo Booth è stato riferito che la voce si sente, insieme al
 
 Il nuovo report identifica l'ingresso predefinito come Internal Microphone VoodooHDA, due canali a 48 kHz. I controlli sinistro e destro hanno valore 57 su 100 e intervallo dichiarato 0–30 dB. Gli altoparlanti sono a 100, con intervallo dichiarato −21,5–0 dB. L'intervallo non rivela i passi reali del codec: si procede con una [lettura dei mixer a due livelli](MICROFONO.md) prima di scegliere una modifica del driver. La correzione del volume altoparlanti resta attiva.
 
+La prima raccolta microfono si è fermata sul controllo del binario: richiedeva l'hash completo originale, mentre la rifirma della variante volume V3 aggiorna anche il Mach-O. La raccolta v2 riconosce la variante attraverso `VolumeManifestHash` e il manifest dei tre file nel backup `volume-test`; verifica originale conservato, variante conservata, bundle installato e unico cambiamento del plist. Non modifica config, driver, stato del backup o firma. Le letture dei mixer sul portatile restano da eseguire.
+
 ## Equalizzazione da rivedere piu avanti
 
 È richiesto un affinamento dell'equalizzazione, da affrontare più avanti. L'attività resta nella roadmap come prova separata della timbrica; non vengono aggiunte ora modifiche a mixer, amplificazione o driver.

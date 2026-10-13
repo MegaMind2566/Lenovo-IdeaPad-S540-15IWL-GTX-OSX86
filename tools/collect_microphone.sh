@@ -36,8 +36,11 @@ trap 'fail "Operazione interrotta."' INT TERM
 PACKAGE=$(cd -P "$(/usr/bin/dirname "${BASH_SOURCE[0]}")/.." && pwd) || fail 'Impossibile trovare il pacchetto.'
 BIN="$PACKAGE/bin/hda_mixer_snapshot"
 SUMS="$PACKAGE/SHA256SUMS"
-DRIVER='/Library/Extensions/VoodooHDA.kext/Contents/MacOS/VoodooHDA'
-DRIVER_SHA='932a7c9e46a65fdab7c8729f599c1094b568ae4fc7f17dad9818c83e833a0973'
+DRIVER_BUNDLE='/Library/Extensions/VoodooHDA.kext'
+DRIVER="$DRIVER_BUNDLE/Contents/MacOS/VoodooHDA"
+DRIVER_CHECK="$PACKAGE/tools/verify_microphone_driver.sh"
+AUDIO_BACKUP='/Volumes/240 GB/EFI/OC/backup-audio-tahoe'
+DRIVER_SHA=''
 
 ordinary_file() { [ -f "$1" ] && [ ! -L "$1" ]; }
 hash() { /usr/bin/shasum -a 256 "$1" | /usr/bin/awk '{print $1}'; }
@@ -49,7 +52,7 @@ case "$EXPECTED" in ''|*[!0-9a-f]*) fail 'Manifesto SHA256 non valido.';; esac
 printf '%s  bin/hda_mixer_snapshot\n' "$EXPECTED" | /usr/bin/cmp -s - "$SUMS" || fail 'Il manifesto non ha il formato previsto.'
 [ "$(hash "$BIN")" = "$EXPECTED" ] || fail 'Il lettore non coincide con il manifesto; non viene eseguito.'
 ordinary_file "$DRIVER" || fail 'Il driver VoodooHDA installato non è disponibile.'
-[ "$(hash "$DRIVER")" = "$DRIVER_SHA" ] || fail 'Il driver installato non è il binario VoodooHDA 3.6.8 verificato.'
+ordinary_file "$DRIVER_CHECK" || fail 'Manca il controllo della variante audio.'
 
 WORK=$(/usr/bin/mktemp -d "$HOME/Desktop/DIAGNOSI-MICROFONO-XXXXXX") || fail 'Impossibile creare la raccolta.'
 ERRORS="$WORK/ERRORI.txt"
@@ -93,12 +96,16 @@ capture() {
     if [ "$rc" -ne 0 ]; then
         if [ "$label" = 'lettura mixer' ]; then
             printf 'Il lettore non ha completato l accesso al driver. Non viene richiesto sudo.\n' >&2
-            [ ! -s "$ERRORS" ] || /bin/cat "$ERRORS" >&2
         fi
+        [ ! -s "$ERRORS" ] || /bin/cat "$ERRORS" >&2
         fail "$label: comando terminato con codice $rc."
     fi
 }
 
+capture "$WORK/DRIVER-VERIFICA.txt" 30 'verifica della variante audio' /bin/bash "$DRIVER_CHECK" "$DRIVER_BUNDLE" "$AUDIO_BACKUP"
+DRIVER_SHA=$(/bin/cat "$WORK/DRIVER-VERIFICA.txt") || fail 'Impossibile leggere il risultato della verifica audio.'
+case "$DRIVER_SHA" in ''|*[!0-9a-f]*) fail 'Il controllo audio non ha restituito un hash valido.';; esac
+[ "${#DRIVER_SHA}" -eq 64 ] || fail 'Il controllo audio non ha restituito un solo hash.'
 capture "$WORK/DRIVER-CARICATI.txt" 20 'verifica driver caricato' /usr/bin/kmutil showloaded
 /usr/bin/grep -Eq 'org\.voodoo\.driver\.VoodooHDA[[:space:]]+\(3\.6\.8\)' "$WORK/DRIVER-CARICATI.txt" || fail 'VoodooHDA 3.6.8 non risulta caricato. Riavvia con la configurazione audio funzionante.'
 # Keep only the relevant audio/Lilu entries, not a complete kext listing.

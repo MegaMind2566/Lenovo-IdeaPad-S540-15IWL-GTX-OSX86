@@ -6,15 +6,17 @@ Questa raccolta confronta i mixer con il cursore ingresso circa al 30% e al 70%.
 
 ## Uso
 
-Estrarre `S540-microfono.zip` in Download ed eseguire:
+Estrarre `S540-microfono-v2.zip` in Download ed eseguire:
 
 ```sh
-bash "$HOME/Downloads/S540-microfono/RACCOGLI-MICROFONO.command"
+bash "$HOME/Downloads/S540-microfono-v2/RACCOGLI-MICROFONO.command"
 ```
 
 Seguire le due indicazioni nel Terminale. Lo ZIP diagnostico viene creato sulla Scrivania. Allegarlo privatamente nella chat; non aggiungere i risultati alla repository. Non servono Xcode o Python sul portatile.
 
-Il programma verifica il binario originale VoodooHDA 3.6.8 installato e quello della sonda. Se un controllo o una lettura fallisce, conserva i dettagli nella cartella della raccolta e segnala il problema. Non richiede privilegi amministrativi e non ripara automaticamente i permessi.
+Il programma verifica VoodooHDA 3.6.8 originale oppure la variante della correzione volume V3. Quest'ultima viene riconosciuta attraverso il manifest registrato nel backup audio del disco `240 GB`: quel volume deve essere montato. Vengono confrontati i tre file del bundle, le copie conservate e il solo cambiamento previsto nel plist. La firma V3 modifica anche il binario Mach-O, quindi il suo hash completo differisce dall'originale. Prima di ogni lettura si ricontrolla l'hash della variante riconosciuta e quello della sonda.
+
+Se un controllo o una lettura fallisce, conserva i dettagli nella cartella della raccolta e segnala il problema. Non richiede privilegi amministrativi e non ripara automaticamente i permessi. Il controllo legge il backup senza richiamare il programma di ripristino audio: il config con `-igfxblr` non viene coinvolto.
 
 ## Cosa contiene
 
