@@ -29,14 +29,48 @@ La preparazione modifica solo:
 
 La coppia Whiskey Lake e le tre proprietà della correzione memoria restano invariate. Il programma conserva la EFI corrente: non ricostruisce identità, ACPI, Bluetooth o profilo Wi-Fi. Non installa pannelli preferenze o servizi aggiuntivi.
 
-## Applicazione da macOS
+## Controllo del volume: pacchetto v3
 
-Prima conservare la copia privata della EFI funzionante già descritta in [GRAFICA-INTEL.md](GRAFICA-INTEL.md). Scaricare **S540-audio-Tahoe-v2.zip** ed estrarlo in Download. Il pacchetto crea la cartella **S540-audio-Tahoe-v2**. Il volume OpenCore deve essere montato come **240 GB**; se ha un nome diverso, passare il percorso reale come unico argomento al comando.
+Dopo la prova v2 sono stati riferiti riproduzione audio e funzionamento dei tasti F1, F2 e F3. La variazione graduale non è ancora efficace: il suono cambia soltanto quando il volume arriva a zero/muto. Non sono stati documentati separatamente cuffie/jack e microfono.
+
+Nel sorgente VoodooHDA 3.6.8, `VoodooHDAEnableVolumeChangeFix` abilita l'inoltro del valore al mixer PCM e agli altri controlli del mixer. Con il flag false, la variazione dell'uscita viene inoltrata al master VOLUME, che può non controllare il guadagno effettivo del codec. Il flag è letto durante l'inizializzazione del dispositivo: serve aggiornare il driver e riavviare per provarlo.
+
+La prova v3 modifica solo `IOKitPersonalities.VoodooHDA.VoodooHDAEnableVolumeChangeFix` da false a true. HalfVolumeFix, HalfMicVolumeFix, MuteFix, Boost, PCM iniziale e altre impostazioni restano invariati. Poiché il plist è sigillato dalla firma del bundle, la copia modificata viene firmata nuovamente ad hoc e verificata sul Mac. Non viene fornito un driver alterato senza firma.
+
+### Sul sistema che ha già audio funzionante
+
+Estrarre **S540-audio-Tahoe-v3.zip** in Download, poi eseguire:
+
+```sh
+bash "$HOME/Downloads/S540-audio-Tahoe-v3/VOLUME-AUDIO.command"
+```
+
+Il programma usa il backup audio formato 2 esistente, verifica il driver già installato, conserva una copia completa e prepara la variante in una cartella temporanea. La sostituzione avviene solo dopo verifica dei file e della firma. Non cambia config, SIP o impostazioni Intel. Richiede la ricostruzione AuxKC con `kmutil rebuild`: seguire l'eventuale approvazione di macOS e riavviare. Non usare unload/load a caldo per questa prova.
+
+Dopo il riavvio eseguire:
+
+```sh
+bash "$HOME/Downloads/S540-audio-Tahoe-v3/VERIFICA-AUDIO.command"
+```
+
+Verificare il flag esposto in IORegistry e, con lo stesso contenuto in riproduzione, confrontare volume circa 25%, 50% e 100%, poi muto. Controllare sia i tasti F2/F3 sia il cursore del volume di macOS. Il successo della scrittura del plist non dimostra ancora l'attenuazione graduale.
+
+Per tornare al driver precedente, mantenendo l'audio installato:
+
+```sh
+bash "$HOME/Downloads/S540-audio-Tahoe-v3/ANNULLA-VOLUME-AUDIO.command"
+```
+
+Seguire il riavvio indicato. Per rimuovere tutto l'audio utilizzare **RIPRISTINA-AUDIO.command del pacchetto v3**: riconosce sia il driver originario sia la variante volume creata e verificata da questa prova. I comandi del vecchio pacchetto v2 controllano soltanto i file originali e si fermerebbero davanti alla variante.
+
+## Prima installazione da macOS
+
+Prima conservare la copia privata della EFI funzionante già descritta in [GRAFICA-INTEL.md](GRAFICA-INTEL.md). Scaricare **S540-audio-Tahoe-v3.zip** ed estrarlo in Download. Il pacchetto crea la cartella **S540-audio-Tahoe-v3**. Il volume OpenCore deve essere montato come **240 GB**; se ha un nome diverso, passare il percorso reale come unico argomento al comando.
 
 1. Preparare la EFI:
 
    ```sh
-   bash "$HOME/Downloads/S540-audio-Tahoe-v2/PREPARA-AUDIO.command"
+   bash "$HOME/Downloads/S540-audio-Tahoe-v3/PREPARA-AUDIO.command"
    ```
 
    Attendere il messaggio di preparazione riuscita, poi riavviare dallo stesso HDD OpenCore e scegliere il Samsung con Tahoe.
@@ -44,7 +78,7 @@ Prima conservare la copia privata della EFI funzionante già descritta in [GRAFI
 2. Installare il driver dopo il riavvio:
 
    ```sh
-   bash "$HOME/Downloads/S540-audio-Tahoe-v2/INSTALLA-AUDIO.command"
+   bash "$HOME/Downloads/S540-audio-Tahoe-v3/INSTALLA-AUDIO.command"
    ```
 
    Il programma verifica il SIP effettivamente attivo, il config preparato e il driver. Quando sudo chiede la password, inserirla nel Terminale; i caratteri non vengono mostrati. Il bundle viene copiato in `/Library/Extensions` e viene richiesto il caricamento con `kmutil load`. Se macOS chiede l'approvazione, aprire **Impostazioni di Sistema → Privacy e sicurezza**, approvare l'estensione e riavviare. I codici kmutil 27 e 28 significano rispettivamente approvazione o riavvio richiesti; non equivalgono a audio già funzionante.
@@ -52,7 +86,7 @@ Prima conservare la copia privata della EFI funzionante già descritta in [GRAFI
 3. Dopo il riavvio verificare:
 
    ```sh
-   bash "$HOME/Downloads/S540-audio-Tahoe-v2/VERIFICA-AUDIO.command"
+   bash "$HOME/Downloads/S540-audio-Tahoe-v3/VERIFICA-AUDIO.command"
    ```
 
    Provare altoparlanti e volume, poi cuffie/jack e microfono. Conservare l'esito di ciascuna prova. Sospensione e ripresa dell'audio sono una verifica successiva.
@@ -62,7 +96,7 @@ Se un controllo si ferma, conservare il messaggio. Non occorre ripetere i vecchi
 ## Ripristino
 
 ```sh
-bash "$HOME/Downloads/S540-audio-Tahoe-v2/RIPRISTINA-AUDIO.command"
+bash "$HOME/Downloads/S540-audio-Tahoe-v3/RIPRISTINA-AUDIO.command"
 ```
 
 Il programma rimuove esclusivamente il driver che questa prova ha installato, dopo averne verificato i file, e richiede la ricostruzione della collezione ausiliaria con `kmutil rebuild`. Dopo l'installazione, il ripristino procede così:
@@ -73,11 +107,13 @@ Il programma rimuove esclusivamente il driver che questa prova ha installato, do
 
 Se config o driver sono stati modificati successivamente, il ripristino automatico si ferma per evitare di sovrascrivere altre modifiche.
 
-Il backup privato è in `EFI/OC/backup-audio-tahoe` e va conservato. Non aggiungerlo alla repository: contiene il config reale del dispositivo. La prova non cancella la precedente copia completa della EFI e non modifica il disco Windows.
+Il backup privato è in `EFI/OC/backup-audio-tahoe` e va conservato. Gli snapshot della prova volume e il relativo manifest sono conservati al suo interno. Non aggiungerlo alla repository: contiene il config reale del dispositivo. La prova non cancella la precedente copia completa della EFI e non modifica il disco Windows.
 
 ## Limiti della verifica
 
-Sintassi Bash, autenticità dell'asset e dei singoli file, integrità ZIP e fixture delle modifiche previste sono stati controllati in Linux. I config preparato e di ritorno al SIP originale passano ocvalidate 1.0.8; le fixture conservano identità, ACPI, Booter, grafica Intel e altre voci dei kext. Una revisione separata ha verificato gestione della copia temporanea, journal, ripresa dopo interruzioni e controllo dell'AuxKC prima del ripristino SIP. La prima esecuzione sul portatile ha verificato payload, firma, proprietà della EFI e HDAS prima del blocco SIP. La lettura corretta e il ripristino dei casi iniziali zero e 0x267 sono stati controllati con fixture; la preparazione v2, l'installazione, l'approvazione e il successivo avvio fisico restano da verificare sul portatile. Il codec supportato e il nome HDAS coerente non certificano automaticamente qualità audio, volume, jack, microfono o ripresa dalla sospensione.
+Sintassi Bash, autenticità dell'asset e dei singoli file, integrità ZIP e fixture delle modifiche previste sono stati controllati in Linux. I config preparato e di ritorno al SIP originale passano ocvalidate 1.0.8; le fixture conservano identità, ACPI, Booter, grafica Intel e altre voci dei kext. Una revisione separata ha verificato gestione della copia temporanea, journal, ripresa dopo interruzioni e controllo dell'AuxKC prima del ripristino SIP. La prima esecuzione sul portatile ha verificato payload, firma, proprietà della EFI e HDAS prima del blocco SIP. La lettura corretta e il ripristino dei casi iniziali zero e 0x267 sono stati controllati con fixture; dopo la versione v2 è stata riferita la riproduzione audio funzionante con i tasti F1–F3.
+
+Per la prova volume v3, una fixture verifica l'unico Bool modificato e la conservazione delle altre proprietà del mixer. Le funzioni hash effettive del programma riconoscono il payload originale e la variante registrata nella fixture, e rifiutano un binario alterato. Firma della nuova variante, ricostruzione AuxKC e attenuazione graduale restano da provare sul Mac. Il codec supportato e il nome HDAS coerente non certificano automaticamente qualità audio, jack, microfono o ripresa dalla sospensione.
 
 AppleHDA resta una strategia successiva se questa prova non soddisfa i requisiti. La ricerca NVIDIA rimane nella [roadmap](ROADMAP.md).
 
@@ -85,6 +121,9 @@ AppleHDA resta una strategia successiva se questa prova non soddisfa i requisiti
 
 - [Dortania Tahoe: audio analogico e VoodooHDA](https://dortania.github.io/OpenCore-Install-Guide/extras/tahoe.html#analog-audio).
 - [VoodooHDA Release368](https://github.com/CloverHackyColor/VoodooHDA/releases/tag/Release368).
+- [VoodooHDA: gestione del volume](https://github.com/CloverHackyColor/VoodooHDA/blob/8c7e8e2ce6de0a917be663a3192857955288c937/tranc/VoodooHDAEngine.cpp#L1027).
+- [VoodooHDA: lettura dei flag e curva del mixer](https://github.com/CloverHackyColor/VoodooHDA/blob/8c7e8e2ce6de0a917be663a3192857955288c937/tranc/VoodooHDADevice.cpp#L237).
+- [Manuale Apple di codesign](https://keith.github.io/xcode-man-pages/codesign.1.html): sostituzione e verifica della firma ad hoc.
 - [VoodooHDA: scelta layout](https://github.com/CloverHackyColor/VoodooHDA/blob/8c7e8e2ce6de0a917be663a3192857955288c937/tranc/VoodooHDADevice.cpp).
 - [VoodooHDA: tabella ALC257](https://github.com/CloverHackyColor/VoodooHDA/blob/8c7e8e2ce6de0a917be663a3192857955288c937/tranc/AppleALCPinConfigs.cpp).
 - [AppleALC: rimozione AppleHDA in macOS 26](https://github.com/acidanthera/AppleALC/blob/master/README.md).

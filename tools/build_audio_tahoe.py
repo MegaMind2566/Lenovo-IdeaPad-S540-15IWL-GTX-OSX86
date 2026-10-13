@@ -13,6 +13,7 @@ import zipfile
 SOURCE_FILES = [
     'PREPARA-AUDIO.command', 'INSTALLA-AUDIO.command',
     'VERIFICA-AUDIO.command', 'RIPRISTINA-AUDIO.command',
+    'VOLUME-AUDIO.command', 'ANNULLA-VOLUME-AUDIO.command',
     'tools/audio_tahoe.sh', 'profiles/audio-tahoe-assets.lock.json',
     'docs/AUDIO-TAHOE.md',
     'licenses/audio-tahoe/VoodooHDA-LICENSE.txt',
@@ -53,7 +54,7 @@ def load_payload(archive, lock):
 
 
 def write_entry(target, name, data):
-    entry = zipfile.ZipInfo('S540-audio-Tahoe-v2/' + name, (1980, 1, 1, 0, 0, 0))
+    entry = zipfile.ZipInfo('S540-audio-Tahoe-v3/' + name, (1980, 1, 1, 0, 0, 0))
     entry.create_system = 3
     mode = 0o755 if name.endswith(('.command', '.sh')) or name.endswith('/MacOS/VoodooHDA') else 0o644
     entry.external_attr = (0o100000 | mode) << 16
@@ -93,9 +94,11 @@ def main():
         'Esegui INSTALLA-AUDIO.command; approva il driver se macOS lo richiede e riavvia.\n'
         'Esegui VERIFICA-AUDIO.command e controlla altoparlanti, cuffie e microfono.\n'
         'RIPRISTINA-AUDIO.command documenta e gestisce il ritorno alla configurazione precedente.\n'
+        'Se audio e tasti funzionano ma il volume cambia solo a muto: esegui VOLUME-AUDIO.command.\n'
+        'ANNULLA-VOLUME-AUDIO.command ripristina soltanto il driver precedente alla prova volume.\n'
         'Il pacchetto non contiene EFI personali, Wi-Fi, SMBIOS o log.\n'
     ).encode()
-    archive = output/'S540-audio-Tahoe-v2.zip'
+    archive = output/'S540-audio-Tahoe-v3.zip'
     with zipfile.ZipFile(archive, 'w') as target:
         for name, data in sorted(entries.items()):
             write_entry(target, name, data)
@@ -105,7 +108,7 @@ def main():
         if len(target.namelist()) != len(entries):
             raise ValueError('Unexpected package entry count')
         for name, data in entries.items():
-            if target.read('S540-audio-Tahoe-v2/' + name) != data:
+            if target.read('S540-audio-Tahoe-v3/' + name) != data:
                 raise ValueError('Final package differs from verified source: ' + name)
     print(archive)
     print('SHA-256:', hashlib.sha256(archive.read_bytes()).hexdigest())

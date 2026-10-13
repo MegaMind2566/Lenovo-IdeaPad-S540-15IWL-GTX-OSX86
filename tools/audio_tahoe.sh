@@ -22,7 +22,12 @@ TEMP=''
 DRAFT=''
 STAGING=''
 cleanup() {
-    if [ -n "$STAGING" ] && [ -d "$STAGING" ]; then /usr/bin/sudo -n /bin/rm -rf "$STAGING" || true; fi
+    if [ -n "$STAGING" ] && [ -d "$STAGING" ]; then
+        if [ ! -e "$DRIVER" ] && [ ! -L "$DRIVER" ] && [ -d "$STAGING/previous.kext" ]; then
+            /usr/bin/sudo -n /bin/mv "$STAGING/previous.kext" "$DRIVER" || true
+        fi
+        /usr/bin/sudo -n /bin/rm -rf "$STAGING" || true
+    fi
     if [ -n "$DRAFT" ] && [ -d "$DRAFT" ]; then /bin/rm -rf "$DRAFT"; fi
     if [ -n "$TEMP" ] && [ -d "$TEMP" ]; then /bin/rm -rf "$TEMP"; fi
 }
@@ -212,7 +217,7 @@ validate_payload() {
     (cd "$ASSETS"; /usr/bin/shasum -a 256 -c SHA256SUMS) >/dev/null || fail 'Il driver audio non supera il controllo SHA256.'
     /usr/bin/codesign --verify --strict "$ASSETS/VoodooHDA.kext" || fail 'La firma del driver audio non è valida.'
 }
-driver_matches() {
+original_driver_matches() {
     local destination=$1 path expected actual
     ordinary "$destination"; no_links "$destination"
     [ "$(/usr/bin/find "$destination" -type f | /usr/bin/wc -l | /usr/bin/tr -d ' ')" = 3 ] || return 1
@@ -222,6 +227,163 @@ driver_matches() {
         actual=$(hash "$destination/$path")
         [ "$actual" = "$expected" ] || return 1
     done < "$ASSETS/SHA256SUMS"
+}
+VOLUME_KEY=IOKitPersonalities.VoodooHDA.VoodooHDAEnableVolumeChangeFix
+VOLUME="$BACKUP/volume-test"
+bundle_manifest_matches() {
+    local destination=$1 manifest=$2 expected path actual
+    ordinary "$destination"; no_links "$destination"
+    [ "$(/usr/bin/find "$destination" -type f | /usr/bin/wc -l | /usr/bin/tr -d ' ')" = 3 ] || return 1
+    while IFS=' ' read -r expected path; do
+        path=${path# }
+        case "$path" in Contents/Info.plist|Contents/MacOS/VoodooHDA|Contents/_CodeSignature/CodeResources) ;; *) return 1;; esac
+        [ -f "$destination/$path" ] || return 1
+        actual=$(hash "$destination/$path")
+        [ "$actual" = "$expected" ] || return 1
+    done < "$manifest"
+}
+validate_volume_backup() {
+    local manifest_hash draft
+    manifest_hash=$(readkey "$BACKUP/state.plist" VolumeManifestHash) || fail 'Manca il riferimento al backup volume.'
+    if [ ! -e "$VOLUME" ] && [ ! -L "$VOLUME" ]; then
+        draft=$(readkey "$BACKUP/state.plist" VolumeDraftPath) || fail 'Il backup volume è incompleto.'
+        case "$draft" in "$BACKUP"/.volume-draft.*) ;; *) fail 'Percorso temporaneo volume non valido.';; esac
+        ordinary "$draft"; no_links "$draft"
+        ordinary "$draft/SHA256SUMS"
+        [ "$(hash "$draft/SHA256SUMS")" = "$manifest_hash" ] || fail 'Il manifest volume temporaneo non coincide.'
+        original_driver_matches "$draft/original/VoodooHDA.kext" || fail 'Il backup driver originale non coincide.'
+        bundle_manifest_matches "$draft/modified/VoodooHDA.kext" "$draft/SHA256SUMS" || fail 'Il driver volume temporaneo non coincide.'
+        /bin/mv "$draft" "$VOLUME"
+    fi
+    ordinary "$VOLUME"; no_links "$VOLUME"
+    ordinary "$VOLUME/SHA256SUMS"
+    [ "$(hash "$VOLUME/SHA256SUMS")" = "$manifest_hash" ] || fail 'Il manifest volume è stato modificato.'
+    [ "$(/usr/bin/wc -l < "$VOLUME/SHA256SUMS" | /usr/bin/tr -d ' ')" = 3 ] || fail 'Il manifest volume non contiene tre file.'
+    original_driver_matches "$VOLUME/original/VoodooHDA.kext" || fail 'Il backup driver originale è stato modificato.'
+    bundle_manifest_matches "$VOLUME/modified/VoodooHDA.kext" "$VOLUME/SHA256SUMS" || fail 'Il backup driver volume è stato modificato.'
+    /bin/cp "$VOLUME/original/VoodooHDA.kext/Contents/Info.plist" "$TEMP/expected-volume.plist"
+    [ "$(readkey "$TEMP/expected-volume.plist" "$VOLUME_KEY")" = false ] || fail 'Il valore volume originario non coincide.'
+    /usr/bin/plutil -replace "$VOLUME_KEY" -bool true "$TEMP/expected-volume.plist"
+    /usr/bin/plutil -convert xml1 "$TEMP/expected-volume.plist"
+    /usr/bin/plutil -convert xml1 -o "$TEMP/actual-volume.plist" "$VOLUME/modified/VoodooHDA.kext/Contents/Info.plist"
+    /usr/bin/cmp -s "$TEMP/expected-volume.plist" "$TEMP/actual-volume.plist" || fail 'Il plist volume contiene altre modifiche.'
+    /usr/bin/codesign --verify --strict "$VOLUME/modified/VoodooHDA.kext" || fail 'La firma del backup volume non è valida.'
+}
+driver_matches() {
+    if original_driver_matches "$1"; then return 0; fi
+    if readkey "$BACKUP/state.plist" VolumeManifestHash >/dev/null; then
+        validate_volume_backup
+        bundle_manifest_matches "$1" "$VOLUME/SHA256SUMS"
+    else
+        return 1
+    fi
+}
+make_volume_backup() {
+    local draft manifest_hash state_temp path
+    if readkey "$BACKUP/state.plist" VolumeManifestHash >/dev/null; then
+        validate_volume_backup; return
+    fi
+    [ ! -e "$VOLUME" ] && [ ! -L "$VOLUME" ] || fail 'Esiste un backup volume senza riferimento verificato.'
+    original_driver_matches "$DRIVER" || fail 'Il driver iniziale volume non è il payload originale verificato.'
+    DRAFT=$(/usr/bin/mktemp -d "$BACKUP/.volume-draft.XXXXXX")
+    draft=$DRAFT
+    /bin/mkdir "$draft/original" "$draft/modified"
+    /usr/bin/ditto --norsrc --noextattr --noacl --noqtn "$DRIVER" "$draft/original/VoodooHDA.kext"
+    original_driver_matches "$draft/original/VoodooHDA.kext" || fail 'Backup driver originale incompleto.'
+    # Sign on the running macOS volume; the EFI backup volume can be FAT/exFAT.
+    /bin/mkdir -p "$TEMP/volume-build"
+    /usr/bin/ditto --norsrc --noextattr --noacl --noqtn "$draft/original/VoodooHDA.kext" "$TEMP/volume-build/VoodooHDA.kext"
+    [ "$(readkey "$TEMP/volume-build/VoodooHDA.kext/Contents/Info.plist" "$VOLUME_KEY")" = false ] || fail 'Il flag volume iniziale non è false.'
+    /usr/bin/plutil -replace "$VOLUME_KEY" -bool true "$TEMP/volume-build/VoodooHDA.kext/Contents/Info.plist"
+    /usr/bin/codesign --force --sign - "$TEMP/volume-build/VoodooHDA.kext"
+    /usr/bin/codesign --verify --strict "$TEMP/volume-build/VoodooHDA.kext"
+    /usr/bin/ditto --norsrc --noextattr --noacl --noqtn "$TEMP/volume-build/VoodooHDA.kext" "$draft/modified/VoodooHDA.kext"
+    : > "$draft/SHA256SUMS"
+    for path in Contents/Info.plist Contents/MacOS/VoodooHDA Contents/_CodeSignature/CodeResources; do
+        printf '%s  %s\n' "$(hash "$draft/modified/VoodooHDA.kext/$path")" "$path" >> "$draft/SHA256SUMS"
+    done
+    manifest_hash=$(hash "$draft/SHA256SUMS")
+    state_temp=$(/usr/bin/mktemp "$BACKUP/.state.XXXXXX")
+    /bin/cp -p "$BACKUP/state.plist" "$state_temp"
+    /usr/bin/plutil -insert VolumeManifestHash -string "$manifest_hash" "$state_temp"
+    /usr/bin/plutil -insert VolumeDraftPath -string "$draft" "$state_temp"
+    /usr/bin/plutil -insert VolumePhase -string ready "$state_temp"
+    /usr/bin/plutil -insert VolumePrevious -string original "$state_temp"
+    /usr/bin/plutil -insert VolumeTarget -string original "$state_temp"
+    /usr/bin/plutil -lint "$state_temp" >/dev/null
+    /bin/mv -f "$state_temp" "$BACKUP/state.plist"
+    DRAFT=
+    /bin/mv "$draft" "$VOLUME"
+    validate_volume_backup
+}
+volume_source() {
+    case "$1" in original|modified) printf '%s/%s/VoodooHDA.kext\n' "$VOLUME" "$1";; *) fail 'Stato driver volume sconosciuto.';; esac
+}
+stage_volume_driver() {
+    local source=$1
+    STAGING=$(/usr/bin/sudo /usr/bin/mktemp -d /Library/Extensions/.s540-audio.XXXXXX)
+    /usr/bin/sudo /bin/chmod 755 "$STAGING"
+    /usr/bin/sudo /usr/bin/ditto --norsrc --noextattr --noacl --noqtn "$source" "$STAGING/VoodooHDA.kext"
+    /usr/bin/sudo /usr/sbin/chown -R root:wheel "$STAGING/VoodooHDA.kext"
+    /usr/bin/sudo /usr/bin/find "$STAGING/VoodooHDA.kext" -type d -exec /bin/chmod 755 {} +
+    /usr/bin/sudo /usr/bin/find "$STAGING/VoodooHDA.kext" -type f -exec /bin/chmod 644 {} +
+    /usr/bin/sudo /bin/chmod 755 "$STAGING/VoodooHDA.kext/Contents/MacOS/VoodooHDA"
+    driver_matches "$STAGING/VoodooHDA.kext" || fail 'Copia temporanea volume non verificata.'
+    /usr/bin/codesign --verify --strict "$STAGING/VoodooHDA.kext"
+}
+resume_volume_swap() {
+    local phase previous source
+    if ! phase=$(readkey "$BACKUP/state.plist" VolumePhase); then return; fi
+    case "$phase" in ready) return;; swapping) ;; *) fail 'Fase volume sconosciuta.';; esac
+    validate_volume_backup
+    if [ -e "$DRIVER" ] || [ -L "$DRIVER" ]; then
+        driver_matches "$DRIVER" || fail 'Il driver è cambiato durante la sostituzione volume.'
+    else
+        previous=$(readkey "$BACKUP/state.plist" VolumePrevious)
+        source=$(volume_source "$previous")
+        /usr/bin/sudo -v
+        stage_volume_driver "$source"
+        /usr/bin/sudo /bin/mv "$STAGING/VoodooHDA.kext" "$DRIVER"
+        /usr/bin/sudo /bin/rmdir "$STAGING"
+        STAGING=
+    fi
+    state_set VolumePhase ready
+}
+volume_driver() {
+    local wanted=$1 source previous result=0
+    load_backup; validate_payload
+    [ "$PHASE" = installed ] && [ "$CURRENT" = "$PREPARED" ] || fail 'La prova audio non è nello stato installato previsto.'
+    require_sip3; runtime_bootargs
+    if [ "$wanted" = modified ]; then
+        make_volume_backup
+    else
+        validate_volume_backup
+    fi
+    resume_volume_swap
+    driver_matches "$DRIVER" || fail 'Il driver installato non appartiene a questa prova.'
+    source=$(volume_source "$wanted")
+    if original_driver_matches "$DRIVER"; then previous=original; else previous=modified; fi
+    if [ "$previous" != "$wanted" ]; then
+        /usr/bin/sudo -v
+        stage_volume_driver "$source"
+        state_set VolumePrevious "$previous"
+        state_set VolumeTarget "$wanted"
+        state_set VolumePhase swapping
+        /usr/bin/sudo /bin/mv "$DRIVER" "$STAGING/previous.kext"
+        /usr/bin/sudo /bin/mv "$STAGING/VoodooHDA.kext" "$DRIVER"
+        driver_matches "$DRIVER" || fail 'Sostituzione volume non verificata.'
+        state_set VolumePhase ready
+        /usr/bin/sudo /bin/rm -rf "$STAGING"
+        STAGING=
+    fi
+    /usr/bin/sudo /usr/bin/kmutil rebuild || result=$?
+    case "$result" in 0|27|28) ;; *) fail "Ricostruzione AuxKC non completata: codice $result. Il driver e il SIP della prova vengono conservati.";; esac
+    if [ "$wanted" = modified ]; then
+        echo 'Correzione volume preparata: solo VoodooHDAEnableVolumeChangeFix=true.'
+    else
+        echo 'Driver audio originale ripristinato byte per byte. Config e SIP della prova restano invariati.'
+    fi
+    echo 'Consenti la ricostruzione in Privacy e sicurezza se richiesto. Riavvia, poi prova volume e muto e apri VERIFICA-AUDIO.command.'
 }
 loaded_voodoo() {
     /usr/bin/kmutil showloaded > "$TEMP/runtime-kexts.txt" || fail 'Impossibile verificare i driver caricati. Il SIP della prova viene conservato.'
@@ -313,6 +475,7 @@ install_driver() {
 }
 verify() {
     /usr/sbin/system_profiler SPAudioDataType
+    /usr/sbin/ioreg -r -c VoodooHDADevice -l -w 0 | /usr/bin/grep 'VoodooHDAEnableVolumeChangeFix' || true
     /usr/bin/kmutil showloaded 2>/dev/null | /usr/bin/grep -E 'AppleHDA|AppleALC|Lilu|VoodooHDA' || true
     echo 'Controlla altoparlanti, cuffie e microfono nelle impostazioni Audio. Nessuna modifica effettuata.'
 }
@@ -351,6 +514,7 @@ restore() {
         installed|removal-pending)
             [ "$CURRENT" = "$PREPARED" ] || fail 'Conserva la EFI della prova fino alla rimozione del driver.'
             require_sip3
+            resume_volume_swap
             if [ "$PHASE" = installed ]; then
                 driver_matches "$DRIVER" || fail 'Il driver installato è stato modificato; non viene rimosso.'
                 [ ! -e "$BACKUP/removed-VoodooHDA.kext" ] && [ ! -L "$BACKUP/removed-VoodooHDA.kext" ] || fail 'Esiste già un driver spostato nel backup.'
@@ -416,4 +580,4 @@ restore() {
 }
 native
 TEMP=$(/usr/bin/mktemp -d /tmp/s540-audio.XXXXXX)
-case "$MODE" in prepare) prepare;; install) install_driver;; verify) verify;; restore) restore;; *) fail 'Operazione sconosciuta.';; esac
+case "$MODE" in prepare) prepare;; install) install_driver;; verify) verify;; restore) restore;; volume) volume_driver modified;; volume-restore) volume_driver original;; *) fail 'Operazione sconosciuta.';; esac
