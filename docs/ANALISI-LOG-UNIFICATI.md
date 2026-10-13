@@ -50,6 +50,14 @@ Lo stesso errore IOVersatile era già presente nell'archivio precedente, con VES
 
 Per il prossimo confronto servono il log OpenCore appena creato da questo tentativo e il config.plist modificato. Prima di interpretare una nuova raccolta occorre confermare l'assenza runtime di VESA. Non viene applicato un blocco IOVersatile o un nuovo parametro grafico in base alla sola fotografia.
 
+## Avvio senza VESA confermato: 170135 e 170413
+
+Entrambi i nuovi log OpenCore del 13 ottobre 2026 selezionano Machintosh SSD sul Samsung USB e mostrano `MBA:NV` e `MBA:OUT` senza `-igfxvesa`, `-x` o `-bsdmgroot`. Lilu 1.7.2 e WhateverGreen 1.7.1 sono iniettati con successo; IntelBTPatcher non compare nelle iniezioni. Le proprietà AAPL,ig-platform-id e device-id sono impostate con esito Success, ma i valori non sono stampati.
+
+I file terminano a EXITBS:START alle 17:01:41 e 17:04:18 secondo l'orologio del booter. Non contengono gli eventi successivi di macOS: questa fine del log non localizza lo stallo. La rimozione manuale è effettiva per entrambi i tentativi. I messaggi NVRAM sul valore già presente sono coerenti con boot-args identici a quelli desiderati.
+
+Il precedente ZIP unificato conteneva avvii con VESA e non documenta il funzionamento Intel di questi tentativi. Ora manca il config.plist modificato per leggere i valori grafici e serviranno gli eventi persistiti del nuovo avvio. Non viene ripetuta la rimozione del parametro già assente.
+
 ## Riferimenti
 
 - [Mandiant: release ufficiale 0.7.0](https://github.com/mandiant/macos-UnifiedLogs/releases/tag/v0.7.0).
