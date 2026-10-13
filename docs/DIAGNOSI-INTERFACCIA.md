@@ -55,3 +55,7 @@ Install.log registra `Install Succeeded`, la fine di Template Migration e la cro
 La prova di avanzamento con Invio non ha avuto effetto. È stata avviata una nuova installazione da zero: attendere il completamento con la stessa EFI e IntelBTPatcher escluso. Se lo schermo nero ricompare, raccogliere i log unificati della nuova installazione con il comando sopra. Il nome del volume Data può cambiare dopo l'inizializzazione: controllarlo di nuovo in Utility Disco.
 
 I messaggi di installazione riuscita non certificano l'integrità di ogni componente; i dati precedenti non dimostrano una corruzione. Una reinstallazione può ripristinare file danneggiati, ma un problema della EFI o della grafica potrebbe ripresentarsi. L'esito della nuova installazione resta da verificare.
+
+## Esito della nuova installazione
+
+Anche dopo la nuova installazione da zero viene riferito lo schermo nero. Questo esito non identifica da solo la causa e non prova l'integrità di ogni file. La raccolta `--unified` va ora eseguita sul volume Data della nuova installazione, verificandone il nome in Utility Disco. I report precedenti restano riferiti all'installazione precedente; attendiamo il nuovo ZIP prima di scegliere altre modifiche alla EFI.
