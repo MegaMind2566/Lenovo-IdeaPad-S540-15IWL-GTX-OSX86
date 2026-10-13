@@ -41,3 +41,27 @@ Dal prossimo avvio servono il risultato visibile e, se il problema continua, il 
 Il booter aggiunge `-bsdmgroot` da `com.apple.Boot.plist` e legge `OS.dmg.root_hash`. Nel codice XNU questo parametro è associato al tentativo di usare BaseSystem come volume radice. È un motivo ulteriore per non dedurre dal solo nome del volume che sia stato raggiunto il sistema finale. Non viene rimosso dai test: proviene dal percorso di avvio Apple, non dai due parametri diagnostici aggiunti alla EFI.
 
 Riferimento: [Apple XNU, bsd_init.c, funzione bsdmgroot_bootable](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/bsd_init.c).
+
+## Log successivo: 063718
+
+È stato ricevuto `opencore-2026-10-13-063718.txt`, relativo al tentativo con la sola esclusione Bluetooth. Il file contiene 723 righe utili; il resto è spazio NUL preallocato. Il file originale e gli identificativi non vengono pubblicati.
+
+| Dato | Risultato |
+|---|---|
+| Voce scelta | `Machintosh SSD`, volume APFS esterno USB |
+| Boot-args in entrambe le righe `MBA:OUT` | `-igfxvesa` presente; `-x` assente |
+| IntelBTPatcher | Nessuna iniezione riportata nel log, coerente con la sua esclusione |
+| IntelBluetoothFirmware / BlueToolFixup | Iniezione riuscita, versioni 2.4.0 e 2.7.2 |
+| Lilu / WhateverGreen | Iniezione riuscita, versioni 1.7.2 e 1.7.1 |
+| Proprietà Intel | Impostazione di piattaforma e device-id riuscita; valori non stampati |
+| Kernel | Darwin 25.6.0 |
+| Parametro BaseSystem | `-bsdmgroot` assente dai boot-args mostrati in questo tentativo |
+| Termine del log | `EXITBS:START` alle 06:37:30 secondo l'orologio del booter |
+
+L'assenza di `-bsdmgroot` è una differenza rispetto al log precedente, non una prova del completamento dell'installazione. La lettura di `OS.dmg.root_hash` da sola non identifica un avvio BaseSystem.
+
+Il booter mostra anche l'avviso `This system was automatically rebooted after panic` prima del nuovo passaggio al kernel. Segnala un panic rilevato prima di questo passaggio; non dimostra un nuovo panic nella successiva schermata nera. È stato riferito il raggiungimento del puntatore senza finestre.
+
+Il prossimo passo è **TEST-INTEL.cmd sulla EFI attuale**, che rimuove soltanto i flag diagnostici eventualmente presenti e conserva IntelBTPatcher escluso. Qui ci si aspetta la rimozione di `-igfxvesa`. La prova combinata e il ripristino nell'ordine inverso sono stati verificati sulla configurazione consegnata. Non usare un vecchio ripristino integrale dopo la modifica Bluetooth.
+
+L'assenza di accelerazione è confermata dal parametro VESA. Che sia la causa della mancata interfaccia resta da verificare con il prossimo avvio. OpenCore termina prima dei log di WindowServer: non consente di localizzare il problema dell'interfaccia o provare Metal.

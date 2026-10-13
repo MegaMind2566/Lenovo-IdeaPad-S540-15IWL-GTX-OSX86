@@ -2,7 +2,7 @@
 
 Nel tentativo da «Machintosh SSD» è comparso il puntatore senza finestre. È stata riferita una scia durante il movimento. Questo è compatibile con un problema di ridisegno dello schermo, ma non identifica da solo driver, framebuffer o memoria come causa.
 
-Il log delle 02:45 confermava entrambi i parametri; la foto del panic successivo mostrava soltanto `-igfxvesa`. Dopo l'esclusione di IntelBTPatcher resta lo schermo nero, ma i boot-args di questo ultimo tentativo non sono stati raccolti: non si assume che i due flag siano ancora presenti. Questa prova controlla la EFI locale e rimuove **soltanto questi due parametri**, se presenti. `-x` richiede l'avvio sicuro; `-igfxvesa` disabilita l'accelerazione Intel. La rimozione permette di provare l'avvio normale con la configurazione UHD 620 già preparata. Non garantisce che Metal funzioni.
+Il log delle 02:45 confermava entrambi i parametri; la foto del panic successivo mostrava soltanto `-igfxvesa`. Il nuovo log `opencore-2026-10-13-063718.txt`, ricevuto dopo l'esclusione di IntelBTPatcher, conferma che `-igfxvesa` è ancora attivo e `-x` è assente. La prossima prova deve rimuovere il parametro VESA mantenendo il patcher escluso. Questa prova controlla la EFI locale e rimuove **soltanto questi due parametri**, se presenti. `-x` richiede l'avvio sicuro; `-igfxvesa` disabilita l'accelerazione Intel. La rimozione permette di provare l'avvio normale con la configurazione UHD 620 già preparata. Non garantisce che Metal funzioni.
 
 Dopo la prova Bluetooth, mantieni IntelBTPatcher escluso e usa questo programma sulla configurazione attuale. Il test Intel conserva la modifica Bluetooth; i vecchi ripristini integrali possono essere rifiutati perché appartengono a uno stato precedente.
 
