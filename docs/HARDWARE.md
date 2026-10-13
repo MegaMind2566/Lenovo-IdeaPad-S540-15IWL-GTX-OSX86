@@ -35,7 +35,7 @@ Il nome del driver Windows della grafica integrata riporta UHD 610, ma il chip e
 ## Dati ancora necessari
 
 - Velocità SuperSpeed e reversibilità della USB-C: mappa a 9 porte ricevuta e verificata.
-- Boot-args effettivi e report della grafica dal sistema installato.
+- Boot-args di un avvio successivo ai ripristini e report della grafica dal sistema installato. Il log delle 02:45 conferma entrambi i parametri diagnostici in quel tentativo.
 - Esiti delle prove dei componenti nella [roadmap](ROADMAP.md).
 
 La Recovery ha raggiunto l'interfaccia grafica e l'installazione di Tahoe è stata avviata sul volume esterno «Macintosh SSD». Il primo desktop non è ancora confermato. Metal, audio, autonomia, sospensione e HDMI restano da verificare sul dispositivo. Nessun voto di compatibilità totale è assegnato prima delle prove.
@@ -51,3 +51,9 @@ L'esito è stato comunicato dopo la proposta del test `-igfxvesa`. I boot-args e
 Il 960 EVO non compariva perché il modulo M.2 si era sganciato nel box. Dopo averlo reinserito è stato riferito il rilevamento del disco. Questo esito risolve il problema di rilevamento osservato; non conferma ancora la velocità SuperSpeed né entrambe le orientazioni della USB-C.
 
 Il disco interno è stato riferito visibile nella Recovery: l'esclusione tramite blocco del driver NVMe non è risultata verificata in questa prova. È stato richiesto di lasciare il disco Windows al suo posto e procedere sul 960 EVO esterno. Nessuna inizializzazione o modifica delle partizioni del disco interno è stata eseguita. Le prove successive valuteranno eventuali problemi di stabilità.
+
+## Log OpenCore delle 02:45
+
+Il log del 13 ottobre 2026 conferma la selezione del volume USB esterno, con nome **Machintosh SSD**, e la presenza di `-igfxvesa` e `-x`. OpenCore riporta l'iniezione riuscita di Lilu 1.7.2 e WhateverGreen 1.7.1 e l'impostazione delle proprietà Intel. Il log non conferma l'inizializzazione dei driver nel kernel o Metal. Il primo desktop resta da raggiungere.
+
+L'[analisi del log](ANALISI-LOG-AVVIO.md) riporta anche il percorso Apple con immagine BaseSystem, l'assenza della tabella MAT e i limiti del blocco NVMe. Il file originale e gli identificativi SMBIOS non vengono aggiunti alla repository.

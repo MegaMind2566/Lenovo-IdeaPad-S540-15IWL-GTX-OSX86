@@ -1,6 +1,6 @@
 # Verifica della grafica Intel dopo l'installazione
 
-La UHD 620 è il primo obiettivo dopo il desktop. La EFI contiene già Lilu, WhateverGreen e le proprietà iniziali `AAPL,ig-platform-id=00009B3E` e `device-id=9B3E0000`. Il test `-igfxvesa`, se applicato, disabilita l'accelerazione Intel. Non è ancora noto se sia attivo nel sistema avviato.
+La UHD 620 è il primo obiettivo dopo il desktop. La EFI contiene già Lilu, WhateverGreen e le proprietà iniziali `AAPL,ig-platform-id=00009B3E` e `device-id=9B3E0000`. Il test `-igfxvesa` disabilita l'accelerazione Intel. Il [log delle 02:45](ANALISI-LOG-AVVIO.md) conferma che in quel tentativo erano attivi `-igfxvesa` e `-x`. Lo stato di un eventuale avvio successivo ai ripristini resta da verificare.
 
 Completa prima l'installazione sul 960 EVO. Mantieni OpenCore sull'HDD di avvio finché il sistema non è stato verificato.
 
@@ -22,9 +22,9 @@ In alternativa, per il report grafico apri **Impostazioni di Sistema → General
 Dopo aver raccolto lo stato, si può provare la configurazione accelerata già preparata:
 
 1. Avvia Windows dal menu Lenovo.
-2. Sullo stesso HDD usato per OpenCore, avvia **RIPRISTINA-GRAFICA.cmd** dal pacchetto del test. Il file deve stare accanto a `EFI`, con `tools/test_graphics.py` presente.
+2. Se sono stati applicati entrambi i test, avvia prima **RIPRISTINA-AVVIO.cmd** e poi **RIPRISTINA-GRAFICA.cmd** sullo stesso HDD di OpenCore. Se è presente solo il test grafico, usa il secondo. I file devono stare accanto a `EFI`, con i rispettivi script nella cartella `tools`. Se **TEST-INTEL.cmd** ha già rimosso i due parametri, questa sequenza non serve.
 3. Attendi il messaggio di ripristino riuscito. Lo script usa `EFI/OC/config.before-graphics-test.plist` e conserva gli identificativi della configurazione originale.
-4. Riavvia dallo stesso OpenCore e scegli **Macintosh SSD**, il volume di macOS installato.
+4. Riavvia dallo stesso OpenCore e scegli il volume esterno di macOS, indicato come **Machintosh SSD** nel log ricevuto. La comparsa del nome non certifica il completamento dell'installazione.
 5. Rileggi i due comandi e verifica Metal.
 
 Se manca il backup o lo script segnala ulteriori modifiche, raccogli il messaggio prima di procedere. Non sostituire il plist con quello di una nuova build: gli identificativi generati potrebbero essere diversi.
