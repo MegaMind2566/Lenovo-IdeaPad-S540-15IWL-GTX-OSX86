@@ -22,6 +22,13 @@ Sono cambiate soltanto le due proprietà Intel. Il backup è identico byte per b
 
 Entrambi i profili dichiarano 58 MB di memoria stolen. La prova non cambia DVMT, non aggiunge patch di memoria o connettori e non dimostra l'accelerazione. Se l'interfaccia parte, verificare [Intel e Metal](GRAFICA-INTEL.md). Se non parte, conservare il nuovo log OpenCore e raccogliere i dati unificati dalla Recovery: i dati GUI ricevuti finora descrivono soltanto avvii VESA. La fine del log OpenCore a EXITBS:START non localizza lo stallo successivo.
 
+
+## Log ricevuto dopo la consegna della prova: 173430
+
+Il nuovo log OpenCore seleziona Machintosh SSD sul Samsung USB. MBA:NV e MBA:OUT sono senza VESA, modalità sicura o bsdmgroot; Lilu 1.7.2 e WhateverGreen 1.7.1 sono iniettati con successo e IntelBTPatcher resta assente. Prelinked status è Success. La sequenza non presenta nuovi errori rispetto al log 170413.
+
+Le due proprietà Intel sono impostate con esito Success, ma OpenCore non stampa i valori: il solo log non conferma che la coppia di prova sia quella letta. Il file termina a EXITBS:START alle 17:34:34 secondo l'orologio del booter e non mostra gli eventi successivi del sistema. Non viene interpretato come prova di un blocco in quel punto. L'esito visibile sullo schermo dopo questo tentativo non è ancora stato riferito.
+
 ## Riferimenti
 
 - [WhateverGreen 1.7.1: manuale Intel](https://github.com/acidanthera/WhateverGreen/blob/1.7.1/Manual/FAQ.IntelHD.en.md), sezioni CFL/CML, Recommended framebuffers e indicazione Whiskey Lake.
