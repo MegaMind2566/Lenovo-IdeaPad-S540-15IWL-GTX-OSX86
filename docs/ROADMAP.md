@@ -26,7 +26,7 @@ Obiettivo: rendere utilizzabili tutti i componenti del Lenovo IdeaPad S540-15IWL
 | Samsung 960 EVO esterno | Box ripristinato; Tahoe avviato al desktop | Uso prolungato senza disconnessioni e ripresa dalla sospensione |
 | NVMe PM981a interno | Visibile nella Recovery; mantenuto per Windows | Verificare eventuali effetti sulla stabilità di macOS |
 | Display e luminosità | Pannello interno online a 1920×1080 nel sistema installato | Regolazione luminosità e ripresa del pannello |
-| CPU, batteria e ventole | Campione istantaneo: CPU 50 °C, frequenza media circa 1,17 GHz, pacchetto Intel stimato 0,98 W; telemetria SMC parziale | Letture coerenti, frequenze e temperature nel tempo, ventole, stato dGPU e autonomia |
+| CPU, batteria e ventole | X86PlatformPlugin attivo; due campioni a riposo: CPU 45–46 °C, frequenza media sistema circa 0,95–0,97 GHz, pacchetto Intel stimato 0,80–0,95 W; telemetria SMC parziale | Temperature sotto carico, ventole, stato dGPU, batteria e autonomia |
 | Sospensione | Non provata | Chiusura coperchio, risveglio e recupero delle periferiche |
 | Webcam | Porta interna mappata; non provata | Acquisizione video e ripresa dopo sospensione |
 | Lettore SD O2Micro | Identificato; supporto da valutare | Driver applicabile e lettura di una scheda |

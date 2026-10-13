@@ -36,7 +36,7 @@ Il comando crea un archivio sul Desktop; va eseguito sul portatile. Se il volume
 3. Regolazione della luminosità e ripresa del pannello dopo la sospensione.
 4. Decodifica video e monitor esterni, come prove distinte.
 
-Il campione powermetrics di circa un secondo riporta 50 °C per la CPU e basso consumo stimato del pacchetto Intel. Non misura la temperatura o il consumo della NVIDIA e non verifica il comportamento prolungato di CPU e ventole. La voce `2Slices on: 100%` indica la permanenza nello stato con due slice attive, non un utilizzo GPU del 100%.
+Il primo campione powermetrics di circa un secondo riportava 50 °C per la CPU. Due campioni successivi a riposo, ciascuno di cinque secondi, riportano 45–46 °C, 0,80–0,95 W stimati per il pacchetto Intel e frequenza media sistema circa 0,95–0,97 GHz. IORegistry conferma X86PlatformPlugin attivo. Il consumo del pacchetto comprende CPU, iGPU e system agent, senza la NVIDIA. Mancano RPM e una nuova osservazione delle ventole; temperatura sotto carico e consumo della dGPU restano da verificare. La voce `2Slices on: 100%` indica la permanenza nello stato con due slice attive; il 100% a 300 MHz è un rapporto di frequenza. Nessuna delle due voci dimostra un utilizzo GPU del 100%.
 
 Le altre funzioni restano nella [roadmap hardware](ROADMAP.md). Per una nuova verifica dello stato, questi comandi leggono informazioni senza modificare la EFI:
 
@@ -50,4 +50,5 @@ system_profiler SPDisplaysDataType
 - [WhateverGreen 1.7.1: opzioni Intel, incluso -igfxvesa](https://github.com/acidanthera/WhateverGreen/blob/1.7.1/README.md#intel-hd-graphics)
 - [Apple: Resoconto di sistema su Tahoe](https://support.apple.com/guide/system-information/welcome/11.0/mac/26)
 - [Apple: creazione di un archivio ZIP con ditto](https://developer.apple.com/documentation/xcode/packaging-mac-software-for-distribution)
+- [Manuale Apple di powermetrics](https://keith.github.io/xcode-man-pages/powermetrics.1.html): potenza stimata, frequenze e sensori istantanei.
 - [Dortania: grafica Intel sui portatili Coffee Lake / Whiskey Lake](https://dortania.github.io/OpenCore-Install-Guide/config-laptop.plist/coffee-lake.html#deviceproperties)

@@ -7,7 +7,7 @@ Report ricevuto il 12 ottobre 2026. Sono riportati solo i dati utili al progetto
 | Modello | Lenovo IdeaPad S540-15IWL GTX, famiglia 81SW | Tahoe avviato al desktop sul 960 EVO esterno |
 | Scheda madre | Lenovo LNVNB161216 | DSDT e 12 SSDT analizzate |
 | BIOS | BWCN19WW, 26 maggio 2021 | UEFI presente; Secure Boot disabilitato nel report |
-| CPU | Intel Core i7-8565U, Whiskey Lake-U, 4 core / 8 thread | Base adatta al tentativo |
+| CPU | Intel Core i7-8565U, Whiskey Lake-U, 4 core / 8 thread | X86PlatformPlugin attivo; due campioni a riposo con basso consumo Intel stimato e CPU 45–46 °C |
 | RAM | 12 GB DDR4-2400, moduli da 8 e 4 GB | Sufficiente per la prima prova |
 | iGPU | Intel UHD 620, PCI 8086:3EA0 | IntelAccelerator rilevato e Metal 3 esposto; carico prolungato da provare |
 | dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91 | Driver disabilitato nella EFI; port Linux mantenuto nella roadmap; spegnimento elettrico da verificare |
@@ -44,6 +44,21 @@ Tahoe ha raggiunto il desktop sul Samsung 960 EVO esterno dopo la correzione del
 Il report grafico del sistema installato espone UHD 620 con device-id `0x3ea5`, Metal 3 e memoria grafica condivisa dinamica fino a 1536 MB. Il pannello interno è online a 1920×1080. Il campione powermetrics rileva IntelAccelerator e boot-args senza `-igfxvesa` né `-x`. La correzione e i limiti delle verifiche sono documentati in [TEST-MEMORIA-INTEL.md](TEST-MEMORIA-INTEL.md) e [GRAFICA-INTEL.md](GRAFICA-INTEL.md).
 
 Un campione di circa un secondo riporta 50 °C per la CPU e 0,98 W stimati per il pacchetto Intel. È una misura istantanea: non verifica la NVIDIA, le ventole o l'autonomia. Lo spegnimento elettrico della dGPU resta aperto.
+
+## Gestione CPU e campioni a riposo: 13 ottobre 2026
+
+IORegistry mostra X86PlatformPlugin registered, matched e active. Dopo l'invito a lasciare il portatile inattivo sono stati forniti due campioni powermetrics, ciascuno con intervallo di cinque secondi:
+
+| Voce | Primo campione | Secondo campione |
+|---|---|---|
+| Pacchetto Intel stimato, CPU + iGPU + system agent | 0,95 W | 0,80 W |
+| Temperatura CPU riportata a fine intervallo | 46 °C | 45 °C |
+| Frequenza media sistema riportata | 947,43 MHz | 965,75 MHz |
+| Frequenza attiva iGPU riportata | 300 MHz | 300 MHz |
+
+Il driver di gestione CPU è quindi attivo e i campioni mostrano un basso consumo Intel stimato a riposo. Le temperature sono letture istantanee alla fine di ciascun intervallo. Il rapporto GPU 100% è rispetto alla frequenza nominale indicata di 300 MHz, non una misura di utilizzo al 100%.
+
+Il report contiene ancora Invalid key detected e non riporta RPM delle ventole: la telemetria SMC resta parziale. Non è stata fornita una nuova osservazione del rumore delle ventole. Questi dati non verificano la temperatura sotto carico, il consumo o lo spegnimento elettrico della NVIDIA, la batteria o la sospensione. I campi LastSleepType del plugin non costituiscono una prova di sospensione riuscita.
 
 ## Audio dal desktop: 13 ottobre 2026
 
