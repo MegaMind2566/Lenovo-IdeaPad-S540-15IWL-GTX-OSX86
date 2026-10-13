@@ -136,6 +136,13 @@ printf 'Cartelle report utente trovate: %s\n' "$user_index" >> "$summary"
 copy_item "$data_root/private/var/log/install.log" 'install.log'
 copy_item "$data_root/private/var/log/system.log" 'system.log'
 
+# The dedicated Recovery preparation saves the exact normal-boot config.
+# Keep it private in the report so runtime events can be matched to its values.
+if [ -f "$bundle_root/EFI/OC/config.before-runtime-logs.plist" ]; then
+    copy_item "$bundle_root/EFI/OC/config.before-runtime-logs.plist" 'config-avvio-normale.plist'
+    copy_item "$bundle_root/EFI/OC/config.plist" 'config-recovery.plist'
+fi
+
 unified_complete=0
 if [ "$unified" -eq 1 ]; then
     mkdir "$work/UnifiedLogs"

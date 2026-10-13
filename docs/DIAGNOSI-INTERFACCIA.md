@@ -1,5 +1,8 @@
 # Raccolta dei report dall'installazione senza interfaccia
 
+**Per il blocco attuale senza VESA:** usare [Recupero dell'avvio normale](RECUPERO-AVVIO-NORMALE.md) e S540-recupero-avvio-normale.zip. La preparazione dedicata conserva il config corrente, aggiunge solo VESA per leggere i dati in Recovery e fornisce un ripristino distinto. Il collector v4 include anche la copia privata del config del tentativo normale. Le istruzioni sotto descrivono i pacchetti precedenti e la copia manuale, già utilizzata.
+
+
 **Raccolta unificata ricevuta:** lo ZIP LOG-UNIFICATI-e8VM9n è stato decodificato. Entrambi gli avvii usano VESA; nel secondo il benvenuto registra un errore di creazione della texture. La [nuova analisi](ANALISI-LOG-UNIFICATI.md) descrive i dati e la prossima prova con TEST-INTEL.cmd.
 
 I log `opencore-2026-10-13-103339.txt` e `opencore-2026-10-13-103615.txt` confermano l'assenza di `-igfxvesa` e `-x`. IntelBTPatcher non viene iniettato; Lilu e WhateverGreen risultano iniettati con successo. Questo non dimostra che la grafica si inizializzi o che Metal funzioni. Il log termina al passaggio al kernel, prima degli eventi dell'interfaccia.
