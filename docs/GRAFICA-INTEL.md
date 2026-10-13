@@ -17,7 +17,9 @@ Questi dati confermano il desktop con il driver acceleratore Intel caricato e Me
 
 La configurazione applicata conserva `AAPL,ig-platform-id=0900A53E` e `device-id=A53E0000`, con `framebuffer-patch-enable=01000000`, `framebuffer-stolenmem=00003001` e `framebuffer-fbmem=00009000`. Le tre proprietà sono Data di quattro byte. Non sono state aggiunte altre patch dopo la comparsa del desktop.
 
-Prima della configurazione iniziale il pannello è rimasto temporaneamente nero, poi l'interfaccia è comparsa senza una nuova modifica della EFI. Non si aggiunge una patch della retroilluminazione sulla sola base di quell'attesa.
+Prima della configurazione iniziale il pannello è rimasto temporaneamente nero, poi l'interfaccia è comparsa senza una nuova modifica della EFI. Quella prima attesa, da sola, non giustificava una patch della retroilluminazione.
+
+Successivamente è stato riferito che il pannello rimane spento per circa due minuti anche all'avvio, prima della mela, mentre macOS accetta già la password e completa il login. Il controllo del codice WEG e del dump del driver Tahoe ha individuato una [prova del solo BLR](AVVIO-RETE.md), limitata allo stesso UUID framebuffer e con backup reversibile. È un candidato da verificare sul portatile: memoria 19 MB/9 MB e identità Intel non vengono modificate.
 
 ## Conservare la EFI funzionante
 

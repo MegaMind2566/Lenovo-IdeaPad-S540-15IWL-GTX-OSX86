@@ -11,23 +11,25 @@ Obiettivo: rendere utilizzabili tutti i componenti del Lenovo IdeaPad S540-15IWL
 5. Trasferire la EFI corrente sul 960 EVO e provare l'avvio senza l'HDD, conservando il supporto già funzionante come ripiego.
 6. Avviare la ricerca NVIDIA e verificare le uscite video secondo il percorso hardware rilevato.
 
+Priorità aggiornate il 13 ottobre 2026: risolvere il pannello spento per circa due minuti durante l'avvio, completare il Bluetooth e verificare la gestione Wi-Fi. Il sistema accetta la password anche mentre il pannello è spento: l'attesa visiva va distinta dal tempo necessario ad avviare macOS. Il percorso e la prova mirata sono in [AVVIO-RETE.md](AVVIO-RETE.md). Batteria e contatori sono [archiviati](BATTERIA-SOSPENSIONE.md); le altre prove di sospensione sono rinviate, insieme al blocco tasti funzione e all'equalizzazione già annotati.
+
 ## Stato e criteri
 
 | Componente | Stato attuale | Prova necessaria |
 |---|---|---|
-| Avvio Tahoe | Configurazione iniziale e desktop raggiunti sul 960 EVO esterno | Spegnimento e riavvio ripetibili |
+| Avvio Tahoe | Desktop raggiunto sul 960 EVO; pannello spento per circa due minuti all'avvio, login possibile anche durante il nero | Risolvere il ritardo del pannello e verificare spegnimento/riavvio ripetibili |
 | Intel UHD 620 | IntelAccelerator rilevato, Metal 3 esposto, memoria condivisa fino a 1536 MB; avvio senza VESA | Carico Metal e uso prolungato senza blocchi o artefatti |
 | Tastiera | Funziona nella Recovery | Uso nel sistema installato e tasti funzione |
 | Touchpad ELAN | Driver presenti; il «mouse» riferito non identifica il dispositivo | Puntamento, clic, scorrimento e gesti |
-| Wi-Fi Intel AC9560 | Funziona nella Recovery con itlwm | Connessione, trasferimenti e riconnessione dopo sospensione |
+| Wi-Fi Intel AC9560 | Funziona nella Recovery con itlwm; nel sistema viene indicato come Ethernet, comportamento previsto dal driver | Verificare gestione delle reti nel desktop e valutare separatamente l'integrazione Wi-Fi nativa su Tahoe |
 | Bluetooth Intel | Panic superato con IntelBTPatcher 2.4 escluso; funzionalità non ancora provata | Confronto con patcher aggiornato, associazione e uso di una periferica, riconnessione dopo sospensione |
 | Audio ALC257 | Riproduzione, volume graduale e tasti F1–F3 confermati dopo la correzione v3 | Equalizzazione da affinare più avanti; cuffie/jack, microfono, commutazione e ripresa da documentare |
 | USB-A e USB-C | Mappa a 9 porte verificata; 960 EVO rilevato | USB 2/3, entrambe le orientazioni USB-C e riconnessione |
 | Samsung 960 EVO esterno | Box ripristinato; Tahoe avviato al desktop | Uso prolungato senza disconnessioni e ripresa dalla sospensione |
 | NVMe PM981a interno | Visibile nella Recovery; mantenuto per Windows | Verificare eventuali effetti sulla stabilità di macOS |
 | Display e luminosità | Pannello interno 1920×1080 e cursore luminosità funzionanti; F11/F12 non funzionano nella prova riferita | F11/F12 rinviati al blocco tasti funzione; ripresa del pannello da provare |
-| CPU, batteria e ventole | X86PlatformPlugin attivo; riposo 45–46 °C e 0,80–0,95 W Intel stimati; ventola riferita silenziosa da tempo. Telemetria SMC parziale | Temperature e ventole sotto carico, stato dGPU, batteria e autonomia |
-| Sospensione | Non provata | Chiusura coperchio, risveglio e recupero delle periferiche |
+| CPU, batteria e ventole | X86PlatformPlugin attivo; riposo 45–46 °C e 0,80–0,95 W Intel stimati; ventola silenziosa. Batteria rilevata al 100% su AC. Telemetria SMC parziale | Temperature sotto carico, stato dGPU, passaggio a batteria e autonomia |
+| Sospensione | pmset registra Sleep Count 1, User Wake Count 1 e Dark Wake Count 0; [dati conservati](BATTERIA-SOSPENSIONE.md) | Prove rinviate: recupero periferiche, coperchio e stop prolungato restano da verificare |
 | Webcam | Porta interna mappata; non provata | Acquisizione video e ripresa dopo sospensione |
 | Lettore SD O2Micro | Identificato; supporto da valutare | Driver applicabile e lettura di una scheda |
 | Lettore impronte | Porta USB interna mappata; supporto da valutare | Valutare driver e integrazione con macOS |

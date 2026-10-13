@@ -1,0 +1,44 @@
+S540 — pannello all'avvio, Bluetooth e rete
+
+Estrai la cartella S540-avvio-rete in Downloads.
+Esegui dal desktop Tahoe, con l'HDD 240 GB collegato.
+
+1. Raccogli lo stato attuale:
+   bash "$HOME/Downloads/S540-avvio-rete/RACCOGLI-AVVIO-RETE.command"
+
+   La password serve alla lettura dei log. Il comando crea sulla Scrivania
+   DIAGNOSI-AVVIO-RETE-XXXXXX.zip. Allega quel file nella chat.
+   Lo ZIP contiene dati privati: non pubblicarlo nella repository.
+
+2. Prepara la prova del pannello:
+   bash "$HOME/Downloads/S540-avvio-rete/TEST-SCHERMO-AVVIO.command"
+
+   Controlla il messaggio finale. Se la prova viene annullata, il config non
+   viene modificato: invia il messaggio e lo ZIP della raccolta.
+   Se viene preparata, riavvia dallo stesso HDD OpenCore e confronta l'attesa
+   a pannello spento con i circa due minuti precedenti.
+
+   Questa prova aggiunge solo -igfxblr. Non cambia framebuffer, memoria,
+   audio, SIP, driver o partizioni. La riuscita sul portatile è da verificare.
+
+3. Dopo il riavvio controlla il parametro attivo:
+   sysctl -n kern.bootargs
+
+   Deve includere -igfxblr. Se manca, il kernel non ha provato la correzione.
+
+Ripristino, prima di qualsiasi altra modifica EFI:
+   bash "$HOME/Downloads/S540-avvio-rete/ANNULLA-SCHERMO-AVVIO.command"
+
+Il backup resta in EFI/OC/backup-schermo-avvio. Il ripristino non sovrascrive
+config modificati da altre prove. Per tornare allo stato precedente quando
+Tahoe non arriva al desktop, usare il comando di annullamento dal Terminale
+della Recovery oppure copiare privatamente before.plist dal backup su
+EFI/OC/config.plist. Conservare gli altri backup.
+
+Il vecchio IntelBTPatcher 2.4 resta escluso. La raccolta legge firmware,
+controller e variabili NVRAM Bluetooth, senza riabilitare quel patcher.
+Il Wi-Fi con itlwm compare come Ethernet per scelta del driver. L'integrazione
+Wi-Fi nativa su Tahoe è un intervento distinto, da valutare.
+
+Verifiche locali: sintassi Bash e fixture simulate. Nessun avvio macOS reale
+è stato eseguito qui. Il test del pannello è limitato al driver CFL analizzato.

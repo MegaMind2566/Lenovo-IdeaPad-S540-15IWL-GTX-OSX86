@@ -13,7 +13,7 @@ Report ricevuto il 12 ottobre 2026. Sono riportati solo i dati utili al progetto
 | dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91 | Driver disabilitato nella EFI; port Linux mantenuto nella roadmap; spegnimento elettrico da verificare |
 | Schermo | BOE NV156FHM-N61, 1920×1080 | Pannello e cursore luminosità funzionanti; F11/F12 da sistemare, ripresa da provare |
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Famiglia PM981a problematica; non assunta compatibile |
-| Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | Funzionamento riferito nella Recovery con itlwm; sistema installato da provare |
+| Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | Funziona nella Recovery con itlwm; nel desktop indicato come Ethernet, comportamento previsto da IOEthernetController; gestione reti da completare |
 | Bluetooth | Intel, USB 8087:0AAA | Panic superato in una prova con IntelBTPatcher escluso; funzionalità Bluetooth e versione aggiornata da verificare |
 | Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Riproduzione, volume graduale e tasti F1–F3 confermati con VoodooHDA 3.6.8 e correzione v3; equalizzazione rinviata, jack e microfono da documentare |
 | Tastiera | PS/2 | Funzionamento riferito nella Recovery con VoodooPS2 |
@@ -59,6 +59,10 @@ IORegistry mostra X86PlatformPlugin registered, matched e active. Dopo l'invito 
 Il driver di gestione CPU è quindi attivo e i campioni mostrano un basso consumo Intel stimato a riposo. Le temperature sono letture istantanee alla fine di ciascun intervallo. Il rapporto GPU 100% è rispetto alla frequenza nominale indicata di 300 MHz, non una misura di utilizzo al 100%.
 
 Il report contiene ancora Invalid key detected e non riporta RPM delle ventole: la telemetria SMC resta parziale. Successivamente è stato riferito che la ventola non fa rumore da tempo: la situazione a riposo è quindi confermata anche dall'osservazione sul portatile. Questi dati non verificano la temperatura sotto carico, il consumo o lo spegnimento elettrico della NVIDIA, la batteria o la sospensione. I campi LastSleepType del plugin non costituiscono una prova di sospensione riuscita.
+
+## Batteria e contatori di stop: 13 ottobre 2026
+
+Il campione pmset mostra batteria interna presente, 100%, charged e alimentazione AC Power. I contatori del sistema sono Sleep Count 1, User Wake Count 1, Dark Wake Count 0. Impostazioni e limiti sono conservati in [BATTERIA-SOSPENSIONE.md](BATTERIA-SOSPENSIONE.md): non sono ancora verificati passaggio a batteria, autonomia o recupero completo delle periferiche. Le ulteriori prove di stop sono rinviate, dando priorità al pannello spento all'avvio, Bluetooth e gestione Wi-Fi.
 
 ## Pannello e tasti luminosità: 13 ottobre 2026
 
