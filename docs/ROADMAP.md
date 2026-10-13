@@ -21,7 +21,7 @@ Obiettivo: rendere utilizzabili tutti i componenti del Lenovo IdeaPad S540-15IWL
 | Touchpad ELAN | Driver presenti; il «mouse» riferito non identifica il dispositivo | Puntamento, clic, scorrimento e gesti |
 | Wi-Fi Intel AC9560 | Funziona nella Recovery con itlwm | Connessione, trasferimenti e riconnessione dopo sospensione |
 | Bluetooth Intel | Panic superato con IntelBTPatcher 2.4 escluso; funzionalità non ancora provata | Confronto con patcher aggiornato, associazione e uso di una periferica, riconnessione dopo sospensione |
-| Audio ALC257 | Audio analogico su Tahoe da completare | Altoparlanti, cuffie, microfono e commutazione delle uscite |
+| Audio ALC257 | Nessun dispositivo nel report dal desktop; solo Lilu caricato. [Prova VoodooHDA 3.6.8](AUDIO-TAHOE.md) preparata, non ancora verificata sul portatile | Caricamento driver, altoparlanti, cuffie, microfono e commutazione delle uscite |
 | USB-A e USB-C | Mappa a 9 porte verificata; 960 EVO rilevato | USB 2/3, entrambe le orientazioni USB-C e riconnessione |
 | Samsung 960 EVO esterno | Box ripristinato; Tahoe avviato al desktop | Uso prolungato senza disconnessioni e ripresa dalla sospensione |
 | NVMe PM981a interno | Visibile nella Recovery; mantenuto per Windows | Verificare eventuali effetti sulla stabilità di macOS |

@@ -1,0 +1,14 @@
+{
+  "repository": "CloverHackyColor/VoodooHDA",
+  "source_commit": "8c7e8e2ce6de0a917be663a3192857955288c937",
+  "release": "Release368",
+  "version": "3.6.8",
+  "url": "https://github.com/CloverHackyColor/VoodooHDA/releases/download/Release368/VoodooHDA.kext-368.zip",
+  "archive_sha256": "9aaa01b245f4827b2de5edfdc028700b9bc8823f03bfb1daf280b8571f88adb0",
+  "archive_size": 135026,
+  "files": {
+    "VoodooHDA.kext/Contents/Info.plist": "21b886b5449b9a0739422b6720ea2bc04fdcc477f79e1e3cece021033a51bf1a",
+    "VoodooHDA.kext/Contents/MacOS/VoodooHDA": "932a7c9e46a65fdab7c8729f599c1094b568ae4fc7f17dad9818c83e833a0973",
+    "VoodooHDA.kext/Contents/_CodeSignature/CodeResources": "6686de10a28a2fe11b36cbb86dcbacc827cfc4ea116b4dabf1845e5aee629e9b"
+  }
+}
