@@ -1,5 +1,13 @@
 S540 — pannello all'avvio, Bluetooth e rete
 
+Esito del 13 ottobre 2026: il solo -igfxblr ha eliminato l'attesa del pannello
+all'avvio, da circa due minuti a zero, nella prova sul portatile. Se la prova
+è già applicata e funziona, conserva questa configurazione e il backup.
+
+La raccolta richiede i primi cinque minuti, ma il report ricevuto includeva
+anche altri avvii ed eventi successivi. L'analisi distingue i segmenti: non
+considerare tutti gli eventi come appartenenti ai primi cinque minuti.
+
 Estrai la cartella S540-avvio-rete in Downloads.
 Esegui dal desktop Tahoe, con l'HDD 240 GB collegato.
 

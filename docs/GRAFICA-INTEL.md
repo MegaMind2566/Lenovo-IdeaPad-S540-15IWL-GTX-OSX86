@@ -19,7 +19,7 @@ La configurazione applicata conserva `AAPL,ig-platform-id=0900A53E` e `device-id
 
 Prima della configurazione iniziale il pannello è rimasto temporaneamente nero, poi l'interfaccia è comparsa senza una nuova modifica della EFI. Quella prima attesa, da sola, non giustificava una patch della retroilluminazione.
 
-Successivamente è stato riferito che il pannello rimane spento per circa due minuti anche all'avvio, prima della mela, mentre macOS accetta già la password e completa il login. Il controllo del codice WEG e del dump del driver Tahoe ha individuato una [prova del solo BLR](AVVIO-RETE.md), limitata allo stesso UUID framebuffer e con backup reversibile. È un candidato da verificare sul portatile: memoria 19 MB/9 MB e identità Intel non vengono modificate.
+Successivamente è stato riferito che il pannello rimane spento per circa due minuti anche all'avvio, prima della mela, mentre macOS accetta già la password e completa il login. Il controllo del codice WEG e del dump del driver Tahoe ha individuato una [prova del solo BLR](AVVIO-RETE.md), limitata allo stesso UUID framebuffer e con backup reversibile. Dopo il riavvio della prova con `-igfxblr`, il 13 ottobre 2026 è stato riferito **schermo nero risolto, attesa zero**. Si mantiene la correzione funzionante. Memoria 19 MB/9 MB e identità Intel non sono modificate; altre patch della retroilluminazione non sono aggiunte.
 
 ## Conservare la EFI funzionante
 

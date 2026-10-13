@@ -1,6 +1,6 @@
 # Pannello spento all'avvio, Bluetooth e Wi-Fi
 
-Queste sono le priorità correnti. Batteria e contatori sono conservati in [BATTERIA-SOSPENSIONE.md](BATTERIA-SOSPENSIONE.md). Le prove di sospensione, i tasti funzione e l'equalizzazione sono rinviati.
+Il ritardo del pannello è risolto nella prova riferita il 13 ottobre 2026: attesa a schermo nero **da circa due minuti a zero** dopo il test del solo `-igfxblr`. Si conserva questa configurazione. Le priorità successive sono associazione Bluetooth e gestione delle reti Wi-Fi. Batteria e contatori sono conservati in [BATTERIA-SOSPENSIONE.md](BATTERIA-SOSPENSIONE.md). Le ulteriori prove di sospensione, i tasti funzione e l'equalizzazione sono rinviati.
 
 ## Distinguere avvio del sistema e accensione del pannello
 
@@ -10,11 +10,13 @@ Il codice ufficiale WhateverGreen 1.7.1 include due correzioni: BLR (`-igfxblr`)
 
 Nel dump Tahoe già raccolto, il framebuffer CFL ha UUID `7E294F0F-852E-3252-B54D-61D9A7BBE6B2`. La sezione executable è completa: 601466 byte. La sequenza LEA con displacement `0xFFF37DA7`, richiesta dal probe BLT per CFL, non è presente. Sono invece presenti chiamate a una funzione comune per i registri PWM `0xC8254` e `0xC8258`. Il dump è mappato in memoria e non conserva LINKEDIT: i nomi delle funzioni non sono risolvibili direttamente.
 
-**Inferenza:** per questo preciso driver, il solo BLR è un candidato più coerente del BLT generico. La prova richiede lo stesso UUID del driver caricato e Darwin 25.6.0. Non è una correzione confermata sul portatile né una raccomandazione per tutte le versioni Tahoe. Non si combinano BLR, BLT e altre opzioni grafiche.
+**Inferenza alla base della prova:** per questo preciso driver, il solo BLR era più coerente del BLT generico. La prova richiede lo stesso UUID del driver caricato e Darwin 25.6.0. L'esito successivo sul portatile conferma l'eliminazione del nero nella prova riferita; non è una raccomandazione per tutte le versioni Tahoe. Non si combinano BLR, BLT e altre opzioni grafiche.
+
+Il report precedente alla prova conferma lo stesso UUID CFL e la memoria Intel già funzionante. Nel segmento dell'ultimo avvio, macOS mostra `LoginwindowUIShown` circa 31,3 secondi dopo il kernel, coerente con il login possibile mentre il pannello era ancora spento. Il report è precedente a BLR e non contiene quel parametro nei boot-args; l'esito dopo il riavvio è stato comunicato direttamente. Non si attribuiscono al test altri cambiamenti hardware non provati.
 
 ## Raccolta dal desktop
 
-`RACCOGLI-AVVIO-RETE.command` legge i primi cinque minuti dell'avvio corrente, i driver caricati e il loro UUID, lo stato Bluetooth/USB, la grafica e i servizi di rete. Le due variabili NVRAM Bluetooth sono lette separatamente; la loro assenza non impedisce lo ZIP. Le letture attuali dei dispositivi sono successive all'avvio.
+`RACCOGLI-AVVIO-RETE.command` richiede a log show l'intervallo dei primi cinque minuti dell'avvio corrente e legge driver con UUID, stato Bluetooth/USB, grafica e servizi di rete. Nel report ricevuto il lettore ha restituito anche avvii precedenti ed eventi successivi: l'intervallo richiesto non è stato rispettato. La causa non è stata accertata. Per l'analisi è stato isolato il segmento che corrisponde a kern.boottime; gli eventi successivi ai cinque minuti sono distinti dalla sequenza iniziale. Non si chiede una nuova raccolta per il problema del pannello risolto. Le due variabili NVRAM Bluetooth sono lette separatamente; la loro assenza non impedisce lo ZIP. Le letture attuali dei dispositivi sono successive all'avvio.
 
 Il comando non modifica EFI, NVRAM o driver. La password serve solo alla lettura dei log. Crea sulla Scrivania una cartella privata e `DIAGNOSI-AVVIO-RETE-XXXXXX.zip`, da allegare nella chat. Il report può contenere indirizzi hardware e messaggi dei processi: non va aggiunto alla repository. Non include config completo, PlatformInfo o Info.plist di itlwm con credenziali.
 
@@ -46,11 +48,15 @@ Il ripristino verifica il backup e conserva i byte originali. **Prima di altre m
 
 IntelBTPatcher 2.4 resta escluso dopo il panic. Il suo sorgente precede la correzione del descrittore HCI USB per Sequoia e successivi. Una build di sviluppo 2.5.0 del sorgente ufficiale `a414375505fa3b014be32f8fca31b5bbfdf9f10f`, con supporto Tahoe dichiarato, è disponibile da Dortania; non è una release stabile.
 
-BlueToolFixup 2.7.2 è già presente. Il progetto richiede per Intel le variabili NVRAM `bluetoothExternalDongleFailed` Data `00` e `bluetoothInternalControllerInfo` Data di tredici byte zero, nel GUID Apple `7C436110-AB2A-4BBB-A880-FE41995C9F82`. Nella EFI esaminata non sono impostate. La raccolta controlla se esistono nella NVRAM attiva e se il firmware è caricato. I dati serviranno a scegliere la modifica; il vecchio patcher non viene riabilitato.
+BlueToolFixup 2.7.2 è già presente. Il progetto richiede per Intel le variabili NVRAM `bluetoothExternalDongleFailed` Data `00` e `bluetoothInternalControllerInfo` Data di **quattordici byte zero**, nel GUID Apple `7C436110-AB2A-4BBB-A880-FE41995C9F82`. Il conteggio precedente di tredici byte era errato: la sequenza ufficiale contiene ventotto cifre esadecimali. Pur non essendo impostate nella configurazione esaminata, entrambe le variabili sono già corrette nella NVRAM attiva del report. Non vengono riscritte.
+
+Il report mostra Bluetooth State On, FirmwareLoaded=Yes, trasporto connesso e firmware Intel/BlueToolFixup caricati; IntelBTPatcher resta escluso. Nell'ultimo avvio lo stack completa l'inizializzazione e avvia la scansione circa 26,5 secondi dopo il kernel. Successivamente sono rilevati dispositivi BLE reali. Non è documentata un'associazione riuscita: il prossimo controllo è associare un mouse o delle cuffie e verificarne l'uso. Questi dati non richiedono un aggiornamento preventivo del driver. La dicitura THIRD_PARTY_DONGLE è una classificazione gestita da BlueToolFixup e non prova che sia presente un dongle esterno.
 
 ## Wi-Fi indicato come Ethernet
 
 È il comportamento previsto di itlwm 2.3.0: usa IOEthernetController. Rinominare il servizio non lo trasforma in una periferica IO80211. La gestione delle reti può avvenire con HeliPort o con i profili del driver; il progetto dichiara che questa rappresentazione non riduce le prestazioni.
+
+Il report del desktop conferma itlwm 2.3.0 e il servizio Ethernet su en0. Per scegliere le reti dalla barra dei menu si può usare [HeliPort 1.5.0 ufficiale](https://github.com/OpenIntelWireless/HeliPort/releases/tag/v1.5.0), con [DMG della release](https://github.com/OpenIntelWireless/HeliPort/releases/download/v1.5.0/HeliPort.dmg). L'app è il client di itlwm: non cambia la classificazione nel pannello di rete macOS. L'installazione e l'uso di HeliPort non sono ancora stati riferiti.
 
 La release stabile ufficiale AirportItlwm 2.3.0 ha pacchetti fino a Sonoma, senza un asset Tahoe. Le strategie con vecchi driver Airport e ripristino dei framework Wi-Fi richiedono modifiche più ampie al sistema e al SIP. L'integrazione nativa su Tahoe resta un lavoro separato; non si sostituisce ora il driver funzionante soltanto per cambiare la voce Ethernet e non si promette AirDrop.
 

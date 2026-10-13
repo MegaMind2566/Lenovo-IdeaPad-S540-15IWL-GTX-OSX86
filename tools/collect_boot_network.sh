@@ -96,7 +96,8 @@ capture_optional() {
     printf 'Non pubblicare questo ZIP nella repository.\n'
     printf 'Nessuna modifica a EFI, NVRAM, driver, impostazioni o archivio dei log.\n'
     printf 'Non copia EFI, config completo, credenziali Wi-Fi o Info.plist di itlwm.\n'
-    printf 'I log riguardano soltanto i primi cinque minuti dell avvio corrente.\n'
+    printf 'Si richiede ai log l intervallo dei primi cinque minuti dell avvio corrente.\n'
+    printf 'Il lettore può restituire eventi fuori intervallo o di altri avvii: verificare sessione e sequenza.\n'
     printf 'Eventuali messaggi non conservati dal sistema non possono essere recuperati.\n'
     printf 'Le letture correnti dei dispositivi sono successive all avvio.\n'
 } > "$SUMMARY"

@@ -11,10 +11,10 @@ Report ricevuto il 12 ottobre 2026. Sono riportati solo i dati utili al progetto
 | RAM | 12 GB DDR4-2400, moduli da 8 e 4 GB | Sufficiente per la prima prova |
 | iGPU | Intel UHD 620, PCI 8086:3EA0 | IntelAccelerator rilevato e Metal 3 esposto; carico prolungato da provare |
 | dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91 | Driver disabilitato nella EFI; port Linux mantenuto nella roadmap; spegnimento elettrico da verificare |
-| Schermo | BOE NV156FHM-N61, 1920×1080 | Pannello e cursore luminosità funzionanti; F11/F12 da sistemare, ripresa da provare |
+| Schermo | BOE NV156FHM-N61, 1920×1080 | Pannello e cursore funzionanti; ritardo nero all'avvio eliminato con -igfxblr nella prova; F11/F12 rinviati |
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Famiglia PM981a problematica; non assunta compatibile |
 | Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | Funziona nella Recovery con itlwm; nel desktop indicato come Ethernet, comportamento previsto da IOEthernetController; gestione reti da completare |
-| Bluetooth | Intel, USB 8087:0AAA | Panic superato in una prova con IntelBTPatcher escluso; funzionalità Bluetooth e versione aggiornata da verificare |
+| Bluetooth | Intel, USB 8087:0AAA | IntelBTPatcher escluso; controller acceso, firmware caricato, scansione BLE e NVRAM corretta confermati; associazione da provare |
 | Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Riproduzione, volume graduale e tasti F1–F3 confermati con VoodooHDA 3.6.8 e correzione v3; equalizzazione rinviata, jack e microfono da documentare |
 | Tastiera | PS/2 | Funzionamento riferito nella Recovery con VoodooPS2 |
 | Touchpad | ELAN0662, I2C HID; controller Intel 8086:9DE8 | Percorso confermato: `_SB.PCI0.I2C0.TPD0`; funzionamento da provare |
@@ -59,6 +59,12 @@ IORegistry mostra X86PlatformPlugin registered, matched e active. Dopo l'invito 
 Il driver di gestione CPU è quindi attivo e i campioni mostrano un basso consumo Intel stimato a riposo. Le temperature sono letture istantanee alla fine di ciascun intervallo. Il rapporto GPU 100% è rispetto alla frequenza nominale indicata di 300 MHz, non una misura di utilizzo al 100%.
 
 Il report contiene ancora Invalid key detected e non riporta RPM delle ventole: la telemetria SMC resta parziale. Successivamente è stato riferito che la ventola non fa rumore da tempo: la situazione a riposo è quindi confermata anche dall'osservazione sul portatile. Questi dati non verificano la temperatura sotto carico, il consumo o lo spegnimento elettrico della NVIDIA, la batteria o la sospensione. I campi LastSleepType del plugin non costituiscono una prova di sospensione riuscita.
+
+## Correzione del pannello e stato Bluetooth: 13 ottobre 2026
+
+La prova del solo `-igfxblr` ha eliminato il nero all'avvio nell'esito riferito: da circa due minuti a zero. Si conserva la configurazione, mantenendo memoria Intel, audio e SIP. Il report precedente al test mostra lo stesso UUID framebuffer e Loginwindow pronto circa 31,3 secondi dopo il kernel. La [diagnosi](AVVIO-RETE.md) distingue il ritardo del pannello dal tempo di avvio del sistema.
+
+Lo stato Bluetooth è On, FirmwareLoaded è Yes e il trasporto è connesso; BlueToolFixup 2.7.2 e IntelBluetoothFirmware 2.4 sono caricati, IntelBTPatcher è assente. Le due variabili NVRAM richieste sono presenti con i valori corretti: un byte zero e quattordici byte zero. Lo stack avvia la scansione e riceve dispositivi BLE. Associazione e uso di una periferica restano da provare: non vengono cambiati preventivamente driver o NVRAM.
 
 ## Batteria e contatori di stop: 13 ottobre 2026
 
