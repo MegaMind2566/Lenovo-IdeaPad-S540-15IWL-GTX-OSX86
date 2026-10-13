@@ -46,7 +46,7 @@ Se il programma segnala che i parametri sono già assenti o rifiuta il backup, c
 
 È stata riferita la rimozione manuale di `-igfxvesa` dal config.plist. La fotografia del nuovo tentativo mostra il caricamento delle collezioni di estensioni e gli errori ripetuti di dipendenze di com.apple.driver.IOVersatile, con codice `0xdc00800e`. DockChannelSerial riporta `has crashed 0 time(s)`. Non è visibile una riga di panic né sono mostrati i boot-args effettivi.
 
-Lo stesso errore IOVersatile era già presente nell'archivio precedente, con VESA attivo, prima dell'avvio di WindowServer. In quel campione DockChannelSerial registrava anche l'avvio riuscito. L'ultima riga della fotografia non identifica quindi da sola il punto che impedisce l'interfaccia. L'errore non è una nuova prova di corruzione o di fallimento Intel.
+Lo stesso errore IOVersatile era già presente nell'archivio precedente, con VESA attivo. Dopo quegli errori WindowServer risultava in esecuzione e Language Chooser proseguiva. In quel campione DockChannelSerial registrava anche l'avvio riuscito. L'ultima riga della fotografia non identifica quindi da sola il punto che impedisce l'interfaccia. L'errore non è una nuova prova di corruzione o di fallimento Intel.
 
 Per il prossimo confronto servono il log OpenCore appena creato da questo tentativo e il config.plist modificato. Prima di interpretare una nuova raccolta occorre confermare l'assenza runtime di VESA. Non viene applicato un blocco IOVersatile o un nuovo parametro grafico in base alla sola fotografia.
 
@@ -68,6 +68,11 @@ Dopo i due tentativi normali è stata preparata una prova di questa coppia speci
 
 La [procedura](TEST-WHISKEY-LAKE.md) conserva boot-args, stato Bluetooth e identità della macchina. Entrambi i framebuffer dichiarano 58 MB di memoria stolen: questo test non risolve né accerta un eventuale limite DVMT. Non vengono aggiunte patch di memoria o connettori in assenza di una diagnosi. Se il risultato non cambia, la raccolta successiva deve includere gli eventi del test normale e di questa prova, da distinguere per avvio.
 
+
+
+## Verifica completa richiesta dopo la prova
+
+Dopo il tentativo 173430 è stato riferito testo fermo con IOVersatile e un secondo messaggio non trascritto completamente. È stata richiesta la verifica della EFI già consegnata, tenendo conto delle poche modifiche note, prima di scegliere ulteriori cambiamenti. La [verifica completa](VERIFICA-EFI.md) ha confermato file, architetture, dipendenze e ACPI; ocvalidate 1.0.8 è stato eseguito sui due config disponibili con risultato No issues found. Nessuna nuova modifica grafica deriva da questi controlli. Per riordinare i vecchi log e le prove sul disco è disponibile la [procedura con archivio verificato](RIORDINO-AVVIO.md).
 
 ## Riferimenti
 

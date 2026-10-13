@@ -2,30 +2,22 @@
 
 Obiettivo: usare macOS Tahoe 26 su Lenovo IdeaPad S540-15IWL GTX e completare le prove di tutti i componenti. La compatibilità completa è un obiettivo da verificare sul dispositivo.
 
-**Stato: Recovery avviata; mouse, tastiera, Wi-Fi e rilevamento del 960 EVO confermati nella prova. Con IntelBTPatcher escluso è stato superato il panic USB/Bluetooth in un tentativo; resta lo schermo nero con il puntatore, senza finestre. Desktop, accelerazione Intel e funzionamento Bluetooth ancora da verificare.**
+**Stato: Recovery avviata; mouse, tastiera, Wi-Fi e rilevamento del 960 EVO confermati nella prova. Con IntelBTPatcher escluso è stato superato il panic USB/Bluetooth in un tentativo; l'interfaccia non è ancora stata raggiunta. L'ultima prova riferita resta su righe di testo. Desktop, accelerazione Intel e funzionamento Bluetooth ancora da verificare.**
 Sequoia 15 resta un'alternativa da valutare se le prove con Tahoe evidenziano problemi.
 
 ## Cosa fare adesso
 
-Il dump disponibile contiene una DSDT e tutte le 12 SSDT enumerate da Windows. Le 20 tabelle ACPI utili raccolte hanno lunghezza, checksum e SHA-256 validi. Non occorre ripetere la raccolta.
+La [verifica completa della EFI e dei config](docs/VERIFICA-EFI.md) non ha trovato file mancanti, versioni OpenCore mischiate o dipendenze incoerenti. Tutti i 55 file della consegna corrispondono al manifest; ocvalidate 1.0.8 è stato eseguito nuovamente sul config allegato e su quello della prova Whiskey Lake, senza problemi. La EFI consegnata è già compatta. I file correnti del disco restano al loro posto, inclusa l'eventuale configurazione Wi-Fi successiva alla consegna.
 
-La [prova senza IntelBTPatcher](docs/TEST-BLUETOOTH.md) ha superato il panic osservato. Mantieni il patcher escluso. Anche dopo la reinstallazione resta lo schermo nero: i [log unificati ricevuti](docs/ANALISI-LOG-UNIFICATI.md) mostrano due avvii ancora con `-igfxvesa`, WindowServer senza accelerazione e un errore di creazione della texture nel benvenuto. Quella raccolta ha motivato la prova senza VESA della nuova installazione. I precedenti log `103339` e `103615` senza VESA riguardavano l'installazione precedente; nella nuova raccolta manca una prova senza VESA della nuova installazione. La grafica Intel e Metal restano da verificare. Il builder esclude il vecchio patcher anche dalle nuove EFI fino a una prova della versione aggiornata. L'esito non conferma ancora il funzionamento Bluetooth.
+Dopo la consegna della [prova Whiskey Lake](docs/TEST-WHISKEY-LAKE.md) viene riferito testo fermo con IOVersatile e un secondo messaggio non trascritto interamente. Il log 173430 conferma i parametri normali, Lilu e WhateverGreen iniettati e IntelBTPatcher escluso; non contiene gli eventi successivi di macOS né stampa i valori Intel. Non viene aggiunta un'altra patch sulla base di quella riga. Il precedente archivio unificato descrive solo avvii VESA: manca ancora il runtime della prova normale per spiegare lo stallo.
 
-La rimozione manuale di VESA è confermata dai nuovi log OpenCore `170135` e `170413`: avviano Machintosh SSD senza `-igfxvesa`, `-x` o `-bsdmgroot`, conservando l'esclusione di IntelBTPatcher. Il config.plist ricevuto è leggibile e conserva il profilo mobile `00009B3E` / `9B3E0000` in campi Data di quattro byte. È stata preparata una [prova reversibile del profilo Whiskey Lake](docs/TEST-WHISKEY-LAKE.md), con la coppia indicata dal manuale di WhateverGreen, cambiando soltanto i due identificativi Intel. Il test non è ancora stato eseguito sul portatile; accelerazione e Metal restano da verificare. Se l'interfaccia non appare, occorrono i dati unificati del nuovo tentativo, poiché il precedente archivio documenta solo avvii VESA.
+Per riordinare il supporto usare **S540-riordino-avvio.zip** e **RIORDINA-AVVIO.cmd**, seguendo la [procedura](docs/RIORDINO-AVVIO.md). Il programma archivia sul Desktop i log, le raccolte e i vecchi strumenti di prova riconosciuti, verifica le copie e li rimuove dall'HDD. Conserva tutta la EFI, i file Recovery e gli strumenti correnti di raccolta. Il rapporto elenca le voci residue: non occorre ricopiare la EFI già disponibile. Il riordino non è una soluzione dello stallo grafico.
 
-Per la raccolta completa usa **S540-diagnosi-unified-v3.zip**: il launcher **RACCOGLI-UNIFIED.command** attiva già `--unified` e usa una cartella distinta dal vecchio collector. La v2 si è fermata perché questa Recovery non dispone di du; la v3 prosegue con la copia quando gli strumenti della stima dello spazio mancano. Le [istruzioni](docs/DIAGNOSI-INTERFACCIA.md) indicano il percorso preciso dell'HDD e il messaggio di versione da controllare.
+Il pacchetto include il collector unificato v3. Dalla Recovery con il Data del Samsung montato, [RACCOGLI-UNIFIED.command](docs/DIAGNOSI-INTERFACCIA.md) raccoglie report, diagnostics e uuidtext del sistema installato anche quando du manca. I dati dell'avvio normale vanno distinti da quelli della Recovery o dei precedenti tentativi VESA.
 
-Continua l'[installazione sul 960 EVO esterno](docs/INSTALLAZIONE.md). Dopo il primo desktop segui la [verifica della grafica Intel](docs/GRAFICA-INTEL.md). Il [test grafico reversibile](docs/TEST-GRAFICA.md) resta una prova temporanea senza accelerazione Intel. Il [log delle 02:45](docs/ANALISI-LOG-AVVIO.md) conferma che in quel tentativo erano attivi sia `-igfxvesa` sia `-x`.
+Il dump ACPI contiene DSDT e tutte le 12 SSDT enumerate da Windows; le 20 tabelle utili hanno lunghezza, checksum e SHA-256 validi. Non occorre ripetere la raccolta. Il Samsung 960 EVO esterno è stato rilevato dopo aver reinserito l'M.2 nel box; la velocità USB 3 resta da verificare. Windows sul PM981a interno rimane al suo posto.
 
-Per una diagnosi dell'avvio di **Machintosh SSD** è disponibile una [prova reversibile di avvio sicuro](docs/AVVIO-SICURO.md), che aggiunge solo `-x` alla EFI attuale e salva un backup. Per il panic Bluetooth la prima prova è invece l'esclusione del patcher.
-
-Per il puntatore con scia è disponibile il [test Intel](docs/TEST-INTEL.md): controlla la configurazione locale e rimuove soltanto `-x` e `-igfxvesa`, se presenti, con un backup distinto per il ripristino.
-
-La [roadmap hardware](docs/ROADMAP.md) mantiene aperto il port NVIDIA come progetto di ricerca dopo la stabilizzazione Intel. Riporta anche audio, Bluetooth, USB, autonomia, sospensione e uscite video, con criteri distinti per confermare il funzionamento.
-
-Il mancato rilevamento del 960 EVO è stato risolto reinserendo l'M.2 nel box. Il disco resta esterno su **USB-C**. La mappa fornita contiene 9 porte; la velocità USB 3 del box resta da verificare con il cavo definitivo. Per una nuova preparazione sono disponibili le istruzioni di [primo avvio](docs/PRIMO-AVVIO.md) e il pacchetto in **Actions → EFI per la prima prova → ultima esecuzione riuscita → Artifacts**.
-
-Le patch sono descritte in [docs/ANALISI-ACPI.md](docs/ANALISI-ACPI.md). I sorgenti sono in `acpi/source`, le versioni compilate in `acpi/compiled`. Compilazione e checksum non sostituiscono un avvio sul portatile.
+La [roadmap hardware](docs/ROADMAP.md) mantiene aperto il port NVIDIA dopo la stabilizzazione Intel. Desktop, Metal, audio, Bluetooth, touchpad, autonomia e sospensione richiedono prove sul portatile. I sorgenti ACPI sono in acpi/source, le versioni compilate in acpi/compiled; [l'analisi](docs/ANALISI-ACPI.md) descrive il loro scopo.
 
 ### Per una nuova raccolta
 
