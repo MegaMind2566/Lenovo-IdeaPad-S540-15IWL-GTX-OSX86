@@ -65,3 +65,11 @@ Il booter mostra anche l'avviso `This system was automatically rebooted after pa
 Il prossimo passo è **TEST-INTEL.cmd sulla EFI attuale**, che rimuove soltanto i flag diagnostici eventualmente presenti e conserva IntelBTPatcher escluso. Qui ci si aspetta la rimozione di `-igfxvesa`. La prova combinata e il ripristino nell'ordine inverso sono stati verificati sulla configurazione consegnata. Non usare un vecchio ripristino integrale dopo la modifica Bluetooth.
 
 L'assenza di accelerazione è confermata dal parametro VESA. Che sia la causa della mancata interfaccia resta da verificare con il prossimo avvio. OpenCore termina prima dei log di WindowServer: non consente di localizzare il problema dell'interfaccia o provare Metal.
+
+## Avvio normale confermato: 103339 e 103615
+
+Entrambi i nuovi log del 13 ottobre 2026 selezionano Machintosh SSD e mostrano boot-args senza `-igfxvesa`, `-x` o `-bsdmgroot`. IntelBTPatcher non viene iniettato; firmware Intel e BlueToolFixup restano presenti. Lilu 1.7.2 e WhateverGreen 1.7.1 sono iniettati con successo, le proprietà Intel sono impostate e il kernel letto è Darwin 25.6.0. Non sono stampati i valori del framebuffer e non è provata l'accelerazione.
+
+Il log `103615` riporta l'assenza di un log di panic e termina a `EXITBS:START` alle 10:36:25 secondo l'orologio del booter. Non contiene i successivi log dell'interfaccia. La nuova foto mostra messaggi di macOS relativi alle firme del codice, kernelmanagerd con limite indicato come non fatale, caricamento delle collezioni di estensioni e fault di IOUserDockChannelSerial. Nessuna riga identifica da sola la causa dello stallo.
+
+Le voci Recovery registrate sono **Recovery 26.7.1** sul Samsung e la Recovery originale dell'HDD sotto **240 GB**. La [raccolta dei report offline](DIAGNOSI-INTERFACCIA.md) legge DiagnosticReports e i log disponibili dal volume Data dell'installazione. Per raggiungere la Recovery si può usare il ripristino del test Intel, che conserva la modifica Bluetooth; la raccolta non modifica il sistema. L'esecuzione in Recovery e i report restano da ricevere.
