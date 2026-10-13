@@ -1,0 +1,61 @@
+name: Build microphone mixer probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - tools/hda_mixer_snapshot.c
+      - tools/collect_microphone.sh
+      - RACCOGLI-MICROFONO.command
+      - docs/MICROFONO.md
+      - .github/workflows/build-microphone-probe.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15-intel
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Compile and verify Intel macOS probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = x86_64
+          bash -n tools/collect_microphone.sh RACCOGLI-MICROFONO.command
+          mkdir -p build/microphone/S540-microfono/bin build/microphone/S540-microfono/tools build/microphone/S540-microfono/licenses
+          package=build/microphone/S540-microfono
+          clang -std=c11 -Wall -Wextra -Werror -mmacosx-version-min=13.0 -arch x86_64 tools/hda_mixer_snapshot.c -framework IOKit -framework CoreFoundation -o "$package/bin/hda_mixer_snapshot"
+          codesign --force --sign - "$package/bin/hda_mixer_snapshot"
+          codesign --verify --strict "$package/bin/hda_mixer_snapshot"
+          test "$(lipo -archs "$package/bin/hda_mixer_snapshot")" = x86_64
+          "$package/bin/hda_mixer_snapshot" --help
+          # No VoodooHDA exists on the runner: test enumeration, JSON and error status.
+          set +e
+          "$package/bin/hda_mixer_snapshot" > build/microphone/no-driver.json 2> build/microphone/no-driver.stderr
+          status=$?
+          set -e
+          test "$status" = 1
+          python3 -c 'import json; d=json.load(open("build/microphone/no-driver.json")); assert d["format"]==1 and d["controllers"]==[] and d["controller_count"]==0'
+          python3 -c 's=open("build/microphone/no-driver.stderr").read(); assert "No VoodooHDADevice found." in s and "IOServiceGetMatchingServices failed" not in s'
+          cp tools/collect_microphone.sh "$package/tools/"
+          cp tools/hda_mixer_snapshot.c "$package/tools/"
+          cp RACCOGLI-MICROFONO.command "$package/"
+          cp docs/MICROFONO.md "$package/LEGGIMI.md"
+          cp licenses/audio-tahoe/VoodooHDA-LICENSE.txt "$package/licenses/"
+          chmod 755 "$package/RACCOGLI-MICROFONO.command" "$package/tools/collect_microphone.sh" "$package/bin/hda_mixer_snapshot"
+          printf '%s\n' "Source commit: $GITHUB_SHA" "VoodooHDA ABI pin: 8c7e8e2ce6de0a917be663a3192857955288c937" > "$package/BUILD.txt"
+          (cd "$package" && shasum -a 256 bin/hda_mixer_snapshot > SHA256SUMS)
+          (cd build/microphone && zip -qr S540-microfono.zip S540-microfono && shasum -a 256 S540-microfono.zip > S540-microfono.zip.sha256)
+          unzip -tq build/microphone/S540-microfono.zip
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: S540-microfono
+          path: |
+            build/microphone/S540-microfono.zip
+            build/microphone/S540-microfono.zip.sha256
+          if-no-files-found: error
+          retention-days: 30

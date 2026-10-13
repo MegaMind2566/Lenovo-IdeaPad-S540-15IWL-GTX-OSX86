@@ -37,6 +37,8 @@ Dopo la prova v3 è stato riferito un esito positivo: riproduzione audio, regola
 
 Nella prova video Photo Booth è stato riferito che la voce si sente, insieme all'immagine della webcam. Il guadagno microfono è eccessivo: la regolazione nelle impostazioni passa bruscamente da troppo alto a troppo basso. L'acquisizione audio è presente; sono da verificare ingresso selezionato e controlli IOAudio. Nel sorgente fissato, VolumeChangeFix aggiorna tutti i mixer anche quando varia l'ingresso: è una possibile causa, da distinguere dall'effettiva configurazione degli amplificatori sul portatile. Non viene applicata una nuova patch al driver; equalizzazione e tasti funzione restano rinviati.
 
+Il nuovo report identifica l'ingresso predefinito come Internal Microphone VoodooHDA, due canali a 48 kHz. I controlli sinistro e destro hanno valore 57 su 100 e intervallo dichiarato 0–30 dB. Gli altoparlanti sono a 100, con intervallo dichiarato −21,5–0 dB. L'intervallo non rivela i passi reali del codec: si procede con una [lettura dei mixer a due livelli](MICROFONO.md) prima di scegliere una modifica del driver. La correzione del volume altoparlanti resta attiva.
+
 ## Equalizzazione da rivedere piu avanti
 
 È richiesto un affinamento dell'equalizzazione, da affrontare più avanti. L'attività resta nella roadmap come prova separata della timbrica; non vengono aggiunte ora modifiche a mixer, amplificazione o driver.
