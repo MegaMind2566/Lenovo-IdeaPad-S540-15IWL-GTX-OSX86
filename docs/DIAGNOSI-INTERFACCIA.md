@@ -8,7 +8,7 @@ La prima raccolta non contiene nuovi report che spieghino lo schermo nero. Anche
 
 ## Passaggi
 
-1. In Windows estrai **S540-diagnosi-unified-v2.zip** nella radice dell'HDD di OpenCore. Devono risultare `RACCOGLI-UNIFIED.command` e la cartella `diagnosi-unified` accanto a `EFI`. Il pacchetto usa nomi distinti e contiene il collector aggiornato nella nuova cartella; la modalità unificata è già attiva nel launcher.
+1. In Windows estrai **S540-diagnosi-unified-v3.zip** nella radice dell'HDD di OpenCore. Accetta la sostituzione dei file v2. Devono risultare `RACCOGLI-UNIFIED.command` e la cartella `diagnosi-unified` accanto a `EFI`. Il pacchetto contiene il collector aggiornato nella nuova cartella; la modalità unificata è già attiva nel launcher.
 2. Conserva la configurazione che ha aperto la Recovery: VESA temporaneo e IntelBTPatcher escluso. Se sei tornato alla prova Intel normale, sullo stesso HDD esegui **RIPRISTINA-INTEL.cmd**. Non ripeterlo se il ripristino è già stato applicato. Se segnala backup mancante o modifiche successive, conserva l'errore senza sostituire il config.
 3. Avvia lo stesso OpenCore e scegli **Recovery 26.7.1**, presente nel menu registrato dai nuovi log. Serve la Recovery per leggere i report salvati sul Samsung. Se questa voce non apre le Utility, è presente anche la Recovery originale dell'HDD sotto il nome **240 GB**; seleziona la voce con l'icona Recovery.
 4. In **Utility Disco → Vista → Mostra tutti i dispositivi**, individua il Samsung esterno e il suo volume **Data/Dati**. Montalo se necessario. Il nome atteso è **Machintosh SSD - Data**; verifica che sia il volume Data del Samsung, della stessa installazione di Machintosh SSD.
@@ -26,9 +26,24 @@ Il programma riconosce automaticamente i nomi `Machintosh SSD - Data` e `Machint
 bash "/Volumes/240 GB/RACCOGLI-UNIFIED.command" "/Volumes/NOME ESATTO DEL VOLUME DATA"
 ```
 
-Il comando usa il percorso preciso dell'HDD già osservato, `240 GB`. Se cambia il nome dell'HDD, sostituiscilo con quello presente in `/Volumes`. Evita il wildcard del launcher quando ci sono più copie su dischi diversi: diventerebbero argomenti aggiuntivi. Se la raccolta si ferma, fotografa il messaggio del Terminale. Le copie incomplete vengono indicate nel riepilogo dello ZIP. Il programma legge il volume Data montato sotto `/Volumes` e scrive la raccolta sull'HDD contenente il pacchetto; rifiuta una destinazione dentro Data e un'origine nel sistema Recovery. Per `--unified` verifica lo spazio per conservare cartella e ZIP, stimando due volte la dimensione dei log più un margine. Non modifica EFI, boot-args, firme o impostazioni del sistema.
+Il comando usa il percorso preciso dell'HDD già osservato, `240 GB`. Se cambia il nome dell'HDD, sostituiscilo con quello presente in `/Volumes`. Evita il wildcard del launcher quando ci sono più copie su dischi diversi: diventerebbero argomenti aggiuntivi. Se la raccolta si ferma, fotografa il messaggio del Terminale. Le copie incomplete vengono indicate nel riepilogo dello ZIP. Il programma legge il volume Data montato sotto `/Volumes` e scrive la raccolta sull'HDD contenente il pacchetto; rifiuta una destinazione dentro Data e un'origine nel sistema Recovery. Per `--unified`, se du/df/awk sono disponibili, verifica lo spazio per conservare cartella e ZIP, stimando due volte la dimensione dei log più un margine. Se uno di questi strumenti manca, prosegue con la copia e registra che lo spazio non è stato stimato. Non modifica EFI, boot-args, firme o impostazioni del sistema.
 
-All'avvio deve comparire **Raccolta unificata v2: diagnostics + uuidtext**. La sequenza precedente (errore sul volume con `--unified` da solo, seguito da "Indica al massimo il percorso del volume Data" aggiungendo il percorso) è compatibile con il vecchio collector, che accetta un solo argomento e non riconosce l'opzione. Non identifica un problema del disco. Le fotografie dei controlli confermano la presenza di Library, Users e private/var nel Data; i due primi controlli manuali avevano errori nel percorso. Il nuovo nome del launcher e la cartella distinta consentono di usare la versione aggiornata senza dipendere dalla sostituzione del vecchio script.
+All'avvio deve comparire **Raccolta unificata v3: diagnostics + uuidtext**. La sequenza precedente (errore sul volume con `--unified` da solo, seguito da "Indica al massimo il percorso del volume Data" aggiungendo il percorso) è compatibile con il vecchio collector, che accetta un solo argomento e non riconosce l'opzione. Non identifica un problema del disco. Le fotografie dei controlli confermano la presenza di Library, Users e private/var nel Data; i due primi controlli manuali avevano errori nel percorso. Il nome distinto del launcher e la cartella separata consentono di usare la versione aggiornata senza dipendere dal vecchio script in tools.
+
+Il launcher v2 è stato avviato nella Recovery reale, dove `du` risulta assente. Il controllo obbligatorio della dimensione ha quindi fermato la raccolta prima della copia. La v3 rende opzionale la stima quando mancano gli strumenti, mantenendo attive entrambe le copie di diagnostics e uuidtext. La disponibilità di du nel sistema completo non ne dimostra la presenza nella Recovery.
+
+## Copia diretta dalla Recovery già aperta
+
+Se il raccoglitore v2 si è fermato per l'assenza di du, si può raccogliere direttamente la coppia di dati offline con i comandi seguenti. In questa sessione l'HDD è `240 GB` e il wildcard del Data corrisponde soltanto a Machintosh SSD - Data. Se ci sono più volumi Data con SSD nel nome, indicare il percorso esatto al posto del wildcard.
+
+```bash
+log_output=$(mktemp -d "/Volumes/240 GB/LOG-UNIFICATI-XXXXXX") &&
+cp -RX /Volumes/*SSD*Data/private/var/db/{diagnostics,uuidtext} "$log_output/" &&
+ditto -c -k "$log_output" "$log_output.zip" &&
+printf '%s\n' "$log_output.zip"
+```
+
+Le righe terminano con `&&` per proseguire solo dopo il successo del comando precedente. Copiano le due directory complete dal Data e producono sull'HDD un ZIP chiamato LOG-UNIFICATI-….zip, mantenendo la cartella. Questa raccolta diretta contiene solo diagnostics e uuidtext: non include i report aggiuntivi del collector, non esegue una stima dello spazio e non converte i dati in un logarchive. Se la copia si ferma, conservare il messaggio e la cartella; non procedere alla compressione di una copia segnalata come incompleta.
 
 ## Limiti e ritorno alla prova normale
 

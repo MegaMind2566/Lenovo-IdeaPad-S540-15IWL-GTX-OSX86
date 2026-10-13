@@ -53,7 +53,15 @@ case "$bundle_root/" in
 esac
 command -v ditto >/dev/null 2>&1 || fail 'ditto non disponibile in questa Recovery.'
 
+space_check='non richiesto'
 if [ "$unified" -eq 1 ]; then
+    missing_space_tools=''
+    for utility in du df awk; do
+        if ! command -v "$utility" >/dev/null 2>&1; then
+            missing_space_tools="$missing_space_tools $utility"
+        fi
+    done
+    if [ -z "$missing_space_tools" ]; then
     unified_kb=0
     for source in "$data_root/private/var/db/diagnostics" "$data_root/private/var/db/uuidtext"; do
         if [ -d "$source" ]; then
@@ -68,6 +76,11 @@ if [ "$unified" -eq 1 ]; then
     needed_kb=$((unified_kb * 2 + 65536))
     [ "$free_kb" -ge "$needed_kb" ] || fail 'Spazio insufficiente sull HDD per conservare cartella e ZIP dei log.'
     printf 'Log unificati: circa %s MB; avvio della raccolta.\n' "$((unified_kb / 1024))"
+        space_check='stima disponibile; spazio sufficiente al momento del controllo'
+    else
+        space_check="stima non disponibile; strumenti mancanti:$missing_space_tools"
+        printf 'Stima dello spazio non disponibile (mancano:%s). Procedo con la copia dei log.\n' "$missing_space_tools"
+    fi
 fi
 
 work=$(mktemp -d "$bundle_root/DIAGNOSI-MACOS-XXXXXX")
@@ -86,6 +99,7 @@ copy_errors=0
     printf 'Non filtra i report per data: gli orologi dei tentativi possono differire.\n'
     printf 'Non esegue log show o sysdiagnose sul sistema Recovery.\n'
     printf 'Raccolta log unificati richiesta: %s\n' "$unified"
+    printf 'Controllo dello spazio: %s\n' "$space_check"
     if [ -e "$data_root/private/var/db/.AppleSetupDone" ]; then
         printf 'Marcatore di configurazione iniziale: presente\n'
     else
