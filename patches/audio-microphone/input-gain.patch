@@ -1,0 +1,249 @@
+--- a/tranc/VoodooHDADevice.cpp
++++ b/tranc/VoodooHDADevice.cpp
+@@ -44,6 +44,7 @@
+ 
+ // cue8chalk: added to allow for the volume change fix to be controlled from the plist
+ #define kVoodooHDAEnableVolumeChangeFixKey "VoodooHDAEnableVolumeChangeFix"
++#define kS540InputGainFixKey "S540InputGainFix"
+ #define kVoodooHDAEnableHalfVolumeFixKey "VoodooHDAEnableHalfVolumeFix"
+ // VertexBZ: added to allow for the Mic and Mute fixes to be controlled from the plist
+ #define kVoodooHDAEnableHalfMicVolumeFixKey "VoodooHDAEnableHalfMicVolumeFix"
+@@ -244,6 +245,11 @@
+ 		mEnableVolumeChangeFix = false;
+ 	}
+ 	
++	// Opt-in only: validated S540 ALC257 recording path; all other paths remain upstream.
++	osBool = OSDynamicCast(OSBoolean, dict->getObject(kS540InputGainFixKey));
++	mEnableS540InputGainFix = osBool && osBool->getValue();
++	setProperty("S540InputGainFixActive", false);
++
+ 	// Half volume slider fix
+ 	osBool = OSDynamicCast(OSBoolean, dict->getObject(kVoodooHDAEnableHalfVolumeFixKey));
+ 	if (osBool) {
+@@ -1000,6 +1006,7 @@
+     LOCK();
+     // cue8chalk: set volume change fix on the engine
+     audioEngine->mEnableVolumeChangeFix = mEnableVolumeChangeFix;
++    audioEngine->mEnableS540InputGainFix = s540InputGainFixEnabled(channel->pcmDevice);
+     // VertexBZ: set Mute fix on the engine
+     audioEngine->mEnableMuteFix = mEnableMuteFix;
+ 
+@@ -2887,6 +2894,51 @@
+ 	return 0;
+ }
+ 
++// This policy is tied to the codec graph observed on the S540, not merely its name.
++bool VoodooHDADevice::s540InputGainFixEnabled(PcmDevice *pcmDevice)
++{
++	if (!mEnableS540InputGainFix || mDeviceId != 0x9dc88086U || !pcmDevice ||
++	    !pcmDevice->funcGroup || !pcmDevice->funcGroup->codec ||
++	    CODEC_ID(pcmDevice->funcGroup->codec) != 0x10ec0257U ||
++	    pcmDevice->recChanId < 0 || pcmDevice->recChanId >= mNumChannels)
++		return false;
++
++	const int recAssoc = mChannels[pcmDevice->recChanId].assocNum;
++	bool adc = false, internalBoost = false, jackBoost = false;
++	AudioControl *control;
++	for (int i = 0; (control = audioCtlEach(pcmDevice->funcGroup, i)); i++) {
++		if (!control->enable || !control->widget ||
++		    control->widget->bindAssoc != recAssoc || control->step <= 0)
++			continue;
++		if (control->dir != HDA_CTL_IN || control->index != 0)
++			return false;
++		if (control->widget->nid == 8 &&
++		    control->ossmask == (SOUND_MASK_IMIX | SOUND_MASK_RECLEV) &&
++		    control->step == 63 && control->size == 2 && control->offset == 23 &&
++		    control->mute == 1) {
++			if (adc) return false;
++			adc = true;
++		} else if (control->step == 3 && control->size == 39 &&
++		           control->offset == 0 && control->mute == 0) {
++			if (control->widget->nid == 18 && control->ossmask == SOUND_MASK_MONITOR) {
++				if (internalBoost) return false;
++				internalBoost = true;
++			} else if (control->widget->nid == 25 && control->ossmask == SOUND_MASK_LINE) {
++				if (jackBoost) return false;
++				jackBoost = true;
++			} else {
++				return false;
++			}
++		} else {
++			return false;
++		}
++	}
++	if (!(adc && internalBoost && jackBoost))
++		return false;
++	setProperty("S540InputGainFixActive", true);
++	return true;
++}
++
+ int VoodooHDADevice::audioCtlOssMixerSet(PcmDevice *pcmDevice, UInt32 dev, UInt32 left, UInt32 right)
+ {
+ 	FunctionGroup *funcGroup = pcmDevice->funcGroup;
+@@ -2896,6 +2948,13 @@
+ 	LOCK();
+ 	
+ 	//logMsg("VoodooHDADevice[%p]::audioCtlOssMixerSet(%p, %ld, %ld, %ld)\n", this, pcmDevice, dev, left, right);
++
++	const bool s540InputGainFix = s540InputGainFixEnabled(pcmDevice);
++	// These caches are routing factors: zero would mute the upstream selector.
++	// The coarse pin boost is held at raw step zero independently below.
++	if (s540InputGainFix && (dev == SOUND_MIXER_IMIX ||
++	    dev == SOUND_MIXER_MONITOR || dev == SOUND_MIXER_LINE))
++		left = right = 100;
+ 
+ 	// Save new values. 
+ 	pcmDevice->left[dev] = left;
+@@ -2977,6 +3036,14 @@
+ 			rvol = (rvol * control->step + 50) / 100;
+ 		}
+         
++		if (s540InputGainFix &&
++		    control->widget->bindAssoc == mChannels[pcmDevice->recChanId].assocNum &&
++		    (control->widget->nid == 18 || control->widget->nid == 25) &&
++		    control->dir == HDA_CTL_IN && control->index == 0 &&
++		    control->step == 3 && control->size == 39 && control->offset == 0) {
++			// 0 dB pin boost; ADC RECLEV alone provides the fine recording gain.
++			lvol = rvol = 0;
++		}
+ 		audioCtlAmpSet(control, mute, lvol, rvol);
+ 	}
+ 
+@@ -3065,6 +3132,11 @@
+ 		uint32_t def = mMixerDefaults[n];
+ 		if (def > 100)
+ 			def = 100;
++		if (s540InputGainFixEnabled(pcmDevice)) {
++			if (n == SOUND_MIXER_RECLEV) def = 50;
++			if (n == SOUND_MIXER_IMIX || n == SOUND_MIXER_MONITOR ||
++			    n == SOUND_MIXER_LINE) def = 100;
++		}
+ 		audioCtlOssMixerSet(pcmDevice, n, def, def);
+ 	}
+ //Slice - attention!	
+--- a/tranc/VoodooHDADevice.h
++++ b/tranc/VoodooHDADevice.h
+@@ -171,6 +171,7 @@
+ 
+ 	// cue8chalk: flag to enable/disable volume fix (loaded from plist)
+ 	bool mEnableVolumeChangeFix;
++	bool mEnableS540InputGainFix;
+ 	bool mEnableHalfVolumeFix;
+     // VertexBZ: flags to enable/disable Mic and Mute fixes (loaded from plist)
+ 	bool mEnableHalfMicVolumeFix;
+@@ -352,6 +353,7 @@
+ 	/***************/
+ 
+ 	int audioCtlOssMixerInit(PcmDevice *pcmDevice);
++	bool s540InputGainFixEnabled(PcmDevice *pcmDevice);
+ 	int audioCtlOssMixerSet(PcmDevice *pcmDevice, UInt32 dev, UInt32 left, UInt32 right);
+ 	int ilerp(int a, int b, float t);	// cue8chalk
+ 	UInt32 audioCtlOssMixerSetRecSrc(PcmDevice *pcmDevice, UInt32 src);
+--- a/tranc/VoodooHDAEngine.cpp
++++ b/tranc/VoodooHDAEngine.cpp
+@@ -300,8 +300,14 @@
+ 			continue;
+ 		if (control->step <= 0)
+ 			continue;
+-		minDb = ((0 - control->offset) * (control->size + 1) / 4) << 16;
+-		maxDb = ((control->step - control->offset) * (control->size + 1) / 4) << 16;
++		if (mEnableS540InputGainFix && getEngineDirection() == kIOAudioStreamDirectionInput) {
++			// Preserve the ADC's 0.75 dB steps, including -17.25 dB; no signed shift.
++			minDb = (IOFixed)((SInt64)(-control->offset) * (control->size + 1) * 16384);
++			maxDb = (IOFixed)((SInt64)(control->step - control->offset) * (control->size + 1) * 16384);
++		} else {
++			minDb = ((0 - control->offset) * (control->size + 1) / 4) << 16;
++			maxDb = ((control->step - control->offset) * (control->size + 1) / 4) << 16;
++		}
+ 		break;
+ 	}
+ 
+@@ -879,8 +885,11 @@
+ 	}	
+ 	else if (direction == kIOAudioStreamDirectionInput) {
+ 		usage = kIOAudioControlUsageInput;
+-		initOssDev = SOUND_MIXER_MIC;
+-		initOssMask = SOUND_MASK_MIC | SOUND_MASK_MONITOR;
++		initOssDev = mEnableS540InputGainFix ? SOUND_MIXER_RECLEV : SOUND_MIXER_MIC;
++		initOssMask = mEnableS540InputGainFix ? SOUND_MASK_RECLEV :
++		              SOUND_MASK_MIC | SOUND_MASK_MONITOR;
++		if (mEnableS540InputGainFix)
++			oldInputGain = mChannel->pcmDevice->left[SOUND_MIXER_RECLEV];
+ 	}
+ 	else {
+ 		errorMsg("uknown direction\n");
+@@ -911,7 +920,9 @@
+ 	
+ 	/* Create Volume controls */
+ 	/* Left channel */
+-	control = IOAudioLevelControl::createVolumeControl(mDevice->mMixerDefaults[initOssDev],
++	control = IOAudioLevelControl::createVolumeControl(
++        (mEnableS540InputGainFix && direction == kIOAudioStreamDirectionInput) ?
++        mChannel->pcmDevice->left[SOUND_MIXER_RECLEV] : mDevice->mMixerDefaults[initOssDev],
+ 													   0,	
+ 													   100,	
+ 													   minDb,
+@@ -930,7 +941,9 @@
+     control->release();
+     
+ 	/* Right channel */
+-	control = IOAudioLevelControl::createVolumeControl(mDevice->mMixerDefaults[initOssDev],
++	control = IOAudioLevelControl::createVolumeControl(
++        (mEnableS540InputGainFix && direction == kIOAudioStreamDirectionInput) ?
++        mChannel->pcmDevice->left[SOUND_MIXER_RECLEV] : mDevice->mMixerDefaults[initOssDev],
+ 													   0,	
+ 													   100,	
+ 													   minDb,
+@@ -1032,7 +1045,7 @@
+ 	if (volumeControl) {
+ 
+ 		int ossDev = ( getEngineDirection() == kIOAudioStreamDirectionOutput) ? SOUND_MIXER_VOLUME:
+-		SOUND_MIXER_MIC;
++		(mEnableS540InputGainFix ? SOUND_MIXER_RECLEV : SOUND_MIXER_MIC);
+ 
+ 		PcmDevice *pcmDevice = mChannel->pcmDevice;
+ 		
+@@ -1060,6 +1073,7 @@
+ 				
+ 				break;
+ 			case SOUND_MIXER_MIC:
++			case SOUND_MIXER_RECLEV:
+ 				oldInputGain = newValue;
+ 				mDevice->audioCtlOssMixerSet(pcmDevice, ossDev, newValue, newValue);
+ 				break;
+@@ -1067,7 +1081,7 @@
+ 				break;
+ 		}
+ 		// cue8chalk: this seems to be needed when pin configs aren't set properly
+-		if (mEnableVolumeChangeFix) {
++		if (mEnableVolumeChangeFix && !mEnableS540InputGainFix) {
+ 			for (int n = 0; n < SOUND_MIXER_NRDEVICES; n++){
+ 				mDevice->audioCtlOssMixerSet(pcmDevice, n, newValue, newValue);
+ 			}
+@@ -1101,6 +1115,16 @@
+ 																			SOUND_MIXER_MIC;
+     
+ 	PcmDevice *pcmDevice = mChannel->pcmDevice;
++	if (mEnableS540InputGainFix) {
++		const bool output = getEngineDirection() == kIOAudioStreamDirectionOutput;
++		const UInt32 mixer = output ?
++		    (mEnableVolumeChangeFix ? SOUND_MIXER_PCM : SOUND_MIXER_VOLUME) :
++		    SOUND_MIXER_RECLEV;
++		mDevice->audioCtlOssMixerSet(pcmDevice, mixer,
++		    newValue ? 0 : (output ? oldOutVolumeLeft : oldInputGain),
++		    newValue ? 0 : (output ? oldOutVolumeRight : oldInputGain));
++		return kIOReturnSuccess;
++	}
+     
+ 	if (newValue) {
+         // VertexBZ: Mute fix
+--- a/tranc/VoodooHDAEngine.h
++++ b/tranc/VoodooHDAEngine.h
+@@ -45,6 +45,7 @@
+ 
+ 	// cue8chalk: flag for volume change fix
+ 	bool mEnableVolumeChangeFix;
++	bool mEnableS540InputGainFix;
+     // VertexBZ: flag for mute fix
+ 	bool mEnableMuteFix;
+ 	

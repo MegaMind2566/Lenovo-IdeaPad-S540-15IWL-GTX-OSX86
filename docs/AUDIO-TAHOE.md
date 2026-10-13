@@ -41,6 +41,10 @@ Il nuovo report identifica l'ingresso predefinito come Internal Microphone Voodo
 
 La prima raccolta microfono si è fermata sul controllo del binario: richiedeva l'hash completo originale, mentre la rifirma della variante volume V3 aggiorna anche il Mach-O. La raccolta v2 riconosce la variante attraverso `VolumeManifestHash` e il manifest dei tre file nel backup `volume-test`; verifica originale conservato, variante conservata, bundle installato e unico cambiamento del plist. Non modifica config, driver, stato del backup o firma. Le letture dei mixer sul portatile restano da eseguire.
 
+La raccolta v2 successiva è riuscita. Con ingresso 30% e 70%, tutti i mixer cached dei tab ingresso e uscita passano rispettivamente a 30 e 70; il volume uscita IOAudio resta invece 100. Il buffer iniziale conferma sul codec ALC257 pin microfono 18 con quattro livelli di boost 0/10/20/30 dB e ADC 8 con 64 livelli -17,25/+30 dB, passi 0,75 dB. I due buffer iniziali sono identici: non rappresentano letture hardware dopo ciascun movimento del cursore.
+
+La [prova di correzione microfono](MICROFONO-FIX.md) usa una variante S540 3.6.9: ingresso su RECLEV dell'ADC, boost fisso a 0 dB e correzione PCM di uscita conservata. Il ciclo che aggiorna tutti i mixer viene escluso soltanto dopo la verifica del controller e del grafo del codec attesi. Installazione e ripristino usano un backup separato sul volume Data e non modificano la EFI con `-igfxblr`. Il risultato della registrazione sul portatile resta da verificare dopo l'installazione della prova.
+
 ## Equalizzazione da rivedere piu avanti
 
 È richiesto un affinamento dell'equalizzazione, da affrontare più avanti. L'attività resta nella roadmap come prova separata della timbrica; non vengono aggiunte ora modifiche a mixer, amplificazione o driver.

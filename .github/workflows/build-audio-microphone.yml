@@ -8,7 +8,10 @@ on:
       - patches/audio-microphone/**
       - tools/build_audio_microphone.py
       - tools/test_audio_microphone_patch.*
+      - tools/test_microphone_installer.py
       - tools/microphone_driver_test.sh
+      - docs/MICROFONO-FIX.md
+      - profiles/audio-tahoe-assets.lock.json
       - INSTALLA-MICROFONO.command
       - ANNULLA-MICROFONO.command
       - VERIFICA-MICROFONO.command
@@ -44,11 +47,30 @@ jobs:
           test "$(uname -m)" = x86_64
           test "$(git -C build-src/VoodooHDA rev-parse HEAD)" = 8c7e8e2ce6de0a917be663a3192857955288c937
           test "$(git -C build-src/MacKernelSDK rev-parse HEAD)" = bfbfbe4cf35979f33ded6c7a8761eb1df091fb39
-      - name: Check native kernel build baseline
+      - name: Apply and test microphone policy
         shell: bash
         run: |
           set -euo pipefail
-          xcodebuild -project build-src/VoodooHDA/tranc/VoodooHDA_BS.xcodeproj -target VoodooHDA -configuration Release ARCHS=x86_64 ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO LLVM_LTO=NO CONFIGURATION_BUILD_DIR="$RUNNER_TEMP/audio-baseline" build > "$RUNNER_TEMP/audio-baseline-build.log" 2>&1 || { tail -100 "$RUNNER_TEMP/audio-baseline-build.log"; exit 1; }
-          test "$(lipo -archs "$RUNNER_TEMP/audio-baseline/VoodooHDA.kext/Contents/MacOS/VoodooHDA")" = x86_64
-          codesign --force --sign - "$RUNNER_TEMP/audio-baseline/VoodooHDA.kext"
-          codesign --verify --strict "$RUNNER_TEMP/audio-baseline/VoodooHDA.kext"
+          git -C build-src/VoodooHDA apply --check "$GITHUB_WORKSPACE/patches/audio-microphone/input-gain.patch"
+          git -C build-src/VoodooHDA apply "$GITHUB_WORKSPACE/patches/audio-microphone/input-gain.patch"
+          python3 tools/test_audio_microphone_patch.py "$GITHUB_WORKSPACE/build-src/VoodooHDA"
+          bash -n tools/microphone_driver_test.sh INSTALLA-MICROFONO.command ANNULLA-MICROFONO.command VERIFICA-MICROFONO.command
+      - name: Build and package microphone driver
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -project build-src/VoodooHDA/tranc/VoodooHDA_BS.xcodeproj -target VoodooHDA -configuration Release ARCHS=x86_64 ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO LLVM_LTO=NO CURRENT_PROJECT_VERSION=3.6.9 MARKETING_VERSION=3.6.9 MODULE_VERSION=3.6.9 CONFIGURATION_BUILD_DIR="$RUNNER_TEMP/audio-build" build > "$RUNNER_TEMP/audio-build.log" 2>&1 || { tail -100 "$RUNNER_TEMP/audio-build.log"; exit 1; }
+          python3 tools/build_audio_microphone.py --built-bundle "$RUNNER_TEMP/audio-build/VoodooHDA.kext" --output-dir "$GITHUB_WORKSPACE/build/audio-microphone"
+      - name: Test guarded installer and rollback without kernel calls
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo env GITHUB_ACTIONS=true RUNNER_TEMP="$RUNNER_TEMP" "$(command -v python3)" tools/test_microphone_installer.py "$GITHUB_WORKSPACE/build/audio-microphone/S540-microfono-fix-v1"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: S540-microfono-fix-v1
+          path: |
+            build/audio-microphone/S540-microfono-fix-v1.zip
+            build/audio-microphone/S540-microfono-fix-v1.zip.sha256
+          if-no-files-found: error
+          retention-days: 30
