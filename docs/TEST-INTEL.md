@@ -1,8 +1,10 @@
 # Prova Intel dopo il puntatore con scia
 
-Nel tentativo da «Macintosh SSD» è comparso il puntatore senza finestre. È stata riferita una scia durante il movimento. Questo è compatibile con un problema di ridisegno dello schermo, ma non identifica da solo driver, framebuffer o memoria come causa.
+Nel tentativo da «Machintosh SSD» è comparso il puntatore senza finestre. È stata riferita una scia durante il movimento. Questo è compatibile con un problema di ridisegno dello schermo, ma non identifica da solo driver, framebuffer o memoria come causa.
 
-La configurazione effettivamente avviata non è stata raccolta: non si assume che siano presenti `-x` o `-igfxvesa`. Questa prova controlla la EFI locale e rimuove **soltanto questi due parametri**, se presenti. `-x` richiede l'avvio sicuro; `-igfxvesa` disabilita l'accelerazione Intel. La rimozione permette di provare l'avvio normale con la configurazione UHD 620 già preparata. Non garantisce che Metal funzioni.
+Il log delle 02:45 confermava entrambi i parametri; la foto del panic successivo mostrava soltanto `-igfxvesa`. Dopo l'esclusione di IntelBTPatcher resta lo schermo nero, ma i boot-args di questo ultimo tentativo non sono stati raccolti: non si assume che i due flag siano ancora presenti. Questa prova controlla la EFI locale e rimuove **soltanto questi due parametri**, se presenti. `-x` richiede l'avvio sicuro; `-igfxvesa` disabilita l'accelerazione Intel. La rimozione permette di provare l'avvio normale con la configurazione UHD 620 già preparata. Non garantisce che Metal funzioni.
+
+Dopo la prova Bluetooth, mantieni IntelBTPatcher escluso e usa questo programma sulla configurazione attuale. Il test Intel conserva la modifica Bluetooth; i vecchi ripristini integrali possono essere rifiutati perché appartengono a uno stato precedente.
 
 ## Applicazione da Windows
 
@@ -12,7 +14,7 @@ Usa la prova sul volume di macOS. Se è ancora presente **macOS Installer** nel 
 2. Estrai `S540-test-Intel.zip` **nella radice dell'HDD che contiene la EFI usata per l'avvio**. Devono risultare `TEST-INTEL.cmd` accanto a `EFI`, e `tools/test_safe_boot.py` nella cartella `tools` dello stesso HDD. Accetta la sostituzione di questo script se proviene dal pacchetto di avvio sicuro precedente.
 3. Avvia **TEST-INTEL.cmd**. Serve lo stesso Python 3 usato per la Recovery.
 4. Leggi l'esito. Se compare **Prova Intel attivata**, il programma elenca i parametri che ha rimosso. Se segnala che sono assenti, non modifica il file: raccogli il testo della finestra prima di proseguire con altri cambiamenti.
-5. Dopo una modifica riuscita, riavvia dallo stesso HDD con OpenCore e scegli **Macintosh SSD**.
+5. Dopo una modifica riuscita, riavvia dallo stesso HDD con OpenCore e scegli **Machintosh SSD**.
 
 Il backup è `EFI/OC/config.before-intel-test.plist`. Gli identificativi SMBIOS, le proprietà Intel, i kext, le ACPI e le altre impostazioni vengono conservati. Il profilo Wi-Fi resta nel proprio kext. Non si sovrascrive l'intera EFI e non si inizializzano dischi.
 

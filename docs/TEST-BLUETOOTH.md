@@ -48,3 +48,11 @@ In alternativa, con un editor plist, il test consiste nel mettere `Enabled = fal
 ## Verifica del programma
 
 Il programma è verificato sulla configurazione della EFI già consegnata: cambia un solo booleano, conserva gli altri valori, si può eseguire due volte, ripristina i byte originali e rifiuta backup di un altro stato o modifiche successive. Rifiuta anche configurazioni con la voce mancante, duplicata o con `Enabled` di tipo errato. L'esito sul portatile resta da raccogliere.
+
+## Esito riferito dopo la prova
+
+Con IntelBTPatcher escluso è stato superato il panic in un avvio. Rimane uno schermo nero con il puntatore, senza finestre; è stata riferita attività del disco. Questo risultato distingue il panic Bluetooth dal problema dell'interfaccia, ma non prova la compatibilità completa del Bluetooth o un errore preciso della grafica.
+
+Mantieni il patcher escluso. Usa ora **TEST-INTEL.cmd** sulla EFI attuale per controllare ed eventualmente rimuovere solo `-x` e `-igfxvesa`. La compatibilità dei due programmi è stata verificata sulla configurazione consegnata: il test Intel conserva l'esclusione di IntelBTPatcher. Se i due flag sono già assenti, il programma non scrive il file; raccogli il suo messaggio e il nuovo log OpenCore. Se segnala un backup di un altro stato, conserva l'errore senza cancellare i backup.
+
+Dopo TEST-BT non eseguire un ripristino integrale del vecchio test grafico: appartiene a uno stato precedente all'esclusione Bluetooth e la protezione del ripristino può rifiutarlo. Se applichi prima TEST-BT e poi TEST-INTEL, per annullare le due prove usa prima RIPRISTINA-INTEL e poi RIPRISTINA-BT.

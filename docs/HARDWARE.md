@@ -14,7 +14,7 @@ Report ricevuto il 12 ottobre 2026. Sono riportati solo i dati utili al progetto
 | Schermo | BOE NV156FHM-N61, 1920×1080 | Luminosità e collegamento da verificare |
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Famiglia PM981a problematica; non assunta compatibile |
 | Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | Funzionamento riferito nella Recovery con itlwm; sistema installato da provare |
-| Bluetooth | Intel, USB 8087:0AAA | Panic USB/Bluetooth osservato con IntelBTPatcher 2.4; esclusione del patcher da provare; versione aggiornata da verificare |
+| Bluetooth | Intel, USB 8087:0AAA | Panic superato in una prova con IntelBTPatcher escluso; funzionalità Bluetooth e versione aggiornata da verificare |
 | Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Codec confermato dal dump Windows; audio analogico Tahoe da ripristinare e verificare |
 | Tastiera | PS/2 | Funzionamento riferito nella Recovery con VoodooPS2 |
 | Touchpad | ELAN0662, I2C HID; controller Intel 8086:9DE8 | Percorso confermato: `_SB.PCI0.I2C0.TPD0`; funzionamento da provare |
@@ -62,4 +62,4 @@ L'[analisi del log](ANALISI-LOG-AVVIO.md) riporta anche il percorso Apple con im
 
 La fotografia ricevuta successivamente mostra un vero panic con processo `bluetoothd`, estensioni IOUSBHostFamily e IntelBTPatcher 2.4 nella traccia, Darwin 25.6.0 e build macOS 25G241. Nei boot-args visibili manca `-x`, mentre rimane `-igfxvesa`. L'intestazione del panic è fuori dall'inquadratura, quindi la causa precisa resta da confermare.
 
-La [prova Bluetooth](TEST-BLUETOOTH.md) esclude solo IntelBTPatcher dalla EFI attuale. La versione 2.4 precede la correzione ufficiale della gestione del descrittore di memoria USB per Sequoia e successivi; il builder la esclude dalle nuove EFI. Il firmware Intel, BlueToolFixup e itlwm restano presenti. Il test sul portatile e il confronto con una build aggiornata sono ancora da eseguire.
+La [prova Bluetooth](TEST-BLUETOOTH.md) esclude solo IntelBTPatcher dalla EFI attuale. La versione 2.4 precede la correzione ufficiale della gestione del descrittore di memoria USB per Sequoia e successivi; il builder la esclude dalle nuove EFI. Il firmware Intel, BlueToolFixup e itlwm restano presenti. La prova sul portatile ha superato il panic e raggiunto uno schermo nero con il puntatore. È stata riferita attività del disco, senza comparsa di finestre. I boot-args di questo tentativo non sono stati ricevuti; non si assume che il ripristino grafico sia stato completato. Il confronto con una build aggiornata del patcher e le funzioni Bluetooth restano da verificare.

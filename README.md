@@ -2,14 +2,14 @@
 
 Obiettivo: usare macOS Tahoe 26 su Lenovo IdeaPad S540-15IWL GTX e completare le prove di tutti i componenti. La compatibilità completa è un obiettivo da verificare sul dispositivo.
 
-**Stato: Recovery avviata; mouse, tastiera, Wi-Fi e rilevamento del 960 EVO confermati nella prova. Dal volume esterno «Machintosh SSD» è comparso il puntatore con scia; una prova successiva ha prodotto un panic USB/Bluetooth con IntelBTPatcher 2.4 nella traccia. Desktop e accelerazione Intel ancora da verificare.**
+**Stato: Recovery avviata; mouse, tastiera, Wi-Fi e rilevamento del 960 EVO confermati nella prova. Con IntelBTPatcher escluso è stato superato il panic USB/Bluetooth in un tentativo; resta lo schermo nero con il puntatore, senza finestre. Desktop, accelerazione Intel e funzionamento Bluetooth ancora da verificare.**
 Sequoia 15 resta un'alternativa da valutare se le prove con Tahoe evidenziano problemi.
 
 ## Cosa fare adesso
 
 Il dump disponibile contiene una DSDT e tutte le 12 SSDT enumerate da Windows. Le 20 tabelle ACPI utili raccolte hanno lunghezza, checksum e SHA-256 validi. Non occorre ripetere la raccolta.
 
-La priorità è la [prova senza IntelBTPatcher](docs/TEST-BLUETOOTH.md): il panic coinvolge `bluetoothd`, `IOUSBHostFamily` e il patcher 2.4 incluso nella prima EFI. La foto conferma che `-x` è stato rimosso e `-igfxvesa` è ancora presente. Completa il ripristino grafico già previsto prima di applicare la nuova prova. Il programma esclude solo IntelBTPatcher dalla EFI attuale con backup e ripristino; il builder lo esclude anche dalle nuove EFI fino a una prova della versione aggiornata.
+La [prova senza IntelBTPatcher](docs/TEST-BLUETOOTH.md) ha superato il panic osservato, ma l'avvio resta sullo schermo nero con il puntatore. Mantieni il patcher escluso. Il prossimo controllo riguarda i boot-args attuali: [TEST-INTEL.cmd](docs/TEST-INTEL.md) rimuove solo `-x` e `-igfxvesa`, se presenti, e conserva l'esclusione Bluetooth. Il builder esclude il vecchio patcher anche dalle nuove EFI fino a una prova della versione aggiornata. L'esito non conferma ancora il funzionamento Bluetooth o la causa del mancato desktop.
 
 Continua l'[installazione sul 960 EVO esterno](docs/INSTALLAZIONE.md). Dopo il primo desktop segui la [verifica della grafica Intel](docs/GRAFICA-INTEL.md). Il [test grafico reversibile](docs/TEST-GRAFICA.md) resta una prova temporanea senza accelerazione Intel. Il [log delle 02:45](docs/ANALISI-LOG-AVVIO.md) conferma che in quel tentativo erano attivi sia `-igfxvesa` sia `-x`.
 
