@@ -12,6 +12,8 @@ Non sono stati trovati file mancanti, versioni OpenCore mischiate, eseguibili di
 |---|---|
 | File allegato, IntelBTPatcher escluso e VESA assente | No issues found, codice di uscita 0 |
 | File preparato per la coppia Whiskey Lake | No issues found, codice di uscita 0 |
+| Traccia diretta Intel, avvio normale | No issues found, codice di uscita 0 |
+| Traccia diretta Intel, Recovery VESA senza dump automatici | No issues found, codice di uscita 0 |
 
 La validazione certifica la struttura e le regole controllate dal programma, non il funzionamento dell'accelerazione sul dispositivo.
 
@@ -58,11 +60,15 @@ Il config allegato differisce dal riferimento soltanto per IntelBTPatcher disabi
 
 AppleALC non viene applicato a Tahoe dal limite di versione. Il Bluetooth con il patcher escluso e lo spegnimento elettrico NVIDIA restano da verificare. Questi sono limiti funzionali noti, non nuovi difetti di struttura. Non sono state introdotte modifiche a Booter, firmware, firme o IOVersatile in base alla sola ultima riga visibile.
 
+## Controllo semantico delle patch
+
+È stata completata la [verifica contro DSDT e SSDT OEM](VERIFICA-PATCH-ACPI.md). CPU, EC, RTC, XOSI, PNLF, percorso GPU e metodi _DSM risultano coerenti con le patch custom. Non è stato individuato un errore statico che giustifichi una nuova patch ACPI o memoria framebuffer. La risoluzione congiunta iasl ha un limite su un possibile overlap OEM condizionale; non viene trattato come errore introdotto dalla EFI.
+
 ## Cosa manca per spiegare lo stallo
 
 Il log OpenCore 173430 mostra la stessa sequenza del precedente 170413, senza nuovi errori e con i boot-args normali. Dopo il tentativo viene riferito testo fermo con IOVersatile e un secondo messaggio non trascritto completamente. Nel precedente archivio unificato, agli errori IOVersatile seguivano eventi di WindowServer in esecuzione e Language Chooser attivo; entrambi quegli avvii usavano VESA. Non è una prova della causa del nuovo stallo.
 
-La nuova coppia Intel non ha prodotto un'interfaccia visibile nella prova riferita. Per una diagnosi del funzionamento successivo del sistema servono gli eventi persistiti dell'avvio normale. La coerenza statica della EFI non permette di dedurre quel risultato.
+La nuova coppia Intel non ha prodotto un'interfaccia visibile nella prova riferita. Nell'ultima raccolta i dodici tracev3 nuovi sono vuoti e i cinque non vuoti coincidono con quelli già analizzati. Le nuove registrazioni timesync confermano altri avvii, ma non aggiungono i messaggi del driver. La [traccia diretta Intel](TRACCIA-INTEL.md) evita di ripetere la stessa raccolta e usa DEBUG delle versioni già presenti, con backup e ripristino dei soli file coinvolti. La coerenza statica della EFI non certifica l'accelerazione.
 
 ## Riordino del disco di avvio
 

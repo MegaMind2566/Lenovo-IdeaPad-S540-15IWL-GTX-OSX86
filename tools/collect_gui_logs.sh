@@ -6,13 +6,16 @@ umask 077
 fail() { printf 'Raccolta non eseguita: %s\n' "$*" >&2; exit 1; }
 
 unified=0
+intel=0
 data_root=''
 while [ "$#" -gt 0 ]; do
     case "$1" in
         --unified) unified=1 ;;
+        --intel) intel=1 ;;
         --help)
-            printf 'Uso: bash collect_gui_logs.sh [--unified] ["/Volumes/Machintosh SSD - Data"]\n'
+            printf 'Uso: bash collect_gui_logs.sh [--unified] [--intel] ["/Volumes/Machintosh SSD - Data"]\n'
             printf '%s\n' '--unified include diagnostics e uuidtext del sistema installato.'
+            printf '%s\n' '--intel include i file diretti Lilu/WhateverGreen e la configurazione della traccia.'
             exit 0 ;;
         --*) fail "Opzione sconosciuta: $1" ;;
         *)
@@ -135,6 +138,21 @@ done
 printf 'Cartelle report utente trovate: %s\n' "$user_index" >> "$summary"
 copy_item "$data_root/private/var/log/install.log" 'install.log'
 copy_item "$data_root/private/var/log/system.log" 'system.log'
+
+if [ "$intel" -eq 1 ]; then
+    mkdir "$work/TracciaIntel"
+    intel_found=0
+    for trace in "$data_root"/private/var/log/Lilu_*.txt "$data_root"/private/var/log/AppleIntelFramebuffer_*; do
+        copy_item "$trace" "TracciaIntel/${trace##*/}"
+        intel_found=$((intel_found + 1))
+    done
+    printf 'File diretti Intel trovati: %s\n' "$intel_found" >> "$summary"
+    if [ "$intel_found" -eq 0 ]; then
+        printf 'Nessun file diretto Intel trovato; il riepilogo registra anche questa assenza.\n'
+    fi
+    copy_item "$bundle_root/EFI/OC/backup-traccia-intel" 'TracciaIntel/backup-traccia-intel'
+    copy_item "$bundle_root/EFI/OC/config.plist" 'TracciaIntel/config-recovery.plist'
+fi
 
 # The dedicated Recovery preparation saves the exact normal-boot config.
 # Keep it private in the report so runtime events can be matched to its values.

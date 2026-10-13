@@ -20,7 +20,7 @@ Il pacchetto **S540-test-WhiskeyLake.zip**, consegnato nella chat, contiene un c
 
 Sono cambiate soltanto le due proprietà Intel. Il backup è identico byte per byte al file ricevuto. Parsing del plist, differenze semantiche e CRC dello ZIP sono verificati. IntelBTPatcher resta disattivato, VESA e modalità sicura restano assenti. Nessun altro valore, inclusa l'identità SMBIOS, è modificato.
 
-Entrambi i profili dichiarano 58 MB di memoria stolen. La prova non cambia DVMT, non aggiunge patch di memoria o connettori e non dimostra l'accelerazione. Se l'interfaccia parte, verificare [Intel e Metal](GRAFICA-INTEL.md). Se non parte, conservare il nuovo log OpenCore e raccogliere i dati unificati dalla Recovery: i dati GUI ricevuti finora descrivono soltanto avvii VESA. La fine del log OpenCore a EXITBS:START non localizza lo stallo successivo.
+Entrambi i profili dichiarano 58 MB di memoria stolen. La prova non cambia DVMT, non aggiunge patch di memoria o connettori e non dimostra l'accelerazione. Se l'interfaccia parte, verificare [Intel e Metal](GRAFICA-INTEL.md). Dopo gli ulteriori tentativi riferiti senza interfaccia, la [verifica ACPI](VERIFICA-PATCH-ACPI.md) non ha trovato una patch incoerente; gli ultimi tracev3 sono vuoti. Il passo successivo è la [traccia diretta Intel](TRACCIA-INTEL.md), conservando la coppia corrente. La fine del log OpenCore a EXITBS:START non localizza lo stallo successivo.
 
 
 ## Log ricevuto dopo la consegna della prova: 173430
@@ -29,7 +29,9 @@ Il nuovo log OpenCore seleziona Machintosh SSD sul Samsung USB. MBA:NV e MBA:OUT
 
 Le due proprietà Intel sono impostate con esito Success, ma OpenCore non stampa i valori: il solo log non conferma che la coppia di prova sia quella letta. Il file termina a EXITBS:START alle 17:34:34 secondo l'orologio del booter e non mostra gli eventi successivi del sistema. Non viene interpretato come prova di un blocco in quel punto. L'esito visibile sullo schermo dopo questo tentativo non è ancora stato riferito.
 
+
 ## Riferimenti
 
 - [WhateverGreen 1.7.1: manuale Intel](https://github.com/acidanthera/WhateverGreen/blob/1.7.1/Manual/FAQ.IntelHD.en.md), sezioni CFL/CML, Recommended framebuffers e indicazione Whiskey Lake.
 - [Dortania: Coffee Lake e Whiskey Lake portatili](https://dortania.github.io/OpenCore-Install-Guide/config-laptop.plist/coffee-lake.html#deviceproperties), indicazione della baseline UHD 620 e patch DVMT condizionale.
+

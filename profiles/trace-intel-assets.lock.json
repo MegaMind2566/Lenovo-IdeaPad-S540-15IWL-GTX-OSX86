@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "assets": [
+    {
+      "name": "Lilu",
+      "version": "1.7.2",
+      "variant": "DEBUG",
+      "filename": "Lilu-1.7.2-DEBUG.zip",
+      "sha256": "e95df95d82e8b151047abf359ecd9c853755c59293e19dfcc3907da8fbd8cf89",
+      "url": "https://github.com/acidanthera/Lilu/releases/download/1.7.2/Lilu-1.7.2-DEBUG.zip",
+      "api_url": "https://api.github.com/repos/acidanthera/Lilu/releases/assets/377952895"
+    },
+    {
+      "name": "WhateverGreen",
+      "version": "1.7.1",
+      "variant": "DEBUG",
+      "filename": "WhateverGreen-1.7.1-DEBUG.zip",
+      "sha256": "f6f4ff75239fd9dcc40bb432eaf1342f9ebf509a9581f54ba536af4f17f11680",
+      "url": "https://github.com/acidanthera/WhateverGreen/releases/download/1.7.1/WhateverGreen-1.7.1-DEBUG.zip",
+      "api_url": "https://api.github.com/repos/acidanthera/WhateverGreen/releases/assets/593877387"
+    }
+  ]
+}
