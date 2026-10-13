@@ -73,3 +73,9 @@ Entrambi i nuovi log del 13 ottobre 2026 selezionano Machintosh SSD e mostrano b
 Il log `103615` riporta l'assenza di un log di panic e termina a `EXITBS:START` alle 10:36:25 secondo l'orologio del booter. Non contiene i successivi log dell'interfaccia. La nuova foto mostra messaggi di macOS relativi alle firme del codice, kernelmanagerd con limite indicato come non fatale, caricamento delle collezioni di estensioni e fault di IOUserDockChannelSerial. Nessuna riga identifica da sola la causa dello stallo.
 
 Le voci Recovery registrate sono **Recovery 26.7.1** sul Samsung e la Recovery originale dell'HDD sotto **240 GB**. La [raccolta dei report offline](DIAGNOSI-INTERFACCIA.md) legge DiagnosticReports e i log disponibili dal volume Data dell'installazione. Per raggiungere la Recovery si può usare il ripristino del test Intel, che conserva la modifica Bluetooth; la raccolta non modifica il sistema. L'esecuzione in Recovery e i report restano da ricevere.
+
+## Report offline del volume Data
+
+La raccolta `DIAGNOSI-MACOS-UN5FYU.zip` contiene il precedente panic bluetoothd/IntelBTPatcher, install.log, system.log e l'inventario APFS. La copia incompleta segnalata dal collector riguarda soltanto gli attributi estesi del panic; i byte del report sono disponibili. Il problema di copia è corretto con `cp -RX` per le raccolte successive.
+
+Install.log riporta il successo dell'installer, il termine di Template Migration e la cronologia di macOS 26.7.1. Language Chooser avvia Hello e nasconde la finestra di progresso in uno degli avvii registrati. La configurazione iniziale non risulta conclusa. Non ci sono nuovi report WindowServer/Setup Assistant nello ZIP, né dati che provino un errore DVMT. I diversi orari dei log impediscono di assegnare tutti questi eventi alla prova normale attuale. La [diagnosi dell'interfaccia](DIAGNOSI-INTERFACCIA.md) descrive la prova di avanzamento con Invio.

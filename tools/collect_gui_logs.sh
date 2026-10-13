@@ -65,7 +65,9 @@ copy_errors=0
 copy_item() {
     local source=$1 label=$2
     if [ -e "$source" ]; then
-        if cp -R "$source" "$work/$label" 2>> "$errors"; then
+        # Diagnostic text needs file contents, not macOS extended attributes.
+        # FAT/exFAT destinations can reject those attributes despite copying data.
+        if cp -RX "$source" "$work/$label" 2>> "$errors"; then
             printf 'Copiato: %s\n' "$label" >> "$summary"
             copied=$((copied + 1))
         else
