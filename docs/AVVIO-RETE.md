@@ -1,6 +1,6 @@
 # Pannello spento all'avvio, Bluetooth e Wi-Fi
 
-Il ritardo del pannello è risolto nella prova riferita il 13 ottobre 2026: attesa a schermo nero **da circa due minuti a zero** dopo il test del solo `-igfxblr`. Si conserva questa configurazione. Le priorità successive sono associazione Bluetooth e gestione delle reti Wi-Fi. Batteria e contatori sono conservati in [BATTERIA-SOSPENSIONE.md](BATTERIA-SOSPENSIONE.md). Le ulteriori prove di sospensione, i tasti funzione e l'equalizzazione sono rinviati.
+Il ritardo del pannello è risolto nella prova riferita il 13 ottobre 2026: attesa a schermo nero **da circa due minuti a zero** dopo il test del solo `-igfxblr`. Si conserva questa configurazione. Il 14 ottobre 2026 è stato riferito il funzionamento con cuffie Bluetooth e di HeliPort. Si conservano firmware Intel, BlueToolFixup e itlwm attuali. Batteria e contatori sono conservati in [BATTERIA-SOSPENSIONE.md](BATTERIA-SOSPENSIONE.md). Le ulteriori prove di sospensione, i tasti funzione e l'equalizzazione sono rinviati.
 
 ## Distinguere avvio del sistema e accensione del pannello
 
@@ -50,19 +50,19 @@ IntelBTPatcher 2.4 resta escluso dopo il panic. Il suo sorgente precede la corre
 
 BlueToolFixup 2.7.2 è già presente. Il progetto richiede per Intel le variabili NVRAM `bluetoothExternalDongleFailed` Data `00` e `bluetoothInternalControllerInfo` Data di **quattordici byte zero**, nel GUID Apple `7C436110-AB2A-4BBB-A880-FE41995C9F82`. Il conteggio precedente di tredici byte era errato: la sequenza ufficiale contiene ventotto cifre esadecimali. Pur non essendo impostate nella configurazione esaminata, entrambe le variabili sono già corrette nella NVRAM attiva del report. Non vengono riscritte.
 
-Il report mostra Bluetooth State On, FirmwareLoaded=Yes, trasporto connesso e firmware Intel/BlueToolFixup caricati; IntelBTPatcher resta escluso. Nell'ultimo avvio lo stack completa l'inizializzazione e avvia la scansione circa 26,5 secondi dopo il kernel. Successivamente sono rilevati dispositivi BLE reali. Non è documentata un'associazione riuscita: il prossimo controllo è associare un mouse o delle cuffie e verificarne l'uso. Questi dati non richiedono un aggiornamento preventivo del driver. La dicitura THIRD_PARTY_DONGLE è una classificazione gestita da BlueToolFixup e non prova che sia presente un dongle esterno.
+Il report mostra Bluetooth State On, FirmwareLoaded=Yes, trasporto connesso e firmware Intel/BlueToolFixup caricati; IntelBTPatcher resta escluso. Nell'ultimo avvio lo stack completa l'inizializzazione e avvia la scansione circa 26,5 secondi dopo il kernel. Successivamente sono rilevati dispositivi BLE reali. Il 14 ottobre 2026 è stato riferito il funzionamento del Bluetooth con cuffie. Questo completa la prova di associazione e uso con quella periferica; microfono delle cuffie e riconnessione non sono ancora documentati. Questi dati non richiedono un aggiornamento preventivo del driver. La dicitura THIRD_PARTY_DONGLE è una classificazione gestita da BlueToolFixup e non prova che sia presente un dongle esterno.
 
 ## Wi-Fi indicato come Ethernet
 
 È il comportamento previsto di itlwm 2.3.0: usa IOEthernetController. Rinominare il servizio non lo trasforma in una periferica IO80211. La gestione delle reti può avvenire con HeliPort o con i profili del driver; il progetto dichiara che questa rappresentazione non riduce le prestazioni.
 
-Il report del desktop conferma itlwm 2.3.0 e il servizio Ethernet su en0. Per scegliere le reti dalla barra dei menu si può usare [HeliPort 1.5.0 ufficiale](https://github.com/OpenIntelWireless/HeliPort/releases/tag/v1.5.0), con [DMG della release](https://github.com/OpenIntelWireless/HeliPort/releases/download/v1.5.0/HeliPort.dmg). L'app è il client di itlwm: non cambia la classificazione nel pannello di rete macOS. L'installazione e l'uso di HeliPort non sono ancora stati riferiti.
+Il report del desktop conferma itlwm 2.3.0 e il servizio Ethernet su en0. Per scegliere le reti dalla barra dei menu si può usare [HeliPort 1.5.0 ufficiale](https://github.com/OpenIntelWireless/HeliPort/releases/tag/v1.5.0), con [DMG della release](https://github.com/OpenIntelWireless/HeliPort/releases/download/v1.5.0/HeliPort.dmg). L'app è il client di itlwm: non cambia la classificazione nel pannello di rete macOS. Il 14 ottobre 2026 è stato riferito che HeliPort funziona. Il risultato non costituisce una misura di velocità o una prova delle funzioni Continuity.
 
 La release stabile ufficiale AirportItlwm 2.3.0 ha pacchetti fino a Sonoma, senza un asset Tahoe. Le strategie con vecchi driver Airport e ripristino dei framework Wi-Fi richiedono modifiche più ampie al sistema e al SIP. L'integrazione nativa su Tahoe resta un lavoro separato; non si sostituisce ora il driver funzionante soltanto per cambiare la voce Ethernet e non si promette AirDrop.
 
 ## Verifiche e limiti
 
-Gli script sono verificati per sintassi Bash e con fixture simulate su Linux. La raccolta copre finestra del boot, timeout, errori, filtro dei dati e creazione ZIP. Le operazioni native macOS e la prova della retroilluminazione devono essere eseguite sul portatile.
+Gli script sono verificati per sintassi Bash e con fixture simulate su Linux. La raccolta copre finestra del boot, timeout, errori, filtro dei dati e creazione ZIP. La raccolta nativa è stata eseguita sul portatile e il report è stato analizzato. La prova del pannello ha eliminato il nero nell'esito riferito. Funzionamento con cuffie Bluetooth e HeliPort sono stati successivamente confermati; le altre verifiche restano aperte.
 
 ## Fonti
 

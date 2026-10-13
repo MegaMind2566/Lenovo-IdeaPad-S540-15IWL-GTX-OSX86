@@ -11,7 +11,7 @@ Obiettivo: rendere utilizzabili tutti i componenti del Lenovo IdeaPad S540-15IWL
 5. Trasferire la EFI corrente sul 960 EVO e provare l'avvio senza l'HDD, conservando il supporto già funzionante come ripiego.
 6. Avviare la ricerca NVIDIA e verificare le uscite video secondo il percorso hardware rilevato.
 
-Priorità aggiornate il 13 ottobre 2026: il pannello spento all'avvio è **risolto nella prova con -igfxblr, attesa da circa due minuti a zero**. Si conserva la EFI corrente. Prossimi controlli: associazione Bluetooth e gestione delle reti Wi-Fi. Il Bluetooth è acceso, il firmware è caricato e la scansione rileva dispositivi BLE; l'associazione resta da provare. Il percorso è in [AVVIO-RETE.md](AVVIO-RETE.md). Batteria e contatori sono [archiviati](BATTERIA-SOSPENSIONE.md); le altre prove di sospensione sono rinviate, insieme al blocco tasti funzione e all'equalizzazione già annotati.
+Priorità aggiornate il 13 ottobre 2026: il pannello spento all'avvio è **risolto nella prova con -igfxblr, attesa da circa due minuti a zero**. Si conserva la EFI corrente. Il 14 ottobre 2026 è stato confermato anche il funzionamento con cuffie Bluetooth e di HeliPort. Prossimi controlli: webcam e microfono interno; le verifiche di velocità rete e riconnessione restano aperte. Il percorso è in [AVVIO-RETE.md](AVVIO-RETE.md). Batteria e contatori sono [archiviati](BATTERIA-SOSPENSIONE.md); le altre prove di sospensione sono rinviate, insieme al blocco tasti funzione e all'equalizzazione già annotati.
 
 ## Stato e criteri
 
@@ -21,8 +21,8 @@ Priorità aggiornate il 13 ottobre 2026: il pannello spento all'avvio è **risol
 | Intel UHD 620 | IntelAccelerator rilevato, Metal 3 esposto, memoria condivisa fino a 1536 MB; avvio senza VESA | Carico Metal e uso prolungato senza blocchi o artefatti |
 | Tastiera | Funziona nella Recovery | Uso nel sistema installato e tasti funzione |
 | Touchpad ELAN | Driver presenti; il «mouse» riferito non identifica il dispositivo | Puntamento, clic, scorrimento e gesti |
-| Wi-Fi Intel AC9560 | Funziona nella Recovery con itlwm; nel sistema viene indicato come Ethernet, comportamento previsto dal driver | Verificare gestione delle reti nel desktop e valutare separatamente l'integrazione Wi-Fi nativa su Tahoe |
-| Bluetooth Intel | IntelBTPatcher 2.4 escluso; controller acceso, firmware caricato, NVRAM corretta e dispositivi BLE rilevati | Associare e usare una periferica; aggiornare il patcher soltanto se emerge una necessità documentata |
+| Wi-Fi Intel AC9560 | itlwm 2.3.0 caricato, Ethernet su en0 previsto dal driver; HeliPort riferito funzionante | Velocità, cambio rete e riconnessione; integrazione Wi-Fi nativa Tahoe separata |
+| Bluetooth Intel | Funzionamento con cuffie confermato; firmware caricato, NVRAM corretta, IntelBTPatcher 2.4 escluso | Microfono delle cuffie e riconnessione da provare; conservare i driver attuali |
 | Audio ALC257 | Riproduzione, volume graduale e tasti F1–F3 confermati dopo la correzione v3 | Equalizzazione da affinare più avanti; cuffie/jack, microfono, commutazione e ripresa da documentare |
 | USB-A e USB-C | Mappa a 9 porte verificata; 960 EVO rilevato | USB 2/3, entrambe le orientazioni USB-C e riconnessione |
 | Samsung 960 EVO esterno | Box ripristinato; Tahoe avviato al desktop | Uso prolungato senza disconnessioni e ripresa dalla sospensione |

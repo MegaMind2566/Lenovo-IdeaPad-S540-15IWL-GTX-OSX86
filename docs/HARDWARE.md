@@ -13,8 +13,8 @@ Report ricevuto il 12 ottobre 2026. Sono riportati solo i dati utili al progetto
 | dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91 | Driver disabilitato nella EFI; port Linux mantenuto nella roadmap; spegnimento elettrico da verificare |
 | Schermo | BOE NV156FHM-N61, 1920×1080 | Pannello e cursore funzionanti; ritardo nero all'avvio eliminato con -igfxblr nella prova; F11/F12 rinviati |
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Famiglia PM981a problematica; non assunta compatibile |
-| Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | Funziona nella Recovery con itlwm; nel desktop indicato come Ethernet, comportamento previsto da IOEthernetController; gestione reti da completare |
-| Bluetooth | Intel, USB 8087:0AAA | IntelBTPatcher escluso; controller acceso, firmware caricato, scansione BLE e NVRAM corretta confermati; associazione da provare |
+| Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | itlwm 2.3.0 caricato e HeliPort riferito funzionante; Ethernet è previsto dal driver; velocità e riconnessione da provare |
+| Bluetooth | Intel, USB 8087:0AAA | Funzionamento con cuffie confermato; firmware caricato, NVRAM corretta e IntelBTPatcher escluso; microfono delle cuffie e riconnessione da provare |
 | Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Riproduzione, volume graduale e tasti F1–F3 confermati con VoodooHDA 3.6.8 e correzione v3; equalizzazione rinviata, jack e microfono da documentare |
 | Tastiera | PS/2 | Funzionamento riferito nella Recovery con VoodooPS2 |
 | Touchpad | ELAN0662, I2C HID; controller Intel 8086:9DE8 | Percorso confermato: `_SB.PCI0.I2C0.TPD0`; funzionamento da provare |
@@ -64,7 +64,7 @@ Il report contiene ancora Invalid key detected e non riporta RPM delle ventole: 
 
 La prova del solo `-igfxblr` ha eliminato il nero all'avvio nell'esito riferito: da circa due minuti a zero. Si conserva la configurazione, mantenendo memoria Intel, audio e SIP. Il report precedente al test mostra lo stesso UUID framebuffer e Loginwindow pronto circa 31,3 secondi dopo il kernel. La [diagnosi](AVVIO-RETE.md) distingue il ritardo del pannello dal tempo di avvio del sistema.
 
-Lo stato Bluetooth è On, FirmwareLoaded è Yes e il trasporto è connesso; BlueToolFixup 2.7.2 e IntelBluetoothFirmware 2.4 sono caricati, IntelBTPatcher è assente. Le due variabili NVRAM richieste sono presenti con i valori corretti: un byte zero e quattordici byte zero. Lo stack avvia la scansione e riceve dispositivi BLE. Associazione e uso di una periferica restano da provare: non vengono cambiati preventivamente driver o NVRAM.
+Lo stato Bluetooth è On, FirmwareLoaded è Yes e il trasporto è connesso; BlueToolFixup 2.7.2 e IntelBluetoothFirmware 2.4 sono caricati, IntelBTPatcher è assente. Le due variabili NVRAM richieste sono presenti con i valori corretti: un byte zero e quattordici byte zero. Lo stack avvia la scansione e riceve dispositivi BLE. Il 14 ottobre 2026 è stato riferito il funzionamento con cuffie Bluetooth, insieme al funzionamento di HeliPort per la gestione delle reti Wi-Fi. Si conservano i driver e la NVRAM attuali. Questo esito non verifica il microfono delle cuffie, il microfono interno ALC257, il jack analogico o la riconnessione dopo stop.
 
 ## Batteria e contatori di stop: 13 ottobre 2026
 
