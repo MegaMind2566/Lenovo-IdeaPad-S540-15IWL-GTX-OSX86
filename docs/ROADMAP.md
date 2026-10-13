@@ -25,8 +25,8 @@ Obiettivo: rendere utilizzabili tutti i componenti del Lenovo IdeaPad S540-15IWL
 | USB-A e USB-C | Mappa a 9 porte verificata; 960 EVO rilevato | USB 2/3, entrambe le orientazioni USB-C e riconnessione |
 | Samsung 960 EVO esterno | Box ripristinato; Tahoe avviato al desktop | Uso prolungato senza disconnessioni e ripresa dalla sospensione |
 | NVMe PM981a interno | Visibile nella Recovery; mantenuto per Windows | Verificare eventuali effetti sulla stabilità di macOS |
-| Display e luminosità | Pannello interno online a 1920×1080 nel sistema installato | Regolazione luminosità e ripresa del pannello |
-| CPU, batteria e ventole | X86PlatformPlugin attivo; due campioni a riposo: CPU 45–46 °C, frequenza media sistema circa 0,95–0,97 GHz, pacchetto Intel stimato 0,80–0,95 W; telemetria SMC parziale | Temperature sotto carico, ventole, stato dGPU, batteria e autonomia |
+| Display e luminosità | Pannello interno 1920×1080 e cursore luminosità funzionanti; F11/F12 non funzionano nella prova riferita | F11/F12 rinviati al blocco tasti funzione; ripresa del pannello da provare |
+| CPU, batteria e ventole | X86PlatformPlugin attivo; riposo 45–46 °C e 0,80–0,95 W Intel stimati; ventola riferita silenziosa da tempo. Telemetria SMC parziale | Temperature e ventole sotto carico, stato dGPU, batteria e autonomia |
 | Sospensione | Non provata | Chiusura coperchio, risveglio e recupero delle periferiche |
 | Webcam | Porta interna mappata; non provata | Acquisizione video e ripresa dopo sospensione |
 | Lettore SD O2Micro | Identificato; supporto da valutare | Driver applicabile e lettura di una scheda |
@@ -35,6 +35,12 @@ Obiettivo: rendere utilizzabili tutti i componenti del Lenovo IdeaPad S540-15IWL
 | NVIDIA GTX 1650 Max-Q | Port Linux mantenuto come ricerca; nessun driver utilizzabile nella EFI | Milestone di inizializzazione, esecuzione GPU e integrazione grafica |
 
 Le prove della Recovery non vengono estese automaticamente al sistema installato. Le voci ancora da completare rimangono aperte fino a un esito documentato.
+
+## Tasti funzione: lavoro rinviato in blocco
+
+Verificare e sistemare insieme **tutti i tasti funzione**, includendo F11/F12 per la luminosità, comportamento Fn e le altre funzioni disponibili sulla tastiera. La richiesta del 13 ottobre 2026 rinvia questo lavoro: non si preparano ora modifiche per i soli tasti luminosità.
+
+F1–F3 per muto e volume sono già riferiti funzionanti e vanno conservati. Il cursore luminosità macOS funziona. Fn+F11/F12 e l'eventuale gestione ACPI con BrightnessKeys saranno valutati nel blocco completo, prima di scegliere le modifiche necessarie.
 
 ## Attività audio rinviata
 

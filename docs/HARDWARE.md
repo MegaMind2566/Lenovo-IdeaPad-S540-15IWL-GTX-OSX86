@@ -11,7 +11,7 @@ Report ricevuto il 12 ottobre 2026. Sono riportati solo i dati utili al progetto
 | RAM | 12 GB DDR4-2400, moduli da 8 e 4 GB | Sufficiente per la prima prova |
 | iGPU | Intel UHD 620, PCI 8086:3EA0 | IntelAccelerator rilevato e Metal 3 esposto; carico prolungato da provare |
 | dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91 | Driver disabilitato nella EFI; port Linux mantenuto nella roadmap; spegnimento elettrico da verificare |
-| Schermo | BOE NV156FHM-N61, 1920×1080 | Pannello interno online alla risoluzione nativa; luminosità e ripresa da verificare |
+| Schermo | BOE NV156FHM-N61, 1920×1080 | Pannello e cursore luminosità funzionanti; F11/F12 da sistemare, ripresa da provare |
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Famiglia PM981a problematica; non assunta compatibile |
 | Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | Funzionamento riferito nella Recovery con itlwm; sistema installato da provare |
 | Bluetooth | Intel, USB 8087:0AAA | Panic superato in una prova con IntelBTPatcher escluso; funzionalità Bluetooth e versione aggiornata da verificare |
@@ -58,7 +58,13 @@ IORegistry mostra X86PlatformPlugin registered, matched e active. Dopo l'invito 
 
 Il driver di gestione CPU è quindi attivo e i campioni mostrano un basso consumo Intel stimato a riposo. Le temperature sono letture istantanee alla fine di ciascun intervallo. Il rapporto GPU 100% è rispetto alla frequenza nominale indicata di 300 MHz, non una misura di utilizzo al 100%.
 
-Il report contiene ancora Invalid key detected e non riporta RPM delle ventole: la telemetria SMC resta parziale. Non è stata fornita una nuova osservazione del rumore delle ventole. Questi dati non verificano la temperatura sotto carico, il consumo o lo spegnimento elettrico della NVIDIA, la batteria o la sospensione. I campi LastSleepType del plugin non costituiscono una prova di sospensione riuscita.
+Il report contiene ancora Invalid key detected e non riporta RPM delle ventole: la telemetria SMC resta parziale. Successivamente è stato riferito che la ventola non fa rumore da tempo: la situazione a riposo è quindi confermata anche dall'osservazione sul portatile. Questi dati non verificano la temperatura sotto carico, il consumo o lo spegnimento elettrico della NVIDIA, la batteria o la sospensione. I campi LastSleepType del plugin non costituiscono una prova di sospensione riuscita.
+
+## Pannello e tasti luminosità: 13 ottobre 2026
+
+Il cursore macOS regola realmente la luminosità del pannello. I tasti F11/F12 non funzionano nella prova riferita; il risultato con Fn non è ancora specificato. La retroilluminazione è quindi funzionante e non si aggiungono nuove patch PNLF o framebuffer per il solo problema dei tasti.
+
+Il DSDT originale contiene i metodi H_EC._Q8E e _Q8F che inviano al pannello GFX0.DD1F le notifiche ACPI 0x86 e 0x87, con condizioni firmware che possono sopprimere alcuni eventi. Il lavoro su F11/F12 è stato rinviato, su richiesta, a un unico blocco con gli altri tasti funzione. In quella fase si verificheranno Fn e gli eventi prodotti, poi si valuterà BrightnessKeys come candidato mirato; non è stato applicato. F1–F3 funzionanti e cursore luminosità vengono conservati. Non si rinominano preventivamente i metodi _Q.
 
 ## Audio dal desktop: 13 ottobre 2026
 

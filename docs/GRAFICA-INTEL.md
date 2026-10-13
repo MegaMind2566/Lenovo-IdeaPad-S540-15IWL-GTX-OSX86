@@ -33,10 +33,10 @@ Il comando crea un archivio sul Desktop; va eseguito sul portatile. Se il volume
 
 1. Riavvio e spegnimento ripetibili con questa stessa EFI, annotando eventuali attese del pannello.
 2. Uso del desktop e un carico che utilizzi Metal, senza blocchi o artefatti.
-3. Regolazione della luminosità e ripresa del pannello dopo la sospensione.
+3. Ripresa del pannello dopo la sospensione. La regolazione dal cursore macOS è già riferita funzionante. F11/F12 non funzionano e sono rinviati al blocco completo dei tasti funzione nella [roadmap](ROADMAP.md#tasti-funzione-lavoro-rinviato-in-blocco).
 4. Decodifica video e monitor esterni, come prove distinte.
 
-Il primo campione powermetrics di circa un secondo riportava 50 °C per la CPU. Due campioni successivi a riposo, ciascuno di cinque secondi, riportano 45–46 °C, 0,80–0,95 W stimati per il pacchetto Intel e frequenza media sistema circa 0,95–0,97 GHz. IORegistry conferma X86PlatformPlugin attivo. Il consumo del pacchetto comprende CPU, iGPU e system agent, senza la NVIDIA. Mancano RPM e una nuova osservazione delle ventole; temperatura sotto carico e consumo della dGPU restano da verificare. La voce `2Slices on: 100%` indica la permanenza nello stato con due slice attive; il 100% a 300 MHz è un rapporto di frequenza. Nessuna delle due voci dimostra un utilizzo GPU del 100%.
+Il primo campione powermetrics di circa un secondo riportava 50 °C per la CPU. Due campioni successivi a riposo, ciascuno di cinque secondi, riportano 45–46 °C, 0,80–0,95 W stimati per il pacchetto Intel e frequenza media sistema circa 0,95–0,97 GHz. IORegistry conferma X86PlatformPlugin attivo. Il consumo del pacchetto comprende CPU, iGPU e system agent, senza la NVIDIA. Gli RPM non sono disponibili, ma successivamente è stata riferita una ventola silenziosa da tempo. Temperatura sotto carico e consumo della dGPU restano da verificare. La voce `2Slices on: 100%` indica la permanenza nello stato con due slice attive; il 100% a 300 MHz è un rapporto di frequenza. Nessuna delle due voci dimostra un utilizzo GPU del 100%.
 
 Le altre funzioni restano nella [roadmap hardware](ROADMAP.md). Per una nuova verifica dello stato, questi comandi leggono informazioni senza modificare la EFI:
 
