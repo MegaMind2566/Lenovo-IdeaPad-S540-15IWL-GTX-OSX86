@@ -2,7 +2,7 @@
 
 Obiettivo: usare macOS Tahoe 26 su Lenovo IdeaPad S540-15IWL GTX e completare le prove di tutti i componenti. La compatibilità completa è un obiettivo da verificare sul dispositivo.
 
-**Stato: Recovery avviata; mouse, tastiera, Wi-Fi e rilevamento del 960 EVO confermati nella prova. Installazione di Tahoe in corso sul volume esterno «Macintosh SSD»; desktop e accelerazione Intel ancora da verificare.**
+**Stato: Recovery avviata; mouse, tastiera, Wi-Fi e rilevamento del 960 EVO confermati nella prova. Il volume esterno «Macintosh SSD» arriva all'avvio di WindowServer, ma il desktop non è ancora comparso. Accelerazione Intel da verificare.**
 Sequoia 15 resta un'alternativa da valutare se le prove con Tahoe evidenziano problemi.
 
 ## Cosa fare adesso
@@ -10,6 +10,8 @@ Sequoia 15 resta un'alternativa da valutare se le prove con Tahoe evidenziano pr
 Il dump disponibile contiene una DSDT e tutte le 12 SSDT enumerate da Windows. Le 20 tabelle ACPI utili raccolte hanno lunghezza, checksum e SHA-256 validi. Non occorre ripetere la raccolta.
 
 Completa l'[installazione sul 960 EVO esterno](docs/INSTALLAZIONE.md) con la EFI che ha avviato la Recovery. Dopo il primo desktop segui la [verifica della grafica Intel](docs/GRAFICA-INTEL.md). Il [test grafico reversibile](docs/TEST-GRAFICA.md) resta una prova temporanea senza accelerazione Intel; i boot-args effettivamente attivi non sono ancora stati raccolti.
+
+Se l'avvio di **Macintosh SSD** resta sul testo, è disponibile una [prova reversibile di avvio sicuro](docs/AVVIO-SICURO.md), che aggiunge solo `-x` alla EFI attuale e salva un backup.
 
 La [roadmap hardware](docs/ROADMAP.md) mantiene aperto il port NVIDIA come progetto di ricerca dopo la stabilizzazione Intel. Riporta anche audio, Bluetooth, USB, autonomia, sospensione e uscite video, con criteri distinti per confermare il funzionamento.
 
