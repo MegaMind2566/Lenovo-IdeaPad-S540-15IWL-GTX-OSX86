@@ -1,5 +1,7 @@
 # Raccolta dei report dall'installazione senza interfaccia
 
+**Raccolta unificata ricevuta:** lo ZIP LOG-UNIFICATI-e8VM9n è stato decodificato. Entrambi gli avvii usano VESA; nel secondo il benvenuto registra un errore di creazione della texture. La [nuova analisi](ANALISI-LOG-UNIFICATI.md) descrive i dati e la prossima prova con TEST-INTEL.cmd.
+
 I log `opencore-2026-10-13-103339.txt` e `opencore-2026-10-13-103615.txt` confermano l'assenza di `-igfxvesa` e `-x`. IntelBTPatcher non viene iniettato; Lilu e WhateverGreen risultano iniettati con successo. Questo non dimostra che la grafica si inizializzi o che Metal funzioni. Il log termina al passaggio al kernel, prima degli eventi dell'interfaccia.
 
 La nuova fotografia mostra servizi di macOS e caricamento delle collezioni di estensioni, senza una riga di panic. Contiene errori di firma del codice, un limite di memoria esplicitamente non fatale di kernelmanagerd e fault ripetuti di IOUserDockChannelSerial. Nessuna di queste righe identifica da sola la causa del mancato desktop.
