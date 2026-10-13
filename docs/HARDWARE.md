@@ -15,7 +15,7 @@ Report ricevuto il 12 ottobre 2026. Sono riportati solo i dati utili al progetto
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Famiglia PM981a problematica; non assunta compatibile |
 | Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | Funzionamento riferito nella Recovery con itlwm; sistema installato da provare |
 | Bluetooth | Intel, USB 8087:0AAA | Panic superato in una prova con IntelBTPatcher escluso; funzionalità Bluetooth e versione aggiornata da verificare |
-| Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Riproduzione e tasti F1–F3 riferiti funzionanti con VoodooHDA 3.6.8; volume graduale da correggere, jack e microfono da provare |
+| Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Riproduzione, volume graduale e tasti F1–F3 confermati con VoodooHDA 3.6.8 e correzione v3; equalizzazione rinviata, jack e microfono da documentare |
 | Tastiera | PS/2 | Funzionamento riferito nella Recovery con VoodooPS2 |
 | Touchpad | ELAN0662, I2C HID; controller Intel 8086:9DE8 | Percorso confermato: `_SB.PCI0.I2C0.TPD0`; funzionamento da provare |
 | Lettore SD | O2Micro SD Host Controller | Supporto da verificare; diverso dal lettore del progetto lucatek |
@@ -47,7 +47,7 @@ Un campione di circa un secondo riporta 50 °C per la CPU e 0,98 W stimati per i
 
 ## Audio dal desktop: 13 ottobre 2026
 
-`system_profiler SPAudioDataType` non espone dispositivi. Tra i kext cercati è caricato soltanto Lilu 1.7.2: AppleALC e AppleHDA sono assenti dall'elenco. La configurazione esclude AppleALC oltre Darwin 24; Tahoe ha rimosso AppleHDA. È stata preparata una [prova reversibile VoodooHDA 3.6.8](AUDIO-TAHOE.md) in Library/Extensions, con layout 11 incluso per ALC257. Dopo la correzione del controllo SIP è stato riferito il funzionamento della riproduzione audio e dei tasti F1–F3. Rimane un difetto del controllo volume: la differenza si sente soltanto a zero/muto. Il pacchetto v3 prepara una prova con VoodooHDAEnableVolumeChangeFix=true. Jack, microfono, qualità e ripresa restano da verificare. Il ripristino AppleHDA nel volume di sistema resta una strategia successiva.
+`system_profiler SPAudioDataType` non espone dispositivi. Tra i kext cercati è caricato soltanto Lilu 1.7.2: AppleALC e AppleHDA sono assenti dall'elenco. La configurazione esclude AppleALC oltre Darwin 24; Tahoe ha rimosso AppleHDA. È stata preparata una [prova reversibile VoodooHDA 3.6.8](AUDIO-TAHOE.md) in Library/Extensions, con layout 11 incluso per ALC257. Dopo la correzione del controllo SIP è stato riferito il funzionamento della riproduzione audio e dei tasti F1–F3. Il difetto iniziale del volume, percepibile soltanto a zero/muto, è stato superato dopo la prova v3 con VoodooHDAEnableVolumeChangeFix=true. È stato riferito un esito positivo della riproduzione e della regolazione graduale. L'equalizzazione è annotata per un affinamento più avanti; jack, microfono e ripresa restano da documentare. Il ripristino AppleHDA nel volume di sistema resta una strategia successiva.
 
 Le sezioni successive descrivono i tentativi precedenti al raggiungimento del desktop.
 

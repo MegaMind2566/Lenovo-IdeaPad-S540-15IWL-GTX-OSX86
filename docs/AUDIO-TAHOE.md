@@ -29,6 +29,14 @@ La preparazione modifica solo:
 
 La coppia Whiskey Lake e le tre proprietà della correzione memoria restano invariate. Il programma conserva la EFI corrente: non ricostruisce identità, ACPI, Bluetooth o profilo Wi-Fi. Non installa pannelli preferenze o servizi aggiuntivi.
 
+## Esito della correzione volume: 13 ottobre 2026
+
+Dopo la prova v3 è stato riferito un esito positivo: riproduzione audio, regolazione graduale e tasti F1–F3 funzionano. Il problema della variazione udibile soltanto a zero/muto è quindi risolto nella prova sul portatile. Si conserva questa configurazione. Il nuovo output tecnico della verifica non è stato allegato; non si estende l'esito automaticamente a jack, microfono o sospensione.
+
+## Equalizzazione da rivedere piu avanti
+
+È richiesto un affinamento dell'equalizzazione, da affrontare più avanti. L'attività resta nella roadmap come prova separata della timbrica; non vengono aggiunte ora modifiche a mixer, amplificazione o driver.
+
 ## Controllo del volume: pacchetto v3
 
 Dopo la prova v2 sono stati riferiti riproduzione audio e funzionamento dei tasti F1, F2 e F3. La variazione graduale non è ancora efficace: il suono cambia soltanto quando il volume arriva a zero/muto. Non sono stati documentati separatamente cuffie/jack e microfono.
@@ -113,7 +121,7 @@ Il backup privato è in `EFI/OC/backup-audio-tahoe` e va conservato. Gli snapsho
 
 Sintassi Bash, autenticità dell'asset e dei singoli file, integrità ZIP e fixture delle modifiche previste sono stati controllati in Linux. I config preparato e di ritorno al SIP originale passano ocvalidate 1.0.8; le fixture conservano identità, ACPI, Booter, grafica Intel e altre voci dei kext. Una revisione separata ha verificato gestione della copia temporanea, journal, ripresa dopo interruzioni e controllo dell'AuxKC prima del ripristino SIP. La prima esecuzione sul portatile ha verificato payload, firma, proprietà della EFI e HDAS prima del blocco SIP. La lettura corretta e il ripristino dei casi iniziali zero e 0x267 sono stati controllati con fixture; dopo la versione v2 è stata riferita la riproduzione audio funzionante con i tasti F1–F3.
 
-Per la prova volume v3, una fixture verifica l'unico Bool modificato e la conservazione delle altre proprietà del mixer. Le funzioni hash effettive del programma riconoscono il payload originale e la variante registrata nella fixture, e rifiutano un binario alterato. Firma della nuova variante, ricostruzione AuxKC e attenuazione graduale restano da provare sul Mac. Il codec supportato e il nome HDAS coerente non certificano automaticamente qualità audio, jack, microfono o ripresa dalla sospensione.
+Per la prova volume v3, una fixture verifica l'unico Bool modificato e la conservazione delle altre proprietà del mixer. Le funzioni hash effettive del programma riconoscono il payload originale e la variante registrata nella fixture, e rifiutano un binario alterato. La firma e la ricostruzione AuxKC non sono state eseguite direttamente nell'ambiente Linux. Dopo la prova sul Mac è stato riferito un esito positivo della riproduzione e dell'attenuazione graduale; non è stato allegato un nuovo report tecnico. Il codec supportato e il nome HDAS coerente non certificano automaticamente qualità audio, jack, microfono o ripresa dalla sospensione.
 
 AppleHDA resta una strategia successiva se questa prova non soddisfa i requisiti. La ricerca NVIDIA rimane nella [roadmap](ROADMAP.md).
 

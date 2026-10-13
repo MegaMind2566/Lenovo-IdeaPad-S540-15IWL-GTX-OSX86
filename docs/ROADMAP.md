@@ -21,7 +21,7 @@ Obiettivo: rendere utilizzabili tutti i componenti del Lenovo IdeaPad S540-15IWL
 | Touchpad ELAN | Driver presenti; il «mouse» riferito non identifica il dispositivo | Puntamento, clic, scorrimento e gesti |
 | Wi-Fi Intel AC9560 | Funziona nella Recovery con itlwm | Connessione, trasferimenti e riconnessione dopo sospensione |
 | Bluetooth Intel | Panic superato con IntelBTPatcher 2.4 escluso; funzionalità non ancora provata | Confronto con patcher aggiornato, associazione e uso di una periferica, riconnessione dopo sospensione |
-| Audio ALC257 | Riproduzione audio e tasti F1–F3 riferiti funzionanti con VoodooHDA 3.6.8; volume percepibile solo a zero/muto. [Prova mixer v3](AUDIO-TAHOE.md#controllo-del-volume-pacchetto-v3) preparata | Attenuazione graduale, qualità, cuffie/jack, microfono e commutazione delle uscite |
+| Audio ALC257 | Riproduzione, volume graduale e tasti F1–F3 confermati dopo la correzione v3 | Equalizzazione da affinare più avanti; cuffie/jack, microfono, commutazione e ripresa da documentare |
 | USB-A e USB-C | Mappa a 9 porte verificata; 960 EVO rilevato | USB 2/3, entrambe le orientazioni USB-C e riconnessione |
 | Samsung 960 EVO esterno | Box ripristinato; Tahoe avviato al desktop | Uso prolungato senza disconnessioni e ripresa dalla sospensione |
 | NVMe PM981a interno | Visibile nella Recovery; mantenuto per Windows | Verificare eventuali effetti sulla stabilità di macOS |
@@ -35,6 +35,10 @@ Obiettivo: rendere utilizzabili tutti i componenti del Lenovo IdeaPad S540-15IWL
 | NVIDIA GTX 1650 Max-Q | Port Linux mantenuto come ricerca; nessun driver utilizzabile nella EFI | Milestone di inizializzazione, esecuzione GPU e integrazione grafica |
 
 Le prove della Recovery non vengono estese automaticamente al sistema installato. Le voci ancora da completare rimangono aperte fino a un esito documentato.
+
+## Attività audio rinviata
+
+**Equalizzazione ALC257:** da rivedere più avanti. L'esito positivo del 13 ottobre 2026 conferma audio e volume dopo la correzione v3. Per ora si conserva la configurazione funzionante; l'affinamento timbrico sarà una prova separata, senza riaprire il problema del volume.
 
 ## Ricerca NVIDIA
 
