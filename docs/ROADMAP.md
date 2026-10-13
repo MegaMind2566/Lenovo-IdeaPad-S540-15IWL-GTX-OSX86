@@ -20,7 +20,7 @@ Obiettivo: rendere utilizzabili tutti i componenti del Lenovo IdeaPad S540-15IWL
 | Tastiera | Funziona nella Recovery | Uso nel sistema installato e tasti funzione |
 | Touchpad ELAN | Driver presenti; il «mouse» riferito non identifica il dispositivo | Puntamento, clic, scorrimento e gesti |
 | Wi-Fi Intel AC9560 | Funziona nella Recovery con itlwm | Connessione, trasferimenti e riconnessione dopo sospensione |
-| Bluetooth Intel | Driver presenti; non provato | Associazione e uso di una periferica, riconnessione dopo sospensione |
+| Bluetooth Intel | Panic USB/Bluetooth con IntelBTPatcher 2.4; [prova di esclusione](TEST-BLUETOOTH.md) pronta; sorgente aggiornato da verificare | Avvio senza panic, confronto con patcher aggiornato, associazione e uso di una periferica, riconnessione dopo sospensione |
 | Audio ALC257 | Audio analogico su Tahoe da completare | Altoparlanti, cuffie, microfono e commutazione delle uscite |
 | USB-A e USB-C | Mappa a 9 porte verificata; 960 EVO rilevato | USB 2/3, entrambe le orientazioni USB-C e riconnessione |
 | Samsung 960 EVO esterno | Box ripristinato; installazione in corso | Uso prolungato senza disconnessioni e ripresa dalla sospensione |

@@ -14,7 +14,7 @@ Report ricevuto il 12 ottobre 2026. Sono riportati solo i dati utili al progetto
 | Schermo | BOE NV156FHM-N61, 1920×1080 | Luminosità e collegamento da verificare |
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Famiglia PM981a problematica; non assunta compatibile |
 | Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | Funzionamento riferito nella Recovery con itlwm; sistema installato da provare |
-| Bluetooth | Intel, USB 8087:0AAA | Firmware e funzionamento su Tahoe da verificare |
+| Bluetooth | Intel, USB 8087:0AAA | Panic USB/Bluetooth osservato con IntelBTPatcher 2.4; esclusione del patcher da provare; versione aggiornata da verificare |
 | Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Codec confermato dal dump Windows; audio analogico Tahoe da ripristinare e verificare |
 | Tastiera | PS/2 | Funzionamento riferito nella Recovery con VoodooPS2 |
 | Touchpad | ELAN0662, I2C HID; controller Intel 8086:9DE8 | Percorso confermato: `_SB.PCI0.I2C0.TPD0`; funzionamento da provare |
@@ -38,7 +38,7 @@ Il nome del driver Windows della grafica integrata riporta UHD 610, ma il chip e
 - Boot-args di un avvio successivo ai ripristini e report della grafica dal sistema installato. Il log delle 02:45 conferma entrambi i parametri diagnostici in quel tentativo.
 - Esiti delle prove dei componenti nella [roadmap](ROADMAP.md).
 
-La Recovery ha raggiunto l'interfaccia grafica e l'installazione di Tahoe è stata avviata sul volume esterno «Macintosh SSD». Il primo desktop non è ancora confermato. Metal, audio, autonomia, sospensione e HDMI restano da verificare sul dispositivo. Nessun voto di compatibilità totale è assegnato prima delle prove.
+La Recovery ha raggiunto l'interfaccia grafica e l'installazione di Tahoe è stata avviata sul volume esterno «Machintosh SSD». Il primo desktop non è ancora confermato. Metal, audio, autonomia, sospensione e HDMI restano da verificare sul dispositivo. Nessun voto di compatibilità totale è assegnato prima delle prove.
 
 ## Esito della prima prova della Recovery
 
@@ -57,3 +57,9 @@ Il disco interno è stato riferito visibile nella Recovery: l'esclusione tramite
 Il log del 13 ottobre 2026 conferma la selezione del volume USB esterno, con nome **Machintosh SSD**, e la presenza di `-igfxvesa` e `-x`. OpenCore riporta l'iniezione riuscita di Lilu 1.7.2 e WhateverGreen 1.7.1 e l'impostazione delle proprietà Intel. Il log non conferma l'inizializzazione dei driver nel kernel o Metal. Il primo desktop resta da raggiungere.
 
 L'[analisi del log](ANALISI-LOG-AVVIO.md) riporta anche il percorso Apple con immagine BaseSystem, l'assenza della tabella MAT e i limiti del blocco NVMe. Il file originale e gli identificativi SMBIOS non vengono aggiunti alla repository.
+
+## Panic USB/Bluetooth successivo
+
+La fotografia ricevuta successivamente mostra un vero panic con processo `bluetoothd`, estensioni IOUSBHostFamily e IntelBTPatcher 2.4 nella traccia, Darwin 25.6.0 e build macOS 25G241. Nei boot-args visibili manca `-x`, mentre rimane `-igfxvesa`. L'intestazione del panic è fuori dall'inquadratura, quindi la causa precisa resta da confermare.
+
+La [prova Bluetooth](TEST-BLUETOOTH.md) esclude solo IntelBTPatcher dalla EFI attuale. La versione 2.4 precede la correzione ufficiale della gestione del descrittore di memoria USB per Sequoia e successivi; il builder la esclude dalle nuove EFI. Il firmware Intel, BlueToolFixup e itlwm restano presenti. Il test sul portatile e il confronto con una build aggiornata sono ancora da eseguire.

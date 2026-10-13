@@ -1,5 +1,7 @@
 # Analisi del log OpenCore delle 02:45
 
+**Aggiornamento successivo:** una fotografia mostra un panic USB/Bluetooth con IntelBTPatcher 2.4 nella traccia. In quella foto `-x` è assente e `-igfxvesa` è ancora presente. Per il prossimo avvio seguire la [prova Bluetooth](TEST-BLUETOOTH.md); il log analizzato qui documenta un tentativo precedente.
+
 Log del 13 ottobre 2026, avvio iniziato alle 02:45:57. Sono riportati solo gli elementi utili alla diagnosi; il file originale e gli identificativi SMBIOS non vengono aggiunti alla repository.
 
 ## Dati confermati

@@ -2,6 +2,8 @@
 
 La UHD 620 è il primo obiettivo dopo il desktop. La EFI contiene già Lilu, WhateverGreen e le proprietà iniziali `AAPL,ig-platform-id=00009B3E` e `device-id=9B3E0000`. Il test `-igfxvesa` disabilita l'accelerazione Intel. Il [log delle 02:45](ANALISI-LOG-AVVIO.md) conferma che in quel tentativo erano attivi `-igfxvesa` e `-x`. Lo stato di un eventuale avvio successivo ai ripristini resta da verificare.
 
+Una fotografia successiva documenta un panic USB/Bluetooth con `bluetoothd` e IntelBTPatcher 2.4 nella traccia, senza `-x` e con `-igfxvesa` ancora presente. Segui prima la [prova Bluetooth](TEST-BLUETOOTH.md), completando il ripristino grafico prima di escludere il patcher. Il panic non va attribuito al framebuffer senza altri dati.
+
 Completa prima l'installazione sul 960 EVO. Mantieni OpenCore sull'HDD di avvio finché il sistema non è stato verificato.
 
 ## 1. Leggi lo stato dal primo desktop

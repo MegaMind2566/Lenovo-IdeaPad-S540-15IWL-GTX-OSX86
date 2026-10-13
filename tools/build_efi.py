@@ -124,8 +124,12 @@ def kernel_entries(kext_dir):
         executable_path = 'Contents/MacOS/' + executable if executable else ''
         if executable_path and not (path/executable_path).is_file():
             raise ValueError(f'Missing executable: {path.name}')
+        # The pinned 2.4 patcher predates the Sequoia USB-memory fix and has
+        # appeared in a Tahoe panic. Keep its files for a later controlled test.
+        enabled = path.name != 'IntelBTPatcher.kext'
         ordered.append({'Arch': 'x86_64', 'BundlePath': path.relative_to(kext_dir).as_posix(),
-                        'Comment': '', 'Enabled': True, 'ExecutablePath': executable_path,
+                        'Comment': '' if enabled else 'Old Bluetooth patcher: excluded after USB panic',
+                        'Enabled': enabled, 'ExecutablePath': executable_path,
                         'MaxKernel': '24.99.99' if path.name == 'AppleALC.kext' else '25.99.99',
                         'MinKernel': '24.0.0', 'PlistPath': 'Contents/Info.plist'})
 
@@ -183,7 +187,7 @@ def make_config(sample, profile, entries, identity):
     cfg['Misc']['Security'].update(ScanPolicy=0, SecureBootModel='Disabled',
                                   Vault='Optional', DmgLoading='Signed')
     cfg['NVRAM']['Add'] = {NVRAM_GUID: {
-        'boot-args': '-v keepsyms=1 debug=0x100 -wegnoegpu -ibtcompatbeta revpatch=sbvmm alcid=11',
+        'boot-args': '-v keepsyms=1 debug=0x100 -wegnoegpu revpatch=sbvmm alcid=11',
         'csr-active-config': bytes(4), 'prev-lang:kbd': b'', 'run-efi-updater': 'No'}}
     cfg['NVRAM']['Delete'] = {NVRAM_GUID: ['boot-args', 'prev-lang:kbd']}
     cfg['NVRAM']['LegacySchema'] = {}
@@ -325,3 +329,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

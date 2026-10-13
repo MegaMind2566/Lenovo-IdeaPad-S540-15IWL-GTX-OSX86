@@ -2,16 +2,18 @@
 
 Obiettivo: usare macOS Tahoe 26 su Lenovo IdeaPad S540-15IWL GTX e completare le prove di tutti i componenti. La compatibilità completa è un obiettivo da verificare sul dispositivo.
 
-**Stato: Recovery avviata; mouse, tastiera, Wi-Fi e rilevamento del 960 EVO confermati nella prova. Dal volume esterno «Macintosh SSD» compare il puntatore con scia, senza finestre. Desktop e accelerazione Intel ancora da verificare.**
+**Stato: Recovery avviata; mouse, tastiera, Wi-Fi e rilevamento del 960 EVO confermati nella prova. Dal volume esterno «Machintosh SSD» è comparso il puntatore con scia; una prova successiva ha prodotto un panic USB/Bluetooth con IntelBTPatcher 2.4 nella traccia. Desktop e accelerazione Intel ancora da verificare.**
 Sequoia 15 resta un'alternativa da valutare se le prove con Tahoe evidenziano problemi.
 
 ## Cosa fare adesso
 
 Il dump disponibile contiene una DSDT e tutte le 12 SSDT enumerate da Windows. Le 20 tabelle ACPI utili raccolte hanno lunghezza, checksum e SHA-256 validi. Non occorre ripetere la raccolta.
 
-Completa l'[installazione sul 960 EVO esterno](docs/INSTALLAZIONE.md) con la EFI che ha avviato la Recovery. Dopo il primo desktop segui la [verifica della grafica Intel](docs/GRAFICA-INTEL.md). Il [test grafico reversibile](docs/TEST-GRAFICA.md) resta una prova temporanea senza accelerazione Intel. Il [log delle 02:45](docs/ANALISI-LOG-AVVIO.md) conferma che in quel tentativo erano attivi sia `-igfxvesa` sia `-x`. Il prossimo confronto richiede un avvio senza questi due parametri.
+La priorità è la [prova senza IntelBTPatcher](docs/TEST-BLUETOOTH.md): il panic coinvolge `bluetoothd`, `IOUSBHostFamily` e il patcher 2.4 incluso nella prima EFI. La foto conferma che `-x` è stato rimosso e `-igfxvesa` è ancora presente. Completa il ripristino grafico già previsto prima di applicare la nuova prova. Il programma esclude solo IntelBTPatcher dalla EFI attuale con backup e ripristino; il builder lo esclude anche dalle nuove EFI fino a una prova della versione aggiornata.
 
-Se l'avvio di **Macintosh SSD** resta sul testo, è disponibile una [prova reversibile di avvio sicuro](docs/AVVIO-SICURO.md), che aggiunge solo `-x` alla EFI attuale e salva un backup.
+Continua l'[installazione sul 960 EVO esterno](docs/INSTALLAZIONE.md). Dopo il primo desktop segui la [verifica della grafica Intel](docs/GRAFICA-INTEL.md). Il [test grafico reversibile](docs/TEST-GRAFICA.md) resta una prova temporanea senza accelerazione Intel. Il [log delle 02:45](docs/ANALISI-LOG-AVVIO.md) conferma che in quel tentativo erano attivi sia `-igfxvesa` sia `-x`.
+
+Per una diagnosi dell'avvio di **Machintosh SSD** è disponibile una [prova reversibile di avvio sicuro](docs/AVVIO-SICURO.md), che aggiunge solo `-x` alla EFI attuale e salva un backup. Per il panic Bluetooth la prima prova è invece l'esclusione del patcher.
 
 Per il puntatore con scia è disponibile il [test Intel](docs/TEST-INTEL.md): controlla la configurazione locale e rimuove soltanto `-x` e `-igfxvesa`, se presenti, con un backup distinto per il ripristino.
 
