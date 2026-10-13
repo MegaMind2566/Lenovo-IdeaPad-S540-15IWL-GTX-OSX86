@@ -5,13 +5,23 @@ umask 077
 
 fail() { printf 'Raccolta non eseguita: %s\n' "$*" >&2; exit 1; }
 
-if [ "$#" -gt 1 ]; then
-    fail 'Indica al massimo il percorso del volume Data.'
-fi
-if [ "${1:-}" = '--help' ]; then
-    printf 'Uso: bash collect_gui_logs.sh ["/Volumes/Machintosh SSD - Data"]\n'
-    exit 0
-fi
+unified=0
+data_root=''
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --unified) unified=1 ;;
+        --help)
+            printf 'Uso: bash collect_gui_logs.sh [--unified] ["/Volumes/Machintosh SSD - Data"]\n'
+            printf '%s\n' '--unified include diagnostics e uuidtext del sistema installato.'
+            exit 0 ;;
+        --*) fail "Opzione sconosciuta: $1" ;;
+        *)
+            [ -z "$data_root" ] || fail 'Indica al massimo il percorso del volume Data.'
+            [ -n "$1" ] || fail 'Il percorso Data non puo essere vuoto.'
+            data_root=$1 ;;
+    esac
+    shift
+done
 if [ "$(uname -s)" != 'Darwin' ]; then
     fail 'Esegui questo programma dal Terminale della Recovery macOS.'
 fi
@@ -19,7 +29,6 @@ fi
 bundle_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)
 [ -d "$bundle_root/EFI/OC" ] || fail 'Estrai il pacchetto nella radice dell HDD di OpenCore, accanto a EFI.'
 
-data_root=${1:-}
 if [ -z "$data_root" ]; then
     for candidate in '/Volumes/Machintosh SSD - Data' '/Volumes/Machintosh SSD - Dati'; do
         if [ -d "$candidate/Library" ] && [ -d "$candidate/private/var" ] && [ -d "$candidate/Users" ]; then
@@ -34,11 +43,32 @@ if [ -z "$data_root" ] || [ ! -d "$data_root" ]; then
     fail 'Monta il volume Data del Samsung in Utility Disco. Se il nome e diverso, passalo come argomento.'
 fi
 data_root=$(cd "$data_root" && pwd -P)
+case "$data_root" in
+    /Volumes/*) ;;
+    *) fail 'Seleziona il volume Data montato sotto /Volumes, non il sistema Recovery in esecuzione.' ;;
+esac
 [ -d "$data_root/Library" ] && [ -d "$data_root/private/var" ] && [ -d "$data_root/Users" ] || fail 'Il percorso non contiene la struttura attesa del volume Data.'
 case "$bundle_root/" in
     "$data_root/"*) fail 'La destinazione deve essere sull HDD di OpenCore, fuori dal volume Data.' ;;
 esac
 command -v ditto >/dev/null 2>&1 || fail 'ditto non disponibile in questa Recovery.'
+
+if [ "$unified" -eq 1 ]; then
+    unified_kb=0
+    for source in "$data_root/private/var/db/diagnostics" "$data_root/private/var/db/uuidtext"; do
+        if [ -d "$source" ]; then
+            source_kb=$(du -sk "$source" | awk '{print $1}') || fail 'Impossibile stimare la dimensione dei log unificati.'
+            case "$source_kb" in ''|*[!0-9]*) fail 'Dimensione dei log non valida.' ;; esac
+            unified_kb=$((unified_kb + source_kb))
+        fi
+    done
+    free_kb=$(LC_ALL=C df -Pk "$bundle_root" | awk 'END {print $4}') || fail 'Impossibile leggere lo spazio libero sull HDD.'
+    case "$free_kb" in ''|*[!0-9]*) fail 'Spazio libero non valido.' ;; esac
+    # Retain the raw copy and ZIP; reserve additional room for reports.
+    needed_kb=$((unified_kb * 2 + 65536))
+    [ "$free_kb" -ge "$needed_kb" ] || fail 'Spazio insufficiente sull HDD per conservare cartella e ZIP dei log.'
+    printf 'Log unificati: circa %s MB; avvio della raccolta.\n' "$((unified_kb / 1024))"
+fi
 
 work=$(mktemp -d "$bundle_root/DIAGNOSI-MACOS-XXXXXX")
 summary="$work/RIEPILOGO.txt"
@@ -55,6 +85,7 @@ copy_errors=0
     printf 'Il programma legge Data e scrive soltanto questa raccolta sull HDD.\n'
     printf 'Non filtra i report per data: gli orologi dei tentativi possono differire.\n'
     printf 'Non esegue log show o sysdiagnose sul sistema Recovery.\n'
+    printf 'Raccolta log unificati richiesta: %s\n' "$unified"
     if [ -e "$data_root/private/var/db/.AppleSetupDone" ]; then
         printf 'Marcatore di configurazione iniziale: presente\n'
     else
@@ -65,7 +96,7 @@ copy_errors=0
 copy_item() {
     local source=$1 label=$2
     if [ -e "$source" ]; then
-        # Diagnostic text needs file contents, not macOS extended attributes.
+        # Diagnostic data needs file contents, not macOS extended attributes.
         # FAT/exFAT destinations can reject those attributes despite copying data.
         if cp -RX "$source" "$work/$label" 2>> "$errors"; then
             printf 'Copiato: %s\n' "$label" >> "$summary"
@@ -91,6 +122,23 @@ printf 'Cartelle report utente trovate: %s\n' "$user_index" >> "$summary"
 copy_item "$data_root/private/var/log/install.log" 'install.log'
 copy_item "$data_root/private/var/log/system.log" 'system.log'
 
+unified_complete=0
+if [ "$unified" -eq 1 ]; then
+    mkdir "$work/UnifiedLogs"
+    copied_before=$copied
+    printf 'Copia diagnostics dal volume Data del Samsung...\n'
+    copy_item "$data_root/private/var/db/diagnostics" 'UnifiedLogs/diagnostics'
+    printf 'Copia uuidtext dal volume Data del Samsung...\n'
+    copy_item "$data_root/private/var/db/uuidtext" 'UnifiedLogs/uuidtext'
+    if [ "$copied" -eq "$((copied_before + 2))" ] && [ -d "$work/UnifiedLogs/diagnostics" ] && [ -d "$work/UnifiedLogs/uuidtext" ]; then
+        unified_complete=1
+        printf 'Coppia log unificati: copiata senza errori segnalati\n' >> "$summary"
+    else
+        printf 'Coppia log unificati: incompleta o assente; verificare ERRORI-COPIA.txt\n' >> "$summary"
+    fi
+    printf 'diagnostics e uuidtext sono dati offline separati, non un archivio logarchive convertito.\n' >> "$summary"
+fi
+
 if command -v diskutil >/dev/null 2>&1; then
     diskutil apfs list > "$work/VOLUMI-APFS.txt" 2>> "$errors" || true
 fi
@@ -101,9 +149,13 @@ find "$work" -type f -print > "$work/INVENTARIO.txt"
 } >> "$summary"
 
 archive="$work.zip"
+printf 'Creazione dello ZIP...\n'
 ditto -c -k "$work" "$archive"
 printf '\nRaccolta salvata: %s\n' "$archive"
 printf 'Allega quel file ZIP nella chat. La cartella di raccolta viene conservata.\n'
 if [ "$copy_errors" -gt 0 ]; then
     printf 'Alcune copie sono incomplete: i dettagli sono nello ZIP.\n'
+fi
+if [ "$unified" -eq 1 ] && [ "$unified_complete" -eq 0 ]; then
+    printf 'I log unificati sono incompleti o assenti. Allega comunque lo ZIP con il riepilogo.\n'
 fi
