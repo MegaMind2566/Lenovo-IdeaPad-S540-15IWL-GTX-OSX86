@@ -29,6 +29,7 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Internal display | Working | Full HD resolution; startup black-screen delay corrected |
 | Brightness slider | Working | Brightness control through macOS settings |
 | Audio playback and volume | Working | VoodooHDA; gradual volume changes and F1–F3 controls |
+| Wired headphone output and switching | Working | Jack output works; speakers mute on connection and resume after unplugging |
 | Internal microphone | Working | S540 microphone correction v2 |
 | Wi-Fi through HeliPort | Working | Intel AC9560 with itlwm; disconnection, reconnection and network switching confirmed |
 | Bluetooth headphone audio and microphone | Working | Playback, headset voice capture, disconnection and reconnection confirmed |
@@ -42,7 +43,7 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Fn function row | Configured | Ordinary F1–F12 events recorded; four conflicting macOS shortcuts disabled, session refresh confirmation pending |
 | Touchpad and gestures | Working | ELAN0662 gestures confirmed in daily use; F6 toggle also works |
 | Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; further icon-key investigation deferred |
-| Analog audio jack | Pending | Connector operation remains to be verified |
+| Wired headset microphone | Pending | Input through the analog jack has not yet been verified |
 | HDMI / USB-C video | Pending | Output routing and external display support |
 | USB-A coverage / storage reliability | Pending | Remaining USB-A ports, measured storage throughput and sustained reliability |
 | SD reader / fingerprint reader | Pending | Driver support and device operation |
@@ -63,7 +64,7 @@ Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including t
 
 - Complete remaining USB-A ports, storage stability and audio-peripheral checks. Battery power, independent SSD boot and USB-C at 5 Gb/s in both orientations are confirmed; measured battery runtime remains open.
 - Complete Intel stability, power management and external display support; sustained-load temperature and fan telemetry remain open.
-- Complete remaining audio peripheral and device support; wireless reconnection and network switching work.
+- Complete wired-headset microphone and remaining device support; headphone output/speaker switching and wireless reconnection work.
 - Retain the working keyboard controls; remaining icon actions, equalization and sleep refinements are deferred.
 - Keep native macOS Wi-Fi integration and NVIDIA driver-port research open.
 

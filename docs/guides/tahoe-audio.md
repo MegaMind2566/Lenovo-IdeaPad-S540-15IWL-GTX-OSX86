@@ -2,6 +2,12 @@
 
 This guide documents the original audio setup and its private rollback backups on the project's existing installation. It is not a complete fresh-install procedure for an EFI release. An EFI archive alone does not include the installed audio extension or these backups. The subsequent microphone upgrade is covered in the [microphone correction guide](microphone-fix.md).
 
+## Current output status: October 14, 2026
+
+Speaker playback, gradual volume control and F1–F3 work with the retained VoodooHDA setup. The wired jack now also passes headphone output and automatic switching: speakers mute when headphones are connected and resume after unplugging. No further audio-driver change follows from this result.
+
+The internal microphone correction remains in use. Input through a wired headset has not yet been checked. Equalisation and audio recovery after sleep remain deferred. The sections below preserve the earlier setup and correction history; their initial unverified jack status is superseded by this result.
+
 ## Initial audio state: October 13, 2026
 
 On the working desktop, `system_profiler SPAudioDataType` returns Audio/Devices with no devices. The kext check shows Lilu 1.7.2, but neither AppleALC nor AppleHDA. The EFI retains AppleALC 1.9.8 with MaxKernel 24.99.99, excluding it on Darwin 25. The Windows report already confirms the Realtek ALC257 codec; another collection is unnecessary.

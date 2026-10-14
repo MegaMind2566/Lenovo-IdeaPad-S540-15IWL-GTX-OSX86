@@ -15,7 +15,7 @@ Report received on 12 October 2026. Only data relevant to the project is include
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Problematic PM981a family; compatibility is not assumed |
 | Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | itlwm 2.3.0 loaded and HeliPort reported working; Ethernet presentation is expected with this driver; disconnection, reconnection and network switching confirmed; transfer speed remains unmeasured |
 | Bluetooth | Intel, USB 8087:0AAA | Headphone playback, microphone, disconnection and reconnection confirmed; firmware loaded, correct NVRAM and IntelBTPatcher excluded |
-| Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Playback, gradual volume adjustment and F1–F3 confirmed with VoodooHDA 3.6.8 and the v3 fix; microphone fix v2 received an initial positive report after reboot; verification report and comparison recordings still to be collected; equalisation deferred, jack operation still to be documented |
+| Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Speaker/headphone output, automatic switching, gradual volume and F1–F3 confirmed; S540 internal microphone fix v2 retained; wired-headset input unverified, equalisation and resume checks deferred |
 | Keyboard | PS/2 | VoodooPS2; direct F1–F3, F6 and F11/F12 working; remaining icon keys and Fn app-key behavior in progress |
 | Touchpad | ELAN0662, I2C HID; Intel 8086:9DE8 controller | Confirmed path: `_SB.PCI0.I2C0.TPD0`; F6 toggle and touchpad gestures confirmed working |
 | SD reader | O2Micro SD Host Controller | Support still to be verified; different from the reader in the lucatek project |
@@ -47,7 +47,7 @@ The reported 4.48 W is USB power allocation, not measured SSD or total laptop co
 - Remaining USB-A port coverage and sustained SSD reliability. The 9-port map is verified, and USB-C operates at 5 Gb/s in both connector orientations with the current Samsung/RTL9210/cable combination.
 - Component test results in the [roadmap](roadmap.md).
 
-Tahoe reached the desktop on the external Samsung 960 EVO after the framebuffer memory fix. IntelAccelerator and exposed Metal 3 support are confirmed; sustained graphics load, audio, battery runtime, sleep and HDMI remain to be verified. No overall compatibility rating is assigned before testing.
+Tahoe reached the desktop on the external Samsung 960 EVO after the framebuffer memory fix. IntelAccelerator and exposed Metal 3 support are confirmed; sustained graphics load, battery runtime, sleep and HDMI remain to be verified. No overall compatibility rating is assigned before testing.
 
 ## Desktop and Intel graphics: 13 October 2026
 
@@ -84,7 +84,7 @@ The service-header filter's incomplete SMCProcessor state match is not evidence 
 
 The test using only `-igfxblr` eliminated the boot blackout in the reported result: from approximately two minutes to zero. The configuration is retained, preserving Intel memory settings, audio and SIP. The report preceding the test shows the same framebuffer UUID and Loginwindow ready approximately 31,3 seconds after the kernel. The [diagnosis](../guides/boot-network.md) distinguishes the panel delay from the system boot time.
 
-Bluetooth status is On, FirmwareLoaded is Yes and the transport is connected; BlueToolFixup 2.7.2 and IntelBluetoothFirmware 2.4 are loaded, while IntelBTPatcher is absent. The two required NVRAM variables are present with the correct values: one zero byte and fourteen zero bytes. The stack starts scanning and receives BLE devices. On 14 October 2026, operation with Bluetooth headphones was reported, together with HeliPort operation for Wi-Fi network management. The current drivers and NVRAM are retained. The Bluetooth headset microphone was subsequently confirmed working on 14 October 2026. Playback and headset voice capture are therefore established as working. Disconnection and reconnection of both Wi-Fi and Bluetooth, together with Wi-Fi network switching, were also confirmed. The analogue jack remains open; sleep recovery belongs to the deferred wake checks.
+Bluetooth status is On, FirmwareLoaded is Yes and the transport is connected; BlueToolFixup 2.7.2 and IntelBluetoothFirmware 2.4 are loaded, while IntelBTPatcher is absent. The two required NVRAM variables are present with the correct values: one zero byte and fourteen zero bytes. The stack starts scanning and receives BLE devices. On 14 October 2026, operation with Bluetooth headphones was reported, together with HeliPort operation for Wi-Fi network management. The current drivers and NVRAM are retained. The Bluetooth headset microphone was subsequently confirmed working on 14 October 2026. Playback and headset voice capture are therefore established as working. Disconnection and reconnection of both Wi-Fi and Bluetooth, together with Wi-Fi network switching, were also confirmed. Wired headphone output and automatic speaker switching were subsequently confirmed. Wired-headset input remains unverified; sleep recovery belongs to the deferred wake checks.
 
 ## Webcam and voice capture: 13 October 2026
 
@@ -95,6 +95,10 @@ In the suggested Photo Booth test, it was reported that the image was visible an
 On 14 October 2026, after testing the **S540-microfono-fix-v2** package and rebooting, an initial positive result was reported. The verification report and comparison recordings have not yet been collected. This version is retained together with the backup of the previous driver; equalisation and function keys remain deferred.
 
 The [test](../guides/microphone-fix.md) uses VoodooHDA 3.6.9, S540 variant: the input slider controls the ADC's 64 levels, microphone boost remains at 0 dB and the speaker PCM volume retains the v3 fix. The v2 package removes the installer's dependency on Xcode tools. CI checks for format, integrity, signature and restoration passed; the initial usage report is not extended to the jack or recovery after sleep.
+
+## Wired headphone output and switching: October 14, 2026
+
+The physical jack check confirms audio through wired headphones, muting of the internal speakers while connected, and automatic return to speakers after unplugging. The existing VoodooHDA configuration is retained. This result covers output and switching; wired-headset microphone input, equalisation and audio recovery after sleep remain separate items.
 
 ## Battery and sleep counters: 13 October 2026
 
