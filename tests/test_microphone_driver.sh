@@ -54,7 +54,7 @@ echo 'Original and re-signed V3 bundle accepted with distinct Mach-O hashes.'
 if /bin/bash "$CHECK" "$INSTALLED" "$BACKUP" > "$FIXTURE/rejected.txt" 2> "$FIXTURE/rejected.stderr"; then
     echo 'Unbound manifest was incorrectly accepted.' >&2; exit 1
 fi
-/usr/bin/grep -F 'Il manifest volume non coincide con lo stato salvato.' "$FIXTURE/rejected.stderr"
+/usr/bin/grep -F 'The volume manifest does not match the saved state.' "$FIXTURE/rejected.stderr"
 /bin/cp "$FIXTURE/good-state.plist" "$STATE"
 
 # A valid signature and updated manifest must not authorize another plist edit.
@@ -66,5 +66,5 @@ save_manifest
 if /bin/bash "$CHECK" "$INSTALLED" "$BACKUP" > "$FIXTURE/rejected.txt" 2> "$FIXTURE/rejected.stderr"; then
     echo 'Unexpected plist edit was incorrectly accepted.' >&2; exit 1
 fi
-/usr/bin/grep -F 'Il plist della variante contiene altre modifiche' "$FIXTURE/rejected.stderr"
+/usr/bin/grep -F 'The variant plist contains changes beyond the volume correction.' "$FIXTURE/rejected.stderr"
 echo 'Manifest mismatch and additional signed plist edit rejected.'

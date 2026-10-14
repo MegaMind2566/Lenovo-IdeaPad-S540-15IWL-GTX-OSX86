@@ -68,20 +68,20 @@ def file_digest(path: Path) -> str:
 def absolute_plain_path(value: str, *, directory: bool = False) -> Path:
     path = Path(value)
     if not path.is_absolute() or any(part in (".", "..") for part in value.split("/")):
-        fail("I percorsi devono essere assoluti e senza componenti relative.")
+        fail("Paths must be absolute and contain no relative components.")
     if "\n" in value or "\r" in value:
-        fail("Il percorso contiene caratteri non ammessi.")
+        fail("The path contains unsupported characters.")
     for component in (path, *path.parents):
         if component.is_symlink():
-            fail(f"Il percorso contiene un collegamento simbolico: {component}")
+            fail(f"The path contains a symbolic link: {component}")
     if directory and not path.is_dir():
-        fail(f"Cartella assente: {path}")
+        fail(f"Directory missing: {path}")
     return path
 
 
 def regular_file(path: Path) -> None:
     if not path.is_file() or path.is_symlink():
-        fail(f"File ordinario assente: {path}")
+        fail(f"Regular file missing: {path}")
 
 
 def run(*arguments: str) -> str:
@@ -96,14 +96,14 @@ def verify_macho(path: Path) -> None:
     with path.open("rb") as stream:
         header = stream.read(32)
     if len(header) != 32:
-        fail("Header Mach-O incompleto.")
+        fail("Incomplete Mach-O header.")
     magic, cpu_type, _, file_type, _, _, _, _ = struct.unpack("<8I", header)
     if (magic, cpu_type, file_type) != (0xFEEDFACF, 0x01000007, 11):
-        fail("Il driver deve essere un MH_KEXT_BUNDLE sottile x86_64.")
+        fail("The driver must be a thin x86_64 MH_KEXT_BUNDLE.")
     if run("/usr/bin/lipo", "-archs", str(path)) != "x86_64":
-        fail("Il driver non contiene soltanto l'architettura x86_64.")
+        fail("The driver is not exclusively x86_64.")
     if b"S540InputGainFixActive" not in path.read_bytes():
-        fail("Il driver compilato non contiene il marcatore della correzione ingresso.")
+        fail("The compiled driver lacks the input-gain fix marker.")
 
 
 def load_original_info() -> dict:
@@ -121,7 +121,7 @@ def load_original_info() -> dict:
         "files": ORIGINAL_FILES,
     }
     if lock != expected:
-        fail("Il lock del rilascio audio non coincide con quello verificato.")
+        fail("The audio release lock does not match the verified reference.")
     # curl enforces one total 60-second network deadline, including redirects.
     with tempfile.TemporaryDirectory(prefix="s540-upstream-audio-") as temporary:
         download = Path(temporary) / "release.zip"
@@ -133,35 +133,35 @@ def load_original_info() -> dict:
             check=True, text=True, capture_output=True, timeout=65,
         )
         if download.stat().st_size != ARCHIVE_SIZE:
-            fail("Dimensione del rilascio ufficiale non valida.")
+            fail("Invalid official release size.")
         data = download.read_bytes()
         if digest(data) != ARCHIVE_SHA:
-            fail("SHA256 del rilascio ufficiale non valido.")
+            fail("Invalid official release SHA256.")
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
         # The entire pinned archive is already authenticated above. Read only
         # the three canonical bundle files; never extract archive metadata.
         files = [item for item in archive.infolist() if item.filename in ORIGINAL_FILES]
         if any(sum(item.filename == name for item in files) != 1 for name in ORIGINAL_FILES):
-            fail("Ogni file canonico deve comparire esattamente una volta nel rilascio.")
+            fail("Each canonical file must appear exactly once in the release.")
         contents = {}
         for item in files:
             mode = item.external_attr >> 16
             if item.is_dir() or stat.S_ISLNK(mode) or item.file_size > 4 * 1024 * 1024:
-                fail("Il rilascio contiene un link o un file troppo grande.")
+                fail("The release contains a symbolic link or an oversized file.")
             value = archive.read(item)
             if digest(value) != ORIGINAL_FILES[item.filename]:
-                fail(f"Impronta upstream errata: {item.filename}")
+                fail(f"Incorrect upstream checksum: {item.filename}")
             contents[item.filename] = value
     info = plistlib.loads(contents["VoodooHDA.kext/Contents/Info.plist"])
     if not isinstance(info, dict):
-        fail("Il plist originale non è un dizionario.")
+        fail("The original plist is not a dictionary.")
     return info
 
 
 def canonical_manifest(bundle: Path) -> tuple[bytes, dict[str, str]]:
     actual = {item.relative_to(bundle).as_posix() for item in bundle.rglob("*") if item.is_file()}
     if actual != set(BUNDLE_FILES) or any(item.is_symlink() for item in bundle.rglob("*")):
-        fail("Il bundle firmato non contiene soltanto i tre file canonici.")
+        fail("The signed bundle must contain only the three canonical files.")
     hashes = {relative: file_digest(bundle / relative) for relative in BUNDLE_FILES}
     manifest = "".join(f"{hashes[relative]}  {relative}\n" for relative in BUNDLE_FILES)
     return manifest.encode("ascii"), hashes
@@ -183,7 +183,7 @@ def write_json(path: Path, content: dict) -> None:
 def make_package(built_bundle: Path, output: Path) -> Path:
     commit = os.environ.get("GITHUB_SHA", "")
     if not re.fullmatch(r"[0-9a-f]{40}", commit):
-        fail("GITHUB_SHA deve identificare il commit CI con 40 caratteri esadecimali.")
+        fail("GITHUB_SHA must identify the CI commit with 40 hexadecimal characters.")
     patch = REPO / "patches/audio-microphone/input-gain.patch"
     regular_file(patch)
     source_binary = built_bundle / "Contents/MacOS/VoodooHDA"
@@ -201,7 +201,7 @@ def make_package(built_bundle: Path, output: Path) -> Path:
     archive_path = output / f"{PACKAGE}.zip"
     if any(path.exists() or path.is_symlink() for path in
            (package, archive_path, output / f"{PACKAGE}.zip.sha256")):
-        fail("La destinazione del pacchetto esiste già; non verrà sovrascritta.")
+        fail("The package destination already exists and will not be overwritten.")
     with tempfile.TemporaryDirectory(prefix="s540-microphone-package-", dir=output) as temporary:
         stage = Path(temporary) / PACKAGE
         stage.mkdir()
@@ -226,7 +226,7 @@ def make_package(built_bundle: Path, output: Path) -> Path:
         regular_file(helper_source)
         helper_text = helper_source.read_text(encoding="utf-8")
         if helper_text.count("MICROPHONE_MANIFEST_SHA_PENDING") != 1:
-            fail("Il segnaposto del manifest nel helper non è unico.")
+            fail("The helper manifest placeholder is not unique.")
         helper = stage / "tools/microphone_driver_test.sh"
         helper.parent.mkdir()
         helper.write_text(
@@ -234,7 +234,7 @@ def make_package(built_bundle: Path, output: Path) -> Path:
         )
         helper.chmod(0o755)
         copy_plain(REPO / "packages/microphone/tools/verify_microphone_driver.sh", stage / "tools/verify_microphone_driver.sh", executable=True)
-        copy_plain(REPO / "docs/guides/MICROFONO-FIX.md", stage / "LEGGIMI.md")
+        copy_plain(REPO / "docs/guides/microphone-fix.md", stage / "LEGGIMI.md")
         for name in LICENSES:
             copy_plain(REPO / "licenses/audio-tahoe" / name, stage / "licenses/audio-tahoe" / name)
         # This validates only the packaged payload. It must not install/load it,
@@ -276,7 +276,7 @@ def make_package(built_bundle: Path, output: Path) -> Path:
                 if not item.is_file():
                     continue
                 if item.is_symlink() or item.name == ".DS_Store":
-                    fail("Il pacchetto contiene file non ammessi.")
+                    fail("The package contains unsupported files.")
                 relative = (Path(PACKAGE) / item.relative_to(stage)).as_posix()
                 entry = zipfile.ZipInfo(relative, date_time=(2026, 10, 14, 0, 0, 0))
                 entry.create_system = 3
@@ -301,18 +301,18 @@ def main() -> int:
     arguments = parser.parse_args()
     try:
         if sys.platform != "darwin" or platform.machine() != "x86_64":
-            fail("La creazione del pacchetto richiede macOS Intel e gli strumenti Apple nativi.")
+            fail("Packaging requires Intel macOS and native Apple tools.")
         built_bundle = absolute_plain_path(arguments.built_bundle, directory=True)
         output = absolute_plain_path(arguments.output_dir)
         output.mkdir(parents=True, exist_ok=True)
         if not output.is_dir():
-            fail("La destinazione non è una cartella.")
+            fail("The destination is not a directory.")
         archive = make_package(built_bundle, output)
-        print(f"Pacchetto verificato: {archive}")
+        print(f"Verified package: {archive}")
         print(f"SHA256: {file_digest(archive)}")
         return 0
     except (ValueError, OSError, KeyError, plistlib.InvalidFileException, json.JSONDecodeError, zipfile.BadZipFile, subprocess.SubprocessError) as error:
-        print(f"Pacchetto non creato: {error}", file=sys.stderr)
+        print(f"Package not created: {error}", file=sys.stderr)
         if isinstance(error, subprocess.CalledProcessError) and error.stderr:
             print(error.stderr[-4000:], file=sys.stderr)
         return 1

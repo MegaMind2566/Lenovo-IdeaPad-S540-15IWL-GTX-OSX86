@@ -21,7 +21,7 @@ function Write-JsonFile {
 function Add-CollectionWarning {
     param([string]$Message)
     $warnings.Add($Message)
-    Write-Host ('  Nota: ' + $Message) -ForegroundColor Yellow
+    Write-Host ('  Note: ' + $Message) -ForegroundColor Yellow
 }
 
 function Get-DeviceProperties {
@@ -39,13 +39,13 @@ function Get-DeviceProperties {
 function Get-AcpiHeader {
     param([string]$Path)
     $bytes = [System.IO.File]::ReadAllBytes($Path)
-    if ($bytes.Length -lt 36) { throw 'Tabella ACPI troppo corta.' }
+    if ($bytes.Length -lt 36) { throw 'ACPI table is too short.' }
     $signature = [System.Text.Encoding]::ASCII.GetString($bytes, 0, 4)
     $length = [BitConverter]::ToUInt32($bytes, 4)
-    if ($length -lt 36 -or $length -ne $bytes.Length) { throw ('Lunghezza ACPI non valida: ' + $signature) }
+    if ($length -lt 36 -or $length -ne $bytes.Length) { throw ('Invalid ACPI length: ' + $signature) }
     $sum = 0
     foreach ($b in $bytes) { $sum = ($sum + [int]$b) -band 255 }
-    if ($sum -ne 0) { throw ('Checksum ACPI non valido: ' + $signature) }
+    if ($sum -ne 0) { throw ('Invalid ACPI checksum: ' + $signature) }
     return [pscustomobject]@{
         Signature = $signature
         Length = $length
@@ -56,12 +56,12 @@ function Get-AcpiHeader {
 }
 
 try {
-    if ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT) { throw 'Questo programma richiede Windows.' }
+    if ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT) { throw 'This program requires Windows.' }
     $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
     $principal = [Security.Principal.WindowsPrincipal]::new($identity)
     $isAdmin = $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
     if (-not $isAdmin) {
-        Write-Host 'Windows richiedera i permessi di amministratore per leggere i dati.'
+        Write-Host 'Windows will request administrator permission to read the data.'
         $arguments = '-NoLogo -NoProfile -ExecutionPolicy Bypass -File "{0}"' -f $PSCommandPath
         if ($OutputRoot) { $arguments += ' -OutputRoot "{0}"' -f $OutputRoot }
         if ($SkipToolDownload) { $arguments += ' -SkipToolDownload' }
@@ -79,8 +79,8 @@ try {
     $out = Join-Path $OutputRoot $name
     $acpiOut = Join-Path $out 'ACPI'
     $null = New-Item -ItemType Directory -Path $acpiOut -Force
-    Write-Host 'Lenovo Hackintosh - raccolta dati' -ForegroundColor Cyan
-    Write-Host '[1/4] Modello, BIOS, processore e dischi'
+    Write-Host 'Lenovo Hackintosh - data collection' -ForegroundColor Cyan
+    Write-Host '[1/4] Model, BIOS, processor and disks'
     try {
         $computer = Get-CimInstance Win32_ComputerSystem
         $bios = Get-CimInstance Win32_BIOS
@@ -94,11 +94,11 @@ try {
             Windows = Get-CimInstance Win32_OperatingSystem | Select-Object Caption, Version, BuildNumber, OSArchitecture
             Disks = @(Get-CimInstance Win32_DiskDrive | Select-Object Index, Model, Size, InterfaceType, FirmwareRevision)
         }
-        try { $system['SecureBoot'] = [bool](Confirm-SecureBootUEFI) } catch { $system['SecureBoot'] = 'Non rilevato' }
+        try { $system['SecureBoot'] = [bool](Confirm-SecureBootUEFI) } catch { $system['SecureBoot'] = 'Not detected' }
         Write-JsonFile (Join-Path $out 'sistema.json') $system
-    } catch { Add-CollectionWarning ('Inventario sistema incompleto: ' + $_.Exception.Message) }
+    } catch { Add-CollectionWarning ('Incomplete system inventory: ' + $_.Exception.Message) }
 
-    Write-Host '[2/4] Identificativi di audio, touchpad e altri dispositivi'
+    Write-Host '[2/4] Audio, touchpad and other device identifiers'
     $devices = @()
     try {
         $classes = @('Display', 'MEDIA', 'AudioEndpoint', 'HIDClass', 'Mouse', 'Keyboard', 'Net', 'Bluetooth', 'System', 'USB', 'SDHost', 'Camera', 'Image')
@@ -125,9 +125,9 @@ try {
             @{n='CompatibleIds';e={$_.CompatibleIds -join '; '}},
             @{n='LocationPaths';e={$_.LocationPaths -join '; '}}, Service |
             Export-Csv -LiteralPath (Join-Path $out 'dispositivi.csv') -NoTypeInformation -Encoding UTF8
-    } catch { Add-CollectionWarning ('Identificativi dispositivi incompleti: ' + $_.Exception.Message) }
+    } catch { Add-CollectionWarning ('Incomplete device identifiers: ' + $_.Exception.Message) }
 
-    Write-Host '[3/4] Tabelle ACPI'
+    Write-Host '[3/4] ACPI tables'
     $tableIds = @()
     $tableCounts = @{}
     $acpiSource = 'Windows API'
@@ -144,10 +144,10 @@ public static class LenovoFirmwareReader {
 }
 '@
         $n = [LenovoFirmwareReader]::EnumSystemFirmwareTables([LenovoFirmwareReader]::Acpi, $null, 0)
-        if ($n -eq 0 -or $n -gt 1048576 -or ($n % 4) -ne 0) { throw 'Enumerazione ACPI non disponibile.' }
+        if ($n -eq 0 -or $n -gt 1048576 -or ($n % 4) -ne 0) { throw 'ACPI enumeration is unavailable.' }
         $buffer = [byte[]]::new([int]$n)
         $read = [LenovoFirmwareReader]::EnumSystemFirmwareTables([LenovoFirmwareReader]::Acpi, $buffer, $n)
-        if ($read -ne $n) { throw 'Enumerazione ACPI incompleta.' }
+        if ($read -ne $n) { throw 'ACPI enumeration is incomplete.' }
         for ($i = 0; $i -lt $n; $i += 4) {
             $id = [BitConverter]::ToUInt32($buffer, $i)
             $sig = [System.Text.Encoding]::ASCII.GetString($buffer, $i, 4)
@@ -157,7 +157,7 @@ public static class LenovoFirmwareReader {
                 $tableCounts[$sig]++
             }
         }
-    } catch { Add-CollectionWarning ('Enumerazione firmware: ' + $_.Exception.Message) }
+    } catch { Add-CollectionWarning ('Firmware enumeration: ' + $_.Exception.Message) }
 
     $toolSpec = [ordered]@{
         Version = '20251212'
@@ -172,17 +172,17 @@ public static class LenovoFirmwareReader {
             $tool = Join-Path $scratch 'acpidump.exe'
             Invoke-WebRequest -Uri $toolSpec.Url -OutFile $tool -UseBasicParsing -TimeoutSec 60
             $actual = (Get-FileHash -LiteralPath $tool -Algorithm SHA256).Hash.ToLowerInvariant()
-            if ($actual -ne $toolSpec.Sha256) { throw 'SHA-256 dello strumento ACPI non valido: esecuzione annullata.' }
+            if ($actual -ne $toolSpec.Sha256) { throw 'Invalid ACPI tool SHA-256; execution cancelled.' }
             Push-Location $scratch
             try {
                 $proc = Start-Process -FilePath $tool -ArgumentList '-b' -WorkingDirectory $scratch -PassThru -NoNewWindow -RedirectStandardOutput (Join-Path $scratch 'output.txt') -RedirectStandardError (Join-Path $scratch 'error.txt')
                 $processHandle = $proc.Handle
-                if (-not $proc.WaitForExit(60000)) { $proc.Kill(); throw 'Lo strumento ACPI non ha terminato entro 60 secondi.' }
+                if (-not $proc.WaitForExit(60000)) { $proc.Kill(); throw 'The ACPI tool did not finish within 60 seconds.' }
                 $proc.WaitForExit()
-                if ($null -ne $proc.ExitCode -and $proc.ExitCode -ne 0) { Add-CollectionWarning ('acpidump ha restituito il codice ' + $proc.ExitCode + '; verifico i file disponibili.') }
+                if ($null -ne $proc.ExitCode -and $proc.ExitCode -ne 0) { Add-CollectionWarning ('acpidump returned code ' + $proc.ExitCode + '; checking available files.') }
                 if (-not (Get-ChildItem -LiteralPath $scratch -Filter 'dsdt*.dat')) {
                     $proc = Start-Process -FilePath $tool -ArgumentList '-b -n DSDT' -WorkingDirectory $scratch -PassThru -NoNewWindow -RedirectStandardOutput (Join-Path $scratch 'dsdt-output.txt') -RedirectStandardError (Join-Path $scratch 'dsdt-error.txt')
-                    if (-not $proc.WaitForExit(30000)) { $proc.Kill(); throw 'Lettura DSDT oltre il tempo previsto.' }
+                    if (-not $proc.WaitForExit(30000)) { $proc.Kill(); throw 'DSDT read exceeded its time limit.' }
                     $proc.WaitForExit()
                 }
             } finally { Pop-Location }
@@ -192,12 +192,12 @@ public static class LenovoFirmwareReader {
                     if ($wantedSignatures -contains $header.Signature) {
                         $destination = Join-Path $acpiOut ($f.BaseName.ToUpperInvariant() + '.aml')
                         Copy-Item -LiteralPath $f.FullName -Destination $destination
-                        $acpiSource = 'ACPICA acpidump; eventuale ripiego Windows API'
+                        $acpiSource = 'ACPICA acpidump; optional Windows API fallback'
                     }
-                } catch { Add-CollectionWarning ('Una tabella ACPI non supera i controlli: ' + $f.Name) }
+                } catch { Add-CollectionWarning ('An ACPI table failed validation: ' + $f.Name) }
             }
         }
-    } catch { Add-CollectionWarning ('Raccolta ACPICA non completa: ' + $_.Exception.Message) }
+    } catch { Add-CollectionWarning ('ACPICA collection incomplete: ' + $_.Exception.Message) }
     finally { Remove-Item -LiteralPath $scratch -Recurse -Force -ErrorAction SilentlyContinue }
 
     foreach ($entry in @($tableIds | Where-Object {$wantedSignatures -contains $_.Signature} | Sort-Object Signature -Unique)) {
@@ -205,16 +205,16 @@ public static class LenovoFirmwareReader {
         $file = $null
         try {
             $size = [LenovoFirmwareReader]::GetSystemFirmwareTable([LenovoFirmwareReader]::Acpi, $entry.Id, $null, 0)
-            if ($size -lt 36 -or $size -gt 16777216) { throw 'Dimensione ACPI non valida.' }
+            if ($size -lt 36 -or $size -gt 16777216) { throw 'Invalid ACPI size.' }
             $data = [byte[]]::new([int]$size)
             $read = [LenovoFirmwareReader]::GetSystemFirmwareTable([LenovoFirmwareReader]::Acpi, $entry.Id, $data, $size)
-            if ($read -ne $size) { throw 'Lettura ACPI incompleta.' }
+            if ($read -ne $size) { throw 'Incomplete ACPI read.' }
             $file = Join-Path $acpiOut ($entry.Signature + '.aml')
             [System.IO.File]::WriteAllBytes($file, $data)
             $null = Get-AcpiHeader $file
         } catch {
             if ($file -and (Test-Path -LiteralPath $file)) { Remove-Item -LiteralPath $file -Force }
-            Add-CollectionWarning ('Ripiego ACPI non riuscito per ' + $entry.Signature)
+            Add-CollectionWarning ('ACPI fallback failed for ' + $entry.Signature)
         }
     }
 
@@ -227,12 +227,12 @@ public static class LenovoFirmwareReader {
     $ssdtDistinct = @($tables | Where-Object Signature -eq 'SSDT' | Select-Object -ExpandProperty Sha256 | Sort-Object -Unique).Count
     $expectedSsdt = if ($tableCounts.ContainsKey('SSDT')) { [int]$tableCounts['SSDT'] } else { 0 }
     $ssdtComplete = $expectedSsdt -gt 0 -and $ssdtDistinct -ge $expectedSsdt
-    if ($dsdtCount -eq 0) { Add-CollectionWarning 'DSDT assente. Allegare comunque lo ZIP per scegliere il metodo successivo.' }
-    if (-not $ssdtComplete) { Add-CollectionWarning 'SSDT complete non confermate. Il ripiego Windows legge solo la prima tabella per firma.' }
-    if ($devices.Count -eq 0) { Add-CollectionWarning 'Nessun identificativo hardware esportato.' }
+    if ($dsdtCount -eq 0) { Add-CollectionWarning 'DSDT missing. Attach the ZIP anyway to choose the next method.' }
+    if (-not $ssdtComplete) { Add-CollectionWarning 'Complete SSDT collection unconfirmed. The Windows fallback reads only the first table per signature.' }
+    if ($devices.Count -eq 0) { Add-CollectionWarning 'No hardware identifiers were exported.' }
     Write-JsonFile (Join-Path $out 'acpi-manifest.json') ([ordered]@{Source=$acpiSource;EnumeratedCounts=$tableCounts;Tables=$tables})
 
-    Write-Host '[4/4] Creazione dello ZIP'
+    Write-Host '[4/4] Creating the ZIP'
     $status = [ordered]@{
         SchemaVersion = 1
         CollectorVersion = $collectionVersion
@@ -250,30 +250,30 @@ public static class LenovoFirmwareReader {
     }
     Write-JsonFile (Join-Path $out 'stato-raccolta.json') $status
     $summary = @(
-        'LENOVO HACKINTOSH - RACCOLTA DATI',
-        ('Stato: ' + $status.CollectionStatus),
-        ('Dispositivi: ' + $devices.Count),
+        'LENOVO HACKINTOSH - DATA COLLECTION',
+        ('Status: ' + $status.CollectionStatus),
+        ('Devices: ' + $devices.Count),
         ('DSDT: ' + $dsdtCount),
-        ('SSDT esportate: ' + $ssdtCount + '; enumerate: ' + $expectedSsdt),
+        ('SSDT exported: ' + $ssdtCount + '; enumerated: ' + $expectedSsdt),
         '',
-        'Allega lo ZIP nella chat del progetto, anche se la raccolta e parziale.',
-        'Questi file non sono una EFI pronta da installare.',
+        'Attach the ZIP in the project chat, even if collection is partial.',
+        'These files are not a ready-to-install EFI.',
         '',
         'Note:'
     ) + @($warnings.ToArray())
     [System.IO.File]::WriteAllLines((Join-Path $out 'LEGGIMI.txt'), [string[]]$summary, $utf8)
     $zip = $out + '.zip'
     Compress-Archive -LiteralPath $out -DestinationPath $zip -CompressionLevel Optimal
-    Write-Host ('File pronto: ' + $zip) -ForegroundColor Green
+    Write-Host ('File ready: ' + $zip) -ForegroundColor Green
     if (-not $NoOpenFolder) {
         Start-Process -FilePath 'explorer.exe' -ArgumentList ('/select,"{0}"' -f $zip)
-        $null = Read-Host 'Premi Invio per chiudere'
+        $null = Read-Host 'Press Enter to close'
     }
     exit 0
 } catch {
-    $message = 'Raccolta non completata: ' + $_.Exception.Message
+    $message = 'Collection did not complete: ' + $_.Exception.Message
     Write-Host $message -ForegroundColor Red
     try { [System.IO.File]::WriteAllText((Join-Path $kitRoot 'errore-avvio.txt'), $message, $utf8) } catch { }
-    if (-not $NoOpenFolder) { $null = Read-Host 'Premi Invio per chiudere' }
+    if (-not $NoOpenFolder) { $null = Read-Host 'Press Enter to close' }
     exit 1
 }

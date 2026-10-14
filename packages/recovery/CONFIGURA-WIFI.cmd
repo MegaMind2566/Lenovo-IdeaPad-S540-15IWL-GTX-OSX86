@@ -7,7 +7,7 @@ if not errorlevel 1 (
 ) else (
   python --version >nul 2>&1
   if errorlevel 1 (
-    echo Installa Python 3 da https://www.python.org/downloads/windows/ e riprova.
+    echo Install Python 3 from https://www.python.org/downloads/windows/ and try again.
   ) else (
     python "tools\configure_wifi.py"
   )

@@ -7,7 +7,7 @@ if not errorlevel 1 (
 ) else (
   python --version >nul 2>&1
   if errorlevel 1 (
-    echo Python 3 non trovato. Usa lo stesso Python usato per scaricare la Recovery.
+    echo Python 3 not found. Use the same Python installation used to download Recovery.
   ) else (
     python "tools\test_bluetooth.py"
   )

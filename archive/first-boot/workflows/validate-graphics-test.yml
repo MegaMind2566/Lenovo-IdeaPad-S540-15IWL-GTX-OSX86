@@ -1,0 +1,51 @@
+name: Reversible graphics trial
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'archive/first-boot/tools/test_graphics.py'
+      - 'archive/first-boot/tools/check_graphics_test.py'
+      - 'archive/first-boot/tools/*GRAFICA.cmd'
+      - 'archive/first-boot/docs/graphics-test.md'
+      - 'archive/first-boot/workflows/validate-graphics-test.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create the reference configuration
+        run: python3 archive/initial-efi/tools/build_efi.py --output build/graphics-validation
+      - name: Check reversible change and ocvalidate
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+          validator = next(Path('build/graphics-validation/upstream/OpenCore').rglob('ocvalidate.linux'))
+          subprocess.run(['python3', 'archive/first-boot/tools/check_graphics_test.py',
+                          'build/graphics-validation/bundle/EFI/OC/config.plist',
+                          '--ocvalidate', str(validator)], check=True)
+          PY
+      - name: Create the trial package
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+          with zipfile.ZipFile('build/S540-test-grafica.zip', 'w', zipfile.ZIP_DEFLATED) as z:
+              for name in ['TEST-GRAFICA.cmd', 'RIPRISTINA-GRAFICA.cmd']:
+                  z.write(Path('archive/first-boot/tools')/name, name)
+              z.write('archive/first-boot/tools/test_graphics.py', 'tools/test_graphics.py')
+              z.write('archive/first-boot/docs/graphics-test.md', 'LEGGIMI.md')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: S540-test-grafica
+          path: build/S540-test-grafica.zip
+          if-no-files-found: error
+          retention-days: 30

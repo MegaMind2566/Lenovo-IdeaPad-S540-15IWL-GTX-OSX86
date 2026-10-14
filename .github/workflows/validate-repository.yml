@@ -1,4 +1,4 @@
-name: Struttura e documentazione
+name: Repository structure and documentation
 
 on:
   push:
@@ -17,5 +17,5 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
-      - name: Verifica struttura, sintassi e collegamenti
+      - name: Validate structure, syntax, and links
         run: python3 tests/validate_repository.py

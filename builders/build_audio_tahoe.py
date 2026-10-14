@@ -20,7 +20,7 @@ SOURCE_FILES = {
     'ANNULLA-VOLUME-AUDIO.command': 'packages/audio/ANNULLA-VOLUME-AUDIO.command',
     'tools/audio_tahoe.sh': 'packages/audio/tools/audio_tahoe.sh',
     'profiles/audio-tahoe-assets.lock.json': 'config/profiles/audio-tahoe-assets.lock.json',
-    'docs/AUDIO-TAHOE.md': 'docs/guides/AUDIO-TAHOE.md',
+    'docs/AUDIO-TAHOE.md': 'docs/guides/tahoe-audio.md',
     'licenses/audio-tahoe/VoodooHDA-LICENSE.txt': 'licenses/audio-tahoe/VoodooHDA-LICENSE.txt',
     'licenses/audio-tahoe/VoodooHDA-third-party-LICENSE.txt': 'licenses/audio-tahoe/VoodooHDA-third-party-LICENSE.txt',
     'licenses/audio-tahoe/AppleALC-LICENSE.txt': 'licenses/audio-tahoe/AppleALC-LICENSE.txt',
@@ -94,14 +94,14 @@ def main():
         digest + '  ' + name + '\n' for name, digest in sorted(lock['files'].items())
     ).encode()
     entries['LEGGIMI.txt'] = (
-        'Prova audio ALC257 su Tahoe. Prima conserva la EFI funzionante.\n'
-        'Leggi docs/AUDIO-TAHOE.md. Esegui PREPARA-AUDIO.command, poi riavvia.\n'
-        'Esegui INSTALLA-AUDIO.command; approva il driver se macOS lo richiede e riavvia.\n'
-        'Esegui VERIFICA-AUDIO.command e controlla altoparlanti, cuffie e microfono.\n'
-        'RIPRISTINA-AUDIO.command documenta e gestisce il ritorno alla configurazione precedente.\n'
-        'Se audio e tasti funzionano ma il volume cambia solo a muto: esegui VOLUME-AUDIO.command.\n'
-        'ANNULLA-VOLUME-AUDIO.command ripristina soltanto il driver precedente alla prova volume.\n'
-        'Il pacchetto non contiene EFI personali, Wi-Fi, SMBIOS o log.\n'
+        'ALC257 audio test on Tahoe. Back up the working EFI first.\n'
+        'Read docs/AUDIO-TAHOE.md. Run PREPARA-AUDIO.command, then restart.\n'
+        'Run INSTALLA-AUDIO.command; approve the driver if requested by macOS, then restart.\n'
+        'Run VERIFICA-AUDIO.command and check speakers, headphones and microphone.\n'
+        'RIPRISTINA-AUDIO.command documents and manages restoration of the previous configuration.\n'
+        'If audio and keys work but the volume changes only when muted, run VOLUME-AUDIO.command.\n'
+        'ANNULLA-VOLUME-AUDIO.command restores only the driver used before the volume test.\n'
+        'The package contains no personal EFI, Wi-Fi credentials, SMBIOS identities or logs.\n'
     ).encode()
     archive = output/'S540-audio-Tahoe-v3.zip'
     with zipfile.ZipFile(archive, 'w') as target:

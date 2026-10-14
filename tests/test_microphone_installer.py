@@ -322,7 +322,7 @@ verify_payload
         with (case["STAGE"] / FILES[1]).open("ab") as stream:
             stream.write(b"unknown-stage-marker")
         unknown_hashes = fingerprints(case["STAGE"])
-        run_case(case, "install", False, "Staging non riconosciuto.")
+        run_case(case, "install", False, "Unrecognized staging content.")
         assert fingerprints(case["DRIVER"]) == original_hashes
         assert fingerprints(case["STAGE"]) == unknown_hashes
         assert not case["PREVIOUS"].exists() and phase(case) == "staging"
@@ -330,7 +330,7 @@ verify_payload
         case = make_case("changed-config", phase="staging")
         write_plist(case["CONFIG"], {"boot-args": "-v voodoo-layout-id=11 -igfxblr", "LaterSetting": True})
         changed_config = case["CONFIG"].read_bytes()
-        run_case(case, "install", False, "La configurazione EFI è cambiata")
+        run_case(case, "install", False, "The EFI configuration changed after the test started; it will not be modified.")
         assert fingerprints(case["DRIVER"]) == original_hashes
         run_case(case, "restore")
         assert_finished(case, original_hashes, "restorerebootrequired")
@@ -339,14 +339,14 @@ verify_payload
         for name, writable in (("writable-state", "STATE"), ("writable-manifest", "ORIGINAL_SUMS")):
             case = make_case(name, phase="staging")
             case[writable].chmod(0o666)
-            run_case(case, "install", False, "Una voce del backup è scrivibile da altri utenti.")
+            run_case(case, "install", False, "A backup entry is writable by other users.")
             assert fingerprints(case["DRIVER"]) == original_hashes
             assert not case["STAGE"].exists() and not case["PREVIOUS"].exists()
             assert phase(case) == "staging"
 
         case = make_case("non-root-backup-file", phase="staging")
         os.chown(case["ORIGINAL"] / FILES[0], 501, -1)
-        run_case(case, "install", False, "Una voce del backup non appartiene a root")
+        run_case(case, "install", False, "A backup entry is not owned by root or is a link.")
         assert fingerprints(case["DRIVER"]) == original_hashes
         assert phase(case) == "staging"
 
@@ -365,7 +365,7 @@ verify_payload
         draft["Phase"] = "swapped"
         draft["ConfigHash"] = "0" * 64
         write_plist(case["BACKUP"] / "state-next.plist", draft)
-        run_case(case, "install", False, "Lo stato temporaneo contiene modifiche oltre alla fase")
+        run_case(case, "install", False, "The temporary state contains changes beyond the phase; the test has stopped.")
         assert fingerprints(case["DRIVER"]) == payload_hashes
         assert fingerprints(case["PREVIOUS"]) == original_hashes
         assert phase(case) == "swapping"

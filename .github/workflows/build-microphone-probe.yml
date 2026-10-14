@@ -7,7 +7,7 @@ on:
       - packages/microphone-diagnostics/**
       - packages/microphone/tools/verify_microphone_driver.sh
       - tests/test_microphone_driver.sh
-      - docs/guides/MICROFONO.md
+      - docs/guides/microphone-diagnostics.md
       - licenses/audio-tahoe/**
       - .github/workflows/build-microphone-probe.yml
   workflow_dispatch:
@@ -49,7 +49,7 @@ jobs:
           cp packages/microphone/tools/verify_microphone_driver.sh "$package/tools/"
           cp packages/microphone-diagnostics/src/hda_mixer_snapshot.c "$package/tools/"
           cp packages/microphone-diagnostics/RACCOGLI-MICROFONO.command "$package/"
-          cp docs/guides/MICROFONO.md "$package/LEGGIMI.md"
+          cp docs/guides/microphone-diagnostics.md "$package/LEGGIMI.md"
           cp licenses/audio-tahoe/VoodooHDA-LICENSE.txt "$package/licenses/"
           chmod 755 "$package/RACCOGLI-MICROFONO.command" "$package/tools/collect_microphone.sh" "$package/bin/hda_mixer_snapshot"
           printf '%s\n' "Source commit: $GITHUB_SHA" "VoodooHDA ABI pin: 8c7e8e2ce6de0a917be663a3192857955288c937" > "$package/BUILD.txt"

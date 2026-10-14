@@ -4,17 +4,17 @@ This archive preserves the tools used before Tahoe reached the desktop. Files we
 
 | Group | Contents | Current relevance |
 |---|---|---|
-| [Initial EFI](efi-iniziale/) | Original OpenCore template builder and workflow | Reference template preceding the Intel, audio and backlight fixes; it does not reproduce the private working EFI |
-| [First boot](primo-avvio/) | VESA, safe boot, Whiskey Lake, framebuffer memory, Intel traces and Recovery logging | Historical investigations that led to the working desktop |
-| [Trace licenses](primo-avvio/licenses/intel-trace/) | Licenses for diagnostic build dependencies | Preserved with their builders and pinned asset versions |
+| [Initial EFI](initial-efi/) | Original OpenCore template builder and workflow | Reference template preceding the Intel, audio and backlight fixes; it does not reproduce the private working EFI |
+| [First boot](first-boot/) | VESA, safe boot, Whiskey Lake, framebuffer memory, Intel traces and Recovery logging | Historical investigations that led to the working desktop |
+| [Trace licenses](first-boot/licenses/intel-trace/) | Licenses for diagnostic build dependencies | Preserved with their builders and pinned asset versions |
 
 ## Investigation notes
 
-- [Intel framebuffer memory fix](primo-avvio/docs/TEST-MEMORIA-INTEL.md).
-- [Intel tracing](primo-avvio/docs/TRACCIA-INTEL.md).
-- [Boot log analysis](primo-avvio/docs/ANALISI-LOG-AVVIO.md).
-- [Unified log analysis](primo-avvio/docs/ANALISI-LOG-UNIFICATI.md).
-- [Recovery log collection](primo-avvio/docs/DIAGNOSI-INTERFACCIA.md).
+- [Intel framebuffer memory fix](first-boot/docs/intel-memory-test.md).
+- [Intel tracing](first-boot/docs/intel-trace.md).
+- [Boot log analysis](first-boot/docs/boot-log-analysis.md).
+- [Unified log analysis](first-boot/docs/unified-log-analysis.md).
+- [Recovery log collection](first-boot/docs/gui-diagnostics.md).
 
 These notes and launchers describe the package names, driver guards and conditions of their original investigation.
 

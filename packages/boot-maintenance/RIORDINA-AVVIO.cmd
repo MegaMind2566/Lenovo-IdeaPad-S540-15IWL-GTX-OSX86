@@ -7,7 +7,7 @@ if not errorlevel 1 (
 ) else (
   python --version >nul 2>&1
   if errorlevel 1 (
-    echo Python 3 non trovato. Usa lo stesso Python gia usato per la Recovery.
+    echo Python 3 not found. Use the same Python installation already used for Recovery.
   ) else (
     python "tools\reorder_boot_disk.py"
   )

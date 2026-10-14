@@ -7,7 +7,7 @@ if not errorlevel 1 (
 ) else (
   python --version >nul 2>&1
   if errorlevel 1 (
-    echo Installa Python 3 da https://www.python.org/downloads/windows/ e riprova.
+    echo Install Python 3 from https://www.python.org/downloads/windows/ and try again.
     pause
     exit /b 1
   )
@@ -15,8 +15,8 @@ if not errorlevel 1 (
 )
 %S540_PY_CMD% "tools\macrecovery\macrecovery.py" -b Mac-5F9802EFE386AA28 -m 00000000000000000 -os latest download
 if errorlevel 1 (
-  echo Download non completato. Non copiare file incompleti sulla chiavetta.
+  echo Download did not complete. Do not copy incomplete files to the USB drive.
 ) else (
-  echo Recovery scaricata. Segui LEGGIMI.md per copiarla sulla chiavetta.
+  echo Recovery downloaded. Follow LEGGIMI.md to copy it to the USB drive.
 )
 pause

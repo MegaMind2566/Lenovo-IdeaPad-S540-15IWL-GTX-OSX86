@@ -15,13 +15,13 @@ def modified(original):
     result = copy.deepcopy(original)
     entries = result['Kernel']['Add']
     if not isinstance(entries, list):
-        raise ValueError('Kernel/Add deve essere una lista.')
+        raise ValueError('Kernel/Add must be a list.')
     matches = [entry for entry in entries if entry.get('BundlePath') == KEXT]
     if len(matches) != 1:
-        raise ValueError('Occorre una sola voce IntelBTPatcher.kext. Nessuna modifica.')
+        raise ValueError('Exactly one IntelBTPatcher.kext entry is required. No changes made.')
     entry = matches[0]
     if not isinstance(entry.get('Enabled'), bool):
-        raise ValueError('Enabled deve essere un valore booleano. Nessuna modifica.')
+        raise ValueError('Enabled must be a boolean. No changes made.')
     entry['Enabled'] = False
     return result
 
@@ -37,18 +37,18 @@ def apply_test(path):
     original = plistlib.loads(raw)
     new = modified(original)
     if new == original:
-        print('IntelBTPatcher e gia escluso da questa configurazione. Nessuna modifica.')
+        print('IntelBTPatcher is already excluded from this configuration. No changes made.')
         return False
     backup = path.with_name(BACKUP)
     if backup.exists() and backup.read_bytes() != raw:
-        raise ValueError('Esiste un backup di un altro stato della configurazione. Nessuna modifica.')
+        raise ValueError('A backup from another configuration state already exists. No changes made.')
     if not backup.exists():
         with backup.open('xb') as stream:
             stream.write(raw)
     atomic_write(path, plistlib.dumps(new, sort_keys=False))
-    print('Prova attivata: solo IntelBTPatcher.kext e stato escluso da Kernel/Add.')
+    print('Test enabled: only IntelBTPatcher.kext was excluded from Kernel/Add.')
     print('Backup: EFI/OC/' + BACKUP)
-    print('Spegni il portatile, riaccendilo dallo stesso OpenCore e scegli Machintosh SSD.')
+    print('Shut down the laptop, boot from the same OpenCore and select Machintosh SSD.')
     return True
 
 
@@ -59,9 +59,9 @@ def restore(path):
     expected = modified(original)
     current = plistlib.loads(path.read_bytes())
     if current != original and current != expected:
-        raise ValueError('Sono presenti altre modifiche. Annulla prima le prove successive a TEST-BT.')
+        raise ValueError('Additional changes are present. Reverse tests applied after TEST-BT first.')
     atomic_write(path, raw)
-    print('Configurazione precedente ripristinata. Backup conservato.')
+    print('The previous configuration was restored. The backup is preserved.')
 
 
 def main():
@@ -71,7 +71,7 @@ def main():
     parser.add_argument('--restore', action='store_true')
     args = parser.parse_args()
     if not args.config.is_file():
-        raise SystemExit("EFI/OC/config.plist non trovato. Estrai il pacchetto nella radice dell'HDD di avvio.")
+        raise SystemExit("EFI/OC/config.plist not found. Extract the package to the boot HDD root.")
     try:
         if args.restore:
             restore(args.config)
@@ -79,7 +79,7 @@ def main():
             apply_test(args.config)
     except (OSError, ValueError, KeyError, TypeError, AttributeError,
             plistlib.InvalidFileException) as error:
-        raise SystemExit('Operazione non eseguita: ' + str(error))
+        raise SystemExit('Operation not performed: ' + str(error))
 
 
 if __name__ == '__main__':

@@ -40,10 +40,10 @@ AUDIO_ZIP_PATHS = {
 def check_structure(root, failures):
     for name in ('tools', 'acpi', 'profiles', 'usb'):
         if (root / name).exists():
-            failures.append(f'Cartella non prevista alla radice: {name}')
+            failures.append(f'Unexpected directory at the repository root: {name}')
     for path in root.iterdir():
         if path.is_file() and path.suffix in ('.command', '.cmd', '.sh', '.ps1', '.py', '.c', '.aml'):
-            failures.append(f'Launcher o sorgente non previsto alla radice: {path.name}')
+            failures.append(f'Unexpected launcher or source file at the repository root: {path.name}')
     required = [
         'builders/build_audio_microphone.py', 'builders/build_audio_tahoe.py',
         'builders/build_acpi.py', 'tests/test_audio_microphone_patch.py',
@@ -52,8 +52,8 @@ def check_structure(root, failures):
         'config/profiles/audio-tahoe-assets.lock.json', 'config/profiles/assets.lock.json',
         'config/profiles/s540-81sw.json', 'config/acpi/compiled/manifest.json',
         'config/usb/ports.json', 'config/usb/UTBMap.kext/Contents/Info.plist',
-        'docs/guides/MICROFONO-FIX.md', 'docs/guides/MICROFONO.md',
-        'docs/guides/AUDIO-TAHOE.md', 'archive/README.md', 'docs/README.md',
+        'docs/guides/microphone-fix.md', 'docs/guides/microphone-diagnostics.md',
+        'docs/guides/tahoe-audio.md', 'archive/README.md', 'docs/README.md',
         'packages/README.md',
         'licenses/audio-tahoe/VoodooHDA-LICENSE.txt',
         'licenses/audio-tahoe/VoodooHDA-third-party-LICENSE.txt',
@@ -63,13 +63,13 @@ def check_structure(root, failures):
         required.extend(f'packages/{package}/{item}' for item in inputs)
     for relative in required:
         if not (root / relative).is_file():
-            failures.append(f'Input attivo necessario assente: {relative}')
+            failures.append(f'Required active input missing: {relative}')
     for path in (root / 'packages').glob('*/*'):
         if path.suffix not in ('.command', '.cmd'):
             continue
         for helper in re.findall(r'tools[\\/]+([A-Za-z0-9_.-]+\.(?:sh|py|ps1))', path.read_text()):
             if not (path.parent / 'tools' / helper).is_file():
-                failures.append(f'{path.relative_to(root)}: helper assente tools/{helper}')
+                failures.append(f'{path.relative_to(root)}: helper missing tools/{helper}')
     # Package source paths may change, but the existing distributed ZIP paths
     # must not. Read the builder's literal source map without importing code.
     builder = root / 'builders/build_audio_tahoe.py'
@@ -83,43 +83,43 @@ def check_structure(root, failures):
             ):
                 source_map = ast.literal_eval(statement.value)
         if not isinstance(source_map, dict) or set(source_map) != AUDIO_ZIP_PATHS:
-            failures.append('Il builder audio non conserva i percorsi del pacchetto esistente.')
+            failures.append('The audio builder does not preserve the existing package paths.')
         else:
             for relative in source_map.values():
                 if not (root / relative).is_file():
-                    failures.append(f'Sorgente del pacchetto audio assente: {relative}')
+                    failures.append(f'Audio package source missing: {relative}')
     # Check literal workflow inputs, while leaving generated build paths alone.
     pattern = r'(?<![\w./-])(?:builders|tests|packages|config|docs|licenses|patches)/[A-Za-z0-9_./-]+\.(?:command|patch|json|ps1|cmd|py|sh|md|c)(?![\w.-])'
     for workflow in (root / '.github/workflows').glob('*.yml'):
         text = workflow.read_text().replace('\\', '/')
         for relative in re.findall(pattern, text):
             if not (root / relative).is_file():
-                failures.append(f'{workflow.relative_to(root)}: input assente {relative}')
+                failures.append(f'{workflow.relative_to(root)}: input missing {relative}')
 
 
 def check_archive(root, failures):
     manifest = root / 'archive/manifest.json'
     if not manifest.is_file():
-        failures.append('Manifest archivio assente.')
+        failures.append('Archive manifest missing.')
         return
     try:
         data = json.loads(manifest.read_text())
         hash_basis = data.get('hash_basis')
         if 'hash_basis' in data and hash_basis != 'cmd-lf-canonical':
-            failures.append(f'Base delle impronte archivio non riconosciuta: {hash_basis}')
+            failures.append(f'Unrecognized archive checksum basis: {hash_basis}')
             return
         old_paths, new_paths = set(), set()
         for move in data['moves']:
             old, new = move['from'], move['to']
             if old in old_paths or new in new_paths:
-                failures.append(f'Spostamento duplicato nel manifest archivio: {old}')
+                failures.append(f'Duplicate move in the archive manifest: {old}')
             old_paths.add(old)
             new_paths.add(new)
             if (root / old).exists():
-                failures.append(f'Vecchio percorso archiviato ancora presente: {old}')
+                failures.append(f'Archived original path still present: {old}')
             target = (root / new).resolve()
             if not target.is_relative_to(root / 'archive') or not target.is_file():
-                failures.append(f'Destinazione archivio assente o fuori archivio: {new}')
+                failures.append(f'Archive destination missing or outside the archive: {new}')
                 continue
             contents = target.read_bytes()
             if hash_basis == 'cmd-lf-canonical' and target.suffix == '.cmd':
@@ -129,9 +129,9 @@ def check_archive(root, failures):
                 contents = contents.replace(b'\r\n', b'\n')
             digest = hashlib.sha256(contents).hexdigest()
             if digest != move['archived_sha256']:
-                failures.append(f'Impronta archivio non coincide: {new}')
+                failures.append(f'Archive checksum mismatch: {new}')
     except (KeyError, ValueError, OSError, TypeError) as error:
-        failures.append(f'Manifest archivio non valido: {error}')
+        failures.append(f'Invalid archive manifest: {error}')
 
 
 def main():
@@ -160,14 +160,14 @@ def main():
                         continue
                     destination = (path.parent / unquote(parsed.path)).resolve()
                     if not destination.exists():
-                        failures.append(f'{path.relative_to(root)}: link assente {target}')
+                        failures.append(f'{path.relative_to(root)}: missing link {target}')
         except (SyntaxError, ValueError, OSError, subprocess.CalledProcessError) as error:
             failures.append(f'{path.relative_to(root)}: {error}')
     check_structure(root, failures)
     check_archive(root, failures)
     if failures:
         raise SystemExit('\n'.join(failures))
-    print(f'PASS: {count} file; struttura, input dei pacchetti, sintassi, archivio e collegamenti locali verificati.')
+    print(f'PASS: {count} files; structure, package inputs, syntax, archive and local links verified.')
 
 
 if __name__ == '__main__':

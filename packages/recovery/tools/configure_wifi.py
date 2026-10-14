@@ -9,18 +9,18 @@ def main():
     root = Path(__file__).resolve().parents[1]
     path = root/'EFI/OC/Kexts/itlwm.kext/Contents/Info.plist'
     if not path.is_file():
-        raise SystemExit('Estrai prima tutto il pacchetto EFI in una cartella normale.')
-    print('Inserisci la rete da usare durante la Recovery. I dati restano su questo PC.')
-    ssid = input('Nome esatto della rete (SSID): ')
+        raise SystemExit('First extract the complete EFI package to a regular directory.')
+    print('Enter the network to use in Recovery. The data stays on this PC.')
+    ssid = input('Exact network name (SSID): ')
     if not ssid:
-        raise SystemExit('SSID vuoto: nessuna modifica.')
-    password = getpass.getpass('Password Wi-Fi (non viene mostrata): ')
+        raise SystemExit('Empty SSID; no changes made.')
+    password = getpass.getpass('Wi-Fi password (hidden): ')
     info = plistlib.loads(path.read_bytes())
     info['IOKitPersonalities']['itlwm']['WiFiConfig'] = {
         'WiFi_1': {'ssid': ssid, 'password': password}}
     path.write_bytes(plistlib.dumps(info, sort_keys=False))
-    print('Profilo salvato. Copia ora la cartella EFI sulla chiavetta.')
-    print('La password è nel plist locale: non caricare questa copia su GitHub o in chat.')
+    print('Profile saved. Now copy the EFI directory to the USB drive.')
+    print('The password is stored in the local plist; do not upload this copy to GitHub or the chat.')
 
 
 if __name__ == '__main__':

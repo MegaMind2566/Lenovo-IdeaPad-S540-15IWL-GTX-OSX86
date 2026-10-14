@@ -12,7 +12,7 @@ on:
       - packages/microphone/tools/microphone_driver_test.sh
       - packages/microphone/tools/verify_microphone_driver.sh
       - licenses/audio-tahoe/**
-      - docs/guides/MICROFONO-FIX.md
+      - docs/guides/microphone-fix.md
       - config/profiles/audio-tahoe-assets.lock.json
       - packages/microphone/INSTALLA-MICROFONO.command
       - packages/microphone/ANNULLA-MICROFONO.command

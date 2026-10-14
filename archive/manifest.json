@@ -3,286 +3,286 @@
   "moves": [
     {
       "from": "PREPARA-RECOVERY-LOG.cmd",
-      "to": "archive/primo-avvio/PREPARA-RECOVERY-LOG.cmd",
+      "to": "archive/first-boot/PREPARA-RECOVERY-LOG.cmd",
       "original_sha256": "431bbb63d078bb3afc768e2fcfacb7b5a95efe6f5a02ce98c10bb1bf96c8f21f",
-      "archived_sha256": "431bbb63d078bb3afc768e2fcfacb7b5a95efe6f5a02ce98c10bb1bf96c8f21f"
+      "archived_sha256": "3deb272efdba84f92a0d7b320d8060cedc1fb7b470ed9f9f931956acdd0ddd85"
     },
     {
       "from": "RIPRISTINA-PROVA-INTEL.cmd",
-      "to": "archive/primo-avvio/RIPRISTINA-PROVA-INTEL.cmd",
+      "to": "archive/first-boot/RIPRISTINA-PROVA-INTEL.cmd",
       "original_sha256": "d9f494587a3f6678f478662e504b995462d32d85731e10d63165db2f42983e8f",
-      "archived_sha256": "d9f494587a3f6678f478662e504b995462d32d85731e10d63165db2f42983e8f"
+      "archived_sha256": "8e45f715f74d255ea9393ccddcbd38997c73b689ea605932a37a64c91ddf0d49"
     },
     {
       "from": "TRACCIA-INTEL.cmd",
-      "to": "archive/primo-avvio/TRACCIA-INTEL.cmd",
+      "to": "archive/first-boot/TRACCIA-INTEL.cmd",
       "original_sha256": "2635f8bb2c7d9a7a8021b61c09aa483fc88874c428067f4c820543479efa7442",
-      "archived_sha256": "2635f8bb2c7d9a7a8021b61c09aa483fc88874c428067f4c820543479efa7442"
+      "archived_sha256": "49190030db733e80792bf2b0fc1ed6880542e41ea1ed8d51ef71a39f31eb3f24"
     },
     {
       "from": "RECOVERY-TRACCIA-INTEL.cmd",
-      "to": "archive/primo-avvio/RECOVERY-TRACCIA-INTEL.cmd",
+      "to": "archive/first-boot/RECOVERY-TRACCIA-INTEL.cmd",
       "original_sha256": "7c80a7391059b8f087fe9b2b58796c71712b3af5b9277a8486c65ed5cf72fafa",
-      "archived_sha256": "7c80a7391059b8f087fe9b2b58796c71712b3af5b9277a8486c65ed5cf72fafa"
+      "archived_sha256": "f331868308574762c09cf2cea3cd6fc82b90c57245f2b0593f98ccf5238bfc94"
     },
     {
       "from": "RIPRISTINA-TRACCIA-INTEL.cmd",
-      "to": "archive/primo-avvio/RIPRISTINA-TRACCIA-INTEL.cmd",
+      "to": "archive/first-boot/RIPRISTINA-TRACCIA-INTEL.cmd",
       "original_sha256": "251ef6685b3e0f3846a6d5bf98e56444a607f4aad862e7e24852e832b73a8865",
-      "archived_sha256": "251ef6685b3e0f3846a6d5bf98e56444a607f4aad862e7e24852e832b73a8865"
+      "archived_sha256": "76b97654a3de17d654faa0ebecbcf984c44a655e2f73e73ac6733594c7fae601"
     },
     {
       "from": "TEST-MEMORIA-INTEL.cmd",
-      "to": "archive/primo-avvio/TEST-MEMORIA-INTEL.cmd",
+      "to": "archive/first-boot/TEST-MEMORIA-INTEL.cmd",
       "original_sha256": "34473c8373d0e576c8944197aea42b4fd015cf40534a2c0f984172815fe08edf",
-      "archived_sha256": "34473c8373d0e576c8944197aea42b4fd015cf40534a2c0f984172815fe08edf"
+      "archived_sha256": "86f3807de0c276ae438e46cfc515548e207556fd2f713fe264db244e0afc5c35"
     },
     {
       "from": "RECOVERY-MEMORIA-INTEL.cmd",
-      "to": "archive/primo-avvio/RECOVERY-MEMORIA-INTEL.cmd",
+      "to": "archive/first-boot/RECOVERY-MEMORIA-INTEL.cmd",
       "original_sha256": "fe6c7fb2a4a6b4c6277382e9b80b441dd5a9445f860bc0e46a96d765248b5835",
-      "archived_sha256": "fe6c7fb2a4a6b4c6277382e9b80b441dd5a9445f860bc0e46a96d765248b5835"
+      "archived_sha256": "ee2a2d319dd863aaa505ceaf7099e254fad0348b95a23944fe98013a9d89c1bd"
     },
     {
       "from": "RIPRISTINA-MEMORIA-INTEL.cmd",
-      "to": "archive/primo-avvio/RIPRISTINA-MEMORIA-INTEL.cmd",
+      "to": "archive/first-boot/RIPRISTINA-MEMORIA-INTEL.cmd",
       "original_sha256": "e75598588dd5dbbe5c917d0d8499e2a83269244cb44a133c8c962906281f6143",
-      "archived_sha256": "e75598588dd5dbbe5c917d0d8499e2a83269244cb44a133c8c962906281f6143"
+      "archived_sha256": "ccb71a0ea24bfe6b0569f84c7f0fd8cb888730ba96f4ba9f87687fd4ba68a31c"
     },
     {
       "from": "RACCOGLI-INTEL.command",
-      "to": "archive/primo-avvio/RACCOGLI-INTEL.command",
+      "to": "archive/first-boot/RACCOGLI-INTEL.command",
       "original_sha256": "473dfea93c9739a1597b81b0b65ced49ab169b38678b741193118c232d849deb",
       "archived_sha256": "473dfea93c9739a1597b81b0b65ced49ab169b38678b741193118c232d849deb"
     },
     {
       "from": "tools/AVVIO-SICURO.cmd",
-      "to": "archive/primo-avvio/tools/AVVIO-SICURO.cmd",
+      "to": "archive/first-boot/tools/AVVIO-SICURO.cmd",
       "original_sha256": "26e2e2647858a0e7100e4d119cbfd8e2be9f6b0495a44574a99a93fb73b986d4",
-      "archived_sha256": "26e2e2647858a0e7100e4d119cbfd8e2be9f6b0495a44574a99a93fb73b986d4"
+      "archived_sha256": "4034884c63da4df0acd4d68ab25a2d14471c3bc904eb49010ee032833a7df66d"
     },
     {
       "from": "tools/RIPRISTINA-AVVIO.cmd",
-      "to": "archive/primo-avvio/tools/RIPRISTINA-AVVIO.cmd",
+      "to": "archive/first-boot/tools/RIPRISTINA-AVVIO.cmd",
       "original_sha256": "8fced19799776e6a255f08f7031088f8cc01069c735247290f99823f3ddf060e",
-      "archived_sha256": "8fced19799776e6a255f08f7031088f8cc01069c735247290f99823f3ddf060e"
+      "archived_sha256": "2efaec566679dd2d432fa45f3664214ee7fda3678608a35158fa2b3cc388b04c"
     },
     {
       "from": "tools/RIPRISTINA-GRAFICA.cmd",
-      "to": "archive/primo-avvio/tools/RIPRISTINA-GRAFICA.cmd",
+      "to": "archive/first-boot/tools/RIPRISTINA-GRAFICA.cmd",
       "original_sha256": "c282658c5bbabec6d5d9ad874041e76bedf1634f64e4cb79ec5fa74bf88d413c",
-      "archived_sha256": "c282658c5bbabec6d5d9ad874041e76bedf1634f64e4cb79ec5fa74bf88d413c"
+      "archived_sha256": "62f036f19939457b602db4b706f5b3e738bf0290f7862c5b72566ed9283db41d"
     },
     {
       "from": "tools/RIPRISTINA-INTEL.cmd",
-      "to": "archive/primo-avvio/tools/RIPRISTINA-INTEL.cmd",
+      "to": "archive/first-boot/tools/RIPRISTINA-INTEL.cmd",
       "original_sha256": "5038071de34ffb671871791d60d4ae61ee60db759ba742d40b3602b8573a8e16",
-      "archived_sha256": "5038071de34ffb671871791d60d4ae61ee60db759ba742d40b3602b8573a8e16"
+      "archived_sha256": "828f3302952820ebd67822b31d1a69c70b415bcc65884568b83feadf7c41ae3e"
     },
     {
       "from": "tools/TEST-GRAFICA.cmd",
-      "to": "archive/primo-avvio/tools/TEST-GRAFICA.cmd",
+      "to": "archive/first-boot/tools/TEST-GRAFICA.cmd",
       "original_sha256": "e5408f09346c93fedc8123048d3830ae6e9f54c59defc332f83847ce6fef6b3a",
-      "archived_sha256": "e5408f09346c93fedc8123048d3830ae6e9f54c59defc332f83847ce6fef6b3a"
+      "archived_sha256": "f768724a2406738cbcf757f90d582ad6d057fc5af3ec0ea2c6a0943821fa8387"
     },
     {
       "from": "tools/TEST-INTEL.cmd",
-      "to": "archive/primo-avvio/tools/TEST-INTEL.cmd",
+      "to": "archive/first-boot/tools/TEST-INTEL.cmd",
       "original_sha256": "baf554329358d471fcc9f3f2b980dc653604c81c096b2fe4b92c5ce49321f879",
-      "archived_sha256": "baf554329358d471fcc9f3f2b980dc653604c81c096b2fe4b92c5ce49321f879"
+      "archived_sha256": "51940d4fa7cf637e3b806c8d302ffa0d44fbd49a16753569cf7c166867997860"
     },
     {
       "from": "tools/RACCOGLI-LOG-MACOS.command",
-      "to": "archive/primo-avvio/tools/RACCOGLI-LOG-MACOS.command",
+      "to": "archive/first-boot/tools/RACCOGLI-LOG-MACOS.command",
       "original_sha256": "71bd90638093fe7e755b199b7cf096d1bef6dacb2d6ed8cdc173423aed58f902",
       "archived_sha256": "71bd90638093fe7e755b199b7cf096d1bef6dacb2d6ed8cdc173423aed58f902"
     },
     {
       "from": "tools/RACCOGLI-UNIFIED.command",
-      "to": "archive/primo-avvio/tools/RACCOGLI-UNIFIED.command",
+      "to": "archive/first-boot/tools/RACCOGLI-UNIFIED.command",
       "original_sha256": "0f9c7efde866b336e1ede2815bcc798fb7887c20db34ed46ff1edc2248546c07",
-      "archived_sha256": "0f9c7efde866b336e1ede2815bcc798fb7887c20db34ed46ff1edc2248546c07"
+      "archived_sha256": "e7dcb938b163a422ca8fb44bd053afb27e7cd73ce53a9cfc77bdd60b0f6cee63"
     },
     {
       "from": "tools/build_intel_memory.py",
-      "to": "archive/primo-avvio/tools/build_intel_memory.py",
+      "to": "archive/first-boot/tools/build_intel_memory.py",
       "original_sha256": "41b842374262db14bf0bc9b300958b929dd6b30ca03828159c9f4bf41435b84a",
-      "archived_sha256": "41b842374262db14bf0bc9b300958b929dd6b30ca03828159c9f4bf41435b84a"
+      "archived_sha256": "c3426d41bf0ba62c10b488f535b207f422d25b331eeafc112709ee6fbf4d20d2"
     },
     {
       "from": "tools/build_intel_trace.py",
-      "to": "archive/primo-avvio/tools/build_intel_trace.py",
+      "to": "archive/first-boot/tools/build_intel_trace.py",
       "original_sha256": "8f3eae2d38be44012f00bbdcf397dd4f6cb4c7c68086437055712169032be5de",
-      "archived_sha256": "8f3eae2d38be44012f00bbdcf397dd4f6cb4c7c68086437055712169032be5de"
+      "archived_sha256": "8299e8368e5faa932d4dbc5496268d3fe8bf45ed966e16442c705dec50f5a05c"
     },
     {
       "from": "tools/check_graphics_test.py",
-      "to": "archive/primo-avvio/tools/check_graphics_test.py",
+      "to": "archive/first-boot/tools/check_graphics_test.py",
       "original_sha256": "d0152433481c162fd6b735cd23f9185e7270a9ecb47b69d30e9c80b2f82c40bf",
       "archived_sha256": "d0152433481c162fd6b735cd23f9185e7270a9ecb47b69d30e9c80b2f82c40bf"
     },
     {
       "from": "tools/collect_gui_logs.sh",
-      "to": "archive/primo-avvio/tools/collect_gui_logs.sh",
+      "to": "archive/first-boot/tools/collect_gui_logs.sh",
       "original_sha256": "94b838b2fa7761383235b4365b872bea8d7cea805d59933344c5f5f426abe32f",
-      "archived_sha256": "94b838b2fa7761383235b4365b872bea8d7cea805d59933344c5f5f426abe32f"
+      "archived_sha256": "c39c76e11116ef65dec1af160d2a24fed334cfe8afbc779afa0b39d0084c5678"
     },
     {
       "from": "tools/recovery_runtime_logs.py",
-      "to": "archive/primo-avvio/tools/recovery_runtime_logs.py",
+      "to": "archive/first-boot/tools/recovery_runtime_logs.py",
       "original_sha256": "ebfc6aff0c31531de5652e61edb3bea5e6ad7cb63c9ed3a94a9db8f45054a019",
-      "archived_sha256": "ebfc6aff0c31531de5652e61edb3bea5e6ad7cb63c9ed3a94a9db8f45054a019"
+      "archived_sha256": "00ed703c730159b381cc14c0d0a6034ab076e7a1b14a5922f69426808654d137"
     },
     {
       "from": "tools/test_graphics.py",
-      "to": "archive/primo-avvio/tools/test_graphics.py",
+      "to": "archive/first-boot/tools/test_graphics.py",
       "original_sha256": "5a226f787857da23ab059a1e8f7baae9dbec832108c0072c7bb2e15dba239c1b",
-      "archived_sha256": "5a226f787857da23ab059a1e8f7baae9dbec832108c0072c7bb2e15dba239c1b"
+      "archived_sha256": "97f944771b8c1ee4ea52c6e043d65efbe6f79d84cc462a5bd1056cbb1978dcb3"
     },
     {
       "from": "tools/test_intel_memory.py",
-      "to": "archive/primo-avvio/tools/test_intel_memory.py",
+      "to": "archive/first-boot/tools/test_intel_memory.py",
       "original_sha256": "eef7669a800c2802094f47d1b6ad42cb5ffa635ed94a69f43cd9e3e3aae77a1a",
-      "archived_sha256": "eef7669a800c2802094f47d1b6ad42cb5ffa635ed94a69f43cd9e3e3aae77a1a"
+      "archived_sha256": "5fa337fea57f5ea64b3bff2160aabd07d5f15aad9fe9b33092ffbbc6ea1d9dad"
     },
     {
       "from": "tools/test_safe_boot.py",
-      "to": "archive/primo-avvio/tools/test_safe_boot.py",
+      "to": "archive/first-boot/tools/test_safe_boot.py",
       "original_sha256": "b6ae5f665894e3ac1e78af61efe3a2154227571466ba8c96ca8bd0d57c5214f8",
-      "archived_sha256": "b6ae5f665894e3ac1e78af61efe3a2154227571466ba8c96ca8bd0d57c5214f8"
+      "archived_sha256": "fbdb31dd94a6a09255e16e39259ef7aadd8740b1b0a57212e17edff276415003"
     },
     {
       "from": "tools/trace_intel.py",
-      "to": "archive/primo-avvio/tools/trace_intel.py",
+      "to": "archive/first-boot/tools/trace_intel.py",
       "original_sha256": "abdbac3f444fd3f7b4d21979bc6d53dcb9017c7573b844c9d7e457a82744bdf9",
-      "archived_sha256": "abdbac3f444fd3f7b4d21979bc6d53dcb9017c7573b844c9d7e457a82744bdf9"
+      "archived_sha256": "4f57206c41e2ef6748d5da6a3b5a8c3db519fe008d3752c69a6e23a0dea4a65b"
     },
     {
       "from": "docs/ANALISI-LOG-AVVIO.md",
-      "to": "archive/primo-avvio/docs/ANALISI-LOG-AVVIO.md",
+      "to": "archive/first-boot/docs/boot-log-analysis.md",
       "original_sha256": "07a1c72474e140e6f45e281e0b0d1e7b8e238d83949fc99e12e88f61568b055c",
-      "archived_sha256": "d5dc87600d1d65a1adef24ac04dfb963f741b7dc8b4b0dc8c6089fbe97abd17c"
+      "archived_sha256": "4d4e4b2400c82cc1afc1d5f649c7207a07134ed882a7a85ffea77981918517df"
     },
     {
       "from": "docs/ANALISI-LOG-UNIFICATI.md",
-      "to": "archive/primo-avvio/docs/ANALISI-LOG-UNIFICATI.md",
+      "to": "archive/first-boot/docs/unified-log-analysis.md",
       "original_sha256": "a0038cc7e938b2f24fd1e34344c7033309178fba97cf039bb82a88df85b802b1",
-      "archived_sha256": "201b66d4d93d9fdcfaf44c4a0f2744d5d27e93acc04de76b27764592bcd32910"
+      "archived_sha256": "c3408b2c714170471b8de5d820ea7c63967ee0b9ccb255c9bfbf9040165d55aa"
     },
     {
       "from": "docs/AVVIO-SICURO.md",
-      "to": "archive/primo-avvio/docs/AVVIO-SICURO.md",
+      "to": "archive/first-boot/docs/safe-boot.md",
       "original_sha256": "b63c3095d074e00b6246a412c27f799fd8736d100aff5fec4ff0103ce566223e",
-      "archived_sha256": "b63c3095d074e00b6246a412c27f799fd8736d100aff5fec4ff0103ce566223e"
+      "archived_sha256": "e09c723b0ecfb689f1c4f94d426d5b34119d0b1a4ab28d7ffa1d156cca9dff74"
     },
     {
       "from": "docs/DIAGNOSI-INTERFACCIA.md",
-      "to": "archive/primo-avvio/docs/DIAGNOSI-INTERFACCIA.md",
+      "to": "archive/first-boot/docs/gui-diagnostics.md",
       "original_sha256": "18349439879f5e63e3ac04901f2c2ebc57934bab2d30418f6c6a758c6b286be0",
-      "archived_sha256": "18349439879f5e63e3ac04901f2c2ebc57934bab2d30418f6c6a758c6b286be0"
+      "archived_sha256": "f3db02d27292b45a6d63c97223af6157c0f3c00d7bedb4a8800f5530900ab758"
     },
     {
       "from": "docs/RECUPERO-AVVIO-NORMALE.md",
-      "to": "archive/primo-avvio/docs/RECUPERO-AVVIO-NORMALE.md",
+      "to": "archive/first-boot/docs/boot-recovery.md",
       "original_sha256": "e329bf57375d26dcc98b62bcf073015bcede87d4ca8c1c74c923c72c75ecda1e",
-      "archived_sha256": "e329bf57375d26dcc98b62bcf073015bcede87d4ca8c1c74c923c72c75ecda1e"
+      "archived_sha256": "74ff20d06fbec35b4fd739930aa4004efb70a27d17e4a41e9ea0835bf7bbbb60"
     },
     {
       "from": "docs/TEST-GRAFICA.md",
-      "to": "archive/primo-avvio/docs/TEST-GRAFICA.md",
+      "to": "archive/first-boot/docs/graphics-test.md",
       "original_sha256": "8ba90941926c2d3c0a9c78d52f17f4dc2cdc48313750b2b51138d6a69a20de33",
-      "archived_sha256": "8ba90941926c2d3c0a9c78d52f17f4dc2cdc48313750b2b51138d6a69a20de33"
+      "archived_sha256": "8275d9f5c7cf7dc96ba11d48558e7955bd2a9e2e5df9a394d2a0214892431867"
     },
     {
       "from": "docs/TEST-INTEL.md",
-      "to": "archive/primo-avvio/docs/TEST-INTEL.md",
+      "to": "archive/first-boot/docs/intel-test.md",
       "original_sha256": "2d12d55317ddf93bfc491113cd645869c2a185baaee23de38a8c7b44b9410dce",
-      "archived_sha256": "2d12d55317ddf93bfc491113cd645869c2a185baaee23de38a8c7b44b9410dce"
+      "archived_sha256": "0e84ab3cffe9a7f1f6f0be9d85a269f868164d4c95516af1f76a3f7372ec41d7"
     },
     {
       "from": "docs/TEST-MEMORIA-INTEL.md",
-      "to": "archive/primo-avvio/docs/TEST-MEMORIA-INTEL.md",
+      "to": "archive/first-boot/docs/intel-memory-test.md",
       "original_sha256": "2b7b929580ce1282b8154263dcadcc90ab58deb89fe3e4c618f2fe988af5c268",
-      "archived_sha256": "ff5e0d473bb2583fc0d0574c38bfa9f2ca5052a4cbeb1cf78e74cd04fb2b373b"
+      "archived_sha256": "a09ea548a5eb28d36ff5d1027c61ebd0f4f983cf165f1bba483c5574ca0d4dfd"
     },
     {
       "from": "docs/TEST-WHISKEY-LAKE.md",
-      "to": "archive/primo-avvio/docs/TEST-WHISKEY-LAKE.md",
+      "to": "archive/first-boot/docs/whiskey-lake-test.md",
       "original_sha256": "9369ffedd47b00b290bb878dee1cd997c5bc099ff5a28710d2824077f1133db7",
-      "archived_sha256": "29b61f1804ed86361a5adfe5bd5ffe8add05586a2e95711298fdf2240f6699e7"
+      "archived_sha256": "58eeeeb2cf56ab2329a92b0e8381afca6798aa4fc229423ddf1e5d556582bb02"
     },
     {
       "from": "docs/TRACCIA-INTEL.md",
-      "to": "archive/primo-avvio/docs/TRACCIA-INTEL.md",
+      "to": "archive/first-boot/docs/intel-trace.md",
       "original_sha256": "5f9f2766355bb77a21e4142160dde7de4df365deea90484cedcb8b878ca120b7",
-      "archived_sha256": "0b040df5a8e4b612ef2bd71ad205bbea8371ddddd96d6b7f0d73702cde44f10a"
+      "archived_sha256": "3636df5607fe90698d02df1d9de5e53bf6773317c5d6eae063f5dc05f64113b3"
     },
     {
       "from": "profiles/trace-intel-assets.lock.json",
-      "to": "archive/primo-avvio/profiles/trace-intel-assets.lock.json",
+      "to": "archive/first-boot/profiles/trace-intel-assets.lock.json",
       "original_sha256": "f51fb2984a4a16aec4d1d52ada25c086390a5bcca82a079e3248088b894ad8f1",
       "archived_sha256": "f51fb2984a4a16aec4d1d52ada25c086390a5bcca82a079e3248088b894ad8f1"
     },
     {
       "from": "licenses/intel-trace/Lilu-Capstone-LICENSE.txt",
-      "to": "archive/primo-avvio/licenses/intel-trace/Lilu-Capstone-LICENSE.txt",
+      "to": "archive/first-boot/licenses/intel-trace/Lilu-Capstone-LICENSE.txt",
       "original_sha256": "65e9ed46a59976eda8f5bd1ea79a680dea38dd299c760bc9a8d87a764ef5029b",
       "archived_sha256": "65e9ed46a59976eda8f5bd1ea79a680dea38dd299c760bc9a8d87a764ef5029b"
     },
     {
       "from": "licenses/intel-trace/Lilu-Capstone-LLVM-LICENSE.txt",
-      "to": "archive/primo-avvio/licenses/intel-trace/Lilu-Capstone-LLVM-LICENSE.txt",
+      "to": "archive/first-boot/licenses/intel-trace/Lilu-Capstone-LLVM-LICENSE.txt",
       "original_sha256": "dfdca2d7fdbabfd937f9dc41b7f61647b0e6cb1f9ee767ecb4520f979ebe91da",
       "archived_sha256": "dfdca2d7fdbabfd937f9dc41b7f61647b0e6cb1f9ee767ecb4520f979ebe91da"
     },
     {
       "from": "licenses/intel-trace/Lilu-HDE-LICENSE.txt",
-      "to": "archive/primo-avvio/licenses/intel-trace/Lilu-HDE-LICENSE.txt",
+      "to": "archive/first-boot/licenses/intel-trace/Lilu-HDE-LICENSE.txt",
       "original_sha256": "aedfabba11f51aecb698f94dcf40d7f35ea14995d2959171d222e671dac01baf",
       "archived_sha256": "aedfabba11f51aecb698f94dcf40d7f35ea14995d2959171d222e671dac01baf"
     },
     {
       "from": "licenses/intel-trace/Lilu-LICENSE.txt",
-      "to": "archive/primo-avvio/licenses/intel-trace/Lilu-LICENSE.txt",
+      "to": "archive/first-boot/licenses/intel-trace/Lilu-LICENSE.txt",
       "original_sha256": "74c3ca48189b796b0d262866e67de8efba77a71516667ce68dc3a8f13c2a3c57",
       "archived_sha256": "74c3ca48189b796b0d262866e67de8efba77a71516667ce68dc3a8f13c2a3c57"
     },
     {
       "from": "licenses/intel-trace/WhateverGreen-LICENSE.txt",
-      "to": "archive/primo-avvio/licenses/intel-trace/WhateverGreen-LICENSE.txt",
+      "to": "archive/first-boot/licenses/intel-trace/WhateverGreen-LICENSE.txt",
       "original_sha256": "8f99f6082ccc808df2ece79446108bfd5c0c04da9ba81c5463568ced862a0b05",
       "archived_sha256": "8f99f6082ccc808df2ece79446108bfd5c0c04da9ba81c5463568ced862a0b05"
     },
     {
       "from": ".github/workflows/validate-graphics-test.yml",
-      "to": "archive/primo-avvio/workflows/validate-graphics-test.yml",
+      "to": "archive/first-boot/workflows/validate-graphics-test.yml",
       "original_sha256": "e636dc746c3e62b8f8719bf8f77d2de5d4848242088de54ee6d9473f0e0906ba",
-      "archived_sha256": "cb9ef03b95152e6133317c53789e575f49491bfccd448b5f0850857f19b1426c"
+      "archived_sha256": "58d145f830625a8cab24beaa3af6cc8c3ccf94e9710f8078ea0d3549ae872b63"
     },
     {
       "from": "tools/build_efi.py",
-      "to": "archive/efi-iniziale/tools/build_efi.py",
+      "to": "archive/initial-efi/tools/build_efi.py",
       "original_sha256": "e9c0b1d9333f12ca9a1d24884a6f1c24ff919b88bb869d04185fd2583221e136",
-      "archived_sha256": "ea3ec82b67a93eef6650a52b0fae49a64d366f5feaf419bb001dd08339a986d6"
+      "archived_sha256": "04d4e2c10da697e39fc511c46f11f5dce9df48425a61a8f8ce552de769df76b3"
     },
     {
       "from": ".github/workflows/build-efi.yml",
-      "to": "archive/efi-iniziale/workflows/build-efi.yml",
+      "to": "archive/initial-efi/workflows/build-efi.yml",
       "original_sha256": "c6118ae6b1daffcaaaabb6327f957e03360fa894878a64042f772d5b92fd69ce",
-      "archived_sha256": "8411ce027434204a109c67317902fbb765efbabb460be2f8a20173f2e191dbb8"
+      "archived_sha256": "7ada4f820e96116fd57d621f0d4d8fa221878e4cd289626df167bf9731c50ea1"
     }
   ],
   "source_fixes": [
     {
-      "path": "archive/efi-iniziale/tools/build_efi.py",
+      "path": "archive/initial-efi/tools/build_efi.py",
       "reason": "ROOT parents[3] resolves shared config/ inputs, recovery package helpers and reference documentation."
     },
     {
-      "path": "archive/efi-iniziale/workflows/build-efi.yml",
+      "path": "archive/initial-efi/workflows/build-efi.yml",
       "reason": "Archived non-executed workflow now references archived builder path."
     },
     {
-      "path": "archive/primo-avvio/workflows/validate-graphics-test.yml",
+      "path": "archive/first-boot/workflows/validate-graphics-test.yml",
       "reason": "Archived non-executed workflow now references archived EFI/graphics scripts and documents; legacy ZIP internal paths unchanged."
     }
   ],

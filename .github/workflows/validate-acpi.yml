@@ -1,4 +1,4 @@
-name: Controllo patch ACPI
+name: ACPI patch validation
 
 on:
   push:
@@ -20,11 +20,11 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Installa compilatore ACPI
+      - name: Install the ACPI compiler
         run: sudo apt-get update && sudo apt-get install -y acpica-tools
-      - name: Compila e verifica AML
+      - name: Compile and validate AML
         run: python3 builders/build_acpi.py
-      - name: Verifica riferimenti del profilo
+      - name: Validate profile references
         run: |
           python3 - <<'PY'
           import json, pathlib

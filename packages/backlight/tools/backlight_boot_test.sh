@@ -14,7 +14,7 @@ FRAMEBUFFER_UUID=7E294F0F-852E-3252-B54D-61D9A7BBE6B2
 OWNER=it.s540.tahoe.backlight-boot-test
 MODE=${1:-test}
 [ "$#" -eq 0 ] || shift
-[ "$#" -le 1 ] || { echo 'Indica al massimo il percorso del disco di avvio.' >&2; exit 1; }
+[ "$#" -le 1 ] || { echo 'Specify at most the boot disk path.' >&2; exit 1; }
 BOOTROOT=${1:-'/Volumes/240 GB'}
 OC="$BOOTROOT/EFI/OC"
 CONFIG="$OC/config.plist"
@@ -29,25 +29,25 @@ cleanup() {
     if [ -n "$TEMP" ] && [ -d "$TEMP" ] && [ ! -L "$TEMP" ]; then /bin/rm -rf "$TEMP"; fi
 }
 trap cleanup EXIT
-trap 'echo "Operazione non completata. Conserva il backup schermo e leggi il messaggio precedente prima di riavviare." >&2' ERR
-fail() { echo "Operazione annullata: $*" >&2; exit 1; }
+trap 'echo "Operation did not complete. Keep the backlight backup and read the previous message before restarting." >&2' ERR
+fail() { echo "Operation cancelled: $*" >&2; exit 1; }
 readkey() { /usr/bin/plutil -extract "$2" raw -o - "$1" 2>/dev/null; }
 hash() { /usr/bin/shasum -a 256 "$1" | /usr/bin/awk '{print $1}'; }
-ordinary() { [ -e "$1" ] && [ ! -L "$1" ] || fail "Percorso assente o simbolico: $1"; }
-no_links() { [ -z "$(/usr/bin/find "$1" -type l -print)" ] || fail 'La cartella contiene collegamenti simbolici.'; }
+ordinary() { [ -e "$1" ] && [ ! -L "$1" ] || fail "Missing path or symbolic link: $1"; }
+no_links() { [ -z "$(/usr/bin/find "$1" -type l -print)" ] || fail 'The directory contains symbolic links.'; }
 no_symlink_chain() {
     local path=$1 part='' component
     local old_ifs=$IFS
-    case "$path" in /*) ;; *) fail 'Usa un percorso assoluto per il disco di avvio.';; esac
-    case "$path" in *$'\n'*|*$'\r'*) fail 'Il percorso contiene caratteri non ammessi.';; esac
+    case "$path" in /*) ;; *) fail 'Use an absolute path for the boot disk.';; esac
+    case "$path" in *$'\n'*|*$'\r'*) fail 'The path contains unsupported characters.';; esac
     IFS=/
     read -r -a components <<< "$path"
     IFS=$old_ifs
     for component in "${components[@]}"; do
         [ -n "$component" ] || continue
-        case "$component" in .|..) fail 'Il percorso non deve contenere . o ..';; esac
+        case "$component" in .|..) fail 'The path must not contain . or ..';; esac
         part="$part/$component"
-        [ ! -L "$part" ] || fail "Collegamento simbolico nel percorso: $part"
+        [ ! -L "$part" ] || fail "Symbolic link in path: $part"
     done
 }
 typed() {
@@ -55,25 +55,25 @@ typed() {
     /usr/bin/grep -Eq "<$3([ />])" "$TEMP/type.plist"
 }
 data_equals() {
-    typed "$1" "$2" data || fail "La proprietà $2 deve essere Data."
-    [ "$(readkey "$1" "$2" | /usr/bin/tr -d '[:space:]')" = "$3" ] || fail "La proprietà $2 non coincide con la EFI verificata."
+    typed "$1" "$2" data || fail "Property $2 must be Data."
+    [ "$(readkey "$1" "$2" | /usr/bin/tr -d '[:space:]')" = "$3" ] || fail "Property $2 does not match the verified EFI."
 }
 string_value() {
-    typed "$1" "$2" string || fail "La proprietà $2 deve essere una stringa."
+    typed "$1" "$2" string || fail "Property $2 must be a string."
     readkey "$1" "$2"
 }
 contains_flag() { case " $1 " in *" $2 "*) return 0;; *) return 1;; esac; }
 reject_unsafe_args() {
     local args=$1
-    case "$args" in *$'\n'*|*$'\r'*|*$'\t'*) fail 'I boot-args contengono separatori non previsti.';; esac
-    contains_flag "$args" -igfxvesa && fail 'Riparti dal desktop con accelerazione Intel attiva: è presente -igfxvesa.'
-    contains_flag "$args" -x && fail 'La configurazione usa l’avvio sicuro.'
-    contains_flag "$args" -igfxblt && fail 'È già presente -igfxblt. Non combinare le due prove della retroilluminazione.'
+    case "$args" in *$'\n'*|*$'\r'*|*$'\t'*) fail 'boot-args contain unexpected separators.';; esac
+    contains_flag "$args" -igfxvesa && fail 'Start from the desktop with Intel acceleration enabled; -igfxvesa is present.'
+    contains_flag "$args" -x && fail 'The configuration uses safe boot.'
+    contains_flag "$args" -igfxblt && fail '-igfxblt is already present. Do not combine the two backlight tests.'
     return 0
 }
 property_absent() {
     if /usr/bin/plutil -extract "$GPU.$2" xml1 -o - "$1" > "$TEMP/property.plist" 2>/dev/null; then
-        fail "La proprietà $2 è già presente. Non combinare correzioni della retroilluminazione, anche se il valore è zero."
+        fail "Property $2 is already present. Do not combine backlight corrections, even when its value is zero."
     fi
 }
 validate_config() {
@@ -85,12 +85,12 @@ validate_config() {
     data_equals "$file" "$GPU.framebuffer-stolenmem" AAAwAQ==
     data_equals "$file" "$GPU.framebuffer-fbmem" AACQAA==
     data_equals "$file" "$SIP" AwAAAA==
-    [ "$(string_value "$file" Misc.Security.SecureBootModel)" = Disabled ] || fail 'SecureBootModel non coincide con la EFI verificata.'
+    [ "$(string_value "$file" Misc.Security.SecureBootModel)" = Disabled ] || fail 'SecureBootModel does not match the verified EFI.'
     args=$(string_value "$file" "$ARGS")
     reject_unsafe_args "$args"
-    contains_flag "$args" voodoo-layout-id=11 || fail 'Manca il layout audio già funzionante.'
+    contains_flag "$args" voodoo-layout-id=11 || fail 'The working audio layout is missing.'
     if [ "$allow_flag" = no ]; then
-        contains_flag "$args" "$FLAG" && fail 'Il flag -igfxblr è già presente senza un backup di questa prova.'
+        contains_flag "$args" "$FLAG" && fail '-igfxblr is already present without a backup from this test.'
     fi
     property_absent "$file" enable-backlight-registers-fix
     property_absent "$file" enable-backlight-registers-alternative-fix
@@ -116,68 +116,68 @@ kernel_limit_allows_256() {
 }
 validate_kext() {
     local file=$1 name=$2 expected_id=$3 i=0 path count=0 index='' value info binary
-    typed "$file" Kernel.Add array || fail 'Kernel/Add non contiene l’array previsto.'
+    typed "$file" Kernel.Add array || fail 'Kernel/Add does not contain the expected array.'
     while /usr/bin/plutil -extract "Kernel.Add.$i" xml1 -o - "$file" > "$TEMP/kernel-entry.plist" 2>/dev/null; do
         path=$(string_value "$file" "Kernel.Add.$i.BundlePath")
         if [ "$path" = "$name.kext" ]; then count=$((count+1)); index=$i; fi
         i=$((i+1))
     done
-    [ "$count" = 1 ] || fail "$name deve comparire una sola volta in Kernel/Add."
-    typed "$file" "Kernel.Add.$index.Enabled" true || fail "$name deve essere abilitato."
-    case "$(string_value "$file" "Kernel.Add.$index.Arch")" in Any|x86_64) ;; *) fail "$name non è abilitato per macOS Intel.";; esac
-    [ "$(string_value "$file" "Kernel.Add.$index.ExecutablePath")" = "Contents/MacOS/$name" ] || fail "Il percorso eseguibile di $name non coincide."
-    [ "$(string_value "$file" "Kernel.Add.$index.PlistPath")" = Contents/Info.plist ] || fail "Il percorso plist di $name non coincide."
+    [ "$count" = 1 ] || fail "$name must appear exactly once in Kernel/Add."
+    typed "$file" "Kernel.Add.$index.Enabled" true || fail "$name must be enabled."
+    case "$(string_value "$file" "Kernel.Add.$index.Arch")" in Any|x86_64) ;; *) fail "$name is not enabled for Intel macOS.";; esac
+    [ "$(string_value "$file" "Kernel.Add.$index.ExecutablePath")" = "Contents/MacOS/$name" ] || fail "The executable path for $name does not match."
+    [ "$(string_value "$file" "Kernel.Add.$index.PlistPath")" = Contents/Info.plist ] || fail "The plist path for $name does not match."
     value=$(string_value "$file" "Kernel.Add.$index.MinKernel")
-    kernel_limit_allows_256 "$value" min || fail "$name non è abilitato per Darwin 25.6.0."
+    kernel_limit_allows_256 "$value" min || fail "$name is not enabled for Darwin 25.6.0."
     value=$(string_value "$file" "Kernel.Add.$index.MaxKernel")
-    kernel_limit_allows_256 "$value" max || fail "$name non è abilitato per Darwin 25.6.0."
+    kernel_limit_allows_256 "$value" max || fail "$name is not enabled for Darwin 25.6.0."
     info="$OC/Kexts/$name.kext/Contents/Info.plist"
     binary="$OC/Kexts/$name.kext/Contents/MacOS/$name"
     for path in "$OC/Kexts/$name.kext" "$OC/Kexts/$name.kext/Contents" "$OC/Kexts/$name.kext/Contents/MacOS" "$info" "$binary"; do ordinary "$path"; done
     no_links "$OC/Kexts/$name.kext"
-    [ -f "$info" ] && [ -f "$binary" ] || fail "Il bundle $name non contiene i file previsti."
+    [ -f "$info" ] && [ -f "$binary" ] || fail "Bundle $name does not contain the expected files."
     /usr/bin/plutil -lint "$info" >/dev/null
-    [ "$(string_value "$info" CFBundleIdentifier)" = "$expected_id" ] || fail "Identificatore inatteso per $name."
+    [ "$(string_value "$info" CFBundleIdentifier)" = "$expected_id" ] || fail "Unexpected identifier for $name."
     value=$(string_value "$info" CFBundleVersion)
     if [ "$name" = WhateverGreen ]; then
-        [ "$value" = 1.7.1 ] || fail 'Questa prova è stata preparata per WhateverGreen 1.7.1.'
-        [ "$(hash "$binary")" = "$WEG_RELEASE_SHA256" ] || fail 'Il binario WhateverGreen non coincide con la build RELEASE verificata.'
+        [ "$value" = 1.7.1 ] || fail 'This test was prepared for WhateverGreen 1.7.1.'
+        [ "$(hash "$binary")" = "$WEG_RELEASE_SHA256" ] || fail 'The WhateverGreen binary does not match the verified RELEASE build.'
     else
-        version_at_least_172 "$value" || fail 'Serve Lilu 1.7.2 o successivo.'
+        version_at_least_172 "$value" || fail 'Lilu 1.7.2 or later is required.'
     fi
 }
 validate_runtime() {
     local lilu_version
-    [ "$(/usr/bin/uname -r)" = 25.6.0 ] || fail 'Il kernel attivo non è Darwin 25.6.0. Raccogli prima la diagnosi aggiornata; nessuna modifica.'
-    [ -x /usr/bin/kmutil ] || fail 'Manca kmutil.'
-    /usr/bin/kmutil showloaded > "$TEMP/runtime-kexts.txt" 2> "$TEMP/runtime-kexts-errors.txt" || fail 'Impossibile leggere i driver caricati. Raccogli prima la diagnosi; nessuna modifica.'
-    /usr/bin/grep -F 'com.apple.driver.AppleIntelCFLGraphicsFramebuffer' "$TEMP/runtime-kexts.txt" > "$TEMP/framebuffer-line.txt" || fail 'Il framebuffer CFL non è caricato. Raccogli prima la diagnosi; nessuna modifica.'
-    /usr/bin/grep -Fiq "$FRAMEBUFFER_UUID" "$TEMP/framebuffer-line.txt" || fail 'Il framebuffer attivo ha un UUID diverso da quello analizzato. Raccogli prima la diagnosi; nessuna modifica.'
-    /usr/bin/grep -Eq 'as\.vit9696\.WhateverGreen[[:space:]]+\(1\.7\.1\)' "$TEMP/runtime-kexts.txt" || fail 'WhateverGreen 1.7.1 non risulta caricato. Raccogli prima la diagnosi; nessuna modifica.'
+    [ "$(/usr/bin/uname -r)" = 25.6.0 ] || fail 'The active kernel is not Darwin 25.6.0. Collect updated diagnostics first; no changes made.'
+    [ -x /usr/bin/kmutil ] || fail 'kmutil is missing.'
+    /usr/bin/kmutil showloaded > "$TEMP/runtime-kexts.txt" 2> "$TEMP/runtime-kexts-errors.txt" || fail 'Cannot read loaded drivers. Collect diagnostics first; no changes made.'
+    /usr/bin/grep -F 'com.apple.driver.AppleIntelCFLGraphicsFramebuffer' "$TEMP/runtime-kexts.txt" > "$TEMP/framebuffer-line.txt" || fail 'The CFL framebuffer is not loaded. Collect diagnostics first; no changes made.'
+    /usr/bin/grep -Fiq "$FRAMEBUFFER_UUID" "$TEMP/framebuffer-line.txt" || fail 'The active framebuffer UUID differs from the analyzed version. Collect diagnostics first; no changes made.'
+    /usr/bin/grep -Eq 'as\.vit9696\.WhateverGreen[[:space:]]+\(1\.7\.1\)' "$TEMP/runtime-kexts.txt" || fail 'WhateverGreen 1.7.1 is not loaded. Collect diagnostics first; no changes made.'
     lilu_version=$(/usr/bin/awk '{ for (i=1;i<=NF;i++) if ($i=="as.vit9696.Lilu") print $(i+1) }' "$TEMP/runtime-kexts.txt")
     lilu_version=${lilu_version#(}; lilu_version=${lilu_version%)}
-    version_at_least_172 "$lilu_version" || fail 'Lilu 1.7.2 o successivo non risulta caricato. Raccogli prima la diagnosi; nessuna modifica.'
+    version_at_least_172 "$lilu_version" || fail 'Lilu 1.7.2 or later is not loaded. Collect diagnostics first; no changes made.'
 }
 native() {
     local path runtime_args
-    [ "$(/usr/bin/uname -s)" = Darwin ] && [ "$(/usr/bin/uname -m)" = x86_64 ] || fail 'Serve macOS Intel.'
-    case "$(/usr/bin/uname -r)" in 25.*) ;; *) fail 'Questa prova richiede macOS Tahoe (Darwin 25).';; esac
+    [ "$(/usr/bin/uname -s)" = Darwin ] && [ "$(/usr/bin/uname -m)" = x86_64 ] || fail 'Intel macOS is required.'
+    case "$(/usr/bin/uname -r)" in 25.*) ;; *) fail 'This test requires macOS Tahoe (Darwin 25).';; esac
     if [ "$MODE" = test ]; then
-        [ -d /System/Volumes/Data ] && [ -d /Users ] || fail 'Esegui la prova dal desktop Tahoe, non dalla Recovery.'
-        [ "$(/usr/bin/id -u)" -ne 0 ] || fail 'Apri la prova dal tuo account.'
+        [ -d /System/Volumes/Data ] && [ -d /Users ] || fail 'Run the test from the Tahoe desktop, not Recovery.'
+        [ "$(/usr/bin/id -u)" -ne 0 ] || fail 'Open the test from your own account.'
     fi
     for command in plutil shasum awk grep tr find mktemp cmp; do
-        [ -x "/usr/bin/$command" ] || fail "Manca il comando macOS $command."
+        [ -x "/usr/bin/$command" ] || fail "Required macOS command missing: $command."
     done
     no_symlink_chain "$BOOTROOT"
     for path in "$BOOTROOT" "$BOOTROOT/EFI" "$OC" "$CONFIG"; do ordinary "$path"; done
-    [ -f "$CONFIG" ] || fail 'config.plist non è un file ordinario.'
-    [ -w "$OC" ] && [ -w "$CONFIG" ] || fail 'Il disco di avvio non è scrivibile dal tuo account.'
+    [ -f "$CONFIG" ] || fail 'config.plist is not a regular file.'
+    [ -w "$OC" ] && [ -w "$CONFIG" ] || fail 'Your account cannot write to the boot disk.'
     /usr/bin/plutil -lint "$CONFIG" >/dev/null
     if [ "$MODE" = test ]; then
         ordinary "$OC/Kexts"
-        [ -x /usr/sbin/sysctl ] || fail 'Manca sysctl.'
-        runtime_args=$(/usr/sbin/sysctl -n kern.bootargs) || fail 'Impossibile leggere i boot-args attivi.'
+        [ -x /usr/sbin/sysctl ] || fail 'sysctl is missing.'
+        runtime_args=$(/usr/sbin/sysctl -n kern.bootargs) || fail 'Cannot read active boot-args.'
         reject_unsafe_args "$runtime_args"
     fi
 }
@@ -203,42 +203,42 @@ make_state() {
 }
 load_backup() {
     local file expected_dir="$TEMP/expected"
-    ordinary "$BACKUP"; [ -d "$BACKUP" ] || fail 'Il percorso backup non è una cartella.'
+    ordinary "$BACKUP"; [ -d "$BACKUP" ] || fail 'The backup path is not a directory.'
     no_links "$BACKUP"
     for file in before tested state; do
         ordinary "$BACKUP/$file.plist"
-        [ -f "$BACKUP/$file.plist" ] || fail 'Il backup contiene un percorso non ordinario.'
+        [ -f "$BACKUP/$file.plist" ] || fail 'The backup contains a path that is not a regular file.'
         /usr/bin/plutil -lint "$BACKUP/$file.plist" >/dev/null
     done
-    [ "$(readkey "$BACKUP/state.plist" Format)" = 1 ] && [ "$(string_value "$BACKUP/state.plist" Owner)" = "$OWNER" ] || fail 'La cartella backup non appartiene a questa prova.'
-    [ "$(hash "$BACKUP/before.plist")" = "$(string_value "$BACKUP/state.plist" BeforeSHA256)" ] || fail 'Il backup originale è stato modificato.'
-    [ "$(hash "$BACKUP/tested.plist")" = "$(string_value "$BACKUP/state.plist" TestedSHA256)" ] || fail 'Il backup della prova è stato modificato.'
+    [ "$(readkey "$BACKUP/state.plist" Format)" = 1 ] && [ "$(string_value "$BACKUP/state.plist" Owner)" = "$OWNER" ] || fail 'The backup directory does not belong to this test.'
+    [ "$(hash "$BACKUP/before.plist")" = "$(string_value "$BACKUP/state.plist" BeforeSHA256)" ] || fail 'The original backup was modified.'
+    [ "$(hash "$BACKUP/tested.plist")" = "$(string_value "$BACKUP/state.plist" TestedSHA256)" ] || fail 'The test backup was modified.'
     /bin/mkdir -p "$expected_dir"
     derive_tested "$BACKUP/before.plist" "$expected_dir/tested.plist"
-    /usr/bin/cmp -s "$expected_dir/tested.plist" "$BACKUP/tested.plist" || fail 'Lo snapshot della prova non contiene soltanto il flag previsto.'
+    /usr/bin/cmp -s "$expected_dir/tested.plist" "$BACKUP/tested.plist" || fail 'The test snapshot contains changes beyond the expected flag.'
     make_state "$BACKUP/before.plist" "$expected_dir/tested.plist" "$expected_dir/state.plist"
     /usr/bin/plutil -convert xml1 -o "$expected_dir/stored-state.plist" "$BACKUP/state.plist"
     /usr/bin/plutil -convert xml1 "$expected_dir/state.plist"
-    /usr/bin/cmp -s "$expected_dir/state.plist" "$expected_dir/stored-state.plist" || fail 'Il manifest del backup non coincide con questa prova.'
+    /usr/bin/cmp -s "$expected_dir/state.plist" "$expected_dir/stored-state.plist" || fail 'The backup manifest does not match this test.'
     BEFORE=$(hash "$BACKUP/before.plist")
     TESTED=$(hash "$BACKUP/tested.plist")
     CURRENT=$(hash "$CONFIG")
-    case "$CURRENT" in "$BEFORE"|"$TESTED") ;; *) fail 'Il config è cambiato dopo questa prova. Nessuna sovrascrittura.';; esac
+    case "$CURRENT" in "$BEFORE"|"$TESTED") ;; *) fail 'The config changed after this test. It will not be overwritten.';; esac
 }
 atomic_config() {
     local wanted=$1 expected=$2 wanted_hash
     ordinary "$CONFIG"
-    [ "$(hash "$CONFIG")" = "$expected" ] || fail 'Il config è cambiato durante i controlli.'
+    [ "$(hash "$CONFIG")" = "$expected" ] || fail 'The config changed during validation.'
     wanted_hash=$(hash "$wanted")
     CONFIG_TEMP=$(/usr/bin/mktemp "$OC/.schermo-config.XXXXXX")
     /bin/cp -p "$wanted" "$CONFIG_TEMP"
     /usr/bin/plutil -lint "$CONFIG_TEMP" >/dev/null
-    [ "$(hash "$CONFIG_TEMP")" = "$wanted_hash" ] || fail 'Copia config incompleta.'
+    [ "$(hash "$CONFIG_TEMP")" = "$wanted_hash" ] || fail 'Incomplete config copy.'
     ordinary "$CONFIG"
-    [ "$(hash "$CONFIG")" = "$expected" ] || fail 'Il config è cambiato durante la copia.'
+    [ "$(hash "$CONFIG")" = "$expected" ] || fail 'The config changed during copying.'
     /bin/mv -f "$CONFIG_TEMP" "$CONFIG"
     CONFIG_TEMP=''
-    [ "$(hash "$CONFIG")" = "$wanted_hash" ] || fail 'Scrittura non verificata. Non riavviare: conserva before.plist nel backup schermo.'
+    [ "$(hash "$CONFIG")" = "$wanted_hash" ] || fail 'Write verification failed. Do not restart; keep before.plist in the backlight backup.'
 }
 test_backlight() {
     local final_backup=$BACKUP original_hash
@@ -252,43 +252,43 @@ test_backlight() {
         original_hash=$(hash "$CONFIG")
         DRAFT=$(/usr/bin/mktemp -d "$OC/.backup-schermo.XXXXXX")
         /bin/cp -p "$CONFIG" "$DRAFT/before.plist"
-        [ "$(hash "$DRAFT/before.plist")" = "$original_hash" ] || fail 'Il config è cambiato durante la lettura.'
+        [ "$(hash "$DRAFT/before.plist")" = "$original_hash" ] || fail 'The config changed during reading.'
         derive_tested "$DRAFT/before.plist" "$DRAFT/tested.plist"
         make_state "$DRAFT/before.plist" "$DRAFT/tested.plist" "$DRAFT/state.plist"
         BACKUP=$DRAFT
         load_backup
-        [ "$(hash "$CONFIG")" = "$original_hash" ] || fail 'Il config è cambiato durante la preparazione.'
-        [ ! -e "$final_backup" ] && [ ! -L "$final_backup" ] || fail 'È comparso un backup durante i controlli.'
+        [ "$(hash "$CONFIG")" = "$original_hash" ] || fail 'The config changed during preparation.'
+        [ ! -e "$final_backup" ] && [ ! -L "$final_backup" ] || fail 'A backup appeared during validation.'
         /bin/mv "$DRAFT" "$final_backup"
         DRAFT=''
         BACKUP=$final_backup
     fi
     if [ "$CURRENT" = "$TESTED" ]; then
-        echo 'La prova -igfxblr è già preparata. Nessuna ulteriore modifica.'
+        echo 'The -igfxblr test is already prepared. No further changes made.'
     else
         atomic_config "$BACKUP/tested.plist" "$CURRENT"
-        echo 'Prova preparata: aggiunto soltanto -igfxblr ai boot-args.'
+        echo 'Test prepared: only -igfxblr was added to boot-args.'
     fi
-    echo 'Riavvia dalla stessa EFI e misura il tempo dello schermo nero prima del login.'
-    echo 'Confrontalo con i circa due minuti precedenti. Questa prova non garantisce la correzione.'
-    echo 'Il backup originale è conservato in EFI/OC/backup-schermo-avvio.'
-    echo 'Per annullare usa ANNULLA-SCHERMO-AVVIO.command prima di altre modifiche EFI o del ripristino audio completo.'
-    echo 'Il comando di annullamento funziona anche dal Terminale della Recovery, specificando il disco di avvio se il nome è diverso.'
+    echo 'Restart from the same EFI and measure the black-screen duration before login.'
+    echo 'Compare it with the previous roughly two minutes. This test does not guarantee a correction.'
+    echo 'The original backup is preserved in EFI/OC/backup-schermo-avvio.'
+    echo 'To reverse the test, use ANNULLA-SCHERMO-AVVIO.command before other EFI changes or full audio restoration.'
+    echo 'The reversal command also works from the Recovery Terminal; specify the boot disk if its name differs.'
 }
 restore_backlight() {
-    [ -e "$BACKUP" ] || [ -L "$BACKUP" ] || fail 'Non esiste un backup di questa prova. Nessuna modifica.'
+    [ -e "$BACKUP" ] || [ -L "$BACKUP" ] || fail 'No backup from this test exists. No changes made.'
     load_backup
     if [ "$CURRENT" = "$BEFORE" ]; then
-        echo 'Il config originale è già presente. Nessuna modifica.'
+        echo 'The original config is already present. No changes made.'
     else
         atomic_config "$BACKUP/before.plist" "$CURRENT"
-        echo 'Config precedente alla prova ripristinato byte per byte.'
-        echo 'Riavvia dalla stessa EFI. Il backup viene conservato.'
+        echo 'The pre-test config was restored byte for byte.'
+        echo 'Restart from the same EFI. The backup is preserved.'
     fi
-    echo 'Ora puoi procedere con altre modifiche EFI o con il ripristino audio completo.'
+    echo 'You can now proceed with other EFI changes or full audio restoration.'
 }
 
-case "$MODE" in test|restore) ;; *) fail 'Modalità non riconosciuta: usa test o restore.';; esac
+case "$MODE" in test|restore) ;; *) fail 'Unrecognized mode; use test or restore.';; esac
 native
 TEMP=$(/usr/bin/mktemp -d /private/tmp/s540-schermo-avvio.XXXXXX)
 if [ "$MODE" = test ]; then test_backlight; else restore_backlight; fi

@@ -47,7 +47,7 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Battery runtime / sleep and wake | Pending | Power transitions and device recovery |
 | NVIDIA electrical power-off | Pending | Disabling its driver does not establish that the GPU is powered off |
 
-Detailed hardware information is in [Hardware](docs/status/HARDWARE.md).
+Detailed hardware information is in [Hardware](docs/status/hardware.md).
 
 ## Operating configuration
 
@@ -62,11 +62,11 @@ Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including t
 - Complete battery, sleep, wake, and external display support.
 - Investigate NVIDIA support, including the Linux driver port as a research project.
 
-See the [Roadmap](docs/status/ROADMAP.md) for the implementation plan.
+See the [Roadmap](docs/status/roadmap.md) for the implementation plan.
 
 ## Documentation and downloads
 
-The [documentation index](docs/README.md) links to setup, maintenance, and recovery procedures. Main guides: [Intel graphics](docs/guides/GRAFICA-INTEL.md), [Tahoe audio](docs/guides/AUDIO-TAHOE.md), and [microphone correction](docs/guides/MICROFONO-FIX.md).
+The [documentation index](docs/README.md) links to setup, maintenance, and recovery procedures. Main guides: [Intel graphics](docs/guides/intel-graphics.md), [Tahoe audio](docs/guides/tahoe-audio.md), and [microphone correction](docs/guides/microphone-fix.md).
 
 Generated packages are available in **Artifacts** from successful [GitHub Actions runs](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions). The current microphone package is `S540-microfono-fix-v2`.
 
