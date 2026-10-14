@@ -4,7 +4,7 @@ Goal: make all components of the Lenovo IdeaPad S540-15IWL GTX usable on macOS T
 
 ## Work order and retained backlog
 
-The [grouped CPU check](cpu-thermal.md) confirms frequency and power response. The active thermal issue is an unavailable load temperature reading. A [passive sensor check](../../packages/cpu-sensors/README.md) records consecutive samples and loaded SMC driver versions; immediate repeat stress is deferred while sensor reliability is reviewed. Independent boot from the external 960 EVO follows; the other hardware items remain tracked below.
+The [CPU and passive sensor reports](cpu-thermal.md) confirm frequency/power response and fifteen consecutive valid idle temperatures at 45–48 °C. Loaded SMC sensor drivers are 1.3.8. The earlier load temperature gap remains unexplained; immediate repeat stress is deferred, and no sensor patch is inferred. The next implementation task is independent boot from the external 960 EVO using the current private working EFI. The remaining thermal and hardware items stay tracked below.
 
 | Order | Work | Remaining scope |
 |---|---|---|
@@ -36,7 +36,7 @@ Priorities updated on 13 October 2026: the panel being off during boot is **reso
 | External Samsung 960 EVO | Enclosure connection restored; Tahoe reached the desktop | Sustained use without disconnections and resume from sleep |
 | Internal PM981a NVMe | Visible in Recovery; retained for Windows | Check for any effects on macOS stability |
 | Display and brightness | Internal 1920×1080 panel, brightness slider and direct F11/F12 working | Retain the BrightnessKeys companion fix; panel resume remains pending |
-| CPU, battery and fans | X86PlatformPlugin active; CPU frequency/power response confirmed. Latest idle 54 °C, estimated Intel power 1.89–2.17 W; brief load 3.62 GHz and 43.83 W. Load stops after three seconds on a missing temperature reading; recovery 57 → 55 °C. Battery detected at 100% on AC | Reliable load-temperature readings, fan telemetry, sustained cooling, dGPU status, switching to battery and runtime |
+| CPU, battery and fans | X86PlatformPlugin active; CPU frequency/power response confirmed. Latest passive session: 15/15 valid temperatures, 45–48 °C; median estimated Intel package power 1.05 W. SMC sensor drivers 1.3.8 loaded. Earlier brief load 3.62 GHz and 43.83 W ended on a missing temperature reading. Battery detected at 100% on AC | Reliable load-temperature readings, fan telemetry, sustained cooling, dGPU status, switching to battery and runtime |
 | Sleep | pmset records Sleep Count 1, User Wake Count 1 and Dark Wake Count 0; [data retained](battery-sleep.md) | Tests deferred: peripheral recovery, lid behaviour and extended sleep still to be verified |
 | Webcam | Working; image capture confirmed alongside the internal microphone | Retain the current configuration; recovery after sleep remains part of the deferred wake checks |
 | O2Micro SD reader | Identified; support to be assessed | Applicable driver and reading a card |

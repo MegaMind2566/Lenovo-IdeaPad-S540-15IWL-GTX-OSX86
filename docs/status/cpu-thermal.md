@@ -32,7 +32,27 @@ The [standalone sensor collector](../../packages/cpu-sensors/README.md) reads fi
 
 The driver review used VirtualSMC 1.3.8 at commit `b15991dd87e36a102bf159ea56490e3126245590`. SMCProcessor registers temperature keys from CPU capability bits and encodes a cached integer temperature as `sp78`; its key reader has no NaN or unavailable-temperature branch. The periodic MSR update retains its previous cached temperature when the valid bit is absent. These source observations do not establish which key powermetrics requests or why the earlier sample contained no accepted temperature. A new driver, generic fan plugin or EFI patch is not justified by that sample.
 
-The continuous passive report remains to be collected on the laptop. The earlier peak temperature and sustained cooling remain unmeasured.
+### Passive report result: October 14, 2026
+
+The continuous reader completed successfully with fifteen samples, each containing one valid numeric CPU temperature. No temperature labels were missing, rejected or duplicated.
+
+| Item | Observed result |
+|---|---|
+| CPU die temperature | 45–48 °C; mean 46.47 °C |
+| Estimated Intel package power | 1.02–2.72 W; median 1.05 W |
+| Reported average system frequency | 0.883–1.855 GHz; median 0.913 GHz |
+| Thermal pressure | Nominal in all fifteen samples |
+| Loaded sensor drivers | VirtualSMC, SMCProcessor and SMCBatteryManager 1.3.8; Lilu 1.7.2 |
+| Reader completion | kmutil, IORegistry and powermetrics exit status 0 |
+| Fan RPM | Not reported |
+
+This establishes complete temperature readings during this passive session and low estimated Intel package power in the observed idle conditions. It does not explain the earlier workload temperature gap or verify sustained-load cooling, battery runtime, NVIDIA power-off or total laptop power.
+
+The SMCProcessor service-header filter did not observe the complete registered/matched/active combination. That output is not proof of an inactive driver: kmutil confirms the loaded extension, the VersionInfo property is present, and all temperature samples are valid. No driver or EFI change is inferred.
+
+Invalid-key warning markers remain: fifteen before the first sample and ninety-eight within sample groups. The report merges stdout and stderr, so their placement cannot identify individual keys or establish an improvement relative to the earlier separate reader sessions. Warnings coexist with valid CPU temperatures.
+
+The current configuration is retained. Further immediate stress is deferred; independent boot from the external Samsung 960 EVO is the next implementation task. Reliable workload temperature measurement remains open.
 
 ### Reviewed primary source
 

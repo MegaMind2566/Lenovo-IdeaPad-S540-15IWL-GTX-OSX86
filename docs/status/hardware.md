@@ -7,7 +7,7 @@ Report received on 12 October 2026. Only data relevant to the project is include
 | Model | Lenovo IdeaPad S540-15IWL GTX, 81SW family | Tahoe reached the desktop on the external 960 EVO |
 | Motherboard | Lenovo LNVNB161216 | DSDT and 12 SSDTs analysed |
 | BIOS | BWCN19WW, 26 May 2021 | UEFI present; Secure Boot disabled in the report |
-| CPU | Intel Core i7-8565U, Whiskey Lake-U, 4 cores / 8 threads | X86PlatformPlugin active; two idle samples with low estimated Intel power consumption and CPU temperature of 45–46 °C |
+| CPU | Intel Core i7-8565U, Whiskey Lake-U, 4 cores / 8 threads | X86PlatformPlugin active; frequency/power response confirmed; latest passive session has 15/15 valid temperature readings at 45–48 °C and median estimated Intel package power 1.05 W |
 | RAM | 12 GB DDR4-2400, 8 and 4 GB modules | Sufficient for the first test |
 | iGPU | Intel UHD 620, PCI 8086:3EA0 | IntelAccelerator detected and Metal 3 exposed; sustained load still to be tested |
 | dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91 | Driver disabled in the EFI; Linux port retained in the roadmap; electrical power-off still to be verified |
@@ -63,6 +63,12 @@ The report still contains Invalid key detected and does not report fan RPM: SMC 
 ## CPU response and thermal reading: 14 October 2026
 
 The [grouped CPU report](cpu-thermal.md) confirms four cores/eight logical processors and an active X86PlatformPlugin. Idle samples report 54 °C and an estimated Intel package power of 1.89–2.17 W. A brief workload reaches 3.62 GHz and 43.83 W; it ends after three seconds because the CPU temperature reading is unavailable. Recovery reports 57 → 56 → 55 °C and power returning to approximately 2 W. The load peak and sustained cooling remain unmeasured. Fifteen unavailable SMC keys persist, and fan RPM is absent; sensor-read reliability remains open.
+
+## Passive CPU sensors: 14 October 2026
+
+A single thirty-second reader session retained fifteen valid CPU temperatures with no missing, rejected or duplicate values: 45–48 °C. Estimated Intel package power has a median of 1.05 W, and thermal pressure is Nominal in every sample. kmutil confirms VirtualSMC, SMCProcessor and SMCBatteryManager 1.3.8, together with Lilu 1.7.2. Invalid-key warning markers remain and do not prevent temperature readings; fan RPM is not reported.
+
+The service-header filter's incomplete SMCProcessor state match is not evidence that the loaded driver is inactive. This result supports normal idle behavior during the observation, not sustained cooling or an explanation of the previous load gap. Details and measurement limits are recorded in [CPU and thermal observations](cpu-thermal.md). The working configuration is retained, with independent external SSD boot next.
 
 ## Panel fix and Bluetooth status: 13 October 2026
 
