@@ -40,7 +40,7 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | F11/F12 brightness keys | Working | BrightnessKeys companion package; not included in EFI v0.1.0 |
 | F6 touchpad toggle | Working | Direct key enables and disables the touchpad |
 | Fn function row | Configured | Ordinary F1–F12 events recorded; four conflicting macOS shortcuts disabled, session refresh confirmation pending |
-| Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; driver-level input discrimination in progress |
+| Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; further icon-key investigation deferred |
 | Native macOS Wi-Fi interface | Not working | Network management uses HeliPort |
 | Touchpad and gestures | Pending | ELAN0662 functionality requires verification |
 | Analog audio jack / Bluetooth microphone | Pending | Separate from speaker and Bluetooth headphone playback |
@@ -60,12 +60,11 @@ Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including t
 
 ## Development priorities
 
-- Consolidate the current configuration and complete the pending hardware features.
-- Prioritize reliable storage, independent boot from the external SSD, USB and external display support.
-- Retain the working keyboard controls and Fn shortcut configuration; remaining icon actions are deferred.
-- Improve audio equalization in a later stage.
-- Complete battery, sleep, wake, and external display support.
-- Investigate NVIDIA support, including the Linux driver port as a research project.
+- Make the external SSD independently bootable and consolidate the current working EFI.
+- Complete storage, USB, Intel stability, power management and external display support.
+- Finish wireless reconnection, audio peripheral and remaining device support.
+- Retain the working keyboard controls; remaining icon actions, equalization and sleep refinements are deferred.
+- Keep native macOS Wi-Fi integration and NVIDIA driver-port research open.
 
 See the [Roadmap](docs/status/roadmap.md) for the implementation plan.
 

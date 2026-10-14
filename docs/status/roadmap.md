@@ -2,14 +2,22 @@
 
 Goal: make all components of the Lenovo IdeaPad S540-15IWL GTX usable on macOS Tahoe. Each component requires testing on the device. NVIDIA research remains open and is planned after stabilising Intel graphics.
 
-## Test order
+## Work order and retained backlog
 
-1. Retain a private copy of the current EFI: the Tahoe desktop has been reached on the external 960 EVO.
-2. Complete UHD 620 stability tests following [Intel graphics](../guides/intel-graphics.md); IntelAccelerator and exposed Metal 3 support are already confirmed.
-3. Verify peripherals, networking, USB and audio in the installed system.
-4. Complete brightness, power management, sleep and reboot checks.
-5. Transfer the current EFI to the 960 EVO and test booting without the HDD, retaining the working boot medium as a fallback.
-6. Start NVIDIA research and verify video outputs according to the identified hardware paths.
+The immediate milestone is independent boot from the external 960 EVO. Completing that milestone does not close the other hardware items below.
+
+| Order | Work | Remaining scope |
+|---|---|---|
+| 1 | Boot and EFI consolidation | Preserve a private copy of the current working EFI, copy it to the external SSD's EFI partition, and establish boot without the HDD. Keep the HDD as a recovery path. Document a later release of the current configuration without replacing v0.1.0. |
+| 2 | Storage and USB reliability | External SSD stability, USB-A/USB-C SuperSpeed, both USB-C orientations, reconnection, shutdown and reboot. |
+| 3 | Graphics, power and thermals | Sustained Intel graphics use, temperatures under load, NVIDIA electrical power-off, incomplete SMC sensors, switching to battery and runtime. Electrical power-off is separate from driver-port research. |
+| 4 | Wireless and audio peripherals | Wi-Fi speed, network changes and reconnection; Bluetooth reconnection and headphone microphone; analog audio jack. Retain the working internal microphone correction. |
+| 5 | External displays | HDMI and USB-C video operation and actual GPU routing before choosing display fixes. |
+| 6 | Other peripherals | Touchpad gestures, sustained webcam operation, O2Micro SD reader and fingerprint-reader support. |
+| Later | Deferred refinements | Remaining F4/F5/F7/F8/F9/F10 icon actions, Fn behavior after session refresh, audio equalization, lid/sleep/wake and peripheral recovery. |
+| Research | Open compatibility work | Native macOS Wi-Fi integration and the NVIDIA Linux-driver port. Neither is treated as completed or discarded. |
+
+Windows on the internal PM981a is retained. The current backlight, Intel framebuffer, audio/microphone and BrightnessKeys corrections are the baseline for subsequent work. Small verification tasks should be grouped around each implementation rather than repeatedly requesting unrelated diagnostic archives.
 
 Priorities updated on 13 October 2026: the panel being off during boot is **resolved in the -igfxblr test, with the wait reduced from approximately two minutes to zero**. The current EFI is retained. On 14 October 2026, operation with Bluetooth headphones and HeliPort was also confirmed. The Photo Booth test shows an image and records voice; the gain defect led to the [microphone fix v2](../guides/microphone-fix.md), with an initial positive report after the reboot on 14 October 2026. The verification report and comparison recordings still need to be collected. Network speed and reconnection remain unresolved. The procedure is in [Boot and network](../guides/boot-network.md). Battery data and counters are [archived](battery-sleep.md); further sleep tests and equalisation are deferred. Remaining keyboard icon actions are deferred while core storage, boot, USB and display support take priority. Working audio, touchpad and brightness keys, together with the configured Fn shortcuts, are retained.
 
