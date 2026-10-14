@@ -185,8 +185,8 @@ appledouble_file() {
             count=word(25,2); limit=26+12*count;
             if(count<1 || count>64 || total<limit || size<limit)exit 1;
             for(i=0;i<count;i++) {
-                p=27+12*i; id=word(p,4); offset=word(p+4,4); length=word(p+8,4);
-                if(id<1 || ids[id]++ || offset<limit || offset>size || length>size-offset)exit 1;
+                p=27+12*i; id=word(p,4); offset=word(p+4,4); entry_length=word(p+8,4);
+                if(id<1 || ids[id]++ || offset<limit || offset>size || entry_length>size-offset)exit 1;
             }
             exit 0
         }'
