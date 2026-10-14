@@ -26,11 +26,12 @@ static const unsigned short ModifierCodes[] = {54, 55, 56, 57, 58, 59, 60, 61, 6
 
 @interface CaptureState : NSObject
 @property(nonatomic) BOOL active;
-@property(nonatomic) BOOL directF5;
+@property(nonatomic) NSUInteger directKey;
 @property(nonatomic) BOOL tapInterrupted;
 @property(nonatomic) BOOL overflow;
 @property(nonatomic) CFAbsoluteTime started;
 @property(nonatomic, strong) NSMutableArray<NSDictionary *> *events;
+@property(nonatomic, strong) NSMutableArray<NSDictionary *> *interruptions;
 @end
 @implementation CaptureState
 @end
@@ -70,21 +71,24 @@ static NSArray<NSString *> *ModifierNames(CGEventFlags flags) {
     return names;
 }
 
-// The only printable-key exception is a refresh shortcut during direct F5.
-// It is not allowed during other trials or without the exact command/control chord.
-static NSString *RefreshShortcut(unsigned short code, CGEventFlags flags, BOOL directF5) {
-    if (!directF5 || code != 15) return nil; // ANSI R key position, never character text.
+// Printable-key positions are accepted only as these exact chords in their own direct trial.
+// No character text is read. Other trials, unmodified letters, and extra chord modifiers are rejected.
+static NSString *AllowedShortcut(unsigned short code, CGEventFlags flags, NSUInteger directKey) {
     CGEventFlags chord = flags & (kCGEventFlagMaskShift | kCGEventFlagMaskControl |
                                  kCGEventFlagMaskAlternate | kCGEventFlagMaskCommand);
-    if (chord == kCGEventFlagMaskCommand) return @"command_r";
-    if (chord == kCGEventFlagMaskControl) return @"control_r";
+    if (directKey == 5 && code == 15) { // ANSI R position.
+        if (chord == kCGEventFlagMaskCommand) return @"command_r";
+        if (chord == kCGEventFlagMaskControl) return @"control_r";
+    }
+    if (directKey == 9 && code == 37 && chord == kCGEventFlagMaskCommand) return @"command_l";
+    if (directKey == 10 && code == 35 && chord == kCGEventFlagMaskCommand) return @"command_p";
     return nil;
 }
 
 static NSDictionary *DecodeKey(CGEventType type, unsigned short code, CGEventFlags flags,
-                               BOOL repeat, BOOL directF5) {
+                               BOOL repeat, NSUInteger directKey) {
     NSString *function = FunctionName(code);
-    NSString *shortcut = RefreshShortcut(code, flags, directF5);
+    NSString *shortcut = AllowedShortcut(code, flags, directKey);
     if (type == kCGEventFlagsChanged) {
         if (!ModifierCode(code)) return nil;
         return @{@"kind": @"modifier_change", @"keycode": @(code),
@@ -96,7 +100,10 @@ static NSDictionary *DecodeKey(CGEventType type, unsigned short code, CGEventFla
                                      @"keycode": @(code), @"modifiers": ModifierNames(flags),
                                      @"repeat": @(repeat)} mutableCopy];
     if (function) decoded[@"function_key"] = function;
-    if (shortcut) decoded[@"refresh_shortcut"] = shortcut;
+    if (shortcut) {
+        decoded[@"shortcut"] = shortcut;
+        if (directKey == 5) decoded[@"refresh_shortcut"] = shortcut;
+    }
     return decoded;
 }
 
@@ -113,13 +120,25 @@ static NSDictionary *DecodeMedia(int subtype, uint32_t data1, CGEventFlags flags
              @"modifiers": ModifierNames(flags)};
 }
 
+static void RecordTapInterruption(CaptureState *capture, CGEventType type, double now) {
+    if (!capture.active) return;
+    NSString *reason = type == kCGEventTapDisabledByTimeout ? @"timeout" :
+                       type == kCGEventTapDisabledByUserInput ? @"user_disabled" : nil;
+    if (!reason) return;
+    capture.tapInterrupted = YES;
+    if (capture.interruptions.count < 4) {
+        [capture.interruptions addObject:@{@"reason": reason,
+            @"elapsed_ms": @(MAX(0, (NSInteger)((now - capture.started) * 1000)))}];
+    }
+}
+
 static CGEventRef ListenCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event,
                                 void *context) {
     (void)proxy;
     @autoreleasepool {
         CaptureState *capture = (__bridge CaptureState *)context;
         if (type == kCGEventTapDisabledByTimeout || type == kCGEventTapDisabledByUserInput) {
-            if (capture.active) capture.tapInterrupted = YES;
+            RecordTapInterruption(capture, type, MonotonicTime());
             return event;
         }
         if (!capture.active) return event;
@@ -133,7 +152,7 @@ static CGEventRef ListenCallback(CGEventTapProxy proxy, CGEventType type, CGEven
         } else if (type == kCGEventKeyDown || type == kCGEventKeyUp || type == kCGEventFlagsChanged) {
             unsigned short code = (unsigned short)CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
             BOOL repeat = CGEventGetIntegerValueField(event, kCGKeyboardEventAutorepeat) != 0;
-            decoded = DecodeKey(type, code, flags, repeat, capture.directF5);
+            decoded = DecodeKey(type, code, flags, repeat, capture.directKey);
         }
         if (decoded) {
             if (capture.events.count < MaximumEventsPerTrial) {
@@ -295,6 +314,23 @@ static BOOL WaitForEnter(void) {
     return NO;
 }
 
+static NSArray<NSDictionary *> *RequestedTrials(BOOL targeted) {
+    NSMutableArray *trials = [NSMutableArray array];
+    if (targeted) {
+        for (NSNumber *key in @[@4, @5, @7, @8, @9, @10]) {
+            [trials addObject:@{@"key": key, @"fn_layer": @NO}];
+        }
+        [trials addObject:@{@"key": @5, @"fn_layer": @YES}];
+    } else {
+        for (NSUInteger layer = 0; layer < 2; layer++) {
+            for (NSUInteger key = 1; key <= 12; key++) {
+                [trials addObject:@{@"key": @(key), @"fn_layer": @(layer == 1)}];
+            }
+        }
+    }
+    return trials;
+}
+
 static BOOL WriteReport(NSDictionary *report, NSString *directory) {
     NSError *error = nil;
     NSData *json = [NSJSONSerialization dataWithJSONObject:report
@@ -310,6 +346,9 @@ static BOOL WriteReport(NSDictionary *report, NSString *directory) {
     for (NSDictionary *trial in report[@"trials"]) {
         [text appendFormat:@"%@: %@\n", trial[@"label"], trial[@"status"]];
         if ([trial[@"tap_interrupted"] boolValue]) [text appendString:@"  Event tap interrupted; do not infer a missing key.\n"];
+        for (NSDictionary *interruption in trial[@"interruptions"]) {
+            [text appendFormat:@"  Interruption: %@ at %@ ms\n", interruption[@"reason"], interruption[@"elapsed_ms"]];
+        }
         for (NSDictionary *record in trial[@"events"]) {
             NSData *line = [NSJSONSerialization dataWithJSONObject:record options:NSJSONWritingSortedKeys error:NULL];
             if (line) [text appendFormat:@"  %@\n", [[NSString alloc] initWithData:line encoding:NSUTF8StringEncoding]];
@@ -328,11 +367,20 @@ static int SelfTest(void) {
         if ((DecodeKey(kCGEventKeyUp, code, kCGEventFlagMaskSecondaryFn, NO, NO) != nil) != expected) return 1;
         if (DecodeKey(kCGEventKeyDown, code, kCGEventFlagMaskCommand, NO, NO) && !expected) return 1;
     }
-    if (!DecodeKey(kCGEventKeyDown, 15, kCGEventFlagMaskCommand, NO, YES)) return 1;
-    if (!DecodeKey(kCGEventKeyDown, 15, kCGEventFlagMaskControl, NO, YES)) return 1;
-    if (DecodeKey(kCGEventKeyDown, 15, 0, NO, YES)) return 1;
-    if (DecodeKey(kCGEventKeyDown, 15, kCGEventFlagMaskCommand | kCGEventFlagMaskShift, NO, YES)) return 1;
-    if (DecodeKey(kCGEventKeyDown, 37, kCGEventFlagMaskCommand, NO, YES)) return 1;
+    if (!DecodeKey(kCGEventKeyDown, 15, kCGEventFlagMaskCommand, NO, 5)) return 1;
+    if (!DecodeKey(kCGEventKeyDown, 15, kCGEventFlagMaskControl, NO, 5)) return 1;
+    if (DecodeKey(kCGEventKeyDown, 15, 0, NO, 5)) return 1;
+    if (DecodeKey(kCGEventKeyDown, 15, kCGEventFlagMaskCommand | kCGEventFlagMaskShift, NO, 5)) return 1;
+    if (DecodeKey(kCGEventKeyDown, 37, kCGEventFlagMaskCommand, NO, 5)) return 1;
+    if (![DecodeKey(kCGEventKeyDown, 37, kCGEventFlagMaskCommand, NO, 9)[@"shortcut"] isEqual:@"command_l"]) return 1;
+    if (![DecodeKey(kCGEventKeyUp, 35, kCGEventFlagMaskCommand, NO, 10)[@"shortcut"] isEqual:@"command_p"]) return 1;
+    for (NSUInteger trialKey = 0; trialKey <= 12; trialKey++) {
+        if ((DecodeKey(kCGEventKeyDown, 37, kCGEventFlagMaskCommand, NO, trialKey) != nil) != (trialKey == 9)) return 1;
+        if ((DecodeKey(kCGEventKeyDown, 35, kCGEventFlagMaskCommand, NO, trialKey) != nil) != (trialKey == 10)) return 1;
+        if (DecodeKey(kCGEventKeyDown, 37, kCGEventFlagMaskControl, NO, trialKey)) return 1;
+        if (DecodeKey(kCGEventKeyDown, 35, kCGEventFlagMaskCommand | kCGEventFlagMaskAlternate, NO, trialKey)) return 1;
+        if (DecodeKey(kCGEventKeyDown, 0, kCGEventFlagMaskCommand, NO, trialKey)) return 1;
+    }
     if (!DecodeKey(kCGEventFlagsChanged, 63, kCGEventFlagMaskSecondaryFn, NO, NO)) return 1;
     if (DecodeKey(kCGEventFlagsChanged, 0, 0, NO, NO)) return 1;
     NSDictionary *media = DecodeMedia(8, (7U << 16) | (0x0aU << 8) | 1U, kCGEventFlagMaskSecondaryFn);
@@ -364,6 +412,26 @@ static int SelfTest(void) {
     serialized = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     if ([serialized containsString:@"65535"] || [serialized containsString:@"private_text"] ||
         [serialized containsString:@"personal_text"] || [serialized containsString:@"parameters"]) return 1;
+    CaptureState *capture = [CaptureState new];
+    capture.interruptions = [NSMutableArray array];
+    capture.started = 10.0;
+    RecordTapInterruption(capture, kCGEventTapDisabledByUserInput, 10.1);
+    if (capture.tapInterrupted || capture.interruptions.count != 0) return 1;
+    capture.active = YES;
+    RecordTapInterruption(capture, kCGEventTapDisabledByTimeout, 10.2);
+    RecordTapInterruption(capture, kCGEventTapDisabledByUserInput, 10.3);
+    if (!capture.tapInterrupted || capture.interruptions.count != 2 ||
+        ![capture.interruptions[0][@"reason"] isEqual:@"timeout"] ||
+        ![capture.interruptions[1][@"reason"] isEqual:@"user_disabled"]) return 1;
+    capture.active = NO;
+    capture.events = [NSMutableArray array];
+    // Exercise the callback's early privacy guard without creating any event or event tap.
+    if (ListenCallback(NULL, kCGEventKeyDown, NULL, (__bridge void *)capture) != NULL ||
+        capture.events.count != 0) return 1;
+    NSArray *targeted = RequestedTrials(YES);
+    if (targeted.count != 7 || RequestedTrials(NO).count != 24 ||
+        ![targeted[0][@"key"] isEqual:@4] || ![targeted[5][@"key"] isEqual:@10] ||
+        ![targeted[6][@"key"] isEqual:@5] || ![targeted[6][@"fn_layer"] boolValue]) return 1;
     puts("Function-key decoder and privacy self-test passed.");
     return 0;
 }
@@ -371,18 +439,20 @@ static int SelfTest(void) {
 int main(int argc, const char *argv[]) {
     @autoreleasepool {
         if (argc == 2 && strcmp(argv[1], "--self-test") == 0) return SelfTest();
-        if (argc != 3 || strcmp(argv[1], "--output") != 0) {
-            fputs("Usage: function-key-events --output EXISTING_PRIVATE_DIRECTORY\n", stderr);
+        BOOL targeted = argc == 4 && strcmp(argv[1], "--targeted") == 0 && strcmp(argv[2], "--output") == 0;
+        int outputIndex = targeted ? 3 : 2;
+        if (!targeted && (argc != 3 || strcmp(argv[1], "--output") != 0)) {
+            fputs("Usage: function-key-events [--targeted] --output EXISTING_PRIVATE_DIRECTORY\n", stderr);
             return 64;
         }
         if (!isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO)) {
             fputs("Run the probe interactively in Terminal. No report was written.\n", stderr);
             return 64;
         }
-        NSString *directory = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:argv[2]
-                                                                                         length:strlen(argv[2])];
+        NSString *directory = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:argv[outputIndex]
+                                                                                         length:strlen(argv[outputIndex])];
         struct stat metadata;
-        if (!directory || lstat(argv[2], &metadata) != 0 || !S_ISDIR(metadata.st_mode) ||
+        if (!directory || lstat(argv[outputIndex], &metadata) != 0 || !S_ISDIR(metadata.st_mode) ||
             metadata.st_uid != getuid() || (metadata.st_mode & 077) != 0) {
             fputs("The output must be an existing private directory owned by the current user.\n", stderr);
             return 73;
@@ -402,80 +472,88 @@ int main(int argc, const char *argv[]) {
                   "Accessibility permission is not requested. No report was written.\n", stderr);
             return 77;
         }
-        CaptureState *capture = [CaptureState new];
-        capture.events = [NSMutableArray array];
-        CGEventMask mask = CGEventMaskBit(kCGEventKeyDown) | CGEventMaskBit(kCGEventKeyUp) |
-                           CGEventMaskBit(kCGEventFlagsChanged) | CGEventMaskBit(SystemDefinedType);
-        CFMachPortRef tap = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap,
-            kCGEventTapOptionListenOnly, mask, ListenCallback, (__bridge void *)capture);
-        if (!tap) {
-            fputs("The passive event tap could not start. Check Input Monitoring and rerun from Terminal.\n", stderr);
-            return 77;
-        }
-        CFRunLoopSourceRef source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0);
-        if (!source) { CFMachPortInvalidate(tap); CFRelease(tap); return 70; }
-        CFRunLoopAddSource(CFRunLoopGetCurrent(), source, kCFRunLoopDefaultMode);
-        CGEventTapEnable(tap, false);
-        puts("Function-key event probe: 24 short, intentional tests.\n"
-             "Save your work first. The real keys keep their current actions.\n"
+        NSArray<NSDictionary *> *requested = RequestedTrials(targeted);
+        printf("Function-key event probe: %lu short, intentional tests.\n", (unsigned long)requested.count);
+        puts("Save your work first. The real keys keep their current actions.\n"
              "F7 can change connectivity; F8 can affect the camera; F9 can lock the screen.\n"
-             "After a lock, unlock normally and return to Terminal.\n"
+             "After a lock, unlock normally and return to Terminal. Close any dialog before the next test.\n"
              "Do not type passwords or other text during a capture window.\n"
              "Press only the requested key once after CAPTURE appears, then release it.\n"
              "The probe does not change keyboard shortcuts, EFI, or any driver.\n");
         NSMutableArray *trials = [NSMutableArray array];
         BOOL stopped = NO;
-        for (NSUInteger layer = 0; layer < 2 && !stopped; layer++) {
-            for (NSUInteger key = 1; key <= 12; key++) {
-                NSString *label = layer == 0 ? [NSString stringWithFormat:@"F%lu direct", (unsigned long)key]
-                                            : [NSString stringWithFormat:@"Fn+F%lu", (unsigned long)key];
-                printf("\n[%lu/24] %s. Press ENTER when ready.\n", (unsigned long)(layer * 12 + key), label.UTF8String);
-                fflush(stdout);
-                if (!WaitForEnter()) { stopped = YES; break; }
-                capture.directF5 = layer == 0 && key == 5;
-                capture.events = [NSMutableArray array];
-                capture.tapInterrupted = NO;
-                capture.overflow = NO;
-                printf("CAPTURE: press and release %s now (3 seconds).\n", label.UTF8String);
-                fflush(stdout);
-                capture.started = MonotonicTime();
-                capture.active = YES;
-                CGEventTapEnable(tap, true);
-                CFAbsoluteTime deadline = capture.started + CaptureSeconds;
-                while (MonotonicTime() < deadline) {
-                    CFRunLoopRunInMode(kCFRunLoopDefaultMode, MAX(0, MIN(0.05, deadline - MonotonicTime())), true);
-                }
-                capture.active = NO;
-                CGEventTapEnable(tap, false);
-                tcflush(STDIN_FILENO, TCIFLUSH); // Discard terminal input generated by the intentional key.
-                NSUInteger keyEvents = 0;
-                for (NSDictionary *event in capture.events) if (![event[@"kind"] isEqual:@"modifier_change"]) keyEvents++;
-                NSString *status = capture.tapInterrupted ? @"CAPTURE INTERRUPTED" :
-                                   keyEvents ? @"MATCHING KEY EVENT" : @"NO MATCHING KEY EVENT";
-                [trials addObject:@{@"number": @(layer * 12 + key), @"label": label,
-                    @"requested_function_key": [NSString stringWithFormat:@"F%lu", (unsigned long)key],
-                    @"user_requested_fn_layer": @(layer == 1), @"window_seconds": @(CaptureSeconds),
-                    @"status": status, @"tap_interrupted": @(capture.tapInterrupted),
-                    @"event_limit_reached": @(capture.overflow), @"events": [capture.events copy]}];
-                printf("%s\n", status.UTF8String);
+        NSString *stopReason = @"none";
+        for (NSUInteger index = 0; index < requested.count; index++) {
+            NSUInteger key = [requested[index][@"key"] unsignedIntegerValue];
+            BOOL fnLayer = [requested[index][@"fn_layer"] boolValue];
+            NSString *label = fnLayer ? [NSString stringWithFormat:@"Fn+F%lu", (unsigned long)key]
+                                     : [NSString stringWithFormat:@"F%lu direct", (unsigned long)key];
+            printf("\n[%lu/%lu] %s. Press ENTER when ready.\n", (unsigned long)index + 1,
+                   (unsigned long)requested.count, label.UTF8String);
+            fflush(stdout);
+            if (!WaitForEnter()) { stopped = YES; stopReason = @"stdin_closed"; break; }
+
+            // A new tap is created only after the user starts this trial. Never manually disable a tap:
+            // disabled notifications can otherwise stay queued and contaminate the next trial.
+            CaptureState *capture = [CaptureState new];
+            capture.directKey = fnLayer ? 0 : key;
+            capture.events = [NSMutableArray array];
+            capture.interruptions = [NSMutableArray array];
+            CGEventMask mask = CGEventMaskBit(kCGEventKeyDown) | CGEventMaskBit(kCGEventKeyUp) |
+                               CGEventMaskBit(kCGEventFlagsChanged) | CGEventMaskBit(SystemDefinedType);
+            CFMachPortRef tap = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap,
+                kCGEventTapOptionListenOnly, mask, ListenCallback, (__bridge void *)capture);
+            if (!tap) {
+                fputs("The passive event tap could not start. Check Input Monitoring and rerun from Terminal.\n", stderr);
+                stopped = YES; stopReason = @"event_tap_creation_failed"; break;
             }
+            CFRunLoopSourceRef source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0);
+            if (!source) {
+                CFMachPortInvalidate(tap); CFRelease(tap);
+                stopped = YES; stopReason = @"run_loop_source_creation_failed"; break;
+            }
+            CFRunLoopAddSource(CFRunLoopGetCurrent(), source, kCFRunLoopDefaultMode);
+            printf("CAPTURE: press and release %s now (3 seconds).\n", label.UTF8String);
+            fflush(stdout);
+            capture.started = MonotonicTime();
+            capture.active = YES;
+            double deadline = capture.started + CaptureSeconds;
+            while (MonotonicTime() < deadline) {
+                CFRunLoopRunInMode(kCFRunLoopDefaultMode, MAX(0, MIN(0.05, deadline - MonotonicTime())), true);
+            }
+            capture.active = NO;
+            CFRunLoopRemoveSource(CFRunLoopGetCurrent(), source, kCFRunLoopDefaultMode);
+            CFMachPortInvalidate(tap);
+            CFRelease(source);
+            CFRelease(tap);
+            tcflush(STDIN_FILENO, TCIFLUSH); // Discard terminal input generated by the intentional key.
+            NSUInteger keyEvents = 0;
+            for (NSDictionary *event in capture.events) if (![event[@"kind"] isEqual:@"modifier_change"]) keyEvents++;
+            NSString *status = capture.tapInterrupted ? @"CAPTURE INTERRUPTED" :
+                               keyEvents ? @"MATCHING KEY EVENT" : @"NO MATCHING KEY EVENT";
+            [trials addObject:@{@"number": @(index + 1), @"label": label,
+                @"requested_function_key": [NSString stringWithFormat:@"F%lu", (unsigned long)key],
+                @"user_requested_fn_layer": @(fnLayer), @"window_seconds": @(CaptureSeconds),
+                @"status": status, @"tap_interrupted": @(capture.tapInterrupted),
+                @"matching_key_event_count": @(keyEvents), @"interruptions": [capture.interruptions copy],
+                @"event_limit_reached": @(capture.overflow), @"events": [capture.events copy]}];
+            printf("%s (%lu matching key events)\n", status.UTF8String, (unsigned long)keyEvents);
         }
-        CFMachPortInvalidate(tap);
-        CFRunLoopRemoveSource(CFRunLoopGetCurrent(), source, kCFRunLoopDefaultMode);
-        CFRelease(source);
-        CFRelease(tap);
-        NSDictionary *report = @{@"schema": @"s540-function-key-events-v1", @"probe_version": @"1.0.0",
-            @"capture_mode": @"session_listen_only", @"completed": @(!stopped && trials.count == 24),
+        NSDictionary *report = @{@"schema": @"s540-function-key-events-v1", @"probe_version": @"1.1.0",
+            @"capture_mode": @"session_listen_only", @"trial_mode": targeted ? @"targeted" : @"full",
+            @"requested_trial_count": @(requested.count), @"stop_reason": stopReason,
+            @"completed": @(!stopped && trials.count == requested.count),
             @"privacy": @{@"typed_text_recorded": @NO, @"personal_paths_recorded": @NO,
                            @"device_identity_recorded": @NO, @"background_installation": @NO},
             @"limitations": @[@"The secondary_fn_flag does not establish physical Fn state.",
                 @"No matching event does not establish that firmware or ACPI produced no event.",
                 @"Secure Input, lock transitions, permission limits, and routing can hide events.",
-                @"Only F1-F20, modifier changes, AUX_CONTROL_BUTTONS, and direct-F5 Command/Control+R are retained."],
+                @"Only F1-F20, modifier changes, AUX_CONTROL_BUTTONS, direct-F5 Command/Control+R, direct-F9 Command+L, and direct-F10 Command+P are retained."],
             @"audio_input_capabilities": InputAudioCapabilities(),
             @"existing_symbolic_hotkeys": ExistingSymbolicHotKeys(), @"trials": trials};
         if (!WriteReport(report, directory)) { fputs("The report could not be saved.\n", stderr); return 74; }
         puts("Report saved. The passive event tap is closed.");
+        if (stopped) puts("Collection ended early. The report contains only completed trials.");
         return 0;
     }
 }

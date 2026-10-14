@@ -1,0 +1,35 @@
+name: Build reversible Fn shortcut setup
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/function-keys-setup/**'
+      - 'packages/function-key-preferences/**'
+      - 'packages/function-key-events/**'
+      - 'builders/build_function_keys_setup.py'
+      - 'builders/build_function_key_events.py'
+      - '.github/workflows/build-function-keys-setup.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15-intel
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Compile and verify native preference and event fixtures
+        run: python3 builders/build_function_keys_setup.py --output-dir build/function-keys-setup
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: S540-function-keys-setup
+          path: |
+            build/function-keys-setup/S540-function-keys-setup.zip
+            build/function-keys-setup/S540-function-keys-setup.zip.sha256
+          if-no-files-found: error
+          retention-days: 30

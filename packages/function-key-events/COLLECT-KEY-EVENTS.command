@@ -4,6 +4,12 @@ set -eu
 umask 077
 
 fail() { printf 'Function-key event collection: %s\n' "$1" >&2; exit 1; }
+TARGETED=0
+if [ "$#" -eq 1 ] && [ "$1" = --targeted ]; then
+  TARGETED=1
+elif [ "$#" -ne 0 ]; then
+  fail 'Usage: COLLECT-KEY-EVENTS.command [--targeted]'
+fi
 PACKAGE_ROOT=$(cd "$(dirname "$0")" && pwd -P)
 PROBE="$PACKAGE_ROOT/bin/function-key-events"
 [ "$(/usr/bin/uname -s)" = Darwin ] || fail 'This package requires macOS.'
@@ -19,7 +25,11 @@ REPORT_ROOT=$(/usr/bin/mktemp -d "$HOME/Desktop/FUNCTION-KEY-EVENTS-XXXXXX") || 
 printf 'The probe may request Input Monitoring for Terminal or the probe.\n'
 printf 'It does not request Accessibility, install a background service, or remap keys.\n\n'
 set +e
-"$PROBE" --output "$REPORT_ROOT"
+if [ "$TARGETED" -eq 1 ]; then
+  "$PROBE" --targeted --output "$REPORT_ROOT"
+else
+  "$PROBE" --output "$REPORT_ROOT"
+fi
 RESULT=$?
 set -e
 if [ "$RESULT" -eq 77 ]; then

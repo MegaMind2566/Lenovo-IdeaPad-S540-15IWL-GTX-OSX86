@@ -77,3 +77,5 @@ The EFI used for initial operation retains `-wegnoegpu`. Electrical power-off of
 
 The BrightnessKeys companion fix now provides working direct F11/F12. F1–F3 audio controls and F6 touchpad toggle also work. The current task is F4/F5/F7/F8/F9/F10 and ordinary Fn+F1–F12 for applications. Event collection is read-only; unobserved scan codes or ACPI events will not be assigned speculative mappings.
 
+All twelve Fn key identities are now recorded. The [Fn shortcut setup](../../packages/function-keys-setup/README.md) targets only the four existing plain F9–F12 macOS bindings and captures seven remaining direct/Fn inputs. Preference behavior is pending the laptop's normal session refresh. F5 still requires physical-layer discrimination; the normalized events of its two layers are identical.
+

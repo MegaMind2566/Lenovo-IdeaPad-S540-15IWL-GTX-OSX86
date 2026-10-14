@@ -45,4 +45,5 @@ Graphics experiments, Intel traces and Recovery log collectors are preserved in 
 - [Function-key diagnosis](../packages/function-keys/README.md): read-only device snapshots and F11/F12 observations for the function-key batch.
 
 - [Function-key events](../packages/function-key-events/README.md): a native, read-only observer for the complete direct/Fn row. It does not install mappings.
+- [Fn shortcut setup](../packages/function-keys-setup/README.md): a reversible change to the four proven macOS bindings and a targeted capture for the remaining icon keys.
 

@@ -23,6 +23,20 @@ The complete row follows the keyboard legends: direct presses perform the icon a
 
 ## Remaining key events
 
+The first complete event report records the expected F1–F12 press and release for every Fn combination. Four existing macOS symbolic shortcuts consume plain F9/F10/F11/F12: IDs 32/33/36/62, with zero modifiers. Their [reversible preference setup](../../packages/function-keys-setup/README.md) disables only those enabled fields, preserving modified shortcuts and the F14/F15 bindings used by brightness.
+
+Direct F5 and Fn+F5 both produce keycode 96 with the same flags. A global F5 reload mapping would also intercept the ordinary Fn+F5 path, so that mapping is deferred until a lower-level distinction is established. The first direct F9/F10 captures retain only Command modifier transitions; their other keys remain unconfirmed. The default input device exposes a writable master mute control, enabling an F4 action once its trigger is established.
+
+Observer 1.0 marked all trials interrupted while still recording the positive key identities above. It reused a tap across intentional disable/enable operations, allowing queued disable notifications to affect the next trial. Version 1.1 creates a fresh tap per window, records genuine interruption reasons, and supports a seven-trial targeted capture. Missing events in the initial interrupted windows do not establish a missing firmware event.
+
+Run the combined setup after extracting it into Downloads:
+
+```bash
+bash "$HOME/Downloads/S540-function-keys-setup/PREPARE-FUNCTION-KEYS.command"
+```
+
+Complete the targeted prompts, retain the private report ZIP on Desktop, and restart normally to refresh macOS shortcut consumers. The original configuration of the four preference fields can be restored through the included `RESTORE-FN-SHORTCUTS.command`. This operation does not load a new EFI component.
+
 The [native event observer](../../packages/function-key-events/README.md) records separate direct and Fn trials for all twelve keys. Its native executable is built on macOS and needs no developer tools on the laptop. It observes only allowed function/media events during the requested trials and does not modify the EFI or keyboard preferences.
 
 The event stream can establish distinct inputs for a mapping. A missing matching event cannot distinguish a scan code discarded by VoodooPS2 from a firmware/ACPI-only action. The physical Fn key may be handled by firmware; the macOS function modifier flag is not proof that physical Fn was held. No remapping is applied until the actual input path is identified.
