@@ -48,6 +48,16 @@ The enclosure's USB serial is not retained. Its reported 4.48 W is allocated USB
 
 The USB-C reversal check is complete: after the preceding 5 Gb/s report, the follow-up explicitly reports the Samsung on reversed USB-C and retains 5 Gb/s. The result applies to the current SSD, enclosure and cable. Remaining USB-A ports can be checked with another USB 3 device or after shutting down before moving the system SSD.
 
+## Remaining USB-A check
+
+Keep the running Samsung connected to USB-C. Use the separate 240 GB HDD or another USB storage device to check the two USB-A connectors, one at a time:
+
+1. Confirm the separate drive appears in Finder and open an existing file from it.
+2. Run `system_profiler SPUSBHostDataType`. Record only that device's name, negotiated Link Speed and physical USB-A connector.
+3. Eject that separate drive in Finder before moving it to the other USB-A connector; repeat the same check there.
+
+Do not eject or move the Samsung system disk. This check needs no formatting, writes, EFI changes or benchmark. The HDD's USB generation and cable capability are not yet established: a 480 Mb/s result alone does not show a faulty USB-A port. SuperSpeed can be established with a device/cable known to support it. A successful file read confirms basic operation, not sustained storage reliability.
+
 ## Received and verified map
 
 The supplied `UTBMap.kext` matches the 9 ports selected in `usb.json` on the `XHC` controller, PCI `8086:9DED`. The original plist is preserved in `usb/UTBMap.kext`; the summary without serial numbers or Windows paths is in `usb/ports.json`. The raw JSON is not added to the repository.

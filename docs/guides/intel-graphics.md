@@ -29,6 +29,8 @@ Preserve a private copy of the exact current Samsung EFI before any future graph
 
 ## HDMI investigation: October 14, 2026
 
+External-display investigation is paused by request. The observations and next routing check below are retained for when this work resumes; no graphics or ACPI changes are scheduled for this stage.
+
 HDMI produces no image in the current configuration. The display report supplied after connecting the monitor was collected with:
 
 ```bash
@@ -39,7 +41,7 @@ It lists Intel UHD Graphics 620 (`0x3ea5`, Metal 3, up to 1536 MB shared memory)
 
 The supplied private EFI uses the working Whiskey Lake identity and memory properties listed above, `-wegnoegpu` and `-igfxblr`, with no connector remapping. OEM SSDT9 enumerates `0x80087330` under NVIDIA `RP05.PXSX`; the ACPI display-type field is External Digital Monitor. Intel's output list is read from runtime OpRegion memory, and no captured VBT/OpRegion is available. NVIDIA routing is a hypothesis until the physical port is identified.
 
-Lenovo's exact GTX model specification confirms HDMI 2.0 output capability but does not publish the GPU wiring. The next check is in Windows with the same monitor, cable and selected HDMI input: open **Settings → System → Display → Advanced display**, select the external monitor and record its **Connected to** GPU. If the external display is absent there too, record that result rather than assigning the port to Intel or NVIDIA. The NVIDIA Control Panel's display-connection diagram is another source of routing evidence.
+Lenovo's exact GTX model specification confirms HDMI 2.0 output capability but does not publish the GPU wiring. When this investigation resumes, check Windows with the same monitor, cable and selected HDMI input: open **Settings → System → Display → Advanced display**, select the external monitor and record its **Connected to** GPU. If the external display is absent there too, record that result rather than assigning the port to Intel or NVIDIA. The NVIDIA Control Panel's display-connection diagram is another source of routing evidence.
 
 Inspecting enumeration and routing precedes any bus-ID, connector-type, pipe or graphics-policy change. The working Intel configuration and disabled optional NVIDIA power-off SSDT are retained.
 
