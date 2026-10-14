@@ -42,3 +42,5 @@ Graphics experiments, Intel traces and Recovery log collectors are preserved in 
 - [EFI release v0.1.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.1.0): compatibility, package and checksum.
 - [EFI setup](../packages/efi/README.md): personalization and dependencies outside the EFI.
 - [Function-key diagnosis](../packages/function-keys/README.md): read-only device snapshots and F11/F12 observations for the function-key batch.
+
+- [Function keys and brightness test](guides/function-keys.md): diagnostic findings, add-only trial and exact rollback.

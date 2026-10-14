@@ -72,3 +72,7 @@ The EFI used for initial operation retains `-wegnoegpu`. Electrical power-off of
 - [Mesa: NVK, hardware support and Linux requirements](https://docs.mesa3d.org/drivers/nvk.html)
 - [Acidanthera: WhateverGreen](https://github.com/acidanthera/WhateverGreen)
 - [Dortania: Tahoe notes](https://dortania.github.io/OpenCore-Install-Guide/extras/tahoe.html)
+
+## Current function-key investigation
+
+The October 14 report shows no brightness HUD or change for F11/F12 with or without Fn; the slider was at maximum 1024. Fn produces ordinary macOS function-key shortcuts, and F1–F3 remain working. The panel ACPI route and existing XOSI configuration support a guarded [BrightnessKeys-only test](../guides/function-keys.md). BrightnessKeys is not yet part of the released EFI. Firmware notification delivery and both brightness directions remain pending.

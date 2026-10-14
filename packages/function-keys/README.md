@@ -28,10 +28,14 @@ The current EFI already loads SSDT-XOSI and enables the `_OSI → XOSI` OEM rena
 
 The read-only snapshots show runtime device matching and exposed brightness changes. **They cannot prove that an ACPI Notify event was emitted when a key was pressed.** A missing change alone does not justify renaming `_Q` methods or adding a ThinkPad-specific NBCF patch to this IdeaPad.
 
-After reviewing the report, a separate, guarded BrightnessKeys-only test is a candidate if the recorded panel route is present. That test has not been applied or packaged here. Broader Fn remapping requires observed keycodes or a confirmed firmware event path. It will preserve the existing F1-F3 volume behaviour.
+After reviewing the report, a separate, guarded BrightnessKeys-only test is a candidate if the recorded panel route is present. The separate [guarded test guide](../../docs/guides/function-keys.md) describes the BrightnessKeys package. The driver has not yet been confirmed on the laptop or added to the released EFI. Broader Fn remapping requires observed keycodes or a confirmed firmware event path. It will preserve the existing F1-F3 volume behaviour.
 
 Primary source references:
 
 - [BrightnessKeys source and notification definitions, release 1.0.3](https://github.com/acidanthera/BrightnessKeys/tree/36820d11327f8aee859997c19f46e24d854ddee7/BrightnessKeys)
 - [BrightnessKeys README](https://github.com/acidanthera/BrightnessKeys/blob/36820d11327f8aee859997c19f46e24d854ddee7/README.md)
 - [VoodooPS2 2.3.7 keyboard source](https://github.com/acidanthera/VoodooPS2/blob/bdbf80639936701337f4574bae8c3ea25bb8dd3d/VoodooPS2Keyboard/VoodooPS2Keyboard.cpp)
+
+## BrightnessKeys test package
+
+The separate `S540-brightness-keys` package contains `TEST-BRIGHTNESS-KEYS.command` and `RESTORE-BRIGHTNESS-KEYS.command`, plus this collector. Follow the [test and rollback guide](../../docs/guides/function-keys.md). When using that package, run the collector from `Downloads/S540-brightness-keys`, rather than the original `Downloads/S540-function-keys` folder. Start the brightness checks near the middle of the slider range.

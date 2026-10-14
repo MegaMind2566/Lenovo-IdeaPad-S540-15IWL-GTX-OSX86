@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   build:
@@ -23,37 +24,40 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
-      - name: Acquire and inspect the official BrightnessKeys dependency
-        shell: bash
+      - name: Build the pinned BrightnessKeys test package
+        run: python3 builders/build_brightness_keys.py --output-dir build/brightness-keys
+      - name: Download the exact current EFI reference
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: '11864172878'
+          run-id: '38497385533'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          merge-multiple: true
+          path: build/efi-reference
+      - name: Verify and extract the public EFI fixture
         run: |
-          mkdir -p build/brightness-keys/audit
-          curl --fail --location --silent --show-error --proto '=https' --proto-redir '=https' --retry 2 --retry-delay 2 --connect-timeout 15 --max-time 120 --output build/brightness-keys/audit/BrightnessKeys-1.0.3-RELEASE.zip https://github.com/acidanthera/BrightnessKeys/releases/download/1.0.3/BrightnessKeys-1.0.3-RELEASE.zip
           python3 - <<'PYCODE'
-          import hashlib, json, plistlib, stat, zipfile
+          import hashlib, json, stat, zipfile
           from pathlib import Path, PurePosixPath
-          path = Path('build/brightness-keys/audit/BrightnessKeys-1.0.3-RELEASE.zip')
-          assert path.stat().st_size == 66112
-          with zipfile.ZipFile(path) as archive:
+          source = Path('build/efi-reference/S540-Tahoe-EFI-v0.1.0.zip')
+          lock = json.loads(Path('config/efi/releases/v0.1.0.json').read_text())
+          assert hashlib.sha256(source.read_bytes()).hexdigest() == lock['zip_sha256']
+          with zipfile.ZipFile(source) as archive:
               assert archive.testzip() is None
-              names = archive.namelist()
-              assert len(names) == len(set(names))
-              for item in archive.infolist():
-                  member = PurePosixPath(item.filename)
-                  assert not member.is_absolute() and '..' not in member.parts and '\\' not in item.filename
-                  assert not stat.S_ISLNK(item.external_attr >> 16)
-              info_name = next(n for n in names if n.endswith('BrightnessKeys.kext/Contents/Info.plist'))
-              info = plistlib.loads(archive.read(info_name))
-              assert info['CFBundleIdentifier'] == 'as.acidanthera.BrightnessKeys'
-              assert info['CFBundleVersion'] == '1.0.3'
-              files = {n: hashlib.sha256(archive.read(n)).hexdigest() for n in names if not n.endswith('/')}
-          report = {'source_commit': '36820d11327f8aee859997c19f46e24d854ddee7', 'official_asset_id': 102146399, 'size': path.stat().st_size, 'sha256': hashlib.sha256(path.read_bytes()).hexdigest(), 'identifier': info['CFBundleIdentifier'], 'version': info['CFBundleVersion'], 'files': files}
-          (path.parent / 'audit.json').write_text(json.dumps(report, indent=2) + '\n')
-          print('Official BrightnessKeys dependency inspected; installer packaging waits for its pinned hash.')
+              for member in archive.infolist():
+                  name = PurePosixPath(member.filename)
+                  assert not name.is_absolute() and '..' not in name.parts and '\\' not in member.filename
+                  assert not stat.S_ISLNK(member.external_attr >> 16)
+              archive.extractall('build/efi-reference/baseline')
           PYCODE
-      - name: Upload dependency audit
+      - name: Test append-only installation, guards and exact rollback
+        run: python3 tests/test_brightness_keys.py build/brightness-keys/S540-brightness-keys build/efi-reference/baseline/EFI
+      - name: Upload the verified test package
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: BrightnessKeys-dependency-audit
-          path: build/brightness-keys/audit/**
+          name: S540-brightness-keys
+          path: |
+            build/brightness-keys/S540-brightness-keys.zip
+            build/brightness-keys/S540-brightness-keys.zip.sha256
           if-no-files-found: error
           retention-days: 30
