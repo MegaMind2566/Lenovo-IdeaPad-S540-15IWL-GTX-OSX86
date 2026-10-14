@@ -24,6 +24,18 @@ private func exactBoolean(_ value: Any?, equals expected: Bool) -> Bool {
     return number.boolValue == expected
 }
 
+private func absoluteURL(_ path: String, directory: Bool) throws -> URL {
+    try require(path.hasPrefix("/") && !path.unicodeScalars.contains(where: { $0.value == 0 }),
+                "Paths must be absolute and contain no null characters.")
+    let components = path.split(separator: "/", omittingEmptySubsequences: true)
+    try require(!components.contains(".") && !components.contains(".."),
+                "Paths must not contain dot or parent-directory components.")
+    // Normalize separators lexically. standardizedFileURL also rewrites Darwin's
+    // /private/var alias to /var, which would introduce a symbolic-link ancestor.
+    let lexical = "/" + components.joined(separator: "/")
+    return URL(fileURLWithPath: lexical, isDirectory: directory)
+}
+
 private func containsToken(_ arguments: String, _ token: String) throws -> Bool {
     let escaped = NSRegularExpression.escapedPattern(for: token)
     let expression = try NSRegularExpression(
@@ -317,6 +329,13 @@ private func stage(source: URL, parent: URL, validator: URL) throws -> URL {
 }
 
 private func fixtures() throws {
+    try require(try absoluteURL("/private/var/fixture/source", directory: true).path == "/private/var/fixture/source",
+                "The canonical Darwin private path was rewritten.")
+    for path in ["relative/path", "/private/var/../var/fixture", "/private/./var/fixture"] {
+        var rejected = false
+        do { _ = try absoluteURL(path, directory: true) } catch { rejected = true }
+        try require(rejected, "A noncanonical path fixture was accepted.")
+    }
     func configuration(_ arguments: String = "-v -wegnoegpu -igfxblr debug=0x100") -> [String: Any] {
         return ["NVRAM": ["Add": [appleGUID: ["boot-args": arguments, "csr-active-config": Data([3, 0, 0, 0])]],
                           "Delete": [appleGUID: ["boot-args", "csr-active-config"]],
@@ -367,9 +386,9 @@ do {
     } else {
         try require(CommandLine.arguments.count == 4,
                     "Usage: prepare-nvidia-visibility SOURCE_EFI_DIRECTORY OUTPUT_PARENT OCVALIDATE_PATH")
-        let source = URL(fileURLWithPath: CommandLine.arguments[1], isDirectory: true).standardizedFileURL
-        let parent = URL(fileURLWithPath: CommandLine.arguments[2], isDirectory: true).standardizedFileURL
-        let validator = URL(fileURLWithPath: CommandLine.arguments[3]).standardizedFileURL
+        let source = try absoluteURL(CommandLine.arguments[1], directory: true)
+        let parent = try absoluteURL(CommandLine.arguments[2], directory: true)
+        let validator = try absoluteURL(CommandLine.arguments[3], directory: false)
         let output = try stage(source: source, parent: parent, validator: validator)
         print("Experimental EFI prepared: " + output.appendingPathComponent("EFI").path)
         print("Private reference and validation logs: " + output.path)

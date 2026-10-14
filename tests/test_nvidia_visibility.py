@@ -42,6 +42,8 @@ def main() -> int:
     with tempfile.TemporaryDirectory(prefix="nvidia-visibility-fixtures-") as temporary:
         # Darwin /var may be a link to /private/var. Use the real fixture path.
         root = Path(temporary).resolve()
+        if str(Path(temporary)).startswith("/var/"):
+            assert str(root).startswith("/private/var/")
         source = root / "mounted EFI" / "EFI"
         output_parent = root / "Desktop"
         output_parent.mkdir()
@@ -101,6 +103,7 @@ def main() -> int:
         link.unlink()
         assert len(list(output_parent.iterdir())) == old_count
         assert "must not overlap" in run(1, parent_path=source).stderr
+        assert "dot or parent-directory" in run(1, source_path=source / ".." / "EFI").stderr
 
         original_config = config.read_bytes()
         for mutation in ("missing-delete", "missing-panel", "prefix-only", "mixed-disable", "flash-off", "legacy-on", "numeric-flash"):
