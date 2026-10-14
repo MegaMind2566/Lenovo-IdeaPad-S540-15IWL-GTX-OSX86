@@ -72,6 +72,25 @@ Retain the summary's downlink/uplink capacity, responsiveness and idle latency w
 
 No additional collector, archive, reboot or EFI change is required. Exclude network names, addresses, credentials and raw connection logs from public status updates. The [Apple instructions](https://support.apple.com/en-us/101942) describe the command and responsiveness metric; the [reference server project](https://github.com/network-quality/server) describes server-based testing.
 
+### Recorded concurrent result: October 14, 2026
+
+| Metric | Result |
+|---|---|
+| Downlink capacity | 15.751 Mb/s |
+| Uplink capacity | 63.036 Mb/s |
+| Responsiveness under load | Low: 1.023 seconds / 58 RPM |
+| Idle latency | 41.376 ms / 1450 RPM |
+
+The delay is elevated during the concurrent test, but no subscribed-line baseline or comparison client result is available. The measurement does not locate the bottleneck or establish an itlwm defect. Keep the current driver.
+
+For one controlled diagnostic comparison, retain the same network and laptop position, stop the laptop's other transfers, and measure the directions sequentially:
+
+```sh
+networkQuality -s
+```
+
+Sequential mode separates upload and download responsiveness. A better result would show sensitivity to concurrent traffic in these observations, without isolating the responsible component. A poor sequential result would still need a separate reference before a driver or router change. [Apple's WWDC22 example](https://developer.apple.com/videos/play/wwdc2022/10078/) uses `-s`; the [responsiveness methodology](https://github.com/network-quality/draft-ietf-ippm-responsiveness/blob/main/draft-ietf-ippm-responsiveness.md#concurrent-vs-sequential-uplink-and-downlink) explains why sequential measurements help distinguish the affected direction.
+
 ## Checks and limitations
 
 The scripts are checked for Bash syntax and with simulated Linux fixtures. Collection checks cover the boot window, timeouts, errors, data filtering, and ZIP creation. Native collection was run on the laptop and the report analyzed. The panel trial eliminated the black screen in the reported result. Bluetooth headphone and HeliPort operation were subsequently confirmed; other checks remain open.

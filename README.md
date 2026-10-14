@@ -67,7 +67,7 @@ Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including t
 
 - Complete storage reliability and remaining USB 2 device checks. Both USB-A connectors and USB-C in both orientations negotiate 5 Gb/s with the tested hardware. Audio peripherals, battery power and independent SSD boot work; measured battery runtime remains open.
 - Complete Intel stability, power management and external display support; sustained-load temperature and fan telemetry remain open.
-- Complete remaining device support and measure network throughput; wired/Bluetooth microphones, headphone switching and wireless reconnection work.
+- Complete remaining device support and investigate connection performance from the recorded Internet baseline; wired/Bluetooth microphones, headphone switching and wireless reconnection work.
 - Retain the working keyboard controls; remaining icon actions, equalization and sleep refinements are deferred.
 - Keep native macOS Wi-Fi integration and NVIDIA driver-port research open.
 

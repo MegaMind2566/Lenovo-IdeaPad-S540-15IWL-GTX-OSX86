@@ -13,7 +13,7 @@ Report received on 12 October 2026. Only data relevant to the project is include
 | dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91 | Driver disabled in the EFI; Linux port retained in the roadmap; electrical power-off still to be verified |
 | Display | BOE NV156FHM-N61, 1920×1080 | Panel, brightness slider and direct F11/F12 working; boot blackout delay eliminated with -igfxblr |
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Problematic PM981a family; compatibility is not assumed |
-| Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | itlwm 2.3.0 loaded and HeliPort reported working; Ethernet presentation is expected with this driver; disconnection, reconnection and network switching confirmed; transfer speed remains unmeasured |
+| Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | itlwm 2.3.0 loaded and HeliPort reported working; Ethernet presentation is expected with this driver; disconnection, reconnection and network switching confirmed; Internet baseline 15.751 Mb/s down / 63.036 Mb/s up with Low loaded responsiveness; cause unresolved |
 | Bluetooth | Intel, USB 8087:0AAA | Headphone playback, microphone, disconnection and reconnection confirmed; firmware loaded, correct NVRAM and IntelBTPatcher excluded |
 | Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Speaker/headphone output, automatic switching, wired-headset input, gradual volume and F1–F3 confirmed; S540 internal microphone fix v2 retained; equalisation and resume checks deferred |
 | Keyboard | PS/2 | VoodooPS2; direct F1–F3, F6 and F11/F12 working; remaining icon keys and Fn app-key behavior in progress |
@@ -105,6 +105,12 @@ Thermal pressure is Nominal in all samples. The same VirtualSMC, SMCProcessor an
 The test using only `-igfxblr` eliminated the boot blackout in the reported result: from approximately two minutes to zero. The configuration is retained, preserving Intel memory settings, audio and SIP. The report preceding the test shows the same framebuffer UUID and Loginwindow ready approximately 31,3 seconds after the kernel. The [diagnosis](../guides/boot-network.md) distinguishes the panel delay from the system boot time.
 
 Bluetooth status is On, FirmwareLoaded is Yes and the transport is connected; BlueToolFixup 2.7.2 and IntelBluetoothFirmware 2.4 are loaded, while IntelBTPatcher is absent. The two required NVRAM variables are present with the correct values: one zero byte and fourteen zero bytes. The stack starts scanning and receives BLE devices. On 14 October 2026, operation with Bluetooth headphones was reported, together with HeliPort operation for Wi-Fi network management. The current drivers and NVRAM are retained. The Bluetooth headset microphone was subsequently confirmed working on 14 October 2026. Playback and headset voice capture are therefore established as working. Disconnection and reconnection of both Wi-Fi and Bluetooth, together with Wi-Fi network switching, were also confirmed. Wired headphone output, automatic speaker switching and wired-headset microphone input were subsequently confirmed. Sleep recovery belongs to the deferred wake checks.
+
+## Internet connection baseline: October 14, 2026
+
+The built-in `networkQuality` summary reports **15.751 Mb/s downlink**, **63.036 Mb/s uplink**, **Low responsiveness at 1.023 seconds / 58 RPM**, and **idle latency 41.376 ms / 1450 RPM**. This is the default concurrent upload/download test on the current connection. The connection remains functional; the observed low loaded responsiveness does not by itself identify a Wi-Fi driver fault.
+
+The result covers the whole path through the laptop, radio, router, Internet service and test endpoint. It is neither isolated Wi-Fi/LAN throughput nor a known comparison against the subscribed line rate. The next bounded comparison uses sequential upload/download on the same laptop, network and position. No itlwm, HeliPort, EFI or router setting is changed from this single baseline. Details are in [Boot and network](../guides/boot-network.md#connection-performance-baseline).
 
 ## Webcam and voice capture: 13 October 2026
 
