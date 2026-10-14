@@ -10,7 +10,7 @@ Report received on 12 October 2026. Only data relevant to the project is include
 | CPU | Intel Core i7-8565U, Whiskey Lake-U, 4 cores / 8 threads | X86PlatformPlugin active; frequency/power response confirmed; idle temperatures 45–48 °C; activity session retains 57–82 °C with no missing readings and final 57 °C |
 | RAM | 12 GB DDR4-2400, 8 and 4 GB modules | Sufficient for the first test |
 | iGPU | Intel UHD 620, PCI 8086:3EA0 | IntelAccelerator detected and Metal 3 exposed; sustained load still to be tested |
-| dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91 | Driver disabled in the EFI; Linux port retained in the roadmap; electrical power-off still to be verified |
+| dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91 | Native PCI inventory found no target in either registry plane with -wegnoegpu active; separate visibility boot experiment prepared; acceleration and electrical power-off remain unverified |
 | Display | BOE NV156FHM-N61, 1920×1080 | Panel, brightness slider and direct F11/F12 working; boot blackout delay eliminated with -igfxblr |
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Problematic PM981a family; compatibility is not assumed |
 | Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | itlwm 2.3.0 loaded and HeliPort reported working; Ethernet presentation is expected with this driver; disconnection, reconnection and network switching confirmed; Internet baseline 15.751 Mb/s down / 63.036 Mb/s up with Low loaded responsiveness; cause unresolved |
@@ -192,3 +192,9 @@ The [Bluetooth test](../guides/bluetooth.md) excludes only IntelBTPatcher from t
 
 Recovery opened the interface and Terminal and read Machintosh SSD - Data. The APFS report shows a 249.8 GB container on the external drive, the System volume sealed and Data mounted without FileVault. The collection contains an old Bluetooth panic and installation logs that reach the Hello welcome screen; initial setup had not yet been completed in that collection. This is not verification of Metal support or Bluetooth operation.
 
+
+## NVIDIA PCI visibility: October 15, 2026
+
+The native inventory completed with `status=not_visible`, `complete=true`, `wegnoegpu_present=true`, an empty match list and no warnings. Neither the active IOService lookup nor the Device Tree fallback exposed the exact `10DE:1F91` identity. This establishes non-visibility under the current disable argument, not electrical power-off or that the argument is the only cause.
+
+The [visibility experiment](../../packages/nvidia-visibility/README.md) prepares a private copy of the current Samsung EFI. It requires the original Delete/Add boot-args policy, removes only the exact disable argument and preserves the working Intel panel argument. Source and copied files are checked; no EFI installation or NVRAM change occurs during preparation. The separate HDD boot and subsequent PCI report remain pending. Raw reports and private EFI copies stay outside the repository.

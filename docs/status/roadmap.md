@@ -8,7 +8,7 @@ The [CPU and sensor reports](cpu-thermal.md) confirm frequency/power response an
 
 | Order | Work | Remaining scope |
 |---|---|---|
-| Now | NVIDIA driver-port research | Pinned source assessment complete; native read-only PCI inventory implemented, with laptop visibility pending. A bounded Darwin transport prototype follows. Graphics acceleration remains unimplemented. |
+| Now | NVIDIA driver-port research | Pinned source assessment complete; native inventory completed with no GPU visible while -wegnoegpu is active. Prepare the separate HDD visibility experiment before a Darwin transport prototype. Graphics acceleration remains unimplemented. |
 | Remaining | Graphics, power and thermals | Sustained Intel graphics use and cooling, fan telemetry and measured battery runtime. Continuous temperature readings during desktop activity and basic battery power/discharge reporting are confirmed. NVIDIA electrical power-off is deferred until after the driver-port attempt. |
 | Complete / retained | Boot and EFI consolidation | Independent Samsung boot confirmed after manual EFI transfer. Keep the HDD as a recovery path and preserve the private working EFI. A later sanitized release remains separate from v0.1.0. |
 | 3 | Storage and USB reliability | USB-C at 5 Gb/s in both orientations and both tested USB-A connectors at 5 Gb/s are confirmed. File reads on both USB-A connectors are confirmed. External USB 2 devices, sustained SSD stability, shutdown and reboot remain separate checks. Move the system SSD cable only after shutdown. |
@@ -63,7 +63,7 @@ Fn+F1–F12 must remain ordinary application function keys. Remove or reassign o
 
 ## NVIDIA research
 
-The [pinned source assessment](../reference/nvidia-port-assessment.md) is complete. It records release 615.78.08, the concrete Linux-to-Darwin boundaries and acceptance criteria. The [native PCI inventory](../../packages/nvidia-pci/README.md) is implemented and packaged separately; laptop visibility remains pending. No NVIDIA GPU driver has been implemented or loaded. Existing Intel operation is retained.
+The [pinned source assessment](../reference/nvidia-port-assessment.md) is complete. It records release 615.78.08, the concrete Linux-to-Darwin boundaries and acceptance criteria. The [native PCI inventory](../../packages/nvidia-pci/README.md) is implemented and packaged separately; the laptop returned not_visible with -wegnoegpu active and no warnings. The [separate visibility experiment](../../packages/nvidia-visibility/README.md) is the next hardware gate. No NVIDIA GPU driver has been implemented or loaded. Existing Intel operation is retained.
 
 The GTX 1650, PCI `10DE:1F91`, is listed among the GPUs compatible with NVIDIA's open source kernel modules. The repository contains operating system independent parts and Linux-specific interfaces. The modules also require GSP firmware and userspace driver components of the same version.
 

@@ -1,0 +1,38 @@
+name: Build reversible NVIDIA visibility experiment
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/nvidia-visibility/**'
+      - 'packages/nvidia-pci/**'
+      - 'builders/build_nvidia_visibility.py'
+      - 'builders/build_efi_release.py'
+      - 'tests/test_nvidia_visibility.py'
+      - 'config/profiles/assets.lock.json'
+      - '.github/workflows/build-nvidia-visibility.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15-intel
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Check the source launchers
+        run: /bin/bash -n packages/nvidia-visibility/PREPARE-NVIDIA.command packages/nvidia-pci/CHECK-NVIDIA.command
+      - name: Compile and test native staging with the pinned validator
+        run: python3 builders/build_nvidia_visibility.py --output-dir build/nvidia-visibility
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: S540-nvidia-visibility-v1
+          path: |
+            build/nvidia-visibility/S540-nvidia-visibility-v1.zip
+            build/nvidia-visibility/S540-nvidia-visibility-v1.zip.sha256
+          if-no-files-found: error
+          retention-days: 30

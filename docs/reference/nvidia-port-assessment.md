@@ -2,7 +2,7 @@
 
 Reviewed on October 15, 2026. Target: Lenovo IdeaPad S540-15IWL GTX, Intel macOS Tahoe, NVIDIA GTX 1650 Max-Q, PCI `10DE:1F91`.
 
-**Status:** source assessment complete; a Darwin GPU driver has not been implemented or loaded. The [native read-only PCI inventory](../../packages/nvidia-pci/README.md) is implemented; laptop visibility is pending. A bounded Darwin transport prototype follows that result. Intel graphics remains the operating configuration.
+**Status:** source assessment complete; a Darwin GPU driver has not been implemented or loaded. The [native read-only PCI inventory](../../packages/nvidia-pci/README.md) is implemented; the laptop returned not_visible with -wegnoegpu active and no warnings. The [separate EFI visibility experiment](../../packages/nvidia-visibility/README.md) precedes a bounded Darwin transport prototype. Intel graphics remains the operating configuration.
 
 ## Source baseline
 
@@ -48,7 +48,7 @@ Acceptance criteria:
 
 The retained EFI contains `-wegnoegpu`. In the installed Lilu 1.7.2 source, the external GPU's IOService can be terminated by the disable path. The inventory therefore checks the exact boot-argument token without exposing other arguments, and falls back to the Device Tree when the active service is absent. Its effect on the observed device graph must be recorded before selecting a matching strategy. A missing node does not prove electrical power-off. Any later change needed to attach a transport prototype belongs in a separate experimental EFI with the working Intel configuration available for recovery.
 
-The built package includes the executable, a private JSON report launcher, per-file checksums and build provenance. No developer tools are required on the laptop. Native build and enumeration are checked in Intel CI; the laptop result is a separate milestone.
+The built package includes the executable, a private JSON report launcher, per-file checksums and build provenance. No developer tools are required on the laptop. Native build and enumeration are checked in Intel CI. On October 15 the laptop lookup completed successfully but found no target in either plane while -wegnoegpu was active. This result does not establish power-off or exclusivity of the cause. A staged copy of the current Samsung EFI now provides the next visibility experiment; the original Delete/Add boot-args policy is checked before preparation so normal Samsung boot restores the working arguments.
 
 ## Subsequent milestones
 

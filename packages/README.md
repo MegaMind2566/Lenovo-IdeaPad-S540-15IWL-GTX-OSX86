@@ -6,6 +6,7 @@ ZIP packages. Builders and regression checks are kept separately.
 
 | Package | Purpose | Guide |
 | --- | --- | --- |
+| [nvidia-visibility](nvidia-visibility) | Prepare and validate a private EFI copy with the GPU disable argument removed; includes the native PCI inventory. | [Visibility experiment](nvidia-visibility/README.md) |
 | [nvidia-pci](nvidia-pci) | Read the target GPU's published PCI metadata, with Device Tree fallback for a hidden service. | [NVIDIA PCI inventory](nvidia-pci/README.md) |
 | [ssd-boot](ssd-boot) | Automatic transfer helper on hold after a mounted-target guard stop. Manual transfer and independent Samsung boot are confirmed. | [Independent SSD boot](../docs/guides/ssd-boot.md) |
 | [cpu-sensors](cpu-sensors) | Read continuous, filtered sensor telemetry and loaded SMC driver versions without a CPU workload. | [Passive sensor check](cpu-sensors/README.md) |
