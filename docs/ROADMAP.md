@@ -11,7 +11,7 @@ Obiettivo: rendere utilizzabili tutti i componenti del Lenovo IdeaPad S540-15IWL
 5. Trasferire la EFI corrente sul 960 EVO e provare l'avvio senza l'HDD, conservando il supporto già funzionante come ripiego.
 6. Avviare la ricerca NVIDIA e verificare le uscite video secondo il percorso hardware rilevato.
 
-Priorità aggiornate il 13 ottobre 2026: il pannello spento all'avvio è **risolto nella prova con -igfxblr, attesa da circa due minuti a zero**. Si conserva la EFI corrente. Il 14 ottobre 2026 è stato confermato anche il funzionamento con cuffie Bluetooth e di HeliPort. La prova Photo Booth mostra immagine e registra la voce; il guadagno microfono passa bruscamente da troppo alto a troppo basso con il cursore; sono da verificare ingresso selezionato e controlli del mixer. Velocità rete e riconnessione restano aperte. Il percorso è in [AVVIO-RETE.md](AVVIO-RETE.md). Batteria e contatori sono [archiviati](BATTERIA-SOSPENSIONE.md); le altre prove di sospensione sono rinviate, insieme al blocco tasti funzione e all'equalizzazione già annotati.
+Priorità aggiornate il 13 ottobre 2026: il pannello spento all'avvio è **risolto nella prova con -igfxblr, attesa da circa due minuti a zero**. Si conserva la EFI corrente. Il 14 ottobre 2026 è stato confermato anche il funzionamento con cuffie Bluetooth e di HeliPort. La prova Photo Booth mostra immagine e registra la voce; il difetto di guadagno ha portato alla [correzione microfono v2](MICROFONO-FIX.md), con primo riscontro positivo dopo il riavvio del 14 ottobre 2026. Report della verifica e registrazioni di confronto restano da acquisire. Velocità rete e riconnessione restano aperte. Il percorso è in [AVVIO-RETE.md](AVVIO-RETE.md). Batteria e contatori sono [archiviati](BATTERIA-SOSPENSIONE.md); le altre prove di sospensione sono rinviate, insieme al blocco tasti funzione e all'equalizzazione già annotati.
 
 ## Stato e criteri
 
@@ -23,7 +23,7 @@ Priorità aggiornate il 13 ottobre 2026: il pannello spento all'avvio è **risol
 | Touchpad ELAN | Driver presenti; il «mouse» riferito non identifica il dispositivo | Puntamento, clic, scorrimento e gesti |
 | Wi-Fi Intel AC9560 | itlwm 2.3.0 caricato, Ethernet su en0 previsto dal driver; HeliPort riferito funzionante | Velocità, cambio rete e riconnessione; integrazione Wi-Fi nativa Tahoe separata |
 | Bluetooth Intel | Funzionamento con cuffie confermato; firmware caricato, NVRAM corretta, IntelBTPatcher 2.4 escluso | Microfono delle cuffie e riconnessione da provare; conservare i driver attuali |
-| Audio ALC257 | Riproduzione, volume graduale e F1–F3 confermati; voce acquisita nella prova video, guadagno microfono eccessivo | Verificare regolazione non graduale e controlli d'ingresso; equalizzazione rinviata, jack e ripresa da documentare |
+| Audio ALC257 | Riproduzione, volume graduale e F1–F3 confermati; correzione microfono v2 con primo riscontro positivo dopo il riavvio | Acquisire report di verifica e registrazioni a livelli diversi; equalizzazione rinviata, jack e ripresa da documentare |
 | USB-A e USB-C | Mappa a 9 porte verificata; 960 EVO rilevato | USB 2/3, entrambe le orientazioni USB-C e riconnessione |
 | Samsung 960 EVO esterno | Box ripristinato; Tahoe avviato al desktop | Uso prolungato senza disconnessioni e ripresa dalla sospensione |
 | NVMe PM981a interno | Visibile nella Recovery; mantenuto per Windows | Verificare eventuali effetti sulla stabilità di macOS |

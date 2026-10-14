@@ -1,10 +1,14 @@
 # Prova della regolazione microfono
 
-Il report a ingresso 30% e 70% conferma che il driver attuale cambia tutti i mixer, compresi quelli di uscita, mentre macOS continua a mostrare il volume altoparlanti a 100. Il codec ALC257 ha un boost microfono con quattro livelli da 0 a 30 dB e un amplificatore ADC con 64 livelli, da -17,25 a +30 dB, in passi da 0,75 dB. La combinazione dei controlli produce i salti percepiti.
+Il report precedente alla correzione, a ingresso 30% e 70%, conferma che il driver cambia tutti i mixer, compresi quelli di uscita, mentre macOS continua a mostrare il volume altoparlanti a 100. Il codec ALC257 ha un boost microfono con quattro livelli da 0 a 30 dB e un amplificatore ADC con 64 livelli, da -17,25 a +30 dB, in passi da 0,75 dB. La combinazione dei controlli produce i salti percepiti.
 
 Questa prova usa VoodooHDA **3.6.9, variante S540**, compilato dal sorgente 3.6.8 fissato. Non è una release ufficiale upstream. Il cursore ingresso usa l'ADC; il boost dei pin microfono interno e jack resta a 0 dB. La correzione PCM del volume altoparlanti resta attiva e i due cursori sono separati. Equalizzazione, tasti funzione e sospensione restano lavori successivi.
 
 La correzione è attiva solo con controller Intel 8086:9dc8, codec Realtek 10ec:0257 e i controlli osservati sul portatile. Se il grafo differisce, il driver conserva l'algoritmo originale e la verifica segnala che la prova non è attiva. La registrazione dal jack resta da provare sul portatile.
+
+## Primo esito sul portatile
+
+Il 14 ottobre 2026, dopo la prova del pacchetto **S540-microfono-fix-v2** e il riavvio, è stato riferito un primo esito positivo. Il report della verifica e registrazioni di confronto non sono ancora stati acquisiti. Si conserva questa versione con il backup del driver precedente; equalizzazione e tasti funzione restano rinviati.
 
 ## Installazione dal desktop Tahoe
 
@@ -52,7 +56,7 @@ La procedura Recovery non è stata eseguita sul portatile. Errori di utility man
 
 ## Verifiche del pacchetto
 
-La CI applica la patch al sorgente fissato e compila per Intel con MacKernelSDK fissato. Verifica formato MH_KEXT_BUNDLE, architettura, firma ad hoc, versione e manifest dei tre file. I test eseguono le funzioni effettive della patch con sanitizzatori e controllano scala, 64 livelli, mute, separazione ingresso/uscita, ripristino dei mixer e fallback. Le fixture dell'installer verificano anche il lettore nativo dell'intestazione, rifiutando binari ARM, universali, di altro tipo e intestazioni tronche; simulano interruzioni dei rename, manifest e permessi errati, ripristino V3 e indipendenza dal config. La CI non carica il driver nel kernel; il funzionamento hardware resta da verificare con la prova descritta sopra.
+La CI applica la patch al sorgente fissato e compila per Intel con MacKernelSDK fissato. Verifica formato MH_KEXT_BUNDLE, architettura, firma ad hoc, versione e manifest dei tre file. I test eseguono le funzioni effettive della patch con sanitizzatori e controllano scala, 64 livelli, mute, separazione ingresso/uscita, ripristino dei mixer e fallback. Le fixture dell'installer verificano anche il lettore nativo dell'intestazione, rifiutando binari ARM, universali, di altro tipo e intestazioni tronche; simulano interruzioni dei rename, manifest e permessi errati, ripristino V3 e indipendenza dal config. La CI non carica il driver nel kernel. Il primo esito sul portatile è riportato sopra; le registrazioni di confronto completano la verifica della regolazione.
 
 ## Sorgenti
 

@@ -15,7 +15,7 @@ Report ricevuto il 12 ottobre 2026. Sono riportati solo i dati utili al progetto
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Famiglia PM981a problematica; non assunta compatibile |
 | Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | itlwm 2.3.0 caricato e HeliPort riferito funzionante; Ethernet è previsto dal driver; velocità e riconnessione da provare |
 | Bluetooth | Intel, USB 8087:0AAA | Funzionamento con cuffie confermato; firmware caricato, NVRAM corretta e IntelBTPatcher escluso; microfono delle cuffie e riconnessione da provare |
-| Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Riproduzione, volume graduale e tasti F1–F3 confermati con VoodooHDA 3.6.8 e correzione v3; voce acquisita nella prova video con guadagno eccessivo da regolare; equalizzazione rinviata, jack da documentare |
+| Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Riproduzione, volume graduale e tasti F1–F3 confermati con VoodooHDA 3.6.8 e correzione v3; correzione microfono v2 con primo riscontro positivo dopo il riavvio; report e registrazioni di confronto da acquisire; equalizzazione rinviata, jack da documentare |
 | Tastiera | PS/2 | Funzionamento riferito nella Recovery con VoodooPS2 |
 | Touchpad | ELAN0662, I2C HID; controller Intel 8086:9DE8 | Percorso confermato: `_SB.PCI0.I2C0.TPD0`; funzionamento da provare |
 | Lettore SD | O2Micro SD Host Controller | Supporto da verificare; diverso dal lettore del progetto lucatek |
@@ -68,7 +68,13 @@ Lo stato Bluetooth è On, FirmwareLoaded è Yes e il trasporto è connesso; Blue
 
 ## Webcam e acquisizione voce: 14 ottobre 2026
 
-Nella prova proposta con Photo Booth è stato riferito che l'immagine è visibile e la voce viene registrata. Il guadagno microfono risulta troppo alto: la successiva regolazione passa bruscamente da troppo alto a troppo basso. Sono da verificare ingresso selezionato e controlli del mixer prima di una modifica. La webcam è quindi funzionante nella prova; il livello dell'ingresso audio non è ancora confermato corretto. Non sono applicate modifiche ai driver.
+Nella prova proposta con Photo Booth è stato riferito che l'immagine è visibile e la voce viene registrata. Il guadagno microfono risulta troppo alto: la successiva regolazione passa bruscamente da troppo alto a troppo basso. Sono da verificare ingresso selezionato e controlli del mixer prima di una modifica. La webcam è quindi funzionante nella prova; il livello dell'ingresso audio non è ancora confermato corretto. Questo esito precede la correzione microfono descritta qui sotto.
+
+## Correzione microfono: 14 ottobre 2026
+
+Il 14 ottobre 2026, dopo la prova del pacchetto **S540-microfono-fix-v2** e il riavvio, è stato riferito un primo esito positivo. Il report della verifica e registrazioni di confronto non sono ancora stati acquisiti. Si conserva questa versione con il backup del driver precedente; equalizzazione e tasti funzione restano rinviati.
+
+La [prova](MICROFONO-FIX.md) usa VoodooHDA 3.6.9 variante S540: il cursore ingresso controlla i 64 livelli dell'ADC, il boost microfono resta a 0 dB e il volume PCM degli altoparlanti conserva la correzione v3. Il pacchetto v2 elimina la dipendenza dell'installer da strumenti Xcode. I controlli CI su formato, integrità, firma e ripristino sono passati; il primo riscontro d'uso non viene esteso al jack o al recupero dopo stop.
 
 ## Batteria e contatori di stop: 13 ottobre 2026
 
