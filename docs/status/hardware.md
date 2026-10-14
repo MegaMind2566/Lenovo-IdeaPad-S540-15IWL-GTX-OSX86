@@ -60,6 +60,10 @@ The CPU power management driver is therefore active, and the samples show low es
 
 The report still contains Invalid key detected and does not report fan RPM: SMC telemetry remains incomplete. It was subsequently reported that the fan had been quiet for some time, so the idle behaviour is also supported by observation of the laptop. These data do not verify temperatures under load, NVIDIA power consumption or electrical power-off, battery operation or sleep. The plugin's LastSleepType fields do not constitute evidence of successful sleep.
 
+## CPU response and thermal reading: 14 October 2026
+
+The [grouped CPU report](cpu-thermal.md) confirms four cores/eight logical processors and an active X86PlatformPlugin. Idle samples report 54 °C and an estimated Intel package power of 1.89–2.17 W. A brief workload reaches 3.62 GHz and 43.83 W; it ends after three seconds because the CPU temperature reading is unavailable. Recovery reports 57 → 56 → 55 °C and power returning to approximately 2 W. The load peak and sustained cooling remain unmeasured. Fifteen unavailable SMC keys persist, and fan RPM is absent; sensor-read reliability remains open.
+
 ## Panel fix and Bluetooth status: 13 October 2026
 
 The test using only `-igfxblr` eliminated the boot blackout in the reported result: from approximately two minutes to zero. The configuration is retained, preserving Intel memory settings, audio and SIP. The report preceding the test shows the same framebuffer UUID and Loginwindow ready approximately 31,3 seconds after the kernel. The [diagnosis](../guides/boot-network.md) distinguishes the panel delay from the system boot time.
