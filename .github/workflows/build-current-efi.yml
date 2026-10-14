@@ -1,0 +1,39 @@
+name: Build current EFI release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'builders/build_efi_release.py'
+      - 'config/efi/current/**'
+      - 'config/profiles/assets.lock.json'
+      - 'config/acpi/compiled/**'
+      - 'config/usb/**'
+      - 'packages/efi/**'
+      - 'licenses/efi/**'
+      - 'docs/releases/v0.1.0.md'
+      - '.github/workflows/build-current-efi.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Reconstruct and validate the current EFI
+        run: python3 builders/build_efi_release.py --output-dir build/efi
+      - name: Upload the EFI package and checksum
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: S540-Tahoe-EFI-v0.1.0
+          path: |
+            build/efi/S540-Tahoe-EFI-v0.1.0.zip
+            build/efi/S540-Tahoe-EFI-v0.1.0.zip.sha256
+          if-no-files-found: error
+          retention-days: 90
