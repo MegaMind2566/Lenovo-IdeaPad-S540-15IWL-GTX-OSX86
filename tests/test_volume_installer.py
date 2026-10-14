@@ -56,6 +56,9 @@ def copy_bundle(source, destination):
     )
     for item in (destination, *destination.rglob("*")):
         assert not item.is_symlink()
+        # ditto invoked by root can retain the CI runner's source ownership.
+        # Model the root-owned installed/backup bundles, as copy_driver does.
+        os.chown(item, 0, 0)
         item.chmod(item.stat().st_mode & 0o777 & ~0o022)
 
 
@@ -324,6 +327,11 @@ verify_payload
         case = make_case("source-state-writable", fresh=True)
         case["SOURCE_STATE"].chmod(0o666)
         run_case(case, "install", False, "writable by other users")
+        assert fingerprints(case["DRIVER"]) == original_hashes and not case["BACKUP"].exists()
+
+        case = make_case("source-driver-not-root-owned", fresh=True)
+        os.chown(case["DRIVER"] / FILES[0], 501, -1)
+        run_case(case, "install", False, "source driver entry is not owned by root")
         assert fingerprints(case["DRIVER"]) == original_hashes and not case["BACKUP"].exists()
 
         case = make_case("normal-install", phase="staging")

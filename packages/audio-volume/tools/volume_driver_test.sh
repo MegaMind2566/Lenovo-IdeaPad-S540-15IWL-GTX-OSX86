@@ -288,6 +288,13 @@ verify_source_driver() {
     case "$expected" in ''|*[!0-9a-f]*) fail 'Invalid microphone payload reference.';; esac
     [ "${#expected}" -eq 64 ] || fail 'Incomplete microphone payload reference.'
     validate_shape "$bundle"
+    check_owned_directory "$bundle"
+    local entry entry_mode
+    while IFS= read -r entry; do
+        [ "$(/usr/bin/stat -f %u "$entry")" = 0 ] || fail 'A source driver entry is not owned by root.'
+        entry_mode=$(/usr/bin/stat -f %Lp "$entry")
+        [ "$((8#$entry_mode & 022))" -eq 0 ] || fail 'A source driver entry is writable by other users.'
+    done < <(/usr/bin/find "$bundle" -print)
     [ "$(readkey "$bundle/Contents/Info.plist" CFBundleIdentifier)" = org.voodoo.driver.VoodooHDA ] || fail 'Unexpected source driver identifier.'
     [ "$(readkey "$bundle/Contents/Info.plist" CFBundleVersion)" = 3.6.9 ] || fail 'The installed driver is not the S540 3.6.9 microphone variant.'
     [ "$(readkey "$bundle/Contents/Info.plist" "$KEY")" = true ] || fail 'The existing PCM volume routing is not enabled.'
@@ -413,7 +420,8 @@ verify_driver() {
         /usr/sbin/ioreg -r -c VoodooHDADevice -l -w 0 > "$TEMP/driver-ioreg.txt"
         /usr/bin/grep -Eq '"S540InputGainFixActive" = (Yes|true)' "$TEMP/driver-ioreg.txt" || fail 'The driver is loaded, but the input correction is not active for this codec.'
         /usr/bin/grep -Eq '"S540OutputRangeFixActive" = (Yes|true)' "$TEMP/driver-ioreg.txt" || fail 'The driver is loaded, but the output graph did not enable the range correction.'
-        /usr/sbin/ioreg -r -c IOAudioLevelControl -l -w 0 > "$TEMP/controls.txt"
+        # This device's subtree excludes Bluetooth/USB audio control services.
+        /bin/cp "$TEMP/driver-ioreg.txt" "$TEMP/controls.txt"
         /usr/bin/awk '
             /\+-o IOAudioLevelControl[[:space:]]/ { usage=""; low=""; high="" }
             /"IOAudioLevelControlMinDB" =/ {low=$NF}
