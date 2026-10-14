@@ -7,12 +7,12 @@ on:
       - 'acpi/**'
       - 'usb/**'
       - 'profiles/**'
-      - 'tools/build_efi.py'
+      - 'archive/efi-iniziale/tools/build_efi.py'
       - 'tools/configure_wifi.py'
       - 'tools/*RECOVERY.cmd'
       - 'tools/*WIFI.cmd'
       - 'docs/PRIMO-AVVIO.md'
-      - '.github/workflows/build-efi.yml'
+      - 'archive/efi-iniziale/workflows/build-efi.yml'
   workflow_dispatch:
 
 permissions:
@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Assembla e valida EFI
-        run: python3 tools/build_efi.py
+        run: python3 archive/efi-iniziale/tools/build_efi.py
       - uses: actions/upload-artifact@v4
         with:
           name: S540-81SW-Tahoe-prima-prova

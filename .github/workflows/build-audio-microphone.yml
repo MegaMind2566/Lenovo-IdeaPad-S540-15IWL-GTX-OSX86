@@ -10,6 +10,8 @@ on:
       - tools/test_audio_microphone_patch.*
       - tools/test_microphone_installer.py
       - tools/microphone_driver_test.sh
+      - tools/verify_microphone_driver.sh
+      - licenses/audio-tahoe/**
       - docs/MICROFONO-FIX.md
       - profiles/audio-tahoe-assets.lock.json
       - INSTALLA-MICROFONO.command

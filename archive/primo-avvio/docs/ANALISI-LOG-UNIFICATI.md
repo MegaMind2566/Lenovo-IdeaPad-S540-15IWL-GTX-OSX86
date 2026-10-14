@@ -72,7 +72,7 @@ La [procedura](TEST-WHISKEY-LAKE.md) conserva boot-args, stato Bluetooth e ident
 
 ## Verifica completa richiesta dopo la prova
 
-Dopo il tentativo 173430 è stato riferito testo fermo con IOVersatile e un secondo messaggio non trascritto completamente. È stata richiesta la verifica della EFI già consegnata, tenendo conto delle poche modifiche note, prima di scegliere ulteriori cambiamenti. La [verifica completa](VERIFICA-EFI.md) ha confermato file, architetture, dipendenze e ACPI; ocvalidate 1.0.8 è stato eseguito sui due config disponibili con risultato No issues found. Nessuna nuova modifica grafica deriva da questi controlli. Per riordinare i vecchi log e le prove sul disco è disponibile la [procedura con archivio verificato](RIORDINO-AVVIO.md).
+Dopo il tentativo 173430 è stato riferito testo fermo con IOVersatile e un secondo messaggio non trascritto completamente. È stata richiesta la verifica della EFI già consegnata, tenendo conto delle poche modifiche note, prima di scegliere ulteriori cambiamenti. La [verifica completa](../../../docs/VERIFICA-EFI.md) ha confermato file, architetture, dipendenze e ACPI; ocvalidate 1.0.8 è stato eseguito sui due config disponibili con risultato No issues found. Nessuna nuova modifica grafica deriva da questi controlli. Per riordinare i vecchi log e le prove sul disco è disponibile la [procedura con archivio verificato](../../../docs/RIORDINO-AVVIO.md).
 
 ## Riferimenti
 

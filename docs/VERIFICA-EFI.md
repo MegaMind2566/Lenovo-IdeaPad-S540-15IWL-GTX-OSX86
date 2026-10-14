@@ -70,7 +70,7 @@ AppleALC non viene applicato a Tahoe dal limite di versione. Il Bluetooth con il
 
 Il log OpenCore 173430 mostra la stessa sequenza del precedente 170413, senza nuovi errori e con i boot-args normali. Dopo il tentativo viene riferito testo fermo con IOVersatile e un secondo messaggio non trascritto completamente. Nel precedente archivio unificato, agli errori IOVersatile seguivano eventi di WindowServer in esecuzione e Language Chooser attivo; entrambi quegli avvii usavano VESA. Non è una prova della causa del nuovo stallo.
 
-La nuova coppia Intel non ha prodotto un'interfaccia visibile nella prova riferita. Nell'ultima raccolta unificata i dodici tracev3 nuovi sono vuoti e i cinque non vuoti coincidono con quelli già analizzati. Le nuove registrazioni timesync confermano altri avvii, ma non aggiungono i messaggi del driver. La successiva [traccia diretta Intel](TRACCIA-INTEL.md) ha prodotto il dump del driver: correlando gli indirizzi del panic, è stato identificato il controllo della memoria stolen insufficiente. La [prova memoria](TEST-MEMORIA-INTEL.md) riduce il requisito framebuffer con tre proprietà documentate. La coerenza statica della EFI non certifica l'accelerazione; l'esito sul dispositivo resta da verificare.
+La nuova coppia Intel non ha prodotto un'interfaccia visibile nella prova riferita. Nell'ultima raccolta unificata i dodici tracev3 nuovi sono vuoti e i cinque non vuoti coincidono con quelli già analizzati. Le nuove registrazioni timesync confermano altri avvii, ma non aggiungono i messaggi del driver. La successiva [traccia diretta Intel](../archive/primo-avvio/docs/TRACCIA-INTEL.md) ha prodotto il dump del driver: correlando gli indirizzi del panic, è stato identificato il controllo della memoria stolen insufficiente. La [prova memoria](../archive/primo-avvio/docs/TEST-MEMORIA-INTEL.md) riduce il requisito framebuffer con tre proprietà documentate. La coerenza statica della EFI non certifica l'accelerazione; l'esito sul dispositivo resta da verificare.
 
 ## Riordino del disco di avvio
 
@@ -84,5 +84,5 @@ I file non riconosciuti restano sul disco e vengono elencati nel rapporto. Il ri
 - [ocvalidate: controlli e limiti](https://github.com/acidanthera/OpenCorePkg/blob/1.0.8/Utilities/ocvalidate/README.md).
 - [Lilu 1.7.2: changelog](https://github.com/acidanthera/Lilu/blob/1.7.2/Changelog.md).
 - [WhateverGreen 1.7.1: changelog](https://github.com/acidanthera/WhateverGreen/blob/1.7.1/Changelog.md).
-- [Analisi della raccolta unificata ricevuta](ANALISI-LOG-UNIFICATI.md).
+- [Analisi della raccolta unificata ricevuta](../archive/primo-avvio/docs/ANALISI-LOG-UNIFICATI.md).
 

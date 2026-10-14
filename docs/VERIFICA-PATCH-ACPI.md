@@ -2,7 +2,7 @@
 
 Verifica del 13 ottobre 2026 sul config ricevuto, sul config della prova Whiskey Lake e sulle 20 tabelle ACPI originali del Lenovo S540-15IWL. Il controllo della struttura della EFI è descritto in [VERIFICA-EFI](VERIFICA-EFI.md). Qui sono stati esaminati i percorsi e i metodi reali: non è stato trovato un errore statico che giustifichi una nuova patch DSDT.
 
-Aggiornamento dopo la traccia diretta: il dump del driver e la foto identificano un errore specifico di memoria stolen insufficiente nel calcolo Apple. La [prova memoria](TEST-MEMORIA-INTEL.md) interviene sulle proprietà framebuffer del config; i riscontri ACPI riportati sotto restano validi.
+Aggiornamento dopo la traccia diretta: il dump del driver e la foto identificano un errore specifico di memoria stolen insufficiente nel calcolo Apple. La [prova memoria](../archive/primo-avvio/docs/TEST-MEMORIA-INTEL.md) interviene sulle proprietà framebuffer del config; i riscontri ACPI riportati sotto restano validi.
 
 ## Patch e oggetti
 
@@ -42,7 +42,7 @@ Nei log OpenCore MAT support è 0. Il codice 1.0.8 tollera l'assenza della MAT d
 
 ## Passo diagnostico conseguente
 
-Le patch esaminate restano invariate. Nell'ultimo archivio dodici nuovi tracev3 sono vuoti e i cinque non vuoti coincidono con quelli precedenti: ripetere la stessa raccolta non registrerebbe necessariamente l'errore Intel. La [traccia diretta Intel](TRACCIA-INTEL.md) usa Lilu e WhateverGreen DEBUG delle stesse versioni presenti e salva anche la configurazione esatta della prova. È uno strumento diagnostico, non una correzione dell'accelerazione già confermata.
+Le patch esaminate restano invariate. Nell'ultimo archivio dodici nuovi tracev3 sono vuoti e i cinque non vuoti coincidono con quelli precedenti: ripetere la stessa raccolta non registrerebbe necessariamente l'errore Intel. La [traccia diretta Intel](../archive/primo-avvio/docs/TRACCIA-INTEL.md) usa Lilu e WhateverGreen DEBUG delle stesse versioni presenti e salva anche la configurazione esatta della prova. È uno strumento diagnostico, non una correzione dell'accelerazione già confermata.
 
 ## Riferimenti primari
 

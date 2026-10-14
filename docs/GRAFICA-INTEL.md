@@ -2,7 +2,7 @@
 
 ## Esito sul dispositivo: 13 ottobre 2026
 
-Con la [correzione della memoria framebuffer](TEST-MEMORIA-INTEL.md), Tahoe ha raggiunto la configurazione iniziale e il desktop sul Samsung 960 EVO esterno. Il successivo campione powermetrics rileva IntelAccelerator e boot-args senza `-igfxvesa` né `-x`. Il report system_profiler conferma:
+Con la [correzione della memoria framebuffer](../archive/primo-avvio/docs/TEST-MEMORIA-INTEL.md), Tahoe ha raggiunto la configurazione iniziale e il desktop sul Samsung 960 EVO esterno. Il successivo campione powermetrics rileva IntelAccelerator e boot-args senza `-igfxvesa` né `-x`. Il report system_profiler conferma:
 
 | Voce | Risultato |
 |---|---|

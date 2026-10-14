@@ -16,7 +16,9 @@ import urllib.request
 import uuid
 import zipfile
 
-ROOT = Path(__file__).resolve().parents[1]
+# Historical template kept below archive/efi-iniziale. Hardware sources,
+# USB mapping and pinned assets remain shared at the repository root.
+ROOT = Path(__file__).resolve().parents[3]
 MODEL = 'MacBookPro16,2'
 NVRAM_GUID = '7C436110-AB2A-4BBB-A880-FE41995C9F82'
 

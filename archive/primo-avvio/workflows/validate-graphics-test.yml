@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'tools/test_graphics.py'
-      - 'tools/check_graphics_test.py'
-      - 'tools/*GRAFICA.cmd'
-      - 'docs/TEST-GRAFICA.md'
-      - '.github/workflows/validate-graphics-test.yml'
+      - 'archive/primo-avvio/tools/test_graphics.py'
+      - 'archive/primo-avvio/tools/check_graphics_test.py'
+      - 'archive/primo-avvio/tools/*GRAFICA.cmd'
+      - 'archive/primo-avvio/docs/TEST-GRAFICA.md'
+      - 'archive/primo-avvio/workflows/validate-graphics-test.yml'
   workflow_dispatch:
 
 permissions:
@@ -21,14 +21,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Crea la configurazione di riferimento
-        run: python3 tools/build_efi.py --output build/graphics-validation
+        run: python3 archive/efi-iniziale/tools/build_efi.py --output build/graphics-validation
       - name: Verifica modifica reversibile e ocvalidate
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import subprocess
           validator = next(Path('build/graphics-validation/upstream/OpenCore').rglob('ocvalidate.linux'))
-          subprocess.run(['python3', 'tools/check_graphics_test.py',
+          subprocess.run(['python3', 'archive/primo-avvio/tools/check_graphics_test.py',
                           'build/graphics-validation/bundle/EFI/OC/config.plist',
                           '--ocvalidate', str(validator)], check=True)
           PY
@@ -39,9 +39,9 @@ jobs:
           import zipfile
           with zipfile.ZipFile('build/S540-test-grafica.zip', 'w', zipfile.ZIP_DEFLATED) as z:
               for name in ['TEST-GRAFICA.cmd', 'RIPRISTINA-GRAFICA.cmd']:
-                  z.write(Path('tools')/name, name)
-              z.write('tools/test_graphics.py', 'tools/test_graphics.py')
-              z.write('docs/TEST-GRAFICA.md', 'LEGGIMI.md')
+                  z.write(Path('archive/primo-avvio/tools')/name, name)
+              z.write('archive/primo-avvio/tools/test_graphics.py', 'tools/test_graphics.py')
+              z.write('archive/primo-avvio/docs/TEST-GRAFICA.md', 'LEGGIMI.md')
           PY
       - uses: actions/upload-artifact@v4
         with:
