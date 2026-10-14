@@ -29,4 +29,12 @@ Microphone diagnostics currently supports the pre-correction 3.6.8 driver.
 
 Historical first-boot experiments are kept in [archive](../archive/README.md).
 
-The [EFI](efi/README.md) package describes the current release. [Function-key diagnosis](function-keys/README.md) is the next read-only hardware task.
+The [EFI](efi/README.md) package describes the current release.
+
+Current keyboard companions:
+
+- [Function-key snapshots](function-keys/README.md): device and brightness observations.
+- [Function-key events](function-key-events/README.md): passive direct/Fn session-event observation.
+- [Fn shortcut setup](function-keys-setup/README.md): reversible removal of four conflicting macOS function-key shortcuts.
+- [Driver scan-code collection](function-key-scancodes/README.md): bounded runtime logging for the verified VoodooPS2Keyboard RELEASE binary, with automatic restoration.
+

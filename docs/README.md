@@ -47,3 +47,5 @@ Graphics experiments, Intel traces and Recovery log collectors are preserved in 
 - [Function-key events](../packages/function-key-events/README.md): a native, read-only observer for the complete direct/Fn row. It does not install mappings.
 - [Fn shortcut setup](../packages/function-keys-setup/README.md): a reversible change to the four proven macOS bindings and a targeted capture for the remaining icon keys.
 
+- [Driver scan-code collection](../packages/function-key-scancodes/README.md): bounded trace windows for the verified VoodooPS2Keyboard RELEASE binary, comparing physical icon keys with ordinary application shortcuts.
+

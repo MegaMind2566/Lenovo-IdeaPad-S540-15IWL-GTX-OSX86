@@ -39,7 +39,8 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | NVIDIA acceleration | Not working | GTX 1650 Max-Q has no supported driver in this configuration |
 | F11/F12 brightness keys | Working | BrightnessKeys companion package; not included in EFI v0.1.0 |
 | F6 touchpad toggle | Working | Direct key enables and disables the touchpad |
-| Remaining icon keys / Fn function row | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; Fn+F1–F12 must remain available to apps |
+| Fn function row | Configured | Ordinary F1–F12 events recorded; four conflicting macOS shortcuts disabled, session refresh confirmation pending |
+| Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; driver-level input discrimination in progress |
 | Native macOS Wi-Fi interface | Not working | Network management uses HeliPort |
 | Touchpad and gestures | Pending | ELAN0662 functionality requires verification |
 | Analog audio jack / Bluetooth microphone | Pending | Separate from speaker and Bluetooth headphone playback |

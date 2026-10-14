@@ -1,0 +1,32 @@
+name: Build bounded keyboard scan-code diagnostic
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/function-key-scancodes/**'
+      - 'builders/build_function_key_scancodes.py'
+      - '.github/workflows/build-function-key-scancodes.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15-intel
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Compile and verify bounded scan-code and pipe fixtures
+        run: python3 builders/build_function_key_scancodes.py --output-dir build/function-key-scancodes
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: S540-function-key-scancodes
+          path: |
+            build/function-key-scancodes/S540-function-key-scancodes.zip
+            build/function-key-scancodes/S540-function-key-scancodes.zip.sha256
+          if-no-files-found: error
+          retention-days: 30

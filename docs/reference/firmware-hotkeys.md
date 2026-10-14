@@ -29,3 +29,11 @@ The [Linux IdeaPad driver](https://github.com/torvalds/linux/blob/5029bff09e79ad
 The locked [VoodooPS2 2.3.7 keyboard map](https://github.com/acidanthera/VoodooPS2/blob/bdbf80639936701337f4574bae8c3ea25bb8dd3d/VoodooPS2Keyboard/ApplePS2ToADBMap.h) maps ordinary PS/2 F1–F12 to ordinary macOS F1–F12. The current release profile contains no Function Keys Standard/Special arrays. Firmware layer discrimination and macOS shortcut consumption are therefore reviewed separately from keyboard scancode remapping.
 
 The [native event observer](../../packages/function-key-events/README.md) is the first diagnostic. It does not issue VPC commands or enable driver-wide scancode logging. If no matching user-space event is found, the firmware and driver paths above remain candidates for a targeted follow-up.
+
+## Driver trace boundary
+
+The current keyboard binary matches the official VoodooPS2 2.3.7 RELEASE payload: SHA-256 `b55758219af1b12b1c0e5e116ff1ee65dc5d8484086e5231103c242a5858a1e5`, Mach-O UUID `EFA883F4-7558-3E98-A352-E202CB3DFAAF`. A live diagnostic must also match the loaded bundle identity, version and UUID; an EFI file alone cannot establish which binary is running.
+
+In the [pinned driver source](https://github.com/acidanthera/VoodooPS2/blob/bdbf80639936701337f4574bae8c3ea25bb8dd3d/VoodooPS2Keyboard/VoodooPS2Keyboard.cpp), a numeric `LogScanCodes` value of 2 enables down/up trace messages at runtime through the keyboard command gate. The trace includes original and remapped scan codes plus the ADB result before the final dead-key suppression. Earlier special handling, macro inversion and repeat filtering can still bypass that trace. An empty trace therefore cannot establish that no PS/2 input occurred.
+
+These `IOLog` messages enter the system log. Any collector must enable the setting only during prompted windows, restore the original value, limit the stream to the exact keyboard message grammar, and keep password entry outside those windows. No persistent boot argument or keyboard map change is required.

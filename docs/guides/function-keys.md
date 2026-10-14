@@ -21,11 +21,26 @@ The complete row follows the keyboard legends: direct presses perform the icon a
 | F11 | Decrease brightness | Working | F11 |
 | F12 | Increase brightness | Working | F12 |
 
-## Remaining key events
+## Verified key events
 
-The first complete event report records the expected F1–F12 press and release for every Fn combination. Four existing macOS symbolic shortcuts consume plain F9/F10/F11/F12: IDs 32/33/36/62, with zero modifiers. Their [reversible preference setup](../../packages/function-keys-setup/README.md) disables only those enabled fields, preserving modified shortcuts and the F14/F15 bindings used by brightness.
+The complete event report records the expected F1–F12 press and release for every Fn combination. The subsequent seven-trial report confirms that the [reversible preference setup](../../packages/function-keys-setup/README.md) disabled the four plain F9/F10/F11/F12 bindings: IDs 32/33/36/62, with zero modifiers. The journal is applied. Modified shortcuts and the F14/F15 brightness bindings remain enabled. A normal restart refreshes macOS shortcut consumers; application behavior after that refresh still requires confirmation.
 
-Direct F5 and Fn+F5 both produce keycode 96 with the same reported modifier names. The targeted capture also retains the complete numeric flags; those bits do not by themselves establish physical Fn state. A global F5 reload mapping would also intercept the ordinary Fn+F5 path, so that mapping is deferred until a lower-level distinction is established. The first direct F9/F10 captures retain only Command modifier transitions; their other keys remain unconfirmed. The default input device exposes a writable master mute control, enabling an F4 action once its trigger is established.
+Observer 1.1.1 completed all seven targeted windows without interruption:
+
+| Physical press | Observed session event | Consequence |
+|---|---|---|
+| Direct F4 | No matching retained event | Inspect the driver/firmware path before assigning microphone mute |
+| Direct F5 and Fn+F5 | F5, keycode 96, numeric flags 8388864, matching down/up | The two presses are indistinguishable in this session capture |
+| Direct F7 | No matching retained event | Inspect the driver/firmware path before assigning airplane mode |
+| Direct F8 | No matching retained event | Inspect the driver/firmware path before assigning camera control |
+| Direct F9 | Command-L, matching down/up | A global chord replacement would also affect normal Command-L |
+| Direct F10 | Command-P, matching down/up | A global chord replacement would also affect normal Command-P |
+
+The input device exposes a writable master mute control, enabling an F4 action once its trigger is established. An empty session window does not establish that firmware produced no event. The complete modifier flags do not prove physical Fn state.
+
+The next [driver diagnostic](../../packages/function-key-scancodes/README.md) compares VoodooPS2Keyboard traces for these keys and ordinary Command-L/Command-P. Distinct raw sequences can justify a narrow keyboard mapping; identical sequences cannot safely be separated by a global chord replacement. The driver's trace is not a complete PS/2 wire capture. If a key has no retained trace, both earlier driver handling and the verified Lenovo VPC path remain candidates requiring their own evidence.
+
+F5 can also be assigned to a browser's own Reload menu command through macOS [App Shortcuts](https://support.apple.com/guide/mac-help/mchlp2271/mac). This preserves the F5 key identity received by other applications and applies equally to direct F5 and Fn+F5 inside that browser. The exact localized menu title must be checked, and assigning its new equivalent can replace the existing Command-R equivalent. No browser override has been installed.
 
 Observer 1.0 marked all trials interrupted while still recording the positive key identities above. It reused a tap across intentional disable/enable operations, allowing queued disable notifications to affect the next trial. Version 1.1 creates a fresh tap per window, records genuine interruption reasons, and supports a seven-trial targeted capture. Missing events in the initial interrupted windows do not establish a missing firmware event.
 
@@ -43,7 +58,7 @@ The event stream can establish distinct inputs for a mapping. A missing matching
 
 The original S540 tables contain a Lenovo `VPC2004` device and a generic VPC notification path. The [firmware hotkey reference](../reference/firmware-hotkeys.md) records the verified methods and separates protocol queries from state-changing commands. The original dumps remain private.
 
-F4 requires a writable Core Audio input-mute control and state verification; reducing input gain is not a substitute for mute. F5 will be restricted to browsers so Command-R does not accidentally invoke unrelated application actions. F9 uses the normal lock-screen action. F10 requires a working external display and an explicit choice of display mode.
+F4 requires a writable Core Audio input-mute control and state verification; reducing input gain is not a substitute for mute. F5 reload must be owned by the browser or use a proven distinct input. F9 uses the normal lock-screen action after its trigger is distinguished from ordinary Command-L. F10 requires a working external display and an explicit choice of display mode, without consuming ordinary Command-P.
 
 F7 must verify both Wi-Fi and Bluetooth power state before claiming airplane mode. itlwm presents an Ethernet interface, so disabling that network service is not evidence that its radio is off. F8 needs a confirmed camera power/privacy path; merely opening privacy settings or closing a camera application is not camera disablement.
 

@@ -92,7 +92,7 @@ The keyboard image and reported actions establish the complete target in [Functi
 
 Fn+F1–F12 must deliver ordinary function keys to applications. macOS Desktop or Mission Control activation is not the desired Fn behavior. Distinct direct/Fn input events and relevant macOS shortcut assignments will be recorded before changing mappings. The BrightnessKeys companion fix is retained; EFI v0.1.0 remains the earlier published snapshot without this driver.
 
-The complete event report subsequently records all twelve ordinary Fn function keys. Four enabled plain F9–F12 macOS bindings are identified; a targeted, reversible preference change is prepared separately from the EFI. Direct and Fn F5 have identical normalized events. Direct F9/F10 need their full selected chord captured, and negative observations in the initial interrupted windows remain inconclusive. The input device exposes a writable master mute control for a future F4 action.
+The complete event report records all twelve ordinary Fn function keys. The subsequent targeted report confirms that the four plain F9–F12 macOS bindings are disabled and the private journal is applied; modified shortcuts and F14/F15 brightness bindings remain enabled. Application behavior after normal session refresh still requires confirmation. The seven new capture windows have no interruptions. Direct and Fn F5 have identical keycodes and numeric flags; direct F9 sends Command-L and direct F10 sends Command-P. Direct F4/F7/F8 have no retained session event. The input device exposes a writable master mute control for a future F4 action. Driver-level evidence is needed before replacing any global key or chord.
 
 ## Audio from the desktop: 13 October 2026
 

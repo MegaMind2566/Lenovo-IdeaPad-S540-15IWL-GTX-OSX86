@@ -40,7 +40,7 @@ Recovery test results are not automatically extended to the installed system. In
 
 ## Function keys: next diagnostic batch
 
-Complete **all function keys** according to the [keyboard mapping](../guides/function-keys.md). Direct audio, touchpad toggle and brightness controls work. Capture the remaining direct events and all twelve Fn events with the [native observer](../../packages/function-key-events/README.md), then apply only mappings justified by the observed inputs.
+Complete **all function keys** according to the [keyboard mapping](../guides/function-keys.md). Direct audio, touchpad toggle and brightness controls work. All twelve Fn identities and the remaining targeted session events are recorded. Compare the driver-level inputs before applying any global remapping.
 
 Fn+F1–F12 must remain ordinary application function keys. Remove or reassign only the macOS shortcuts that consume those keys. F7 requires verified Wi-Fi and Bluetooth state; F8 needs a confirmed camera disable path. EFI v0.1.0 remains the earlier snapshot; the working BrightnessKeys companion package is retained separately.
 
@@ -77,5 +77,7 @@ The EFI used for initial operation retains `-wegnoegpu`. Electrical power-off of
 
 The BrightnessKeys companion fix now provides working direct F11/F12. F1–F3 audio controls and F6 touchpad toggle also work. The current task is F4/F5/F7/F8/F9/F10 and ordinary Fn+F1–F12 for applications. Event collection is read-only; unobserved scan codes or ACPI events will not be assigned speculative mappings.
 
-All twelve Fn key identities are now recorded. The [Fn shortcut setup](../../packages/function-keys-setup/README.md) targets only the four existing plain F9–F12 macOS bindings and captures seven remaining direct/Fn inputs. Preference behavior is pending the laptop's normal session refresh. F5 still requires physical-layer discrimination; the normalized events of its two layers are identical.
+All twelve Fn key identities are recorded. The [Fn shortcut setup](../../packages/function-keys-setup/README.md) has disabled the four existing plain F9–F12 macOS bindings; application behavior is pending the laptop's normal session refresh. Observer 1.1.1 completed seven targeted windows without interruption: direct and Fn F5 have identical complete session events, direct F9 sends Command-L, direct F10 sends Command-P, and direct F4/F7/F8 have no retained event.
+
+The next step is a bounded VoodooPS2Keyboard trace comparison, including ordinary Command-L and Command-P. Only a demonstrated input distinction can justify a global remap. Browser-specific F5 Reload is also possible without changing its ordinary function-key identity; no browser override has been applied. Missing PS/2 observations would lead to a separate guarded VPC investigation, not a guessed ACPI patch.
 
