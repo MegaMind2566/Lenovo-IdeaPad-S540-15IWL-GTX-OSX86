@@ -12,6 +12,7 @@ import plistlib
 import re
 import shlex
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
@@ -95,6 +96,13 @@ def main():
     prefix = text[:text.index(marker)]
     assert re.search(r"^install_driver\(\)", prefix, re.MULTILINE)
     assert re.search(r"^restore_driver\(\)", prefix, re.MULTILINE)
+    assert re.search(r"^verify_macho_header\(\)", prefix, re.MULTILINE)
+    runtime_source = "\n".join(
+        line for line in text.splitlines() if not line.lstrip().startswith("#")
+    )
+    assert not re.search(r"\b(?:lipo|otool|xcrun)\b", runtime_source), (
+        "Installer must not invoke Xcode-managed tools on the user's Mac."
+    )
     locked_sha = re.search(r"^PAYLOAD_MANIFEST_SHA='([0-9a-f]{64})'$", text, re.MULTILINE)
     assert locked_sha, "Package must contain its injected manifest lock."
     assert digest(payload_sums) == locked_sha.group(1)
@@ -112,6 +120,57 @@ def main():
         shutil.copyfile(payload_sums, approved_sums)
         approved_sums.chmod(0o600)
         assert digest(approved_sums) == locked_sha.group(1)
+
+        # Exercise the production byte-header reader, not a duplicate parser.
+        # Its thin-header check complements the full manifest/signature checks
+        # in verify_payload; these tiny crafted files are never loaded as kexts.
+        header_folder = root / "macho-header-fixtures"
+        header_folder.mkdir(mode=0o700)
+
+        def check_header(path, accepts, unprivileged=False):
+            shell = prefix + "\nverify_macho_header " + shlex.quote(str(path)) + "\n"
+            options = {"user": 501, "group": 20, "extra_groups": []} if unprivileged else {}
+            result = subprocess.run(
+                ["/bin/bash", "-c", shell], capture_output=True, text=True,
+                timeout=15, **options,
+            )
+            assert (result.returncode == 0) == accepts, (
+                f"Header {path.name}: unexpected status {result.returncode}\n"
+                f"{result.stdout}\n{result.stderr}"
+            )
+
+        check_header(approved_payload / FILES[1], True)
+        intel_header = struct.pack("<IIII", 0xFEEDFACF, 0x01000007, 3, 0x0B)
+        valid = header_folder / "intel-kext-header.bin"
+        valid.write_bytes(intel_header)
+        valid.chmod(0o600)
+        check_header(valid, True)
+        subtype = header_folder / "intel-capability-subtype-header.bin"
+        subtype.write_bytes(struct.pack("<IIII", 0xFEEDFACF, 0x01000007, 0x80000003, 0x0B))
+        check_header(subtype, True)
+        rejected_headers = {
+            "arm64": struct.pack("<IIII", 0xFEEDFACF, 0x0100000C, 3, 0x0B),
+            "intel32": struct.pack("<IIII", 0xFEEDFACF, 0x00000007, 3, 0x0B),
+            "fat": struct.pack(">IIII", 0xCAFEBABE, 1, 0x01000007, 3),
+            "big-endian": struct.pack(">IIII", 0xFEEDFACF, 0x01000007, 3, 0x0B),
+            "non-kext": struct.pack("<IIII", 0xFEEDFACF, 0x01000007, 3, 2),
+        }
+        rejected_headers.update({
+            f"truncated-{length}": intel_header[:length]
+            for length in (0, 1, 12, 13, 15)
+        })
+        for name, contents in rejected_headers.items():
+            path = header_folder / f"{name}.bin"
+            path.write_bytes(contents)
+            check_header(path, False)
+        check_header(header_folder / "absent.bin", False)
+        # Root can read chmod 000 files. Drop credentials only for this read so
+        # a real permission-denied error tests od/awk pipefail handling.
+        unreadable = header_folder / "unreadable.bin"
+        unreadable.write_bytes(intel_header)
+        unreadable.chmod(0o000)
+        check_header(unreadable, False, unprivileged=True)
+        print("PASS: native Mach-O header reader accepts Intel kexts and rejects invalid/unreadable headers.")
 
         # Build the real previous V3 variant, including its changed embedded
         # Mach-O signature. No kext is loaded or copied to a live system path.

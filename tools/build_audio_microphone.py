@@ -22,7 +22,7 @@ import zipfile
 
 
 REPO = Path(__file__).resolve().parents[1]
-PACKAGE = "S540-microfono-fix-v1"
+PACKAGE = "S540-microfono-fix-v2"
 VERSION = "3.6.9"
 SOURCE_COMMIT = "8c7e8e2ce6de0a917be663a3192857955288c937"
 SDK_COMMIT = "bfbfbe4cf35979f33ded6c7a8761eb1df091fb39"

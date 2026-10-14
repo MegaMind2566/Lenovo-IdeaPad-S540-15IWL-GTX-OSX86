@@ -108,6 +108,20 @@ check_owned_backup() {
         [ "$((8#$mode & 022))" -eq 0 ] || fail 'Una voce del backup è scrivibile da altri utenti.'
     done < <(/usr/bin/find "$BACKUP" -print)
 }
+verify_macho_header() {
+    # Byte inspection uses a macOS system utility, without developer-tool shims.
+    # Require a complete little-endian, thin x86_64 MH_KEXT_BUNDLE header.
+    /usr/bin/od -An -N16 -v -tx1 "$1" | /usr/bin/awk '
+        { for (i = 1; i <= NF; i++) {
+            bytes[++count] = $i
+            if (length($i) != 2 || $i ~ /[^0-9a-f]/) invalid = 1
+        } }
+        END { exit !(count == 16 && !invalid &&
+            bytes[1] == "cf" && bytes[2] == "fa" && bytes[3] == "ed" && bytes[4] == "fe" &&
+            bytes[5] == "07" && bytes[6] == "00" && bytes[7] == "00" && bytes[8] == "01" &&
+            bytes[13] == "0b" && bytes[14] == "00" && bytes[15] == "00" && bytes[16] == "00") }
+    '
+}
 verify_payload() {
     case "$PAYLOAD_MANIFEST_SHA" in ''|*[!0-9a-f]*) fail 'Questo pacchetto non contiene ancora il driver compilato e bloccato.';; esac
     [ "${#PAYLOAD_MANIFEST_SHA}" -eq 64 ] || fail 'Impronta payload incompleta.'
@@ -118,12 +132,7 @@ verify_payload() {
     [ "$(readkey "$PAYLOAD/Contents/Info.plist" "$KEY")" = true ] || fail 'La correzione volume deve restare attiva.'
     [ "$(readkey "$PAYLOAD/Contents/Info.plist" IOKitPersonalities.VoodooHDA.S540InputGainFix)" = true ] || fail 'La correzione microfono prevista non è abilitata nel payload.'
     if [ "$RECOVERY" -ne 1 ]; then
-        [ "$(/usr/bin/lipo -archs "$PAYLOAD/Contents/MacOS/VoodooHDA")" = x86_64 ] || fail 'Il driver non è esclusivamente Intel x86_64.'
-        /usr/bin/otool -hv "$PAYLOAD/Contents/MacOS/VoodooHDA" > "$TEMP/payload-header.txt"
-        if ! /usr/bin/grep -Eq 'KEXT_?BUNDLE' "$TEMP/payload-header.txt"; then
-            /bin/cat "$TEMP/payload-header.txt" >&2
-            fail 'Il payload non è un bundle kernel.'
-        fi
+        verify_macho_header "$PAYLOAD/Contents/MacOS/VoodooHDA" || fail 'Il payload non è un bundle kernel Intel x86_64 con intestazione completa.'
     fi
     verify_signature "$PAYLOAD"
 }
@@ -272,6 +281,7 @@ install_driver() {
     if [ ! -e "$BACKUP" ]; then
         if ! /usr/bin/kmutil libraries --bundle-path "$PAYLOAD" --xml > "$TEMP/kernel-libraries.xml" 2> "$TEMP/kernel-libraries-errors.txt"; then
             /bin/cat "$TEMP/kernel-libraries-errors.txt" >&2
+            /bin/cat "$TEMP/kernel-libraries.xml" >&2
             fail 'Il nuovo driver non risolve tutti i simboli del kernel Tahoe attuale. Il driver funzionante non viene sostituito.'
         fi
         ordinary_file "$CHECK" || fail 'Il controllo della variante audio originale manca.'
@@ -438,7 +448,7 @@ for utility in /usr/bin/awk /usr/bin/plutil /usr/bin/cmp /usr/bin/find /usr/bin/
     [ -x "$utility" ] || fail "Utility necessaria assente: $utility. Nessun driver viene sostituito."
 done
 if [ "$RECOVERY" -ne 1 ]; then
-    for utility in /usr/bin/codesign /usr/bin/lipo /usr/bin/otool; do
+    for utility in /usr/bin/codesign /usr/bin/od; do
         [ -x "$utility" ] || fail "Utility necessaria assente: $utility. Nessun driver viene sostituito."
     done
 fi

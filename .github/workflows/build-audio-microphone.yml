@@ -65,12 +65,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          sudo env GITHUB_ACTIONS=true RUNNER_TEMP="$RUNNER_TEMP" "$(command -v python3)" tools/test_microphone_installer.py "$GITHUB_WORKSPACE/build/audio-microphone/S540-microfono-fix-v1"
+          sudo env GITHUB_ACTIONS=true RUNNER_TEMP="$RUNNER_TEMP" "$(command -v python3)" tools/test_microphone_installer.py "$GITHUB_WORKSPACE/build/audio-microphone/S540-microfono-fix-v2"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: S540-microfono-fix-v1
+          name: S540-microfono-fix-v2
           path: |
-            build/audio-microphone/S540-microfono-fix-v1.zip
-            build/audio-microphone/S540-microfono-fix-v1.zip.sha256
+            build/audio-microphone/S540-microfono-fix-v2.zip
+            build/audio-microphone/S540-microfono-fix-v2.zip.sha256
           if-no-files-found: error
           retention-days: 30
