@@ -10,16 +10,21 @@ import urllib.request
 import zipfile
 
 
-SOURCE_FILES = [
-    'PREPARA-AUDIO.command', 'INSTALLA-AUDIO.command',
-    'VERIFICA-AUDIO.command', 'RIPRISTINA-AUDIO.command',
-    'VOLUME-AUDIO.command', 'ANNULLA-VOLUME-AUDIO.command',
-    'tools/audio_tahoe.sh', 'profiles/audio-tahoe-assets.lock.json',
-    'docs/AUDIO-TAHOE.md',
-    'licenses/audio-tahoe/VoodooHDA-LICENSE.txt',
-    'licenses/audio-tahoe/VoodooHDA-third-party-LICENSE.txt',
-    'licenses/audio-tahoe/AppleALC-LICENSE.txt',
-]
+# Preserve the ZIP's established paths while source files live by feature.
+SOURCE_FILES = {
+    'PREPARA-AUDIO.command': 'packages/audio/PREPARA-AUDIO.command',
+    'INSTALLA-AUDIO.command': 'packages/audio/INSTALLA-AUDIO.command',
+    'VERIFICA-AUDIO.command': 'packages/audio/VERIFICA-AUDIO.command',
+    'RIPRISTINA-AUDIO.command': 'packages/audio/RIPRISTINA-AUDIO.command',
+    'VOLUME-AUDIO.command': 'packages/audio/VOLUME-AUDIO.command',
+    'ANNULLA-VOLUME-AUDIO.command': 'packages/audio/ANNULLA-VOLUME-AUDIO.command',
+    'tools/audio_tahoe.sh': 'packages/audio/tools/audio_tahoe.sh',
+    'profiles/audio-tahoe-assets.lock.json': 'config/profiles/audio-tahoe-assets.lock.json',
+    'docs/AUDIO-TAHOE.md': 'docs/guides/AUDIO-TAHOE.md',
+    'licenses/audio-tahoe/VoodooHDA-LICENSE.txt': 'licenses/audio-tahoe/VoodooHDA-LICENSE.txt',
+    'licenses/audio-tahoe/VoodooHDA-third-party-LICENSE.txt': 'licenses/audio-tahoe/VoodooHDA-third-party-LICENSE.txt',
+    'licenses/audio-tahoe/AppleALC-LICENSE.txt': 'licenses/audio-tahoe/AppleALC-LICENSE.txt',
+}
 
 
 def load_payload(archive, lock):
@@ -67,7 +72,7 @@ def main():
     parser.add_argument('--asset-zip', type=Path, help='Use an already downloaded pinned upstream ZIP')
     args = parser.parse_args()
     root = Path(__file__).resolve().parent.parent
-    lock = json.loads((root/'profiles/audio-tahoe-assets.lock.json').read_text())
+    lock = json.loads((root/'config/profiles/audio-tahoe-assets.lock.json').read_text())
     output = root/'build/audio-tahoe'
     output.mkdir(parents=True, exist_ok=True)
     upstream = args.asset_zip
@@ -80,8 +85,8 @@ def main():
                 raise ValueError('Downloaded audio archive failed validation')
             upstream.write_bytes(data)
     entries = load_payload(upstream, lock)
-    for name in SOURCE_FILES:
-        source = root/name
+    for name, source_name in SOURCE_FILES.items():
+        source = root/source_name
         if source.is_symlink() or not source.is_file():
             raise ValueError('Missing or unsafe package source: ' + name)
         entries[name] = source.read_bytes()

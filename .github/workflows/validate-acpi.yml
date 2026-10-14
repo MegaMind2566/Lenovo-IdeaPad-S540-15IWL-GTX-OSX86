@@ -4,9 +4,9 @@ on:
   push:
     branches: [main]
     paths:
-      - 'acpi/**'
-      - 'profiles/**'
-      - 'tools/build_acpi.py'
+      - 'config/acpi/**'
+      - 'config/profiles/**'
+      - 'builders/build_acpi.py'
       - '.github/workflows/validate-acpi.yml'
   pull_request:
   workflow_dispatch:
@@ -23,12 +23,12 @@ jobs:
       - name: Installa compilatore ACPI
         run: sudo apt-get update && sudo apt-get install -y acpica-tools
       - name: Compila e verifica AML
-        run: python3 tools/build_acpi.py
+        run: python3 builders/build_acpi.py
       - name: Verifica riferimenti del profilo
         run: |
           python3 - <<'PY'
           import json, pathlib
-          profile = json.loads(pathlib.Path('profiles/s540-81sw.json').read_text())
+          profile = json.loads(pathlib.Path('config/profiles/s540-81sw.json').read_text())
           for table in profile['acpi_add']:
               path = pathlib.Path('build/acpi') / table['path']
               assert path.is_file(), path

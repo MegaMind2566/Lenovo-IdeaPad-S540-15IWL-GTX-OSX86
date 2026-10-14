@@ -4,12 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - tools/hda_mixer_snapshot.c
-      - tools/collect_microphone.sh
-      - tools/verify_microphone_driver.sh
-      - tools/test_microphone_driver.sh
-      - RACCOGLI-MICROFONO.command
-      - docs/MICROFONO.md
+      - packages/microphone-diagnostics/**
+      - packages/microphone/tools/verify_microphone_driver.sh
+      - tests/test_microphone_driver.sh
+      - docs/guides/MICROFONO.md
+      - licenses/audio-tahoe/**
       - .github/workflows/build-microphone-probe.yml
   workflow_dispatch:
 
@@ -24,16 +23,16 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - name: Verify original and re-signed audio driver variants
         shell: bash
-        run: bash tools/test_microphone_driver.sh
+        run: bash tests/test_microphone_driver.sh
       - name: Compile and verify Intel macOS probe
         shell: bash
         run: |
           set -euo pipefail
           test "$(uname -m)" = x86_64
-          bash -n tools/collect_microphone.sh tools/verify_microphone_driver.sh RACCOGLI-MICROFONO.command
+          bash -n packages/microphone-diagnostics/tools/collect_microphone.sh packages/microphone/tools/verify_microphone_driver.sh packages/microphone-diagnostics/RACCOGLI-MICROFONO.command
           mkdir -p build/microphone/S540-microfono-v2/bin build/microphone/S540-microfono-v2/tools build/microphone/S540-microfono-v2/licenses
           package=build/microphone/S540-microfono-v2
-          clang -std=c11 -Wall -Wextra -Werror -mmacosx-version-min=13.0 -arch x86_64 tools/hda_mixer_snapshot.c -framework IOKit -framework CoreFoundation -o "$package/bin/hda_mixer_snapshot"
+          clang -std=c11 -Wall -Wextra -Werror -mmacosx-version-min=13.0 -arch x86_64 packages/microphone-diagnostics/src/hda_mixer_snapshot.c -framework IOKit -framework CoreFoundation -o "$package/bin/hda_mixer_snapshot"
           codesign --force --sign - "$package/bin/hda_mixer_snapshot"
           codesign --verify --strict "$package/bin/hda_mixer_snapshot"
           test "$(lipo -archs "$package/bin/hda_mixer_snapshot")" = x86_64
@@ -46,11 +45,11 @@ jobs:
           test "$status" = 1
           python3 -c 'import json; d=json.load(open("build/microphone/no-driver.json")); assert d["format"]==1 and d["controllers"]==[] and d["controller_count"]==0'
           python3 -c 's=open("build/microphone/no-driver.stderr").read(); assert "No VoodooHDADevice found." in s and "IOServiceGetMatchingServices failed" not in s'
-          cp tools/collect_microphone.sh "$package/tools/"
-          cp tools/verify_microphone_driver.sh "$package/tools/"
-          cp tools/hda_mixer_snapshot.c "$package/tools/"
-          cp RACCOGLI-MICROFONO.command "$package/"
-          cp docs/MICROFONO.md "$package/LEGGIMI.md"
+          cp packages/microphone-diagnostics/tools/collect_microphone.sh "$package/tools/"
+          cp packages/microphone/tools/verify_microphone_driver.sh "$package/tools/"
+          cp packages/microphone-diagnostics/src/hda_mixer_snapshot.c "$package/tools/"
+          cp packages/microphone-diagnostics/RACCOGLI-MICROFONO.command "$package/"
+          cp docs/guides/MICROFONO.md "$package/LEGGIMI.md"
           cp licenses/audio-tahoe/VoodooHDA-LICENSE.txt "$package/licenses/"
           chmod 755 "$package/RACCOGLI-MICROFONO.command" "$package/tools/collect_microphone.sh" "$package/bin/hda_mixer_snapshot"
           printf '%s\n' "Source commit: $GITHUB_SHA" "VoodooHDA ABI pin: 8c7e8e2ce6de0a917be663a3192857955288c937" > "$package/BUILD.txt"

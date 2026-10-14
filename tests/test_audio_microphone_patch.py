@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Execute the patched driver's actual mixer/gain functions against the observed graph.
 
-Usage: python3 tools/test_audio_microphone_patch.py /path/to/patched/VoodooHDA
+Usage: python3 tests/test_audio_microphone_patch.py /path/to/patched/VoodooHDA
 No Apple kernel headers are needed. The kext must also be compiled with its SDK.
 """
 from pathlib import Path

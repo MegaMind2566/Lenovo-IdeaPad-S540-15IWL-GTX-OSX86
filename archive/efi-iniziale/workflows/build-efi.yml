@@ -4,14 +4,14 @@ on:
   push:
     branches: [main]
     paths:
-      - 'acpi/**'
-      - 'usb/**'
-      - 'profiles/**'
+      - 'config/acpi/**'
+      - 'config/usb/**'
+      - 'config/profiles/**'
       - 'archive/efi-iniziale/tools/build_efi.py'
-      - 'tools/configure_wifi.py'
-      - 'tools/*RECOVERY.cmd'
-      - 'tools/*WIFI.cmd'
-      - 'docs/PRIMO-AVVIO.md'
+      - 'packages/recovery/tools/configure_wifi.py'
+      - 'packages/recovery/*RECOVERY.cmd'
+      - 'packages/recovery/*WIFI.cmd'
+      - 'docs/reference/PRIMO-AVVIO.md'
       - 'archive/efi-iniziale/workflows/build-efi.yml'
   workflow_dispatch:
 

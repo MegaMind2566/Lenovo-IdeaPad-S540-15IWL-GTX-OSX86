@@ -35,4 +35,4 @@ Il controller è stato verificato con nove gruppi di prove su backup, alterazion
 
 - [Lilu 1.7.2, flag di debug e liludump](https://github.com/acidanthera/Lilu/blob/1.7.2/README.md).
 - [WhateverGreen 1.7.1, wegdbg e igfxdump](https://github.com/acidanthera/WhateverGreen/blob/1.7.1/README.md).
-- [Verifica delle patch ACPI](../../../docs/VERIFICA-PATCH-ACPI.md).
+- [Verifica delle patch ACPI](../../../docs/reference/VERIFICA-PATCH-ACPI.md).

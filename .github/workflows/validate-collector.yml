@@ -3,6 +3,9 @@ name: Controllo raccolta Windows
 on:
   push:
     branches: [main]
+    paths:
+      - packages/hardware-inventory/**
+      - .github/workflows/validate-collector.yml
   pull_request:
   workflow_dispatch:
 
@@ -20,12 +23,12 @@ jobs:
         run: |
           $tokens = $null
           $errors = $null
-          [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $env:GITHUB_WORKSPACE 'tools\Raccogli-Dati.ps1'), [ref]$tokens, [ref]$errors) | Out-Null
+          [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $env:GITHUB_WORKSPACE 'packages\hardware-inventory\tools\Raccogli-Dati.ps1'), [ref]$tokens, [ref]$errors) | Out-Null
           if ($errors.Count -gt 0) { $errors | Format-List; throw 'Sintassi PowerShell non valida' }
       - name: Prova raccolta sul runner Windows
         shell: powershell
         run: |
-          & .\tools\Raccogli-Dati.ps1 -OutputRoot (Join-Path $env:RUNNER_TEMP 'lenovo-collector') -SkipToolDownload -NoOpenFolder
+          & .\packages\hardware-inventory\tools\Raccogli-Dati.ps1 -OutputRoot (Join-Path $env:RUNNER_TEMP 'lenovo-collector') -SkipToolDownload -NoOpenFolder
           if ($LASTEXITCODE -ne 0) { throw 'Raccolta fallita' }
       - name: Verifica archivio e dati esportati
         shell: powershell

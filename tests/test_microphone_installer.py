@@ -3,7 +3,7 @@
 
 Run as root on the Intel macOS Actions runner, after building the package:
 sudo env GITHUB_ACTIONS=true RUNNER_TEMP="$RUNNER_TEMP" python3 \
-    tools/test_microphone_installer.py build/audio/S540-microfono-fix
+    tests/test_microphone_installer.py build/audio/S540-microfono-fix
 """
 import hashlib
 import os

@@ -18,4 +18,4 @@ jobs:
         with:
           persist-credentials: false
       - name: Verifica struttura, sintassi e collegamenti
-        run: python3 tools/validate_repository.py
+        run: python3 tests/validate_repository.py

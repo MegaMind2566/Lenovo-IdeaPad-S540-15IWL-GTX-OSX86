@@ -5,13 +5,13 @@ Obiettivo: rendere utilizzabili tutti i componenti del Lenovo IdeaPad S540-15IWL
 ## Ordine delle prove
 
 1. Conservare una copia privata della EFI corrente: il desktop di Tahoe sul 960 EVO esterno è stato raggiunto.
-2. Completare le prove di stabilità della UHD 620 seguendo [GRAFICA-INTEL.md](GRAFICA-INTEL.md); IntelAccelerator e Metal 3 esposto sono già confermati.
+2. Completare le prove di stabilità della UHD 620 seguendo [GRAFICA-INTEL.md](../guides/GRAFICA-INTEL.md); IntelAccelerator e Metal 3 esposto sono già confermati.
 3. Verificare periferiche, rete, USB e audio nel sistema installato.
 4. Completare luminosità, gestione energetica, sospensione e riavvii.
 5. Trasferire la EFI corrente sul 960 EVO e provare l'avvio senza l'HDD, conservando il supporto già funzionante come ripiego.
 6. Avviare la ricerca NVIDIA e verificare le uscite video secondo il percorso hardware rilevato.
 
-Priorità aggiornate il 13 ottobre 2026: il pannello spento all'avvio è **risolto nella prova con -igfxblr, attesa da circa due minuti a zero**. Si conserva la EFI corrente. Il 14 ottobre 2026 è stato confermato anche il funzionamento con cuffie Bluetooth e di HeliPort. La prova Photo Booth mostra immagine e registra la voce; il difetto di guadagno ha portato alla [correzione microfono v2](MICROFONO-FIX.md), con primo riscontro positivo dopo il riavvio del 14 ottobre 2026. Report della verifica e registrazioni di confronto restano da acquisire. Velocità rete e riconnessione restano aperte. Il percorso è in [AVVIO-RETE.md](AVVIO-RETE.md). Batteria e contatori sono [archiviati](BATTERIA-SOSPENSIONE.md); le altre prove di sospensione sono rinviate, insieme al blocco tasti funzione e all'equalizzazione già annotati.
+Priorità aggiornate il 13 ottobre 2026: il pannello spento all'avvio è **risolto nella prova con -igfxblr, attesa da circa due minuti a zero**. Si conserva la EFI corrente. Il 14 ottobre 2026 è stato confermato anche il funzionamento con cuffie Bluetooth e di HeliPort. La prova Photo Booth mostra immagine e registra la voce; il difetto di guadagno ha portato alla [correzione microfono v2](../guides/MICROFONO-FIX.md), con primo riscontro positivo dopo il riavvio del 14 ottobre 2026. Report della verifica e registrazioni di confronto restano da acquisire. Velocità rete e riconnessione restano aperte. Il percorso è in [AVVIO-RETE.md](../guides/AVVIO-RETE.md). Batteria e contatori sono [archiviati](BATTERIA-SOSPENSIONE.md); le altre prove di sospensione sono rinviate, insieme al blocco tasti funzione e all'equalizzazione già annotati.
 
 ## Stato e criteri
 

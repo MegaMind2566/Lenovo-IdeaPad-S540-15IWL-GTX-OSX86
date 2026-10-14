@@ -1,27 +1,34 @@
-# Guide del progetto
+# Documentation
 
-Lo stato corrente è nel [README principale](../README.md). Questo indice distingue le procedure ancora utili dalla ricostruzione delle diagnosi precedenti.
+Start with the [project README](../README.md) for the current state and scope. Detailed technical guides are currently written in Italian.
 
-## Stato e procedure attuali
+## Status
 
-| Guida | Scopo |
+| Document | Purpose |
 |---|---|
-| [Hardware](HARDWARE.md) | Identificativi ed esiti sul portatile, con limiti delle prove |
-| [Roadmap](ROADMAP.md) | Componenti aperti, priorità e criteri di verifica |
-| [Grafica Intel](GRAFICA-INTEL.md) | Accelerazione Intel e prove di stabilità |
-| [Avvio e rete](AVVIO-RETE.md) | Correzione `-igfxblr`, Wi-Fi con HeliPort e Bluetooth |
-| [Audio Tahoe](AUDIO-TAHOE.md) | Preparazione iniziale, volume e ripristino VoodooHDA |
-| [Microfono v2](MICROFONO-FIX.md) | Variante S540 3.6.9, verifica dopo riavvio e ripristino del driver precedente |
-| [Mappatura USB](MAPPATURA-USB.md) | Porte rilevate e prove mancanti |
-| [Batteria e sospensione](BATTERIA-SOSPENSIONE.md) | Campioni archiviati e verifiche rinviate |
-| [Riordino del supporto di avvio](RIORDINO-AVVIO.md) | Manutenzione separata del disco; il riordino della repository non modifica il supporto |
+| [Hardware](status/HARDWARE.md) | Hardware IDs and results observed on the laptop |
+| [Roadmap](status/ROADMAP.md) | Open work, priorities and acceptance criteria |
+| [Battery and sleep](status/BATTERIA-SOSPENSIONE.md) | Recorded samples and deferred checks |
 
-## Basi tecniche e prima installazione
+## Current guides
 
-- [Analisi ACPI](ANALISI-ACPI.md), [verifica patch ACPI](VERIFICA-PATCH-ACPI.md) e [verifica della consegna EFI iniziale](VERIFICA-EFI.md).
-- [Installazione sul disco esterno](INSTALLAZIONE.md) e [istruzioni della EFI iniziale](PRIMO-AVVIO.md): descrivono la fase iniziale, precedente alla configurazione funzionante.
-- [Raccolta microfono](MICROFONO.md): procedura per VoodooHDA 3.6.8 precedente alla correzione. Il controllo del driver rifiuta la variante 3.6.9; non è la verifica della v2.
+| Guide | Purpose |
+|---|---|
+| [Intel graphics](guides/GRAFICA-INTEL.md) | Acceleration and stability checks |
+| [Boot and networking](guides/AVVIO-RETE.md) | Backlight boot fix, HeliPort and Bluetooth |
+| [Tahoe audio](guides/AUDIO-TAHOE.md) | Initial audio setup, volume fix and recovery |
+| [Microphone v2](guides/MICROFONO-FIX.md) | S540 driver variant, verification and rollback |
+| [USB mapping](guides/MAPPATURA-USB.md) | Mapped ports and outstanding tests |
+| [Boot disk maintenance](guides/RIORDINO-AVVIO.md) | Separate maintenance procedure for the physical boot disk |
+| [Bluetooth](guides/TEST-BLUETOOTH.md) | The targeted patcher exclusion and its rollback |
+| [Previous microphone diagnostics](guides/MICROFONO.md) | Collector for VoodooHDA 3.6.8 before the microphone fix; it rejects the 3.6.9 variant |
 
-## Diagnosi precedenti
+## Reference
 
-Le vecchie prove grafiche, le tracce Intel e le raccolte Recovery sono nell'[archivio](../archive/README.md), insieme a sorgenti, licenze e spiegazione delle dipendenze. Gli esiti utili restano collegati allo stato hardware corrente.
+- [ACPI analysis](reference/ANALISI-ACPI.md), [ACPI patch review](reference/VERIFICA-PATCH-ACPI.md) and [initial EFI delivery review](reference/VERIFICA-EFI.md).
+- [External disk installation](reference/INSTALLAZIONE.md) and [initial EFI instructions](reference/PRIMO-AVVIO.md), written before the working configuration.
+- [Repository layout](reference/REPOSITORY-LAYOUT.md), including the distinction between source modules and generated ZIP packages.
+
+## Previous investigations
+
+Graphics experiments, Intel traces and Recovery log collectors are preserved in the [archive](../archive/README.md), together with their sources, asset locks and licenses.

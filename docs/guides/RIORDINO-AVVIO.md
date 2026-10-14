@@ -1,6 +1,6 @@
 # Riordinare l'HDD di OpenCore
 
-Il riordino conserva i file di avvio attuali e archivia sul Desktop di Windows le vecchie prove riconoscibili del progetto. Il controllo completo della consegna e dei config è riportato in [VERIFICA-EFI.md](VERIFICA-EFI.md). Non è una nuova prova del framebuffer e non sostituisce la EFI.
+Il riordino conserva i file di avvio attuali e archivia sul Desktop di Windows le vecchie prove riconoscibili del progetto. Il controllo completo della consegna e dei config è riportato in [VERIFICA-EFI.md](../reference/VERIFICA-EFI.md). Non è una nuova prova del framebuffer e non sostituisce la EFI.
 
 ## Uso
 

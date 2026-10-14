@@ -1,27 +1,27 @@
-# Archivio delle prove precedenti
+# Previous investigations
 
-Questo archivio conserva i sorgenti delle prove usate prima del desktop funzionante. I file sono stati spostati, senza duplicare pacchetti o cancellare diagnosi. La [documentazione corrente](../docs/README.md) indica le procedure ancora utili.
+This archive preserves the tools used before Tahoe reached the desktop. Files were moved rather than duplicated into additional ZIP packages. Follow the [current documentation](../docs/README.md) for supported procedures.
 
-| Gruppo | Contenuto | Esito e percorso attuale |
+| Group | Contents | Current relevance |
 |---|---|---|
-| [EFI iniziale](efi-iniziale/) | Builder e workflow della prima configurazione OpenCore | Modello di riferimento precedente alle correzioni Intel, audio e pannello; non riproduce la EFI privata funzionante |
-| [Primo avvio](primo-avvio/) | Prove VESA, avvio sicuro, Whiskey Lake, memoria Intel, tracce e raccolte Recovery | Il desktop è stato raggiunto dopo la correzione della memoria; la configurazione corrente è descritta in [Grafica Intel](../docs/GRAFICA-INTEL.md) |
-| [Licenze delle tracce](primo-avvio/licenses/intel-trace/) | Licenze dei componenti usati dalle build diagnostiche | Conservate insieme a builder e lock degli asset |
+| [Initial EFI](efi-iniziale/) | Original OpenCore template builder and workflow | Reference template preceding the Intel, audio and backlight fixes; it does not reproduce the private working EFI |
+| [First boot](primo-avvio/) | VESA, safe boot, Whiskey Lake, framebuffer memory, Intel traces and Recovery logging | Historical investigations that led to the working desktop |
+| [Trace licenses](primo-avvio/licenses/intel-trace/) | Licenses for diagnostic build dependencies | Preserved with their builders and pinned asset versions |
 
-## Consultare la diagnosi
+## Investigation notes
 
-- [Correzione memoria Intel](primo-avvio/docs/TEST-MEMORIA-INTEL.md).
-- [Traccia Intel](primo-avvio/docs/TRACCIA-INTEL.md).
-- [Analisi dei log di avvio](primo-avvio/docs/ANALISI-LOG-AVVIO.md).
-- [Analisi dei log unificati](primo-avvio/docs/ANALISI-LOG-UNIFICATI.md).
-- [Raccolta dalla Recovery](primo-avvio/docs/DIAGNOSI-INTERFACCIA.md).
+- [Intel framebuffer memory fix](primo-avvio/docs/TEST-MEMORIA-INTEL.md).
+- [Intel tracing](primo-avvio/docs/TRACCIA-INTEL.md).
+- [Boot log analysis](primo-avvio/docs/ANALISI-LOG-AVVIO.md).
+- [Unified log analysis](primo-avvio/docs/ANALISI-LOG-UNIFICATI.md).
+- [Recovery log collection](primo-avvio/docs/DIAGNOSI-INTERFACCIA.md).
 
-Le altre guide e i launcher originali sono nel gruppo `primo-avvio`. Sono procedure storiche: il loro contesto, i nomi dei pacchetti e i controlli del driver riflettono quella fase del lavoro.
+These notes and launchers describe the package names, driver guards and conditions of their original investigation.
 
-## Dipendenze e ripristino dei sorgenti
+## Dependencies and provenance
 
-Le prove memoria e traccia condividono `tools/trace_intel.py`. I builder diagnostici conservano la struttura interna `tools`, `docs`, `profiles` e `licenses`, così i pacchetti generati mantengono i propri percorsi. Il builder EFI iniziale usa ancora ACPI, USB e profilo hardware condivisi alla radice della repository.
+The memory and tracing experiments share `tools/trace_intel.py`. Their internal `tools`, `docs`, `profiles` and `licenses` structure is retained so that generated diagnostic packages keep their original runtime paths. The initial EFI builder reads the shared hardware configuration under `config/` and recovery helpers under `packages/recovery/`.
 
-I workflow qui conservati non vengono eseguiti automaticamente da GitHub Actions. Alcuni launcher sono sorgenti copiati alla radice dei vecchi pacchetti e non vanno eseguiti direttamente dalla loro cartella `tools`. La raccolta unificata originale dipende inoltre dal layout del vecchio pacchetto `diagnosi-unified`; resta come riferimento, non come procedura corrente.
+Archived workflows are not run automatically by GitHub Actions. Some launchers were intended to be copied to the root of their generated packages. The original unified collector also depends on the old `diagnosi-unified` package layout; it is retained as a reference rather than a current procedure.
 
-Il [manifest degli spostamenti](manifest.json) registra il percorso precedente, quello nuovo, le impronte SHA-256 e il commit d'origine. La cronologia Git conserva le versioni anteriori al riordino. La EFI reale e i backup presenti sul portatile non vengono modificati da questo archivio.
+The [move manifest](manifest.json) records old and new paths, SHA-256 hashes and the source commit. Git history preserves earlier versions. Repository maintenance does not modify the laptop's EFI or private backups.

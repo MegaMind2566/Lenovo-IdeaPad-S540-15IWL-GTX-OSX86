@@ -41,7 +41,7 @@ Tahoe ha raggiunto il desktop sul Samsung 960 EVO esterno dopo la correzione del
 
 ## Desktop e grafica Intel: 13 ottobre 2026
 
-Il report grafico del sistema installato espone UHD 620 con device-id `0x3ea5`, Metal 3 e memoria grafica condivisa dinamica fino a 1536 MB. Il pannello interno è online a 1920×1080. Il campione powermetrics rileva IntelAccelerator e boot-args senza `-igfxvesa` né `-x`. La correzione e i limiti delle verifiche sono documentati in [TEST-MEMORIA-INTEL.md](../archive/primo-avvio/docs/TEST-MEMORIA-INTEL.md) e [GRAFICA-INTEL.md](GRAFICA-INTEL.md).
+Il report grafico del sistema installato espone UHD 620 con device-id `0x3ea5`, Metal 3 e memoria grafica condivisa dinamica fino a 1536 MB. Il pannello interno è online a 1920×1080. Il campione powermetrics rileva IntelAccelerator e boot-args senza `-igfxvesa` né `-x`. La correzione e i limiti delle verifiche sono documentati in [TEST-MEMORIA-INTEL.md](../../archive/primo-avvio/docs/TEST-MEMORIA-INTEL.md) e [GRAFICA-INTEL.md](../guides/GRAFICA-INTEL.md).
 
 Un campione di circa un secondo riporta 50 °C per la CPU e 0,98 W stimati per il pacchetto Intel. È una misura istantanea: non verifica la NVIDIA, le ventole o l'autonomia. Lo spegnimento elettrico della dGPU resta aperto.
 
@@ -62,7 +62,7 @@ Il report contiene ancora Invalid key detected e non riporta RPM delle ventole: 
 
 ## Correzione del pannello e stato Bluetooth: 13 ottobre 2026
 
-La prova del solo `-igfxblr` ha eliminato il nero all'avvio nell'esito riferito: da circa due minuti a zero. Si conserva la configurazione, mantenendo memoria Intel, audio e SIP. Il report precedente al test mostra lo stesso UUID framebuffer e Loginwindow pronto circa 31,3 secondi dopo il kernel. La [diagnosi](AVVIO-RETE.md) distingue il ritardo del pannello dal tempo di avvio del sistema.
+La prova del solo `-igfxblr` ha eliminato il nero all'avvio nell'esito riferito: da circa due minuti a zero. Si conserva la configurazione, mantenendo memoria Intel, audio e SIP. Il report precedente al test mostra lo stesso UUID framebuffer e Loginwindow pronto circa 31,3 secondi dopo il kernel. La [diagnosi](../guides/AVVIO-RETE.md) distingue il ritardo del pannello dal tempo di avvio del sistema.
 
 Lo stato Bluetooth è On, FirmwareLoaded è Yes e il trasporto è connesso; BlueToolFixup 2.7.2 e IntelBluetoothFirmware 2.4 sono caricati, IntelBTPatcher è assente. Le due variabili NVRAM richieste sono presenti con i valori corretti: un byte zero e quattordici byte zero. Lo stack avvia la scansione e riceve dispositivi BLE. Il 14 ottobre 2026 è stato riferito il funzionamento con cuffie Bluetooth, insieme al funzionamento di HeliPort per la gestione delle reti Wi-Fi. Si conservano i driver e la NVRAM attuali. Questo esito non verifica il microfono delle cuffie, il microfono interno ALC257, il jack analogico o la riconnessione dopo stop.
 
@@ -74,7 +74,7 @@ Nella prova proposta con Photo Booth è stato riferito che l'immagine è visibil
 
 Il 14 ottobre 2026, dopo la prova del pacchetto **S540-microfono-fix-v2** e il riavvio, è stato riferito un primo esito positivo. Il report della verifica e registrazioni di confronto non sono ancora stati acquisiti. Si conserva questa versione con il backup del driver precedente; equalizzazione e tasti funzione restano rinviati.
 
-La [prova](MICROFONO-FIX.md) usa VoodooHDA 3.6.9 variante S540: il cursore ingresso controlla i 64 livelli dell'ADC, il boost microfono resta a 0 dB e il volume PCM degli altoparlanti conserva la correzione v3. Il pacchetto v2 elimina la dipendenza dell'installer da strumenti Xcode. I controlli CI su formato, integrità, firma e ripristino sono passati; il primo riscontro d'uso non viene esteso al jack o al recupero dopo stop.
+La [prova](../guides/MICROFONO-FIX.md) usa VoodooHDA 3.6.9 variante S540: il cursore ingresso controlla i 64 livelli dell'ADC, il boost microfono resta a 0 dB e il volume PCM degli altoparlanti conserva la correzione v3. Il pacchetto v2 elimina la dipendenza dell'installer da strumenti Xcode. I controlli CI su formato, integrità, firma e ripristino sono passati; il primo riscontro d'uso non viene esteso al jack o al recupero dopo stop.
 
 ## Batteria e contatori di stop: 13 ottobre 2026
 
@@ -88,7 +88,7 @@ Il DSDT originale contiene i metodi H_EC._Q8E e _Q8F che inviano al pannello GFX
 
 ## Audio dal desktop: 13 ottobre 2026
 
-`system_profiler SPAudioDataType` non espone dispositivi. Tra i kext cercati è caricato soltanto Lilu 1.7.2: AppleALC e AppleHDA sono assenti dall'elenco. La configurazione esclude AppleALC oltre Darwin 24; Tahoe ha rimosso AppleHDA. È stata preparata una [prova reversibile VoodooHDA 3.6.8](AUDIO-TAHOE.md) in Library/Extensions, con layout 11 incluso per ALC257. Dopo la correzione del controllo SIP è stato riferito il funzionamento della riproduzione audio e dei tasti F1–F3. Il difetto iniziale del volume, percepibile soltanto a zero/muto, è stato superato dopo la prova v3 con VoodooHDAEnableVolumeChangeFix=true. È stato riferito un esito positivo della riproduzione e della regolazione graduale. L'equalizzazione è annotata per un affinamento più avanti; jack, microfono e ripresa restano da documentare. Il ripristino AppleHDA nel volume di sistema resta una strategia successiva.
+`system_profiler SPAudioDataType` non espone dispositivi. Tra i kext cercati è caricato soltanto Lilu 1.7.2: AppleALC e AppleHDA sono assenti dall'elenco. La configurazione esclude AppleALC oltre Darwin 24; Tahoe ha rimosso AppleHDA. È stata preparata una [prova reversibile VoodooHDA 3.6.8](../guides/AUDIO-TAHOE.md) in Library/Extensions, con layout 11 incluso per ALC257. Dopo la correzione del controllo SIP è stato riferito il funzionamento della riproduzione audio e dei tasti F1–F3. Il difetto iniziale del volume, percepibile soltanto a zero/muto, è stato superato dopo la prova v3 con VoodooHDAEnableVolumeChangeFix=true. È stato riferito un esito positivo della riproduzione e della regolazione graduale. L'equalizzazione è annotata per un affinamento più avanti; jack, microfono e ripresa restano da documentare. Il ripristino AppleHDA nel volume di sistema resta una strategia successiva.
 
 Le sezioni successive descrivono i tentativi precedenti al raggiungimento del desktop.
 
@@ -96,7 +96,7 @@ Le sezioni successive descrivono i tentativi precedenti al raggiungimento del de
 
 Il 13 ottobre 2026 è stato riferito il raggiungimento della selezione della lingua e il funzionamento di mouse, tastiera e Wi-Fi nella Recovery. Non è stato specificato se il mouse indicato sia il touchpad o un dispositivo USB: il touchpad ELAN resta da verificare separatamente.
 
-L'esito è stato comunicato dopo la proposta del test `-igfxvesa`. I boot-args effettivi non sono stati raccolti, quindi non si attribuisce ancora il risultato con certezza a quel parametro. La comparsa della Recovery non dimostra l'accelerazione Metal, né la compatibilità completa del sistema installato. La [verifica Intel](GRAFICA-INTEL.md) parte da questi dati dopo l'installazione.
+L'esito è stato comunicato dopo la proposta del test `-igfxvesa`. I boot-args effettivi non sono stati raccolti, quindi non si attribuisce ancora il risultato con certezza a quel parametro. La comparsa della Recovery non dimostra l'accelerazione Metal, né la compatibilità completa del sistema installato. La [verifica Intel](../guides/GRAFICA-INTEL.md) parte da questi dati dopo l'installazione.
 
 ## Rilevamento del disco esterno e preferenza per l'interno
 
@@ -108,13 +108,13 @@ Il disco interno è stato riferito visibile nella Recovery: l'esclusione tramite
 
 Il log del 13 ottobre 2026 conferma la selezione del volume USB esterno, con nome **Machintosh SSD**, e la presenza di `-igfxvesa` e `-x`. OpenCore riporta l'iniezione riuscita di Lilu 1.7.2 e WhateverGreen 1.7.1 e l'impostazione delle proprietà Intel. Il log non conferma l'inizializzazione dei driver nel kernel o Metal. In quel tentativo il desktop non era ancora stato raggiunto.
 
-L'[analisi del log](../archive/primo-avvio/docs/ANALISI-LOG-AVVIO.md) riporta anche il percorso Apple con immagine BaseSystem, l'assenza della tabella MAT e i limiti del blocco NVMe. Il file originale e gli identificativi SMBIOS non vengono aggiunti alla repository.
+L'[analisi del log](../../archive/primo-avvio/docs/ANALISI-LOG-AVVIO.md) riporta anche il percorso Apple con immagine BaseSystem, l'assenza della tabella MAT e i limiti del blocco NVMe. Il file originale e gli identificativi SMBIOS non vengono aggiunti alla repository.
 
 ## Panic USB/Bluetooth successivo
 
 La fotografia ricevuta successivamente mostra un vero panic con processo `bluetoothd`, estensioni IOUSBHostFamily e IntelBTPatcher 2.4 nella traccia, Darwin 25.6.0 e build macOS 25G241. Nei boot-args visibili manca `-x`, mentre rimane `-igfxvesa`. L'intestazione del panic è fuori dall'inquadratura, quindi la causa precisa resta da confermare.
 
-La [prova Bluetooth](TEST-BLUETOOTH.md) esclude solo IntelBTPatcher dalla EFI attuale. La versione 2.4 precede la correzione ufficiale della gestione del descrittore di memoria USB per Sequoia e successivi; il builder la esclude dalle nuove EFI. Il firmware Intel, BlueToolFixup e itlwm restano presenti. La prova sul portatile ha superato il panic e raggiunto uno schermo nero con il puntatore. È stata riferita attività del disco, senza comparsa di finestre. Il log di questo tentativo è stato ricevuto: conferma `-igfxvesa` attivo e `-x` assente. Non contiene l'iniezione di IntelBTPatcher; firmware Intel e BlueToolFixup sono ancora iniettati. L'iniezione di Lilu/WhateverGreen riesce, ma non dimostra l'inizializzazione della grafica nel kernel. Due log successivi, `103339` e `103615`, confermano la rimozione di VESA e dell'avvio sicuro mantenendo IntelBTPatcher escluso. Una nuova foto mostra lo stallo sul testo con errori di servizi, firme del codice e DriverKit, senza una riga di panic. Il caricamento di Lilu/WhateverGreen non prova Metal. La successiva [raccolta dei report del sistema da Recovery](../archive/primo-avvio/docs/DIAGNOSI-INTERFACCIA.md) ha preceduto la diagnosi del panic Intel e la correzione memoria. Il confronto con una build aggiornata del patcher e le funzioni Bluetooth restano da verificare.
+La [prova Bluetooth](../guides/TEST-BLUETOOTH.md) esclude solo IntelBTPatcher dalla EFI attuale. La versione 2.4 precede la correzione ufficiale della gestione del descrittore di memoria USB per Sequoia e successivi; il builder la esclude dalle nuove EFI. Il firmware Intel, BlueToolFixup e itlwm restano presenti. La prova sul portatile ha superato il panic e raggiunto uno schermo nero con il puntatore. È stata riferita attività del disco, senza comparsa di finestre. Il log di questo tentativo è stato ricevuto: conferma `-igfxvesa` attivo e `-x` assente. Non contiene l'iniezione di IntelBTPatcher; firmware Intel e BlueToolFixup sono ancora iniettati. L'iniezione di Lilu/WhateverGreen riesce, ma non dimostra l'inizializzazione della grafica nel kernel. Due log successivi, `103339` e `103615`, confermano la rimozione di VESA e dell'avvio sicuro mantenendo IntelBTPatcher escluso. Una nuova foto mostra lo stallo sul testo con errori di servizi, firme del codice e DriverKit, senza una riga di panic. Il caricamento di Lilu/WhateverGreen non prova Metal. La successiva [raccolta dei report del sistema da Recovery](../../archive/primo-avvio/docs/DIAGNOSI-INTERFACCIA.md) ha preceduto la diagnosi del panic Intel e la correzione memoria. Il confronto con una build aggiornata del patcher e le funzioni Bluetooth restano da verificare.
 
 ## Prima raccolta dei report in Recovery
 

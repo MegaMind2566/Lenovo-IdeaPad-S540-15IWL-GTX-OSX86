@@ -38,7 +38,7 @@ Invia l'esito e una foto leggibile dell'ultima schermata se l'avvio si blocca. I
 - VoodooPS2 per la tastiera; VoodooI2C e VoodooI2CHID per ELAN0662.
 - VirtualSMC, SMCProcessor e SMCBatteryManager; lettura della batteria da verificare.
 - `itlwm` per Intel AC9560; dopo l'installazione si potrà usare [HeliPort](https://github.com/OpenIntelWireless/HeliPort/releases/tag/v1.5.0).
-- IntelBluetoothFirmware e BlueToolFixup attivi. IntelBTPatcher 2.4 presente ma escluso nelle nuove build dopo un panic USB/Bluetooth; `-ibtcompatbeta` rimosso. Per la EFI già consegnata usare la [prova reversibile Bluetooth](TEST-BLUETOOTH.md). Bluetooth da verificare.
+- IntelBluetoothFirmware e BlueToolFixup attivi. IntelBTPatcher 2.4 presente ma escluso nelle nuove build dopo un panic USB/Bluetooth; `-ibtcompatbeta` rimosso. Per la EFI già consegnata usare la [prova reversibile Bluetooth](../guides/TEST-BLUETOOTH.md). Bluetooth da verificare.
 - AppleALC viene caricato **solo su Sequoia**, con layout iniziale 11. L'audio analogico non è ancora ripristinato su Tahoe.
 - SIP abilitato; `SecureBootModel=Disabled` e RestrictEvents con `revpatch=sbvmm` per il percorso di aggiornamento Tahoe.
 

@@ -5,7 +5,7 @@ umask 077
 export LC_ALL=C
 [ "${GITHUB_ACTIONS:-}" = true ] || { echo 'Run this fixture in GitHub Actions.' >&2; exit 1; }
 ROOT=$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-CHECK="$ROOT/tools/verify_microphone_driver.sh"
+CHECK="$ROOT/packages/microphone/tools/verify_microphone_driver.sh"
 FIXTURE=$(/usr/bin/mktemp -d "$RUNNER_TEMP/microphone-driver-fixture.XXXXXX")
 trap '/bin/rm -rf "$FIXTURE"' EXIT
 

@@ -1,6 +1,6 @@
 # Pannello spento all'avvio, Bluetooth e Wi-Fi
 
-Il ritardo del pannello è risolto nella prova riferita il 13 ottobre 2026: attesa a schermo nero **da circa due minuti a zero** dopo il test del solo `-igfxblr`. Si conserva questa configurazione. Il 14 ottobre 2026 è stato riferito il funzionamento con cuffie Bluetooth e di HeliPort. Si conservano firmware Intel, BlueToolFixup e itlwm attuali. Batteria e contatori sono conservati in [BATTERIA-SOSPENSIONE.md](BATTERIA-SOSPENSIONE.md). Le ulteriori prove di sospensione, i tasti funzione e l'equalizzazione sono rinviati.
+Il ritardo del pannello è risolto nella prova riferita il 13 ottobre 2026: attesa a schermo nero **da circa due minuti a zero** dopo il test del solo `-igfxblr`. Si conserva questa configurazione. Il 14 ottobre 2026 è stato riferito il funzionamento con cuffie Bluetooth e di HeliPort. Si conservano firmware Intel, BlueToolFixup e itlwm attuali. Batteria e contatori sono conservati in [BATTERIA-SOSPENSIONE.md](../status/BATTERIA-SOSPENSIONE.md). Le ulteriori prove di sospensione, i tasti funzione e l'equalizzazione sono rinviati.
 
 ## Distinguere avvio del sistema e accensione del pannello
 

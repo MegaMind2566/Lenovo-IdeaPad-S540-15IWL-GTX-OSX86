@@ -20,7 +20,7 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
     compiler = subprocess.run([args.iasl, '-v'], check=True, capture_output=True, text=True).stdout.strip()
     manifest = []
-    sources = sorted((root / 'acpi' / 'source').glob('*.dsl'))
+    sources = sorted((root / 'config' / 'acpi' / 'source').glob('*.dsl'))
     if not sources:
         raise RuntimeError('No ACPI source files found')
     for source in sources:

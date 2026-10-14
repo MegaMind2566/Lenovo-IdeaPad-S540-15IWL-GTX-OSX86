@@ -161,13 +161,13 @@
       "from": "docs/ANALISI-LOG-AVVIO.md",
       "to": "archive/primo-avvio/docs/ANALISI-LOG-AVVIO.md",
       "original_sha256": "07a1c72474e140e6f45e281e0b0d1e7b8e238d83949fc99e12e88f61568b055c",
-      "archived_sha256": "856c155e4e17b2188e5d61da93e1eadc1cb2fa3808ed2b0e84b3c7bfc25f59b8"
+      "archived_sha256": "d5dc87600d1d65a1adef24ac04dfb963f741b7dc8b4b0dc8c6089fbe97abd17c"
     },
     {
       "from": "docs/ANALISI-LOG-UNIFICATI.md",
       "to": "archive/primo-avvio/docs/ANALISI-LOG-UNIFICATI.md",
       "original_sha256": "a0038cc7e938b2f24fd1e34344c7033309178fba97cf039bb82a88df85b802b1",
-      "archived_sha256": "7ad733700756a344599617db346a12864f3be1aa240ab42bf93227957d674f75"
+      "archived_sha256": "201b66d4d93d9fdcfaf44c4a0f2744d5d27e93acc04de76b27764592bcd32910"
     },
     {
       "from": "docs/AVVIO-SICURO.md",
@@ -203,19 +203,19 @@
       "from": "docs/TEST-MEMORIA-INTEL.md",
       "to": "archive/primo-avvio/docs/TEST-MEMORIA-INTEL.md",
       "original_sha256": "2b7b929580ce1282b8154263dcadcc90ab58deb89fe3e4c618f2fe988af5c268",
-      "archived_sha256": "8209ae9ee3fa9897cef711aef29c467ecfa8ff961dd2190129a2450b71b4b69c"
+      "archived_sha256": "ff5e0d473bb2583fc0d0574c38bfa9f2ca5052a4cbeb1cf78e74cd04fb2b373b"
     },
     {
       "from": "docs/TEST-WHISKEY-LAKE.md",
       "to": "archive/primo-avvio/docs/TEST-WHISKEY-LAKE.md",
       "original_sha256": "9369ffedd47b00b290bb878dee1cd997c5bc099ff5a28710d2824077f1133db7",
-      "archived_sha256": "0e80b6631acb3964f79d5dff9ad2a580abc4e5e33af6065d3460562128ed055f"
+      "archived_sha256": "29b61f1804ed86361a5adfe5bd5ffe8add05586a2e95711298fdf2240f6699e7"
     },
     {
       "from": "docs/TRACCIA-INTEL.md",
       "to": "archive/primo-avvio/docs/TRACCIA-INTEL.md",
       "original_sha256": "5f9f2766355bb77a21e4142160dde7de4df365deea90484cedcb8b878ca120b7",
-      "archived_sha256": "43dff0f84e7a98857aa1bc208a0b0a260aba1e7982f6deeb695892277738e650"
+      "archived_sha256": "0b040df5a8e4b612ef2bd71ad205bbea8371ddddd96d6b7f0d73702cde44f10a"
     },
     {
       "from": "profiles/trace-intel-assets.lock.json",
@@ -263,19 +263,19 @@
       "from": "tools/build_efi.py",
       "to": "archive/efi-iniziale/tools/build_efi.py",
       "original_sha256": "e9c0b1d9333f12ca9a1d24884a6f1c24ff919b88bb869d04185fd2583221e136",
-      "archived_sha256": "f1042a9bfd21211b901575e1e882153fe24c6d80fdd5726ef5da89f328810286"
+      "archived_sha256": "ea3ec82b67a93eef6650a52b0fae49a64d366f5feaf419bb001dd08339a986d6"
     },
     {
       "from": ".github/workflows/build-efi.yml",
       "to": "archive/efi-iniziale/workflows/build-efi.yml",
       "original_sha256": "c6118ae6b1daffcaaaabb6327f957e03360fa894878a64042f772d5b92fd69ce",
-      "archived_sha256": "1605986e359583494b8e30f41026a1c4f6a0ab3ad0b20336218ac55154f32e70"
+      "archived_sha256": "8411ce027434204a109c67317902fbb765efbabb460be2f8a20173f2e191dbb8"
     }
   ],
   "source_fixes": [
     {
       "path": "archive/efi-iniziale/tools/build_efi.py",
-      "reason": "ROOT parents[3] resolves shared repository hardware, ACPI, USB, profiles and first-install helpers."
+      "reason": "ROOT parents[3] resolves shared config/ inputs, recovery package helpers and reference documentation."
     },
     {
       "path": "archive/efi-iniziale/workflows/build-efi.yml",

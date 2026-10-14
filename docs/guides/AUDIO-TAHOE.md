@@ -135,7 +135,7 @@ Sintassi Bash, autenticità dell'asset e dei singoli file, integrità ZIP e fixt
 
 Per la prova volume v3, una fixture verifica l'unico Bool modificato e la conservazione delle altre proprietà del mixer. Le funzioni hash effettive del programma riconoscono il payload originale e la variante registrata nella fixture, e rifiutano un binario alterato. La firma e la ricostruzione AuxKC non sono state eseguite direttamente nell'ambiente Linux. Dopo la prova sul Mac è stato riferito un esito positivo della riproduzione e dell'attenuazione graduale; non è stato allegato un nuovo report tecnico. Il codec supportato e il nome HDAS coerente non certificano automaticamente qualità audio, jack, microfono o ripresa dalla sospensione.
 
-AppleHDA resta una strategia successiva se questa prova non soddisfa i requisiti. La ricerca NVIDIA rimane nella [roadmap](ROADMAP.md).
+AppleHDA resta una strategia successiva se questa prova non soddisfa i requisiti. La ricerca NVIDIA rimane nella [roadmap](../status/ROADMAP.md).
 
 ## Fonti primarie
 

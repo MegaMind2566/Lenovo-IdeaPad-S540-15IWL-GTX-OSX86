@@ -107,7 +107,7 @@ def verify_macho(path: Path) -> None:
 
 
 def load_original_info() -> dict:
-    lock_path = REPO / "profiles/audio-tahoe-assets.lock.json"
+    lock_path = REPO / "config/profiles/audio-tahoe-assets.lock.json"
     regular_file(lock_path)
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
     expected = {
@@ -221,8 +221,8 @@ def make_package(built_bundle: Path, output: Path) -> Path:
         sums.write_bytes(manifest)
         sums.chmod(0o644)
         for name in ("INSTALLA-MICROFONO.command", "ANNULLA-MICROFONO.command", "VERIFICA-MICROFONO.command"):
-            copy_plain(REPO / name, stage / name, executable=True)
-        helper_source = REPO / "tools/microphone_driver_test.sh"
+            copy_plain(REPO / "packages/microphone" / name, stage / name, executable=True)
+        helper_source = REPO / "packages/microphone/tools/microphone_driver_test.sh"
         regular_file(helper_source)
         helper_text = helper_source.read_text(encoding="utf-8")
         if helper_text.count("MICROPHONE_MANIFEST_SHA_PENDING") != 1:
@@ -233,8 +233,8 @@ def make_package(built_bundle: Path, output: Path) -> Path:
             helper_text.replace("MICROPHONE_MANIFEST_SHA_PENDING", manifest_sha), encoding="utf-8"
         )
         helper.chmod(0o755)
-        copy_plain(REPO / "tools/verify_microphone_driver.sh", stage / "tools/verify_microphone_driver.sh", executable=True)
-        copy_plain(REPO / "docs/MICROFONO-FIX.md", stage / "LEGGIMI.md")
+        copy_plain(REPO / "packages/microphone/tools/verify_microphone_driver.sh", stage / "tools/verify_microphone_driver.sh", executable=True)
+        copy_plain(REPO / "docs/guides/MICROFONO-FIX.md", stage / "LEGGIMI.md")
         for name in LICENSES:
             copy_plain(REPO / "licenses/audio-tahoe" / name, stage / "licenses/audio-tahoe" / name)
         # This validates only the packaged payload. It must not install/load it,

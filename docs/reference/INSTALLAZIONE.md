@@ -21,7 +21,7 @@ Se le voci del menu sono diverse o l'installer mostra un errore, raccogli una fo
 
 ## Dopo il primo desktop
 
-Mantieni la EFI attuale durante l'installazione. L'eventuale opzione di test `-igfxvesa` è temporanea: il raggiungimento della Recovery non conferma l'accelerazione Intel. Dopo il primo desktop segui la [verifica Intel](GRAFICA-INTEL.md), poi le prove nella [roadmap hardware](ROADMAP.md). OpenCore resterà inizialmente sull'HDD di avvio; il trasferimento della EFI sull'SSD esterno verrà eseguito dopo la prova del sistema installato.
+Mantieni la EFI attuale durante l'installazione. L'eventuale opzione di test `-igfxvesa` è temporanea: il raggiungimento della Recovery non conferma l'accelerazione Intel. Dopo il primo desktop segui la [verifica Intel](../guides/GRAFICA-INTEL.md), poi le prove nella [roadmap hardware](../status/ROADMAP.md). OpenCore resterà inizialmente sull'HDD di avvio; il trasferimento della EFI sull'SSD esterno verrà eseguito dopo la prova del sistema installato.
 
 Il disco Windows interno rimane al suo posto, secondo la preferenza espressa. Il rilevamento nella Recovery non conferma l'efficacia del blocco NVMe della configurazione iniziale né la stabilità sotto carico.
 

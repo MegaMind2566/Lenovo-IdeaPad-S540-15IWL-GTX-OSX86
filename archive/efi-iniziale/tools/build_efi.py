@@ -238,8 +238,8 @@ def main():
     cache, source = out/'downloads', out/'upstream'
     cache.mkdir(exist_ok=True)
     source.mkdir(exist_ok=True)
-    lock = json.loads((ROOT/'profiles/assets.lock.json').read_text())
-    profile = json.loads((ROOT/'profiles/s540-81sw.json').read_text())
+    lock = json.loads((ROOT/'config/profiles/assets.lock.json').read_text())
+    profile = json.loads((ROOT/'config/profiles/s540-81sw.json').read_text())
     downloads, extracted, manifests = {}, {}, []
     for asset in lock['assets']:
         archive, digest = download(asset, cache)
@@ -274,13 +274,13 @@ def main():
         path = ps2_plugins/name
         if path.exists():
             shutil.rmtree(path)
-    shutil.copytree(ROOT/'usb/UTBMap.kext', oc/'Kexts/UTBMap.kext')
+    shutil.copytree(ROOT/'config/usb/UTBMap.kext', oc/'Kexts/UTBMap.kext')
     wifi_path = oc/'Kexts/itlwm.kext/Contents/Info.plist'
     wifi = read_plist(wifi_path)
     wifi['IOKitPersonalities']['itlwm']['WiFiConfig'] = {}
     write_plist(wifi_path, wifi)
     for table in profile['acpi_add']:
-        shutil.copy2(ROOT/'acpi/compiled'/table['path'], oc/'ACPI'/table['path'])
+        shutil.copy2(ROOT/'config/acpi/compiled'/table['path'], oc/'ACPI'/table['path'])
     identity = identity_for(unique_file(oc_source, 'macserial.linux'), args.identity)
     config = make_config(unique_file(oc_source, 'Docs/Sample.plist'), profile,
                          kernel_entries(oc/'Kexts'), identity)
@@ -302,10 +302,10 @@ def main():
     for path in recovery_source.iterdir():
         if path.is_file():
             shutil.copy2(path, utilities/path.name)
-    shutil.copy2(ROOT/'tools/configure_wifi.py', bundle/'tools/configure_wifi.py')
-    shutil.copy2(ROOT/'tools/SCARICA-RECOVERY.cmd', bundle/'SCARICA-RECOVERY.cmd')
-    shutil.copy2(ROOT/'tools/CONFIGURA-WIFI.cmd', bundle/'CONFIGURA-WIFI.cmd')
-    shutil.copy2(ROOT/'docs/PRIMO-AVVIO.md', bundle/'LEGGIMI.md')
+    shutil.copy2(ROOT/'packages/recovery/tools/configure_wifi.py', bundle/'tools/configure_wifi.py')
+    shutil.copy2(ROOT/'packages/recovery/SCARICA-RECOVERY.cmd', bundle/'SCARICA-RECOVERY.cmd')
+    shutil.copy2(ROOT/'packages/recovery/CONFIGURA-WIFI.cmd', bundle/'CONFIGURA-WIFI.cmd')
+    shutil.copy2(ROOT/'docs/reference/PRIMO-AVVIO.md', bundle/'LEGGIMI.md')
     shutil.copy2(out/'ocvalidate.txt', bundle/'ocvalidate.txt')
     manifest = {'schema': 1, 'status': 'validated configuration; hardware boot not tested',
                 'commit': os.environ.get('GITHUB_SHA'), 'opencore': '1.0.8 DEBUG',

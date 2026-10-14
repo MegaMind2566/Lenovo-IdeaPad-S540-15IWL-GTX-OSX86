@@ -6,7 +6,7 @@ Il panic ricevuto dopo la traccia diretta è stato localizzato nel driver AppleI
 
 Dopo l'applicazione della correzione sono state raggiunte la configurazione iniziale e la scrivania di Tahoe. Il pannello temporaneamente nero ha poi mostrato l'interfaccia senza altre modifiche della EFI. Il campione powermetrics rileva IntelAccelerator e boot-args senza VESA né modalità sicura; system_profiler espone Metal 3, memoria grafica condivisa dinamica fino a 1536 MB e pannello interno online a 1920×1080. L'identificativo esposto `0x3ea5` è coerente con la coppia Whiskey Lake applicata.
 
-Il precedente blocco nel controllo della memoria framebuffer è stato superato nell'avvio osservato. Carico Metal prolungato, avvii ripetuti, luminosità, sospensione e altre funzioni hardware restano da verificare. Conservare la EFI corrente prima di ulteriori prove, come descritto in [GRAFICA-INTEL.md](../../../docs/GRAFICA-INTEL.md).
+Il precedente blocco nel controllo della memoria framebuffer è stato superato nell'avvio osservato. Carico Metal prolungato, avvii ripetuti, luminosità, sospensione e altre funzioni hardware restano da verificare. Conservare la EFI corrente prima di ulteriori prove, come descritto in [GRAFICA-INTEL.md](../../../docs/guides/GRAFICA-INTEL.md).
 
 ## Evidenza dal dump precedente alla correzione
 
