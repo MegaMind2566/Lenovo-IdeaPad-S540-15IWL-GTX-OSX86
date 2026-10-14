@@ -32,6 +32,10 @@ The Windows integrated graphics driver name reports UHD 610, but the chip and PC
 - Internal NVMe: PCI `PciRoot(0x0)/Pci(0x1D,0x0)/Pci(0x0,0x0)`, consistent with `_SB.PCI0.RP09.PXSX`.
 - Samsung 960 EVO for the macOS test: external USB-C connection confirmed; capacity not stated in the received documentation.
 
+## External boot-disk layout: October 14, 2026
+
+The disk listing reports a 240.1 GB external GUID HDD with a single Microsoft Basic Data partition named 240 GB, and a separate 250.1 GB external GUID SSD with a 209.7 MB EFI system partition and a 249.8 GB APFS partition. These correspond to the current HDD source and Samsung 960 EVO system disk. The source EFI remains on the HDD; independent SSD boot is not yet confirmed. The [transfer guide](../guides/ssd-boot.md) uses live APFS backing-disk discovery rather than fixed disk numbers.
+
 ## Data still needed
 
 - USB-C SuperSpeed operation and both connector orientations: a 9-port map has been received and verified.

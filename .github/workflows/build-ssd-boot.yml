@@ -1,0 +1,36 @@
+name: Build external SSD boot helper
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/ssd-boot/**'
+      - 'builders/build_ssd_boot.py'
+      - 'tests/test_ssd_boot.sh'
+      - 'tests/check_ssd_native_schema.sh'
+      - '.github/workflows/build-ssd-boot.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15-intel
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Verify disk guards, copy verification and rollback
+        run: /bin/bash tests/test_ssd_boot.sh
+      - name: Build and verify the standalone package
+        run: python3 builders/build_ssd_boot.py --output-dir build/ssd-boot
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: S540-ssd-boot
+          path: |
+            build/ssd-boot/S540-ssd-boot.zip
+            build/ssd-boot/S540-ssd-boot.zip.sha256
+          if-no-files-found: error
+          retention-days: 30

@@ -15,13 +15,14 @@ Start with the [project README](../README.md) for the current state and scope. D
 
 | Guide | Purpose |
 |---|---|
-| [Passive CPU sensors](../packages/cpu-sensors/README.md) | A continuous sensor reading with no CPU workload; current follow-up |
+| [Passive CPU sensors](../packages/cpu-sensors/README.md) | A continuous sensor reading with no CPU workload; fifteen valid idle readings recorded |
 | [CPU, temperature and power](../packages/cpu-thermal/README.md) | Grouped idle, short-load and recovery collector; further load checks are on hold pending sensor reliability |
 | [Intel graphics](guides/intel-graphics.md) | Acceleration and stability checks |
 | [Boot and networking](guides/boot-network.md) | Backlight boot fix, HeliPort and Bluetooth |
 | [Tahoe audio](guides/tahoe-audio.md) | Initial audio setup, volume fix and recovery |
 | [Microphone v2](guides/microphone-fix.md) | S540 driver variant, verification and rollback |
 | [USB mapping](guides/usb-mapping.md) | Mapped ports and outstanding tests |
+| [Independent SSD boot](guides/ssd-boot.md) | Transfer the private working boot files from the HDD to the existing Samsung EFI partition |
 | [Boot disk maintenance](guides/boot-maintenance.md) | Separate maintenance procedure for the physical boot disk |
 | [Function keys](guides/function-keys.md) | Keyboard icon actions, ordinary Fn function keys, event diagnosis and brightness rollback |
 | [Bluetooth](guides/bluetooth.md) | The targeted patcher exclusion and its rollback |
