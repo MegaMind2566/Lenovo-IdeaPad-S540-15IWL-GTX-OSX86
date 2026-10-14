@@ -53,7 +53,7 @@ Detailed hardware information is in [Hardware](docs/status/hardware.md).
 
 macOS uses the external SSD; Windows remains on the internal PM981a. OpenCore currently boots from a separate USB HDD. Moving the EFI to the 960 EVO is a planned step.
 
-Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including the S540 microphone correction. The EFI alone does not install this extension. Follow the audio guides for installation and rollback.
+Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including the S540 microphone correction. The EFI alone does not install this extension. The audio guides document the existing installation and upgrade procedures; those helpers require their original rollback state.
 
 ## Development priorities
 
@@ -67,6 +67,8 @@ See the [Roadmap](docs/status/roadmap.md) for the implementation plan.
 ## Documentation and downloads
 
 The [documentation index](docs/README.md) links to setup, maintenance, and recovery procedures. Main guides: [Intel graphics](docs/guides/intel-graphics.md), [Tahoe audio](docs/guides/tahoe-audio.md), and [microphone correction](docs/guides/microphone-fix.md).
+
+Download the [first EFI release, v0.1.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.1.0), with compatibility notes and setup instructions. Personalize its SMBIOS identity before use.
 
 Generated packages are available in **Artifacts** from successful [GitHub Actions runs](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions). The current microphone package is `S540-microfono-fix-v2`.
 

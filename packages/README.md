@@ -28,3 +28,5 @@ corresponding guide before switching packages or reversing a later correction.
 Microphone diagnostics currently supports the pre-correction 3.6.8 driver.
 
 Historical first-boot experiments are kept in [archive](../archive/README.md).
+
+The [EFI](efi/README.md) package describes the current release. [Function-key diagnosis](function-keys/README.md) is the next read-only hardware task.

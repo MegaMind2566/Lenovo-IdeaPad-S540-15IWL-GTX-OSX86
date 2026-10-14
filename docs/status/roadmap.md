@@ -28,7 +28,7 @@ Priorities updated on 13 October 2026: the panel being off during boot is **reso
 | External Samsung 960 EVO | Enclosure connection restored; Tahoe reached the desktop | Sustained use without disconnections and resume from sleep |
 | Internal PM981a NVMe | Visible in Recovery; retained for Windows | Check for any effects on macOS stability |
 | Display and brightness | Internal 1920×1080 panel and brightness slider working; F11/F12 do not work in the reported test | F11/F12 deferred to the function key batch; panel resume still to be tested |
-| CPU, battery and fans | X86PlatformPlugin active; idle 45–46 °C and estimated Intel power of 0,80–0,95 W; fan quiet. Battery detected at 100% on AC. Incomplete SMC telemetry | Temperatures under load, dGPU status, switching to battery power and battery runtime |
+| CPU, battery and fans | X86PlatformPlugin active; idle 45–46 °C and estimated Intel power of 0.80–0.95 W; fan quiet. Battery detected at 100% on AC. Incomplete SMC telemetry | Temperatures under load, dGPU status, switching to battery power and battery runtime |
 | Sleep | pmset records Sleep Count 1, User Wake Count 1 and Dark Wake Count 0; [data retained](battery-sleep.md) | Tests deferred: peripheral recovery, lid behaviour and extended sleep still to be verified |
 | Webcam | Image present in the Photo Booth test of 14 October 2026 | Sustained use and resume still to be verified |
 | O2Micro SD reader | Identified; support to be assessed | Applicable driver and reading a card |
@@ -38,9 +38,9 @@ Priorities updated on 13 October 2026: the panel being off during boot is **reso
 
 Recovery test results are not automatically extended to the installed system. Incomplete items remain open until a documented result is available.
 
-## Function keys: work deferred as a batch
+## Function keys: next diagnostic batch
 
-Verify and fix **all function keys** together, including F11/F12 for brightness, Fn behaviour and the other functions available on the keyboard. The request of 13 October 2026 defers this work: changes for the brightness keys alone are not being prepared now.
+Verify and fix **all function keys** together, including F11/F12 for brightness, Fn behaviour and the other functions available on the keyboard. This work was deferred on 13 October 2026. Following the first EFI release, the next step is the [read-only function-key collector](../../packages/function-keys/README.md), beginning with F11/F12 and preserving the working audio keys. No additional EFI patch has been applied.
 
 F1–F3 for mute and volume are already reported working and must be preserved. The macOS brightness slider works. Fn+F11/F12 and possible ACPI handling with BrightnessKeys will be assessed in the complete batch before choosing the required changes.
 

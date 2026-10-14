@@ -1,0 +1,70 @@
+name: Build function-key diagnostics
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/function-keys/**'
+      - '.github/workflows/build-function-keys.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15-intel
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Check native syntax and metadata collection
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n packages/function-keys/COLLECT-FUNCTION-KEYS.command packages/function-keys/tools/collect_function_keys.sh
+          bash packages/function-keys/COLLECT-FUNCTION-KEYS.command --help
+          mkdir -p "$RUNNER_TEMP/function-key-check"
+          bash packages/function-keys/COLLECT-FUNCTION-KEYS.command --snapshots-only --output-dir "$RUNNER_TEMP/function-key-check" --efi-config "$GITHUB_WORKSPACE/config/efi/current/config.plist"
+          python3 - <<'PY'
+          import os, plistlib
+          from pathlib import Path
+          reports = list((Path(os.environ['RUNNER_TEMP']) / 'function-key-check').glob('FUNCTION-KEYS-*'))
+          report = next(p for p in reports if p.is_dir())
+          assert (report.parent / (report.name + '.zip')).is_file()
+          for name in ('EFI-ACPI-ADD.plist', 'EFI-ACPI-PATCH.plist', 'EFI-KERNEL-ADD.plist', 'EFI-UEFI-DRIVERS.plist'):
+              assert isinstance(plistlib.loads((report / name).read_bytes()), list)
+          assert not list(report.rglob('config.plist'))
+          assert 'Snapshots-only mode' in (report / 'SUMMARY.txt').read_text()
+          PY
+      - name: Assemble the portable diagnostic package
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, os, shutil, zipfile
+          from pathlib import Path
+          root = Path('packages/function-keys')
+          output = Path('build/function-keys')
+          stage = output / 'S540-function-keys'
+          shutil.copytree(root, stage)
+          readme = stage / 'README.md'
+          readme.write_text(readme.read_text().replace('../../docs/status/hardware.md', 'https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/blob/main/docs/status/hardware.md'))
+          (stage / 'BUILD.txt').write_text('Source commit: ' + os.environ['GITHUB_SHA'] + '\n')
+          files = sorted(p for p in stage.rglob('*') if p.is_file())
+          (stage / 'SHA256SUMS').write_text(''.join(hashlib.sha256(p.read_bytes()).hexdigest() + '  ' + p.relative_to(stage).as_posix() + '\n' for p in files))
+          archive = output / 'S540-function-keys.zip'
+          with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as bundle:
+              for p in sorted(stage.rglob('*')):
+                  if p.is_file():
+                      bundle.write(p, p.relative_to(output).as_posix())
+          (output / (archive.name + '.sha256')).write_text(hashlib.sha256(archive.read_bytes()).hexdigest() + '  ' + archive.name + '\n')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: S540-function-keys
+          path: |
+            build/function-keys/S540-function-keys.zip
+            build/function-keys/S540-function-keys.zip.sha256
+          if-no-files-found: error
+          retention-days: 30
