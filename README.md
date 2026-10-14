@@ -30,8 +30,8 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Brightness slider | Working | Brightness control through macOS settings |
 | Audio playback and volume | Working | VoodooHDA; gradual volume changes and F1–F3 controls |
 | Internal microphone | Working | S540 microphone correction v2 |
-| Wi-Fi through HeliPort | Working | Intel AC9560 with itlwm |
-| Bluetooth headphone audio and microphone | Working | Playback and headset voice capture confirmed |
+| Wi-Fi through HeliPort | Working | Intel AC9560 with itlwm; disconnection, reconnection and network switching confirmed |
+| Bluetooth headphone audio and microphone | Working | Playback, headset voice capture, disconnection and reconnection confirmed |
 | Webcam | Working | Image capture confirmed alongside the internal microphone |
 | CPU power management | Working | X86PlatformPlugin active |
 | Battery detection | Working | Battery and charge state available |
@@ -62,7 +62,7 @@ Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including t
 
 - Make the external SSD independently bootable and consolidate the current working EFI.
 - Complete storage, USB, Intel stability, power management and external display support.
-- Finish wireless reconnection, audio peripheral and remaining device support.
+- Complete remaining audio peripheral and device support; wireless reconnection and network switching work.
 - Retain the working keyboard controls; remaining icon actions, equalization and sleep refinements are deferred.
 - Keep native macOS Wi-Fi integration and NVIDIA driver-port research open.
 
