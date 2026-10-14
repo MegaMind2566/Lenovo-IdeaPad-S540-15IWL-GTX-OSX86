@@ -83,7 +83,7 @@ def build(output: Path) -> Path:
             destination.chmod(0o755 if relative.endswith(".command") else 0o644)
         binary.chmod(0o755)
         run(["/bin/bash", "-n", str(stage / "COLLECT-KEY-EVENTS.command")], timeout=15)
-        record = {"schema": 1, "package": PACKAGE, "version": "1.0.0",
+        record = {"schema": 1, "package": PACKAGE, "version": "1.1.1",
                   "source_commit": source_commit, "architecture": "x86_64", "minimum_macos": "13.0",
                   "source_sha256": source_hashes, "binary_sha256": digest(binary.read_bytes()),
                   "signature": "ad-hoc, identifier org.s540.function-key-events",

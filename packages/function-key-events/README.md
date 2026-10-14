@@ -28,7 +28,7 @@ The wrapper creates a private report folder and ZIP on Desktop. Attach the ZIP t
 
 The report retains:
 
-- F1–F20 key positions, press/release, repeat status, and normalized modifier flags.
+- F1–F20 key positions, press/release, repeat status, normalized modifier names and the complete numeric modifier flags.
 - Modifier-key changes and media/control button subtype 8 events.
 - Command+R or Control+R only during **direct F5**, Command+L only during **direct F9**, and Command+P only during **direct F10**. These exact chords are observations, not assumed mappings.
 - The requested physical layer for each trial, matching-event count/status, and actual event-tap interruption reason/time.

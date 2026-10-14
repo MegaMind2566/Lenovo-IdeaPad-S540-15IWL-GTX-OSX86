@@ -41,7 +41,7 @@ Restart afterward. Restore merges only the changed original enabled values into 
 
 ## Remaining mappings
 
-The direct and Fn F5 trials currently share the same macOS event. A global F5-to-refresh rule would also intercept Fn+F5. F5 stays unmodified until a lower-level distinction is established.
+The direct and Fn F5 trials currently share the same reported keycode and modifier names. The targeted observer also retains the complete numeric flags. A global F5-to-refresh rule would also intercept Fn+F5. F5 stays unmodified until a lower-level distinction is established.
 
 The first F9/F10 report retained only their Command modifier transitions. The targeted observer now permits exact Command-L during direct F9 and Command-P during direct F10, without recording other printable keys or typing. Their identities remain pending until that report is reviewed.
 

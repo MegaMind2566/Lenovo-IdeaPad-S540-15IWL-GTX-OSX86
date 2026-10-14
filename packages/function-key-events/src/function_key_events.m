@@ -92,12 +92,12 @@ static NSDictionary *DecodeKey(CGEventType type, unsigned short code, CGEventFla
     if (type == kCGEventFlagsChanged) {
         if (!ModifierCode(code)) return nil;
         return @{@"kind": @"modifier_change", @"keycode": @(code),
-                 @"modifiers": ModifierNames(flags)};
+                 @"modifiers": ModifierNames(flags), @"modifier_flags": @(flags)};
     }
     if (type != kCGEventKeyDown && type != kCGEventKeyUp) return nil;
     if (!function && !shortcut) return nil;
     NSMutableDictionary *decoded = [@{@"kind": type == kCGEventKeyDown ? @"key_down" : @"key_up",
-                                     @"keycode": @(code), @"modifiers": ModifierNames(flags),
+                                     @"keycode": @(code), @"modifiers": ModifierNames(flags), @"modifier_flags": @(flags),
                                      @"repeat": @(repeat)} mutableCopy];
     if (function) decoded[@"function_key"] = function;
     if (shortcut) {
@@ -117,7 +117,7 @@ static NSDictionary *DecodeMedia(int subtype, uint32_t data1, CGEventFlags flags
     return @{@"kind": @"media_button", @"subtype": @(subtype), @"media_key_code": @(key),
              @"state": state == 0x0a ? @"down" : state == 0x0b ? @"up" : @"other",
              @"state_code": @(state), @"repeat": @((low & 1) != 0),
-             @"modifiers": ModifierNames(flags)};
+             @"modifiers": ModifierNames(flags), @"modifier_flags": @(flags)};
 }
 
 static void RecordTapInterruption(CaptureState *capture, CGEventType type, double now) {
@@ -388,6 +388,10 @@ static int SelfTest(void) {
         ![media[@"repeat"] boolValue] || DecodeMedia(7, 0, 0)) return 1;
     if (![ModifierNames(kCGEventFlagMaskCommand | kCGEventFlagMaskSecondaryFn)
           isEqual:@[@"command", @"secondary_fn_flag"]]) return 1;
+    NSDictionary *flagsA = DecodeKey(kCGEventKeyDown, 96, kCGEventFlagMaskSecondaryFn, NO, 5);
+    NSDictionary *flagsB = DecodeKey(kCGEventKeyDown, 96, kCGEventFlagMaskSecondaryFn | kCGEventFlagMaskNonCoalesced, NO, 5);
+    if (![flagsA[@"modifiers"] isEqual:flagsB[@"modifiers"]] ||
+        [flagsA[@"modifier_flags"] isEqual:flagsB[@"modifier_flags"]]) return 1;
     NSData *data = [NSJSONSerialization dataWithJSONObject:@[media] options:0 error:NULL];
     NSString *serialized = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     if (!serialized || [serialized containsString:@"characters"] || [serialized containsString:@"data2"]) return 1;
@@ -539,7 +543,7 @@ int main(int argc, const char *argv[]) {
                 @"event_limit_reached": @(capture.overflow), @"events": [capture.events copy]}];
             printf("%s (%lu matching key events)\n", status.UTF8String, (unsigned long)keyEvents);
         }
-        NSDictionary *report = @{@"schema": @"s540-function-key-events-v1", @"probe_version": @"1.1.0",
+        NSDictionary *report = @{@"schema": @"s540-function-key-events-v1", @"probe_version": @"1.1.1",
             @"capture_mode": @"session_listen_only", @"trial_mode": targeted ? @"targeted" : @"full",
             @"requested_trial_count": @(requested.count), @"stop_reason": stopReason,
             @"completed": @(!stopped && trials.count == requested.count),
