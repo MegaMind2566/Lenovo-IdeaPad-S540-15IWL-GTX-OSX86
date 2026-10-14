@@ -31,6 +31,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 
 ## Reference
 
+- [NVIDIA port assessment](reference/nvidia-port-assessment.md): pinned source, Linux/Darwin boundaries and the first implementation milestone.
 - [ACPI analysis](reference/acpi-analysis.md), [ACPI patch review](reference/acpi-patch-review.md) and [initial EFI delivery review](reference/efi-review.md).
 - [External disk installation](reference/installation.md) and [initial EFI instructions](reference/first-boot.md), written before the working configuration.
 - [Repository layout](reference/repository-layout.md), including the distinction between source modules and generated ZIP packages.

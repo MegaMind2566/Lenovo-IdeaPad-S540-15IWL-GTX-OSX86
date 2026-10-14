@@ -8,7 +8,8 @@ The [CPU and sensor reports](cpu-thermal.md) confirm frequency/power response an
 
 | Order | Work | Remaining scope |
 |---|---|---|
-| 1 | Graphics, power and thermals | Sustained Intel graphics use and cooling, fan telemetry and measured battery runtime. Continuous temperature readings during desktop activity and basic battery power/discharge reporting are confirmed. NVIDIA electrical power-off is deferred until after the driver-port attempt. |
+| Now | NVIDIA driver-port research | Pinned source assessment complete; next implement a read-only PCI inventory, then a bounded Darwin transport prototype. Graphics acceleration remains unimplemented. |
+| Remaining | Graphics, power and thermals | Sustained Intel graphics use and cooling, fan telemetry and measured battery runtime. Continuous temperature readings during desktop activity and basic battery power/discharge reporting are confirmed. NVIDIA electrical power-off is deferred until after the driver-port attempt. |
 | Complete / retained | Boot and EFI consolidation | Independent Samsung boot confirmed after manual EFI transfer. Keep the HDD as a recovery path and preserve the private working EFI. A later sanitized release remains separate from v0.1.0. |
 | 3 | Storage and USB reliability | USB-C at 5 Gb/s in both orientations and both tested USB-A connectors at 5 Gb/s are confirmed. File reads on both USB-A connectors are confirmed. External USB 2 devices, sustained SSD stability, shutdown and reboot remain separate checks. Move the system SSD cable only after shutdown. |
 | Complete / retained | Quiet output volume | Full DAC-range correction reported working during YouTube playback on October 15. Retain the correction; equalisation remains deferred. |
@@ -62,14 +63,16 @@ Fn+F1–F12 must remain ordinary application function keys. Remove or reassign o
 
 ## NVIDIA research
 
+The [pinned source assessment](../reference/nvidia-port-assessment.md) is complete. It records release 615.78.08, the concrete Linux-to-Darwin boundaries and acceptance criteria. The next implementation is a read-only PCI inventory; no NVIDIA driver has been implemented or loaded. Existing Intel operation is retained.
+
 The GTX 1650, PCI `10DE:1F91`, is listed among the GPUs compatible with NVIDIA's open source kernel modules. The repository contains operating system independent parts and Linux-specific interfaces. The modules also require GSP firmware and userspace driver components of the same version.
 
 Mesa/NVK provides an open Vulkan driver for NVIDIA, but its current implementation requires Linux. Both foundations need assessment: neither is already a macOS driver for the GTX 1650.
 
 The proposed path is a technical assessment, not an already validated port:
 
-1. Study Linux dependencies, firmware and parts reusable on Darwin/IOKit.
-2. Prepare a prototype for the PCI device, memory and interrupts on Intel macOS.
+1. Source assessment complete: pinned Linux dependencies, firmware/userspace requirements and candidate reusable code are recorded in the assessment.
+2. Implement the read-only PCI inventory, then prepare a separate bounded prototype for device attachment, memory and interrupts on Intel macOS.
 3. Test GPU initialisation and execution of a minimal command, with observable results on the laptop.
 4. Assess the userspace component and the path towards Vulkan or other experimental functions.
 5. Address Metal integration, the macOS graphics system, power management and video outputs separately.
