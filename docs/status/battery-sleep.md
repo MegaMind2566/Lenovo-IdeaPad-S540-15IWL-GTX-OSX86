@@ -1,10 +1,22 @@
 # Battery and sleep counters
 
-Results received from the Tahoe desktop on 13 October 2026. The system is installed on the external USB Samsung 960 EVO; the EFI is on the OpenCore HDD. This page retains the data without changing any settings.
+Results received from the Tahoe desktop on October 13–14, 2026. Tahoe and OpenCore now boot independently from the external USB Samsung 960 EVO after manual EFI transfer. This page retains the observations without changing settings.
 
 ## Battery reading
 
-`pmset -g batt` reports **AC Power**, an internal battery present, **100%** and **charged** status. The reported time is `0:00 remaining`. No sample on Battery Power was provided: switching to battery power, discharge and battery runtime have not yet been verified.
+On October 13, `pmset -g batt` reported **AC Power**, an internal battery present, **100%** and **charged**, with `0:00 remaining`.
+
+On October 14, after removing AC power, it reports:
+
+| Item | Observed value |
+|---|---|
+| Power source | **Battery Power** |
+| Internal battery | Present |
+| Charge indicator | 100% |
+| Status | **Discharging** |
+| OS remaining-time estimate | 2 hours 21 minutes |
+
+Basic battery operation and discharge reporting are confirmed. The displayed remaining time is an estimate at that moment, not measured runtime. The reading does not determine battery health, usable capacity, extended SSD stability or sleep recovery. Battery instance IDs are excluded.
 
 ## System counters
 
@@ -14,9 +26,11 @@ Results received from the Tahoe desktop on 13 October 2026. The system is instal
 | Dark Wake Count | 0 |
 | User Wake Count | 1 |
 
-These counters cover the current boot. They document one sleep event and one user wake event recorded by the system; they do not identify the test time or, by themselves, certify recovery of the panel, USB drives, networking and audio. Hibernation and extended sleep remain to be verified.
+These counters cover the boot associated with the original October 13 report. They document one sleep event and one user wake event recorded by the system; they do not identify the test time or, by themselves, certify recovery of the panel, USB drives, networking and audio. Hibernation and extended sleep remain to be verified.
 
 ## Reported settings
+
+These settings were collected on October 13 and were not reread with the new battery sample.
 
 | Setting | Battery Power | AC Power |
 |---|---:|---:|
@@ -39,7 +53,7 @@ These counters cover the current boot. They document one sleep event and one use
 | womp | not reported | 1 |
 | networkoversleep | not reported | 0 |
 
-`hibernatefile` is `/var/vm/sleepimage` for both power sources. The settings have not been changed. Sleep work is deferred: priority is given to the panel being off for approximately two minutes during boot, Bluetooth and Wi-Fi management.
+`hibernatefile` is `/var/vm/sleepimage` for both power sources. No settings are changed by this record. Sleep work remains deferred while remaining peripheral checks, storage reliability and power/thermal measurements take priority. The former panel delay, wireless reconnection and network switching are already resolved.
 
 ## Reference
 

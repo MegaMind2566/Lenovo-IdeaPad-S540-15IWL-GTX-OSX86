@@ -34,7 +34,7 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Bluetooth headphone audio and microphone | Working | Playback, headset voice capture, disconnection and reconnection confirmed |
 | Webcam | Working | Image capture confirmed alongside the internal microphone |
 | CPU power management | Working | X86PlatformPlugin active |
-| Battery detection | Working | Battery and charge state available |
+| Battery detection and battery power | Working | Internal battery recognized; discharge reported after AC removal |
 | External SSD access | Working | Samsung 960 EVO in a USB-C enclosure |
 | USB-C SuperSpeed and connector orientation | Working | Samsung/RTL9210 at 5 Gb/s in both laptop-side connector orientations with the current cable |
 | F11/F12 brightness keys | Working | BrightnessKeys companion package; not included in EFI v0.1.0 |
@@ -46,7 +46,7 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | HDMI / USB-C video | Pending | Output routing and external display support |
 | USB-A coverage / storage reliability | Pending | Remaining USB-A ports, measured storage throughput and sustained reliability |
 | SD reader / fingerprint reader | Pending | Driver support and device operation |
-| Battery runtime / sleep and wake | Pending | Power transitions and device recovery |
+| Battery runtime / sleep and wake | Pending | Measured runtime and device recovery; basic battery power is confirmed |
 | NVIDIA electrical power-off | Pending | Disabling its driver does not establish that the GPU is powered off |
 | NVIDIA acceleration | Not working | GTX 1650 Max-Q has no supported driver in this configuration |
 | Native macOS Wi-Fi interface | Not working | Network management uses HeliPort |
@@ -61,7 +61,7 @@ Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including t
 
 ## Development priorities
 
-- Verify operation on battery, remaining USB-A ports and storage stability. Independent SSD boot and USB-C at 5 Gb/s in both orientations are confirmed.
+- Complete remaining USB-A ports, storage stability and audio-peripheral checks. Battery power, independent SSD boot and USB-C at 5 Gb/s in both orientations are confirmed; measured battery runtime remains open.
 - Complete Intel stability, power management and external display support; sustained-load temperature and fan telemetry remain open.
 - Complete remaining audio peripheral and device support; wireless reconnection and network switching work.
 - Retain the working keyboard controls; remaining icon actions, equalization and sleep refinements are deferred.

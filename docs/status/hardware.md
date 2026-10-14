@@ -98,7 +98,11 @@ The [test](../guides/microphone-fix.md) uses VoodooHDA 3.6.9, S540 variant: the 
 
 ## Battery and sleep counters: 13 October 2026
 
-The pmset sample shows an internal battery present, 100%, charged and AC Power supply. The system counters are Sleep Count 1, User Wake Count 1 and Dark Wake Count 0. Settings and limitations are retained in [Battery and sleep](battery-sleep.md): switching to battery power, battery runtime and full peripheral recovery have not yet been verified. Further sleep tests are deferred, with priority given to the panel being off during boot, Bluetooth and Wi-Fi management.
+The pmset sample shows an internal battery present, 100%, charged and AC Power supply. The system counters are Sleep Count 1, User Wake Count 1 and Dark Wake Count 0. Settings and limitations are retained in [Battery and sleep](battery-sleep.md). This earlier AC sample did not establish battery operation, runtime or full peripheral recovery. The subsequent battery-power result is recorded below; sleep work remains deferred.
+
+## Battery power: October 14, 2026
+
+After the AC-removal check, `pmset -g batt` reports **Battery Power**, internal battery present, **100%** and **discharging**, with **2:21 remaining**. Switching to battery and discharge reporting are therefore established. The remaining time is the operating system's current estimate, not measured autonomy or proof of battery health/capacity. This result does not establish sustained SSD reliability or sleep recovery. The [battery record](battery-sleep.md) preserves the reading without the instance ID.
 
 ## Panel and brightness keys: 13 October 2026
 
