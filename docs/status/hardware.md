@@ -15,7 +15,7 @@ Report received on 12 October 2026. Only data relevant to the project is include
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Problematic PM981a family; compatibility is not assumed |
 | Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | itlwm 2.3.0 loaded and HeliPort reported working; Ethernet presentation is expected with this driver; disconnection, reconnection and network switching confirmed; transfer speed remains unmeasured |
 | Bluetooth | Intel, USB 8087:0AAA | Headphone playback, microphone, disconnection and reconnection confirmed; firmware loaded, correct NVRAM and IntelBTPatcher excluded |
-| Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Speaker/headphone output, automatic switching, gradual volume and F1–F3 confirmed; S540 internal microphone fix v2 retained; wired-headset input unverified, equalisation and resume checks deferred |
+| Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Speaker/headphone output, automatic switching, wired-headset input, gradual volume and F1–F3 confirmed; S540 internal microphone fix v2 retained; equalisation and resume checks deferred |
 | Keyboard | PS/2 | VoodooPS2; direct F1–F3, F6 and F11/F12 working; remaining icon keys and Fn app-key behavior in progress |
 | Touchpad | ELAN0662, I2C HID; Intel 8086:9DE8 controller | Confirmed path: `_SB.PCI0.I2C0.TPD0`; F6 toggle and touchpad gestures confirmed working |
 | SD reader | O2Micro SD Host Controller | Support still to be verified; different from the reader in the lucatek project |
@@ -44,9 +44,11 @@ The reported 4.48 W is USB power allocation, not measured SSD or total laptop co
 
 ## HDMI no-image report: October 14, 2026
 
-The HDMI connection does not produce an image with the current Tahoe configuration. macOS display enumeration with the external monitor connected has not yet been collected. This records the observed failure without assigning it to a cable, Intel connector mapping or NVIDIA routing.
+The HDMI connection does not produce an image with the current Tahoe configuration. The subsequent `system_profiler SPDisplaysDataType` report lists only Intel UHD Graphics 620 (`0x3ea5`, Metal 3, up to 1536 MB shared memory) and the online internal 1920×1080 panel. No external display is enumerated. This does not identify whether the cause is connector configuration, GPU routing, cable or monitor input. The next routing check is the external display's connected GPU in Windows with the same monitor and cable.
 
 The supplied OEM SSDT9 places `_DOD = {0x80087330}` under NVIDIA `RP05.PXSX`; its ACPI display type is External Digital Monitor. Intel's `_DOD` reads runtime OpRegion values, which are absent from the supplied tables. These declarations suggest a possible NVIDIA path but do not identify the tested physical HDMI port conclusively. The reviewed EFI has `-wegnoegpu`, the working Intel memory patches and no connector remapping. No graphics or ACPI change is made from the no-image report alone.
+
+USB-C video cannot currently be tested. [Lenovo's exact GTX model specification](https://psref.lenovo.com/syspool/Sys/PDF/IdeaPad/ideapad_S540_15IWL_GTX/ideapad_S540_15IWL_GTX_Spec.pdf) lists a USB 3.1 Type-C Gen 1 port and external digital display support through HDMI, without declaring DisplayPort Alt Mode. Hardware video capability is therefore unverified; the working 5 Gb/s USB data connection is not evidence of video support. The HDMI failure is not extended to USB-C.
 
 ## Data still needed
 
@@ -90,7 +92,7 @@ The service-header filter's incomplete SMCProcessor state match is not evidence 
 
 The test using only `-igfxblr` eliminated the boot blackout in the reported result: from approximately two minutes to zero. The configuration is retained, preserving Intel memory settings, audio and SIP. The report preceding the test shows the same framebuffer UUID and Loginwindow ready approximately 31,3 seconds after the kernel. The [diagnosis](../guides/boot-network.md) distinguishes the panel delay from the system boot time.
 
-Bluetooth status is On, FirmwareLoaded is Yes and the transport is connected; BlueToolFixup 2.7.2 and IntelBluetoothFirmware 2.4 are loaded, while IntelBTPatcher is absent. The two required NVRAM variables are present with the correct values: one zero byte and fourteen zero bytes. The stack starts scanning and receives BLE devices. On 14 October 2026, operation with Bluetooth headphones was reported, together with HeliPort operation for Wi-Fi network management. The current drivers and NVRAM are retained. The Bluetooth headset microphone was subsequently confirmed working on 14 October 2026. Playback and headset voice capture are therefore established as working. Disconnection and reconnection of both Wi-Fi and Bluetooth, together with Wi-Fi network switching, were also confirmed. Wired headphone output and automatic speaker switching were subsequently confirmed. Wired-headset input remains unverified; sleep recovery belongs to the deferred wake checks.
+Bluetooth status is On, FirmwareLoaded is Yes and the transport is connected; BlueToolFixup 2.7.2 and IntelBluetoothFirmware 2.4 are loaded, while IntelBTPatcher is absent. The two required NVRAM variables are present with the correct values: one zero byte and fourteen zero bytes. The stack starts scanning and receives BLE devices. On 14 October 2026, operation with Bluetooth headphones was reported, together with HeliPort operation for Wi-Fi network management. The current drivers and NVRAM are retained. The Bluetooth headset microphone was subsequently confirmed working on 14 October 2026. Playback and headset voice capture are therefore established as working. Disconnection and reconnection of both Wi-Fi and Bluetooth, together with Wi-Fi network switching, were also confirmed. Wired headphone output, automatic speaker switching and wired-headset microphone input were subsequently confirmed. Sleep recovery belongs to the deferred wake checks.
 
 ## Webcam and voice capture: 13 October 2026
 
@@ -98,13 +100,13 @@ In the suggested Photo Booth test, it was reported that the image was visible an
 
 ## Microphone fix: 14 October 2026
 
-On 14 October 2026, after testing the **S540-microfono-fix-v2** package and rebooting, an initial positive result was reported. The verification report and comparison recordings have not yet been collected. This version is retained together with the backup of the previous driver; equalisation and function keys remain deferred.
+On 14 October 2026, after installing the **S540-microfono-fix-v2** package and rebooting, microphone operation was reported working. This version is retained together with the backup of the previous driver. Internal, Bluetooth and wired-headset microphone operation have now been confirmed; further gain or tonal refinement is deferred.
 
 The [test](../guides/microphone-fix.md) uses VoodooHDA 3.6.9, S540 variant: the input slider controls the ADC's 64 levels, microphone boost remains at 0 dB and the speaker PCM volume retains the v3 fix. The v2 package removes the installer's dependency on Xcode tools. CI checks for format, integrity, signature and restoration passed; the initial usage report is not extended to the jack or recovery after sleep.
 
-## Wired headphone output and switching: October 14, 2026
+## Analog audio jack: October 14, 2026
 
-The physical jack check confirms audio through wired headphones, muting of the internal speakers while connected, and automatic return to speakers after unplugging. The existing VoodooHDA configuration is retained. This result covers output and switching; wired-headset microphone input, equalisation and audio recovery after sleep remain separate items.
+The physical jack check confirms audio through wired headphones, muting of the internal speakers while connected, and automatic return to speakers after unplugging. Microphone input through the 3.5 mm jack was subsequently confirmed working. The existing VoodooHDA configuration is retained. Equalisation and audio recovery after sleep remain deferred.
 
 ## Battery and sleep counters: 13 October 2026
 

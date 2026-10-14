@@ -30,6 +30,7 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Brightness slider | Working | Brightness control through macOS settings |
 | Audio playback and volume | Working | VoodooHDA; gradual volume changes and F1–F3 controls |
 | Wired headphone output and switching | Working | Jack output works; speakers mute on connection and resume after unplugging |
+| Wired headset microphone | Working | Microphone input through the 3.5 mm combo jack |
 | Internal microphone | Working | S540 microphone correction v2 |
 | Wi-Fi through HeliPort | Working | Intel AC9560 with itlwm; disconnection, reconnection and network switching confirmed |
 | Bluetooth headphone audio and microphone | Working | Playback, headset voice capture, disconnection and reconnection confirmed |
@@ -43,15 +44,14 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Fn function row | Configured | Ordinary F1–F12 events recorded; four conflicting macOS shortcuts disabled, session refresh confirmation pending |
 | Touchpad and gestures | Working | ELAN0662 gestures confirmed in daily use; F6 toggle also works |
 | Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; further icon-key investigation deferred |
-| Wired headset microphone | Pending | Input through the analog jack has not yet been verified |
-| USB-C video | Pending | Hardware video capability and output routing remain unverified |
+| USB-C video | Pending | No video test available; hardware video capability and routing remain unverified |
 | USB-A coverage / storage reliability | Pending | Remaining USB-A ports, measured storage throughput and sustained reliability |
 | SD reader / fingerprint reader | Pending | Driver support and device operation |
 | Battery runtime / sleep and wake | Pending | Measured runtime and device recovery; basic battery power is confirmed |
 | NVIDIA electrical power-off | Pending | Disabling its driver does not establish that the GPU is powered off |
 | NVIDIA acceleration | Not working | GTX 1650 Max-Q has no supported driver in this configuration |
 | Native macOS Wi-Fi interface | Not working | Network management uses HeliPort |
-| HDMI output | Not working | No image with the current Tahoe configuration; display detection and GPU routing under investigation |
+| HDMI output | Not working | No image or external display in the macOS report; physical GPU routing under investigation |
 
 Detailed hardware information is in [Hardware](docs/status/hardware.md).
 
@@ -65,7 +65,7 @@ Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including t
 
 - Complete remaining USB-A ports, storage stability and audio-peripheral checks. Battery power, independent SSD boot and USB-C at 5 Gb/s in both orientations are confirmed; measured battery runtime remains open.
 - Complete Intel stability, power management and external display support; sustained-load temperature and fan telemetry remain open.
-- Complete wired-headset microphone and remaining device support; headphone output/speaker switching and wireless reconnection work.
+- Complete remaining device support and measure network throughput; wired/Bluetooth microphones, headphone switching and wireless reconnection work.
 - Retain the working keyboard controls; remaining icon actions, equalization and sleep refinements are deferred.
 - Keep native macOS Wi-Fi integration and NVIDIA driver-port research open.
 

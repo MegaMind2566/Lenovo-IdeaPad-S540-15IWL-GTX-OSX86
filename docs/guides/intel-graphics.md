@@ -29,17 +29,23 @@ Preserve a private copy of the exact current Samsung EFI before any future graph
 
 ## HDMI investigation: October 14, 2026
 
-HDMI produces no image in the current configuration. Leave the external monitor powered on, connected to the laptop's HDMI port and set to the intended input, then read:
+HDMI produces no image in the current configuration. The display report supplied after connecting the monitor was collected with:
 
 ```bash
 system_profiler SPDisplaysDataType
 ```
 
-The first question is whether macOS enumerates the external display, including its GPU grouping, resolution and online state. An absent monitor does not establish which GPU owns the physical connector.
+It lists Intel UHD Graphics 620 (`0x3ea5`, Metal 3, up to 1536 MB shared memory) and only the online internal 1920×1080 panel. No external display is enumerated. An absent monitor does not establish which GPU owns the physical connector.
 
 The supplied private EFI uses the working Whiskey Lake identity and memory properties listed above, `-wegnoegpu` and `-igfxblr`, with no connector remapping. OEM SSDT9 enumerates `0x80087330` under NVIDIA `RP05.PXSX`; the ACPI display-type field is External Digital Monitor. Intel's output list is read from runtime OpRegion memory, and no captured VBT/OpRegion is available. NVIDIA routing is a hypothesis until the physical port is identified.
 
-Lenovo's exact GTX model specification confirms HDMI 2.0 output capability but does not publish the GPU wiring. If a later Windows check is needed, the NVIDIA Control Panel's display-connection diagram can identify the GPU associated with the attached display. Inspecting enumeration and routing precedes any bus-ID, connector-type, pipe or graphics-policy change. The working Intel configuration and disabled optional NVIDIA power-off SSDT are retained.
+Lenovo's exact GTX model specification confirms HDMI 2.0 output capability but does not publish the GPU wiring. The next check is in Windows with the same monitor, cable and selected HDMI input: open **Settings → System → Display → Advanced display**, select the external monitor and record its **Connected to** GPU. If the external display is absent there too, record that result rather than assigning the port to Intel or NVIDIA. The NVIDIA Control Panel's display-connection diagram is another source of routing evidence.
+
+Inspecting enumeration and routing precedes any bus-ID, connector-type, pipe or graphics-policy change. The working Intel configuration and disabled optional NVIDIA power-off SSDT are retained.
+
+## USB-C video capability
+
+No USB-C video test is currently available. The exact GTX model specification lists USB 3.1 Type-C Gen 1 and describes external digital display support through HDMI; it does not declare DisplayPort Alt Mode. Video capability remains unverified. The confirmed 5 Gb/s SSD connection in both orientations establishes USB data operation only. Do not infer a USB-C video fault from the HDMI result or apply an output patch before establishing hardware support.
 
 ## Remaining checks
 
@@ -63,6 +69,7 @@ system_profiler SPDisplaysDataType
 - [ACPI: output enumeration and display-type fields](https://uefi.org/htmlspecs/ACPI_Spec_6_4_html/Apx_B_Video_Extensions/display-specific-methods.html).
 - [WhateverGreen 1.7.1: framebuffer connectors](https://github.com/acidanthera/WhateverGreen/blob/1.7.1/Manual/FAQ.IntelHD.en.md).
 - [NVIDIA: configuration visualizer and display connections](https://www.nvidia.com/content/Control-Panel-Help/vLatest/en-us/mergedProjects/3D%20Settings/To_use_PhysX_GPU_acceleration.htm).
+- [Microsoft: opening Advanced display and selecting a monitor](https://support.microsoft.com/en-us/windows/hardware/display-graphics/change-the-refresh-rate-on-your-monitor-in-windows).
 
 - [WhateverGreen 1.7.1: Intel options, including -igfxvesa](https://github.com/acidanthera/WhateverGreen/blob/1.7.1/README.md#intel-hd-graphics)
 - [Apple: System Information on Tahoe](https://support.apple.com/guide/system-information/welcome/11.0/mac/26)

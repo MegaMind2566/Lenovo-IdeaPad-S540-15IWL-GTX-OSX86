@@ -6,11 +6,11 @@ The report collected before the correction, at 30% and 70% input, confirms that 
 
 This procedure uses VoodooHDA **3.6.9, S540 variant**, built from the pinned 3.6.8 source. It is not an official upstream release. The input slider uses the ADC; boost on the internal and jack microphone pins stays at 0 dB. The PCM speaker-volume correction remains active, and the two sliders are independent. Equalization, function keys, and sleep remain later tasks.
 
-The correction activates only for Intel controller 8086:9dc8, Realtek codec 10ec:0257, and the controls observed on the laptop. If the graph differs, the driver retains the original algorithm and verification reports that the correction is inactive. Recording through the analog jack remains unverified on the laptop.
+The correction activates only for Intel controller 8086:9dc8, Realtek codec 10ec:0257, and the controls observed on the laptop. If the graph differs, the driver retains the original algorithm and verification reports that the correction is inactive. Recording through the analog jack was subsequently confirmed working; see the on-device result below.
 
 ## On-device result
 
-After package **S540-microfono-fix-v2** and a reboot on October 14, 2026, an initial positive result was reported. Verification output and comparison recordings have not yet been collected. This version is retained with the previous driver's backup; equalization and function-key work remain deferred.
+After package **S540-microfono-fix-v2** and a reboot on October 14, 2026, internal microphone operation was reported working. Bluetooth headset voice capture and microphone input through the 3.5 mm jack were subsequently confirmed. The working correction and previous driver's backup are retained. Equalization and audio recovery after sleep remain deferred.
 
 ## Installing from the Tahoe desktop
 
@@ -58,7 +58,7 @@ The Recovery procedure has not been run on the laptop. Missing utilities or unre
 
 ## Package validation
 
-CI applies the patch to the pinned source and builds for Intel using a pinned MacKernelSDK. It checks MH_KEXT_BUNDLE format, architecture, ad hoc signature, version, and the three-file manifest. Tests execute the patch's actual functions with sanitizers and check the scale, 64 levels, mute, input/output separation, mixer restoration, and fallback. Installer fixtures also check the native header reader, rejecting ARM, universal, wrong-type, and truncated binaries; they simulate interrupted renames, incorrect manifests and permissions, V3 restoration, and config independence. CI does not load the driver into the kernel. The on-device result is recorded above; comparison recordings complete the gain-control verification.
+CI applies the patch to the pinned source and builds for Intel using a pinned MacKernelSDK. It checks MH_KEXT_BUNDLE format, architecture, ad hoc signature, version, and the three-file manifest. Tests execute the patch's actual functions with sanitizers and check the scale, 64 levels, mute, input/output separation, mixer restoration, and fallback. Installer fixtures also check the native header reader, rejecting ARM, universal, wrong-type, and truncated binaries; they simulate interrupted renames, incorrect manifests and permissions, V3 restoration, and config independence. CI does not load the driver into the kernel. The on-device functional result is recorded above; it does not quantify recording quality or establish audio recovery after sleep.
 
 ## Sources
 
