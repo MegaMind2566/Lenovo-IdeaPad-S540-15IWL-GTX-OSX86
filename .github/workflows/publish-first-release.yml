@@ -1,0 +1,55 @@
+name: Publish first EFI release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'config/efi/releases/v0.1.0.json'
+      - 'builders/publish_efi_release.py'
+      - '.github/workflows/publish-first-release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-efi-v0.1.0
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Read the verified artifact identity
+        id: source
+        run: |
+          python3 - <<'PY'
+          import importlib.util, os
+          from pathlib import Path
+          spec = importlib.util.spec_from_file_location('publisher', 'builders/publish_efi_release.py')
+          publisher = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(publisher)
+          lock = publisher.load_lock()
+          with Path(os.environ['GITHUB_OUTPUT']).open('a') as output:
+              output.write(f"run_id={lock['run_id']}\nartifact_id={lock['artifact_id']}\n")
+          PY
+      - name: Download the exact reviewed build artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: ${{ steps.source.outputs.artifact_id }}
+          run-id: ${{ steps.source.outputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          merge-multiple: true
+          path: build/release
+      - name: Verify and publish v0.1.0
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 builders/publish_efi_release.py --artifact-directory build/release
