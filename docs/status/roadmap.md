@@ -4,7 +4,7 @@ Goal: make all components of the Lenovo IdeaPad S540-15IWL GTX usable on macOS T
 
 ## Work order and retained backlog
 
-The [CPU and passive sensor reports](cpu-thermal.md) confirm frequency/power response and fifteen consecutive valid idle temperatures at 45–48 °C. Loaded SMC sensor drivers are 1.3.8. The earlier load temperature gap remains unexplained; immediate repeat stress is deferred, and no sensor patch is inferred. Independent boot from the external 960 EVO is now confirmed after manual transfer of the private working EFI. The Samsung/RTL9210 connection reports 5 Gb/s in both USB-C connector orientations. Battery Power and discharge are now reported after AC removal. Wired-headphone output and automatic return to speakers are now confirmed. The next available peripheral check is HDMI with a monitor or TV; output routing remains unverified. USB-A coverage, sustained storage reliability and measured battery runtime remain open. The remaining thermal and hardware items stay tracked below.
+The [CPU and passive sensor reports](cpu-thermal.md) confirm frequency/power response and fifteen consecutive valid idle temperatures at 45–48 °C. Loaded SMC sensor drivers are 1.3.8. The earlier load temperature gap remains unexplained; immediate repeat stress is deferred, and no sensor patch is inferred. Independent boot from the external 960 EVO is now confirmed after manual transfer of the private working EFI. The Samsung/RTL9210 connection reports 5 Gb/s in both USB-C connector orientations. Battery Power and discharge are now reported after AC removal. Wired-headphone output and automatic return to speakers are now confirmed. HDMI now has a no-image report in the current Tahoe configuration. The active display investigation is monitor enumeration and physical GPU routing before any connector change. USB-A coverage, sustained storage reliability and measured battery runtime remain open. The remaining thermal and hardware items stay tracked below.
 
 | Order | Work | Remaining scope |
 |---|---|---|
@@ -12,7 +12,7 @@ The [CPU and passive sensor reports](cpu-thermal.md) confirm frequency/power res
 | Complete / retained | Boot and EFI consolidation | Independent Samsung boot confirmed after manual EFI transfer. Keep the HDD as a recovery path and preserve the private working EFI. A later sanitized release remains separate from v0.1.0. |
 | 3 | Storage and USB reliability | USB-C at 5 Gb/s in both orientations confirmed with the current Samsung, RTL9210 enclosure and cable. Remaining USB-A coverage, sustained SSD stability, shutdown and reboot. Move the system SSD cable only after shutdown. |
 | 4 | Audio peripherals and network throughput | Wired-headset microphone and Wi-Fi transfer-speed measurement. Analog headphone output, automatic speaker switching, internal/Bluetooth microphones and wireless reconnection are confirmed. Retain the working audio correction. |
-| 5 | External displays | HDMI and USB-C video operation and actual GPU routing before choosing display fixes. |
+| 5 | External displays | HDMI produces no image in the current configuration. Read macOS display enumeration with the monitor connected, then establish physical GPU routing. USB-C video capability remains unverified. |
 | 6 | Other peripherals | O2Micro SD reader and fingerprint-reader support. |
 | Later | Deferred refinements | Remaining F4/F5/F7/F8/F9/F10 icon actions, Fn behavior after session refresh, audio equalization, lid/sleep/wake and peripheral recovery. |
 | Research | Open compatibility work | Native macOS Wi-Fi integration and the NVIDIA Linux-driver port. Neither is treated as completed or discarded. |
@@ -43,7 +43,8 @@ Priorities updated on 13 October 2026: the panel being off during boot is **reso
 | Webcam | Working; image capture confirmed alongside the internal microphone | Retain the current configuration; recovery after sleep remains part of the deferred wake checks |
 | O2Micro SD reader | Identified; support to be assessed | Applicable driver and reading a card |
 | Fingerprint reader | Internal USB port mapped; support to be assessed | Assess drivers and macOS integration |
-| HDMI and USB-C video | Operation and routing not verified | Identify the GPU connected to each output and test an external monitor |
+| HDMI | No image reported with the current Tahoe configuration | Capture display enumeration with HDMI connected and establish the owning GPU before selecting a fix |
+| USB-C video | Video capability and routing not verified; USB data works | Establish hardware video capability before testing or patching an output |
 | NVIDIA GTX 1650 Max-Q | Linux port retained as research; no usable driver in the EFI | Milestones for initialisation, GPU execution and graphics integration |
 
 Recovery test results are not automatically extended to the installed system. Incomplete items remain open until a documented result is available.

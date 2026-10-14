@@ -21,21 +21,31 @@ Before initial setup, the panel was temporarily black, then the interface appear
 
 A later report described the panel remaining off for about two minutes at startup, before the Apple logo, while macOS already accepted the password and completed login. A review of the WEG code and Tahoe driver dump identified a [BLR-only trial](boot-network.md), restricted to the same framebuffer UUID and protected by a reversible backup. After rebooting with `-igfxblr`, the result reported on October 13, 2026 was **black screen resolved, zero delay**. Keep the working correction. The 19 MB/9 MB memory settings and Intel identity remain unchanged; no other backlight patches are added.
 
-## Preserve the working EFI
+## Working baseline and private backup
 
-Before further checks, create a private copy of the entire current EFI folder on the OpenCore HDD, including the framebuffer memory correction backups. With the boot volume mounted as `240 GB`, run this in Terminal:
+Tahoe and OpenCore now boot independently from the external Samsung 960 EVO after manual EFI transfer. The 240 GB HDD is retained as the recovery route. The [SSD boot guide](ssd-boot.md) records the result and the separate automatic helper's unresolved guard stop.
 
-```sh
-ditto -c -k --keepParent "/Volumes/240 GB/EFI" "$HOME/Desktop/EFI-Tahoe-Metal3-$(date +%Y%m%d-%H%M%S).zip"
+Preserve a private copy of the exact current Samsung EFI before any future graphics change. Identify its live partition and mount point rather than assuming a permanent disk number or using the earlier public release. The archive includes machine-specific identity and configuration; keep it outside the repository.
+
+## HDMI investigation: October 14, 2026
+
+HDMI produces no image in the current configuration. Leave the external monitor powered on, connected to the laptop's HDMI port and set to the intended input, then read:
+
+```bash
+system_profiler SPDisplaysDataType
 ```
 
-The command creates an archive on the Desktop and must be run on the laptop. If the volume is mounted under a different name, locate the EFI folder in Finder first. The archive contains personal configuration and a Wi-Fi profile: keep it private and do not add it to the repository. The EFI remains on the HDD until booting from the Samsung is prepared and checked separately.
+The first question is whether macOS enumerates the external display, including its GPU grouping, resolution and online state. An absent monitor does not establish which GPU owns the physical connector.
+
+The supplied private EFI uses the working Whiskey Lake identity and memory properties listed above, `-wegnoegpu` and `-igfxblr`, with no connector remapping. OEM SSDT9 enumerates `0x80087330` under NVIDIA `RP05.PXSX`; the ACPI display-type field is External Digital Monitor. Intel's output list is read from runtime OpRegion memory, and no captured VBT/OpRegion is available. NVIDIA routing is a hypothesis until the physical port is identified.
+
+Lenovo's exact GTX model specification confirms HDMI 2.0 output capability but does not publish the GPU wiring. If a later Windows check is needed, the NVIDIA Control Panel's display-connection diagram can identify the GPU associated with the attached display. Inspecting enumeration and routing precedes any bus-ID, connector-type, pipe or graphics-policy change. The working Intel configuration and disabled optional NVIDIA power-off SSDT are retained.
 
 ## Remaining checks
 
 1. Repeatable restart and shutdown with this same EFI, noting any panel delays.
 2. Desktop use and a Metal workload without freezes or artifacts.
-3. Panel recovery after sleep. Brightness control from the macOS slider is already reported as working. F11/F12 do not work and are deferred to the complete function-key task in the [roadmap](../status/roadmap.md#tasti-funzione-lavoro-rinviato-in-blocco).
+3. Panel recovery after sleep remains deferred. The brightness slider and direct F11/F12 work; remaining icon keys are tracked in the [roadmap](../status/roadmap.md#deferred-function-key-work).
 4. Video decoding and external displays as separate checks.
 
 The first powermetrics sample, lasting about one second, reported a CPU temperature of 50 °C. Two subsequent idle samples, each lasting five seconds, report 45–46 °C, estimated Intel package power of 0.80–0.95 W, and a system average frequency of about 0.95–0.97 GHz. IORegistry confirms that X86PlatformPlugin is active. Package power includes the CPU, iGPU, and system agent, excluding NVIDIA. Fan RPM is unavailable, but a later report stated that the fan had been quiet for some time. Temperature under load and dGPU power consumption remain to be checked. `2Slices on: 100%` describes time spent in the state with two active slices; 100% at 300 MHz is a frequency ratio. Neither value demonstrates 100% GPU utilization.
@@ -48,6 +58,11 @@ system_profiler SPDisplaysDataType
 ```
 
 ## References
+
+- [Lenovo: exact S540-15IWL GTX specification](https://psref.lenovo.com/syspool/Sys/PDF/IdeaPad/ideapad_S540_15IWL_GTX/ideapad_S540_15IWL_GTX_Spec.pdf).
+- [ACPI: output enumeration and display-type fields](https://uefi.org/htmlspecs/ACPI_Spec_6_4_html/Apx_B_Video_Extensions/display-specific-methods.html).
+- [WhateverGreen 1.7.1: framebuffer connectors](https://github.com/acidanthera/WhateverGreen/blob/1.7.1/Manual/FAQ.IntelHD.en.md).
+- [NVIDIA: configuration visualizer and display connections](https://www.nvidia.com/content/Control-Panel-Help/vLatest/en-us/mergedProjects/3D%20Settings/To_use_PhysX_GPU_acceleration.htm).
 
 - [WhateverGreen 1.7.1: Intel options, including -igfxvesa](https://github.com/acidanthera/WhateverGreen/blob/1.7.1/README.md#intel-hd-graphics)
 - [Apple: System Information on Tahoe](https://support.apple.com/guide/system-information/welcome/11.0/mac/26)

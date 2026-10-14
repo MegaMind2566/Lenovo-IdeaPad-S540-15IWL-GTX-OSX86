@@ -42,6 +42,12 @@ The macOS USB host report identifies the external ULT-Best enclosure as Realtek 
 
 The reported 4.48 W is USB power allocation, not measured SSD or total laptop consumption. The link speed does not measure storage throughput or establish sustained reliability. Internal Bluetooth and camera enumeration do not extend this result to other external ports. The same report enumerates a Goodix fingerprint device, USB `27C6:55B4`; functional macOS fingerprint support remains unverified.
 
+## HDMI no-image report: October 14, 2026
+
+The HDMI connection does not produce an image with the current Tahoe configuration. macOS display enumeration with the external monitor connected has not yet been collected. This records the observed failure without assigning it to a cable, Intel connector mapping or NVIDIA routing.
+
+The supplied OEM SSDT9 places `_DOD = {0x80087330}` under NVIDIA `RP05.PXSX`; its ACPI display type is External Digital Monitor. Intel's `_DOD` reads runtime OpRegion values, which are absent from the supplied tables. These declarations suggest a possible NVIDIA path but do not identify the tested physical HDMI port conclusively. The reviewed EFI has `-wegnoegpu`, the working Intel memory patches and no connector remapping. No graphics or ACPI change is made from the no-image report alone.
+
 ## Data still needed
 
 - Remaining USB-A port coverage and sustained SSD reliability. The 9-port map is verified, and USB-C operates at 5 Gb/s in both connector orientations with the current Samsung/RTL9210/cable combination.

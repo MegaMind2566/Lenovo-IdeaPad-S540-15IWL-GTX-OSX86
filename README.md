@@ -44,13 +44,14 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Touchpad and gestures | Working | ELAN0662 gestures confirmed in daily use; F6 toggle also works |
 | Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; further icon-key investigation deferred |
 | Wired headset microphone | Pending | Input through the analog jack has not yet been verified |
-| HDMI / USB-C video | Pending | Output routing and external display support |
+| USB-C video | Pending | Hardware video capability and output routing remain unverified |
 | USB-A coverage / storage reliability | Pending | Remaining USB-A ports, measured storage throughput and sustained reliability |
 | SD reader / fingerprint reader | Pending | Driver support and device operation |
 | Battery runtime / sleep and wake | Pending | Measured runtime and device recovery; basic battery power is confirmed |
 | NVIDIA electrical power-off | Pending | Disabling its driver does not establish that the GPU is powered off |
 | NVIDIA acceleration | Not working | GTX 1650 Max-Q has no supported driver in this configuration |
 | Native macOS Wi-Fi interface | Not working | Network management uses HeliPort |
+| HDMI output | Not working | No image with the current Tahoe configuration; display detection and GPU routing under investigation |
 
 Detailed hardware information is in [Hardware](docs/status/hardware.md).
 
