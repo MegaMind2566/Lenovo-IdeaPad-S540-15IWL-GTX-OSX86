@@ -68,6 +68,79 @@ def write_plist(path, values):
     path.chmod(0o600)
 
 
+def test_control_range_parsers(helper_text):
+    """Run the production AWK parsers against read-only IORegistry fixtures."""
+    parsers = re.findall(
+        r"/usr/bin/awk '([^']*)' \"\$TEMP/controls\.txt\"", helper_text,
+    )
+    assert len(parsers) == 2, "Expected exactly two control-range parsers."
+    assert "1768845428" in parsers[0] and "1869968496" in parsers[1]
+
+    def node(kind, usage, low=None, high=None):
+        fields = [f'| "IOAudioControlUsage" = {usage}']
+        if low is not None:
+            fields.append(f'| "IOAudioLevelControlMinDB" = {low}')
+        if high is not None:
+            fields.append(f'| "IOAudioLevelControlMaxDB" = {high}')
+        return f"| +-o {kind}  <class {kind}>\n| {{\n" + "\n".join(fields) + "\n| }\n"
+
+    def level(usage, low, high):
+        return node("IOAudioLevelControl", usage, low, high)
+
+    def check(name, entries, expected=(True, True)):
+        fixture = "".join(entries)
+        for direction, (parser, accepts) in enumerate(zip(parsers, expected)):
+            result = subprocess.run(
+                ["/usr/bin/awk", parser], input=fixture,
+                capture_output=True, text=True, timeout=10,
+            )
+            assert result.returncode in (0, 1), (
+                f"{name}: parser {direction} failed: {result.stderr}"
+            )
+            assert (result.returncode == 0) == accepts, (
+                f"{name}: unexpected parser {direction} status {result.returncode}"
+            )
+
+    inputs = [level("1768845428", "-1130496", "1966080")] * 2
+    outputs = [level("1869968496", "-4276224", "0")] * 2
+    check("signed-ranges", inputs + outputs)
+    check("unsigned-ranges", [
+        level("1768845428", "18446744073708421120", "1966080"),
+        level("1768845428", "18446744073708421120", "1966080"),
+        level("1869968496", "18446744073705275392", "0"),
+        level("1869968496", "18446744073705275392", "0"),
+    ])
+    mixed = []
+    for usage, entries in (("1768845428", inputs), ("1869968496", outputs)):
+        for entry in entries:
+            mixed.extend((entry, node("IOAudioToggleControl", usage),
+                          node("IOAudioSelectorControl", usage, "0", "999"),
+                          node("IOUserClient", usage, "0", "999")))
+    check("mute-selector-client-ignored", mixed)
+    nested = inputs + outputs
+    nested[0] = nested[0].replace(
+        '| "IOAudioLevelControlMinDB"',
+        '| "UnrelatedDictionary" = {\n| }\n| "IOAudioLevelControlMinDB"',
+    )
+    check("nested-dictionary", nested)
+    for direction, entries, other in ((0, inputs, outputs), (1, outputs, inputs)):
+        usage = "1768845428" if direction == 0 else "1869968496"
+        low = "-1130496" if direction == 0 else "-4276224"
+        high = "1966080" if direction == 0 else "0"
+        expected = (False, True) if direction == 0 else (True, False)
+        check(f"missing-level-{direction}", entries[:1] + other, expected)
+        check(f"extra-level-{direction}", entries + entries[:1] + other, expected)
+        check(f"wrong-range-{direction}",
+              [level(usage, "0", "999"), entries[1]] + other, expected)
+        check(f"missing-low-{direction}",
+              [entries[0], level(usage, None, high)] + other, expected)
+        check(f"missing-high-{direction}",
+              [entries[0], level(usage, low, None)] + other, expected)
+        check(f"wrong-usage-{direction}",
+              [entries[0], level("0", low, high)] + other, expected)
+    print("PASS: production IOAudio parsers accept exact ranges and ignore mute/selector/client nodes.")
+
+
 def main():
     if (
         os.environ.get("GITHUB_ACTIONS") != "true"
@@ -84,6 +157,7 @@ def main():
     payload = package / "assets/volume/VoodooHDA.kext"
     payload_sums = package / "assets/volume/SHA256SUMS"
     text = helper.read_text(encoding="utf-8")
+    test_control_range_parsers(text)
     marker = 'case "$MODE" in install|restore|verify'
     assert text.count(marker) == 1, "Expected exactly one main CLI boundary."
     prefix = text[:text.index(marker)]

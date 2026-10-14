@@ -423,19 +423,41 @@ verify_driver() {
         # This device's subtree excludes Bluetooth/USB audio control services.
         /bin/cp "$TEMP/driver-ioreg.txt" "$TEMP/controls.txt"
         /usr/bin/awk '
-            /\+-o IOAudioLevelControl[[:space:]]/ { usage=""; low=""; high="" }
-            /"IOAudioLevelControlMinDB" =/ {low=$NF}
-            /"IOAudioLevelControlMaxDB" =/ {high=$NF}
-            /"IOAudioControlUsage" =/ {usage=$NF}
-            /\}/ {if(usage=="1768845428") {count++; if(low!="-1130496" && low!="18446744073708421120") bad=1; if(high!="1966080") bad=1; usage=""}}
-            END {exit (count!=2 || bad)}' "$TEMP/controls.txt" || fail 'The two input controls do not expose the expected range (-17.25/+30 dB).'
+            function finish_level() {
+                if (isLevel && usage=="1768845428") {
+                    count++
+                    if(low!="-1130496" && low!="18446744073708421120") bad=1
+                    if(high!="1966080") bad=1
+                }
+            }
+            /\+-o[[:space:]]/ {
+                finish_level()
+                isLevel=($0 ~ /\+-o IOAudioLevelControl[[:space:]]/)
+                usage=""; low=""; high=""
+                next
+            }
+            isLevel && /"IOAudioLevelControlMinDB" =/ {low=$NF}
+            isLevel && /"IOAudioLevelControlMaxDB" =/ {high=$NF}
+            isLevel && /"IOAudioControlUsage" =/ {usage=$NF}
+            END {finish_level(); exit (count!=2 || bad)}' "$TEMP/controls.txt" || fail 'The two input controls do not expose the expected range (-17.25/+30 dB).'
         /usr/bin/awk '
-            /\+-o IOAudioLevelControl[[:space:]]/ { usage=""; low=""; high="" }
-            /"IOAudioLevelControlMinDB" =/ {low=$NF}
-            /"IOAudioLevelControlMaxDB" =/ {high=$NF}
-            /"IOAudioControlUsage" =/ {usage=$NF}
-            /\}/ {if(usage=="1869968496") {count++; if(low!="-4276224" && low!="18446744073705275392") bad=1; if(high!="0") bad=1; usage=""}}
-            END {exit (count!=2 || bad)}' "$TEMP/controls.txt" || fail 'The two output controls do not expose the expected range (-65.25/0 dB).'
+            function finish_level() {
+                if (isLevel && usage=="1869968496") {
+                    count++
+                    if(low!="-4276224" && low!="18446744073705275392") bad=1
+                    if(high!="0") bad=1
+                }
+            }
+            /\+-o[[:space:]]/ {
+                finish_level()
+                isLevel=($0 ~ /\+-o IOAudioLevelControl[[:space:]]/)
+                usage=""; low=""; high=""
+                next
+            }
+            isLevel && /"IOAudioLevelControlMinDB" =/ {low=$NF}
+            isLevel && /"IOAudioLevelControlMaxDB" =/ {high=$NF}
+            isLevel && /"IOAudioControlUsage" =/ {usage=$NF}
+            END {finish_level(); exit (count!=2 || bad)}' "$TEMP/controls.txt" || fail 'The two output controls do not expose the expected range (-65.25/0 dB).'
         write_phase verified
         printf 'Driver 3.6.10 loaded; microphone correction and full output range active; input/output ranges verified.\n'
         printf 'Start playback quietly and check the first volume steps, mute/unmute and headphones. Keep the working microphone input setting.\n'
