@@ -50,7 +50,7 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | USB 2 device coverage / storage reliability | Pending | External USB 2 devices, measured throughput and sustained reliability |
 | SD reader / fingerprint reader | Pending | Driver support and device operation |
 | Battery runtime / sleep and wake | Pending | Measured runtime and device recovery; basic battery power is confirmed |
-| NVIDIA electrical power-off | Pending | Disabling its driver does not establish that the GPU is powered off |
+| NVIDIA electrical power-off | Pending | Deferred until after the driver-port attempt; the current disabled driver does not establish power-off |
 | NVIDIA acceleration | Not working | GTX 1650 Max-Q has no supported driver in this configuration |
 | Native macOS Wi-Fi interface | Not working | Network management uses HeliPort |
 | HDMI output | Not working | No image or external display in the macOS report; physical GPU routing under investigation |

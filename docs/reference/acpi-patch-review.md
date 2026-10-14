@@ -54,7 +54,7 @@ The device's OEM `_STA` always returns `0x0F`. That status does not measure the 
 
 The reviewed [Lilu 1.7.2 implementation](https://github.com/acidanthera/Lilu/blob/1.7.2/Lilu/Sources/kern_devinfo.cpp) terminates and stops GPU/audio IOService objects in `processSwitchOff()`; that function contains no explicit call to this OEM `_OFF`. This supports keeping software device disabling separate from verified electrical power-off.
 
-No ACPI or EFI change follows from this review. The optional SSDT remains disabled pending a bounded, justified hardware sequence and evidence of the resulting state. NVIDIA Linux-driver port research remains open and separate.
+No ACPI or EFI change follows from this review. By request, electrical power-off work is deferred until after the NVIDIA driver-port attempt. The optional SSDT remains disabled. When this work resumes, it still requires a bounded, justified hardware sequence and evidence of the resulting state. NVIDIA Linux-driver port research remains open and separate.
 
 ## Primary references
 

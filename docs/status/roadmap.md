@@ -8,13 +8,13 @@ The [CPU and sensor reports](cpu-thermal.md) confirm frequency/power response an
 
 | Order | Work | Remaining scope |
 |---|---|---|
-| 1 | Graphics, power and thermals | Sustained Intel graphics use and cooling, fan telemetry, NVIDIA electrical power-off and measured battery runtime. Continuous temperature readings during desktop activity are confirmed. Basic battery power/discharge reporting is confirmed. Electrical power-off is separate from driver-port research. |
+| 1 | Graphics, power and thermals | Sustained Intel graphics use and cooling, fan telemetry and measured battery runtime. Continuous temperature readings during desktop activity and basic battery power/discharge reporting are confirmed. NVIDIA electrical power-off is deferred until after the driver-port attempt. |
 | Complete / retained | Boot and EFI consolidation | Independent Samsung boot confirmed after manual EFI transfer. Keep the HDD as a recovery path and preserve the private working EFI. A later sanitized release remains separate from v0.1.0. |
 | 3 | Storage and USB reliability | USB-C at 5 Gb/s in both orientations and both tested USB-A connectors at 5 Gb/s are confirmed. File reads on both USB-A connectors are confirmed. External USB 2 devices, sustained SSD stability, shutdown and reboot remain separate checks. Move the system SSD cable only after shutdown. |
-| 4 | Network throughput | Wi-Fi transfer-speed measurement. Analog headphone output, automatic speaker switching, internal/wired/Bluetooth microphones and wireless reconnection are confirmed. Retain the working audio correction. |
+| Active | Network performance | Establish a connection baseline with Apple's built-in networkQuality tool. This measures the full Internet path, not isolated Wi-Fi radio throughput. Audio peripherals and wireless reconnection remain confirmed; retain the working drivers. |
 | Paused | External displays | HDMI produces no image and macOS lists only the internal panel. A Windows GPU-routing check is retained for when this work resumes. USB-C video cannot currently be tested; hardware capability remains unverified. |
 | 6 | Other peripherals | O2Micro SD reader and fingerprint-reader support. |
-| Later | Deferred refinements | Remaining F4/F5/F7/F8/F9/F10 icon actions, Fn behavior after session refresh, audio equalization, lid/sleep/wake and peripheral recovery. |
+| Later | Deferred refinements | Remaining F4/F5/F7/F8/F9/F10 icon actions, Fn behavior after session refresh, audio equalization, lid/sleep/wake and peripheral recovery. NVIDIA electrical power-off follows the driver-port attempt. |
 | Research | Open compatibility work | Native macOS Wi-Fi integration and the NVIDIA Linux-driver port. Neither is treated as completed or discarded. |
 
 The October 14 disk listing shows the source HDD as a 240.1 GB external GUID disk with one Microsoft Basic Data partition. The Samsung is a separate 250.1 GB external GUID disk with an existing 209.7 MB EFI system partition and APFS. The current private EFI was copied manually, and independent Samsung boot is confirmed following the HDD-disconnected procedure. The [transfer helper](../guides/ssd-boot.md) stopped at its initial mounted-target guard before backup or copy; that helper is on hold pending identification of the failed condition.
@@ -75,7 +75,7 @@ The proposed path is a technical assessment, not an already validated port:
 
 A successful kernel prototype does not demonstrate desktop acceleration. The laptop's hybrid GPU configuration also requires verification of panel and output connections. Experimental tests will use an EFI separate from the one stabilised with Intel.
 
-The EFI used for initial operation retains `-wegnoegpu`. Electrical power-off of the NVIDIA GPU and porting its driver are separate tasks. The optional SSDT that calls `_OFF` remains disabled. The [firmware review](../reference/acpi-patch-review.md) identifies an unbounded wait for `LNKS=0` before the power-gate writes, plus a separate conditional power-resource sequence. A correct method path and absent GPU IOService do not establish safe execution or electrical power-off.
+The EFI used for initial operation retains `-wegnoegpu`. Electrical power-off of the NVIDIA GPU and porting its driver are separate tasks. By request, electrical power-off work is deferred until after the driver-port attempt. The optional SSDT that calls `_OFF` remains disabled. The [firmware review](../reference/acpi-patch-review.md) identifies an unbounded wait for `LNKS=0` before the power-gate writes, plus a separate conditional power-resource sequence. A correct method path and absent GPU IOService do not establish safe execution or electrical power-off.
 
 ## References
 

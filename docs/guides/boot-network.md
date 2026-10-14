@@ -60,6 +60,18 @@ The desktop report confirms itlwm 2.3.0 and the Ethernet service on en0. To sele
 
 The official stable AirportItlwm 2.3.0 release has packages up to Sonoma, without a Tahoe asset. Approaches using older Airport drivers and restored Wi-Fi frameworks require broader system and SIP changes. Native Tahoe integration remains a separate task; the working driver is not replaced now solely to change the Ethernet label, and AirDrop is not promised.
 
+## Connection performance baseline
+
+Wireless disconnection/reconnection and network switching are already confirmed. The next performance observation uses the working itlwm/HeliPort connection without changing the driver or its Ethernet presentation. Close the laptop's downloads and streams, keep HeliPort connected to the usual network, and run Apple's built-in command:
+
+```sh
+networkQuality
+```
+
+Retain the summary's downlink/uplink capacity, responsiveness and idle latency when reported. This measures the full path through Wi-Fi, router, Internet service and remote endpoint. It is not an isolated radio/LAN throughput measurement; a low result alone does not identify an itlwm defect. Interpret it as a baseline before selecting any further comparison. Use the connected network path for the test; another active connection or VPN would change what is being measured.
+
+No additional collector, archive, reboot or EFI change is required. Exclude network names, addresses, credentials and raw connection logs from public status updates. The [Apple instructions](https://support.apple.com/en-us/101942) describe the command and responsiveness metric; the [reference server project](https://github.com/network-quality/server) describes server-based testing.
+
 ## Checks and limitations
 
 The scripts are checked for Bash syntax and with simulated Linux fixtures. Collection checks cover the boot window, timeouts, errors, data filtering, and ZIP creation. Native collection was run on the laptop and the report analyzed. The panel trial eliminated the black screen in the reported result. Bluetooth headphone and HeliPort operation were subsequently confirmed; other checks remain open.
