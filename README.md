@@ -42,7 +42,7 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Fn function row | Configured | Ordinary F1–F12 events recorded; four conflicting macOS shortcuts disabled, session refresh confirmation pending |
 | Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; further icon-key investigation deferred |
 | Native macOS Wi-Fi interface | Not working | Network management uses HeliPort |
-| Touchpad and gestures | Pending | ELAN0662 functionality requires verification |
+| Touchpad and gestures | Working | ELAN0662 gestures confirmed in daily use; F6 toggle also works |
 | Analog audio jack / Bluetooth microphone | Pending | Separate from speaker and Bluetooth headphone playback |
 | HDMI / USB-C video | Pending | Output routing and external display support |
 | USB SuperSpeed / USB-C orientation | Pending | Transfer speed and both connector orientations |

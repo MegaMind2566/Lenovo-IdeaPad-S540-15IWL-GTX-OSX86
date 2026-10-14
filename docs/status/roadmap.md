@@ -13,7 +13,7 @@ The immediate milestone is independent boot from the external 960 EVO. Completin
 | 3 | Graphics, power and thermals | Sustained Intel graphics use, temperatures under load, NVIDIA electrical power-off, incomplete SMC sensors, switching to battery and runtime. Electrical power-off is separate from driver-port research. |
 | 4 | Wireless and audio peripherals | Wi-Fi speed, network changes and reconnection; Bluetooth reconnection and headphone microphone; analog audio jack. Retain the working internal microphone correction. |
 | 5 | External displays | HDMI and USB-C video operation and actual GPU routing before choosing display fixes. |
-| 6 | Other peripherals | Touchpad gestures, sustained webcam operation, O2Micro SD reader and fingerprint-reader support. |
+| 6 | Other peripherals | Sustained webcam operation, O2Micro SD reader and fingerprint-reader support. |
 | Later | Deferred refinements | Remaining F4/F5/F7/F8/F9/F10 icon actions, Fn behavior after session refresh, audio equalization, lid/sleep/wake and peripheral recovery. |
 | Research | Open compatibility work | Native macOS Wi-Fi integration and the NVIDIA Linux-driver port. Neither is treated as completed or discarded. |
 
@@ -28,7 +28,7 @@ Priorities updated on 13 October 2026: the panel being off during boot is **reso
 | Tahoe boot | Desktop on the 960 EVO; panel delay eliminated in the test using only -igfxblr, reported wait zero | Retain the fix and verify repeatable shutdown/reboot in use |
 | Intel UHD 620 | IntelAccelerator detected, Metal 3 exposed, shared memory up to 1536 MB; boot without VESA | Metal load and sustained use without freezes or artefacts |
 | Keyboard | Direct F1–F3, F6 and F11/F12 working | Map the six remaining icon actions and preserve ordinary Fn+F1–F12 for applications |
-| ELAN touchpad | F6 toggle working; drivers present | Pointing, clicking, scrolling and gestures |
+| ELAN touchpad | F6 toggle and gestures confirmed working in use | Retain the current configuration; recovery after sleep remains part of the deferred wake checks |
 | Intel AC9560 Wi-Fi | itlwm 2.3.0 loaded, Ethernet on en0 is expected with this driver; HeliPort reported working | Speed, network switching and reconnection; native Tahoe Wi-Fi integration is separate |
 | Intel Bluetooth | Operation with headphones confirmed; firmware loaded, correct NVRAM, IntelBTPatcher 2.4 excluded | Headphone microphone and reconnection still to be tested; retain the current drivers |
 | ALC257 audio | Playback, gradual volume adjustment and F1–F3 confirmed; microphone fix v2 received an initial positive report after reboot | Collect the verification report and recordings at different levels; equalisation deferred, jack and resume behaviour still to be documented |

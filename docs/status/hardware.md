@@ -17,7 +17,7 @@ Report received on 12 October 2026. Only data relevant to the project is include
 | Bluetooth | Intel, USB 8087:0AAA | Operation with headphones confirmed; firmware loaded, correct NVRAM and IntelBTPatcher excluded; headphone microphone and reconnection still to be tested |
 | Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Playback, gradual volume adjustment and F1–F3 confirmed with VoodooHDA 3.6.8 and the v3 fix; microphone fix v2 received an initial positive report after reboot; verification report and comparison recordings still to be collected; equalisation deferred, jack operation still to be documented |
 | Keyboard | PS/2 | VoodooPS2; direct F1–F3, F6 and F11/F12 working; remaining icon keys and Fn app-key behavior in progress |
-| Touchpad | ELAN0662, I2C HID; Intel 8086:9DE8 controller | Confirmed path: `_SB.PCI0.I2C0.TPD0`; F6 toggle working; gestures remain to be documented |
+| Touchpad | ELAN0662, I2C HID; Intel 8086:9DE8 controller | Confirmed path: `_SB.PCI0.I2C0.TPD0`; F6 toggle and touchpad gestures confirmed working |
 | SD reader | O2Micro SD Host Controller | Support still to be verified; different from the reader in the lucatek project |
 | Webcam | TwinHan Integrated Camera USB | Image present in the Photo Booth test; sustained use and resume still to be verified |
 
@@ -85,6 +85,10 @@ The pmset sample shows an internal battery present, 100%, charged and AC Power s
 The macOS slider actually adjusts panel brightness. F11/F12 do not work in the reported test; the result with Fn has not yet been specified. Backlight control therefore works, and no new PNLF or framebuffer patches are added solely for the key issue.
 
 The original DSDT contains H_EC._Q8E and _Q8F methods that send ACPI notifications 0x86 and 0x87 to the GFX0.DD1F panel, with firmware conditions that may suppress some events. At the user's request, work on F11/F12 has been deferred to a single batch with the other function keys. That stage will check Fn behaviour and the generated events, then assess BrightnessKeys as a targeted candidate; it has not been applied. Working F1–F3 and the brightness slider are preserved. The _Q methods are not renamed in advance.
+
+## Touchpad gestures: 14 October 2026
+
+Touchpad gestures are confirmed working in normal use. The existing ELAN configuration and F6 toggle are retained. Gesture support is removed from the open hardware backlog; recovery after sleep remains unverified.
 
 ## Function-row mapping: 14 October 2026
 
