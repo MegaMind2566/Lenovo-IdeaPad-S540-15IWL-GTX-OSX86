@@ -16,13 +16,13 @@
       "name": "HS02",
       "port": 2,
       "connector": 255,
-      "description": "Fingerprint interno"
+      "description": "Internal fingerprint reader"
     },
     {
       "name": "HS03",
       "port": 4,
       "connector": 255,
-      "description": "Webcam interna"
+      "description": "Internal webcam"
     },
     {
       "name": "HS04",
@@ -40,7 +40,7 @@
       "name": "HS06",
       "port": 10,
       "connector": 255,
-      "description": "Bluetooth interno"
+      "description": "Internal Bluetooth"
     },
     {
       "name": "SS01",
