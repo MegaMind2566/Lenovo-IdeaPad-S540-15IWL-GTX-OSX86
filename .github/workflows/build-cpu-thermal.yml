@@ -1,0 +1,35 @@
+name: Build CPU and thermal check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/cpu-thermal/**'
+      - 'builders/build_cpu_thermal.py'
+      - 'tests/test_cpu_thermal.sh'
+      - '.github/workflows/build-cpu-thermal.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15-intel
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Verify Bash 3.2 cleanup and scalar fixtures
+        run: /bin/bash tests/test_cpu_thermal.sh
+      - name: Build and verify the standalone package
+        run: python3 builders/build_cpu_thermal.py --output-dir build/cpu-thermal
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: S540-cpu-thermal
+          path: |
+            build/cpu-thermal/S540-cpu-thermal.zip
+            build/cpu-thermal/S540-cpu-thermal.zip.sha256
+          if-no-files-found: error
+          retention-days: 30
