@@ -244,6 +244,8 @@ def brightness_bundle(path: Path) -> tuple[dict[str, bytes], dict]:
         fail("The bundle identity or version does not match BrightnessKeys 1.0.3.")
     if info.get("CFBundleExecutable") != "BrightnessKeys":
         fail("The brightness bundle names an unexpected executable.")
+    if info.get("CFBundlePackageType") != "KEXT":
+        fail("The brightness bundle is not a kernel extension.")
     metadata = {"identifier": IDENTIFIER, "version": VERSION,
                 "macho": macho_metadata(files[binary_path], 11),
                 "libraries": info.get("OSBundleLibraries", {}),
@@ -402,7 +404,9 @@ def package(arguments: argparse.Namespace, acquired: tuple) -> tuple[Path, str]:
         "files": [{"path": name, "sha256": sha256(raw)} for name, raw in sorted(bundle.items())],
         "validator_sha256": sha256(validator), "opencore_sha256": oc_hash,
     }
-    manifest_raw = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    # The runtime uses native plutil on macOS without developer tools. An XML
+    # plist keeps the manifest readable by that interface on the target system.
+    manifest_raw = plistlib.dumps(manifest, fmt=plistlib.FMT_XML, sort_keys=True)
     manifest_sha = sha256(manifest_raw)
     runtime = ROOT / "packages/function-keys"
     helper_source = runtime / "tools/brightness_keys_test.sh"
@@ -419,7 +423,7 @@ def package(arguments: argparse.Namespace, acquired: tuple) -> tuple[Path, str]:
         # occurs. The cache/audit directories are never copied into the package.
         for name, raw in bundle.items():
             write_bytes(stage / "payload" / name, raw, "/Contents/MacOS/" in name)
-        write_bytes(stage / "payload/manifest.json", manifest_raw)
+        write_bytes(stage / "payload/manifest.plist", manifest_raw)
         write_bytes(stage / "bin/ocvalidate", validator, True)
         for name in ("TEST-BRIGHTNESS-KEYS.command", "RESTORE-BRIGHTNESS-KEYS.command",
                      "COLLECT-FUNCTION-KEYS.command"):
@@ -439,8 +443,9 @@ def package(arguments: argparse.Namespace, acquired: tuple) -> tuple[Path, str]:
         source_names = ["tools/brightness_keys_test.sh", "tools/collect_function_keys.sh",
                         "TEST-BRIGHTNESS-KEYS.command", "RESTORE-BRIGHTNESS-KEYS.command",
                         "COLLECT-FUNCTION-KEYS.command"]
-        subprocess.run(["/bin/bash", "-n", *[str(stage / name) for name in source_names]],
-                       check=True, capture_output=True, text=True, timeout=15)
+        for name in source_names:
+            subprocess.run(["/bin/bash", "-n", str(stage / name)],
+                           check=True, capture_output=True, text=True, timeout=15)
         for name, raw in bundle.items():
             if (stage / "payload" / name).read_bytes() != raw:
                 fail("The staged brightness driver differs from its official release.")

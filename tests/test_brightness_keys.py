@@ -77,7 +77,7 @@ def main() -> int:
     assert (reference / "BOOT/BOOTx64.efi").is_file()
     assert (package / HELPER).is_file()
     assert (package / "payload" / BUNDLE / "Contents/Info.plist").is_file()
-    assert (package / "payload/manifest.json").is_file()
+    assert (package / "payload/manifest.plist").is_file()
     assert (package / "bin/ocvalidate").is_file()
     for source in (package, reference):
         assert not any(path.is_symlink() for path in (source, *source.rglob("*")))

@@ -13,6 +13,7 @@ ARGS='NVRAM.Add.7C436110-AB2A-4BBB-A880-FE41995C9F82.boot-args'
 TEMP=''
 CONFIG_TEMP=''
 DRAFT=''
+RUNTIME_BRIGHTNESS_LOADED=0
 
 fail() { printf 'Brightness-key test: %s\n' "$*" >&2; exit 1; }
 hash() { /usr/bin/shasum -a 256 "$1" | /usr/bin/awk '{print $1}'; }
@@ -33,7 +34,7 @@ cleanup() {
     if [ -n "$CONFIG_TEMP" ] && ordinary_file "$CONFIG_TEMP"; then /bin/rm -f "$CONFIG_TEMP"; fi
     if [ -n "$DRAFT" ] && [ -d "$DRAFT" ] && [ ! -L "$DRAFT" ]; then
         local name
-        for name in before.plist tested.plist state.plist manifest.json; do
+        for name in before.plist tested.plist state.plist manifest.plist; do
             if ordinary_file "$DRAFT/$name"; then /bin/rm -f "$DRAFT/$name"; fi
         done
         /bin/rmdir "$DRAFT" 2>/dev/null || true
@@ -87,7 +88,10 @@ runtime_guard() {
         /usr/bin/grep -Eq '"brightness"[[:space:]]*=' "$TEMP/panel.txt" || fail 'The active panel does not expose brightness control.'
         /usr/bin/kmutil showloaded > "$TEMP/loaded.txt" 2> "$TEMP/loaded-errors.txt" || fail 'Cannot inspect loaded drivers.'
         /usr/bin/grep -Eq 'as\.vit9696\.Lilu[[:space:]]+\(1\.7\.2\)' "$TEMP/loaded.txt" || fail 'This pilot requires loaded Lilu 1.7.2. Collect updated diagnostics if the active version differs.'
-        if /usr/bin/grep -Fq "$IDENTIFIER" "$TEMP/loaded.txt"; then fail 'BrightnessKeys is already loaded; do not combine installations.'; fi
+        if /usr/bin/grep -Fq "$IDENTIFIER" "$TEMP/loaded.txt"; then
+            /usr/bin/grep -Eq 'as\.acidanthera\.BrightnessKeys[[:space:]]+\(1\.0\.3\)' "$TEMP/loaded.txt" || fail 'A different BrightnessKeys version is already loaded.'
+            RUNTIME_BRIGHTNESS_LOADED=1
+        fi
     fi
 }
 
@@ -280,17 +284,17 @@ load_backup() {
     [ -z "$(/usr/bin/find "$BACKUP" ! -type f ! -type d -print)" ] || fail 'The backup contains links or special files.'
     while IFS= read -r path; do
         name=${path##*/}
-        case "$name" in before.plist|tested.plist|state.plist|state-next.plist|manifest.json) ordinary_file "$path" || fail 'An expected backup file is not regular.';;
+        case "$name" in before.plist|tested.plist|state.plist|state-next.plist|manifest.plist) ordinary_file "$path" || fail 'An expected backup file is not regular.';;
             removed-BrightnessKeys.kext) [ -d "$path" ] && [ ! -L "$path" ] || fail 'The removed bundle is not a regular directory.';;
             *) fail 'The backup contains an unexpected top-level item.';; esac
     done < <(/usr/bin/find "$BACKUP" -mindepth 1 -maxdepth 1 -print)
-    for name in before.plist tested.plist state.plist manifest.json; do
+    for name in before.plist tested.plist state.plist manifest.plist; do
         ordinary_file "$BACKUP/$name" || fail 'The private backup is incomplete.'
     done
     STATE="$BACKUP/state.plist"
     typed "$STATE" Format integer && [ "$(readkey "$STATE" Format)" = 1 ] || fail 'Unsupported backup format.'
     [ "$(string_value "$STATE" Owner)" = "$OWNER" ] || fail 'The backup belongs to a different operation.'
-    [ "$(hash "$BACKUP/manifest.json")" = "$PAYLOAD_MANIFEST_SHA" ] || fail 'The backup manifest was modified or belongs to a different package.'
+    [ "$(hash "$BACKUP/manifest.plist")" = "$PAYLOAD_MANIFEST_SHA" ] || fail 'The backup manifest was modified or belongs to a different package.'
     BEFORE=$(string_value "$STATE" BeforeSHA256); TESTED=$(string_value "$STATE" TestedSHA256)
     valid_hash "$BEFORE" && valid_hash "$TESTED" || fail 'Invalid config hashes in the journal.'
     [ "$(hash "$BACKUP/before.plist")" = "$BEFORE" ] || fail 'The original config backup was modified.'
@@ -310,9 +314,9 @@ write_phase() {
     valid_phase "$phase" || fail 'Invalid new journal phase.'
     safe_path "$BACKUP"; safe_path "$CONFIG"
     ordinary_file "$STATE" && [ "$(hash "$STATE")" = "$STATE_HASH" ] || fail 'The journal changed during the operation.'
-    ordinary_file "$BACKUP/before.plist" && ordinary_file "$BACKUP/tested.plist" && ordinary_file "$BACKUP/manifest.json" || fail 'A private backup file was replaced by a link or special file.'
+    ordinary_file "$BACKUP/before.plist" && ordinary_file "$BACKUP/tested.plist" && ordinary_file "$BACKUP/manifest.plist" || fail 'A private backup file was replaced by a link or special file.'
     [ "$(hash "$BACKUP/before.plist")" = "$BEFORE" ] && [ "$(hash "$BACKUP/tested.plist")" = "$TESTED" ] || fail 'A config snapshot changed during the operation.'
-    [ "$(hash "$BACKUP/manifest.json")" = "$PAYLOAD_MANIFEST_SHA" ] || fail 'The backup manifest changed during the operation.'
+    [ "$(hash "$BACKUP/manifest.plist")" = "$PAYLOAD_MANIFEST_SHA" ] || fail 'The backup manifest changed during the operation.'
     ordinary_file "$CONFIG" && [ "$(hash "$CONFIG")" = "$CURRENT" ] || fail 'The config changed during the operation; the journal will not be advanced.'
     safe_path "$OC/OpenCore.efi"
     ordinary_file "$OC/OpenCore.efi" && [ "$(hash "$OC/OpenCore.efi")" = "$OPENCORE_SHA" ] || fail 'OpenCore changed during the operation.'
@@ -339,10 +343,10 @@ create_backup() {
     DRAFT=$(/usr/bin/mktemp -d "$OC/.backup-function-keys.XXXXXX")
     /bin/cp -p "$TEMP/before.plist" "$DRAFT/before.plist"
     /bin/cp -p "$TEMP/tested.plist" "$DRAFT/tested.plist"
-    /bin/cp "$MANIFEST" "$DRAFT/manifest.json"
+    /bin/cp "$MANIFEST" "$DRAFT/manifest.plist"
     make_state "$DRAFT/before.plist" "$DRAFT/tested.plist" "$DRAFT/state.plist" prepared
     /bin/chmod 700 "$DRAFT"
-    /bin/chmod 600 "$DRAFT/before.plist" "$DRAFT/tested.plist" "$DRAFT/state.plist" "$DRAFT/manifest.json"
+    /bin/chmod 600 "$DRAFT/before.plist" "$DRAFT/tested.plist" "$DRAFT/state.plist" "$DRAFT/manifest.plist"
     [ "$(hash "$CONFIG")" = "$original_hash" ] || fail 'The config changed during backup preparation.'
     exists "$BACKUP" && fail 'The backup path appeared during preparation.'
     /bin/mv "$DRAFT" "$BACKUP"
@@ -365,7 +369,9 @@ atomic_config_replace() {
     CURRENT=$wanted_hash
 }
 apply_test() {
+    if [ "$RUNTIME_BRIGHTNESS_LOADED" -eq 1 ] && ! exists "$BACKUP"; then fail 'BrightnessKeys is already loaded without this test backup; do not combine installations.'; fi
     if exists "$BACKUP"; then load_backup; else create_backup; fi
+    if [ "$RUNTIME_BRIGHTNESS_LOADED" -eq 1 ] && [ "$CURRENT" != "$TESTED" ]; then fail 'BrightnessKeys is already loaded outside this installed test configuration.'; fi
     [ "$PHASE" != restored ] && [ "$PHASE" != restoring ] || fail 'This journal belongs to a completed or interrupted restore. Finish restoring before preparing another test.'
     exists "$REMOVED" && fail 'A previously removed bundle exists; do not restart the test from this backup.'
     if [ "$CURRENT" = "$TESTED" ]; then
@@ -444,7 +450,7 @@ main() {
     safe_path "$BOOTROOT"
     PACKAGE=$(cd "$(/usr/bin/dirname "$0")/.." && pwd -P)
     PAYLOAD="$PACKAGE/payload/BrightnessKeys.kext"
-    MANIFEST="$PACKAGE/payload/manifest.json"
+    MANIFEST="$PACKAGE/payload/manifest.plist"
     VALIDATOR="$PACKAGE/bin/ocvalidate"
     OC="$BOOTROOT/EFI/OC"; CONFIG="$OC/config.plist"
     BACKUP="$OC/backup-function-keys"; STATE="$BACKUP/state.plist"
