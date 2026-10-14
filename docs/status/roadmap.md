@@ -4,13 +4,13 @@ Goal: make all components of the Lenovo IdeaPad S540-15IWL GTX usable on macOS T
 
 ## Work order and retained backlog
 
-The immediate milestone is independent boot from the external 960 EVO. Completing that milestone does not close the other hardware items below.
+The active stage is a single grouped CPU, temperature and power check. Independent boot from the external 960 EVO follows; the other hardware items remain tracked below.
 
 | Order | Work | Remaining scope |
 |---|---|---|
-| 1 | Boot and EFI consolidation | Preserve a private copy of the current working EFI, copy it to the external SSD's EFI partition, and establish boot without the HDD. Keep the HDD as a recovery path. Document a later release of the current configuration without replacing v0.1.0. |
-| 2 | Storage and USB reliability | External SSD stability, USB-A/USB-C SuperSpeed, both USB-C orientations, reconnection, shutdown and reboot. |
-| 3 | Graphics, power and thermals | Sustained Intel graphics use, temperatures under load, NVIDIA electrical power-off, incomplete SMC sensors, switching to battery and runtime. Electrical power-off is separate from driver-port research. |
+| 1 | Graphics, power and thermals | Sustained Intel graphics use, temperatures under load, NVIDIA electrical power-off, incomplete SMC sensors, switching to battery and runtime. Electrical power-off is separate from driver-port research. |
+| 2 | Boot and EFI consolidation | Preserve a private copy of the current working EFI, copy it to the external SSD's EFI partition, and establish boot without the HDD. Keep the HDD as a recovery path. Document a later release of the current configuration without replacing v0.1.0. |
+| 3 | Storage and USB reliability | External SSD stability, USB-A/USB-C SuperSpeed, both USB-C orientations, reconnection, shutdown and reboot. |
 | 4 | Audio peripherals and network throughput | Analog audio jack and Wi-Fi transfer-speed measurement. Wi-Fi network switching, Wi-Fi/Bluetooth disconnection and reconnection, and the Bluetooth headset microphone are confirmed working. Retain the working internal microphone correction. |
 | 5 | External displays | HDMI and USB-C video operation and actual GPU routing before choosing display fixes. |
 | 6 | Other peripherals | O2Micro SD reader and fingerprint-reader support. |

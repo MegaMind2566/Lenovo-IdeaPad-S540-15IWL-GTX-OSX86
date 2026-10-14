@@ -36,19 +36,19 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | CPU power management | Working | X86PlatformPlugin active |
 | Battery detection | Working | Battery and charge state available |
 | External SSD access | Working | Samsung 960 EVO in a USB-C enclosure |
-| NVIDIA acceleration | Not working | GTX 1650 Max-Q has no supported driver in this configuration |
 | F11/F12 brightness keys | Working | BrightnessKeys companion package; not included in EFI v0.1.0 |
 | F6 touchpad toggle | Working | Direct key enables and disables the touchpad |
 | Fn function row | Configured | Ordinary F1–F12 events recorded; four conflicting macOS shortcuts disabled, session refresh confirmation pending |
-| Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; further icon-key investigation deferred |
-| Native macOS Wi-Fi interface | Not working | Network management uses HeliPort |
 | Touchpad and gestures | Working | ELAN0662 gestures confirmed in daily use; F6 toggle also works |
+| Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; further icon-key investigation deferred |
 | Analog audio jack | Pending | Connector operation remains to be verified |
 | HDMI / USB-C video | Pending | Output routing and external display support |
 | USB SuperSpeed / USB-C orientation | Pending | Transfer speed and both connector orientations |
 | SD reader / fingerprint reader | Pending | Driver support and device operation |
 | Battery runtime / sleep and wake | Pending | Power transitions and device recovery |
 | NVIDIA electrical power-off | Pending | Disabling its driver does not establish that the GPU is powered off |
+| NVIDIA acceleration | Not working | GTX 1650 Max-Q has no supported driver in this configuration |
+| Native macOS Wi-Fi interface | Not working | Network management uses HeliPort |
 
 Detailed hardware information is in [Hardware](docs/status/hardware.md).
 
@@ -60,7 +60,7 @@ Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including t
 
 ## Development priorities
 
-- Make the external SSD independently bootable and consolidate the current working EFI.
+- Complete the current CPU, temperature and power checks, then make the external SSD independently bootable and consolidate the working EFI.
 - Complete storage, USB, Intel stability, power management and external display support.
 - Complete remaining audio peripheral and device support; wireless reconnection and network switching work.
 - Retain the working keyboard controls; remaining icon actions, equalization and sleep refinements are deferred.
