@@ -31,7 +31,7 @@ Historical first-boot experiments are kept in [archive](../archive/README.md).
 
 The [EFI](efi/README.md) package describes the current release.
 
-Current keyboard companions:
+Available keyboard companions (remaining icon-key investigation is deferred):
 
 - [Function-key snapshots](function-keys/README.md): device and brightness observations.
 - [Function-key events](function-key-events/README.md): passive direct/Fn session-event observation.

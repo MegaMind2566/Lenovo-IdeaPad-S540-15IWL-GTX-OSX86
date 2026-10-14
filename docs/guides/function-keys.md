@@ -1,6 +1,6 @@
 # Function keys and brightness
 
-The brightness slider and direct F11/F12 brightness keys work with the BrightnessKeys companion package. Direct F1–F3 audio controls and F6 touchpad toggle also work. The remaining icon actions and ordinary Fn function-key behavior are the current task.
+The brightness slider and direct F11/F12 brightness keys work with the BrightnessKeys companion package. Direct F1–F3 audio controls and F6 touchpad toggle also work. The Fn shortcut configuration is retained. Work on the remaining icon actions is deferred while core hardware support takes priority.
 
 ## Target mapping
 
@@ -38,7 +38,7 @@ Observer 1.1.1 completed all seven targeted windows without interruption:
 
 The input device exposes a writable master mute control, enabling an F4 action once its trigger is established. An empty session window does not establish that firmware produced no event. The complete modifier flags do not prove physical Fn state.
 
-The next [driver diagnostic](../../packages/function-key-scancodes/README.md) compares VoodooPS2Keyboard traces for these keys and ordinary Command-L/Command-P. Distinct raw sequences can justify a narrow keyboard mapping; identical sequences cannot safely be separated by a global chord replacement. The driver's trace is not a complete PS/2 wire capture. If a key has no retained trace, both earlier driver handling and the verified Lenovo VPC path remain candidates requiring their own evidence.
+The [driver diagnostic](../../packages/function-key-scancodes/README.md) was prepared to compare VoodooPS2Keyboard traces for these keys and ordinary Command-L/Command-P. Its laptop report stopped after three empty F4/F5/Fn+F5 windows: trace visibility was not confirmed by the positive controls, and logging restoration is verified. No raw key identity can be inferred from this report. Further keyboard diagnostics are deferred. Distinct raw sequences can justify a narrow keyboard mapping; identical sequences cannot safely be separated by a global chord replacement. The driver's trace is not a complete PS/2 wire capture. If a key has no retained trace, both earlier driver handling and the verified Lenovo VPC path remain candidates requiring their own evidence.
 
 F5 can also be assigned to a browser's own Reload menu command through macOS [App Shortcuts](https://support.apple.com/guide/mac-help/mchlp2271/mac). This preserves the F5 key identity received by other applications and applies equally to direct F5 and Fn+F5 inside that browser. The exact localized menu title must be checked, and assigning its new equivalent can replace the existing Command-R equivalent. No browser override has been installed.
 

@@ -4,6 +4,11 @@ This companion records ten short driver trace windows for the S540 keyboard:
 F4, F5, Fn+F5, F7, F8, F9, F10, ordinary Command+L, ordinary Command+P, and Fn alone.
 It helps compare driver-level identities before choosing any key mapping.
 
+The initial laptop report did not confirm trace visibility; the F5 controls
+stopped the collection after three empty windows. Logging restoration was
+verified. Further keyboard diagnostics are deferred, and no mapping is inferred
+from this report.
+
 The package changes no EFI files, ACPI tables, key maps, symbolic shortcuts, audio
 settings, or firmware settings. Nothing is installed and no restart is needed.
 

@@ -11,7 +11,7 @@ Goal: make all components of the Lenovo IdeaPad S540-15IWL GTX usable on macOS T
 5. Transfer the current EFI to the 960 EVO and test booting without the HDD, retaining the working boot medium as a fallback.
 6. Start NVIDIA research and verify video outputs according to the identified hardware paths.
 
-Priorities updated on 13 October 2026: the panel being off during boot is **resolved in the -igfxblr test, with the wait reduced from approximately two minutes to zero**. The current EFI is retained. On 14 October 2026, operation with Bluetooth headphones and HeliPort was also confirmed. The Photo Booth test shows an image and records voice; the gain defect led to the [microphone fix v2](../guides/microphone-fix.md), with an initial positive report after the reboot on 14 October 2026. The verification report and comparison recordings still need to be collected. Network speed and reconnection remain unresolved. The procedure is in [Boot and network](../guides/boot-network.md). Battery data and counters are [archived](battery-sleep.md); further sleep tests and equalisation are deferred. The complete function row is now the active keyboard task.
+Priorities updated on 13 October 2026: the panel being off during boot is **resolved in the -igfxblr test, with the wait reduced from approximately two minutes to zero**. The current EFI is retained. On 14 October 2026, operation with Bluetooth headphones and HeliPort was also confirmed. The Photo Booth test shows an image and records voice; the gain defect led to the [microphone fix v2](../guides/microphone-fix.md), with an initial positive report after the reboot on 14 October 2026. The verification report and comparison recordings still need to be collected. Network speed and reconnection remain unresolved. The procedure is in [Boot and network](../guides/boot-network.md). Battery data and counters are [archived](battery-sleep.md); further sleep tests and equalisation are deferred. Remaining keyboard icon actions are deferred while core storage, boot, USB and display support take priority. Working audio, touchpad and brightness keys, together with the configured Fn shortcuts, are retained.
 
 ## Status and criteria
 
@@ -38,9 +38,9 @@ Priorities updated on 13 October 2026: the panel being off during boot is **reso
 
 Recovery test results are not automatically extended to the installed system. Incomplete items remain open until a documented result is available.
 
-## Function keys: next diagnostic batch
+## Deferred function-key work
 
-Complete **all function keys** according to the [keyboard mapping](../guides/function-keys.md). Direct audio, touchpad toggle and brightness controls work. All twelve Fn identities and the remaining targeted session events are recorded. Compare the driver-level inputs before applying any global remapping.
+Complete **all function keys** according to the [keyboard mapping](../guides/function-keys.md). Direct audio, touchpad toggle and brightness controls work. All twelve Fn identities and the remaining targeted session events are recorded. Further driver-level investigation is deferred; no global remapping is applied.
 
 Fn+F1–F12 must remain ordinary application function keys. Remove or reassign only the macOS shortcuts that consume those keys. F7 requires verified Wi-Fi and Bluetooth state; F8 needs a confirmed camera disable path. EFI v0.1.0 remains the earlier snapshot; the working BrightnessKeys companion package is retained separately.
 
@@ -73,11 +73,11 @@ The EFI used for initial operation retains `-wegnoegpu`. Electrical power-off of
 - [Acidanthera: WhateverGreen](https://github.com/acidanthera/WhateverGreen)
 - [Dortania: Tahoe notes](https://dortania.github.io/OpenCore-Install-Guide/extras/tahoe.html)
 
-## Current function-key investigation
+## Function-key investigation retained for later
 
-The BrightnessKeys companion fix now provides working direct F11/F12. F1–F3 audio controls and F6 touchpad toggle also work. The current task is F4/F5/F7/F8/F9/F10 and ordinary Fn+F1–F12 for applications. Event collection is read-only; unobserved scan codes or ACPI events will not be assigned speculative mappings.
+The BrightnessKeys companion fix now provides working direct F11/F12. F1–F3 audio controls and F6 touchpad toggle also work. F4/F5/F7/F8/F9/F10 remain open for a later keyboard stage. The configured ordinary Fn+F1–F12 path is retained. Event collection is read-only; unobserved scan codes or ACPI events will not be assigned speculative mappings.
 
 All twelve Fn key identities are recorded. The [Fn shortcut setup](../../packages/function-keys-setup/README.md) has disabled the four existing plain F9–F12 macOS bindings; application behavior is pending the laptop's normal session refresh. Observer 1.1.1 completed seven targeted windows without interruption: direct and Fn F5 have identical complete session events, direct F9 sends Command-L, direct F10 sends Command-P, and direct F4/F7/F8 have no retained event.
 
-The next step is a bounded VoodooPS2Keyboard trace comparison, including ordinary Command-L and Command-P. Only a demonstrated input distinction can justify a global remap. Browser-specific F5 Reload is also possible without changing its ordinary function-key identity; no browser override has been applied. Missing PS/2 observations would lead to a separate guarded VPC investigation, not a guessed ACPI patch.
+The bounded driver collector stopped after three empty F4/F5/Fn+F5 windows because its F5 positive controls did not verify log visibility. Logging restoration is confirmed. This result does not identify any missing hardware event or justify a key mapping. Additional keyboard diagnostics are deferred. Only a demonstrated input distinction can justify a global remap. Browser-specific F5 Reload is also possible without changing its ordinary function-key identity; no browser override has been applied. Missing PS/2 observations would lead to a separate guarded VPC investigation, not a guessed ACPI patch.
 

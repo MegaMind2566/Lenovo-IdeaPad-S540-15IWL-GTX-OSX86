@@ -61,7 +61,8 @@ Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including t
 ## Development priorities
 
 - Consolidate the current configuration and complete the pending hardware features.
-- Complete the remaining keyboard icon actions and preserve ordinary Fn+F1–F12 for applications.
+- Prioritize reliable storage, independent boot from the external SSD, USB and external display support.
+- Retain the working keyboard controls and Fn shortcut configuration; remaining icon actions are deferred.
 - Improve audio equalization in a later stage.
 - Complete battery, sleep, wake, and external display support.
 - Investigate NVIDIA support, including the Linux driver port as a research project.
