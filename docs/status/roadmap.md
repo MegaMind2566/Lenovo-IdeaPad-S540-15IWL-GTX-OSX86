@@ -11,7 +11,7 @@ The immediate milestone is independent boot from the external 960 EVO. Completin
 | 1 | Boot and EFI consolidation | Preserve a private copy of the current working EFI, copy it to the external SSD's EFI partition, and establish boot without the HDD. Keep the HDD as a recovery path. Document a later release of the current configuration without replacing v0.1.0. |
 | 2 | Storage and USB reliability | External SSD stability, USB-A/USB-C SuperSpeed, both USB-C orientations, reconnection, shutdown and reboot. |
 | 3 | Graphics, power and thermals | Sustained Intel graphics use, temperatures under load, NVIDIA electrical power-off, incomplete SMC sensors, switching to battery and runtime. Electrical power-off is separate from driver-port research. |
-| 4 | Wireless and audio peripherals | Wi-Fi speed, network changes and reconnection; Bluetooth reconnection and headphone microphone; analog audio jack. Retain the working internal microphone correction. |
+| 4 | Wireless and audio peripherals | Wi-Fi speed, network changes and reconnection; Bluetooth reconnection and analog audio jack. Retain the working internal microphone correction. |
 | 5 | External displays | HDMI and USB-C video operation and actual GPU routing before choosing display fixes. |
 | 6 | Other peripherals | O2Micro SD reader and fingerprint-reader support. |
 | Later | Deferred refinements | Remaining F4/F5/F7/F8/F9/F10 icon actions, Fn behavior after session refresh, audio equalization, lid/sleep/wake and peripheral recovery. |
@@ -30,7 +30,7 @@ Priorities updated on 13 October 2026: the panel being off during boot is **reso
 | Keyboard | Direct F1–F3, F6 and F11/F12 working | Map the six remaining icon actions and preserve ordinary Fn+F1–F12 for applications |
 | ELAN touchpad | F6 toggle and gestures confirmed working in use | Retain the current configuration; recovery after sleep remains part of the deferred wake checks |
 | Intel AC9560 Wi-Fi | itlwm 2.3.0 loaded, Ethernet on en0 is expected with this driver; HeliPort reported working | Speed, network switching and reconnection; native Tahoe Wi-Fi integration is separate |
-| Intel Bluetooth | Operation with headphones confirmed; firmware loaded, correct NVRAM, IntelBTPatcher 2.4 excluded | Headphone microphone and reconnection still to be tested; retain the current drivers |
+| Intel Bluetooth | Headphone playback and microphone confirmed; firmware loaded, correct NVRAM, IntelBTPatcher 2.4 excluded | Reconnection remains open; retain the current drivers |
 | ALC257 audio | Playback, gradual volume adjustment and F1–F3 confirmed; microphone fix v2 received an initial positive report after reboot | Collect the verification report and recordings at different levels; equalisation deferred, jack and resume behaviour still to be documented |
 | USB-A and USB-C | 9-port map verified; 960 EVO detected | USB 2/3, both USB-C connector orientations and reconnection |
 | External Samsung 960 EVO | Enclosure connection restored; Tahoe reached the desktop | Sustained use without disconnections and resume from sleep |

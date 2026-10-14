@@ -31,7 +31,7 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Audio playback and volume | Working | VoodooHDA; gradual volume changes and F1–F3 controls |
 | Internal microphone | Working | S540 microphone correction v2 |
 | Wi-Fi through HeliPort | Working | Intel AC9560 with itlwm |
-| Bluetooth headphone audio | Working | Headphone playback |
+| Bluetooth headphone audio and microphone | Working | Playback and headset voice capture confirmed |
 | Webcam | Working | Image capture confirmed alongside the internal microphone |
 | CPU power management | Working | X86PlatformPlugin active |
 | Battery detection | Working | Battery and charge state available |
@@ -43,7 +43,7 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; further icon-key investigation deferred |
 | Native macOS Wi-Fi interface | Not working | Network management uses HeliPort |
 | Touchpad and gestures | Working | ELAN0662 gestures confirmed in daily use; F6 toggle also works |
-| Analog audio jack / Bluetooth microphone | Pending | Separate from speaker and Bluetooth headphone playback |
+| Analog audio jack | Pending | Connector operation remains to be verified |
 | HDMI / USB-C video | Pending | Output routing and external display support |
 | USB SuperSpeed / USB-C orientation | Pending | Transfer speed and both connector orientations |
 | SD reader / fingerprint reader | Pending | Driver support and device operation |
