@@ -32,7 +32,7 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Internal microphone | Working | S540 microphone correction v2 |
 | Wi-Fi through HeliPort | Working | Intel AC9560 with itlwm |
 | Bluetooth headphone audio | Working | Headphone playback |
-| Webcam | Working | Image available in Photo Booth |
+| Webcam | Working | Image capture confirmed alongside the internal microphone |
 | CPU power management | Working | X86PlatformPlugin active |
 | Battery detection | Working | Battery and charge state available |
 | External SSD access | Working | Samsung 960 EVO in a USB-C enclosure |

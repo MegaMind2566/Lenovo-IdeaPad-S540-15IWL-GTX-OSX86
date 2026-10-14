@@ -13,7 +13,7 @@ The immediate milestone is independent boot from the external 960 EVO. Completin
 | 3 | Graphics, power and thermals | Sustained Intel graphics use, temperatures under load, NVIDIA electrical power-off, incomplete SMC sensors, switching to battery and runtime. Electrical power-off is separate from driver-port research. |
 | 4 | Wireless and audio peripherals | Wi-Fi speed, network changes and reconnection; Bluetooth reconnection and headphone microphone; analog audio jack. Retain the working internal microphone correction. |
 | 5 | External displays | HDMI and USB-C video operation and actual GPU routing before choosing display fixes. |
-| 6 | Other peripherals | Sustained webcam operation, O2Micro SD reader and fingerprint-reader support. |
+| 6 | Other peripherals | O2Micro SD reader and fingerprint-reader support. |
 | Later | Deferred refinements | Remaining F4/F5/F7/F8/F9/F10 icon actions, Fn behavior after session refresh, audio equalization, lid/sleep/wake and peripheral recovery. |
 | Research | Open compatibility work | Native macOS Wi-Fi integration and the NVIDIA Linux-driver port. Neither is treated as completed or discarded. |
 
@@ -38,7 +38,7 @@ Priorities updated on 13 October 2026: the panel being off during boot is **reso
 | Display and brightness | Internal 1920×1080 panel, brightness slider and direct F11/F12 working | Retain the BrightnessKeys companion fix; panel resume remains pending |
 | CPU, battery and fans | X86PlatformPlugin active; idle 45–46 °C and estimated Intel power of 0.80–0.95 W; fan quiet. Battery detected at 100% on AC. Incomplete SMC telemetry | Temperatures under load, dGPU status, switching to battery power and battery runtime |
 | Sleep | pmset records Sleep Count 1, User Wake Count 1 and Dark Wake Count 0; [data retained](battery-sleep.md) | Tests deferred: peripheral recovery, lid behaviour and extended sleep still to be verified |
-| Webcam | Image present in the Photo Booth test of 14 October 2026 | Sustained use and resume still to be verified |
+| Webcam | Working; image capture confirmed alongside the internal microphone | Retain the current configuration; recovery after sleep remains part of the deferred wake checks |
 | O2Micro SD reader | Identified; support to be assessed | Applicable driver and reading a card |
 | Fingerprint reader | Internal USB port mapped; support to be assessed | Assess drivers and macOS integration |
 | HDMI and USB-C video | Operation and routing not verified | Identify the GPU connected to each output and test an external monitor |

@@ -19,7 +19,7 @@ Report received on 12 October 2026. Only data relevant to the project is include
 | Keyboard | PS/2 | VoodooPS2; direct F1–F3, F6 and F11/F12 working; remaining icon keys and Fn app-key behavior in progress |
 | Touchpad | ELAN0662, I2C HID; Intel 8086:9DE8 controller | Confirmed path: `_SB.PCI0.I2C0.TPD0`; F6 toggle and touchpad gestures confirmed working |
 | SD reader | O2Micro SD Host Controller | Support still to be verified; different from the reader in the lucatek project |
-| Webcam | TwinHan Integrated Camera USB | Image present in the Photo Booth test; sustained use and resume still to be verified |
+| Webcam | TwinHan Integrated Camera USB | Working; image capture confirmed alongside the internal microphone |
 
 The Windows integrated graphics driver name reports UHD 610, but the chip and PCI ID in the report identify UHD 620. The configuration will be based on the actual chip.
 
@@ -66,9 +66,9 @@ The test using only `-igfxblr` eliminated the boot blackout in the reported resu
 
 Bluetooth status is On, FirmwareLoaded is Yes and the transport is connected; BlueToolFixup 2.7.2 and IntelBluetoothFirmware 2.4 are loaded, while IntelBTPatcher is absent. The two required NVRAM variables are present with the correct values: one zero byte and fourteen zero bytes. The stack starts scanning and receives BLE devices. On 14 October 2026, operation with Bluetooth headphones was reported, together with HeliPort operation for Wi-Fi network management. The current drivers and NVRAM are retained. This result does not verify the headphone microphone, the internal ALC257 microphone, the analogue jack or reconnection after sleep.
 
-## Webcam and voice capture: 14 October 2026
+## Webcam and voice capture: 13 October 2026
 
-In the suggested Photo Booth test, it was reported that the image was visible and voice was recorded. Microphone gain was too high: subsequent adjustment abruptly changed it from too high to too low. The selected input and mixer controls need to be checked before making a change. The webcam therefore works in this test; the audio input level has not yet been confirmed as correct. This result predates the microphone fix described below.
+In the suggested Photo Booth test, it was reported that the image was visible and voice was recorded. Microphone gain was too high: subsequent adjustment abruptly changed it from too high to too low. The selected input and mixer controls need to be checked before making a change. The webcam works and is no longer an open hardware item. The audio input gain issue in that earlier check was subsequently addressed by the microphone fix below.
 
 ## Microphone fix: 14 October 2026
 
