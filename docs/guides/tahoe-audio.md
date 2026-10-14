@@ -2,9 +2,9 @@
 
 This guide documents the original audio setup and its private rollback backups on the project's existing installation. It is not a complete fresh-install procedure for an EFI release. An EFI archive alone does not include the installed audio extension or these backups. The subsequent microphone upgrade is covered in the [microphone correction guide](microphone-fix.md).
 
-## Current audio status: October 14, 2026
+## Current audio status: October 15, 2026
 
-Speaker playback and F1–F3 work with the retained VoodooHDA setup, and the earlier mute-only volume defect is resolved. A later report finds the output too loud near the minimum and the low steps too coarse. The [fine-volume correction](volume-control.md) restores the full DAC range while preserving the working microphone patch; its laptop result is pending. The wired jack passes headphone output and automatic switching: speakers mute when headphones are connected and resume after unplugging.
+Speaker playback and F1–F3 work with the retained VoodooHDA setup, and the earlier mute-only volume defect is resolved. A later report found the output too loud near the minimum and the low steps too coarse. The [fine-volume correction](volume-control.md) restores the full DAC range while preserving the microphone patch; it was reported working during YouTube playback on October 15. The wired jack passes headphone output and automatic switching: speakers mute when headphones are connected and resume after unplugging.
 
 The internal microphone correction remains in use. Microphone input through a wired headset on the 3.5 mm combo jack is now confirmed working, alongside the internal and Bluetooth microphones. Equalisation and audio recovery after sleep remain deferred. The sections below preserve the earlier setup and correction history; their initial unverified jack and microphone status is superseded by these results.
 

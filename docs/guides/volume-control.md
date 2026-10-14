@@ -1,6 +1,6 @@
 # Fine output volume control
 
-This upgrade addresses loud speaker/headphone output near the bottom of the macOS volume slider. Playback, F1–F3, jack switching and microphone operation already work; the low-volume range needs refinement. The on-device result for this new correction is pending.
+This upgrade addresses loud speaker/headphone output near the bottom of the macOS volume slider. The correction was reported working during YouTube playback on October 15, 2026. Quiet-volume regulation is retained as resolved. F1–F3, jack switching and microphone operation were already working; equalisation and audio recovery after sleep remain deferred.
 
 ## Scope and source evidence
 
@@ -22,7 +22,7 @@ Enter the administrator password when asked. The command saves the exact working
 
 Installation does not require the 240 GB HDD or read/edit its EFI. The current EFI, SIP, NVRAM, AMFI and sealed system volume are unchanged. The new private backup is `/Library/Application Support/S540-volume-fine`; the earlier microphone backup is retained independently.
 
-## Verify after restarting
+## Optional driver check after restarting
 
 ```sh
 bash "$HOME/Downloads/S540-volume-fine-v1/VERIFY-VOLUME.command"
@@ -30,7 +30,7 @@ bash "$HOME/Downloads/S540-volume-fine-v1/VERIFY-VOLUME.command"
 
 Verification checks the installed hashes, loaded version 3.6.10, both active correction markers and the two input/output control ranges. Output must expose −65.25/0 dB; input must remain −17.25/+30 dB. These checks establish the loaded variant, not subjective audio quality.
 
-Start playback at the first non-muted level, then increase gradually. Check the quiet end, ordinary volume steps, F1 mute, unmute and headphones. Keep the existing microphone input setting and confirm a short recording still works. Record the result before retaining the correction as the new baseline. Equalisation and audio recovery after sleep remain separate work.
+The listening result above is sufficient to close the reported quiet-volume issue. The optional command remains available for driver diagnostics; no further collection is required for this result. Equalisation and audio recovery after sleep remain separate work.
 
 ## Restore the previous driver
 

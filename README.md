@@ -20,7 +20,7 @@ Tahoe boots directly from the external Samsung 960 EVO, with Intel graphics acce
 
 ## Compatibility
 
-Current status as of **October 14, 2026**. **Pending** means the feature has not yet been established as working or not working.
+Current status as of **October 15, 2026**. **Pending** means the feature has not yet been established as working or not working.
 
 | Feature | Status | Details |
 |---|---|---|
@@ -28,7 +28,7 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Intel graphics acceleration | Working | IntelAccelerator, Metal 3, up to 1536 MB shared graphics memory |
 | Internal display | Working | Full HD resolution; startup black-screen delay corrected |
 | Brightness slider | Working | Brightness control through macOS settings |
-| Audio playback and controls | Working | VoodooHDA, F1–F3 and jack switching; quiet-volume refinement pending |
+| Audio playback and controls | Working | VoodooHDA, F1–F3 and jack switching; quiet-volume correction confirmed during YouTube playback |
 | Wired headphone output and switching | Working | Jack output works; speakers mute on connection and resume after unplugging |
 | Wired headset microphone | Working | Microphone input through the 3.5 mm combo jack |
 | Internal microphone | Working | S540 microphone correction v2 |
@@ -46,7 +46,6 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Fn function row | Configured | Ordinary F1–F12 events recorded; four conflicting macOS shortcuts disabled, session refresh confirmation pending |
 | Touchpad and gestures | Working | ELAN0662 gestures confirmed in daily use; F6 toggle also works |
 | Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; further icon-key investigation deferred |
-| Quiet-volume range | Pending | Full DAC-range correction prepared; laptop result pending |
 | USB-C video | Pending | No video test available; hardware video capability and routing remain unverified |
 | USB 2 device coverage / storage reliability | Pending | External USB 2 devices, measured throughput and sustained reliability |
 | SD reader / fingerprint reader | Pending | Driver support and device operation |
@@ -80,7 +79,7 @@ The [documentation index](docs/README.md) links to setup, maintenance, and recov
 
 Download the [first EFI release, v0.1.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.1.0), with compatibility notes and setup instructions. Personalize its SMBIOS identity before use.
 
-Generated packages are available in **Artifacts** from successful [GitHub Actions runs](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions). Current companion packages are `S540-microfono-fix-v2` and `S540-brightness-keys-v2`. The [function-key guide](docs/guides/function-keys.md) records the complete keyboard mapping and remaining work.
+Generated packages are available in **Artifacts** from successful [GitHub Actions runs](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions). Current companion packages are `S540-microfono-fix-v2`, `S540-volume-fine-v1` and `S540-brightness-keys-v2`. The [function-key guide](docs/guides/function-keys.md) records the complete keyboard mapping and remaining work.
 
 **Code → Download ZIP downloads source code, without compiled payloads. It is not an installer.** Builders assemble the feature sources into distributable ZIPs with their own launchers and runtime layout.
 

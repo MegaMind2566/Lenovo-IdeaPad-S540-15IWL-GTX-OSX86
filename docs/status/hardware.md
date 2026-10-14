@@ -15,7 +15,7 @@ Report received on 12 October 2026. Only data relevant to the project is include
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Problematic PM981a family; compatibility is not assumed |
 | Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | itlwm 2.3.0 loaded and HeliPort reported working; Ethernet presentation is expected with this driver; disconnection, reconnection and network switching confirmed; Internet baseline 15.751 Mb/s down / 63.036 Mb/s up with Low loaded responsiveness; cause unresolved |
 | Bluetooth | Intel, USB 8087:0AAA | Headphone playback, microphone, disconnection and reconnection confirmed; firmware loaded, correct NVRAM and IntelBTPatcher excluded |
-| Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Speaker/headphone output, automatic switching, wired-headset input and F1–F3 confirmed; S540 microphone fix v2 retained; quiet-volume range correction pending; equalisation and resume checks deferred |
+| Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Speaker/headphone output, automatic switching, wired-headset input and F1–F3 confirmed; S540 microphone fix v2 retained; quiet-volume correction confirmed during YouTube playback; equalisation and resume checks deferred |
 | Keyboard | PS/2 | VoodooPS2; direct F1–F3, F6 and F11/F12 working; remaining icon keys and Fn app-key behavior in progress |
 | Touchpad | ELAN0662, I2C HID; Intel 8086:9DE8 controller | Confirmed path: `_SB.PCI0.I2C0.TPD0`; F6 toggle and touchpad gestures confirmed working |
 | SD reader | O2Micro SD Host Controller | Support still to be verified; different from the reader in the lucatek project |
@@ -128,9 +128,9 @@ The physical jack check confirms audio through wired headphones, muting of the i
 
 ## Quiet output range: October 14, 2026
 
-The output remains too loud near the minimum, with coarse low-volume steps. The previously collected codec graph identifies DAC NID 2, output capability `0x00025757`, mute=0, step=87, size=2 and offset=87. Speaker/headphone pins provide mute separately. The upstream PCM volume-fix interpolation restricts the DAC to its upper half; the exposed −21.5 dB is a master-mixer fallback, not the actual DAC minimum.
+The reported issue was output that remained too loud near the minimum, with coarse low-volume steps. The previously collected codec graph identifies DAC NID 2, output capability `0x00025757`, mute=0, step=87, size=2 and offset=87. Speaker/headphone pins provide mute separately. The upstream PCM volume-fix interpolation restricts the DAC to its upper half; the exposed −21.5 dB is a master-mixer fallback, not the actual DAC minimum.
 
-A separate opt-in output patch restores the full −65.25/0 dB DAC range and matching metadata only for the verified S540 analog topology. Maximum gain and the microphone correction remain unchanged in code. The guarded 3.6.10 upgrade retains an exact private 3.6.9 rollback copy; the [volume guide](../guides/volume-control.md) records installation and verification. Audible low-volume quality and the new driver on this laptop remain pending until its next report. Raw mixer diagnostics remain private.
+A separate opt-in output patch restores the full −65.25/0 dB DAC range and matching metadata only for the verified S540 analog topology. Maximum gain and the microphone correction remain unchanged in code. The guarded 3.6.10 upgrade retains an exact private 3.6.9 rollback copy; the [volume guide](../guides/volume-control.md) records installation and verification. On October 15, 2026, the correction was reported working during YouTube playback, resolving the quiet-volume complaint. Raw mixer diagnostics remain private.
 
 ## Battery and sleep counters: 13 October 2026
 
