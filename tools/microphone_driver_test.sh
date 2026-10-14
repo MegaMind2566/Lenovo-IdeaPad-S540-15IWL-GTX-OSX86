@@ -119,7 +119,11 @@ verify_payload() {
     [ "$(readkey "$PAYLOAD/Contents/Info.plist" IOKitPersonalities.VoodooHDA.S540InputGainFix)" = true ] || fail 'La correzione microfono prevista non è abilitata nel payload.'
     if [ "$RECOVERY" -ne 1 ]; then
         [ "$(/usr/bin/lipo -archs "$PAYLOAD/Contents/MacOS/VoodooHDA")" = x86_64 ] || fail 'Il driver non è esclusivamente Intel x86_64.'
-        /usr/bin/otool -hv "$PAYLOAD/Contents/MacOS/VoodooHDA" | /usr/bin/grep -Eq 'KEXT_BUNDLE' || fail 'Il payload non è un bundle kernel.'
+        /usr/bin/otool -hv "$PAYLOAD/Contents/MacOS/VoodooHDA" > "$TEMP/payload-header.txt"
+        if ! /usr/bin/grep -Eq 'KEXT_?BUNDLE' "$TEMP/payload-header.txt"; then
+            /bin/cat "$TEMP/payload-header.txt" >&2
+            fail 'Il payload non è un bundle kernel.'
+        fi
     fi
     verify_signature "$PAYLOAD"
 }
