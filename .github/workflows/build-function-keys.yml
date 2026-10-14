@@ -47,7 +47,12 @@ jobs:
           root = Path('packages/function-keys')
           output = Path('build/function-keys')
           stage = output / 'S540-function-keys'
-          shutil.copytree(root, stage)
+          stage.mkdir(parents=True)
+          for name in ('COLLECT-FUNCTION-KEYS.command', 'tools/collect_function_keys.sh', 'README.md'):
+              target = stage / name
+              target.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copyfile(root / name, target)
+              target.chmod(0o755 if target.suffix in ('.command', '.sh') else 0o644)
           readme = stage / 'README.md'
           readme.write_text(readme.read_text().replace('../../docs/status/hardware.md', 'https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/blob/main/docs/status/hardware.md'))
           (stage / 'BUILD.txt').write_text('Source commit: ' + os.environ['GITHUB_SHA'] + '\n')
