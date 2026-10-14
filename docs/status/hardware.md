@@ -38,13 +38,13 @@ The disk listing reports a 240.1 GB external GUID HDD with a single Microsoft Ba
 
 ## Current USB SSD link: October 14, 2026
 
-The macOS USB host report identifies the external ULT-Best enclosure as Realtek RTL9210, USB `0BDA:9210`, with a device **Link Speed of 5 Gb/s** under AppleIntelCNLUSBXHCI (`8086:9DED`). This confirms SuperSpeed on the current SSD connection. The physical USB-A/USB-C connector and opposite USB-C orientation are not identified by this report. The USB serial is excluded.
+The macOS USB host report identifies the external ULT-Best enclosure as Realtek RTL9210, USB `0BDA:9210`, with a device **Link Speed of 5 Gb/s** under AppleIntelCNLUSBXHCI (`8086:9DED`). The subsequent report explicitly identifies the laptop-side USB-C connector as reversed and again reports 5 Gb/s. Together with the preceding connection, this confirms USB-C SuperSpeed in both orientations with the current Samsung, RTL9210 enclosure and cable. Remaining USB-A ports and other cables are not covered. The USB serial is excluded.
 
 The reported 4.48 W is USB power allocation, not measured SSD or total laptop consumption. The link speed does not measure storage throughput or establish sustained reliability. Internal Bluetooth and camera enumeration do not extend this result to other external ports. The same report enumerates a Goodix fingerprint device, USB `27C6:55B4`; functional macOS fingerprint support remains unverified.
 
 ## Data still needed
 
-- Remaining USB port coverage and both USB-C orientations. The 9-port map is verified, and the current RTL9210 SSD link reports 5 Gb/s; the report does not identify the physical connector.
+- Remaining USB-A port coverage and sustained SSD reliability. The 9-port map is verified, and USB-C operates at 5 Gb/s in both connector orientations with the current Samsung/RTL9210/cable combination.
 - Component test results in the [roadmap](roadmap.md).
 
 Tahoe reached the desktop on the external Samsung 960 EVO after the framebuffer memory fix. IntelAccelerator and exposed Metal 3 support are confirmed; sustained graphics load, audio, battery runtime, sleep and HDMI remain to be verified. No overall compatibility rating is assigned before testing.
