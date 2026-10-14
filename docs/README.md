@@ -1,6 +1,6 @@
 # Documentation
 
-Start with the [project README](../README.md) for the current state and scope. Detailed technical guides are currently written in Italian.
+Start with the [project README](../README.md) for the current state and scope. Documentation and runtime messages are written in English.
 
 ## Status
 
@@ -20,6 +20,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 | [Microphone v2](guides/microphone-fix.md) | S540 driver variant, verification and rollback |
 | [USB mapping](guides/usb-mapping.md) | Mapped ports and outstanding tests |
 | [Boot disk maintenance](guides/boot-maintenance.md) | Separate maintenance procedure for the physical boot disk |
+| [Function keys](guides/function-keys.md) | Keyboard icon actions, ordinary Fn function keys, event diagnosis and brightness rollback |
 | [Bluetooth](guides/bluetooth.md) | The targeted patcher exclusion and its rollback |
 | [Previous microphone diagnostics](guides/microphone-diagnostics.md) | Collector for VoodooHDA 3.6.8 before the microphone fix; it rejects the 3.6.9 variant |
 
@@ -35,7 +36,7 @@ Graphics experiments, Intel traces and Recovery log collectors are preserved in 
 
 ## Release preparation
 
-[v0.1.0 release notes](releases/v0.1.0.md) describe the working features and remaining limitations. Publication is pending the current EFI snapshot.
+[v0.1.0 release notes](releases/v0.1.0.md) describe the published EFI and its remaining limitations. Later companion fixes are documented separately from that release.
 
 ## Current EFI and next hardware task
 
@@ -43,4 +44,5 @@ Graphics experiments, Intel traces and Recovery log collectors are preserved in 
 - [EFI setup](../packages/efi/README.md): personalization and dependencies outside the EFI.
 - [Function-key diagnosis](../packages/function-keys/README.md): read-only device snapshots and F11/F12 observations for the function-key batch.
 
-- [Function keys and brightness test](guides/function-keys.md): diagnostic findings, add-only trial and exact rollback.
+- [Function-key events](../packages/function-key-events/README.md): a native, read-only observer for the complete direct/Fn row. It does not install mappings.
+

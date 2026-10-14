@@ -1,0 +1,32 @@
+name: Build native function-key observer
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/function-key-events/**'
+      - 'builders/build_function_key_events.py'
+      - '.github/workflows/build-function-key-events.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15-intel
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Compile, sign and verify the passive observer
+        run: python3 builders/build_function_key_events.py --output-dir build/function-key-events
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: S540-function-key-events
+          path: |
+            build/function-key-events/S540-function-key-events.zip
+            build/function-key-events/S540-function-key-events.zip.sha256
+          if-no-files-found: error
+          retention-days: 30

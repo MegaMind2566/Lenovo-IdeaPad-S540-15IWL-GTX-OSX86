@@ -37,7 +37,9 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Battery detection | Working | Battery and charge state available |
 | External SSD access | Working | Samsung 960 EVO in a USB-C enclosure |
 | NVIDIA acceleration | Not working | GTX 1650 Max-Q has no supported driver in this configuration |
-| F11/F12 brightness keys | Not working | Brightness remains available through the slider |
+| F11/F12 brightness keys | Working | BrightnessKeys companion package; not included in EFI v0.1.0 |
+| F6 touchpad toggle | Working | Direct key enables and disables the touchpad |
+| Remaining icon keys / Fn function row | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; Fn+F1–F12 must remain available to apps |
 | Native macOS Wi-Fi interface | Not working | Network management uses HeliPort |
 | Touchpad and gestures | Pending | ELAN0662 functionality requires verification |
 | Analog audio jack / Bluetooth microphone | Pending | Separate from speaker and Bluetooth headphone playback |
@@ -58,7 +60,8 @@ Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including t
 ## Development priorities
 
 - Consolidate the current configuration and complete the pending hardware features.
-- Improve audio equalization and function-key support in a later stage.
+- Complete the remaining keyboard icon actions and preserve ordinary Fn+F1–F12 for applications.
+- Improve audio equalization in a later stage.
 - Complete battery, sleep, wake, and external display support.
 - Investigate NVIDIA support, including the Linux driver port as a research project.
 
@@ -70,7 +73,7 @@ The [documentation index](docs/README.md) links to setup, maintenance, and recov
 
 Download the [first EFI release, v0.1.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.1.0), with compatibility notes and setup instructions. Personalize its SMBIOS identity before use.
 
-Generated packages are available in **Artifacts** from successful [GitHub Actions runs](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions). The current microphone package is `S540-microfono-fix-v2`.
+Generated packages are available in **Artifacts** from successful [GitHub Actions runs](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions). Current companion packages are `S540-microfono-fix-v2` and `S540-brightness-keys-v2`. The [function-key guide](docs/guides/function-keys.md) records the complete keyboard mapping and remaining work.
 
 **Code → Download ZIP downloads source code, without compiled payloads. It is not an installer.** Builders assemble the feature sources into distributable ZIPs with their own launchers and runtime layout.
 
@@ -89,3 +92,4 @@ Generated packages are available in **Artifacts** from successful [GitHub Action
 | [archive/](archive/README.md) | Superseded procedures and development history |
 
 Machine-specific SMBIOS identifiers, Wi-Fi credentials, and original diagnostic reports are kept out of the repository. The S540 VoodooHDA variant is a project modification, not an official upstream release.
+
