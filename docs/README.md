@@ -15,12 +15,13 @@ Start with the [project README](../README.md) for the current state and scope. D
 
 | Guide | Purpose |
 |---|---|
-| [Passive CPU sensors](../packages/cpu-sensors/README.md) | A continuous sensor reading with no CPU workload; fifteen valid idle readings recorded |
-| [CPU, temperature and power](../packages/cpu-thermal/README.md) | Grouped idle, short-load and recovery collector; further load checks are on hold pending sensor reliability |
+| [Passive CPU sensors](../packages/cpu-sensors/README.md) | A continuous sensor reading with no CPU workload; complete temperature readings at idle and during desktop activity |
+| [CPU, temperature and power](../packages/cpu-thermal/README.md) | Grouped idle, short-load and recovery collector; sustained-cooling validation remains separate from the successful activity readings |
 | [Intel graphics](guides/intel-graphics.md) | Acceleration and stability checks |
 | [Boot and networking](guides/boot-network.md) | Backlight boot fix, HeliPort and Bluetooth |
 | [Tahoe audio](guides/tahoe-audio.md) | Initial audio setup, volume fix and recovery |
 | [Microphone v2](guides/microphone-fix.md) | S540 driver variant, verification and rollback |
+| [Fine output volume](guides/volume-control.md) | Full analog DAC range with the working microphone correction retained |
 | [USB mapping](guides/usb-mapping.md) | Mapped ports and outstanding tests |
 | [Independent SSD boot](guides/ssd-boot.md) | Confirmed manual EFI transfer and Samsung boot; automatic helper on hold |
 | [Boot disk maintenance](guides/boot-maintenance.md) | Separate maintenance procedure for the physical boot disk |

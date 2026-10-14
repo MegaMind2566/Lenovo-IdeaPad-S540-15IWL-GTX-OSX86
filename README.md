@@ -28,7 +28,7 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Intel graphics acceleration | Working | IntelAccelerator, Metal 3, up to 1536 MB shared graphics memory |
 | Internal display | Working | Full HD resolution; startup black-screen delay corrected |
 | Brightness slider | Working | Brightness control through macOS settings |
-| Audio playback and volume | Working | VoodooHDA; gradual volume changes and F1–F3 controls |
+| Audio playback and controls | Working | VoodooHDA, F1–F3 and jack switching; quiet-volume refinement pending |
 | Wired headphone output and switching | Working | Jack output works; speakers mute on connection and resume after unplugging |
 | Wired headset microphone | Working | Microphone input through the 3.5 mm combo jack |
 | Internal microphone | Working | S540 microphone correction v2 |
@@ -46,6 +46,7 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Fn function row | Configured | Ordinary F1–F12 events recorded; four conflicting macOS shortcuts disabled, session refresh confirmation pending |
 | Touchpad and gestures | Working | ELAN0662 gestures confirmed in daily use; F6 toggle also works |
 | Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; further icon-key investigation deferred |
+| Quiet-volume range | Pending | Full DAC-range correction prepared; laptop result pending |
 | USB-C video | Pending | No video test available; hardware video capability and routing remain unverified |
 | USB 2 device coverage / storage reliability | Pending | External USB 2 devices, measured throughput and sustained reliability |
 | SD reader / fingerprint reader | Pending | Driver support and device operation |

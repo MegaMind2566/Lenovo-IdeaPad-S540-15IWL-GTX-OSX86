@@ -91,6 +91,18 @@ networkQuality -s
 
 Sequential mode separates upload and download responsiveness. A better result would show sensitivity to concurrent traffic in these observations, without isolating the responsible component. A poor sequential result would still need a separate reference before a driver or router change. [Apple's WWDC22 example](https://developer.apple.com/videos/play/wwdc2022/10078/) uses `-s`; the [responsiveness methodology](https://github.com/network-quality/draft-ietf-ippm-responsiveness/blob/main/draft-ietf-ippm-responsiveness.md#concurrent-vs-sequential-uplink-and-downlink) explains why sequential measurements help distinguish the affected direction.
 
+### Recorded sequential comparison: October 14, 2026
+
+| Metric | Result |
+|---|---|
+| Downlink capacity | 78.762 Mb/s |
+| Uplink capacity | 81.610 Mb/s |
+| Uplink responsiveness | Low: 684.383 ms / 87 RPM |
+| Downlink responsiveness | Medium: 144.830 ms / 414 RPM |
+| Idle latency | 33.658 ms / 1782 RPM |
+
+The sequential trial reports higher capacity than the concurrent baseline, and the larger loaded delay is in the uplink. The difference shows sensitivity to test conditions in these observations; it does not isolate radio, driver, router, ISP or endpoint. No line-rate or independent-client reference is available. Keep itlwm/HeliPort unchanged. Further network investigation is deferred while the reported quiet-volume issue is addressed.
+
 ## Checks and limitations
 
 The scripts are checked for Bash syntax and with simulated Linux fixtures. Collection checks cover the boot window, timeouts, errors, data filtering, and ZIP creation. Native collection was run on the laptop and the report analyzed. The panel trial eliminated the black screen in the reported result. Bluetooth headphone and HeliPort operation were subsequently confirmed; other checks remain open.

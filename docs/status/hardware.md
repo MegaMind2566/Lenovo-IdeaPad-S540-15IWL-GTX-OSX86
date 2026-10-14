@@ -15,7 +15,7 @@ Report received on 12 October 2026. Only data relevant to the project is include
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Problematic PM981a family; compatibility is not assumed |
 | Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | itlwm 2.3.0 loaded and HeliPort reported working; Ethernet presentation is expected with this driver; disconnection, reconnection and network switching confirmed; Internet baseline 15.751 Mb/s down / 63.036 Mb/s up with Low loaded responsiveness; cause unresolved |
 | Bluetooth | Intel, USB 8087:0AAA | Headphone playback, microphone, disconnection and reconnection confirmed; firmware loaded, correct NVRAM and IntelBTPatcher excluded |
-| Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Speaker/headphone output, automatic switching, wired-headset input, gradual volume and F1–F3 confirmed; S540 internal microphone fix v2 retained; equalisation and resume checks deferred |
+| Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Speaker/headphone output, automatic switching, wired-headset input and F1–F3 confirmed; S540 microphone fix v2 retained; quiet-volume range correction pending; equalisation and resume checks deferred |
 | Keyboard | PS/2 | VoodooPS2; direct F1–F3, F6 and F11/F12 working; remaining icon keys and Fn app-key behavior in progress |
 | Touchpad | ELAN0662, I2C HID; Intel 8086:9DE8 controller | Confirmed path: `_SB.PCI0.I2C0.TPD0`; F6 toggle and touchpad gestures confirmed working |
 | SD reader | O2Micro SD Host Controller | Support still to be verified; different from the reader in the lucatek project |
@@ -110,7 +110,7 @@ Bluetooth status is On, FirmwareLoaded is Yes and the transport is connected; Bl
 
 The built-in `networkQuality` summary reports **15.751 Mb/s downlink**, **63.036 Mb/s uplink**, **Low responsiveness at 1.023 seconds / 58 RPM**, and **idle latency 41.376 ms / 1450 RPM**. This is the default concurrent upload/download test on the current connection. The connection remains functional; the observed low loaded responsiveness does not by itself identify a Wi-Fi driver fault.
 
-The result covers the whole path through the laptop, radio, router, Internet service and test endpoint. It is neither isolated Wi-Fi/LAN throughput nor a known comparison against the subscribed line rate. The next bounded comparison uses sequential upload/download on the same laptop, network and position. No itlwm, HeliPort, EFI or router setting is changed from this single baseline. Details are in [Boot and network](../guides/boot-network.md#connection-performance-baseline).
+The result covers the whole path through the laptop, radio, router, Internet service and test endpoint. It is neither isolated Wi-Fi/LAN throughput nor a known comparison against the subscribed line rate. The subsequent sequential result is 78.762 Mb/s downlink and 81.610 Mb/s uplink, with uplink responsiveness Low (684.383 ms / 87 RPM), downlink responsiveness Medium (144.830 ms / 414 RPM) and idle latency 33.658 ms / 1782 RPM. This trial is faster than the concurrent baseline, with the larger loaded delay in the uplink; the observation still does not locate the bottleneck. No itlwm, HeliPort, EFI or router setting is changed from this single baseline. Details are in [Boot and network](../guides/boot-network.md#connection-performance-baseline).
 
 ## Webcam and voice capture: 13 October 2026
 
@@ -125,6 +125,12 @@ The [test](../guides/microphone-fix.md) uses VoodooHDA 3.6.9, S540 variant: the 
 ## Analog audio jack: October 14, 2026
 
 The physical jack check confirms audio through wired headphones, muting of the internal speakers while connected, and automatic return to speakers after unplugging. Microphone input through the 3.5 mm jack was subsequently confirmed working. The existing VoodooHDA configuration is retained. Equalisation and audio recovery after sleep remain deferred.
+
+## Quiet output range: October 14, 2026
+
+The output remains too loud near the minimum, with coarse low-volume steps. The previously collected codec graph identifies DAC NID 2, output capability `0x00025757`, mute=0, step=87, size=2 and offset=87. Speaker/headphone pins provide mute separately. The upstream PCM volume-fix interpolation restricts the DAC to its upper half; the exposed −21.5 dB is a master-mixer fallback, not the actual DAC minimum.
+
+A separate opt-in output patch restores the full −65.25/0 dB DAC range and matching metadata only for the verified S540 analog topology. Maximum gain and the microphone correction remain unchanged in code. The guarded 3.6.10 upgrade retains an exact private 3.6.9 rollback copy; the [volume guide](../guides/volume-control.md) records installation and verification. Audible low-volume quality and the new driver on this laptop remain pending until its next report. Raw mixer diagnostics remain private.
 
 ## Battery and sleep counters: 13 October 2026
 

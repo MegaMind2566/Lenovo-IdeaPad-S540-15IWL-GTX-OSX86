@@ -4,7 +4,7 @@ This guide documents the original audio setup and its private rollback backups o
 
 ## Current audio status: October 14, 2026
 
-Speaker playback, gradual volume control and F1–F3 work with the retained VoodooHDA setup. The wired jack now also passes headphone output and automatic switching: speakers mute when headphones are connected and resume after unplugging. No further audio-driver change follows from this result.
+Speaker playback and F1–F3 work with the retained VoodooHDA setup, and the earlier mute-only volume defect is resolved. A later report finds the output too loud near the minimum and the low steps too coarse. The [fine-volume correction](volume-control.md) restores the full DAC range while preserving the working microphone patch; its laptop result is pending. The wired jack passes headphone output and automatic switching: speakers mute when headphones are connected and resume after unplugging.
 
 The internal microphone correction remains in use. Microphone input through a wired headset on the 3.5 mm combo jack is now confirmed working, alongside the internal and Bluetooth microphones. Equalisation and audio recovery after sleep remain deferred. The sections below preserve the earlier setup and correction history; their initial unverified jack and microphone status is superseded by these results.
 

@@ -11,7 +11,8 @@ The [CPU and sensor reports](cpu-thermal.md) confirm frequency/power response an
 | 1 | Graphics, power and thermals | Sustained Intel graphics use and cooling, fan telemetry and measured battery runtime. Continuous temperature readings during desktop activity and basic battery power/discharge reporting are confirmed. NVIDIA electrical power-off is deferred until after the driver-port attempt. |
 | Complete / retained | Boot and EFI consolidation | Independent Samsung boot confirmed after manual EFI transfer. Keep the HDD as a recovery path and preserve the private working EFI. A later sanitized release remains separate from v0.1.0. |
 | 3 | Storage and USB reliability | USB-C at 5 Gb/s in both orientations and both tested USB-A connectors at 5 Gb/s are confirmed. File reads on both USB-A connectors are confirmed. External USB 2 devices, sustained SSD stability, shutdown and reboot remain separate checks. Move the system SSD cable only after shutdown. |
-| Active | Network performance | Concurrent Internet baseline: 15.751 Mb/s down, 63.036 Mb/s up, Low responsiveness (1.023 s / 58 RPM), idle latency 41.376 ms. Compare sequential upload/download on the same laptop and network before attributing a cause. This does not isolate Wi-Fi radio throughput. Retain the working drivers. |
+| Active | Quiet output volume | The low end is too loud with the current half-range PCM mapping. A scoped full DAC-range upgrade preserves the microphone correction and maximum gain; laptop confirmation remains pending. |
+| Recorded | Network performance | Concurrent baseline 15.751/63.036 Mb/s down/up; sequential 78.762/81.610 Mb/s. Sequential responsiveness: uplink Low (684.383 ms), downlink Medium (144.830 ms). The cause of the path delay is unresolved; retain the working Wi-Fi driver. |
 | Paused | External displays | HDMI produces no image and macOS lists only the internal panel. A Windows GPU-routing check is retained for when this work resumes. USB-C video cannot currently be tested; hardware capability remains unverified. |
 | 6 | Other peripherals | O2Micro SD reader and fingerprint-reader support. |
 | Later | Deferred refinements | Remaining F4/F5/F7/F8/F9/F10 icon actions, Fn behavior after session refresh, audio equalization, lid/sleep/wake and peripheral recovery. NVIDIA electrical power-off follows the driver-port attempt. |
@@ -31,9 +32,9 @@ Priorities updated on 13 October 2026: the panel being off during boot is **reso
 | Intel UHD 620 | IntelAccelerator detected, Metal 3 exposed, shared memory up to 1536 MB; boot without VESA | Metal load and sustained use without freezes or artefacts |
 | Keyboard | Direct F1–F3, F6 and F11/F12 working | Map the six remaining icon actions and preserve ordinary Fn+F1–F12 for applications |
 | ELAN touchpad | F6 toggle and gestures confirmed working in use | Retain the current configuration; recovery after sleep remains part of the deferred wake checks |
-| Intel AC9560 Wi-Fi | itlwm 2.3.0 and HeliPort working; disconnection, reconnection and network switching confirmed; Ethernet on en0 is expected with this driver | Internet baseline 15.751 Mb/s down / 63.036 Mb/s up, Low loaded responsiveness; sequential comparison pending. Isolated Wi-Fi throughput and native Tahoe integration remain separate |
+| Intel AC9560 Wi-Fi | itlwm 2.3.0 and HeliPort working; disconnection, reconnection and network switching confirmed; Ethernet on en0 is expected with this driver | Internet baseline recorded; sequential result 78.762 Mb/s down / 81.610 Mb/s up with Low uplink and Medium downlink responsiveness. Isolated Wi-Fi throughput and native Tahoe integration remain separate |
 | Intel Bluetooth | Headphone playback, microphone, disconnection and reconnection confirmed; firmware loaded, correct NVRAM, IntelBTPatcher 2.4 excluded | Retain the current drivers; recovery after sleep belongs to the deferred wake checks |
-| ALC257 audio | Speaker/headphone output, automatic switching, wired-headset input, gradual volume and F1–F3 confirmed; internal microphone fix v2 retained | Retain the working driver; equalisation and resume checks deferred |
+| ALC257 audio | Speaker/headphone output, automatic switching, wired-headset input and F1–F3 confirmed; internal microphone fix v2 retained; output too loud near minimum | Full DAC-range upgrade prepared, awaiting laptop result; equalisation and resume checks deferred |
 | USB-A and USB-C | 9-port map verified; Samsung/RTL9210 at 5 Gb/s in both USB-C orientations; Initio enclosure at 5 Gb/s on both tested USB-A connectors | External USB 2 devices and sustained storage use; SuperSpeed links and file reads are confirmed for both USB-A connectors |
 | External Samsung 960 EVO | Independent boot confirmed; current enclosure link 5 Gb/s | Sustained storage use without disconnections and measured throughput; resume remains part of deferred wake checks |
 | Internal PM981a NVMe | Visible in Recovery; retained for Windows | Check for any effects on macOS stability |
@@ -57,7 +58,7 @@ Fn+F1–F12 must remain ordinary application function keys. Remove or reassign o
 
 ## Deferred audio work
 
-**ALC257 equalisation:** to be reviewed later. The positive result of 13 October 2026 confirms audio and volume after the v3 fix. The working configuration is retained for now; tonal refinement will be a separate test, without reopening the volume issue.
+**ALC257 equalisation:** to be reviewed later. The earlier mute-only volume issue was resolved, but the quiet end is now reported too loud. The [full DAC-range correction](../guides/volume-control.md) addresses that separate range limitation and preserves the microphone fix; its on-device result is pending. Tonal refinement remains deferred.
 
 ## NVIDIA research
 

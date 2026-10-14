@@ -8,8 +8,9 @@ ZIP packages. Builders and regression checks are kept separately.
 | --- | --- | --- |
 | [ssd-boot](ssd-boot) | Automatic transfer helper on hold after a mounted-target guard stop. Manual transfer and independent Samsung boot are confirmed. | [Independent SSD boot](../docs/guides/ssd-boot.md) |
 | [cpu-sensors](cpu-sensors) | Read continuous, filtered sensor telemetry and loaded SMC driver versions without a CPU workload. | [Passive sensor check](cpu-sensors/README.md) |
-| [cpu-thermal](cpu-thermal) | Collect bounded idle, CPU-load and recovery telemetry with owned-worker cleanup. Further load checks are on hold pending sensor reliability. | [CPU check](cpu-thermal/README.md) |
+| [cpu-thermal](cpu-thermal) | Collect bounded idle, CPU-load and recovery telemetry with owned-worker cleanup. Continuous temperature readings during desktop activity work; sustained cooling remains separate. | [CPU check](cpu-thermal/README.md) |
 | [microphone](microphone) | Install, verify and reverse the scoped ALC257 input-gain correction. Includes the shared V3 audio ownership check. | [Microphone correction](../docs/guides/microphone-fix.md) |
+| [audio-volume](audio-volume) | Restore the full analog DAC range while retaining the 3.6.9 microphone correction and an exact private rollback copy. | [Fine output volume](../docs/guides/volume-control.md) |
 | [audio](audio) | Prepare, install and reverse the Tahoe VoodooHDA audio setup and its speaker-volume correction. | [Audio](../docs/guides/tahoe-audio.md) |
 | [backlight](backlight) | Apply or reverse the guarded `-igfxblr` boot-backlight correction. | [Boot and network](../docs/guides/boot-network.md) |
 | [boot-network](boot-network) | Collect startup, graphics, Bluetooth and network reports without changing their configuration. | [Boot and network](../docs/guides/boot-network.md) |

@@ -1,0 +1,80 @@
+name: Build fine output volume driver
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/build-audio-volume.yml
+      - patches/audio-microphone/**
+      - patches/audio-volume/**
+      - builders/build_audio_volume.py
+      - builders/build_audio_microphone.py
+      - tests/test_audio_output_patch.py
+      - tests/test_audio_microphone_patch.py
+      - tests/test_volume_installer.py
+      - packages/audio-volume/**
+      - licenses/audio-tahoe/**
+      - docs/guides/volume-control.md
+      - config/profiles/audio-tahoe-assets.lock.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15-intel
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: CloverHackyColor/VoodooHDA
+          ref: 8c7e8e2ce6de0a917be663a3192857955288c937
+          path: build-src/VoodooHDA
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: joevt/MacKernelSDK
+          ref: bfbfbe4cf35979f33ded6c7a8761eb1df091fb39
+          path: build-src/MacKernelSDK
+          persist-credentials: false
+      - name: Verify pinned source and SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = x86_64
+          test "$(git -C build-src/VoodooHDA rev-parse HEAD)" = 8c7e8e2ce6de0a917be663a3192857955288c937
+          test "$(git -C build-src/MacKernelSDK rev-parse HEAD)" = bfbfbe4cf35979f33ded6c7a8761eb1df091fb39
+      - name: Preserve microphone policy and test output range
+        shell: bash
+        run: |
+          set -euo pipefail
+          git -C build-src/VoodooHDA apply --check "$GITHUB_WORKSPACE/patches/audio-microphone/input-gain.patch"
+          git -C build-src/VoodooHDA apply "$GITHUB_WORKSPACE/patches/audio-microphone/input-gain.patch"
+          python3 tests/test_audio_microphone_patch.py "$GITHUB_WORKSPACE/build-src/VoodooHDA"
+          git -C build-src/VoodooHDA apply --check "$GITHUB_WORKSPACE/patches/audio-volume/output-range.patch"
+          git -C build-src/VoodooHDA apply "$GITHUB_WORKSPACE/patches/audio-volume/output-range.patch"
+          python3 tests/test_audio_output_patch.py "$GITHUB_WORKSPACE/build-src/VoodooHDA"
+          bash -n packages/audio-volume/tools/volume_driver_test.sh packages/audio-volume/INSTALL-VOLUME.command packages/audio-volume/RESTORE-VOLUME.command packages/audio-volume/VERIFY-VOLUME.command
+      - name: Build and package full-range driver
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -project build-src/VoodooHDA/tranc/VoodooHDA_BS.xcodeproj -target VoodooHDA -configuration Release ARCHS=x86_64 ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO LLVM_LTO=NO CURRENT_PROJECT_VERSION=3.6.10 MARKETING_VERSION=3.6.10 MODULE_VERSION=3.6.10 CONFIGURATION_BUILD_DIR="$RUNNER_TEMP/audio-volume-build" build > "$RUNNER_TEMP/audio-volume-build.log" 2>&1 || { tail -100 "$RUNNER_TEMP/audio-volume-build.log"; exit 1; }
+          python3 builders/build_audio_volume.py --built-bundle "$RUNNER_TEMP/audio-volume-build/VoodooHDA.kext" --output-dir "$GITHUB_WORKSPACE/build/audio-volume"
+      - name: Test guarded volume installer and rollback without kernel calls
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo env GITHUB_ACTIONS=true RUNNER_TEMP="$RUNNER_TEMP" "$(command -v python3)" tests/test_volume_installer.py "$GITHUB_WORKSPACE/build/audio-volume/S540-volume-fine-v1"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: S540-volume-fine-v1
+          path: |
+            build/audio-volume/S540-volume-fine-v1.zip
+            build/audio-volume/S540-volume-fine-v1.zip.sha256
+          if-no-files-found: error
+          retention-days: 30

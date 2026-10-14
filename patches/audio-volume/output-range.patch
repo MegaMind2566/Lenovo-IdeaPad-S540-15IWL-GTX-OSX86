@@ -1,0 +1,178 @@
+--- a/tranc/VoodooHDADevice.cpp
++++ b/tranc/VoodooHDADevice.cpp
+@@ -45,6 +45,7 @@
+ // cue8chalk: added to allow for the volume change fix to be controlled from the plist
+ #define kVoodooHDAEnableVolumeChangeFixKey "VoodooHDAEnableVolumeChangeFix"
+ #define kS540InputGainFixKey "S540InputGainFix"
++#define kS540OutputRangeFixKey "S540OutputRangeFix"
+ #define kVoodooHDAEnableHalfVolumeFixKey "VoodooHDAEnableHalfVolumeFix"
+ // VertexBZ: added to allow for the Mic and Mute fixes to be controlled from the plist
+ #define kVoodooHDAEnableHalfMicVolumeFixKey "VoodooHDAEnableHalfMicVolumeFix"
+@@ -249,6 +250,9 @@
+ 	osBool = OSDynamicCast(OSBoolean, dict->getObject(kS540InputGainFixKey));
+ 	mEnableS540InputGainFix = osBool && osBool->getValue();
+ 	setProperty("S540InputGainFixActive", false);
++	osBool = OSDynamicCast(OSBoolean, dict->getObject(kS540OutputRangeFixKey));
++	mEnableS540OutputRangeFix = osBool && osBool->getValue();
++	setProperty("S540OutputRangeFixActive", false);
+ 
+ 	// Half volume slider fix
+ 	osBool = OSDynamicCast(OSBoolean, dict->getObject(kVoodooHDAEnableHalfVolumeFixKey));
+@@ -1007,6 +1011,8 @@
+     // cue8chalk: set volume change fix on the engine
+     audioEngine->mEnableVolumeChangeFix = mEnableVolumeChangeFix;
+     audioEngine->mEnableS540InputGainFix = s540InputGainFixEnabled(channel->pcmDevice);
++    audioEngine->mEnableS540OutputRangeFix = channel->direction == PCMDIR_PLAY &&
++        s540OutputRangeFixEnabled(channel->pcmDevice);
+     // VertexBZ: set Mute fix on the engine
+     audioEngine->mEnableMuteFix = mEnableMuteFix;
+ 
+@@ -2939,6 +2945,36 @@
+ 	return true;
+ }
+ 
++// The full output range is opt-in and only valid for the observed analog DAC.
++bool VoodooHDADevice::s540OutputRangeFixEnabled(PcmDevice *pcmDevice)
++{
++	if (!mEnableS540OutputRangeFix || !mEnableVolumeChangeFix ||
++	    !s540InputGainFixEnabled(pcmDevice) || pcmDevice->digital ||
++	    pcmDevice->playChanId < 0 || pcmDevice->playChanId >= mNumChannels)
++		return false;
++	const int assoc = mChannels[pcmDevice->playChanId].assocNum;
++	if (assoc < 0 || assoc >= pcmDevice->funcGroup->audio.numAssocs ||
++	    pcmDevice->funcGroup->audio.assocs[assoc].digital)
++		return false;
++	bool found = false;
++	AudioControl *control;
++	for (int i = 0; (control = audioCtlEach(pcmDevice->funcGroup, i)); i++) {
++		if (!control->enable || !control->widget || control->step <= 0 ||
++		    (control->widget->bindAssoc != assoc && control->widget->bindAssoc != -2))
++			continue;
++		if (found || control->widget->bindAssoc != assoc ||
++		    control->widget->nid != 2 || control->dir != HDA_CTL_OUT ||
++		    control->index != 0 || control->ossmask != SOUND_MASK_PCM ||
++		    control->step != 87 || control->size != 2 ||
++		    control->offset != 87 || control->mute != 0)
++			return false;
++		found = true;
++	}
++	if (!found) return false;
++	setProperty("S540OutputRangeFixActive", true);
++	return true;
++}
++
+ int VoodooHDADevice::audioCtlOssMixerSet(PcmDevice *pcmDevice, UInt32 dev, UInt32 left, UInt32 right)
+ {
+ 	FunctionGroup *funcGroup = pcmDevice->funcGroup;
+@@ -2950,6 +2986,7 @@
+ 	//logMsg("VoodooHDADevice[%p]::audioCtlOssMixerSet(%p, %ld, %ld, %ld)\n", this, pcmDevice, dev, left, right);
+ 
+ 	const bool s540InputGainFix = s540InputGainFixEnabled(pcmDevice);
++	const bool s540OutputRangeFix = s540OutputRangeFixEnabled(pcmDevice);
+ 	// These caches are routing factors: zero would mute the upstream selector.
+ 	// The coarse pin boost is held at raw step zero independently below.
+ 	if (s540InputGainFix && (dev == SOUND_MIXER_IMIX ||
+@@ -3026,7 +3063,7 @@
+ 
+         // VertexBZ: Separated flags for Volume/PCM and Mic Half Volume fixes
+ 		if ((dev == SOUND_MIXER_VOLUME && mEnableHalfVolumeFix) ||
+-            (dev == SOUND_MIXER_PCM && mEnableVolumeChangeFix) ||
++            (dev == SOUND_MIXER_PCM && mEnableVolumeChangeFix && !s540OutputRangeFix) ||
+             (dev == SOUND_MIXER_MIC && mEnableHalfMicVolumeFix)) {
+ 			// cue8chalk: lerp the volume between the midpoint and the end to get the true value
+ 			lvol = ilerp(control->offset >> 1, control->offset, ((lvol * control->step + 50) / 100) / (control->offset != 0 ? (float)control->offset : 1));
+--- a/tranc/VoodooHDADevice.h
++++ b/tranc/VoodooHDADevice.h
+@@ -172,6 +172,7 @@
+ 	// cue8chalk: flag to enable/disable volume fix (loaded from plist)
+ 	bool mEnableVolumeChangeFix;
+ 	bool mEnableS540InputGainFix;
++	bool mEnableS540OutputRangeFix;
+ 	bool mEnableHalfVolumeFix;
+     // VertexBZ: flags to enable/disable Mic and Mute fixes (loaded from plist)
+ 	bool mEnableHalfMicVolumeFix;
+@@ -354,6 +355,7 @@
+ 
+ 	int audioCtlOssMixerInit(PcmDevice *pcmDevice);
+ 	bool s540InputGainFixEnabled(PcmDevice *pcmDevice);
++	bool s540OutputRangeFixEnabled(PcmDevice *pcmDevice);
+ 	int audioCtlOssMixerSet(PcmDevice *pcmDevice, UInt32 dev, UInt32 left, UInt32 right);
+ 	int ilerp(int a, int b, float t);	// cue8chalk
+ 	UInt32 audioCtlOssMixerSetRecSrc(PcmDevice *pcmDevice, UInt32 src);
+--- a/tranc/VoodooHDAEngine.cpp
++++ b/tranc/VoodooHDAEngine.cpp
+@@ -300,8 +300,9 @@
+ 			continue;
+ 		if (control->step <= 0)
+ 			continue;
+-		if (mEnableS540InputGainFix && getEngineDirection() == kIOAudioStreamDirectionInput) {
+-			// Preserve the ADC's 0.75 dB steps, including -17.25 dB; no signed shift.
++		if ((mEnableS540InputGainFix && getEngineDirection() == kIOAudioStreamDirectionInput) ||
++		    (mEnableS540OutputRangeFix && getEngineDirection() == kIOAudioStreamDirectionOutput)) {
++			// Preserve exact quarter-dB capability units; never shift a negative value.
+ 			minDb = (IOFixed)((SInt64)(-control->offset) * (control->size + 1) * 16384);
+ 			maxDb = (IOFixed)((SInt64)(control->step - control->offset) * (control->size + 1) * 16384);
+ 		} else {
+@@ -880,8 +881,12 @@
+ 	direction = getEngineDirection();
+ 	if (direction == kIOAudioStreamDirectionOutput) {
+ 		usage = kIOAudioControlUsageOutput;
+-		initOssDev = SOUND_MIXER_VOLUME;
+-		initOssMask = SOUND_MASK_VOLUME;
++		initOssDev = mEnableS540OutputRangeFix ? SOUND_MIXER_PCM : SOUND_MIXER_VOLUME;
++		initOssMask = mEnableS540OutputRangeFix ? SOUND_MASK_PCM : SOUND_MASK_VOLUME;
++		if (mEnableS540OutputRangeFix) {
++			oldOutVolumeLeft = mChannel->pcmDevice->left[SOUND_MIXER_PCM];
++			oldOutVolumeRight = mChannel->pcmDevice->right[SOUND_MIXER_PCM];
++		}
+ 	}	
+ 	else if (direction == kIOAudioStreamDirectionInput) {
+ 		usage = kIOAudioControlUsageInput;
+@@ -921,6 +926,8 @@
+ 	/* Create Volume controls */
+ 	/* Left channel */
+ 	control = IOAudioLevelControl::createVolumeControl(
++        (mEnableS540OutputRangeFix && direction == kIOAudioStreamDirectionOutput) ?
++        mChannel->pcmDevice->left[SOUND_MIXER_PCM] :
+         (mEnableS540InputGainFix && direction == kIOAudioStreamDirectionInput) ?
+         mChannel->pcmDevice->left[SOUND_MIXER_RECLEV] : mDevice->mMixerDefaults[initOssDev],
+ 													   0,	
+@@ -942,6 +949,8 @@
+     
+ 	/* Right channel */
+ 	control = IOAudioLevelControl::createVolumeControl(
++        (mEnableS540OutputRangeFix && direction == kIOAudioStreamDirectionOutput) ?
++        mChannel->pcmDevice->right[SOUND_MIXER_PCM] :
+         (mEnableS540InputGainFix && direction == kIOAudioStreamDirectionInput) ?
+         mChannel->pcmDevice->left[SOUND_MIXER_RECLEV] : mDevice->mMixerDefaults[initOssDev],
+ 													   0,	
+@@ -1055,7 +1064,8 @@
+ 				if(volumeControl->getChannelID() == 1) {
+ 					oldOutVolumeLeft = newValue;
+ 					if (mEnableVolumeChangeFix) {
+-						mDevice->audioCtlOssMixerSet(pcmDevice, SOUND_MIXER_PCM, newValue, newValue);
++						mDevice->audioCtlOssMixerSet(pcmDevice, SOUND_MIXER_PCM, newValue,
++						mEnableS540OutputRangeFix ? oldOutVolumeRight : newValue);
+ 					} else {
+ 						mDevice->audioCtlOssMixerSet(pcmDevice, SOUND_MIXER_VOLUME, newValue, pcmDevice->right[0]);
+ 					}
+@@ -1065,7 +1075,8 @@
+ 				else if(volumeControl->getChannelID() == 2) {
+ 					oldOutVolumeRight = newValue;
+ 					if (mEnableVolumeChangeFix) {
+-						mDevice->audioCtlOssMixerSet(pcmDevice, SOUND_MIXER_PCM, newValue, newValue);
++						mDevice->audioCtlOssMixerSet(pcmDevice, SOUND_MIXER_PCM,
++						mEnableS540OutputRangeFix ? oldOutVolumeLeft : newValue, newValue);
+ 					} else {
+ 						mDevice->audioCtlOssMixerSet(pcmDevice, SOUND_MIXER_VOLUME, pcmDevice->left[0], newValue);
+ 					}
+--- a/tranc/VoodooHDAEngine.h
++++ b/tranc/VoodooHDAEngine.h
+@@ -46,6 +46,7 @@
+ 	// cue8chalk: flag for volume change fix
+ 	bool mEnableVolumeChangeFix;
+ 	bool mEnableS540InputGainFix;
++	bool mEnableS540OutputRangeFix;
+     // VertexBZ: flag for mute fix
+ 	bool mEnableMuteFix;
+ 	

@@ -12,6 +12,8 @@ The correction activates only for Intel controller 8086:9dc8, Realtek codec 10ec
 
 After package **S540-microfono-fix-v2** and a reboot on October 14, 2026, internal microphone operation was reported working. Bluetooth headset voice capture and microphone input through the 3.5 mm jack were subsequently confirmed. The working correction and previous driver's backup are retained. Equalization and audio recovery after sleep remain deferred.
 
+The later [fine-volume upgrade](volume-control.md) preserves this input correction in driver 3.6.10. While that upgrade is installed, use its own verify/restore commands; restore it before using this guide's older rollback helper.
+
 ## Installing from the Tahoe desktop
 
 Version v2 checks the driver's Intel header using system utilities. It requires neither Xcode nor Command Line Tools and retains v1's integrity and signature checks.
