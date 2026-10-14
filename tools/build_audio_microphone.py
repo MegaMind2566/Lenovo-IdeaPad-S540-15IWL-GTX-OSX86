@@ -138,13 +138,15 @@ def load_original_info() -> dict:
         if digest(data) != ARCHIVE_SHA:
             fail("SHA256 del rilascio ufficiale non valido.")
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
-        files = [item for item in archive.infolist() if not item.is_dir()]
-        if len(files) != 3 or {item.filename for item in files} != set(ORIGINAL_FILES):
-            fail("Il rilascio deve contenere esattamente i tre file canonici.")
+        # The entire pinned archive is already authenticated above. Read only
+        # the three canonical bundle files; never extract archive metadata.
+        files = [item for item in archive.infolist() if item.filename in ORIGINAL_FILES]
+        if any(sum(item.filename == name for item in files) != 1 for name in ORIGINAL_FILES):
+            fail("Ogni file canonico deve comparire esattamente una volta nel rilascio.")
         contents = {}
         for item in files:
             mode = item.external_attr >> 16
-            if stat.S_ISLNK(mode) or item.file_size > 4 * 1024 * 1024:
+            if item.is_dir() or stat.S_ISLNK(mode) or item.file_size > 4 * 1024 * 1024:
                 fail("Il rilascio contiene un link o un file troppo grande.")
             value = archive.read(item)
             if digest(value) != ORIGINAL_FILES[item.filename]:
