@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 LOCK = ROOT / "config/profiles/brightness-keys-assets.lock.json"
 CONFIG = ROOT / "config/efi/current/config.plist"
 PLAN = ROOT / "config/efi/current/manifest.json"
-PACKAGE = "S540-brightness-keys"
+PACKAGE = "S540-brightness-keys-v2"
 IDENTIFIER = "as.acidanthera.BrightnessKeys"
 VERSION = "1.0.3"
 SOURCE_REPOSITORY = "MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86"
@@ -431,7 +431,7 @@ def package(arguments: argparse.Namespace, acquired: tuple) -> tuple[Path, str]:
         write_bytes(stage / "tools/brightness_keys_test.sh",
                     helper_text.replace(marker, manifest_sha).encode("utf-8"), True)
         copy_source(runtime / "tools/collect_function_keys.sh", stage / "tools/collect_function_keys.sh", True)
-        write_bytes(stage / "README.md", absolute_readme_links(runtime / "README.md").encode("utf-8"))
+        write_bytes(stage / "README.md", absolute_readme_links(runtime / "README.md").replace("S540-brightness-keys", PACKAGE).encode("utf-8"))
         copy_source(ROOT / "licenses/brightness-keys/LICENSE", stage / "LICENSES/BrightnessKeys-LICENSE.txt")
         copy_source(ROOT / "licenses/efi/OpenCore-LICENSE.txt", stage / "LICENSES/OpenCore-LICENSE.txt")
         build = {"schema": 1, "package": PACKAGE, "source_commit": os.environ.get("GITHUB_SHA"),

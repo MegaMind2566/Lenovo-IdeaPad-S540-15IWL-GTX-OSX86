@@ -51,13 +51,13 @@ jobs:
               archive.extractall('build/efi-reference/baseline')
           PYCODE
       - name: Test append-only installation, guards and exact rollback
-        run: python3 tests/test_brightness_keys.py build/brightness-keys/S540-brightness-keys build/efi-reference/baseline/EFI
+        run: python3 tests/test_brightness_keys.py build/brightness-keys/S540-brightness-keys-v2 build/efi-reference/baseline/EFI
       - name: Upload the verified test package
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: S540-brightness-keys
+          name: S540-brightness-keys-v2
           path: |
-            build/brightness-keys/S540-brightness-keys.zip
-            build/brightness-keys/S540-brightness-keys.zip.sha256
+            build/brightness-keys/S540-brightness-keys-v2.zip
+            build/brightness-keys/S540-brightness-keys-v2.zip.sha256
           if-no-files-found: error
           retention-days: 30

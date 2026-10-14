@@ -12,14 +12,14 @@ The [previous firmware analysis](../status/hardware.md) records `_Q8E`/`_Q8F` se
 
 ## Reversible BrightnessKeys test
 
-The `S540-brightness-keys` package adds the official **BrightnessKeys 1.0.3 RELEASE** bundle and one enabled `Kernel → Add` entry to the current boot EFI. It retains the existing function-key mappings, Intel framebuffer, `-igfxblr`, audio, ACPI and identity settings. The personal configuration backup stays on the boot device.
+The `S540-brightness-keys-v2` package adds the official **BrightnessKeys 1.0.3 RELEASE** bundle and one enabled `Kernel → Add` entry to the current boot EFI. It retains the existing function-key mappings, Intel framebuffer, `-igfxblr`, audio, ACPI and identity settings. The personal configuration backup stays on the boot device.
 
 The installer checks the driver manifest, OpenCore version, current and candidate configurations, and the private rollback snapshots. It stops if the configuration or owned files differ from the expected state. The first EFI release remains unchanged while this driver is under evaluation.
 
 Extract the package to Downloads and run:
 
 ```bash
-bash "$HOME/Downloads/S540-brightness-keys/TEST-BRIGHTNESS-KEYS.command"
+bash "$HOME/Downloads/S540-brightness-keys-v2/TEST-BRIGHTNESS-KEYS.command"
 ```
 
 The default boot directory is `/Volumes/240 GB`. If its mount point differs, pass the exact boot directory as the final argument.
@@ -33,7 +33,7 @@ After restarting through that boot device:
 5. Run the included collector and keep the resulting private ZIP:
 
 ```bash
-bash "$HOME/Downloads/S540-brightness-keys/COLLECT-FUNCTION-KEYS.command"
+bash "$HOME/Downloads/S540-brightness-keys-v2/COLLECT-FUNCTION-KEYS.command"
 ```
 
 Its BrightnessKeys snapshot can show `VersionInfo`, `BrightnessPanel` and `BrightnessKeyRouted`. The routing properties are written when the driver receives a supported notification. A loaded driver with no routed event requires a separate review of the firmware conditions; it does not justify a generic DSDT or ThinkPad patch.
@@ -41,7 +41,7 @@ Its BrightnessKeys snapshot can show `VersionInfo`, `BrightnessPanel` and `Brigh
 To restore the exact previous configuration and remove the verified test bundle from active loading:
 
 ```bash
-bash "$HOME/Downloads/S540-brightness-keys/RESTORE-BRIGHTNESS-KEYS.command"
+bash "$HOME/Downloads/S540-brightness-keys-v2/RESTORE-BRIGHTNESS-KEYS.command"
 ```
 
 Restart after restoration. If the current configuration was edited after installing the test, the restore command stops to avoid overwriting those edits.
@@ -51,3 +51,9 @@ Restart after restoration. If the current configuration was edited after install
 BrightnessKeys uses the existing Lilu dependency; it has no additional Tahoe beta boot argument. Its absence of a version gate is not a hardware compatibility result. The test remains pending until the laptop confirms driver loading and both brightness directions.
 
 Other function keys will be handled in the same hardware workstream after their actual behavior is recorded. The ordinary Fn function-key path and working audio controls remain the baseline.
+
+## FAT boot-volume metadata
+
+Version 2 uses data-only copies for the configuration snapshots and recognizes validated AppleDouble sidecars and Finder metadata. It retains these metadata files. Real configuration, manifest and driver hashes, backup ownership and all rollback guards remain enforced.
+
+The private backup format and driver payload are compatible with version 1. A valid interrupted backup can be resumed; keep `backup-function-keys` in place. Unexpected files still stop the operation, and the error now includes the filename.

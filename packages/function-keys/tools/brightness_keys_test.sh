@@ -167,12 +167,74 @@ validate_payload() {
     [ "$(string_value "$PAYLOAD/Contents/Info.plist" CFBundlePackageType)" = KEXT ] || fail 'The payload is not a kernel extension.'
     verify_macho "$PAYLOAD/Contents/MacOS/BrightnessKeys"
 }
+metadata_header() {
+    /usr/bin/od -An -N8 -v -tx1 "$1" | /usr/bin/awk '{for(i=1;i<=NF;i++)printf "%s",$i}'
+}
+appledouble_file() {
+    local path=$1 size
+    ordinary_file "$path" || return 1
+    size=$(/usr/bin/stat -f '%z' "$path") || return 1
+    case "$size" in ''|*[!0-9]*) return 1;; esac
+    [ "$size" -ge 26 ] || return 1
+    /usr/bin/od -An -N794 -v -tx1 "$path" | /usr/bin/awk -v size="$size" '
+        function dec(s, i,v,c) { v=0; for(i=1;i<=length(s);i++) { c=index("0123456789abcdef",substr(s,i,1))-1; if(c<0)return -1; v=v*16+c } return v }
+        function word(p, n,s,j) { s=""; for(j=0;j<n;j++)s=s b[p+j]; return dec(s) }
+        { for(i=1;i<=NF;i++)b[++total]=$i }
+        END {
+            if(total<26 || word(1,4)!=333319 || word(5,4)!=131072)exit 1;
+            count=word(25,2); limit=26+12*count;
+            if(count<1 || count>64 || total<limit || size<limit)exit 1;
+            for(i=0;i<count;i++) {
+                p=27+12*i; id=word(p,4); offset=word(p+4,4); length=word(p+8,4);
+                if(id<1 || ids[id]++ || offset<limit || offset>size || length>size-offset)exit 1;
+            }
+            exit 0
+        }'
+}
+finder_store_file() {
+    ordinary_file "$1" || return 1
+    [ "$(metadata_header "$1")" = 0000000142756431 ] || return 1
+    [ "$(/usr/bin/stat -f '%z' "$1")" -ge 32 ]
+}
+backup_metadata() {
+    local path=$1 name target
+    name=${path##*/}
+    if [ "$name" = .DS_Store ]; then finder_store_file "$path"; return; fi
+    case "$name" in ._*) target=${name#._};; *) return 1;; esac
+    case "$target" in before.plist|tested.plist|state.plist|state-next.plist|manifest.plist)
+        ordinary_file "$BACKUP/$target" || return 1;;
+        removed-BrightnessKeys.kext)
+        [ -d "$BACKUP/$target" ] && [ ! -L "$BACKUP/$target" ] || return 1;;
+        *) return 1;;
+    esac
+    appledouble_file "$path"
+}
+bundle_metadata() {
+    local bundle=$1 relative=$2 path target name directory owned
+    path="$bundle/$relative"; name=${relative##*/}; directory=${relative%/*}
+    [ "$directory" != "$relative" ] || directory=''
+    if [ "$name" = .DS_Store ]; then finder_store_file "$path"; return; fi
+    case "$name" in ._*) target=${name#._};; *) return 1;; esac
+    if [ -n "$directory" ]; then target="$directory/$target"; fi
+    owned="BrightnessKeys.kext/$target"
+    if ! /usr/bin/grep -Fxq "$owned" "$TEMP/manifest-files.txt" && ! /usr/bin/grep -Fq "$owned/" "$TEMP/manifest-files.txt"; then return 1; fi
+    if [ ! -e "$bundle/$target" ] || [ -L "$bundle/$target" ]; then return 1; fi
+    appledouble_file "$path"
+}
+
 bundle_matches() {
     local bundle=$1 i=0 path expected
     safe_path "$bundle"
     [ -d "$bundle" ] && [ ! -L "$bundle" ] || fail "Missing driver bundle: $bundle"
     [ -z "$(/usr/bin/find "$bundle" ! -type f ! -type d -print)" ] || fail 'The driver bundle contains links or special files.'
-    (cd "$bundle" && /usr/bin/find . -type f -print) | /usr/bin/awk '{sub(/^\.\//,""); print "BrightnessKeys.kext/" $0}' | /usr/bin/sort > "$TEMP/bundle-files.txt"
+    : > "$TEMP/bundle-files-raw.txt"
+    while IFS= read -r path; do
+        path=${path#./}
+        safe_path "$bundle/$path"
+        if bundle_metadata "$bundle" "$path"; then continue; fi
+        printf 'BrightnessKeys.kext/%s\n' "$path" >> "$TEMP/bundle-files-raw.txt"
+    done < <(cd "$bundle" && /usr/bin/find . -type f -print)
+    /usr/bin/sort "$TEMP/bundle-files-raw.txt" > "$TEMP/bundle-files.txt"
     /usr/bin/cmp -s "$TEMP/bundle-files.txt" "$TEMP/manifest-files-sorted.txt" || fail 'The driver bundle file list differs from the locked manifest.'
     while /usr/bin/plutil -extract "files.$i" xml1 -o - "$MANIFEST" > /dev/null 2>&1; do
         path=$(readkey "$MANIFEST" "files.$i.path"); path=${path#BrightnessKeys.kext/}
@@ -244,7 +306,7 @@ derive_test_config() {
     /usr/bin/plutil -insert MaxKernel -string 25.99.99 "$entry"
     /usr/bin/plutil -insert MinKernel -string 25.0.0 "$entry"
     /usr/bin/plutil -insert PlistPath -string Contents/Info.plist "$entry"
-    /bin/cp -p "$before" "$destination"
+    /bin/cp -Xp "$before" "$destination"
     /usr/bin/plutil -insert "Kernel.Add.$ADD_COUNT" -xml "$(/bin/cat "$entry")" "$destination"
     validate_oc "$destination"
 }
@@ -273,7 +335,7 @@ check_next_state() {
     exists "$next" || return 0
     ordinary_file "$next" || fail 'The journal draft is not a regular file.'
     phase=$(string_value "$next" Phase); valid_phase "$phase" || fail 'Invalid draft journal phase.'
-    /bin/cp "$next" "$TEMP/next-state-check.plist"
+    /bin/cp -X "$next" "$TEMP/next-state-check.plist"
     /usr/bin/plutil -replace Phase -string "$PHASE" "$TEMP/next-state-check.plist"
     canonical_equal "$STATE" "$TEMP/next-state-check.plist" || fail 'The journal draft changes fields beyond the phase.'
 }
@@ -286,7 +348,7 @@ load_backup() {
         name=${path##*/}
         case "$name" in before.plist|tested.plist|state.plist|state-next.plist|manifest.plist) ordinary_file "$path" || fail 'An expected backup file is not regular.';;
             removed-BrightnessKeys.kext) [ -d "$path" ] && [ ! -L "$path" ] || fail 'The removed bundle is not a regular directory.';;
-            *) fail 'The backup contains an unexpected top-level item.';; esac
+            *) backup_metadata "$path" || fail "The backup contains an unexpected top-level item: $name";; esac
     done < <(/usr/bin/find "$BACKUP" -mindepth 1 -maxdepth 1 -print)
     for name in before.plist tested.plist state.plist manifest.plist; do
         ordinary_file "$BACKUP/$name" || fail 'The private backup is incomplete.'
@@ -334,16 +396,16 @@ create_backup() {
     exists "$ACTIVE" && fail 'A BrightnessKeys bundle already exists without this test backup.'
     exists "$STAGE" && fail 'A staging bundle already exists without this test backup.'
     original_hash=$(hash "$CONFIG")
-    /bin/cp -p "$CONFIG" "$TEMP/before.plist"
+    /bin/cp -Xp "$CONFIG" "$TEMP/before.plist"
     [ "$(hash "$TEMP/before.plist")" = "$original_hash" ] && [ "$(hash "$CONFIG")" = "$original_hash" ] || fail 'The config changed during reading.'
     derive_test_config "$TEMP/before.plist" "$TEMP/tested.plist"
     # Both original and candidate have passed the matching native validator.
     [ "$(hash "$CONFIG")" = "$original_hash" ] || fail 'The config changed during validation.'
     safe_path "$OC"
     DRAFT=$(/usr/bin/mktemp -d "$OC/.backup-function-keys.XXXXXX")
-    /bin/cp -p "$TEMP/before.plist" "$DRAFT/before.plist"
-    /bin/cp -p "$TEMP/tested.plist" "$DRAFT/tested.plist"
-    /bin/cp "$MANIFEST" "$DRAFT/manifest.plist"
+    /bin/cp -Xp "$TEMP/before.plist" "$DRAFT/before.plist"
+    /bin/cp -Xp "$TEMP/tested.plist" "$DRAFT/tested.plist"
+    /bin/cp -X "$MANIFEST" "$DRAFT/manifest.plist"
     make_state "$DRAFT/before.plist" "$DRAFT/tested.plist" "$DRAFT/state.plist" prepared
     /bin/chmod 700 "$DRAFT"
     /bin/chmod 600 "$DRAFT/before.plist" "$DRAFT/tested.plist" "$DRAFT/state.plist" "$DRAFT/manifest.plist"
@@ -359,7 +421,7 @@ atomic_config_replace() {
     safe_path "$CONFIG"
     ordinary_file "$CONFIG" && [ "$(hash "$CONFIG")" = "$expected" ] || fail 'The config changed before replacement.'
     CONFIG_TEMP=$(/usr/bin/mktemp "$OC/.brightness-config.XXXXXX")
-    /bin/cp -p "$wanted" "$CONFIG_TEMP"
+    /bin/cp -Xp "$wanted" "$CONFIG_TEMP"
     [ "$(hash "$CONFIG_TEMP")" = "$wanted_hash" ] || fail 'The staged config copy is incomplete.'
     validate_oc "$CONFIG_TEMP"
     ordinary_file "$CONFIG" && [ "$(hash "$CONFIG")" = "$expected" ] || fail 'The config changed during replacement preparation.'
@@ -457,7 +519,7 @@ main() {
     ACTIVE="$OC/Kexts/BrightnessKeys.kext"
     STAGE="$OC/Kexts/.BrightnessKeys-s540-stage.kext"
     REMOVED="$BACKUP/removed-BrightnessKeys.kext"
-    for command in plutil shasum awk grep find mktemp cmp sort od ditto dirname; do
+    for command in plutil shasum awk grep find mktemp cmp sort od stat ditto dirname; do
         [ -x "/usr/bin/$command" ] || fail "Required macOS system command is missing: $command."
     done
     TEMP=$(/usr/bin/mktemp -d "${TMPDIR:-/tmp}/s540-brightness-keys.XXXXXX")
