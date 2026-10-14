@@ -36,6 +36,7 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | CPU power management | Working | X86PlatformPlugin active |
 | Battery detection | Working | Battery and charge state available |
 | External SSD access | Working | Samsung 960 EVO in a USB-C enclosure |
+| USB SuperSpeed on the current SSD connection | Working | RTL9210 enclosure reports a 5 Gb/s link |
 | F11/F12 brightness keys | Working | BrightnessKeys companion package; not included in EFI v0.1.0 |
 | F6 touchpad toggle | Working | Direct key enables and disables the touchpad |
 | Fn function row | Configured | Ordinary F1–F12 events recorded; four conflicting macOS shortcuts disabled, session refresh confirmation pending |
@@ -43,7 +44,7 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; further icon-key investigation deferred |
 | Analog audio jack | Pending | Connector operation remains to be verified |
 | HDMI / USB-C video | Pending | Output routing and external display support |
-| USB SuperSpeed / USB-C orientation | Pending | Transfer speed and both connector orientations |
+| USB port coverage / USB-C orientation | Pending | Other ports and both connector orientations; measured storage throughput and sustained reliability remain unverified |
 | SD reader / fingerprint reader | Pending | Driver support and device operation |
 | Battery runtime / sleep and wake | Pending | Power transitions and device recovery |
 | NVIDIA electrical power-off | Pending | Disabling its driver does not establish that the GPU is powered off |
@@ -60,8 +61,8 @@ Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including t
 
 ## Development priorities
 
-- Verify the external SSD's negotiated USB speed and storage stability; independent SSD boot is complete.
-- Complete USB-C orientation checks, Intel stability, power management and external display support; sustained-load temperature and fan telemetry remain open.
+- Verify remaining USB ports, USB-C orientations and storage stability; the current SSD link is 5 Gb/s and independent boot is complete.
+- Complete Intel stability, power management and external display support; sustained-load temperature and fan telemetry remain open.
 - Complete remaining audio peripheral and device support; wireless reconnection and network switching work.
 - Retain the working keyboard controls; remaining icon actions, equalization and sleep refinements are deferred.
 - Keep native macOS Wi-Fi integration and NVIDIA driver-port research open.

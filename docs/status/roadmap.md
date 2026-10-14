@@ -4,13 +4,13 @@ Goal: make all components of the Lenovo IdeaPad S540-15IWL GTX usable on macOS T
 
 ## Work order and retained backlog
 
-The [CPU and passive sensor reports](cpu-thermal.md) confirm frequency/power response and fifteen consecutive valid idle temperatures at 45–48 °C. Loaded SMC sensor drivers are 1.3.8. The earlier load temperature gap remains unexplained; immediate repeat stress is deferred, and no sensor patch is inferred. Independent boot from the external 960 EVO is now confirmed after manual transfer of the private working EFI. The active task is negotiated USB speed and storage reliability. The remaining thermal and hardware items stay tracked below.
+The [CPU and passive sensor reports](cpu-thermal.md) confirm frequency/power response and fifteen consecutive valid idle temperatures at 45–48 °C. Loaded SMC sensor drivers are 1.3.8. The earlier load temperature gap remains unexplained; immediate repeat stress is deferred, and no sensor patch is inferred. Independent boot from the external 960 EVO is now confirmed after manual transfer of the private working EFI. The current RTL9210 SSD connection reports a 5 Gb/s SuperSpeed link. The active task is remaining USB port/orientation coverage and storage reliability. The remaining thermal and hardware items stay tracked below.
 
 | Order | Work | Remaining scope |
 |---|---|---|
 | 1 | Graphics, power and thermals | Sustained Intel graphics use, temperatures under load, NVIDIA electrical power-off, incomplete SMC sensors, switching to battery and runtime. Electrical power-off is separate from driver-port research. |
 | Complete / retained | Boot and EFI consolidation | Independent Samsung boot confirmed after manual EFI transfer. Keep the HDD as a recovery path and preserve the private working EFI. A later sanitized release remains separate from v0.1.0. |
-| 3 | Storage and USB reliability | External SSD stability, USB-A/USB-C SuperSpeed, both USB-C orientations, reconnection, shutdown and reboot. |
+| 3 | Storage and USB reliability | Current SSD link confirmed at 5 Gb/s. Remaining USB-A/USB-C port coverage, both USB-C orientations, sustained SSD stability, shutdown and reboot. Move the system SSD cable only after shutdown. |
 | 4 | Audio peripherals and network throughput | Analog audio jack and Wi-Fi transfer-speed measurement. Wi-Fi network switching, Wi-Fi/Bluetooth disconnection and reconnection, and the Bluetooth headset microphone are confirmed working. Retain the working internal microphone correction. |
 | 5 | External displays | HDMI and USB-C video operation and actual GPU routing before choosing display fixes. |
 | 6 | Other peripherals | O2Micro SD reader and fingerprint-reader support. |
@@ -34,8 +34,8 @@ Priorities updated on 13 October 2026: the panel being off during boot is **reso
 | Intel AC9560 Wi-Fi | itlwm 2.3.0 and HeliPort working; disconnection, reconnection and network switching confirmed; Ethernet on en0 is expected with this driver | Transfer speed remains unmeasured; native Tahoe Wi-Fi integration is separate |
 | Intel Bluetooth | Headphone playback, microphone, disconnection and reconnection confirmed; firmware loaded, correct NVRAM, IntelBTPatcher 2.4 excluded | Retain the current drivers; recovery after sleep belongs to the deferred wake checks |
 | ALC257 audio | Playback, gradual volume adjustment and F1–F3 confirmed; microphone fix v2 received an initial positive report after reboot | Collect the verification report and recordings at different levels; equalisation deferred, jack and resume behaviour still to be documented |
-| USB-A and USB-C | 9-port map verified; 960 EVO detected | USB 2/3, both USB-C connector orientations and reconnection |
-| External Samsung 960 EVO | Enclosure connection restored; Tahoe reached the desktop | Sustained use without disconnections and resume from sleep |
+| USB-A and USB-C | 9-port map verified; RTL9210 bridge 0BDA:9210 reports 5 Gb/s on the current SSD connection | Establish the physical port and other port speeds; verify both USB-C orientations after shutdown |
+| External Samsung 960 EVO | Independent boot confirmed; current enclosure link 5 Gb/s | Sustained storage use without disconnections and measured throughput; resume remains part of deferred wake checks |
 | Internal PM981a NVMe | Visible in Recovery; retained for Windows | Check for any effects on macOS stability |
 | Display and brightness | Internal 1920×1080 panel, brightness slider and direct F11/F12 working | Retain the BrightnessKeys companion fix; panel resume remains pending |
 | CPU, battery and fans | X86PlatformPlugin active; CPU frequency/power response confirmed. Latest passive session: 15/15 valid temperatures, 45–48 °C; median estimated Intel package power 1.05 W. SMC sensor drivers 1.3.8 loaded. Earlier brief load 3.62 GHz and 43.83 W ended on a missing temperature reading. Battery detected at 100% on AC | Reliable load-temperature readings, fan telemetry, sustained cooling, dGPU status, switching to battery and runtime |

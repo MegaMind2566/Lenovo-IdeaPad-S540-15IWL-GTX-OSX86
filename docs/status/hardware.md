@@ -36,9 +36,15 @@ The Windows integrated graphics driver name reports UHD 610, but the chip and PC
 
 The disk listing reports a 240.1 GB external GUID HDD with a single Microsoft Basic Data partition named 240 GB, and a separate 250.1 GB external GUID SSD with a 209.7 MB EFI system partition and a 249.8 GB APFS partition. These correspond to the current HDD source and Samsung 960 EVO system disk. The current private EFI was then copied manually to the SSD's EFI system partition. Independent boot from the Samsung is confirmed after the HDD-disconnected procedure. The HDD copy remains a recovery route. The [transfer helper](../guides/ssd-boot.md) had stopped at its initial mounted-target guard before backup or copy; its failed condition remains unidentified, and no filesystem cause is inferred.
 
+## Current USB SSD link: October 14, 2026
+
+The macOS USB host report identifies the external ULT-Best enclosure as Realtek RTL9210, USB `0BDA:9210`, with a device **Link Speed of 5 Gb/s** under AppleIntelCNLUSBXHCI (`8086:9DED`). This confirms SuperSpeed on the current SSD connection. The physical USB-A/USB-C connector and opposite USB-C orientation are not identified by this report. The USB serial is excluded.
+
+The reported 4.48 W is USB power allocation, not measured SSD or total laptop consumption. The link speed does not measure storage throughput or establish sustained reliability. Internal Bluetooth and camera enumeration do not extend this result to other external ports. The same report enumerates a Goodix fingerprint device, USB `27C6:55B4`; functional macOS fingerprint support remains unverified.
+
 ## Data still needed
 
-- USB-C SuperSpeed operation and both connector orientations: a 9-port map has been received and verified.
+- Remaining USB port coverage and both USB-C orientations. The 9-port map is verified, and the current RTL9210 SSD link reports 5 Gb/s; the report does not identify the physical connector.
 - Component test results in the [roadmap](roadmap.md).
 
 Tahoe reached the desktop on the external Samsung 960 EVO after the framebuffer memory fix. IntelAccelerator and exposed Metal 3 support are confirmed; sustained graphics load, audio, battery runtime, sleep and HDMI remain to be verified. No overall compatibility rating is assigned before testing.
@@ -72,7 +78,7 @@ The [grouped CPU report](cpu-thermal.md) confirms four cores/eight logical proce
 
 A single thirty-second reader session retained fifteen valid CPU temperatures with no missing, rejected or duplicate values: 45–48 °C. Estimated Intel package power has a median of 1.05 W, and thermal pressure is Nominal in every sample. kmutil confirms VirtualSMC, SMCProcessor and SMCBatteryManager 1.3.8, together with Lilu 1.7.2. Invalid-key warning markers remain and do not prevent temperature readings; fan RPM is not reported.
 
-The service-header filter's incomplete SMCProcessor state match is not evidence that the loaded driver is inactive. This result supports normal idle behavior during the observation, not sustained cooling or an explanation of the previous load gap. Details and measurement limits are recorded in [CPU and thermal observations](cpu-thermal.md). The working configuration is retained, with independent external SSD boot next.
+The service-header filter's incomplete SMCProcessor state match is not evidence that the loaded driver is inactive. This result supports normal idle behavior during the observation, not sustained cooling or an explanation of the previous load gap. Details and measurement limits are recorded in [CPU and thermal observations](cpu-thermal.md). The working configuration is retained. Independent external SSD boot was subsequently confirmed; remaining USB coverage and storage reliability are next.
 
 ## Panel fix and Bluetooth status: 13 October 2026
 
