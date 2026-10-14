@@ -24,4 +24,4 @@ The memory and tracing experiments share `tools/trace_intel.py`. Their internal 
 
 Archived workflows are not run automatically by GitHub Actions. Some launchers were intended to be copied to the root of their generated packages. The original unified collector also depends on the old `diagnosi-unified` package layout; it is retained as a reference rather than a current procedure.
 
-The [move manifest](manifest.json) records old and new paths, SHA-256 hashes and the source commit. Git history preserves earlier versions. Repository maintenance does not modify the laptop's EFI or private backups.
+The [move manifest](manifest.json) records old and new paths, SHA-256 hashes and the source commit. Batch-script hashes use LF-normalized text to account for Git's CRLF checkout setting; other files are checked byte for byte. Git history preserves earlier versions. Repository maintenance does not modify the laptop's EFI or private backups.

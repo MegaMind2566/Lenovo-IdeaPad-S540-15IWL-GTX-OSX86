@@ -104,6 +104,10 @@ def check_archive(root, failures):
         return
     try:
         data = json.loads(manifest.read_text())
+        hash_basis = data.get('hash_basis')
+        if 'hash_basis' in data and hash_basis != 'cmd-lf-canonical':
+            failures.append(f'Base delle impronte archivio non riconosciuta: {hash_basis}')
+            return
         old_paths, new_paths = set(), set()
         for move in data['moves']:
             old, new = move['from'], move['to']
@@ -117,7 +121,13 @@ def check_archive(root, failures):
             if not target.is_relative_to(root / 'archive') or not target.is_file():
                 failures.append(f'Destinazione archivio assente o fuori archivio: {new}')
                 continue
-            digest = hashlib.sha256(target.read_bytes()).hexdigest()
+            contents = target.read_bytes()
+            if hash_basis == 'cmd-lf-canonical' and target.suffix == '.cmd':
+                # Git checks out *.cmd with CRLF through .gitattributes. Only
+                # this declared basis permits that equivalent representation;
+                # all other files retain byte-exact checksum verification.
+                contents = contents.replace(b'\r\n', b'\n')
+            digest = hashlib.sha256(contents).hexdigest()
             if digest != move['archived_sha256']:
                 failures.append(f'Impronta archivio non coincide: {new}')
     except (KeyError, ValueError, OSError, TypeError) as error:

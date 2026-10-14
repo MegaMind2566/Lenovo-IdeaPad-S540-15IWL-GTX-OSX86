@@ -32,3 +32,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 ## Previous investigations
 
 Graphics experiments, Intel traces and Recovery log collectors are preserved in the [archive](../archive/README.md), together with their sources, asset locks and licenses.
+
+## Release preparation
+
+[v0.1.0 release notes](releases/v0.1.0.md) describe the working features and remaining limitations. Publication is pending the current EFI snapshot.

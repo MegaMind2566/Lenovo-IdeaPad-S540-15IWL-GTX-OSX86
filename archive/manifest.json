@@ -286,5 +286,6 @@
       "reason": "Archived non-executed workflow now references archived EFI/graphics scripts and documents; legacy ZIP internal paths unchanged."
     }
   ],
-  "source_commit": "8fd01de8575ff9b43c8fae30b3a9d37d2f3fdda3"
+  "source_commit": "8fd01de8575ff9b43c8fae30b3a9d37d2f3fdda3",
+  "hash_basis": "cmd-lf-canonical"
 }
