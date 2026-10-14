@@ -38,9 +38,15 @@ The disk listing reports a 240.1 GB external GUID HDD with a single Microsoft Ba
 
 ## Current USB SSD link: October 14, 2026
 
-The macOS USB host report identifies the external ULT-Best enclosure as Realtek RTL9210, USB `0BDA:9210`, with a device **Link Speed of 5 Gb/s** under AppleIntelCNLUSBXHCI (`8086:9DED`). The subsequent report explicitly identifies the laptop-side USB-C connector as reversed and again reports 5 Gb/s. Together with the preceding connection, this confirms USB-C SuperSpeed in both orientations with the current Samsung, RTL9210 enclosure and cable. Remaining USB-A ports and other cables are not covered. The USB serial is excluded.
+The macOS USB host report identifies the external ULT-Best enclosure as Realtek RTL9210, USB `0BDA:9210`, with a device **Link Speed of 5 Gb/s** under AppleIntelCNLUSBXHCI (`8086:9DED`). The subsequent report explicitly identifies the laptop-side USB-C connector as reversed and again reports 5 Gb/s. Together with the preceding connection, this confirms USB-C SuperSpeed in both orientations with the current Samsung, RTL9210 enclosure and cable. That USB-C result does not cover USB-A; the subsequent two-port result is recorded below. Other cables are not covered. The USB serial is excluded.
 
 The reported 4.48 W is USB power allocation, not measured SSD or total laptop consumption. The link speed does not measure storage throughput or establish sustained reliability. Internal Bluetooth and camera enumeration do not extend this result to other external ports. The same report enumerates a Goodix fingerprint device, USB `27C6:55B4`; functional macOS fingerprint support remains unverified.
+
+## USB-A SuperSpeed result: October 14, 2026
+
+Two USB host reports supplied for the requested two-connector check identify the same Initio 3639S enclosure, USB `13FD:5910`, at **5 Gb/s**. Its Location ID changes from `0x14700000` to `0x14800000`. This confirms SuperSpeed negotiation on both tested USB-A connectors with the current device and cable. Left/right connector labels and logical map entries are not assigned from these snapshots. The serial is excluded.
+
+The Samsung/RTL9210 system disk remains enumerated at 5 Gb/s in both reports. These snapshots do not establish uninterrupted operation between them, file-read success, measured transfer speed, sustained reliability or the USB 2 companion paths. File access was requested but has not yet been reported separately. No EFI change is required by these results.
 
 ## HDMI no-image report: October 14, 2026
 
@@ -52,7 +58,7 @@ USB-C video cannot currently be tested. [Lenovo's exact GTX model specification]
 
 ## Data still needed
 
-- Remaining USB-A port coverage and sustained SSD reliability. The 9-port map is verified, and USB-C operates at 5 Gb/s in both connector orientations with the current Samsung/RTL9210/cable combination.
+- File access, external USB 2 device coverage and sustained SSD reliability. The 9-port map is verified; both tested USB-A connectors and USB-C in both orientations negotiate 5 Gb/s with the respective tested device/cable combinations.
 - Component test results in the [roadmap](roadmap.md).
 
 Tahoe reached the desktop on the external Samsung 960 EVO after the framebuffer memory fix. IntelAccelerator and exposed Metal 3 support are confirmed; sustained graphics load, battery runtime, sleep and HDMI remain to be verified. No overall compatibility rating is assigned before testing.
@@ -86,7 +92,7 @@ The [grouped CPU report](cpu-thermal.md) confirms four cores/eight logical proce
 
 A single thirty-second reader session retained fifteen valid CPU temperatures with no missing, rejected or duplicate values: 45–48 °C. Estimated Intel package power has a median of 1.05 W, and thermal pressure is Nominal in every sample. kmutil confirms VirtualSMC, SMCProcessor and SMCBatteryManager 1.3.8, together with Lilu 1.7.2. Invalid-key warning markers remain and do not prevent temperature readings; fan RPM is not reported.
 
-The service-header filter's incomplete SMCProcessor state match is not evidence that the loaded driver is inactive. This result supports normal idle behavior during the observation, not sustained cooling or an explanation of the previous load gap. Details and measurement limits are recorded in [CPU and thermal observations](cpu-thermal.md). The working configuration is retained. Independent external SSD boot was subsequently confirmed; remaining USB coverage and storage reliability are next.
+The service-header filter's incomplete SMCProcessor state match is not evidence that the loaded driver is inactive. This result supports normal idle behavior during the observation, not sustained cooling or an explanation of the previous load gap. Details and measurement limits are recorded in [CPU and thermal observations](cpu-thermal.md). The working configuration is retained. Independent external SSD boot and external SuperSpeed links were subsequently confirmed; USB 2 device coverage and storage reliability remain open.
 
 ## Panel fix and Bluetooth status: 13 October 2026
 

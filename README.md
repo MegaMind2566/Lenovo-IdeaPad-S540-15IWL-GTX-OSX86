@@ -39,13 +39,14 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Battery detection and battery power | Working | Internal battery recognized; discharge reported after AC removal |
 | External SSD access | Working | Samsung 960 EVO in a USB-C enclosure |
 | USB-C SuperSpeed and connector orientation | Working | Samsung/RTL9210 at 5 Gb/s in both laptop-side connector orientations with the current cable |
+| USB-A SuperSpeed | Working | Same Initio enclosure at 5 Gb/s on both tested USB-A connectors |
 | F11/F12 brightness keys | Working | BrightnessKeys companion package; not included in EFI v0.1.0 |
 | F6 touchpad toggle | Working | Direct key enables and disables the touchpad |
 | Fn function row | Configured | Ordinary F1–F12 events recorded; four conflicting macOS shortcuts disabled, session refresh confirmation pending |
 | Touchpad and gestures | Working | ELAN0662 gestures confirmed in daily use; F6 toggle also works |
 | Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; further icon-key investigation deferred |
 | USB-C video | Pending | No video test available; hardware video capability and routing remain unverified |
-| USB-A coverage / storage reliability | Pending | Remaining USB-A ports, measured storage throughput and sustained reliability |
+| USB 2 device coverage / storage reliability | Pending | External USB 2 devices, file-access confirmation, measured throughput and sustained reliability |
 | SD reader / fingerprint reader | Pending | Driver support and device operation |
 | Battery runtime / sleep and wake | Pending | Measured runtime and device recovery; basic battery power is confirmed |
 | NVIDIA electrical power-off | Pending | Disabling its driver does not establish that the GPU is powered off |
@@ -63,7 +64,7 @@ Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including t
 
 ## Development priorities
 
-- Complete remaining USB-A ports, storage stability and audio-peripheral checks. Battery power, independent SSD boot and USB-C at 5 Gb/s in both orientations are confirmed; measured battery runtime remains open.
+- Complete storage reliability and remaining USB 2 device checks. Both USB-A connectors and USB-C in both orientations negotiate 5 Gb/s with the tested hardware. Audio peripherals, battery power and independent SSD boot work; measured battery runtime remains open.
 - Complete Intel stability, power management and external display support; sustained-load temperature and fan telemetry remain open.
 - Complete remaining device support and measure network throughput; wired/Bluetooth microphones, headphone switching and wireless reconnection work.
 - Retain the working keyboard controls; remaining icon actions, equalization and sleep refinements are deferred.
