@@ -65,7 +65,7 @@ Do not eject or move the Samsung system disk. This check needs no formatting, wr
 | First connector | Initio 3639S, USB `13FD:5910` | `0x14700000` | **5 Gb/s** |
 | Second connector | Same Initio enclosure | `0x14800000` | **5 Gb/s** |
 
-Both requested USB-A SuperSpeed checks are therefore complete with this enclosure and cable. The snapshots do not label the physical connectors left/right or establish a logical SSxx map entry. Samsung/RTL9210 remains enumerated at 5 Gb/s in both reports. Serial numbers are excluded. File access was not reported separately; measured throughput, sustained stability and external USB 2 device coverage remain unverified. No USB patch is inferred from these successful link results.
+Both requested USB-A SuperSpeed checks are therefore complete with this enclosure and cable. The snapshots do not label the physical connectors left/right or establish a logical SSxx map entry. Samsung/RTL9210 remains enumerated at 5 Gb/s in both reports. Serial numbers are excluded. File access was subsequently confirmed working on both connectors. Measured throughput, sustained stability and external USB 2 device coverage remain unverified. No USB patch is inferred from these successful link results.
 
 ## Received and verified map
 

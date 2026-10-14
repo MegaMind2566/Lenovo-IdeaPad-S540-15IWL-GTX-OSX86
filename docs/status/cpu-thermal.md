@@ -52,10 +52,16 @@ The SMCProcessor service-header filter did not observe the complete registered/m
 
 Invalid-key warning markers remain: fifteen before the first sample and ninety-eight within sample groups. The report merges stdout and stderr, so their placement cannot identify individual keys or establish an improvement relative to the earlier separate reader sessions. Warnings coexist with valid CPU temperatures.
 
-The current configuration is retained. Further immediate stress is deferred; independent boot from the external Samsung 960 EVO is the next implementation task. Reliable workload temperature measurement remains open.
+The current configuration is retained. Independent boot from the external Samsung, USB-C SuperSpeed in both orientations, and USB-A SuperSpeed/file reads on both connectors have since been confirmed. Reliable workload temperature measurement remains open.
 
 ### Reviewed primary source
 
 - [SMCProcessor registration and periodic update](https://github.com/acidanthera/VirtualSMC/blob/b15991dd87e36a102bf159ea56490e3126245590/Sensors/SMCProcessor/SMCProcessor.cpp)
 - [Temperature key implementation](https://github.com/acidanthera/VirtualSMC/blob/b15991dd87e36a102bf159ea56490e3126245590/Sensors/SMCProcessor/KeyImplementations.cpp)
 - [Sensor plugin scope](https://github.com/acidanthera/VirtualSMC/blob/b15991dd87e36a102bf159ea56490e3126245590/Docs/SensorInfo.md)
+
+## Next observation: normal desktop activity
+
+The original CPU collector restarts `powermetrics -n 1` for each sample and accepts only a strict decimal temperature line. The later passive collector uses one continuous session and records missing, rejected and duplicate temperature categories. These implementation differences do not retrospectively explain the original missing load reading.
+
+The next observation reuses the existing [sensor collector](../../packages/cpu-sensors/README.md) during about 15–20 seconds of normal browser activity within its thirty-second collection. For this run, the idle-only prompt to leave the laptop untouched does not apply. No artificial CPU workers are started, and no EFI, driver or power setting changes are needed. Compare temperature completeness with the observed frequency and estimated package power; if activity produces no measurable change, do not treat the run as a load-temperature result. Controlled stress and sustained-cooling validation remain separate later work.

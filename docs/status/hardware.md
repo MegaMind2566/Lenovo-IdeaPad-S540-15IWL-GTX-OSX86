@@ -46,7 +46,7 @@ The reported 4.48 W is USB power allocation, not measured SSD or total laptop co
 
 Two USB host reports supplied for the requested two-connector check identify the same Initio 3639S enclosure, USB `13FD:5910`, at **5 Gb/s**. Its Location ID changes from `0x14700000` to `0x14800000`. This confirms SuperSpeed negotiation on both tested USB-A connectors with the current device and cable. Left/right connector labels and logical map entries are not assigned from these snapshots. The serial is excluded.
 
-The Samsung/RTL9210 system disk remains enumerated at 5 Gb/s in both reports. These snapshots do not establish uninterrupted operation between them, file-read success, measured transfer speed, sustained reliability or the USB 2 companion paths. File access was requested but has not yet been reported separately. No EFI change is required by these results.
+The Samsung/RTL9210 system disk remains enumerated at 5 Gb/s in both reports. File access was subsequently confirmed working on both USB-A connectors. The snapshots and successful reads do not establish uninterrupted operation between reports, measured transfer speed, sustained reliability or the USB 2 companion paths. No EFI change is required by these results.
 
 ## HDMI no-image report: October 14, 2026
 
@@ -58,7 +58,7 @@ USB-C video cannot currently be tested. [Lenovo's exact GTX model specification]
 
 ## Data still needed
 
-- File access, external USB 2 device coverage and sustained SSD reliability. The 9-port map is verified; both tested USB-A connectors and USB-C in both orientations negotiate 5 Gb/s with the respective tested device/cable combinations.
+- External USB 2 device coverage and sustained SSD reliability. The 9-port map is verified; both tested USB-A connectors and USB-C in both orientations negotiate 5 Gb/s with the respective tested device/cable combinations.
 - Component test results in the [roadmap](roadmap.md).
 
 Tahoe reached the desktop on the external Samsung 960 EVO after the framebuffer memory fix. IntelAccelerator and exposed Metal 3 support are confirmed; sustained graphics load, battery runtime, sleep and HDMI remain to be verified. No overall compatibility rating is assigned before testing.

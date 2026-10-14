@@ -39,14 +39,14 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Battery detection and battery power | Working | Internal battery recognized; discharge reported after AC removal |
 | External SSD access | Working | Samsung 960 EVO in a USB-C enclosure |
 | USB-C SuperSpeed and connector orientation | Working | Samsung/RTL9210 at 5 Gb/s in both laptop-side connector orientations with the current cable |
-| USB-A SuperSpeed | Working | Same Initio enclosure at 5 Gb/s on both tested USB-A connectors |
+| USB-A SuperSpeed and file access | Working | Same Initio enclosure at 5 Gb/s; files open on both tested USB-A connectors |
 | F11/F12 brightness keys | Working | BrightnessKeys companion package; not included in EFI v0.1.0 |
 | F6 touchpad toggle | Working | Direct key enables and disables the touchpad |
 | Fn function row | Configured | Ordinary F1–F12 events recorded; four conflicting macOS shortcuts disabled, session refresh confirmation pending |
 | Touchpad and gestures | Working | ELAN0662 gestures confirmed in daily use; F6 toggle also works |
 | Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; further icon-key investigation deferred |
 | USB-C video | Pending | No video test available; hardware video capability and routing remain unverified |
-| USB 2 device coverage / storage reliability | Pending | External USB 2 devices, file-access confirmation, measured throughput and sustained reliability |
+| USB 2 device coverage / storage reliability | Pending | External USB 2 devices, measured throughput and sustained reliability |
 | SD reader / fingerprint reader | Pending | Driver support and device operation |
 | Battery runtime / sleep and wake | Pending | Measured runtime and device recovery; basic battery power is confirmed |
 | NVIDIA electrical power-off | Pending | Disabling its driver does not establish that the GPU is powered off |
