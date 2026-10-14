@@ -2,7 +2,7 @@
 
 Reviewed on October 15, 2026. Target: Lenovo IdeaPad S540-15IWL GTX, Intel macOS Tahoe, NVIDIA GTX 1650 Max-Q, PCI `10DE:1F91`.
 
-**Status:** source assessment complete; a Darwin GPU driver has not been implemented or loaded. The next implementation milestone is a read-only PCI inventory, followed by a bounded Darwin transport prototype. Intel graphics remains the operating configuration.
+**Status:** source assessment complete; a Darwin GPU driver has not been implemented or loaded. The [native read-only PCI inventory](../../packages/nvidia-pci/README.md) is implemented; laptop visibility is pending. A bounded Darwin transport prototype follows that result. Intel graphics remains the operating configuration.
 
 ## Source baseline
 
@@ -37,7 +37,7 @@ This is an initial boundary inventory, not a claim that the remaining port is li
 
 ## First implementation milestone: PCI visibility
 
-Build a small native Intel macOS program that reads IORegistry metadata through IOKit. Match vendor/device IDs exactly and report the registry path, subsystem identity and already-published resource metadata when available. This first inventory should not claim the PCI device, open a hardware user client, map MMIO, enable bus mastering, start DMA, load firmware or invoke ACPI methods.
+The native Intel macOS program in `packages/nvidia-pci` reads IORegistry metadata through IOKit. Match vendor/device IDs exactly and report the registry path, subsystem identity and already-published resource metadata when available. This first inventory should not claim the PCI device, open a hardware user client, map MMIO, enable bus mastering, start DMA, load firmware or invoke ACPI methods.
 
 Acceptance criteria:
 
@@ -46,7 +46,9 @@ Acceptance criteria:
 - Limit output to the GPU and relevant parent bridge; exclude machine identity and unrelated device data.
 - Distinguish visible device metadata from confirmed hardware access or initialization.
 
-The retained EFI contains `-wegnoegpu`. Its effect on the observed device graph must be recorded before selecting a matching strategy. A missing node does not prove electrical power-off. Any later change needed to attach a transport prototype belongs in a separate experimental EFI with the working Intel configuration available for recovery.
+The retained EFI contains `-wegnoegpu`. In the installed Lilu 1.7.2 source, the external GPU's IOService can be terminated by the disable path. The inventory therefore checks the exact boot-argument token without exposing other arguments, and falls back to the Device Tree when the active service is absent. Its effect on the observed device graph must be recorded before selecting a matching strategy. A missing node does not prove electrical power-off. Any later change needed to attach a transport prototype belongs in a separate experimental EFI with the working Intel configuration available for recovery.
+
+The built package includes the executable, a private JSON report launcher, per-file checksums and build provenance. No developer tools are required on the laptop. Native build and enumeration are checked in Intel CI; the laptop result is a separate milestone.
 
 ## Subsequent milestones
 
@@ -70,4 +72,5 @@ Electrical power-off remains deferred until after the driver-port attempt, as re
 - [Mesa NVK requirements](https://docs.mesa3d.org/drivers/nvk.html) and [Nouveau project architecture](https://nouveau.freedesktop.org/).
 - [Linux Nouveau ABI reference](https://github.com/torvalds/linux/blob/v6.6/include/uapi/drm/nouveau_drm.h).
 - [Apple DriverKit provisioning requirements](https://developer.apple.com/help/account/provisioning-profiles/create-a-driverkit-development-provisioning-profile): DriverKit is a candidate to evaluate, not an assumed entitlement or deployment path.
+- [Installed Lilu 1.7.2 device-disable path](https://github.com/acidanthera/Lilu/blob/1.7.2/Lilu/Sources/kern_devinfo.cpp).
 - [Existing firmware and ACPI review](acpi-patch-review.md) and [project roadmap](../status/roadmap.md).

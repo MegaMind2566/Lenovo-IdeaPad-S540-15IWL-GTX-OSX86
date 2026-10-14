@@ -1,0 +1,41 @@
+name: Build read-only NVIDIA PCI inventory
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/nvidia-pci/**'
+      - 'builders/build_nvidia_pci.py'
+      - 'tests/test_nvidia_pci_core.py'
+      - '.github/workflows/build-nvidia-pci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15-intel
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Test PCI identity and private report encoding
+        run: python3 tests/test_nvidia_pci_core.py
+      - name: Build and verify the native Intel package
+        run: python3 builders/build_nvidia_pci.py --output-dir build/nvidia-pci
+      - name: Check the packaged launcher without administrator access
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/unzip -q build/nvidia-pci/S540-nvidia-pci-v1.zip -d "$RUNNER_TEMP/nvidia-package"
+          /bin/bash "$RUNNER_TEMP/nvidia-package/S540-nvidia-pci-v1/CHECK-NVIDIA.command" --output-dir "$RUNNER_TEMP"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: S540-nvidia-pci-v1
+          path: |
+            build/nvidia-pci/S540-nvidia-pci-v1.zip
+            build/nvidia-pci/S540-nvidia-pci-v1.zip.sha256
+          if-no-files-found: error
+          retention-days: 30
