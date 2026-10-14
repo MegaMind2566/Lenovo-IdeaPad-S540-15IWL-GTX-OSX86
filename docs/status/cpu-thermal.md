@@ -25,3 +25,17 @@ The collector retained no valid CPU temperature line in the load sample. The ori
 The previously supplied EFI enables VirtualSMC, SMCProcessor and SMCBatteryManager 1.3.8 with Darwin 24.0.0–25.99.99 bounds. Darwin 25.6.0 is inside those bounds. This is a configuration review, not proof of the exact extensions loaded during the new report.
 
 The working configuration is retained. No CPU, BIOS, power-limit or graphics patch is inferred from the missing sample. Original reports and private EFI identity data are excluded from the repository.
+
+## Passive sensor follow-up
+
+The [standalone sensor collector](../../packages/cpu-sensors/README.md) reads fifteen consecutive two-second samples without starting a workload. It records filtered loaded-driver versions and the SMCProcessor runtime state. Temperature diagnostics distinguish a missing label, a rejected or unavailable value, duplicate labels and a single accepted reading. Unknown payloads and unrelated raw telemetry are discarded.
+
+The driver review used VirtualSMC 1.3.8 at commit `b15991dd87e36a102bf159ea56490e3126245590`. SMCProcessor registers temperature keys from CPU capability bits and encodes a cached integer temperature as `sp78`; its key reader has no NaN or unavailable-temperature branch. The periodic MSR update retains its previous cached temperature when the valid bit is absent. These source observations do not establish which key powermetrics requests or why the earlier sample contained no accepted temperature. A new driver, generic fan plugin or EFI patch is not justified by that sample.
+
+The continuous passive report remains to be collected on the laptop. The earlier peak temperature and sustained cooling remain unmeasured.
+
+### Reviewed primary source
+
+- [SMCProcessor registration and periodic update](https://github.com/acidanthera/VirtualSMC/blob/b15991dd87e36a102bf159ea56490e3126245590/Sensors/SMCProcessor/SMCProcessor.cpp)
+- [Temperature key implementation](https://github.com/acidanthera/VirtualSMC/blob/b15991dd87e36a102bf159ea56490e3126245590/Sensors/SMCProcessor/KeyImplementations.cpp)
+- [Sensor plugin scope](https://github.com/acidanthera/VirtualSMC/blob/b15991dd87e36a102bf159ea56490e3126245590/Docs/SensorInfo.md)

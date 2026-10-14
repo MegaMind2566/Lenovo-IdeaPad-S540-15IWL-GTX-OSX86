@@ -4,7 +4,7 @@ Goal: make all components of the Lenovo IdeaPad S540-15IWL GTX usable on macOS T
 
 ## Work order and retained backlog
 
-The [grouped CPU check](cpu-thermal.md) confirms frequency and power response. The active thermal issue is an unavailable load temperature reading; immediate repeat stress is deferred while sensor reliability is reviewed. Independent boot from the external 960 EVO follows; the other hardware items remain tracked below.
+The [grouped CPU check](cpu-thermal.md) confirms frequency and power response. The active thermal issue is an unavailable load temperature reading. A [passive sensor check](../../packages/cpu-sensors/README.md) records consecutive samples and loaded SMC driver versions; immediate repeat stress is deferred while sensor reliability is reviewed. Independent boot from the external 960 EVO follows; the other hardware items remain tracked below.
 
 | Order | Work | Remaining scope |
 |---|---|---|

@@ -9,12 +9,14 @@ Start with the [project README](../README.md) for the current state and scope. D
 | [Hardware](status/hardware.md) | Hardware IDs and results observed on the laptop |
 | [Roadmap](status/roadmap.md) | Open work, priorities and acceptance criteria |
 | [Battery and sleep](status/battery-sleep.md) | Recorded samples and deferred checks |
+| [CPU and thermals](status/cpu-thermal.md) | CPU response, incomplete load-temperature measurement and sensor follow-up |
 
 ## Current guides
 
 | Guide | Purpose |
 |---|---|
-| [CPU, temperature and power](../packages/cpu-thermal/README.md) | One grouped idle, short-load and recovery check |
+| [Passive CPU sensors](../packages/cpu-sensors/README.md) | A continuous sensor reading with no CPU workload; current follow-up |
+| [CPU, temperature and power](../packages/cpu-thermal/README.md) | Grouped idle, short-load and recovery collector; further load checks are on hold pending sensor reliability |
 | [Intel graphics](guides/intel-graphics.md) | Acceleration and stability checks |
 | [Boot and networking](guides/boot-network.md) | Backlight boot fix, HeliPort and Bluetooth |
 | [Tahoe audio](guides/tahoe-audio.md) | Initial audio setup, volume fix and recovery |
