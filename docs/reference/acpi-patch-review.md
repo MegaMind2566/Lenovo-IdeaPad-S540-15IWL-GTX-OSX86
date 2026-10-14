@@ -44,6 +44,18 @@ OpenCore logs report MAT support as 0. The 1.0.8 code tolerates a missing MAT du
 
 The reviewed patches remain unchanged. The latest archive contains twelve new empty tracev3 files and five nonempty files matching the previous collection. Repeating that collection would not necessarily capture the Intel error. The [direct Intel trace](../../archive/first-boot/docs/intel-trace.md) uses DEBUG Lilu and WhateverGreen builds of the same installed versions and also saves the exact test config. It is a diagnostic tool, not an already confirmed acceleration fix.
 
+## NVIDIA power-off review: October 14, 2026
+
+The previously supplied private EFI keeps `SSDT-DGPU-OFF` disabled and includes `-wegnoegpu`. The optional table calls the OEM `\_SB.PCI0.RP05.PXSX._OFF` under Darwin. Confirming the method's path does not establish that calling it during initialization is safe.
+
+In the supplied OEM SSDT9, `PXSX._OFF` issues an EC command, checks firmware state and can call `HGOF`. That method can set `LNKD=1` and wait for `LNKS=0` without a timeout before clearing `DPWR` and `DPWE`. If the hardware condition does not arrive, the method can remain in the wait. The separate `RP05.PC05._OFF` power-resource path includes an EC mutex, `MSD3` tracking and conditional GC6 sequencing; it is not treated as an interchangeable call.
+
+The device's OEM `_STA` always returns `0x0F`. That status does not measure the physical power rail. Likewise, Intel package power excludes the NVIDIA rail.
+
+The reviewed [Lilu 1.7.2 implementation](https://github.com/acidanthera/Lilu/blob/1.7.2/Lilu/Sources/kern_devinfo.cpp) terminates and stops GPU/audio IOService objects in `processSwitchOff()`; that function contains no explicit call to this OEM `_OFF`. This supports keeping software device disabling separate from verified electrical power-off.
+
+No ACPI or EFI change follows from this review. The optional SSDT remains disabled pending a bounded, justified hardware sequence and evidence of the resulting state. NVIDIA Linux-driver port research remains open and separate.
+
 ## Primary references
 
 - [OpenCore 1.0.8, ACPI order and Booter quirks](https://github.com/acidanthera/OpenCorePkg/blob/1.0.8/Docs/Configuration.tex).

@@ -74,7 +74,7 @@ The proposed path is a technical assessment, not an already validated port:
 
 A successful kernel prototype does not demonstrate desktop acceleration. The laptop's hybrid GPU configuration also requires verification of panel and output connections. Experimental tests will use an EFI separate from the one stabilised with Intel.
 
-The EFI used for initial operation retains `-wegnoegpu`. Electrical power-off of the NVIDIA GPU and porting its driver are separate tasks. The optional SSDT that calls `_OFF` remains disabled until the firmware method's behaviour has been verified.
+The EFI used for initial operation retains `-wegnoegpu`. Electrical power-off of the NVIDIA GPU and porting its driver are separate tasks. The optional SSDT that calls `_OFF` remains disabled. The [firmware review](../reference/acpi-patch-review.md) identifies an unbounded wait for `LNKS=0` before the power-gate writes, plus a separate conditional power-resource sequence. A correct method path and absent GPU IOService do not establish safe execution or electrical power-off.
 
 ## References
 
