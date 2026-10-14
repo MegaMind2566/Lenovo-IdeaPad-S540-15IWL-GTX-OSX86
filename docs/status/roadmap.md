@@ -4,12 +4,12 @@ Goal: make all components of the Lenovo IdeaPad S540-15IWL GTX usable on macOS T
 
 ## Work order and retained backlog
 
-The [CPU and passive sensor reports](cpu-thermal.md) confirm frequency/power response and fifteen consecutive valid idle temperatures at 45–48 °C. Loaded SMC sensor drivers are 1.3.8. The earlier load temperature gap remains unexplained; immediate repeat stress is deferred, and no sensor patch is inferred. The next implementation task is independent boot from the external 960 EVO using the current private working EFI. The remaining thermal and hardware items stay tracked below.
+The [CPU and passive sensor reports](cpu-thermal.md) confirm frequency/power response and fifteen consecutive valid idle temperatures at 45–48 °C. Loaded SMC sensor drivers are 1.3.8. The earlier load temperature gap remains unexplained; immediate repeat stress is deferred, and no sensor patch is inferred. Independent boot from the external 960 EVO is now confirmed after manual transfer of the private working EFI. The active task is negotiated USB speed and storage reliability. The remaining thermal and hardware items stay tracked below.
 
 | Order | Work | Remaining scope |
 |---|---|---|
 | 1 | Graphics, power and thermals | Sustained Intel graphics use, temperatures under load, NVIDIA electrical power-off, incomplete SMC sensors, switching to battery and runtime. Electrical power-off is separate from driver-port research. |
-| 2 | Boot and EFI consolidation | Preserve a private copy of the current working EFI, copy it to the external SSD's EFI partition, and establish boot without the HDD. Keep the HDD as a recovery path. Document a later release of the current configuration without replacing v0.1.0. |
+| Complete / retained | Boot and EFI consolidation | Independent Samsung boot confirmed after manual EFI transfer. Keep the HDD as a recovery path and preserve the private working EFI. A later sanitized release remains separate from v0.1.0. |
 | 3 | Storage and USB reliability | External SSD stability, USB-A/USB-C SuperSpeed, both USB-C orientations, reconnection, shutdown and reboot. |
 | 4 | Audio peripherals and network throughput | Analog audio jack and Wi-Fi transfer-speed measurement. Wi-Fi network switching, Wi-Fi/Bluetooth disconnection and reconnection, and the Bluetooth headset microphone are confirmed working. Retain the working internal microphone correction. |
 | 5 | External displays | HDMI and USB-C video operation and actual GPU routing before choosing display fixes. |
@@ -17,7 +17,7 @@ The [CPU and passive sensor reports](cpu-thermal.md) confirm frequency/power res
 | Later | Deferred refinements | Remaining F4/F5/F7/F8/F9/F10 icon actions, Fn behavior after session refresh, audio equalization, lid/sleep/wake and peripheral recovery. |
 | Research | Open compatibility work | Native macOS Wi-Fi integration and the NVIDIA Linux-driver port. Neither is treated as completed or discarded. |
 
-The October 14 disk listing shows the source HDD as a 240.1 GB external GUID disk with one Microsoft Basic Data partition. The Samsung is a separate 250.1 GB external GUID disk with an existing 209.7 MB EFI system partition and APFS. The [SSD boot helper](../guides/ssd-boot.md) prepares the private working BOOT/OC transfer with backup and verification. The actual transfer and boot with the HDD disconnected remain pending.
+The October 14 disk listing shows the source HDD as a 240.1 GB external GUID disk with one Microsoft Basic Data partition. The Samsung is a separate 250.1 GB external GUID disk with an existing 209.7 MB EFI system partition and APFS. The current private EFI was copied manually, and independent Samsung boot is confirmed following the HDD-disconnected procedure. The [transfer helper](../guides/ssd-boot.md) stopped at its initial mounted-target guard before backup or copy; that helper is on hold pending identification of the failed condition.
 
 Windows on the internal PM981a is retained. The current backlight, Intel framebuffer, audio/microphone and BrightnessKeys corrections are the baseline for subsequent work. Small verification tasks should be grouped around each implementation rather than repeatedly requesting unrelated diagnostic archives.
 
@@ -27,7 +27,7 @@ Priorities updated on 13 October 2026: the panel being off during boot is **reso
 
 | Component | Current status | Required test |
 |---|---|---|
-| Tahoe boot | Desktop on the 960 EVO; panel delay eliminated in the test using only -igfxblr, reported wait zero | Retain the fix and verify repeatable shutdown/reboot in use |
+| Tahoe boot | Independent boot from the external Samsung, with OpenCore on its EFI partition; boot blackout corrected by -igfxblr | Retain the working EFI and verify repeatable shutdown/reboot in use |
 | Intel UHD 620 | IntelAccelerator detected, Metal 3 exposed, shared memory up to 1536 MB; boot without VESA | Metal load and sustained use without freezes or artefacts |
 | Keyboard | Direct F1–F3, F6 and F11/F12 working | Map the six remaining icon actions and preserve ordinary Fn+F1–F12 for applications |
 | ELAN touchpad | F6 toggle and gestures confirmed working in use | Retain the current configuration; recovery after sleep remains part of the deferred wake checks |

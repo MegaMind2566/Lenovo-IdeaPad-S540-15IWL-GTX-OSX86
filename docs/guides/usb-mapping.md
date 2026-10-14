@@ -18,6 +18,22 @@ The map must respect the macOS limit of 15 ports per controller. This limit appl
 
 Source: [USBToolBox — official documentation](https://github.com/USBToolBox/tool).
 
+## Current macOS link-speed check
+
+Independent Samsung boot is confirmed after manual EFI transfer. The original Windows mapping recorded the RTL9210 bridge at USB 2 speed; this does not establish its current macOS connection speed.
+
+With Tahoe running from the SSD in its current connection, read the USB device report:
+
+```bash
+system_profiler SPUSBHostDataType
+```
+
+Review the enclosure's own **Link Speed** or **Speed** entry, together with its position in the USB tree. A controller's advertised maximum is not the enclosure's negotiated link speed, and neither is a measured storage transfer rate. USB SuperSpeed remains pending until the current device report is available.
+
+The current system SSD must remain connected while macOS is running. Later USB-C orientation and alternate-port checks require shutdown before moving its cable, followed by another boot and device-speed reading. Sustained storage reliability remains a separate usage check.
+
+The report-type selection for Tahoe is also implemented in the primary source of [usbi](https://gist.github.com/kaushikgopal/7e1555569cd5bb3138cb5ca67bb7a4ae). No third-party utility is required for this read-only check.
+
 ## Received and verified map
 
 The supplied `UTBMap.kext` matches the 9 ports selected in `usb.json` on the `XHC` controller, PCI `8086:9DED`. The original plist is preserved in `usb/UTBMap.kext`; the summary without serial numbers or Windows paths is in `usb/ports.json`. The raw JSON is not added to the repository.

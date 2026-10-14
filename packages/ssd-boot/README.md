@@ -1,5 +1,7 @@
 # Boot directly from the external macOS SSD
 
+**Helper on hold.** Version 1.0.0 stopped at its initial mounted-target identity/writability check on the laptop, before backup or copy. The failed condition remains unidentified. Independent Samsung boot succeeded after a manual transfer of the current private EFI. Do not rerun this helper on that working installation. Its source remains available for a scoped guard correction; CI success is not a successful laptop transfer.
+
 This installer copies the **current private working OpenCore files** from `/Volumes/240 GB/EFI` to the EFI partition of the external SSD running macOS. It does not use the public EFI release.
 
 It discovers the running APFS container and its physical disk. The expected layout is an external 240 GB source with one Microsoft Basic Data partition and an external 250 GB target with EFI + APFS partitions. Disk numbers may change. An ambiguous or different layout stops the installer.

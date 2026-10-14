@@ -1,6 +1,6 @@
 # Independent boot from the external SSD
 
-Tahoe currently runs on the external Samsung 960 EVO while OpenCore is read from the separate 240 GB HDD. The next step places the current private boot files on the SSD's existing EFI system partition.
+**Independent Samsung boot is confirmed as of October 14, 2026.** The current private EFI was copied manually from the 240 GB HDD to the SSD's existing EFI system partition, then booted through the Samsung following the HDD-disconnected procedure. Keep the HDD as the recovery route.
 
 ## Observed layout
 
@@ -11,7 +11,11 @@ Tahoe currently runs on the external Samsung 960 EVO while OpenCore is read from
 
 Device numbers are observations from that listing, not fixed installer settings. The helper resolves the current system's APFS backing disk and requires the verified external layout before writing.
 
-## Transfer
+## Transfer helper: on hold
+
+Version 1.0.0 stopped on the laptop with `the SSD identity or writable mount changed` at the initial mounted-target check, before creating the Desktop backup or copying EFI files. The precise failed condition is unknown. Guard and transaction fixtures passed on macOS CI, but that does not establish compatibility with the laptop's mounted EFI metadata. The manual transfer succeeded; do not rerun this helper on the already working SSD.
+
+The following command is retained as a development reference while the guard issue remains open:
 
 Extract **S540-ssd-boot.zip** into Downloads and run:
 
@@ -25,7 +29,7 @@ The public v0.1.0 release is an earlier snapshot. This transfer uses the current
 
 ## Independent boot check
 
-1. After the helper reports a verified copy, shut down.
+1. After copying the current working EFI, shut down.
 2. Disconnect the 240 GB HDD and leave the Samsung connected.
 3. Open the Lenovo boot menu with **F12** or **Fn+F12** at power-on.
 4. Select the UEFI entry for the Samsung's USB enclosure. Its name may reflect the bridge rather than Samsung.
@@ -33,7 +37,7 @@ The public v0.1.0 release is an earlier snapshot. This transfer uses the current
 
 Keep the HDD available as the existing recovery route. Reconnect it and select its UEFI entry if the new path does not reach OpenCore or the desktop. Firmware boot-order changes can follow the successful independent boot.
 
-Copy verification establishes file integrity, not firmware detection or a successful boot. Independent SSD boot remains pending until observed on the laptop.
+The independent boot result belongs to the manual transfer. It does not establish successful execution of the automatic helper. USB link speed, both connector orientations and sustained SSD reliability remain separate checks.
 
 ## References
 

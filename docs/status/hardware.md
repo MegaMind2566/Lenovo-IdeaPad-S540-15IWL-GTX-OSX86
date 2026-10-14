@@ -4,7 +4,7 @@ Report received on 12 October 2026. Only data relevant to the project is include
 
 | Item | Reported data | macOS status |
 |---|---|---|
-| Model | Lenovo IdeaPad S540-15IWL GTX, 81SW family | Tahoe reached the desktop on the external 960 EVO |
+| Model | Lenovo IdeaPad S540-15IWL GTX, 81SW family | Tahoe boots independently from the external 960 EVO |
 | Motherboard | Lenovo LNVNB161216 | DSDT and 12 SSDTs analysed |
 | BIOS | BWCN19WW, 26 May 2021 | UEFI present; Secure Boot disabled in the report |
 | CPU | Intel Core i7-8565U, Whiskey Lake-U, 4 cores / 8 threads | X86PlatformPlugin active; frequency/power response confirmed; latest passive session has 15/15 valid temperature readings at 45–48 °C and median estimated Intel package power 1.05 W |
@@ -34,7 +34,7 @@ The Windows integrated graphics driver name reports UHD 610, but the chip and PC
 
 ## External boot-disk layout: October 14, 2026
 
-The disk listing reports a 240.1 GB external GUID HDD with a single Microsoft Basic Data partition named 240 GB, and a separate 250.1 GB external GUID SSD with a 209.7 MB EFI system partition and a 249.8 GB APFS partition. These correspond to the current HDD source and Samsung 960 EVO system disk. The source EFI remains on the HDD; independent SSD boot is not yet confirmed. The [transfer guide](../guides/ssd-boot.md) uses live APFS backing-disk discovery rather than fixed disk numbers.
+The disk listing reports a 240.1 GB external GUID HDD with a single Microsoft Basic Data partition named 240 GB, and a separate 250.1 GB external GUID SSD with a 209.7 MB EFI system partition and a 249.8 GB APFS partition. These correspond to the current HDD source and Samsung 960 EVO system disk. The current private EFI was then copied manually to the SSD's EFI system partition. Independent boot from the Samsung is confirmed after the HDD-disconnected procedure. The HDD copy remains a recovery route. The [transfer helper](../guides/ssd-boot.md) had stopped at its initial mounted-target guard before backup or copy; its failed condition remains unidentified, and no filesystem cause is inferred.
 
 ## Data still needed
 

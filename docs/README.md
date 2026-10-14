@@ -22,7 +22,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 | [Tahoe audio](guides/tahoe-audio.md) | Initial audio setup, volume fix and recovery |
 | [Microphone v2](guides/microphone-fix.md) | S540 driver variant, verification and rollback |
 | [USB mapping](guides/usb-mapping.md) | Mapped ports and outstanding tests |
-| [Independent SSD boot](guides/ssd-boot.md) | Transfer the private working boot files from the HDD to the existing Samsung EFI partition |
+| [Independent SSD boot](guides/ssd-boot.md) | Confirmed manual EFI transfer and Samsung boot; automatic helper on hold |
 | [Boot disk maintenance](guides/boot-maintenance.md) | Separate maintenance procedure for the physical boot disk |
 | [Function keys](guides/function-keys.md) | Keyboard icon actions, ordinary Fn function keys, event diagnosis and brightness rollback |
 | [Bluetooth](guides/bluetooth.md) | The targeted patcher exclusion and its rollback |

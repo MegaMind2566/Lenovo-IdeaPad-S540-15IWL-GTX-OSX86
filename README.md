@@ -2,7 +2,7 @@
 
 An OpenCore project for **macOS Tahoe 26** on the Lenovo IdeaPad S540-15IWL GTX. The goal is to improve hardware support while keeping configuration, driver patches, and recovery procedures organized and reproducible.
 
-Tahoe currently runs with Intel graphics acceleration, audio, Wi-Fi, Bluetooth headphone audio, and the webcam. Development continues on the remaining hardware features.
+Tahoe boots directly from the external Samsung 960 EVO, with Intel graphics acceleration, audio, Wi-Fi, Bluetooth headphone audio, and the webcam. Development continues on the remaining hardware features.
 
 ## Hardware
 
@@ -24,7 +24,7 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 
 | Feature | Status | Details |
 |---|---|---|
-| macOS boot and desktop | Working | Tahoe on the external 960 EVO; OpenCore on a USB HDD |
+| macOS boot and desktop | Working | Tahoe and OpenCore on the external 960 EVO; independent SSD boot confirmed |
 | Intel graphics acceleration | Working | IntelAccelerator, Metal 3, up to 1536 MB shared graphics memory |
 | Internal display | Working | Full HD resolution; startup black-screen delay corrected |
 | Brightness slider | Working | Brightness control through macOS settings |
@@ -54,14 +54,14 @@ Detailed hardware information is in [Hardware](docs/status/hardware.md).
 
 ## Operating configuration
 
-macOS uses the external SSD; Windows remains on the internal PM981a. OpenCore currently boots from a separate USB HDD. Moving the EFI to the 960 EVO is a planned step.
+macOS and OpenCore use the external Samsung 960 EVO. Independent boot is confirmed after manually copying the current private EFI from the 240 GB HDD. The HDD remains available as a recovery route; Windows remains on the internal PM981a.
 
 Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including the S540 microphone correction. The EFI alone does not install this extension. The audio guides document the existing installation and upgrade procedures; those helpers require their original rollback state.
 
 ## Development priorities
 
-- Complete the current CPU, temperature and power checks, then make the external SSD independently bootable and consolidate the working EFI.
-- Complete storage, USB, Intel stability, power management and external display support.
+- Verify the external SSD's negotiated USB speed and storage stability; independent SSD boot is complete.
+- Complete USB-C orientation checks, Intel stability, power management and external display support; sustained-load temperature and fan telemetry remain open.
 - Complete remaining audio peripheral and device support; wireless reconnection and network switching work.
 - Retain the working keyboard controls; remaining icon actions, equalization and sleep refinements are deferred.
 - Keep native macOS Wi-Fi integration and NVIDIA driver-port research open.
