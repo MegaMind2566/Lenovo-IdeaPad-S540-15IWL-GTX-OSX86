@@ -60,8 +60,29 @@ The current configuration is retained. Independent boot from the external Samsun
 - [Temperature key implementation](https://github.com/acidanthera/VirtualSMC/blob/b15991dd87e36a102bf159ea56490e3126245590/Sensors/SMCProcessor/KeyImplementations.cpp)
 - [Sensor plugin scope](https://github.com/acidanthera/VirtualSMC/blob/b15991dd87e36a102bf159ea56490e3126245590/Docs/SensorInfo.md)
 
-## Next observation: normal desktop activity
+## Continuous reader during desktop activity
 
 The original CPU collector restarts `powermetrics -n 1` for each sample and accepts only a strict decimal temperature line. The later passive collector uses one continuous session and records missing, rejected and duplicate temperature categories. These implementation differences do not retrospectively explain the original missing load reading.
 
-The next observation reuses the existing [sensor collector](../../packages/cpu-sensors/README.md) during about 15–20 seconds of normal browser activity within its thirty-second collection. For this run, the idle-only prompt to leave the laptop untouched does not apply. No artificial CPU workers are started, and no EFI, driver or power setting changes are needed. Compare temperature completeness with the observed frequency and estimated package power; if activity produces no measurable change, do not treat the run as a load-temperature result. Controlled stress and sustained-cooling validation remain separate later work.
+The follow-up reused the existing [sensor collector](../../packages/cpu-sensors/README.md) after requesting about 15–20 seconds of normal browser activity within its thirty-second collection. The idle-only prompt to leave the laptop untouched did not apply. The collector starts no artificial CPU workers and changes no EFI, driver or power setting. The report does not separately timestamp the browser activity.
+
+### Activity report result: October 14, 2026
+
+| Item | Observed result |
+|---|---|
+| Accepted CPU temperatures | 15 of 15; no missing, rejected or duplicate readings |
+| CPU die temperature | 57–82 °C; median 59 °C; mean 62.33 °C |
+| Estimated Intel package power | 3.03–35.62 W; median 4.60 W |
+| Reported average system frequency | 1.230–3.436 GHz; median 1.507 GHz |
+| Highest retained sample | Sample 4: 82 °C, 35.62 W and 3436.41 MHz |
+| Following / final temperature | 59 °C in sample 5 / 57 °C in sample 15 |
+| Thermal pressure | Nominal in every sample |
+| Loaded sensor drivers | VirtualSMC, SMCProcessor and SMCBatteryManager 1.3.8; Lilu 1.7.2 |
+| Reader completion | kmutil, IORegistry and powermetrics exit status 0 |
+| Fan RPM | Not reported |
+
+Compared with the earlier idle report (45–48 °C, median estimated package power 1.05 W and average system frequency 0.913 GHz), this session contains a clear activity/power rise while every CPU temperature remains readable. The original missing load sample is not reproduced. Its original cause is still unknown; the filter's incomplete SMCProcessor service-state observation does not establish a driver failure.
+
+The highest retained temperature is a sampled value, not a guarantee of the true peak between readings. The last seven temperatures are 57–59 °C as estimated package power falls to 3.03–4.60 W. This is not a sustained workload or proof that thermal throttling never occurs. NVIDIA electrical power-off, fan telemetry, battery runtime and total laptop power remain unverified by this report.
+
+There are fifteen startup warning markers and ninety-eight within sample groups, as in the idle session. These counts do not identify individual unavailable keys or justify an SMC patch. The configuration is retained; no immediate repeat sensor collection or artificial stress is required by this result.

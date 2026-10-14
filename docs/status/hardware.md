@@ -7,7 +7,7 @@ Report received on 12 October 2026. Only data relevant to the project is include
 | Model | Lenovo IdeaPad S540-15IWL GTX, 81SW family | Tahoe boots independently from the external 960 EVO |
 | Motherboard | Lenovo LNVNB161216 | DSDT and 12 SSDTs analysed |
 | BIOS | BWCN19WW, 26 May 2021 | UEFI present; Secure Boot disabled in the report |
-| CPU | Intel Core i7-8565U, Whiskey Lake-U, 4 cores / 8 threads | X86PlatformPlugin active; frequency/power response confirmed; latest passive session has 15/15 valid temperature readings at 45–48 °C and median estimated Intel package power 1.05 W |
+| CPU | Intel Core i7-8565U, Whiskey Lake-U, 4 cores / 8 threads | X86PlatformPlugin active; frequency/power response confirmed; idle temperatures 45–48 °C; activity session retains 57–82 °C with no missing readings and final 57 °C |
 | RAM | 12 GB DDR4-2400, 8 and 4 GB modules | Sufficient for the first test |
 | iGPU | Intel UHD 620, PCI 8086:3EA0 | IntelAccelerator detected and Metal 3 exposed; sustained load still to be tested |
 | dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91 | Driver disabled in the EFI; Linux port retained in the roadmap; electrical power-off still to be verified |
@@ -93,6 +93,12 @@ The [grouped CPU report](cpu-thermal.md) confirms four cores/eight logical proce
 A single thirty-second reader session retained fifteen valid CPU temperatures with no missing, rejected or duplicate values: 45–48 °C. Estimated Intel package power has a median of 1.05 W, and thermal pressure is Nominal in every sample. kmutil confirms VirtualSMC, SMCProcessor and SMCBatteryManager 1.3.8, together with Lilu 1.7.2. Invalid-key warning markers remain and do not prevent temperature readings; fan RPM is not reported.
 
 The service-header filter's incomplete SMCProcessor state match is not evidence that the loaded driver is inactive. This result supports normal idle behavior during the observation, not sustained cooling or an explanation of the previous load gap. Details and measurement limits are recorded in [CPU and thermal observations](cpu-thermal.md). The working configuration is retained. Independent external SSD boot and external SuperSpeed links were subsequently confirmed; USB 2 device coverage and storage reliability remain open.
+
+## CPU sensors during desktop activity: October 14, 2026
+
+The next continuous thirty-second report, collected after requesting normal browser activity, retains fifteen valid CPU temperatures with no missing, rejected or duplicate values. Recorded temperatures span **57–82 °C** (median 59 °C). Sample 4 contains the highest retained temperature, **82 °C**, alongside the highest estimated Intel package power, **35.62 W**, and average system frequency, **3436.41 MHz**. The next sample is 59 °C, and the final sample is 57 °C. Activity timing is not separately logged, so these are observed samples rather than a timed browser-workload profile.
+
+Thermal pressure is Nominal in all samples. The same VirtualSMC, SMCProcessor and SMCBatteryManager 1.3.8 and Lilu 1.7.2 are loaded. Warning markers persist, with no fan RPM. The previous missing temperature does not recur during this activity/power rise. This supports working continuous temperature telemetry beyond idle; it does not establish the true inter-sample peak, sustained-load cooling, absence of throttling, NVIDIA power-off or total system power. No sensor, EFI or power-limit change follows from this result. The [CPU record](cpu-thermal.md) preserves the measurement limits.
 
 ## Panel fix and Bluetooth status: 13 October 2026
 

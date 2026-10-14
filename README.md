@@ -35,7 +35,8 @@ Current status as of **October 14, 2026**. **Pending** means the feature has not
 | Wi-Fi through HeliPort | Working | Intel AC9560 with itlwm; disconnection, reconnection and network switching confirmed |
 | Bluetooth headphone audio and microphone | Working | Playback, headset voice capture, disconnection and reconnection confirmed |
 | Webcam | Working | Image capture confirmed alongside the internal microphone |
-| CPU power management | Working | X86PlatformPlugin active |
+| CPU power management | Working | X86PlatformPlugin active; frequency and estimated package power respond to activity |
+| CPU temperature telemetry | Working | Readings retained at idle and during desktop activity; fan RPM remains unavailable |
 | Battery detection and battery power | Working | Internal battery recognized; discharge reported after AC removal |
 | External SSD access | Working | Samsung 960 EVO in a USB-C enclosure |
 | USB-C SuperSpeed and connector orientation | Working | Samsung/RTL9210 at 5 Gb/s in both laptop-side connector orientations with the current cable |
