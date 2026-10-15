@@ -40,7 +40,11 @@ bool Context::rawRead(NvU32 offset, NvU32 width, NvU32 &value) {
     if (!ordinaryThread() || !validAccess(offset, width)) return false;
 #if defined(KERNEL)
     if (!device_) return false;
-    // UInt8 selects the standard-config overload, never extended space.
+    // The pinned public SDK configRead wrappers dispatch to the exported
+    // extendedConfigRead entry points even for a UInt8 argument. validAccess
+    // above restricts every request to the first 256 bytes; the Apple
+    // implementation therefore sets registerNumExtended to zero. No extended
+    // configuration offset or config write is reachable through this adapter.
     const UInt8 byteOffset = static_cast<UInt8>(offset);
     if (width == 1) value = device_->configRead8(byteOffset);
     else if (width == 2) value = device_->configRead16(byteOffset);

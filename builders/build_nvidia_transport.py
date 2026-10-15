@@ -173,6 +173,17 @@ extern "C" bool s540AuditProviderArbitration(IOPCIDevice *provider)
     return !unavailable;
 }
 
+extern "C" UInt32 s540AuditStandardConfigReads(IOPCIDevice *provider,
+    UInt8 *byte, UInt16 *word)
+{
+    // The pinned public SDK wrappers use extendedConfigRead entry points,
+    // even for these fixed, aligned standard-space offsets. No offset above
+    // 255 is admitted by either this reference or the production PCI policy.
+    *byte = provider->configRead8(UInt8{0x00});
+    *word = provider->configRead16(UInt8{0x02});
+    return provider->configRead32(UInt8{0x2c});
+}
+
 extern "C" UInt64 s540AuditPublishedMemoryGeometry(IOPCIDevice *provider,
     unsigned int index, UInt64 *tag)
 {
@@ -747,6 +758,20 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                           'serialized_by': 'nonblocking provider arbitration and shared startup lease',
                       },
                       'resolved_c_abi': list(HARDWARE_C_SYMBOLS),
+                      'pci_standard_config_reads': {
+                          'scope': 'aligned read-only offsets within the first 256 configuration bytes',
+                          'kernel_sdk_commit': SDK_COMMIT,
+                          'sdk_wrapper_reference': 'Headers/IOKit/pci/IOPCIDevice.h:461-496',
+                          'iopcifamily_commit': '4822b27a36e2de70e231ecf2bf3021384fab6ec2',
+                          'implementation_reference': 'IOPCIDevice.cpp:1275-1319',
+                          'export_reference': 'config/IOPCIFamily.exports:208,214,215',
+                          'public_wrapper_imports': [
+                              '__ZN11IOPCIDevice19extendedConfigRead8Ey',
+                              '__ZN11IOPCIDevice20extendedConfigRead16Ey',
+                              '__ZN11IOPCIDevice20extendedConfigRead32Ey',
+                          ],
+                          'extended_register_bits': 'zero for all admitted offsets',
+                      },
                       'static_initializers': False,
                   },
                   'package_file_sha256_excluding_BUILD': {name: digest(data) for name, data in payload.items()},
