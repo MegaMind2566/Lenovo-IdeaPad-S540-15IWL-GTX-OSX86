@@ -19,11 +19,19 @@ No administrator password or developer tools are required. The native Intel exec
 | `not_visible` | Neither inspected registry plane exposed the exact device; this is not proof of electrical power-off |
 | `error` | Enumeration or selected metadata was incomplete; retain the report |
 
-The current `-wegnoegpu` flag can terminate the external GPU's IOService node. The report records only whether that exact boot-argument token is present, never the full boot arguments. Device Tree fallback helps retain identity information when the service is hidden.
+The `-wegnoegpu` flag can terminate the external GPU's IOService node. The report records only whether that exact boot-argument token is present, never the full boot arguments. Device Tree fallback helps retain identity information when the service is hidden.
 
 The report includes the matched GPU's PCI IDs and registry path, limited parent-bridge identity and bounded raw `reg`/`assigned-addresses` properties when published. Those byte strings are metadata, not MMIO reads or measured VRAM capacity. Machine serials, account names, network details and unrelated devices are excluded.
 
 The executable does not open a hardware user client, write PCI configuration, map registers, enable DMA, load firmware or call ACPI. The launcher only creates a new report folder. Keep the working EFI as it is for this inventory.
+
+## Laptop result: October 15, 2026
+
+The latest reports return `found`, `complete=true`, `service_visible=true`, `wegnoegpu_present=false` and no warnings. The active `IOPCIDevice` identifies `10DE:1F91`, subsystem `17AA:3806`, revision `A1` and display class `030000`. It is published as `GFX0@0` below `RP05@1C,4` through `IOPP`; the parent bridge is Intel `8086:9DBC`, class `060400`.
+
+The earlier report returned `not_visible` with `-wegnoegpu` present. The automatic visibility helper stopped before making changes, and the argument was subsequently removed manually. The later inventory completes the PCI visibility milestone without establishing the full current EFI contents, electrical power state, configuration-space access, MMIO access or GPU initialization. Raw reports remain private.
+
+The next bounded prototype is being implemented for IOKit PCI attachment, configuration-space identity reads and already-assigned resource descriptors. It has not yet attached successfully on this laptop. MMIO, DMA, GSP and acceleration belong to later milestones.
 
 ## Build and scope
 

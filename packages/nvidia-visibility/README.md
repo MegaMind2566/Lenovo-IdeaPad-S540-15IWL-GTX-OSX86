@@ -1,10 +1,16 @@
 # NVIDIA visibility boot experiment
 
+**Superseded for this laptop:** PCI visibility is now confirmed after manual removal of `-wegnoegpu`. The latest inventory finds the active `10DE:1F91` PCI service with the argument absent. Repeating this preparation is not required for the reached milestone; see the [PCI result](../nvidia-pci/README.md#laptop-result-october-15-2026) and [transport plan](../../docs/reference/nvidia-port-assessment.md#current-implementation-milestone-bounded-pci-transport).
+
+The V1 automatic locator stopped on the laptop because its required `Mounted` Boolean was missing or invalid in disk metadata. It stopped before creating a candidate or changing EFI/NVRAM. This known failure is not a GPU or boot failure. The retained instructions below describe the original preparation design, not a successful automatic laptop run.
+
 The first laptop inventory completed without warnings but found no `10DE:1F91` node in IOService or the Device Tree. Its exact `-wegnoegpu` boot-argument check returned true. This records non-visibility with the disable argument active; it does not prove electrical power-off or establish that the argument is the only cause.
 
 This package prepares a separate copy of the **current Samsung EFI** with only the exact `-wegnoegpu` argument removed. It includes the native preparation tools, OpenCore 1.0.8 validator and the PCI inventory executable. It does not provide a NVIDIA GPU driver.
 
 ## Prepare the copy on Tahoe
+
+These are retained helper instructions. The manual alternative is to keep the working Samsung EFI intact, edit a separate HDD copy, remove only the exact disable argument, retain `-igfxblr` and the working Intel patches, and leave any NVIDIA power-off SSDT disabled. The later inventory, rather than an assumed EFI edit, establishes that the argument is absent and the PCI device is visible. The latest reports do not audit all other EFI settings. A blanket NVRAM reset is unnecessary.
 
 Extract **S540-nvidia-visibility-v1.zip** into Downloads, then run:
 

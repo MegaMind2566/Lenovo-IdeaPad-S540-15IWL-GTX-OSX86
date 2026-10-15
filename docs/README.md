@@ -17,8 +17,8 @@ Start with the [project README](../README.md) for the current state and scope. D
 |---|---|
 | [Passive CPU sensors](../packages/cpu-sensors/README.md) | A continuous sensor reading with no CPU workload; complete temperature readings at idle and during desktop activity |
 | [CPU, temperature and power](../packages/cpu-thermal/README.md) | Grouped idle, short-load and recovery collector; sustained-cooling validation remains separate from the successful activity readings |
-| [NVIDIA visibility experiment](../packages/nvidia-visibility/README.md) | Prepare a separate EFI copy for the hidden-GPU boot test, retaining the original Samsung fallback |
-| [NVIDIA PCI inventory](../packages/nvidia-pci/README.md) | Native read-only visibility check for the first NVIDIA port milestone |
+| [NVIDIA PCI transport](../packages/nvidia-transport/README.md) | Bounded attachment/configuration-read prototype in development; laptop attachment not yet validated |
+| [NVIDIA PCI inventory](../packages/nvidia-pci/README.md) | Native read-only inventory; active target PCI visibility is confirmed |
 | [Intel graphics](guides/intel-graphics.md) | Acceleration and stability checks |
 | [Boot and networking](guides/boot-network.md) | Backlight boot fix, HeliPort and Bluetooth |
 | [Tahoe audio](guides/tahoe-audio.md) | Initial audio setup, volume fix and recovery |
@@ -40,7 +40,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 
 ## Previous investigations
 
-Graphics experiments, Intel traces and Recovery log collectors are preserved in the [archive](../archive/README.md), together with their sources, asset locks and licenses.
+Graphics experiments, Intel traces and Recovery log collectors are preserved in the [archive](../archive/README.md), together with their sources, asset locks and licenses. The [NVIDIA visibility helper](../packages/nvidia-visibility/README.md) is superseded for the reached milestone: its V1 automatic locator stopped at `Mounted`, and the subsequent manual path produced an active target PCI service.
 
 ## Release preparation
 

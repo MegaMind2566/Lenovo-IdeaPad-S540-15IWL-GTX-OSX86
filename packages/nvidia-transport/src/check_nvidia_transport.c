@@ -1,0 +1,640 @@
+/*
+ * Read only the S540NvidiaPCIProbe snapshot and its direct provider identity.
+ * No IOServiceOpen, PCI configuration access, BAR mapping, MMIO, DMA, writes,
+ * firmware operations, or administrator privileges are used by this program.
+ *
+ * Build: clang -arch x86_64 -std=c11 -Wall -Wextra -Werror -O2 \
+ *   check_nvidia_transport.c -framework IOKit -framework CoreFoundation \
+ *   -o check-nvidia-transport
+ */
+#include <CoreFoundation/CoreFoundation.h>
+#include <IOKit/IOKitLib.h>
+#include <inttypes.h>
+#include <limits.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define TOOL_VERSION "0.1.0"
+#define PROBE_CLASS "S540NvidiaPCIProbe"
+#define SNAPSHOT_KEY "S540NvidiaPCIProbeSnapshot"
+#define ACCESS_POLICY "config-read-and-resource-metadata-only"
+#define BAR_COUNT 6
+#define MAX_SERVICES 8
+#define MAX_BOOT_ARGUMENT_BYTES 4096
+
+struct bar_descriptor {
+    uint8_t reg;
+    int present;
+    uint64_t address;
+    uint64_t length;
+};
+
+struct snapshot {
+    uint32_t format;
+    char probe_version[32];
+    uint16_t vendor;
+    uint16_t device;
+    uint16_t subsystem_vendor;
+    uint16_t subsystem;
+    uint8_t revision;
+    uint32_t class_code;
+    uint16_t command;
+    uint16_t status;
+    struct bar_descriptor bars[BAR_COUNT];
+};
+
+enum warning_code {
+    WARN_MATCHING_ALLOCATION,
+    WARN_ENUMERATION_FAILED,
+    WARN_ENUMERATION_INVALIDATED,
+    WARN_SERVICE_LIMIT,
+    WARN_MULTIPLE_SERVICES,
+    WARN_SERVICE_CLASS,
+    WARN_PROVIDER_LOOKUP,
+    WARN_PROVIDER_CLASS,
+    WARN_PROVIDER_IDENTITY,
+    WARN_SNAPSHOT_INVALID,
+    WARN_CONTEXT_UNREADABLE,
+    WARNING_COUNT
+};
+
+static const char *const warning_names[WARNING_COUNT] = {
+    "matching_allocation_failed", "enumeration_failed",
+    "enumeration_invalidated", "service_limit_reached",
+    "multiple_probe_services", "unexpected_probe_class",
+    "direct_provider_unavailable", "unexpected_direct_provider_class",
+    "direct_provider_identity_mismatch", "snapshot_missing_or_invalid",
+    "boot_argument_context_unreadable"
+};
+
+struct report {
+    struct snapshot snapshot;
+    size_t services;
+    int attached;
+    int complete;
+    int wegnoegpu_known;
+    int wegnoegpu_present;
+    unsigned int warnings[WARNING_COUNT];
+};
+
+static void warn_report(struct report *report, enum warning_code code,
+                        int incomplete)
+{
+    if (report->warnings[code] != UINT_MAX)
+        ++report->warnings[code];
+    if (incomplete)
+        report->complete = 0;
+}
+
+static int has_boot_token(const char *arguments, const char *token)
+{
+    size_t wanted = strlen(token);
+    const char *p = arguments;
+    while (*p != '\0') {
+        p += strspn(p, " \t\r\n\v\f");
+        size_t length = strcspn(p, " \t\r\n\v\f");
+        /* XNU leading-dash flags remain present with an =value suffix. */
+        if (length >= wanted && memcmp(p, token, wanted) == 0 &&
+            (length == wanted || p[wanted] == '='))
+            return 1;
+        p += length;
+    }
+    return 0;
+}
+
+/* Snapshot values must be integral CFNumbers, never booleans or raw bytes. */
+static int decode_number(CFTypeRef object, uint64_t maximum, uint64_t *result)
+{
+    int64_t signed_value = 0;
+    if (object == NULL || CFGetTypeID(object) != CFNumberGetTypeID() ||
+        CFNumberIsFloatType((CFNumberRef)object) ||
+        !CFNumberGetValue((CFNumberRef)object, kCFNumberSInt64Type,
+                          &signed_value) || signed_value < 0 ||
+        (uint64_t)signed_value > maximum)
+        return 0;
+    *result = (uint64_t)signed_value;
+    return 1;
+}
+
+static int dictionary_number(CFDictionaryRef dictionary, CFStringRef key,
+                              uint64_t maximum, uint64_t *result)
+{
+    return decode_number(CFDictionaryGetValue(dictionary, key), maximum, result);
+}
+
+static int exact_string(CFTypeRef object, CFStringRef expected)
+{
+    return object != NULL && CFGetTypeID(object) == CFStringGetTypeID() &&
+           CFEqual(object, expected);
+}
+
+static int decode_version(CFTypeRef object, char *version, size_t capacity)
+{
+    if (object == NULL || CFGetTypeID(object) != CFStringGetTypeID() ||
+        CFStringGetLength((CFStringRef)object) == 0 ||
+        CFStringGetLength((CFStringRef)object) >= (CFIndex)capacity ||
+        !CFStringGetCString((CFStringRef)object, version, (CFIndex)capacity,
+                             kCFStringEncodingASCII) ||
+        strlen(version) != (size_t)CFStringGetLength((CFStringRef)object))
+        return 0;
+    for (const unsigned char *p = (const unsigned char *)version; *p; ++p)
+        if (!(*p >= '0' && *p <= '9') && *p != '.')
+            return 0;
+    return 1;
+}
+
+/* Strict key counts ensure no additional raw registry payload is accepted. */
+static int decode_snapshot(CFTypeRef object, struct snapshot *output)
+{
+    struct snapshot candidate;
+    memset(&candidate, 0, sizeof(candidate));
+    if (object == NULL || CFGetTypeID(object) != CFDictionaryGetTypeID())
+        return 0;
+    CFDictionaryRef dictionary = (CFDictionaryRef)object;
+    if (CFDictionaryGetCount(dictionary) != 13 ||
+        !exact_string(CFDictionaryGetValue(dictionary, CFSTR("Stage")),
+                       CFSTR("attached")) ||
+        !exact_string(CFDictionaryGetValue(dictionary, CFSTR("AccessPolicy")),
+                       CFSTR(ACCESS_POLICY)) ||
+        !decode_version(CFDictionaryGetValue(dictionary, CFSTR("ProbeVersion")),
+                         candidate.probe_version,
+                         sizeof(candidate.probe_version)))
+        return 0;
+    uint64_t value = 0;
+#define READ_FIELD(KEY, MAXIMUM, FIELD) do { \
+    if (!dictionary_number(dictionary, CFSTR(KEY), (MAXIMUM), &value)) \
+        return 0; \
+    candidate.FIELD = value; \
+} while (0)
+    READ_FIELD("Format", UINT32_MAX, format);
+    READ_FIELD("VendorID", UINT16_MAX, vendor);
+    READ_FIELD("DeviceID", UINT16_MAX, device);
+    READ_FIELD("SubsystemVendorID", UINT16_MAX, subsystem_vendor);
+    READ_FIELD("SubsystemID", UINT16_MAX, subsystem);
+    READ_FIELD("RevisionID", UINT8_MAX, revision);
+    READ_FIELD("ClassCode", UINT32_C(0xffffff), class_code);
+    READ_FIELD("Command", UINT16_MAX, command);
+    READ_FIELD("Status", UINT16_MAX, status);
+#undef READ_FIELD
+    if (candidate.format != 1 || candidate.vendor != 0x10de ||
+        candidate.device != 0x1f91 || candidate.subsystem_vendor != 0x17aa ||
+        candidate.subsystem != 0x3806 || candidate.revision != 0xa1 ||
+        candidate.class_code != 0x030000)
+        return 0;
+    CFTypeRef bars_object = CFDictionaryGetValue(dictionary,
+                                                 CFSTR("BARDescriptors"));
+    if (bars_object == NULL || CFGetTypeID(bars_object) != CFArrayGetTypeID() ||
+        CFArrayGetCount((CFArrayRef)bars_object) != BAR_COUNT)
+        return 0;
+    for (CFIndex index = 0; index < BAR_COUNT; ++index) {
+        CFTypeRef bar_object = CFArrayGetValueAtIndex((CFArrayRef)bars_object,
+                                                      index);
+        if (bar_object == NULL ||
+            CFGetTypeID(bar_object) != CFDictionaryGetTypeID())
+            return 0;
+        CFDictionaryRef bar = (CFDictionaryRef)bar_object;
+        struct bar_descriptor *descriptor = &candidate.bars[index];
+        if (!dictionary_number(bar, CFSTR("Register"), UINT8_MAX, &value) ||
+            value != (uint64_t)(0x10 + 4 * index))
+            return 0;
+        descriptor->reg = (uint8_t)value;
+        CFTypeRef present = CFDictionaryGetValue(bar, CFSTR("Present"));
+        if (present == NULL || CFGetTypeID(present) != CFBooleanGetTypeID())
+            return 0;
+        descriptor->present = CFBooleanGetValue((CFBooleanRef)present);
+        if (CFDictionaryGetCount(bar) != (descriptor->present ? 4 : 2))
+            return 0;
+        if (descriptor->present &&
+            (!dictionary_number(bar, CFSTR("Address"), INT64_MAX,
+                                  &descriptor->address) ||
+             !dictionary_number(bar, CFSTR("Length"), INT64_MAX,
+                                  &descriptor->length) ||
+             descriptor->length == 0 ||
+             descriptor->address > UINT64_MAX - descriptor->length))
+            return 0;
+    }
+    *output = candidate;
+    return 1;
+}
+
+/* PCI identity properties can also use the standard four little-endian bytes. */
+static int decode_provider_id(CFTypeRef object, uint16_t *result)
+{
+    uint64_t value = 0;
+    if (object == NULL)
+        return 0;
+    if (CFGetTypeID(object) == CFDataGetTypeID()) {
+        if (CFDataGetLength((CFDataRef)object) != 4)
+            return 0;
+        const UInt8 *bytes = CFDataGetBytePtr((CFDataRef)object);
+        value = (uint64_t)bytes[0] | ((uint64_t)bytes[1] << 8) |
+                ((uint64_t)bytes[2] << 16) | ((uint64_t)bytes[3] << 24);
+        if (value > UINT16_MAX)
+            return 0;
+    } else if (!decode_number(object, UINT16_MAX, &value)) {
+        return 0;
+    }
+    *result = (uint16_t)value;
+    return 1;
+}
+
+static int provider_id_equals(io_registry_entry_t provider, CFStringRef key,
+                               uint16_t expected)
+{
+    CFTypeRef object = IORegistryEntryCreateCFProperty(provider, key,
+                                                       kCFAllocatorDefault, 0);
+    uint16_t actual = 0;
+    int valid = decode_provider_id(object, &actual);
+    if (object != NULL)
+        CFRelease(object);
+    return valid && actual == expected;
+}
+
+static int exact_class(io_object_t object, const char *expected)
+{
+    io_name_t name;
+    memset(name, 0, sizeof(name));
+    return IOObjectGetClass(object, name) == KERN_SUCCESS &&
+           memchr(name, '\0', sizeof(name)) != NULL &&
+           strcmp(name, expected) == 0;
+}
+
+static void read_probe(io_registry_entry_t service, struct report *report)
+{
+    if (!exact_class(service, PROBE_CLASS)) {
+        warn_report(report, WARN_SERVICE_CLASS, 1);
+        return;
+    }
+    io_registry_entry_t provider = IO_OBJECT_NULL;
+    if (IORegistryEntryGetParentEntry(service, kIOServicePlane, &provider) !=
+        KERN_SUCCESS || provider == IO_OBJECT_NULL) {
+        warn_report(report, WARN_PROVIDER_LOOKUP, 1);
+        return;
+    }
+    int valid = 1;
+    if (!exact_class(provider, "IOPCIDevice")) {
+        warn_report(report, WARN_PROVIDER_CLASS, 1);
+        valid = 0;
+    } else if (!provider_id_equals(provider, CFSTR("vendor-id"), 0x10de) ||
+               !provider_id_equals(provider, CFSTR("device-id"), 0x1f91) ||
+               !provider_id_equals(provider, CFSTR("subsystem-vendor-id"),
+                                     0x17aa) ||
+               !provider_id_equals(provider, CFSTR("subsystem-id"), 0x3806)) {
+        warn_report(report, WARN_PROVIDER_IDENTITY, 1);
+        valid = 0;
+    }
+    IOObjectRelease(provider);
+    if (!valid)
+        return;
+    CFTypeRef object = IORegistryEntryCreateCFProperty(service,
+        CFSTR(SNAPSHOT_KEY), kCFAllocatorDefault, 0);
+    valid = decode_snapshot(object, &report->snapshot);
+    if (object != NULL)
+        CFRelease(object);
+    if (!valid) {
+        warn_report(report, WARN_SNAPSHOT_INVALID, 1);
+        return;
+    }
+    report->attached = 1;
+}
+
+static void read_context(struct report *report)
+{
+    io_registry_entry_t chosen = IORegistryEntryFromPath(
+        kIOMainPortDefault, "IODeviceTree:/chosen");
+    if (chosen == IO_OBJECT_NULL) {
+        warn_report(report, WARN_CONTEXT_UNREADABLE, 0);
+        return;
+    }
+    CFTypeRef object = IORegistryEntryCreateCFProperty(chosen,
+        CFSTR("boot-args"), kCFAllocatorDefault, 0);
+    IOObjectRelease(chosen);
+    char arguments[MAX_BOOT_ARGUMENT_BYTES];
+    memset(arguments, 0, sizeof(arguments));
+    int valid = 0;
+    if (object != NULL && CFGetTypeID(object) == CFStringGetTypeID()) {
+        valid = CFStringGetCString((CFStringRef)object, arguments,
+                                    sizeof(arguments), kCFStringEncodingUTF8);
+    } else if (object != NULL && CFGetTypeID(object) == CFDataGetTypeID()) {
+        CFIndex length = CFDataGetLength((CFDataRef)object);
+        if (length >= 0 && (uint64_t)length < sizeof(arguments)) {
+            if (length > 0)
+                memcpy(arguments, CFDataGetBytePtr((CFDataRef)object),
+                         (size_t)length);
+            const char *first_nul = memchr(arguments, '\0', (size_t)length);
+            valid = first_nul == NULL || first_nul == arguments + length - 1;
+        }
+    }
+    if (object != NULL)
+        CFRelease(object);
+    if (valid) {
+        report->wegnoegpu_known = 1;
+        report->wegnoegpu_present = has_boot_token(arguments, "-wegnoegpu");
+    } else {
+        warn_report(report, WARN_CONTEXT_UNREADABLE, 0);
+    }
+    memset(arguments, 0, sizeof(arguments));
+}
+
+static void collect_report(struct report *report)
+{
+    read_context(report);
+    CFMutableDictionaryRef matching = IOServiceMatching(PROBE_CLASS);
+    if (matching == NULL) {
+        warn_report(report, WARN_MATCHING_ALLOCATION, 1);
+        return;
+    }
+    io_iterator_t iterator = IO_OBJECT_NULL;
+    if (IOServiceGetMatchingServices(kIOMainPortDefault, matching, &iterator) !=
+        KERN_SUCCESS) {
+        warn_report(report, WARN_ENUMERATION_FAILED, 1);
+        return;
+    }
+    io_registry_entry_t service;
+    while ((service = IOIteratorNext(iterator)) != IO_OBJECT_NULL) {
+        ++report->services;
+        if (report->services > MAX_SERVICES) {
+            IOObjectRelease(service);
+            warn_report(report, WARN_SERVICE_LIMIT, 1);
+            break;
+        }
+        if (report->services == 1)
+            read_probe(service, report);
+        IOObjectRelease(service);
+    }
+    if (!IOIteratorIsValid(iterator))
+        warn_report(report, WARN_ENUMERATION_INVALIDATED, 1);
+    IOObjectRelease(iterator);
+    if (report->services > 1) {
+        warn_report(report, WARN_MULTIPLE_SERVICES, 1);
+        report->attached = 0;
+    }
+}
+
+static void write_snapshot(FILE *out, const struct snapshot *snapshot)
+{
+    /* All strings here are constants or the ASCII digits/dots version. */
+    fprintf(out, "{\"format\":%" PRIu32 ",\"probe_version\":\"%s\","
+        "\"stage\":\"attached\",\"access_policy\":\"%s\","
+        "\"identity\":{\"vendor_id\":\"0x%04x\",\"device_id\":\"0x%04x\","
+        "\"subsystem_vendor_id\":\"0x%04x\",\"subsystem_device_id\":\"0x%04x\","
+        "\"revision_id\":\"0x%02x\",\"class_code\":\"0x%06" PRIx32 "\"},"
+        "\"command\":\"0x%04x\",\"status\":\"0x%04x\",\"bars\":[",
+        snapshot->format, snapshot->probe_version, ACCESS_POLICY,
+        (unsigned int)snapshot->vendor, (unsigned int)snapshot->device,
+        (unsigned int)snapshot->subsystem_vendor,
+        (unsigned int)snapshot->subsystem, (unsigned int)snapshot->revision,
+        snapshot->class_code, (unsigned int)snapshot->command,
+        (unsigned int)snapshot->status);
+    for (size_t index = 0; index < BAR_COUNT; ++index) {
+        const struct bar_descriptor *bar = &snapshot->bars[index];
+        if (index)
+            fputc(',', out);
+        fprintf(out, "{\"register\":\"0x%02x\",\"present\":%s",
+            (unsigned int)bar->reg, bar->present ? "true" : "false");
+        if (bar->present)
+            fprintf(out, ",\"address\":\"0x%016" PRIx64 "\","
+                "\"length_bytes\":%" PRIu64, bar->address, bar->length);
+        fputc('}', out);
+    }
+    fputs("]}", out);
+}
+
+static void write_report(FILE *out, const struct report *report)
+{
+    fprintf(out, "{\"format\":1,\"tool\":\"nvidia-transport\",\"version\":\"%s\","
+        "\"target\":{\"vendor_id\":\"0x10de\",\"device_id\":\"0x1f91\","
+        "\"subsystem_vendor_id\":\"0x17aa\",\"subsystem_device_id\":\"0x3806\"},"
+        "\"status\":\"%s\",\"complete\":%s,"
+        "\"context\":{\"wegnoegpu_present\":%s},\"probe\":",
+        TOOL_VERSION, !report->complete ? "error" :
+            report->attached ? "attached" : "not_attached",
+        report->complete ? "true" : "false",
+        !report->wegnoegpu_known ? "null" :
+            report->wegnoegpu_present ? "true" : "false");
+    if (report->attached && report->complete) {
+        fputs("{\"service_class\":\"" PROBE_CLASS "\","
+              "\"provider_class\":\"IOPCIDevice\","
+              "\"provider_identity_verified\":true,\"snapshot\":", out);
+        write_snapshot(out, &report->snapshot);
+        fputc('}', out);
+    } else {
+        fputs("null", out);
+    }
+    fputs(",\"warnings\":[", out);
+    int emitted = 0;
+    for (size_t index = 0; index < WARNING_COUNT; ++index) {
+        if (!report->warnings[index])
+            continue;
+        if (emitted++)
+            fputc(',', out);
+        fprintf(out, "{\"code\":\"%s\",\"count\":%u}", warning_names[index],
+                  report->warnings[index]);
+    }
+    fputs("]}\n", out);
+}
+
+static void fixture_number(CFMutableDictionaryRef dictionary, CFStringRef key,
+                            int64_t value)
+{
+    CFNumberRef number = CFNumberCreate(kCFAllocatorDefault,
+                                         kCFNumberSInt64Type, &value);
+    if (number == NULL) {
+        fputs("Self-test allocation failed.\n", stderr);
+        exit(1);
+    }
+    CFDictionarySetValue(dictionary, key, number);
+    CFRelease(number);
+}
+
+static CFMutableDictionaryRef valid_fixture(void)
+{
+    CFMutableDictionaryRef dictionary = CFDictionaryCreateMutable(
+        kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks,
+        &kCFTypeDictionaryValueCallBacks);
+    CFMutableArrayRef bars = CFArrayCreateMutable(kCFAllocatorDefault, 0,
+                                                  &kCFTypeArrayCallBacks);
+    if (dictionary == NULL || bars == NULL) {
+        fputs("Self-test allocation failed.\n", stderr);
+        exit(1);
+    }
+    fixture_number(dictionary, CFSTR("Format"), 1);
+    CFDictionarySetValue(dictionary, CFSTR("ProbeVersion"), CFSTR("0.1.0"));
+    CFDictionarySetValue(dictionary, CFSTR("Stage"), CFSTR("attached"));
+    CFDictionarySetValue(dictionary, CFSTR("AccessPolicy"), CFSTR(ACCESS_POLICY));
+    fixture_number(dictionary, CFSTR("VendorID"), 0x10de);
+    fixture_number(dictionary, CFSTR("DeviceID"), 0x1f91);
+    fixture_number(dictionary, CFSTR("SubsystemVendorID"), 0x17aa);
+    fixture_number(dictionary, CFSTR("SubsystemID"), 0x3806);
+    fixture_number(dictionary, CFSTR("RevisionID"), 0xa1);
+    fixture_number(dictionary, CFSTR("ClassCode"), 0x030000);
+    fixture_number(dictionary, CFSTR("Command"), 6);
+    fixture_number(dictionary, CFSTR("Status"), 0x10);
+    for (size_t index = 0; index < BAR_COUNT; ++index) {
+        CFMutableDictionaryRef bar = CFDictionaryCreateMutable(
+            kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks,
+            &kCFTypeDictionaryValueCallBacks);
+        if (bar == NULL) {
+            fputs("Self-test allocation failed.\n", stderr);
+            exit(1);
+        }
+        fixture_number(bar, CFSTR("Register"), (int64_t)(0x10 + 4 * index));
+        CFDictionarySetValue(bar, CFSTR("Present"), index == 0 ?
+                               kCFBooleanTrue : kCFBooleanFalse);
+        if (index == 0) {
+            fixture_number(bar, CFSTR("Address"), 0xc0000000);
+            fixture_number(bar, CFSTR("Length"), 0x1000000);
+        }
+        CFArrayAppendValue(bars, bar);
+        CFRelease(bar);
+    }
+    CFDictionarySetValue(dictionary, CFSTR("BARDescriptors"), bars);
+    CFRelease(bars);
+    return dictionary;
+}
+
+static void require_test(int condition, const char *name, unsigned int *count)
+{
+    if (!condition) {
+        fprintf(stderr, "Self-test failed: %s\n", name);
+        exit(1);
+    }
+    ++*count;
+}
+
+static int run_self_tests(void)
+{
+    unsigned int count = 0;
+    struct snapshot snapshot;
+    CFMutableDictionaryRef fixture = valid_fixture();
+    require_test(decode_snapshot(fixture, &snapshot) &&
+        snapshot.bars[0].address == UINT64_C(0xc0000000) &&
+        snapshot.bars[0].length == UINT64_C(0x1000000),
+        "valid production decoder fixture", &count);
+    require_test(!decode_snapshot(NULL, &snapshot), "missing snapshot", &count);
+    require_test(!decode_snapshot(kCFBooleanTrue, &snapshot),
+                   "wrong snapshot type", &count);
+    CFDictionarySetValue(fixture, CFSTR("Extra"), CFSTR("not allowed"));
+    require_test(!decode_snapshot(fixture, &snapshot), "extra snapshot key", &count);
+    CFDictionaryRemoveValue(fixture, CFSTR("Extra"));
+    CFDictionaryRemoveValue(fixture, CFSTR("Format"));
+    require_test(!decode_snapshot(fixture, &snapshot), "missing format", &count);
+    fixture_number(fixture, CFSTR("Format"), 2);
+    require_test(!decode_snapshot(fixture, &snapshot), "unsupported format", &count);
+    fixture_number(fixture, CFSTR("Format"), 1);
+    CFDictionarySetValue(fixture, CFSTR("VendorID"), kCFBooleanTrue);
+    require_test(!decode_snapshot(fixture, &snapshot), "boolean numeric field", &count);
+    fixture_number(fixture, CFSTR("VendorID"), -1);
+    require_test(!decode_snapshot(fixture, &snapshot), "negative numeric field", &count);
+    fixture_number(fixture, CFSTR("VendorID"), 0x10000);
+    require_test(!decode_snapshot(fixture, &snapshot), "oversized numeric field", &count);
+    fixture_number(fixture, CFSTR("VendorID"), 0x10de);
+    double floating_value = 1.0;
+    CFNumberRef floating = CFNumberCreate(kCFAllocatorDefault,
+                                           kCFNumberDoubleType, &floating_value);
+    require_test(floating != NULL, "floating fixture allocation", &count);
+    CFDictionarySetValue(fixture, CFSTR("Format"), floating);
+    CFRelease(floating);
+    require_test(!decode_snapshot(fixture, &snapshot), "floating numeric field", &count);
+    fixture_number(fixture, CFSTR("Format"), 1);
+    fixture_number(fixture, CFSTR("SubsystemID"), 0x3807);
+    require_test(!decode_snapshot(fixture, &snapshot), "wrong subsystem", &count);
+    fixture_number(fixture, CFSTR("SubsystemID"), 0x3806);
+    fixture_number(fixture, CFSTR("ClassCode"), 0x030200);
+    require_test(!decode_snapshot(fixture, &snapshot), "wrong class code", &count);
+    fixture_number(fixture, CFSTR("ClassCode"), 0x030000);
+    CFDictionarySetValue(fixture, CFSTR("AccessPolicy"), CFSTR("write"));
+    require_test(!decode_snapshot(fixture, &snapshot), "wrong policy", &count);
+    CFDictionarySetValue(fixture, CFSTR("AccessPolicy"), CFSTR(ACCESS_POLICY));
+    CFDictionarySetValue(fixture, CFSTR("Stage"), CFSTR("ready"));
+    require_test(!decode_snapshot(fixture, &snapshot), "wrong stage", &count);
+    CFDictionarySetValue(fixture, CFSTR("Stage"), CFSTR("attached"));
+    CFDictionarySetValue(fixture, CFSTR("ProbeVersion"),
+                           CFSTR("12345678901234567890123456789012"));
+    require_test(!decode_snapshot(fixture, &snapshot), "oversized version", &count);
+    CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.1.0\""));
+    require_test(!decode_snapshot(fixture, &snapshot), "unsafe version character", &count);
+    CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.1.0"));
+    CFMutableArrayRef bars = (CFMutableArrayRef)CFDictionaryGetValue(
+        fixture, CFSTR("BARDescriptors"));
+    CFArrayAppendValue(bars, CFArrayGetValueAtIndex(bars, 0));
+    require_test(!decode_snapshot(fixture, &snapshot), "oversized BAR array", &count);
+    CFArrayRemoveValueAtIndex(bars, BAR_COUNT);
+    CFMutableDictionaryRef bar = (CFMutableDictionaryRef)CFArrayGetValueAtIndex(bars, 1);
+    fixture_number(bar, CFSTR("Register"), 0x10);
+    require_test(!decode_snapshot(fixture, &snapshot), "duplicate BAR register", &count);
+    fixture_number(bar, CFSTR("Register"), 0x14);
+    CFDictionarySetValue(bar, CFSTR("Present"), CFSTR("false"));
+    require_test(!decode_snapshot(fixture, &snapshot), "wrong BAR boolean type", &count);
+    CFDictionarySetValue(bar, CFSTR("Present"), kCFBooleanFalse);
+    fixture_number(bar, CFSTR("Address"), 0);
+    require_test(!decode_snapshot(fixture, &snapshot), "absent BAR metadata", &count);
+    CFDictionaryRemoveValue(bar, CFSTR("Address"));
+    bar = (CFMutableDictionaryRef)CFArrayGetValueAtIndex(bars, 0);
+    fixture_number(bar, CFSTR("Length"), 0);
+    require_test(!decode_snapshot(fixture, &snapshot), "zero BAR length", &count);
+    fixture_number(bar, CFSTR("Length"), 0x1000000);
+    CFDictionarySetValue(bar, CFSTR("Address"), CFSTR("0xc0000000"));
+    require_test(!decode_snapshot(fixture, &snapshot), "wrong BAR address type", &count);
+    fixture_number(bar, CFSTR("Address"), 0xc0000000);
+    CFDictionaryRemoveValue(bar, CFSTR("Length"));
+    require_test(!decode_snapshot(fixture, &snapshot), "missing present BAR length", &count);
+    fixture_number(bar, CFSTR("Length"), 0x1000000);
+    require_test(decode_snapshot(fixture, &snapshot), "restored valid fixture", &count);
+    CFRelease(fixture);
+
+    const UInt8 identity_bytes[] = {0xde, 0x10, 0, 0};
+    uint16_t identity = 0;
+    CFDataRef identity_data = CFDataCreate(kCFAllocatorDefault, identity_bytes, 4);
+    require_test(identity_data != NULL &&
+        decode_provider_id(identity_data, &identity) && identity == 0x10de,
+        "provider little-endian identity", &count);
+    CFRelease(identity_data);
+    CFDataRef short_data = CFDataCreate(kCFAllocatorDefault, identity_bytes, 3);
+    require_test(short_data != NULL && !decode_provider_id(short_data, &identity),
+        "short provider identity", &count);
+    CFRelease(short_data);
+    require_test(!decode_provider_id(kCFBooleanTrue, &identity),
+        "boolean provider identity", &count);
+    require_test(has_boot_token("-v\t-wegnoegpu -igfxblr", "-wegnoegpu"),
+        "exact boot token", &count);
+    require_test(has_boot_token("-v -wegnoegpu=0 -igfxblr", "-wegnoegpu"),
+        "valued leading-dash boot flag", &count);
+    require_test(has_boot_token("-wegnoegpu=anything", "-wegnoegpu"),
+        "arbitrary leading-dash flag value", &count);
+    require_test(!has_boot_token("foo-wegnoegpu -x-wegnoegpu -wegnoegpu-other -wegnoegpux", "-wegnoegpu"),
+        "nonexact boot flag alias", &count);
+    fprintf(stdout, "NVIDIA transport self-tests passed (%u checks).\n", count);
+    return 0;
+}
+
+int main(int argc, char **argv)
+{
+    if (argc == 2 && strcmp(argv[1], "--self-test") == 0)
+        return run_self_tests();
+    if (argc == 2 && strcmp(argv[1], "--version") == 0) {
+        puts("nvidia-transport " TOOL_VERSION);
+        return 0;
+    }
+    if (argc == 2 && strcmp(argv[1], "--help") == 0) {
+        puts("Usage: nvidia-transport [--help | --version | --self-test]\n"
+             "Read the S540 NVIDIA transport probe snapshot and verify its provider.\n"
+             "No administrator privileges or device access are required.\n"
+             "not_attached is an observation, not a diagnosis of the GPU.");
+        return 0;
+    }
+    if (argc != 1) {
+        fputs("Usage: nvidia-transport [--help | --version | --self-test]\n", stderr);
+        return 64;
+    }
+    struct report report;
+    memset(&report, 0, sizeof(report));
+    report.complete = 1;
+    collect_report(&report);
+    write_report(stdout, &report);
+    if (fflush(stdout) == EOF || ferror(stdout))
+        return 74;
+    return report.complete ? 0 : 1;
+}

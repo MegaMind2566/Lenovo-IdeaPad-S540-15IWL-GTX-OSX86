@@ -1,0 +1,47 @@
+name: Build NVIDIA PCI attachment prototype
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/nvidia-transport/**'
+      - 'builders/build_nvidia_transport.py'
+      - 'tests/test_nvidia_transport*'
+      - '.github/workflows/build-nvidia-transport.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15-intel
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: acidanthera/MacKernelSDK
+          ref: 3f750085caa17ec3a7880f11c11bf4f48cd6a164
+          path: build-src/MacKernelSDK
+          persist-credentials: false
+      - name: Check the bounded PCI access policy
+        run: python3 tests/test_nvidia_transport_kernel.py
+      - name: Build and verify the native Intel package
+        run: python3 builders/build_nvidia_transport.py --kernel-sdk build-src/MacKernelSDK --output-dir build/nvidia-transport
+      - name: Run the packaged reporter without loading the kernel probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/unzip -q build/nvidia-transport/S540-nvidia-transport-v1.zip -d "$RUNNER_TEMP/nvidia-transport-package"
+          /bin/bash "$RUNNER_TEMP/nvidia-transport-package/S540-nvidia-transport-v1/CHECK-TRANSPORT.command" --output-dir "$RUNNER_TEMP"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: S540-nvidia-transport-v1
+          path: |
+            build/nvidia-transport/S540-nvidia-transport-v1.zip
+            build/nvidia-transport/S540-nvidia-transport-v1.zip.sha256
+          if-no-files-found: error
+          retention-days: 30

@@ -2,7 +2,7 @@
 
 Reviewed on October 15, 2026. Target: Lenovo IdeaPad S540-15IWL GTX, Intel macOS Tahoe, NVIDIA GTX 1650 Max-Q, PCI `10DE:1F91`.
 
-**Status:** source assessment complete; a Darwin GPU driver has not been implemented or loaded. The [native read-only PCI inventory](../../packages/nvidia-pci/README.md) is implemented; the laptop returned not_visible with -wegnoegpu active and no warnings. The [separate EFI visibility experiment](../../packages/nvidia-visibility/README.md) precedes a bounded Darwin transport prototype. Intel graphics remains the operating configuration.
+**Status:** source assessment and PCI visibility are complete. The [native read-only PCI inventory](../../packages/nvidia-pci/README.md) now finds `10DE:1F91` as an active `IOPCIDevice`, with `-wegnoegpu` absent. The [bounded Darwin PCI attachment prototype](../../packages/nvidia-transport/README.md) is implemented; attachment on the laptop has not been validated. GPU initialization, execution and graphics acceleration remain unimplemented. Intel graphics remains the operating display configuration.
 
 ## Source baseline
 
@@ -14,7 +14,7 @@ Reviewed on October 15, 2026. Target: Lenovo IdeaPad S540-15IWL GTX, Intel macOS
 | Mesa NVK | Official documentation inspected on the review date | An alternative Vulkan research path; no Mesa build or source revision has been selected |
 | Nouveau ABI reference | Linux `v6.6`, `include/uapi/drm/nouveau_drm.h` | Defines VM initialization, VM binding and command-execution interfaces; not a Darwin interface |
 
-The exact laptop subsystem ID must come from the device rather than a neighbouring Lenovo entry in NVIDIA's table. Hardware inclusion in a Linux support table establishes a relevant source candidate, not macOS support.
+The laptop inventory identifies subsystem `17AA:3806` and revision `A1`. Hardware inclusion in a Linux support table establishes a relevant source candidate, not macOS support.
 
 NVIDIA separates reusable resource-manager logic in `src/` from its Linux interfaces in `kernel-open/`. Calls in `src/nvidia/arch/nvalloc/unix/src/os.c` still reach OS services for PCI access, mapping and work scheduling. Reusing the logic therefore requires implementing and checking these contracts on Darwin; changing the build target alone is insufficient.
 
@@ -46,15 +46,33 @@ Acceptance criteria:
 - Limit output to the GPU and relevant parent bridge; exclude machine identity and unrelated device data.
 - Distinguish visible device metadata from confirmed hardware access or initialization.
 
-The retained EFI contains `-wegnoegpu`. In the installed Lilu 1.7.2 source, the external GPU's IOService can be terminated by the disable path. The inventory therefore checks the exact boot-argument token without exposing other arguments, and falls back to the Device Tree when the active service is absent. Its effect on the observed device graph must be recorded before selecting a matching strategy. A missing node does not prove electrical power-off. Any later change needed to attach a transport prototype belongs in a separate experimental EFI with the working Intel configuration available for recovery.
+The earlier operating EFI contained `-wegnoegpu`. In the installed Lilu 1.7.2 source, the external GPU's IOService can be terminated by the disable path. The inventory therefore checks the exact boot-argument token without exposing other arguments, and falls back to the Device Tree when the active service is absent. A missing node does not prove electrical power-off. Transport work uses a separate experimental EFI with the working Intel configuration available for recovery.
 
-The built package includes the executable, a private JSON report launcher, per-file checksums and build provenance. No developer tools are required on the laptop. Native build and enumeration are checked in Intel CI. On October 15 the laptop lookup completed successfully but found no target in either plane while -wegnoegpu was active. This result does not establish power-off or exclusivity of the cause. A staged copy of the current Samsung EFI now provides the next visibility experiment; the original Delete/Add boot-args policy is checked before preparation so normal Samsung boot restores the working arguments.
+The built package includes the executable, a private JSON report launcher, per-file checksums and build provenance. No developer tools are required on the laptop. Native build and enumeration are checked in Intel CI. The first October 15 laptop report found no target while `-wegnoegpu` was active. The automatic [visibility helper](../../packages/nvidia-visibility/README.md) then stopped at its `Mounted` metadata check before creating a candidate or changing EFI/NVRAM. The argument was subsequently removed manually. The later reports agree on the following normalized result:
+
+| Observation | Result |
+|---|---|
+| Inventory status | `found`, `complete=true`, no warnings |
+| Disable argument | `wegnoegpu_present=false` |
+| Active service | `IOPCIDevice`, `service_visible=true` |
+| GPU identity | `10DE:1F91`, subsystem `17AA:3806`, revision `A1`, class `030000` |
+| Topology | GPU `GFX0@0` below `RP05@1C,4` through `IOPP` |
+| Parent PCI bridge | Intel `8086:9DBC`, class `060400` |
+
+This completes the PCI visibility milestone. It establishes published identity and topology, not hardware register access, GPU initialization, electrical power state or acceleration. The reports do not audit every setting in the current EFI. Raw reports and private configurations remain outside the repository.
+
+## Current implementation milestone: bounded PCI transport
+
+The prototype is limited to IOKit attachment to this exact PCI device, configuration-space identity reads, and inspection of already-assigned resource descriptors. It defines attachment, refusal and teardown behavior without PCI configuration writes, BAR reassignment, MMIO mapping or reads, DMA, interrupts, ACPI invocation or firmware loading. Its build and fixture results remain separate from a successful attachment on this laptop, which has not yet been observed. The kernel SDK is pinned to Acidanthera commit `3f750085caa17ec3a7880f11c11bf4f48cd6a164`.
+
+Resource inspection reads the provider's published `IODeviceMemory` array directly, with bounded type/tag checks. The convenience `getDeviceMemoryWithRegister` and `getDeviceMemoryWithIndex` calls are excluded: the inspected Apple implementation can call `setTunnelL1Enable`, which does not belong in this observational milestone.
 
 ## Subsequent milestones
 
 | Milestone | Required result |
 |---|---|
-| Darwin transport | Native build, defined attachment/teardown, bounded resource access and failure handling |
+| Darwin PCI attachment | Native build, exact-device attachment/teardown, bounded configuration reads and already-assigned resource descriptors; laptop result pending |
+| Further hardware transport | Separate reviewed work for MMIO, DMA and interrupts, with bounded access and failure handling |
 | GPU and GSP startup | Matching, hashed firmware; observed initialization with timeouts and cleanup; no success inferred from PCI enumeration |
 | Minimal execution | One deterministic command with a checked result and recoverable failure path |
 | Graphics userspace | An explicit kernel/application ABI and a selected rendering or compute target |
@@ -69,6 +87,7 @@ Electrical power-off remains deferred until after the driver-port attempt, as re
 - [Pinned NVIDIA source and compatible-GPU table](https://github.com/NVIDIA/open-gpu-kernel-modules/tree/1a82fbfda8f321b056eb3568850f9316c5e465c5).
 - [NVIDIA OS interface contract](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/arch/nvalloc/unix/include/os-interface.h).
 - [Apple IOPCIDevice public header](https://github.com/apple-oss-distributions/IOPCIFamily/blob/4822b27a36e2de70e231ecf2bf3021384fab6ec2/IOKit/pci/IOPCIDevice.h).
+- [Apple resource-accessor implementation](https://github.com/apple-oss-distributions/IOPCIFamily/blob/4822b27a36e2de70e231ecf2bf3021384fab6ec2/IOPCIDevice.cpp) and [pinned MacKernelSDK](https://github.com/acidanthera/MacKernelSDK/tree/3f750085caa17ec3a7880f11c11bf4f48cd6a164).
 - [Mesa NVK requirements](https://docs.mesa3d.org/drivers/nvk.html) and [Nouveau project architecture](https://nouveau.freedesktop.org/).
 - [Linux Nouveau ABI reference](https://github.com/torvalds/linux/blob/v6.6/include/uapi/drm/nouveau_drm.h).
 - [Apple DriverKit provisioning requirements](https://developer.apple.com/help/account/provisioning-profiles/create-a-driverkit-development-provisioning-profile): DriverKit is a candidate to evaluate, not an assumed entitlement or deployment path.

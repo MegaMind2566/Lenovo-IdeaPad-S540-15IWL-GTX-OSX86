@@ -10,7 +10,7 @@ Report received on 12 October 2026. Only data relevant to the project is include
 | CPU | Intel Core i7-8565U, Whiskey Lake-U, 4 cores / 8 threads | X86PlatformPlugin active; frequency/power response confirmed; idle temperatures 45–48 °C; activity session retains 57–82 °C with no missing readings and final 57 °C |
 | RAM | 12 GB DDR4-2400, 8 and 4 GB modules | Sufficient for the first test |
 | iGPU | Intel UHD 620, PCI 8086:3EA0 | IntelAccelerator detected and Metal 3 exposed; sustained load still to be tested |
-| dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91 | Native PCI inventory found no target in either registry plane with -wegnoegpu active; separate visibility boot experiment prepared; acceleration and electrical power-off remain unverified |
+| dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91; subsystem 17AA:3806; revision A1 | Active IOPCIDevice confirmed with -wegnoegpu absent; initialization, acceleration and electrical power state remain unverified |
 | Display | BOE NV156FHM-N61, 1920×1080 | Panel, brightness slider and direct F11/F12 working; boot blackout delay eliminated with -igfxblr |
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Problematic PM981a family; compatibility is not assumed |
 | Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | itlwm 2.3.0 loaded and HeliPort reported working; Ethernet presentation is expected with this driver; disconnection, reconnection and network switching confirmed; Internet baseline 15.751 Mb/s down / 63.036 Mb/s up with Low loaded responsiveness; cause unresolved |
@@ -52,7 +52,7 @@ The Samsung/RTL9210 system disk remains enumerated at 5 Gb/s in both reports. Fi
 
 The HDMI connection does not produce an image with the current Tahoe configuration. The subsequent `system_profiler SPDisplaysDataType` report lists only Intel UHD Graphics 620 (`0x3ea5`, Metal 3, up to 1536 MB shared memory) and the online internal 1920×1080 panel. No external display is enumerated. This does not identify whether the cause is connector configuration, GPU routing, cable or monitor input. The next routing check is the external display's connected GPU in Windows with the same monitor and cable.
 
-The supplied OEM SSDT9 places `_DOD = {0x80087330}` under NVIDIA `RP05.PXSX`; its ACPI display type is External Digital Monitor. Intel's `_DOD` reads runtime OpRegion values, which are absent from the supplied tables. These declarations suggest a possible NVIDIA path but do not identify the tested physical HDMI port conclusively. The reviewed EFI has `-wegnoegpu`, the working Intel memory patches and no connector remapping. No graphics or ACPI change is made from the no-image report alone.
+The supplied OEM SSDT9 places `_DOD = {0x80087330}` under NVIDIA `RP05.PXSX`; its ACPI display type is External Digital Monitor. Intel's `_DOD` reads runtime OpRegion values, which are absent from the supplied tables. These declarations suggest a possible NVIDIA path but do not identify the tested physical HDMI port conclusively. The EFI reviewed for that HDMI check contained `-wegnoegpu`, the working Intel memory patches and no connector remapping. No graphics or ACPI change is made from the no-image report alone.
 
 USB-C video cannot currently be tested. [Lenovo's exact GTX model specification](https://psref.lenovo.com/syspool/Sys/PDF/IdeaPad/ideapad_S540_15IWL_GTX/ideapad_S540_15IWL_GTX_Spec.pdf) lists a USB 3.1 Type-C Gen 1 port and external digital display support through HDMI, without declaring DisplayPort Alt Mode. Hardware video capability is therefore unverified; the working 5 Gb/s USB data connection is not evidence of video support. The HDMI failure is not extended to USB-C.
 
@@ -195,6 +195,19 @@ Recovery opened the interface and Terminal and read Machintosh SSD - Data. The A
 
 ## NVIDIA PCI visibility: October 15, 2026
 
-The native inventory completed with `status=not_visible`, `complete=true`, `wegnoegpu_present=true`, an empty match list and no warnings. Neither the active IOService lookup nor the Device Tree fallback exposed the exact `10DE:1F91` identity. This establishes non-visibility under the current disable argument, not electrical power-off or that the argument is the only cause.
+The first native inventory returned `not_visible`, `complete=true`, `wegnoegpu_present=true` and no warnings. The automatic [visibility helper](../../packages/nvidia-visibility/README.md) subsequently stopped at its required `Mounted` metadata check before creating a candidate or changing EFI/NVRAM. The disable argument was then removed manually.
 
-The [visibility experiment](../../packages/nvidia-visibility/README.md) prepares a private copy of the current Samsung EFI. It requires the original Delete/Add boot-args policy, removes only the exact disable argument and preserves the working Intel panel argument. Source and copied files are checked; no EFI installation or NVRAM change occurs during preparation. The separate HDD boot and subsequent PCI report remain pending. Raw reports and private EFI copies stay outside the repository.
+The latest reports agree on the following normalized evidence:
+
+| Item | Observed result |
+|---|---|
+| Inventory | `found`, `complete=true`, no warnings |
+| Disable argument | `wegnoegpu_present=false` |
+| Active service | `IOPCIDevice`, `service_visible=true` |
+| GPU | `10DE:1F91`, subsystem `17AA:3806`, revision `A1`, class `030000` |
+| Topology | `GFX0@0` below `RP05@1C,4` through `IOPP` |
+| Parent bridge | Intel `8086:9DBC`, class `060400` |
+
+PCI visibility is therefore confirmed. The inventory reads published metadata; it does not open the device or verify PCI configuration-space access, MMIO, DMA, GSP, GPU execution, acceleration or electrical power state. It does not audit every current EFI setting or establish the physical routing of HDMI. Raw reports and private configurations remain outside the repository.
+
+The next prototype is being implemented for bounded IOKit attachment, configuration-space identity reads and inspection of already-assigned resource descriptors. Laptop attachment remains unvalidated. NVIDIA electrical power-off and external-display work retain their deferred status.

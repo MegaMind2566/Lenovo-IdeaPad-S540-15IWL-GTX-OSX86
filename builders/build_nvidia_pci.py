@@ -109,7 +109,7 @@ def build(output: Path) -> Path:
                                  'ad-hoc signature and thin Mach-O',
                                  'native read-only IORegistry enumeration',
                                  'report schema and imported API checks'],
-                  'hardware_status': 'Laptop PCI visibility pending; no GPU initialization or acceleration.'}
+                  'hardware_status': 'Laptop PCI visibility confirmed; no GPU initialization or acceleration.'}
         payload['BUILD.json'] = (json.dumps(record, indent=2, sort_keys=True) + '\n').encode()
         payload['SHA256SUMS'] = ''.join(digest(data) + '  ' + name + '\n'
                                          for name, data in sorted(payload.items())).encode('ascii')

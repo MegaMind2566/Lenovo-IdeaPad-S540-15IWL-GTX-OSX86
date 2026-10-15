@@ -6,8 +6,9 @@ ZIP packages. Builders and regression checks are kept separately.
 
 | Package | Purpose | Guide |
 | --- | --- | --- |
-| [nvidia-visibility](nvidia-visibility) | Prepare and validate a private EFI copy with the GPU disable argument removed; includes the native PCI inventory. | [Visibility experiment](nvidia-visibility/README.md) |
-| [nvidia-pci](nvidia-pci) | Read the target GPU's published PCI metadata, with Device Tree fallback for a hidden service. | [NVIDIA PCI inventory](nvidia-pci/README.md) |
+| [nvidia-transport](nvidia-transport) | Bounded IOKit PCI attachment prototype in development; laptop attachment remains unvalidated. No MMIO, DMA, firmware or acceleration. | [PCI transport](nvidia-transport/README.md) |
+| [nvidia-visibility](nvidia-visibility) | Superseded for the reached visibility milestone. V1 automatic locator stopped at `Mounted`; subsequent manual removal of the disable argument produced a visible PCI service. | [Retained visibility experiment](nvidia-visibility/README.md) |
+| [nvidia-pci](nvidia-pci) | Read published PCI metadata; laptop visibility is confirmed for the exact target. No hardware access or GPU initialization. | [NVIDIA PCI inventory](nvidia-pci/README.md) |
 | [ssd-boot](ssd-boot) | Automatic transfer helper on hold after a mounted-target guard stop. Manual transfer and independent Samsung boot are confirmed. | [Independent SSD boot](../docs/guides/ssd-boot.md) |
 | [cpu-sensors](cpu-sensors) | Read continuous, filtered sensor telemetry and loaded SMC driver versions without a CPU workload. | [Passive sensor check](cpu-sensors/README.md) |
 | [cpu-thermal](cpu-thermal) | Collect bounded idle, CPU-load and recovery telemetry with owned-worker cleanup. Continuous temperature readings during desktop activity work; sustained cooling remains separate. | [CPU check](cpu-thermal/README.md) |

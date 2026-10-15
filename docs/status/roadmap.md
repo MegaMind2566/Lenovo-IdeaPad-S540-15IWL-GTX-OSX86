@@ -8,7 +8,7 @@ The [CPU and sensor reports](cpu-thermal.md) confirm frequency/power response an
 
 | Order | Work | Remaining scope |
 |---|---|---|
-| Now | NVIDIA driver-port research | Pinned source assessment complete; native inventory completed with no GPU visible while -wegnoegpu is active. Prepare the separate HDD visibility experiment before a Darwin transport prototype. Graphics acceleration remains unimplemented. |
+| Now | NVIDIA PCI transport prototype | PCI visibility confirmed: active `10DE:1F91`, subsystem `17AA:3806`, revision `A1`, behind `RP05`; disable argument absent. Implement bounded IOKit attachment, configuration-space identity reads and already-assigned resource descriptors. Laptop attachment remains unvalidated; MMIO, DMA, GSP and acceleration remain later work. |
 | Remaining | Graphics, power and thermals | Sustained Intel graphics use and cooling, fan telemetry and measured battery runtime. Continuous temperature readings during desktop activity and basic battery power/discharge reporting are confirmed. NVIDIA electrical power-off is deferred until after the driver-port attempt. |
 | Complete / retained | Boot and EFI consolidation | Independent Samsung boot confirmed after manual EFI transfer. Keep the HDD as a recovery path and preserve the private working EFI. A later sanitized release remains separate from v0.1.0. |
 | 3 | Storage and USB reliability | USB-C at 5 Gb/s in both orientations and both tested USB-A connectors at 5 Gb/s are confirmed. File reads on both USB-A connectors are confirmed. External USB 2 devices, sustained SSD stability, shutdown and reboot remain separate checks. Move the system SSD cable only after shutdown. |
@@ -47,7 +47,7 @@ Priorities updated on 13 October 2026: the panel being off during boot is **reso
 | Fingerprint reader | Internal USB port mapped; support to be assessed | Assess drivers and macOS integration |
 | HDMI | No image; macOS display report lists only the internal panel | Identify the connected external display's owning GPU in Windows before selecting a fix |
 | USB-C video | No video test available; video capability and routing not verified; USB data works | Check hardware capability from documentation; keep separate from the observed HDMI failure |
-| NVIDIA GTX 1650 Max-Q | Linux port retained as research; no usable driver in the EFI | Milestones for initialisation, GPU execution and graphics integration |
+| NVIDIA GTX 1650 Max-Q | Active PCI service confirmed with disable argument absent; no initialized GPU driver | Bounded PCI transport attachment/configuration reads and assigned resources first; GPU startup, execution and graphics integration remain separate |
 
 Recovery test results are not automatically extended to the installed system. Incomplete items remain open until a documented result is available.
 
@@ -63,7 +63,9 @@ Fn+F1–F12 must remain ordinary application function keys. Remove or reassign o
 
 ## NVIDIA research
 
-The [pinned source assessment](../reference/nvidia-port-assessment.md) is complete. It records release 615.78.08, the concrete Linux-to-Darwin boundaries and acceptance criteria. The [native PCI inventory](../../packages/nvidia-pci/README.md) is implemented and packaged separately; the laptop returned not_visible with -wegnoegpu active and no warnings. The [separate visibility experiment](../../packages/nvidia-visibility/README.md) is the next hardware gate. No NVIDIA GPU driver has been implemented or loaded. Existing Intel operation is retained.
+The [pinned source assessment](../reference/nvidia-port-assessment.md) is complete. It records release 615.78.08, the concrete Linux-to-Darwin boundaries and acceptance criteria. The [native PCI inventory](../../packages/nvidia-pci/README.md) now confirms an active `10DE:1F91` service, subsystem `17AA:3806`, revision `A1`, below `RP05`, with `-wegnoegpu` absent and no warnings. The earlier report found no target with the argument present. The automatic [visibility helper](../../packages/nvidia-visibility/README.md) stopped at its `Mounted` check before changes; the argument was subsequently removed manually. The latest reports establish visibility without auditing the full current EFI. The helper is superseded for this reached milestone.
+
+A bounded IOKit PCI transport prototype is being implemented. It will attach to the exact device, read configuration-space identity and inspect already-assigned resource descriptors. It has not yet attached on the laptop. No NVIDIA GPU initialization, MMIO access, DMA, firmware loading or acceleration has been validated. Intel display operation and the recovery EFI are retained.
 
 The GTX 1650, PCI `10DE:1F91`, is listed among the GPUs compatible with NVIDIA's open source kernel modules. The repository contains operating system independent parts and Linux-specific interfaces. The modules also require GSP firmware and userspace driver components of the same version.
 
@@ -72,14 +74,14 @@ Mesa/NVK provides an open Vulkan driver for NVIDIA, but its current implementati
 The proposed path is a technical assessment, not an already validated port:
 
 1. Source assessment complete: pinned Linux dependencies, firmware/userspace requirements and candidate reusable code are recorded in the assessment.
-2. Run the native read-only PCI inventory, then prepare a separate bounded prototype for device attachment, memory and interrupts on Intel macOS.
+2. PCI visibility complete. Implement bounded IOKit attachment, configuration-space identity reads and already-assigned resource descriptors; validate attachment on the laptop before expanding into MMIO, DMA or interrupts.
 3. Test GPU initialisation and execution of a minimal command, with observable results on the laptop.
 4. Assess the userspace component and the path towards Vulkan or other experimental functions.
 5. Address Metal integration, the macOS graphics system, power management and video outputs separately.
 
 A successful kernel prototype does not demonstrate desktop acceleration. The laptop's hybrid GPU configuration also requires verification of panel and output connections. Experimental tests will use an EFI separate from the one stabilised with Intel.
 
-The EFI used for initial operation retains `-wegnoegpu`. Electrical power-off of the NVIDIA GPU and porting its driver are separate tasks. By request, electrical power-off work is deferred until after the driver-port attempt. The optional SSDT that calls `_OFF` remains disabled. The [firmware review](../reference/acpi-patch-review.md) identifies an unbounded wait for `LNKS=0` before the power-gate writes, plus a separate conditional power-resource sequence. A correct method path and absent GPU IOService do not establish safe execution or electrical power-off.
+The EFI used for initial operation retained `-wegnoegpu`; the latest inventory confirms it is absent in the visibility boot. Electrical power-off of the NVIDIA GPU and porting its driver are separate tasks. By request, electrical power-off work is deferred until after the driver-port attempt. The optional SSDT that calls `_OFF` must stay disabled for transport work; the latest inventory does not audit ACPI table configuration. The [firmware review](../reference/acpi-patch-review.md) identifies an unbounded wait for `LNKS=0` before the power-gate writes, plus a separate conditional power-resource sequence. A correct method path and absent GPU IOService do not establish safe execution or electrical power-off.
 
 ## References
 

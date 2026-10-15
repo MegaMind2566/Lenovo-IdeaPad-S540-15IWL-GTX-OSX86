@@ -45,12 +45,13 @@ Current status as of **October 15, 2026**. **Pending** means the feature has not
 | F6 touchpad toggle | Working | Direct key enables and disables the touchpad |
 | Fn function row | Configured | Ordinary F1–F12 events recorded; four conflicting macOS shortcuts disabled, session refresh confirmation pending |
 | Touchpad and gestures | Working | ELAN0662 gestures confirmed in daily use; F6 toggle also works |
+| NVIDIA PCI visibility | Confirmed | Active `10DE:1F91` PCI service; subsystem `17AA:3806`; no NVIDIA initialization or acceleration |
 | Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; further icon-key investigation deferred |
 | USB-C video | Pending | No video test available; hardware video capability and routing remain unverified |
 | USB 2 device coverage / storage reliability | Pending | External USB 2 devices, measured throughput and sustained reliability |
 | SD reader / fingerprint reader | Pending | Driver support and device operation |
 | Battery runtime / sleep and wake | Pending | Measured runtime and device recovery; basic battery power is confirmed |
-| NVIDIA electrical power-off | Pending | Deferred until after the driver-port attempt; the current disabled driver does not establish power-off |
+| NVIDIA electrical power-off | Pending | Deferred until after the driver-port attempt; PCI visibility does not establish electrical power state |
 | NVIDIA acceleration | Not working | GTX 1650 Max-Q has no supported driver in this configuration |
 | Native macOS Wi-Fi interface | Not working | Network management uses HeliPort |
 | HDMI output | Not working | No image or external display in the macOS report; physical GPU routing under investigation |
@@ -61,15 +62,18 @@ Detailed hardware information is in [Hardware](docs/status/hardware.md).
 
 macOS and OpenCore use the external Samsung 960 EVO. Independent boot is confirmed after manually copying the current private EFI from the 240 GB HDD. The HDD remains available as a recovery route; Windows remains on the internal PM981a.
 
+The latest NVIDIA inventory confirms an active PCI service after manual removal of `-wegnoegpu`. This is a visibility milestone, not a working NVIDIA graphics driver. The experimental path preserves Intel display operation and a recovery EFI; the reports do not audit the full current EFI.
+
 Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including the S540 microphone correction. The EFI alone does not install this extension. The audio guides document the existing installation and upgrade procedures; those helpers require their original rollback state.
 
 ## Development priorities
 
+- Implement the bounded NVIDIA PCI transport prototype: IOKit attachment, configuration-space identity reads and already-assigned resource descriptors. PCI visibility is confirmed; laptop attachment, MMIO, DMA, firmware startup and acceleration are not.
 - Complete storage reliability and remaining USB 2 device checks. Both USB-A connectors and USB-C in both orientations negotiate 5 Gb/s with the tested hardware. Audio peripherals, battery power and independent SSD boot work; measured battery runtime remains open.
-- Complete Intel stability, power management and external display support; sustained-load temperature and fan telemetry remain open.
+- Complete Intel stability and power-management coverage; sustained cooling and fan telemetry remain open. External-display work is paused.
 - Complete remaining device support and investigate connection performance from the recorded Internet baseline; wired/Bluetooth microphones, headphone switching and wireless reconnection work.
 - Retain the working keyboard controls; remaining icon actions, equalization and sleep refinements are deferred.
-- Keep native macOS Wi-Fi integration and NVIDIA driver-port research open.
+- Keep native macOS Wi-Fi integration open; NVIDIA electrical power-off remains deferred until after the driver-port attempt.
 
 See the [Roadmap](docs/status/roadmap.md) for the implementation plan.
 
