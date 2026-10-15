@@ -27,7 +27,7 @@ jobs:
           ref: 3f750085caa17ec3a7880f11c11bf4f48cd6a164
           path: build-src/MacKernelSDK
           persist-credentials: false
-      - name: Check the bounded PCI access policy
+      - name: Check PCI identity, BAR0 and power-state refusal policy
         run: python3 tests/test_nvidia_transport_kernel.py
       - name: Build and verify the native Intel package
         run: python3 builders/build_nvidia_transport.py --kernel-sdk build-src/MacKernelSDK --output-dir build/nvidia-transport
