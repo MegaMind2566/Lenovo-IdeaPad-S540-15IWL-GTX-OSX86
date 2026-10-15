@@ -2,7 +2,7 @@
 
 This development component connects three original NVIDIA allocation callers and five original mutex callers to candidate Darwin backends. Function bodies come from NVIDIA release `615.78.08`, commit `1a82fbfda8f321b056eb3568850f9316c5e465c5`; includes and interface profiles are explicitly adapted. This is not the complete NVPort library or NVIDIA resource manager.
 
-[Targeted Intel macOS CI passed](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38722294509), including original-caller execution, sanitizers, mandatory assertion failure and kernel compile/link/import checks. The confirmed v0.4.0 laptop probe and its sources are unchanged. This component has no kext or laptop installation package. Kernel and interrupt execution of these candidate backends remain untested.
+[The earlier targeted Intel macOS CI passed](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38722294509), including original-caller execution, sanitizers, mandatory assertion failure and kernel compile/link/import checks. The component is now included in the [v0.5.0 transport candidate](../nvidia-transport/README.md), pending native CI verification and one combined laptop result. Version 0.4.0 remains the confirmed laptop checkpoint. Kernel and interrupt execution of the new backends remain untested.
 
 ## Allocation without sleeping
 
@@ -31,7 +31,9 @@ The original mandatory acquisition assertion stays active. A failed OS acquisiti
 
 The [successful CI run](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38722294509) used source `df3738eb8a3ab08f3f0668735a42def18c821cd3`. The [provenance records](upstream/README.md) verified exact upstream bytes, function bodies, ABI widths and mutex layout. All 16 hook/caller/assertion symbols resolved in the relocatable kernel object, with exactly 15 platform imports and no static initializers. Native reserve/caller/mutex harnesses passed both plain and under AddressSanitizer/UndefinedBehaviorSanitizer with fatal diagnostics. The failed original acquisition assertion terminated its separate subprocess with SIGABRT. The downloaded report and all 40 source checksums were verified.
 
-No PCI or MMIO access, firmware, DMA, GPU commands, HAL objects or RM objects are added. The v4 laptop result remains the confirmed hardware checkpoint. A later combined kernel milestone is required before using these candidate backends on the laptop.
+The v0.5.0 candidate records its exact source revision and native validation results in the transport package's `BUILD.json`. The shared startup entry point uses a nonblocking singleton lease, runs 35 caller/reserve checks and 23 foundation checks, and releases its resources before the transport's two read-only TU117 identification loads. The startup creates no workers and does not intentionally enter a blocking mutex wait. The deliberate mandatory-assertion failure is exercised only by a separate native CI process.
+
+No new GPU access, firmware, DMA, GPU commands, HAL objects or RM objects are added. The v4 laptop result remains the confirmed hardware checkpoint. The v5 result is pending; kernel contention, interrupt-context allocation, suspend/wake and full RM compatibility remain unvalidated.
 
 ## Primary references
 

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 #include "S540NvidiaCallerRuntime.hpp"
 #include "S540NvidiaReserve.hpp"
+#include "../../nvidia-os-adapter/src/S540NvidiaMemory.hpp"
 #include "../upstream/nvport_allocator_callers.h"
 #include "../upstream/nvport_mutex_callers.h"
 
@@ -37,7 +38,11 @@ bool ordinaryThreadContext()
 void allocationCallers(Result &result)
 {
     using namespace S540NvidiaReserve;
-    void *slots[kSlotCount] = {};
+    void *slots[kSlotCount];
+    // Route this larger stack initialization through the reviewed memory
+    // hook. An aggregate zero initializer can introduce an implicit bzero
+    // import in the Darwin kernel build despite -fno-builtin.
+    os_mem_set(slots, 0, static_cast<NvU32>(sizeof(slots)));
     bool full = true;
     bool uniqueAndAligned = true;
     bool contents = true;
