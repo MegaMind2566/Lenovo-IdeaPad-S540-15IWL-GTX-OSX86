@@ -5,6 +5,8 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
+import platform
+import struct
 import subprocess
 import sys
 import tempfile
@@ -20,6 +22,111 @@ SPEC.loader.exec_module(BUILDER)
 
 
 class CompileDiagnosticsTests(unittest.TestCase):
+    def link_command_fixture(self, *, cross_probe=False, extra_export=False):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            commands = []
+
+            def link_fixture(args, **_kwargs):
+                commands.append(args)
+                Path(args[args.index('-o') + 1]).write_bytes(b'explicit-link-output-fixture')
+                return subprocess.CompletedProcess(args, 0, '', '')
+
+            def symbol_fixture(path, *, expected_type):
+                self.assertEqual(expected_type, 8 if cross_probe else 11)
+                roots = BUILDER.GLOBAL_ROOTS if path.name.startswith('global') else BUILDER.ADAPTER_ROOTS
+                exports = {BUILDER.PREFIX + root for root in roots}
+                if extra_export:
+                    exports.add(BUILDER.PREFIX + 'unexpected_callback')
+                return exports, {BUILDER.PREFIX + 'fixture_required'}, []
+
+            with mock.patch.object(BUILDER, 'execute', side_effect=link_fixture), \
+                 mock.patch.object(BUILDER, 'macho_symbols', side_effect=symbol_fixture):
+                records = BUILDER.link_dependency_controls(
+                    [output / 'fixture.o'], output, ['fixture-ld'], cross_probe=cross_probe)
+            return commands, records
+
+    def test_native_controls_use_kernel_profile_and_keep_exact_roots(self):
+        commands, records = self.link_command_fixture()
+        for command, roots in zip(commands, (BUILDER.GLOBAL_ROOTS, BUILDER.ADAPTER_ROOTS)):
+            self.assertIn('-kext', command)
+            self.assertNotIn('-bundle', command)
+            self.assertNotIn('-lSystem', command)
+            self.assertNotIn('-fPIC', command)
+            self.assertIn('-dead_strip', command)
+            self.assertEqual(command[command.index('-undefined') + 1], 'dynamic_lookup')
+            exports = [command[i + 1] for i, arg in enumerate(command) if arg == '-exported_symbol']
+            self.assertEqual(exports, ['_' + BUILDER.PREFIX + root for root in roots])
+        for record in records.values():
+            self.assertEqual(record['mach_o_filetype'], 11)
+            self.assertEqual(record['image_type'], 'MH_KEXT_BUNDLE')
+            self.assertEqual(record['link_profile'], 'native-kernel-non-pic')
+            self.assertFalse(record['dynamic_libraries_linked'])
+            self.assertFalse(record['image_executed'])
+            self.assertFalse(record['production_candidate_allowed'])
+
+    def test_pic_cross_probe_is_separate_from_native_kernel_profile(self):
+        commands, records = self.link_command_fixture(cross_probe=True)
+        for command in commands:
+            self.assertIn('-bundle', command)
+            self.assertNotIn('-kext', command)
+        for record in records.values():
+            self.assertEqual(record['mach_o_filetype'], 8)
+            self.assertEqual(record['link_profile'], 'explicit-pic-cross-probe')
+            self.assertFalse(record['production_candidate_allowed'])
+
+    def test_kernel_control_does_not_accept_extra_exports(self):
+        with self.assertRaisesRegex(ValueError, 'exports differ'):
+            self.link_command_fixture(extra_export=True)
+
+    def test_kernel_image_rejects_dylib_dependencies_and_wrong_filetype(self):
+        with tempfile.TemporaryDirectory() as directory:
+            image = Path(directory) / 'fixture.bundle'
+            for command in BUILDER.DYLIB_LOAD_COMMANDS:
+                # Explicit parser-only fixture, not a link or execution proof.
+                image.write_bytes(struct.pack('<8I', 0xfeedfacf, 0x01000007, 3,
+                                              11, 1, 8, 0, 0) + struct.pack('<2I', command, 8))
+                with self.assertRaisesRegex(ValueError, 'dynamic library'):
+                    BUILDER.macho_symbols(image, expected_type=11)
+            image.write_bytes(struct.pack('<8I', 0xfeedfacf, 0x01000007, 3, 8, 0, 0, 0, 0))
+            with self.assertRaisesRegex(ValueError, 'thin x86_64'):
+                BUILDER.macho_symbols(image, expected_type=11)
+
+    @unittest.skipUnless(sys.platform == 'darwin' and platform.machine() == 'x86_64',
+                         'Actual Apple kernel-profile linking requires Intel macOS.')
+    def test_actual_native_non_pic_kernel_link_smoke(self):
+        # This is an actual Apple compiler/linker regression, not an original
+        # RM or kernel execution control. It runs before the expensive full RM
+        # compile when this test file is invoked by the development workflow.
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            source = output / 'kernel-link-fixture.c'
+            obj = output / 'kernel-link-fixture.o'
+            source.write_text(
+                'static int fixtureKernelData = 7;\n'
+                'extern int s540Global_fixture_required(void *);\n'
+                'extern int s540Global_fixture_unreachable(void);\n' +
+                ''.join('int ' + BUILDER.PREFIX + root + '(void) { return '
+                        's540Global_fixture_required(&fixtureKernelData); }\n'
+                        for root in BUILDER.ADAPTER_ROOTS) +
+                'int s540Global_fixture_unreachable_callback(void) { return '
+                's540Global_fixture_unreachable(); }\n')
+            BUILDER.execute(['/usr/bin/xcrun', 'clang', '-arch', 'x86_64',
+                             '-mmacosx-version-min=15.0', '-mkernel', '-mcmodel=kernel',
+                             '-fno-pic', '-fno-pie', '-ffreestanding', '-fno-stack-protector',
+                             '-mno-red-zone', '-O1', '-Wall', '-Wextra', '-Werror',
+                             '-c', str(source), '-o', str(obj)],
+                            diagnostic_log=output / 'native-fixture-compile.log')
+            records = BUILDER.link_dependency_controls([obj], output, ['/usr/bin/xcrun', 'ld'])
+            for name, roots in (('global', BUILDER.GLOBAL_ROOTS), ('adapter', BUILDER.ADAPTER_ROOTS)):
+                exports, imports, _ = BUILDER.macho_symbols(
+                    output / (name + '-dependency-control.bundle'), expected_type=11)
+                self.assertEqual(exports, {BUILDER.PREFIX + root for root in roots})
+                self.assertEqual(imports, {'s540Global_fixture_required'})
+                self.assertFalse(records[name]['dynamic_libraries_linked'])
+                self.assertEqual(records[name]['mach_o_filetype'], 11)
+                self.assertFalse(records[name]['image_executed'])
+
     def test_failed_link_keeps_full_diagnostics_and_bounds_display(self):
         with tempfile.TemporaryDirectory() as directory:
             log = Path(directory) / 'global-dependency-control.log'

@@ -40,7 +40,7 @@ jobs:
           ref: 3f750085caa17ec3a7880f11c11bf4f48cd6a164
           path: build-src/MacKernelSDK
           persist-credentials: false
-      - name: Verify compiler failure diagnostics
+      - name: Verify compiler diagnostics and native kernel link
         run: python3 packages/nvidia-global-rm/tests/test_compile_diagnostics.py
       - name: Compile every original RM unit in its isolated Darwin namespace
         run: >-

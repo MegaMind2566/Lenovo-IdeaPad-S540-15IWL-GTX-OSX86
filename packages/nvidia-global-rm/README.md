@@ -87,20 +87,26 @@ and runtime contract. A 4 KiB limit on individual frames does not prove that
 the aggregate call chain fits a Darwin kernel stack. No kernel readiness is
 inferred from the development control.
 
-The first native Intel macOS workflow compiled all 1,100 unchanged source
-units, repeated compilation with the verified private namespace, and reached
-the dependency-control link. That link failed; the original subprocess wrapper
-did not surface its diagnostic. This is native source-compilation evidence,
-not a passing workflow or validation of the cleanup overlays. No original RM
-entry point ran in that job.
+Native Intel macOS compilation passed for all 1,100 unchanged source units
+and their private-namespace rebuild. The dependency-control link then failed
+because its ordinary dynamic-bundle format required `libSystem.dylib`.
+The native control now selects `MH_KEXT_BUNDLE`, matching the original
+non-PIC kernel objects, and rejects dylib load commands. The explicitly PIC
+cross-probe keeps its separate dynamic-bundle format; its result cannot
+validate the native kernel link. Exact retained roots, undefined imports and
+dead stripping are inspected for both profiles. These diagnostic images are
+never loaded, and the complete corrected native workflow remains pending.
+Source compilation does not validate the cleanup overlays or execute RM.
 
 ## External ABI boundary
 
 [EXTERNAL-CONTRACTS.json](EXTERNAL-CONTRACTS.json) records 244 exact non-crypto
-external declarations retained by the complete startup/adapter/ISR root set.
+external declarations retained by the selected startup/adapter/ISR root set.
 The separately reviewed [crypto boundary](../nvidia-global-rm-crypto/README.md)
 covers its 64 additional imports. Source inventories are not implementation or
-runtime evidence.
+runtime evidence. The selected root controls are not the complete coordinator
+closure. Work-item, private-state, event-lock, fault, timer and evidence entry
+points must also be included and reviewed before runtime admission.
 
 `generate_refusals.py` accepts an explicit set of implemented original symbol
 names. It can generate only typed `NV_ERR_NOT_SUPPORTED` and `NULL` failure

@@ -5250,9 +5250,10 @@
     "rm_disable_adapter",
     "rm_shutdown_adapter",
     "rm_isr",
-    "rm_isr_bh"
+    "rm_isr_bh",
+    "rm_isr_bh_unlocked"
   ],
-  "scope": "Exact original non-crypto external declarations retained by the complete Darwin adapter/startup root closure. This inventory does not establish implementations or runtime readiness.",
+  "scope": "Exact original non-crypto external declarations retained by the selected Darwin global/adapter/ISR dependency roots. Final production coordinator references require a separate complete closure audit; this inventory does not establish implementation or runtime readiness.",
   "source_sha256": {
     "src/common/nvlink/interface/nvlink_os.h": "d4b1d8e3fcf365b39c0b90708ca4465bf3b642b89e9e13f400800989c9418037",
     "src/nvidia/arch/nvalloc/unix/include/nv-dev-printf.h": "0585b5d49b1bcaa6ec1fe07511c337cfa77ddf45b4aa9076ca5a02a516b1ec5d",

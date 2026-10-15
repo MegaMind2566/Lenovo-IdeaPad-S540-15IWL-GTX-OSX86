@@ -26,7 +26,10 @@ PREFIX = 's540Global_'
 COMPILER_MEMORY_IMPORTS = {'__bzero', 'bzero', 'memcpy', 'memset', 'memmove'}
 GLOBAL_ROOTS = ('rm_init_rm', 'rm_shutdown_rm')
 ADAPTER_ROOTS = (*GLOBAL_ROOTS, 'rm_init_adapter', 'rm_shutdown_adapter',
-                 'rm_disable_adapter', 'rm_isr', 'rm_isr_bh')
+                 'rm_disable_adapter', 'rm_isr', 'rm_isr_bh', 'rm_isr_bh_unlocked')
+MH_BUNDLE = 8
+MH_KEXT_BUNDLE = 11
+DYLIB_LOAD_COMMANDS = {0xc, 0x80000018, 0x8000001f, 0x20, 0x80000023}
 
 
 def execute(args: list[str], *, cwd: Path | None = None,
@@ -100,6 +103,8 @@ def macho_symbols(path: Path, *, expected_type: int = 1) -> tuple[set[str], set[
         command, size = struct.unpack_from('<II', data, offset)
         if size < 8 or offset + size > len(data):
             raise ValueError('Invalid Mach-O load command.')
+        if expected_type == MH_KEXT_BUNDLE and command in DYLIB_LOAD_COMMANDS:
+            raise ValueError('A kernel dependency-control image links a dynamic library.')
         if command == 2:
             table = struct.unpack_from('<4I', data, offset + 8)
         if command == 0x19:
@@ -239,22 +244,36 @@ def audit_namespace(objects: list[Path], namespace: Path) -> dict:
 
 
 def link_dependency_controls(objects: list[Path], output: Path,
-                             linker: list[str]) -> dict:
+                             linker: list[str], *, cross_probe: bool = False) -> dict:
     """Inspect real Mach-O root reachability; unresolved images are never loaded."""
+    # Native original RM uses -mkernel/-fno-pic. Apple ld's -kext profile
+    # permits its kernel text relocations and leaves kernel symbols unresolved
+    # without a user-space libSystem dependency. The explicit Zig PIC cross
+    # probe uses a normal bundle because its LLD linker has no -kext support;
+    # this is a different output profile, never a native fallback.
+    filetype = MH_BUNDLE if cross_probe else MH_KEXT_BUNDLE
+    output_kind = '-bundle' if cross_probe else '-kext'
     records = {}
     for name, roots in (('global', GLOBAL_ROOTS), ('adapter', ADAPTER_ROOTS)):
         image = output / (name + '-dependency-control.bundle')
         args = [*linker, '-arch', 'x86_64', '-platform_version', 'macos', '15.0', '15.0',
-                '-bundle', '-undefined', 'dynamic_lookup', '-dead_strip', '-no_uuid']
+                output_kind, '-undefined', 'dynamic_lookup', '-dead_strip', '-no_uuid']
         args += [value for root in roots for value in ('-exported_symbol', '_' + PREFIX + root)]
         execute([*args, *(str(path) for path in objects), '-o', str(image)], timeout=300,
                 diagnostic_log=output / (name + '-dependency-control.log'))
-        defined, external, sections = macho_symbols(image, expected_type=8)
+        defined, external, sections = macho_symbols(image, expected_type=filetype)
         if defined != {PREFIX + root for root in roots}:
             raise ValueError('The dependency-control exports differ from the exact RM roots.')
         records[name] = {'roots': list(roots), 'external_count': len(external),
                          'external': sorted(external), 'image_bytes': image.stat().st_size,
-                         'sections': sections, 'image_executed': False}
+                         'sections': sections, 'image_executed': False,
+                         'mach_o_filetype': filetype,
+                         'image_type': 'MH_BUNDLE' if cross_probe else 'MH_KEXT_BUNDLE',
+                         'link_profile': 'explicit-pic-cross-probe' if cross_probe else 'native-kernel-non-pic',
+                         'root_scope': 'selected-original-global-adapter-isr-subset; not-complete-coordinator-closure',
+                         'production_candidate_allowed': False}
+        if not cross_probe:
+            records[name]['dynamic_libraries_linked'] = False
     (output / 'dependency-controls.json').write_text(json.dumps(records, indent=2, sort_keys=True) + '\n')
     return records
 
@@ -339,7 +358,8 @@ def compile_original(upstream: Path, output: Path, compiler: Path,
     if needs_link:
         try:
             record['dependency_controls'] = link_dependency_controls(objects, output,
-                [str(linker)] if linker is not None else ['/usr/bin/xcrun', 'ld'])
+                [str(linker)] if linker is not None else ['/usr/bin/xcrun', 'ld'],
+                cross_probe=cross_probe)
         except (RuntimeError, ValueError, subprocess.TimeoutExpired):
             record['dependency_controls_status'] = 'failed'
             save_record()

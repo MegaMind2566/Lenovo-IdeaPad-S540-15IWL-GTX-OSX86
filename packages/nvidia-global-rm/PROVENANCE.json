@@ -33,6 +33,36 @@
     "result": "passed",
     "tests": 5
   },
+  "dependency_control_profiles": {
+    "actual_root_exports": "required_exactly",
+    "added_root": "rm_isr_bh_unlocked",
+    "cross_probe_retained_imports": {
+      "adapter": 310,
+      "global": 204,
+      "new_or_missing_declarations": 0,
+      "note": "Explicit PIC cross-probe, not actual native kernel link evidence."
+    },
+    "explicit_cross_probe": {
+      "image_executed": false,
+      "link_kind": "bundle",
+      "macho_filetype": 8,
+      "native_kernel_link_evidence": false,
+      "original_codegen": "explicit PIC cross-probe override"
+    },
+    "libSystem_dependency_added": false,
+    "missing_callbacks": "remain_undefined_and_are_inventory_only",
+    "native_failure_fallback": false,
+    "native_intel_macos": {
+      "dylib_load_commands": "rejected",
+      "full_corrected_workflow": "pending",
+      "image_executed": false,
+      "link_kind": "kext",
+      "macho_filetype": 11,
+      "original_codegen": "non-PIC kernel code model"
+    },
+    "scope": "Selected original global/adapter/ISR dependency roots, not the complete production coordinator reference closure.",
+    "selected_adapter_roots": 8
+  },
   "development_global_control": {
     "adapter_initialized": false,
     "cleanup": true,
@@ -61,7 +91,7 @@
     ],
     "noncrypto_contracts": 244,
     "path": "EXTERNAL-CONTRACTS.json",
-    "sha256": "d1efe4ca0b48f75216980f44324d3b86d1bac01d2f2ecaef2f7437cc59df8ac8"
+    "sha256": "da397ce1feb29a824293e6beda326a6474778a9e960490c754786f91464cfd30"
   },
   "facade_implemented_count": 82,
   "facade_implemented_noncrypto_contracts": [
@@ -162,20 +192,24 @@
     "adapter_initialized": false,
     "cleanup_overlays_applied": false,
     "dependency_control_link": "failed",
+    "diagnostic_artifact_sha256": "502f1823562973a59c0c0171a1976213cd0e89c7c0adf29a88856dd04ba19c29",
+    "failing_control_format": "ordinary dynamic bundle; Mach-O type 8",
     "global_rm_executed": false,
     "gsp_initialized": false,
-    "job": 116658262213,
-    "linker_diagnostic": "not_surfaced_by_original_subprocess_wrapper",
+    "job": 116667471924,
+    "linker_diagnostic": "ld: dynamic executables or dylibs must link with libSystem.dylib",
+    "native_compiler_version": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
     "private_namespace_audit": "passed",
-    "source_commit": "985db348262faba513c88908cae324ce3472e817",
+    "source_commit": "faef3c07eff604213155480f3aea44202be19b27",
     "unchanged_namespaced_source_units_compiled": 1100,
     "unchanged_original_source_units_compiled": 1100,
     "workflow_result": "failure",
-    "workflow_run": 38803489763
+    "workflow_run": 38806167244
   },
   "production_entry": "hard-refused-in-KERNEL-builds",
   "production_gates": [
     "Integrate the seven explicit source overlays and checked memory header in the production source-substitution build; validate their lifecycle on the authoritative Darwin toolchain.",
+    "Derive and review the final original root closure from every production bridge, including work-item, private-state, event-lock, fault, timer and evidence entry points; selected diagnostic roots alone do not admit runtime.",
     "Resolve or preflight-block every actual retained external ABI dependency; no scalar/void success placeholders.",
     "Verify the compiled runtime stack policy and aggregate kernel stack budget; the pinned profile leaves __use_altstack__ undefined and the original wrapper does not switch stacks by itself.",
     "Complete authoritative Apple compiler/native lifecycle checks before considering one hardware checkpoint."
