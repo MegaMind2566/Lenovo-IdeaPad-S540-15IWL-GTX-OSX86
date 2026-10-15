@@ -2,7 +2,7 @@
 
 This component implements the combined v8 preparation block for the S540's NVIDIA GTX 1650 Max-Q (`10DE:1F91`, subsystem `17AA:3806`, revision `A1`). It is delivered inside **S540-nvidia-transport-v8**, version `0.8.0`, report format `8`. A successful result is `transport_prepared`.
 
-**Hardware candidate:** [native Intel CI](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38752519794) and compiled-package verification passed. One combined laptop checkpoint remains pending. Version 0.7.0 remains the confirmed kernel baseline: all 258 startup checks passed, with complete cleanup, verified provider identity, the two-read TU117 variant-41 match and no warnings.
+**Confirmed kernel checkpoint:** version `0.8.0` returned `transport_prepared` on the laptop with all 390 combined checks passed: 258 CPU and 132 preparation. Cleanup is complete, the verified provider and two-read TU117 variant-41 match are retained, and there are no warnings. [Native Intel CI](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38752519794) and compiled-package verification also passed. No additional laptop test is requested for this completed checkpoint.
 
 ## Combined scope
 
@@ -54,9 +54,13 @@ SHA256 hashes actual bytes and has standard-vector coverage. Firmware assets and
 
 The verified build source is `70f798c2269cff5dd3e50546afe7ffe713e2c6ac`. Kernel compilation/linking, signatures, the unchanged 24 CPU imports and 11 additional reviewed SDK imports passed. All 535 reporter checks passed. The aggregate failure harness covered seven cross-stage faults; its 32 mixed startup attempts completed eight and correctly refused 24, plain and sanitized. The downloaded 639,644-byte ZIP, all 195 files and 176 embedded source hashes were verified. ZIP SHA256: `5218be643594d60a050d59d1c856d39b82d1836fd0534d7a1159fa58a139c776`. Native userspace simulation does not validate kernel DMA mappings, actual interrupt delivery or GPU responses. CI does not load the extension.
 
-## One laptop checkpoint
+## Completed laptop checkpoint
 
-Use the [transport package guide](../nvidia-transport/README.md) for the single compiled package, existing OpenCore entry, 240 GB test EFI and Samsung fallback procedure. Do not run separate DMA, PCI or firmware packages. All preparation results and existing regression evidence are included in the same boot/report.
+The format-8 laptop report confirms version `0.8.0`, `transport_prepared`, `complete=true`, no warnings and a null reason. All 390 kernel startup checks passed: the existing 258 CPU checks and 132 preparation checks, with every component and cleanup result true. The extra preparation check compared with the 131-check native path is the kernel provider-arbitration guard. The exact PCI provider identity is verified, and the same two read-only identification loads select TU117 variant 41.
+
+Host preparation reports `direct_untranslated`, 65,536 bytes, 16 segments and reason `none`. PCI inventory reports three capabilities, one MSI vector and zero MSI-X vectors; both observed enable bits are false. Untranslated preparation does not prove device DMA compatibility or absence of an IOMMU. All six later-activity fields remain false: device DMA verified, firmware image verified, firmware loaded, interrupts enabled, GPU initialized and RM initialized.
+
+The [transport package guide](../nvidia-transport/README.md) retains the compiled package, existing OpenCore entry, 240 GB test EFI and Samsung fallback procedure for reproduction. The combined checkpoint is complete; no separate DMA, PCI, firmware or repeated v8 laptop test is required.
 
 Format 8 contains 25 preparation metadata fields, including component status, DMA mode/size/segments, PCI inventory, observed interrupt state and finite failure reasons. Successful host preparation does not override the mandatory false fields for device DMA verification, real firmware verification/loading, interrupt enabling, GPU initialization and RM initialization.
 

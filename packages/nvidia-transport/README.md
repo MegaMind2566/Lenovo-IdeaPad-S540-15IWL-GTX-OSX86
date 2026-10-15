@@ -4,11 +4,19 @@ Version **0.8.0** combines the existing CPU runtime with bounded host-memory DMA
 
 **This is transport preparation.** NVIDIA HAL/RM construction, GPU initialization, verified device DMA, live interrupt delivery, firmware loading and graphics/Metal acceleration remain unimplemented.
 
-The confirmed v7 laptop baseline passed all 258 CPU startup checks: 128 support, 72 lifecycle, 35 caller/reserve and 23 foundations. V8 retains those blocks as automatic regression coverage. A v8 hardware result is not yet recorded; no separate v7 rerun is required.
+The combined v8 laptop checkpoint is complete: version `0.8.0`, format `8`, `transport_prepared`, all 390 kernel startup checks passed, cleanup complete and no warnings. This retains all 258 CPU checks and adds 132 preparation checks. No additional v8 laptop test is requested.
 
-## One combined laptop checkpoint
+## Confirmed combined kernel result
 
-Use the EFI on the **240 GB test disk**. Retain the working Samsung EFI as the fallback.
+The format-8 laptop report confirms version `0.8.0`, `transport_prepared`, `complete=true`, no warnings and a null reason. All 390 kernel startup checks passed: the existing 258 CPU checks and 132 preparation checks, with every component and cleanup result true. The extra preparation check compared with the 131-check native path is the kernel provider-arbitration guard. The exact PCI provider identity is verified, and the same two read-only identification loads select TU117 variant 41.
+
+Host preparation reports `direct_untranslated`, 65,536 bytes, 16 segments and reason `none`. PCI inventory reports three capabilities, one MSI vector and zero MSI-X vectors; both observed enable bits are false. Untranslated preparation does not prove device DMA compatibility or absence of an IOMMU. All six later-activity fields remain false: device DMA verified, firmware image verified, firmware loaded, interrupts enabled, GPU initialized and RM initialized.
+
+This combined v8 kernel-startup checkpoint is complete; no additional laptop test is requested for it. The next implementation block is the actual selected Resource Manager startup path and its missing Darwin services. Device DMA, interrupt delivery, real firmware loading and GPU/GSP initialization remain later integration work.
+
+## Reproducing the completed checkpoint
+
+The procedure below is retained for reproduction, not a request to repeat the completed checkpoint. Use the EFI on the **240 GB test disk** and retain the working Samsung EFI as the fallback.
 
 1. Extract **S540-nvidia-transport-v8.zip** into Downloads.
 2. Save the previous `EFI/OC/Kexts/S540NvidiaPCIProbe.kext` outside the EFI directory.
@@ -20,7 +28,7 @@ Use the EFI on the **240 GB test disk**. Retain the working Samsung EFI as the f
    bash "$HOME/Downloads/S540-nvidia-transport-v8/CHECK-TRANSPORT.command"
    ```
 
-Share **nvidia-transport.json** from the new **NVIDIA-TRANSPORT…** folder on the Desktop. Expected success is **`transport_prepared`**, version **`0.8.0`**, format **8**, with all four CPU blocks and `hardware_preparation` passed. The six GPU/device activity flags remain false even on success.
+The launcher saves **nvidia-transport.json** in a new **NVIDIA-TRANSPORT…** folder on the Desktop. The confirmed success result is **`transport_prepared`**, version **`0.8.0`**, format **8**, with all four CPU blocks and `hardware_preparation` passed. The six GPU/device activity flags remain false even on success.
 
 This single checkpoint includes startup, host-memory preparation, PCI capabilities, observed interrupt configuration, parser/RPC checks and cleanup. No additional package or individual primitive test is needed.
 
