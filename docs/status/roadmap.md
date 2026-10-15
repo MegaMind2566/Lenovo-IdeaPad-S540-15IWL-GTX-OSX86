@@ -6,7 +6,7 @@ Goal: make all components of the Lenovo IdeaPad S540-15IWL GTX usable on macOS T
 
 Version 0.6.0 is the confirmed kernel baseline. Its 130 checks are complete. Future development is grouped by an integrated runtime result, rather than one laptop checkpoint per primitive, wrapper, source extraction or version bump.
 
-The next bundle targets the CPU support runtime required by a selected original NVIDIA initialization path. It combines these work areas:
+The v7 implementation bundle targets the selected memory/PRNG CPU support profile and original NVIDIA vector/list consumers. It combines checked initialization, strings, pseudorandom generation, safe utilities, real allocator-backed containers, failure cleanup and one report/package. An explicit vector correction releases the old buffer during reallocation of an empty container. Native verification is in progress; v6 remains the confirmed hardware baseline. The bundle covers these work areas:
 
 | Work area | Included in the same development bundle |
 |---|---|

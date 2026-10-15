@@ -37,6 +37,13 @@ struct IntegratedResult {
 // objects and reserve allocations are released before returning.
 IntegratedResult checkIntegrated();
 
+// Extend the existing startup sequence without acquiring a second lease. The
+// continuation is entered only after the v6 lifecycle passed and returned its
+// memory subsystem and reserve cold. It has the same finite ordinary-thread,
+// no-hardware and quiescent-cleanup contract as the v5 continuation.
+using StartupContinuation = S540NvidiaCallerRuntime::StartupContinuation;
+IntegratedResult checkIntegrated(StartupContinuation continuation, void *context);
+
 } // namespace S540NvidiaLifecycleRuntime
 
 #endif

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the integrated NVIDIA lifecycle and bounded TU117 probe package."""
+"""Build the integrated NVIDIA runtime/RM consumer and bounded TU117 probe."""
 from __future__ import annotations
 
 import argparse
@@ -22,8 +22,9 @@ SOURCE = ROOT / 'packages/nvidia-transport'
 ADAPTER = ROOT / 'packages/nvidia-os-adapter'
 CALLERS = ROOT / 'packages/nvidia-caller-integration'
 LIFECYCLE = ROOT / 'packages/nvidia-nvport-lifecycle'
-PACKAGE = 'S540-nvidia-transport-v6'
-VERSION = '0.6.0'
+RUNTIME = ROOT / 'packages/nvidia-nvport-runtime'
+PACKAGE = 'S540-nvidia-transport-v7'
+VERSION = '0.7.0'
 SDK_COMMIT = '3f750085caa17ec3a7880f11c11bf4f48cd6a164'
 BUNDLE = 'S540NvidiaPCIProbe.kext'
 EXECUTABLE = 'S540NvidiaPCIProbe'
@@ -39,6 +40,9 @@ CALLER_C = ('nvport_allocator_callers',)
 LIFECYCLE_CPP = ('S540NvidiaSpinlock', 'S540NvidiaLifecycleRuntime',
                  'S540NvidiaLifecycleDiagnostics')
 LIFECYCLE_C = ('nvport_memory_lifecycle', 'nvport_owned_sync')
+RUNTIME_CPP = ('S540NvidiaSupportRuntime', 'S540NvidiaRmConsumer')
+RUNTIME_C = ('nvport_runtime_strings', 'nvport_runtime_prng', 'nvport_runtime_core')
+CONSUMER_C = ('vector', 'list')
 CALLER_SYMBOLS = (
     'os_alloc_mem', 'os_free_mem', 'os_alloc_mutex', 'os_free_mutex',
     'os_acquire_mutex', 'os_cond_acquire_mutex', 'os_release_mutex',
@@ -60,6 +64,38 @@ CALLER_SYMBOLS = (
     's540NvportLifecycleContextAllowed',
 )
 CALLER_DATA_SYMBOLS = ('portSyncSpinlockSize', 'portSyncMutexSize')
+RUNTIME_SYMBOLS = (
+    's540NvportRuntimeInitialize', 's540NvportRuntimeShutdown',
+    's540NvportRuntimeIsInitialized', 's540NvportRuntimeIsCold',
+    'portStringLength', 'portStringLengthSafe', 'portStringCompare',
+    'portStringCompareIgnoreCase', 'portStringCopy', 'portStringCat',
+    'portStringConvertAsciiToUtf16', 'portStringBufferToHex', 'portStringTok',
+    'portStringStrStr', 'portStringStrChar',
+    'portCryptoInitialize', 'portCryptoShutdown',
+    'portCryptoPseudoRandomGeneratorCreate', 'portCryptoPseudoRandomGeneratorDestroy',
+    'portCryptoPseudoRandomGeneratorGetU32', 'portCryptoPseudoRandomGeneratorGetU64',
+    'portCryptoPseudoRandomGeneratorFillBuffer', 'portCryptoPseudoRandomSetSeed',
+    'portCryptoPseudoRandomGetU32', 'portCryptoPseudoRandomGetU64',
+    'portCryptoPseudoRandomFillBuffer',
+)
+RUNTIME_DATA_SYMBOLS = ('portCryptoDefaultGenerator',)
+CONSUMER_SYMBOLS = (
+    'vectAppend_IMPL', 'vectAt_IMPL', 'vectCapacity_IMPL', 'vectClear_IMPL',
+    'vectCount_IMPL', 'vectDestroy_IMPL', 'vectInit_IMPL', 'vectInsert_IMPL',
+    'vectIsEmpty_IMPL', 'vectIsValid_IMPL', 'vectIterNext_IMPL', 'vectIterPrev_IMPL',
+    'vectIterRange_IMPL', 'vectPrepend_IMPL', 'vectRemove_IMPL', 'vectReserve_IMPL',
+    'vectTrim_IMPL',
+    'listAppendExisting_IMPL', 'listAppendNew_IMPL', 'listAppendValue_IMPL',
+    'listCount_IMPL', 'listDestroyIntrusive_IMPL', 'listDestroy_IMPL',
+    'listFindByValue_IMPL', 'listHead_IMPL', 'listInitIntrusive_IMPL', 'listInit_IMPL',
+    'listInsertExisting_IMPL', 'listInsertNew_IMPL', 'listInsertValue_IMPL',
+    'listIsValid_IMPL', 'listIterNext_IMPL', 'listIterRange_IMPL', 'listNext_IMPL',
+    'listPrependExisting_IMPL', 'listPrependNew_IMPL', 'listPrependValue_IMPL',
+    'listPrev_IMPL', 'listRemoveAllByValue_IMPL', 'listRemoveFirstByValue_IMPL',
+    'listRemoveIntrusive_IMPL', 'listRemove_IMPL', 'listTail_IMPL',
+)
+FORBIDDEN_RUNTIME_SYMBOLS = ('portInitialize', 'portShutdown',
+                             'portStringBufferToHexGroups')
 KPI_LIBRARIES = {
     'com.apple.kpi.iokit': '8.0.0', 'com.apple.kpi.libkern': '8.0.0',
     'com.apple.kpi.mach': '8.0.0', 'com.apple.iokit.IOPCIFamily': '2.9.0',
@@ -117,7 +153,7 @@ def native_check(binary: Path) -> dict:
 
 
 def adapter_sources() -> tuple[list[Path], list[Path]]:
-    """The reviewed production closure, reused by native lifecycle checks."""
+    """Preserve the reviewed v6 closure and its independent native checks."""
     cpp = [ADAPTER / 'src' / (stem + '.cpp') for stem in ADAPTER_CPP]
     cpp += [CALLERS / 'src' / (stem + '.cpp') for stem in CALLER_CPP]
     cpp += [LIFECYCLE / 'src' / (stem + '.cpp') for stem in LIFECYCLE_CPP]
@@ -127,27 +163,67 @@ def adapter_sources() -> tuple[list[Path], list[Path]]:
     return cpp, c
 
 
+def runtime_sources() -> tuple[list[Path], list[Path]]:
+    """The v7 extension, linked together with the confirmed v6 closure."""
+    cpp = [RUNTIME / 'src' / (stem + '.cpp') for stem in RUNTIME_CPP]
+    c = [RUNTIME / 'upstream' / (stem + '.c') for stem in RUNTIME_C]
+    c += [RUNTIME / 'upstream/consumer' / (stem + '.c') for stem in CONSUMER_C]
+    return cpp, c
+
+
+def production_sources() -> tuple[list[Path], list[Path]]:
+    cpp, c = adapter_sources()
+    extra_cpp, extra_c = runtime_sources()
+    return [*cpp, *extra_cpp], [*c, *extra_c]
+
+
 def native_flags() -> list[str]:
     return ['-arch', 'x86_64', '-mmacosx-version-min=15.0', '-O2',
             '-Wall', '-Wextra', '-Werror',
             '-I', str(ADAPTER / 'upstream/include'),
             '-I', str(ADAPTER / 'src'), '-I', str(CALLERS / 'src'),
-            '-I', str(LIFECYCLE / 'src'), '-I', str(LIFECYCLE / 'upstream')]
+            '-I', str(LIFECYCLE / 'src'), '-I', str(LIFECYCLE / 'upstream'),
+            '-I', str(RUNTIME / 'src'), '-I', str(RUNTIME / 'upstream'),
+            '-I', str(RUNTIME / 'upstream/consumer/include')]
+
+
+def source_flags(source: Path) -> list[str]:
+    # These unchanged container translation units use the narrow consumer
+    # NvPort profile. Other adapter units must retain the original nvport.h
+    # first, particularly S540NvidiaAtomic.h and its pinned atomic headers.
+    if source in {
+            RUNTIME / 'upstream/consumer/vector.c',
+            RUNTIME / 'upstream/consumer/list.c',
+            RUNTIME / 'src/S540NvidiaRmConsumer.cpp',
+            RUNTIME / 'tests/check_rm_consumer_native.cpp'}:
+        flags = ['-I', str(RUNTIME / 'upstream/consumer/include')]
+        if source.suffix == '.c':
+            # The unchanged release-profile iterator-validity functions accept
+            # but do not use their container parameter under GNU typeof.
+            flags.append('-Wno-unused-parameter')
+        return flags
+    return []
 
 
 def compile_native_harness(work: Path, label: str, harness: Path,
-                           sanitizer: list[str]) -> Path:
-    cpp_sources, c_sources = adapter_sources()
+                           sanitizer: list[str], *, with_runtime: bool = False) -> Path:
+    cpp_sources, c_sources = production_sources() if with_runtime else adapter_sources()
     common = native_flags()
     objects = []
     for source in c_sources:
         obj = work / (label + '-' + source.stem + '.o')
-        run('/usr/bin/xcrun', 'clang', *common, '-std=gnu11', '-ffreestanding', *sanitizer,
+        run('/usr/bin/xcrun', 'clang', *source_flags(source), *common,
+            '-std=gnu11', '-ffreestanding', *sanitizer,
             '-c', str(source), '-o', str(obj))
         objects.append(str(obj))
+    for source in cpp_sources:
+        obj = work / (label + '-' + source.stem + '.o')
+        run('/usr/bin/xcrun', 'clang++', *source_flags(source), *common,
+            '-std=c++17', *sanitizer, '-pthread', '-c', str(source), '-o', str(obj))
+        objects.append(str(obj))
     binary = work / ('check-' + label)
-    run('/usr/bin/xcrun', 'clang++', *common, '-std=c++17', *sanitizer, '-pthread',
-        str(harness), *(str(source) for source in cpp_sources), *objects,
+    run('/usr/bin/xcrun', 'clang++', *source_flags(harness), *common,
+        '-std=c++17', *sanitizer, '-pthread', str(harness), *objects,
         '-o', str(binary))
     return binary
 
@@ -166,6 +242,7 @@ def check_integrated_runtime(work: Path) -> dict:
                 or result.get('entrypoint') != 'S540NvidiaLifecycleRuntime::checkIntegrated'
                 or result.get('reserve_cold_after') is not True
                 or result.get('component') != 'nvport-lifecycle-runtime'
+                or result.get('checks') != 72
                 or result.get('foundation_checks') != 23
                 or result.get('caller_checks') != 35
                 or result.get('failures') != 0
@@ -193,7 +270,7 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
     if archive.exists() or sidecar.exists():
         raise ValueError('The output already exists.')
     kernel_sources = [SOURCE / 'src/S540NvidiaPCIProbe.cpp', SOURCE / 'src/kmod_start.cpp']
-    adapter_cpp, adapter_c = adapter_sources()
+    adapter_cpp, adapter_c = production_sources()
     # Preserve the entire adapter source subtree, including NVIDIA and LLVM
     # notices, exact upstream inputs, adaptation records, and test sources.
     source_inputs = [*sorted((ADAPTER / 'src').rglob('*')),
@@ -202,11 +279,15 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                      *sorted((SOURCE / 'src').rglob('*')),
                      *sorted(CALLERS.rglob('*')),
                      *sorted(LIFECYCLE.rglob('*')),
+                     *sorted(RUNTIME.rglob('*')),
                      ADAPTER / 'README.md',
                      ROOT / 'builders/build_nvidia_transport.py',
                      ROOT / 'builders/check_nvidia_foundations.py',
                      ROOT / 'builders/check_nvidia_callers.py',
                      ROOT / 'builders/check_nvidia_lifecycle.py',
+                     ROOT / 'builders/check_nvidia_runtime.py',
+                     ROOT / 'tests/test_nvidia_runtime_provenance.py',
+                     ROOT / 'tests/test_nvidia_rm_consumer_provenance.py',
                      ROOT / 'tests/test_nvidia_lifecycle_provenance.py',
                      ROOT / 'tests/test_nvidia_caller_provenance.py',
                      ROOT / 'tests/test_nvidia_transport_kernel.py',
@@ -266,6 +347,14 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                 or lifecycle_record.get('github_sha') != commit):
             raise ValueError('The NVIDIA lifecycle checks do not match this source revision.')
         native_results = check_integrated_runtime(work)
+        runtime_output = work / 'runtime-checks'
+        runtime_checks = run(sys.executable, str(ROOT / 'builders/check_nvidia_runtime.py'),
+                             '--kernel-sdk', str(sdk), '--output-dir', str(runtime_output))
+        print(runtime_checks.stdout.strip())
+        runtime_record = json.loads((runtime_output / 'runtime-checks.json').read_text())
+        if (runtime_record.get('status') != 'passed'
+                or runtime_record.get('github_sha') != commit):
+            raise ValueError('The NVIDIA runtime/RM checks do not match this source revision.')
         flags = ['-arch', 'x86_64', '-mmacosx-version-min=15.0', '-mkernel',
                  '-fno-builtin', '-ffreestanding', '-fno-common', '-fno-stack-protector',
                  '-fno-asynchronous-unwind-tables', '-fno-unwind-tables',
@@ -274,7 +363,9 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                  '-nostdinc', '-isystem', str(sdk / 'Headers'),
                  '-I', str(SOURCE / 'src'), '-I', str(ADAPTER / 'src'),
                  '-I', str(ADAPTER / 'upstream/include'), '-I', str(CALLERS / 'src'),
-                 '-I', str(LIFECYCLE / 'src'), '-I', str(LIFECYCLE / 'upstream')]
+                 '-I', str(LIFECYCLE / 'src'), '-I', str(LIFECYCLE / 'upstream'),
+                 '-I', str(RUNTIME / 'src'), '-I', str(RUNTIME / 'upstream'),
+                 '-I', str(RUNTIME / 'upstream/consumer/include')]
         cpp_flags = ['-fapple-kext', '-fno-exceptions', '-fno-rtti',
                      '-fno-threadsafe-statics', '-nostdinc++', '-std=c++17']
         objects, adapter_objects = [], []
@@ -282,7 +373,7 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
             obj = work / (source.stem + '.o')
             compiler = 'clang' if source.suffix == '.c' else 'clang++'
             language_flags = ['-std=gnu11'] if source.suffix == '.c' else cpp_flags
-            run('/usr/bin/xcrun', compiler, *flags, *language_flags,
+            run('/usr/bin/xcrun', compiler, *source_flags(source), *flags, *language_flags,
                 '-c', str(source), '-o', str(obj))
             macho(obj, 1)
             objects.append(str(obj))
@@ -310,9 +401,15 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
         for symbol in CALLER_SYMBOLS:
             if not re.search(r'\bT _' + re.escape(symbol) + r'$', defined, re.M):
                 raise ValueError('An actual NVIDIA caller or OS hook is missing: ' + symbol)
-        for symbol in CALLER_DATA_SYMBOLS:
+        for symbol in [*RUNTIME_SYMBOLS, *CONSUMER_SYMBOLS]:
+            if not re.search(r'\bT _' + re.escape(symbol) + r'$', defined, re.M):
+                raise ValueError('An actual NVIDIA runtime/RM symbol is missing: ' + symbol)
+        for symbol in [*CALLER_DATA_SYMBOLS, *RUNTIME_DATA_SYMBOLS]:
             if not re.search(r'\b[SDsd] _' + re.escape(symbol) + r'$', defined, re.M):
-                raise ValueError('An original NVIDIA synchronization size is missing: ' + symbol)
+                raise ValueError('An original NVIDIA runtime data symbol is missing: ' + symbol)
+        for symbol in FORBIDDEN_RUNTIME_SYMBOLS:
+            if re.search(r'\b[TSDBtsdb] _' + re.escape(symbol) + r'$', defined, re.M):
+                raise ValueError('An excluded NVIDIA runtime entry is linked: ' + symbol)
         sections = run('/usr/bin/otool', '-l', str(linked_adapter)).stdout
         if '__mod_init_func' in sections or '__mod_term_func' in sections:
             raise ValueError('The integrated adapter gained static initialization.')
@@ -351,7 +448,7 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
         allowed_statuses = {'not_attached'}
         if allow_legacy_probe:
             allowed_statuses.add('outdated_probe')
-        if (live.get('format') != 6 or live.get('tool') != 'nvidia-transport'
+        if (live.get('format') != 7 or live.get('tool') != 'nvidia-transport'
                 or live.get('version') != VERSION or live.get('complete') is not True
                 or live.get('status') not in allowed_statuses):
             raise ValueError('The native reporter returned an unexpected report or loaded probe.')
@@ -376,6 +473,7 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
             'validation/foundation-checks.json': (foundation_output / 'foundation-checks.json').read_bytes(),
             'validation/caller-checks.json': (caller_output / 'caller-checks.json').read_bytes(),
             'validation/lifecycle-checks.json': (lifecycle_output / 'lifecycle-checks.json').read_bytes(),
+            'validation/runtime-checks.json': (runtime_output / 'runtime-checks.json').read_bytes(),
             'THIRD-PARTY-NOTICES.txt': (
                 'The unmodified kernel module runtime is from MacKernelSDK.\n'
                 'Portions Copyright (c) 2000, 2008-2012 Apple Inc. All rights reserved.\n'
@@ -390,7 +488,8 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                 'Corresponding source, original reference inputs, and precise adaptation\n'
                 'provenance are included under source/packages/nvidia-os-adapter/ and\n'
                 'source/packages/nvidia-caller-integration/ and\n'
-                'source/packages/nvidia-nvport-lifecycle/.\n'
+                'source/packages/nvidia-nvport-lifecycle/ and\n'
+                'source/packages/nvidia-nvport-runtime/.\n'
                 'The pinned atomic header closure includes LLVM-derived declarations;\n'
                 'licenses/LLVM-LICENSE.txt supplies the accompanying license.\n'
                 'Project-authored adapters and probe source use the MIT license in LICENSE.\n').encode(),
@@ -418,6 +517,7 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                                     for item in required if item.is_relative_to(ROOT)},
                   'native_report_status': live['status'],
                   'native_adapter_checks': native_results,
+                  'native_runtime_checks': runtime_record['native_execution'],
                   'kernel_adapter_imports': sorted(adapter_imports),
                   'kernel_compiler_helpers': {
                       '___bzero': {
@@ -436,6 +536,10 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                   },
                   'kernel_adapter_resolved_caller_symbols': list(CALLER_SYMBOLS),
                   'kernel_adapter_resolved_caller_data': list(CALLER_DATA_SYMBOLS),
+                  'kernel_adapter_resolved_runtime_symbols': list(RUNTIME_SYMBOLS),
+                  'kernel_adapter_resolved_runtime_data': list(RUNTIME_DATA_SYMBOLS),
+                  'kernel_adapter_resolved_rm_consumer_symbols': list(CONSUMER_SYMBOLS),
+                  'kernel_adapter_excluded_runtime_entries': list(FORBIDDEN_RUNTIME_SYMBOLS),
                   'kernel_kpi_libraries': KPI_LIBRARIES,
                   'kernel_adapter_static_initializers': False,
                   'kernel_adapter_object_sha256': digest(linked_adapter.read_bytes()),
@@ -446,13 +550,15 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                                  'native original mutex caller contention and mandatory assertion checks',
                                  'native lifecycle reserve exhaustion, allocation rollback and tracked concurrent use',
                                  'native spinlock exclusion, simulated interrupt-state restoration and fatal misuse checks',
+                                 'checked NvPort core lifecycle, original string/PRNG utility bodies and real RM container consumer',
+                                 'native runtime failure rollback, shared-lease contention and complete cold cleanup',
                                  'same bounded startup entry point as probe, with reserve lifecycle cleanup',
                                  'address and undefined-behavior sanitizers with fatal recovery policy',
                                  'native Intel kernel compile and link with adapter import allowlist',
                                  'thin x86_64 Mach-O and module entry metadata',
                                  'ad-hoc signature verification', 'native report decoder self-test',
                                  live_validation],
-                  'hardware_status': 'Version 0.5.0 TU117 identification, the 23-check CPU-only foundation self-check and the 35-check original caller integration are confirmed on the laptop. Version 0.6.0 adds tracked allocations, owned object lifecycle and spinlocks; execution of this new combined kernel startup is not established by this CI build. The complete NvPort core, NVIDIA HAL and resource manager are not instantiated. GPU initialization, firmware, DMA and acceleration remain unimplemented.'}
+                  'hardware_status': 'Version 0.6.0 is confirmed on the laptop: 72 lifecycle checks, 35 caller/reserve checks, 23 foundation checks and two-read TU117 identification. Version 0.7.0 adds the checked core, string/PRNG utilities and a real CPU-side RM container consumer. Execution of this new combined kernel startup is not established by this CI build. The complete NVPort profile, NVIDIA HAL and GPU resource manager are not instantiated. GPU initialization, firmware, DMA and acceleration remain unimplemented.'}
         payload['BUILD.json'] = (json.dumps(record, indent=2, sort_keys=True) + '\n').encode()
         payload['SHA256SUMS'] = ''.join(digest(data) + '  ' + name + '\n' for name, data in sorted(payload.items())).encode('ascii')
         pending = work / archive.name

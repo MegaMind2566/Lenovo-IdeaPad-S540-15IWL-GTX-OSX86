@@ -251,17 +251,50 @@ void runLifecycle(void *context)
           !S540NvidiaReserve::ready() && S540NvidiaReserve::liveSlots() == 0);
 }
 
+struct ContinuationContext {
+    Result *lifecycle;
+    S540NvidiaLifecycleRuntime::StartupContinuation continuation;
+    void *context;
+};
+
+void runWithContinuation(void *context)
+{
+    auto &next = *static_cast<ContinuationContext *>(context);
+    runLifecycle(next.lifecycle);
+    if (next.continuation == nullptr || !next.lifecycle->passed())
+        return;
+    if (s540NvportMemoryIsCold() != NV_TRUE ||
+        S540NvidiaReserve::ready() || S540NvidiaReserve::liveSlots() != 0) {
+        next.lifecycle->cleanup = false;
+        return;
+    }
+    next.continuation(next.context);
+    // The continuation owns its unwind. Unknown outstanding objects must not
+    // be reclaimed by the previous block or reported as successful cleanup.
+    if (s540NvportMemoryIsCold() != NV_TRUE ||
+        S540NvidiaReserve::ready() || S540NvidiaReserve::liveSlots() != 0)
+        next.lifecycle->cleanup = false;
+}
+
 } // namespace
 
 S540NvidiaLifecycleRuntime::IntegratedResult
 S540NvidiaLifecycleRuntime::checkIntegrated()
 {
+    return checkIntegrated(nullptr, nullptr);
+}
+
+S540NvidiaLifecycleRuntime::IntegratedResult
+S540NvidiaLifecycleRuntime::checkIntegrated(StartupContinuation continuation,
+                                         void *context)
+{
     IntegratedResult result{};
     // Positive failed evidence if the shared lease or prior cleanup refuses
     // the continuation. Absence must not look like a successful empty test.
     result.lifecycle = {1, 1, false, false, false, false, false};
+    ContinuationContext next{&result.lifecycle, continuation, context};
     result.v5 = S540NvidiaCallerRuntime::checkIntegrated(
-        runLifecycle, &result.lifecycle);
+        runWithContinuation, &next);
     result.acquired = result.v5.acquired;
     return result;
 }

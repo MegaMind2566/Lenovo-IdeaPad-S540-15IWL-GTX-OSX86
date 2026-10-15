@@ -1,0 +1,116 @@
+{
+  "format": 1,
+  "repository": "NVIDIA/open-gpu-kernel-modules",
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "release": "615.78.08",
+  "upstream_files": [
+    {
+      "path": "list.c",
+      "source_path": "src/nvidia/src/libraries/containers/list.c",
+      "git_blob_sha1": "4f5155b7be4b6da05d077b7f1100ae082054d916",
+      "sha256": "3758b82c26dd95daa47be41a6bbe9ffb690b417d1599182b5fdc77fd6e298edc",
+      "bytes": 10656,
+      "modified": false
+    },
+    {
+      "path": "reference/vector.c",
+      "source_path": "src/nvidia/src/libraries/containers/vector.c",
+      "git_blob_sha1": "82af7c7a585fe0becc69323ec9412531d9689672",
+      "sha256": "2c88c8ede9a70158fc0a07bc6599e79c2e8d3420a6927c7240233973605d6af0",
+      "bytes": 12080,
+      "modified": false
+    },
+    {
+      "path": "include/containers/vector.h",
+      "source_path": "src/nvidia/inc/libraries/containers/vector.h",
+      "git_blob_sha1": "6554e5d56ef4875360721e8c78ad169327645ba4",
+      "sha256": "4a20ed322012804fe0a714ea2a63e2c881af1af1e6fafe65f2f1d9e78ab1098f",
+      "bytes": 8086,
+      "modified": false
+    },
+    {
+      "path": "include/containers/list.h",
+      "source_path": "src/nvidia/inc/libraries/containers/list.h",
+      "git_blob_sha1": "629f33c3c857e8e006054b2e998018c1dcedcf88",
+      "sha256": "1a9d50463b9356fd4e90feda7412e02b9577b07c9e232c8f218da0c037bc58d2",
+      "bytes": 14266,
+      "modified": false
+    },
+    {
+      "path": "include/containers/type_safety.h",
+      "source_path": "src/nvidia/inc/libraries/containers/type_safety.h",
+      "git_blob_sha1": "90a9afa9abfc7646f4ac8a829a67f74abd187b55",
+      "sha256": "d40049a95769128933be549bfbd3b8270014970c7533624c093aac6434e4644f",
+      "bytes": 10455,
+      "modified": false
+    },
+    {
+      "path": "reference/nvassert.h",
+      "source_path": "src/nvidia/inc/libraries/utils/nvassert.h",
+      "git_blob_sha1": "b1a8b2d8763e7542b8802a091862116e3664ea6e",
+      "sha256": "817c434764c12fcb3340aeb53e8c595a2d1818ef3b76473639bf15d303ac41fc",
+      "bytes": 44633,
+      "modified": false
+    },
+    {
+      "path": "reference/rs_client.c",
+      "source_path": "src/nvidia/src/libraries/resserv/src/rs_client.c",
+      "git_blob_sha1": "0fa885c984f806703b927eb4c61db3f82020d8a8",
+      "sha256": "8658e31561093e0fef2554eef99328193f52e4d8ffef2c7b58b57fe9c8683eb4",
+      "bytes": 52492,
+      "modified": false
+    }
+  ],
+  "adapted_translation_unit": {
+    "path": "vector.c",
+    "source_reference": "reference/vector.c",
+    "sha256": "85809e2115ca53254ab2c74845f003452114c0c4c01f4adaba5d7359d95d8da8",
+    "changed_function": "_vectReallocHelper",
+    "change": "Move old-buffer free after successful optional copy, before publication; release empty old buffers without discarding them on allocation or copy failure."
+  },
+  "interfaces": [
+    {
+      "path": "include/nvport/nvport.h",
+      "sha256": "3a763a32e433ecb250bf7eebf71e319a7390dbb344a767ba3822a018f646d9ee"
+    },
+    {
+      "path": "include/nvmisc.h",
+      "sha256": "dff1c53ee7ebcba297497aeba15aeb1eaf84e739b47595ecdd97701f8556d899"
+    },
+    {
+      "path": "include/utils/nvassert.h",
+      "sha256": "26a981e55b2e1566b96699401fcd19587a2dfb5b63b79822f9f2a416950325a5"
+    }
+  ],
+  "rm_call_sites": [
+    {
+      "source_path": "src/nvidia/src/libraries/resserv/src/rs_client.c",
+      "reference": "reference/rs_client.c",
+      "expression": "listInit(&pClient->accessBackRefList, pAllocator);"
+    },
+    {
+      "source_path": "src/nvidia/src/kernel/gpu/intr/intr.c",
+      "git_blob_sha1": "16010bfe9194fee3e286eefedec22681f8f26f87",
+      "expression": "NV_ASSERT_OK_OR_RETURN(vectInit(&pIntr->intrTable,",
+      "line": 776
+    }
+  ],
+  "scope": {
+    "real_original_containers": true,
+    "real_tracked_allocator": true,
+    "full_resource_manager": false,
+    "gpu_access": false,
+    "thread_safe_containers": false,
+    "checked_capacity_arithmetic": false,
+    "self_insert_alias_support": false
+  },
+  "bounds": {
+    "element_bytes": 4,
+    "production_vector_max_capacity": 32,
+    "native_vector_max_capacity": 64,
+    "production_list_max_nodes": 6,
+    "native_list_max_nodes": 12,
+    "reserve_slot_count": 32,
+    "reserve_slot_bytes": 131072
+  }
+}

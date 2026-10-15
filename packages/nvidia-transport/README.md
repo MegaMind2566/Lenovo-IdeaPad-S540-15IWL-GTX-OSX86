@@ -1,6 +1,6 @@
-# NVIDIA integrated NVPort lifecycle prototype
+# NVIDIA integrated CPU support runtime prototype
 
-Version **0.6.0** combines tracked NVPort allocation, spinlocks, allocator-owned mutexes, failure cleanup and resource accounting with the existing foundation/caller startup and two-read TU117 identification.
+Version **0.7.0** combines the existing foundation/caller/object-lifecycle blocks with a checked CPU runtime, NVIDIA string and pseudorandom utilities, and real vector/list library consumers used by the resource manager. Startup, failure cleanup, reporting and delivery are integrated into one package.
 
 **This is an experimental CPU-side integration milestone.** NVIDIA HAL/RM construction, GPU initialization, firmware, DMA, GPU commands and graphics/Metal acceleration remain unimplemented.
 
@@ -8,17 +8,17 @@ Version **0.6.0** combines tracked NVPort allocation, spinlocks, allocator-owned
 
 Use the EFI on the **240 GB test disk** and retain the working Samsung EFI as the fallback.
 
-1. Extract **S540-nvidia-transport-v6.zip** into Downloads.
+1. Extract **S540-nvidia-transport-v7.zip** into Downloads.
 2. Save the previous `EFI/OC/Kexts/S540NvidiaPCIProbe.kext` outside the EFI directory.
 3. Replace that kext with the new one. **Keep config.plist unchanged.**
 4. Boot from the 240 GB EFI and select Tahoe.
 5. Run:
 
    ```bash
-   bash "$HOME/Downloads/S540-nvidia-transport-v6/CHECK-TRANSPORT.command"
+   bash "$HOME/Downloads/S540-nvidia-transport-v7/CHECK-TRANSPORT.command"
    ```
 
-Share **nvidia-transport.json** from the new **NVIDIA-TRANSPORT…** folder on the Desktop. Expected success is **`integrated_passed`**, version **`0.6.0`**, format **6**, with all three CPU evidence blocks passed. The format-5 milestone is already confirmed; it does not require another separate test.
+Share **nvidia-transport.json** from the new **NVIDIA-TRANSPORT…** folder on the Desktop. Expected success is **`integrated_passed`**, version **`0.7.0`**, format **7**, with all four CPU evidence blocks passed. Version 0.6.0 is already confirmed; its checks remain automatic regression coverage within this report and require no separate test.
 
 If startup fails, boot using the Samsung EFI and restore the previous test-disk kext. Rollback uses a reboot; runtime unload is untested. This package requires no NVRAM reset, SIP change or new OpenCore entry.
 
@@ -30,8 +30,11 @@ If startup fails, boot using the Samsung EFI and restore the previous test-disk 
 - Spinlocks preserve the prior interrupt state in the kernel backend.
 - The bounded startup verifies lifecycle transitions and returns tracked allocations, reserve slots and OS backing-object counts to their initial state.
 - One nonblocking startup lease covers both the existing checks and the new lifecycle. No worker thread or intentionally contended mutex wait runs during kernel startup.
+- The [support runtime](../nvidia-nvport-runtime/README.md) adds original string and xorshift utilities, checked memory/PRNG initialization and reverse-order shutdown.
+- Original vector/list consumers exercise tracked allocation, growth, insertion, iteration, removal and destruction. An explicit vector correction fixes old-buffer release when an allocated vector is empty; allocation failure preserves the previous container.
+- Support initialization, utilities, consumers and cleanup have independent evidence. Success requires every component, not only the previous 130 startup assertions.
 
-The initialization entry point is an explicit, status-returning adaptation of NVIDIA's memory bootstrap. It checks lock-storage allocation and spinlock initialization before publishing initialized state. The original bootstrap does not check those failures; the adaptation and exact function provenance are recorded in the source manifest. This is not full NvPort core initialization.
+The memory entry point is an explicit, status-returning adaptation of NVIDIA's bootstrap. It checks lock-storage allocation and spinlock initialization before publishing initialized state. The support core then checks actual PRNG allocation and refuses shutdown while consumer allocations or custom allocators remain live. Adaptations and exact source provenance are recorded in the manifests. This is a selected CPU profile, not full NvPort core or RM initialization.
 
 The selected release profile enables allocation counters. Fenceposts, allocation lists, caller information, GSP limits and log instrumentation are excluded. Active allocation counts are real; this profile does not provide active/peak allocation byte sizes. Reserve and OS-object accounting provide separate cleanup evidence.
 
@@ -49,11 +52,11 @@ Kernel contention, interrupt-context execution, suspend/wake, runtime stop/unloa
 
 ## Report states
 
-| Format-6 status | Meaning |
+| Format-7 status | Meaning |
 |---|---|
-| `integrated_passed` | Foundation, original-caller and NVPort lifecycle blocks passed; TU117 identification matched. |
-| `foundations_failed` / `callers_failed` / `lifecycle_failed` | A CPU startup block reported failure. Preserve the report. |
-| `invalid_foundations` / `invalid_callers` / `invalid_lifecycle` | CPU evidence is absent or malformed. |
+| `integrated_passed` | Foundation, original-caller, NVPort lifecycle and support-runtime blocks passed; TU117 identification matched. |
+| `foundations_failed` / `callers_failed` / `lifecycle_failed` / `support_failed` | A CPU startup block reported failure. Preserve the report. |
+| `invalid_foundations` / `invalid_callers` / `invalid_lifecycle` / `invalid_support` | CPU evidence is absent or malformed. |
 | `outdated_probe` | An earlier probe is loaded. Replace the kext on the EFI actually used for boot and reboot. |
 | `not_attached` | The probe service is absent; the report alone does not identify the cause. |
 | `refused` / `failed` / `error` | A hardware prerequisite, identification operation or report validation failed. |

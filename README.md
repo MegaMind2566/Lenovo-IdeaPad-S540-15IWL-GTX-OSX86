@@ -51,6 +51,7 @@ Current status as of **October 15, 2026**. **Pending** means the feature has not
 | NVIDIA OS-adapter startup | Working diagnostic | Version 0.4.0 passed the integrated kernel startup check for clocks, ordinary RAM, atomics, allocation and thread mutexes; no GPU initialization |
 | NVIDIA original-caller startup | Working diagnostic | Version 0.5.0 passed 35 original-caller/reserve checks and 23 foundation checks in the Tahoe kernel; two-read TU117 identification retained |
 | NVIDIA tracked memory and object lifecycle | Working diagnostic | Version 0.6.0 passed 72 lifecycle, 35 caller/reserve and 23 foundation checks in the Tahoe kernel, including cleanup; no warnings or GPU initialization |
+| NVIDIA CPU support runtime and RM library consumers | Development | Version 0.7.0 groups checked module startup, string/PRNG utilities, real vector/list consumers and failure cleanup; native validation and a combined hardware checkpoint remain separate |
 | Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; further icon-key investigation deferred |
 | USB-C video | Pending | No video test available; hardware video capability and routing remain unverified |
 | USB 2 device coverage / storage reliability | Pending | External USB 2 devices, measured throughput and sustained reliability |

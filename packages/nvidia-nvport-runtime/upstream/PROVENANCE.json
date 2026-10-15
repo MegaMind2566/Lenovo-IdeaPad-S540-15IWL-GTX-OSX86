@@ -1,0 +1,561 @@
+{
+  "format": 1,
+  "component": "nvidia-nvport-runtime",
+  "release": "615.78.08",
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "upstream_files": [
+    {
+      "path": "reference/string_generic.c",
+      "source_path": "src/nvidia/src/libraries/nvport/string/string_generic.c",
+      "git_blob_sha1": "4ec73acc292677af93ffa4626fbdc6208fb51740",
+      "sha256": "7b585234290a74b14cee59adfbc2d12b4c1b33fa6ac2ed25c1b58e5f297eccc1",
+      "bytes": 9033,
+      "modified": false
+    },
+    {
+      "path": "reference/crypto_random_xorshift.c",
+      "source_path": "src/nvidia/src/libraries/nvport/crypto/crypto_random_xorshift.c",
+      "git_blob_sha1": "f2d34cc81b68300bfc7c588cfa72b4c235a627dc",
+      "sha256": "ecadfacde4334a54756595075a75f7164808e1fc18ff467cd30757d2ce0a724f",
+      "bytes": 6001,
+      "modified": false
+    },
+    {
+      "path": "reference/core.c",
+      "source_path": "src/nvidia/src/libraries/nvport/core/core.c",
+      "git_blob_sha1": "8a4f0d371be2d9568c786f07899683a981fd5b51",
+      "sha256": "9c218913cff6c69dd74a42ac5321ee9e94849d11bf12963206b10f65f8db694d",
+      "bytes": 3101,
+      "modified": false
+    },
+    {
+      "path": "reference/string.h",
+      "source_path": "src/nvidia/inc/libraries/nvport/string.h",
+      "git_blob_sha1": "32ab84eef9dff9cb99a5f8a2a0c4b1d0bb7abaf2",
+      "sha256": "e39544b30acc096963b09453254f7335a9e8f4276aee055edf93aeba386aeb10",
+      "bytes": 6507,
+      "modified": false
+    },
+    {
+      "path": "reference/crypto.h",
+      "source_path": "src/nvidia/inc/libraries/nvport/crypto.h",
+      "git_blob_sha1": "adda6c9c7756500787f2beaff674fcc4b7eaa147",
+      "sha256": "cfc33b7347157c532611b5484b69263a018011d4fcbf682ae802275e2fa8be21",
+      "bytes": 12895,
+      "modified": false
+    },
+    {
+      "path": "reference/core.h",
+      "source_path": "src/nvidia/inc/libraries/nvport/core.h",
+      "git_blob_sha1": "26f8ec10f15e0bd4a53c3e899dcde9195b4de0ef",
+      "sha256": "f4a2c178a681264300c307ea0a18d3b9df22c14bd34d71d8a74115ae73c09137",
+      "bytes": 2152,
+      "modified": false
+    },
+    {
+      "path": "reference/util.h",
+      "source_path": "src/nvidia/inc/libraries/nvport/util.h",
+      "git_blob_sha1": "177e5d03b9ff8c4e76aeb02cf83b44983e1a43f5",
+      "sha256": "aa586f83501ed5fcac774ca747c690b526909f31c59c90d0705200514f2ec1d5",
+      "bytes": 8208,
+      "modified": false
+    },
+    {
+      "path": "reference/util_generic.h",
+      "source_path": "src/nvidia/inc/libraries/nvport/inline/util_generic.h",
+      "git_blob_sha1": "c5e6e371e3805bb4e5c24838513339b423fda9b0",
+      "sha256": "d76fd0f11f329bcbcdab9f3e390b945c405be51fa1efb611454be67b5ff0c611",
+      "bytes": 6849,
+      "modified": false
+    },
+    {
+      "path": "reference/util_gcc_clang.h",
+      "source_path": "src/nvidia/inc/libraries/nvport/inline/util_gcc_clang.h",
+      "git_blob_sha1": "be58d89a333b139dd44bd7e94c8dc668cb29cfcb",
+      "sha256": "82cb3492de7ca3cb28f9066c9bd559f914fbb1886b06e4216e760926cde5f107",
+      "bytes": 6735,
+      "modified": false
+    },
+    {
+      "path": "../../nvidia-nvport-lifecycle/upstream/reference/safe_generic.h",
+      "source_path": "src/nvidia/inc/libraries/nvport/inline/safe_generic.h",
+      "git_blob_sha1": "e701c2cecde7816760291c78b3fea5507acc82a5",
+      "sha256": "8e8ca640cade42f204d2afd699c3fe399d0fca82507e0c4adb869c768e51d85e",
+      "bytes": 12618,
+      "modified": false
+    }
+  ],
+  "adapted_translation_units": [
+    {
+      "path": "nvport_runtime_strings.c",
+      "sha256": "3f2c14377a3eee4a0dd044cca1be233270f4c167f1ab25bb0afe06869d49fefb",
+      "complete_upstream_translation_unit": false,
+      "functions": [
+        {
+          "source_reference": "reference/string_generic.c",
+          "source_function": "portStringLength",
+          "compiled_function": "portStringLength",
+          "source_body_sha256": "b467ae6fc5705abd0084f9e323b53067d5231591748ff9422624ee1ab4b408b9",
+          "compiled_body_sha256": "b467ae6fc5705abd0084f9e323b53067d5231591748ff9422624ee1ab4b408b9",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/string_generic.c",
+          "source_function": "portStringLengthSafe",
+          "compiled_function": "portStringLengthSafe",
+          "source_body_sha256": "6e59e4a5a3f4d45a754236d0131cd38be1a3cfcf9cca60d1186d60e8313d6d1a",
+          "compiled_body_sha256": "6e59e4a5a3f4d45a754236d0131cd38be1a3cfcf9cca60d1186d60e8313d6d1a",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/string_generic.c",
+          "source_function": "portStringCompare",
+          "compiled_function": "portStringCompare",
+          "source_body_sha256": "2193aa18623c6e8e555c4fa09e1138a391972e36d4200efa1614356d7de2c660",
+          "compiled_body_sha256": "2193aa18623c6e8e555c4fa09e1138a391972e36d4200efa1614356d7de2c660",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/string_generic.c",
+          "source_function": "_portToLower",
+          "compiled_function": "_portToLower",
+          "source_body_sha256": "cd60caec58efd4e459c618f7062e92ac12c98a856d487c2b57bb49081ddb7ba8",
+          "compiled_body_sha256": "cd60caec58efd4e459c618f7062e92ac12c98a856d487c2b57bb49081ddb7ba8",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/string_generic.c",
+          "source_function": "portStringCompareIgnoreCase",
+          "compiled_function": "portStringCompareIgnoreCase",
+          "source_body_sha256": "1176300813cf766d925056c1d20409ec0555ce5625d4edc0bed03bb0333ce32b",
+          "compiled_body_sha256": "1176300813cf766d925056c1d20409ec0555ce5625d4edc0bed03bb0333ce32b",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/string_generic.c",
+          "source_function": "portStringCopy",
+          "compiled_function": "portStringCopy",
+          "source_body_sha256": "21ee480ba37ab4bc498495e0c156e05f8aef85bd75ebc7ac6a4cd7aa1aac4160",
+          "compiled_body_sha256": "21ee480ba37ab4bc498495e0c156e05f8aef85bd75ebc7ac6a4cd7aa1aac4160",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/string_generic.c",
+          "source_function": "portStringCat",
+          "compiled_function": "portStringCat",
+          "source_body_sha256": "46ce087aef33aad59bbb8f9c9b4bf15a6b20ed1bb69af1e9213313a2a416d24c",
+          "compiled_body_sha256": "46ce087aef33aad59bbb8f9c9b4bf15a6b20ed1bb69af1e9213313a2a416d24c",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/string_generic.c",
+          "source_function": "portStringConvertAsciiToUtf16",
+          "compiled_function": "portStringConvertAsciiToUtf16",
+          "source_body_sha256": "1f4ff6706b46f4d243377b8d73b1448e6b2039acda8c1e0e8b860a3bfa1579d4",
+          "compiled_body_sha256": "1f4ff6706b46f4d243377b8d73b1448e6b2039acda8c1e0e8b860a3bfa1579d4",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/string_generic.c",
+          "source_function": "portStringBufferToHex",
+          "compiled_function": "portStringBufferToHex",
+          "source_body_sha256": "2274f24eac7c721abf78b006efaf15f154cc6469e2c049a3995c064ee9213d46",
+          "compiled_body_sha256": "2274f24eac7c721abf78b006efaf15f154cc6469e2c049a3995c064ee9213d46",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/string_generic.c",
+          "source_function": "portStringChr",
+          "compiled_function": "portStringChr",
+          "source_body_sha256": "7b4900eb80978856c11344ddc945fa84652ae217d66daead701fe1fc447611e3",
+          "compiled_body_sha256": "7b4900eb80978856c11344ddc945fa84652ae217d66daead701fe1fc447611e3",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/string_generic.c",
+          "source_function": "portStringTok",
+          "compiled_function": "portStringTok",
+          "source_body_sha256": "e5202b8e1e9e1112cea18be22e40ee2700b14d1cf82c5c475312d6d21e7255c6",
+          "compiled_body_sha256": "e5202b8e1e9e1112cea18be22e40ee2700b14d1cf82c5c475312d6d21e7255c6",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/string_generic.c",
+          "source_function": "portStringStrStr",
+          "compiled_function": "portStringStrStr",
+          "source_body_sha256": "aad3d4b5e7e8832c8530a5340dfc85f3f6a4cf295a4b51b4bb6756ce6d845503",
+          "compiled_body_sha256": "aad3d4b5e7e8832c8530a5340dfc85f3f6a4cf295a4b51b4bb6756ce6d845503",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/string_generic.c",
+          "source_function": "portStringStrChar",
+          "compiled_function": "portStringStrChar",
+          "source_body_sha256": "a1f8e656b108d07315ec9e5516423851bf1e3fd91d2215b4d6f0dd45f7ebc0b9",
+          "compiled_body_sha256": "a1f8e656b108d07315ec9e5516423851bf1e3fd91d2215b4d6f0dd45f7ebc0b9",
+          "changes": []
+        }
+      ],
+      "adaptations": [
+        "Explicit includes and fixed selected profile only; compiled function bodies are unchanged."
+      ]
+    },
+    {
+      "path": "nvport_runtime_prng.c",
+      "sha256": "e68aeac5b0ff77c8edabb632eba017ba20b42783e90a66c932e0d0b3b38065b8",
+      "complete_upstream_translation_unit": false,
+      "functions": [
+        {
+          "source_reference": "reference/crypto_random_xorshift.c",
+          "source_function": "portCryptoInitialize",
+          "compiled_function": "portCryptoInitialize",
+          "source_body_sha256": "9d103de015d85f45049b4f91ac9a5172cee8ce2d06be40e65a9116270eefc09b",
+          "compiled_body_sha256": "9d103de015d85f45049b4f91ac9a5172cee8ce2d06be40e65a9116270eefc09b",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/crypto_random_xorshift.c",
+          "source_function": "portCryptoShutdown",
+          "compiled_function": "portCryptoShutdown",
+          "source_body_sha256": "2f123359d25df34defe915dc811468a810c30fbabead9b757e0014bd2baebe8f",
+          "compiled_body_sha256": "2f123359d25df34defe915dc811468a810c30fbabead9b757e0014bd2baebe8f",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/crypto_random_xorshift.c",
+          "source_function": "_initState",
+          "compiled_function": "_initState",
+          "source_body_sha256": "a4b51480feaccbd08a8b793d72bd2f8f9721b4e262c28a83fa883d418a12a11e",
+          "compiled_body_sha256": "a4b51480feaccbd08a8b793d72bd2f8f9721b4e262c28a83fa883d418a12a11e",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/crypto_random_xorshift.c",
+          "source_function": "_xorshift128plus_GetU64",
+          "compiled_function": "_xorshift128plus_GetU64",
+          "source_body_sha256": "d4eb644bdf66ee34746247e41eeba5c490a28419be7ed062afa36c0a6a908184",
+          "compiled_body_sha256": "d4eb644bdf66ee34746247e41eeba5c490a28419be7ed062afa36c0a6a908184",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/crypto_random_xorshift.c",
+          "source_function": "portCryptoPseudoRandomGeneratorCreate",
+          "compiled_function": "portCryptoPseudoRandomGeneratorCreate",
+          "source_body_sha256": "49fb84b4aaa7b2ef55a12e98c11e68ae03a5c6bd41a4534e7bceb39016143a71",
+          "compiled_body_sha256": "49fb84b4aaa7b2ef55a12e98c11e68ae03a5c6bd41a4534e7bceb39016143a71",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/crypto_random_xorshift.c",
+          "source_function": "portCryptoPseudoRandomGeneratorDestroy",
+          "compiled_function": "portCryptoPseudoRandomGeneratorDestroy",
+          "source_body_sha256": "39cfbc3880a33e764bac7a52cbe3d45eacf9dcf4ad4c7105b278e7d39ef419e4",
+          "compiled_body_sha256": "39cfbc3880a33e764bac7a52cbe3d45eacf9dcf4ad4c7105b278e7d39ef419e4",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/crypto_random_xorshift.c",
+          "source_function": "portCryptoPseudoRandomGeneratorGetU32",
+          "compiled_function": "portCryptoPseudoRandomGeneratorGetU32",
+          "source_body_sha256": "e4f8f72cd1af205f1b213a3a29afd660f68551f6b0fa36d4d484e121f08cb933",
+          "compiled_body_sha256": "e4f8f72cd1af205f1b213a3a29afd660f68551f6b0fa36d4d484e121f08cb933",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/crypto_random_xorshift.c",
+          "source_function": "portCryptoPseudoRandomGeneratorGetU64",
+          "compiled_function": "portCryptoPseudoRandomGeneratorGetU64",
+          "source_body_sha256": "16142724556b26d4b4501c8e2b89ecb4a18c4670935a7b346564a0109f9d432b",
+          "compiled_body_sha256": "16142724556b26d4b4501c8e2b89ecb4a18c4670935a7b346564a0109f9d432b",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/crypto_random_xorshift.c",
+          "source_function": "portCryptoPseudoRandomGeneratorFillBuffer",
+          "compiled_function": "portCryptoPseudoRandomGeneratorFillBuffer",
+          "source_body_sha256": "b9313e5edff74b2fb8e16068a38eae76c88dbcc8b0f2bfc8c906e01927fc1bff",
+          "compiled_body_sha256": "b9313e5edff74b2fb8e16068a38eae76c88dbcc8b0f2bfc8c906e01927fc1bff",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/crypto_random_xorshift.c",
+          "source_function": "portCryptoPseudoRandomSetSeed",
+          "compiled_function": "portCryptoPseudoRandomSetSeed",
+          "source_body_sha256": "efa76daadf253915ee6a15bb5a6666cd331face6d4ef3e01d842cee0f8d70e2a",
+          "compiled_body_sha256": "efa76daadf253915ee6a15bb5a6666cd331face6d4ef3e01d842cee0f8d70e2a",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/crypto_random_xorshift.c",
+          "source_function": "portCryptoPseudoRandomGetU32",
+          "compiled_function": "portCryptoPseudoRandomGetU32",
+          "source_body_sha256": "8e777834e8701e336ad9e3e751ae60aad4c6ddad88e744ed0bcae8069ed46211",
+          "compiled_body_sha256": "8e777834e8701e336ad9e3e751ae60aad4c6ddad88e744ed0bcae8069ed46211",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/crypto_random_xorshift.c",
+          "source_function": "portCryptoPseudoRandomGetU64",
+          "compiled_function": "portCryptoPseudoRandomGetU64",
+          "source_body_sha256": "4d0a7ddd8cb607d0a9ba4677864ad957ee770664fc79ece314f767f526bacc1c",
+          "compiled_body_sha256": "4d0a7ddd8cb607d0a9ba4677864ad957ee770664fc79ece314f767f526bacc1c",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/crypto_random_xorshift.c",
+          "source_function": "portCryptoPseudoRandomFillBuffer",
+          "compiled_function": "portCryptoPseudoRandomFillBuffer",
+          "source_body_sha256": "13f5d5d5f47d0e30d14bbaba3f44c2be498f5c6b090def8e1dc70b19c1b944fe",
+          "compiled_body_sha256": "13f5d5d5f47d0e30d14bbaba3f44c2be498f5c6b090def8e1dc70b19c1b944fe",
+          "changes": []
+        }
+      ],
+      "adaptations": [
+        "Explicit includes and fixed selected profile only; compiled function bodies are unchanged."
+      ]
+    },
+    {
+      "path": "nvport_runtime_utilities.h",
+      "sha256": "55882d285a224f60f4b4c1cdb12454952e8db1d9bd068c35a0577f692088dd48",
+      "complete_upstream_translation_unit": false,
+      "functions": [
+        {
+          "source_reference": "reference/util_generic.h",
+          "source_function": "portUtilWriteLittleEndian16",
+          "compiled_function": "portUtilWriteLittleEndian16",
+          "source_body_sha256": "73c5aaf79345e4543a1fa0c51e182229193c86baebf68da3d28a67c8aef84af0",
+          "compiled_body_sha256": "73c5aaf79345e4543a1fa0c51e182229193c86baebf68da3d28a67c8aef84af0",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/util_generic.h",
+          "source_function": "portUtilWriteLittleEndian32",
+          "compiled_function": "portUtilWriteLittleEndian32",
+          "source_body_sha256": "e604ee2caa05bd60b67a3ed43812b17749f70446e34f0507a272fa52fa98ecdb",
+          "compiled_body_sha256": "e604ee2caa05bd60b67a3ed43812b17749f70446e34f0507a272fa52fa98ecdb",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/util_generic.h",
+          "source_function": "portUtilWriteLittleEndian64",
+          "compiled_function": "portUtilWriteLittleEndian64",
+          "source_body_sha256": "4209a64eb7be78ea540d3c5d94300c2ffd1c42e3453553ac21d2635736b21043",
+          "compiled_body_sha256": "4209a64eb7be78ea540d3c5d94300c2ffd1c42e3453553ac21d2635736b21043",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/util_generic.h",
+          "source_function": "portUtilWriteBigEndian16",
+          "compiled_function": "portUtilWriteBigEndian16",
+          "source_body_sha256": "fae1304dae747dca15b79d3740ce92a17926a13c9079ba44c60c5709ca35ee8e",
+          "compiled_body_sha256": "fae1304dae747dca15b79d3740ce92a17926a13c9079ba44c60c5709ca35ee8e",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/util_generic.h",
+          "source_function": "portUtilWriteBigEndian32",
+          "compiled_function": "portUtilWriteBigEndian32",
+          "source_body_sha256": "b5760649fab3b4146fa4588d6f25ef5b95bfa265509e99e7cb47dd0425ca544f",
+          "compiled_body_sha256": "b5760649fab3b4146fa4588d6f25ef5b95bfa265509e99e7cb47dd0425ca544f",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/util_generic.h",
+          "source_function": "portUtilWriteBigEndian64",
+          "compiled_function": "portUtilWriteBigEndian64",
+          "source_body_sha256": "6cce52836270fbac70c9475b1f131c7d74e4b33977229c766c1fc3659877b697",
+          "compiled_body_sha256": "6cce52836270fbac70c9475b1f131c7d74e4b33977229c766c1fc3659877b697",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/util_generic.h",
+          "source_function": "portUtilToUpper",
+          "compiled_function": "portUtilToUpper",
+          "source_body_sha256": "b725948967c62a07127baba8a418b00199f4e1a75816dd32e5145dd2ed2965bb",
+          "compiled_body_sha256": "b725948967c62a07127baba8a418b00199f4e1a75816dd32e5145dd2ed2965bb",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/util_generic.h",
+          "source_function": "portUtilToLower",
+          "compiled_function": "portUtilToLower",
+          "source_body_sha256": "3ca3359f3483b915e1fcab04817a8a5c302cdf4d259068a20c9aac22e34a1f65",
+          "compiled_body_sha256": "3ca3359f3483b915e1fcab04817a8a5c302cdf4d259068a20c9aac22e34a1f65",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/util_gcc_clang.h",
+          "source_function": "portUtilCountLeadingZeros64",
+          "compiled_function": "portUtilCountLeadingZeros64",
+          "source_body_sha256": "c87ee8fc1607bb3b1bd0c9215b6d019d826fa6d814fc765460f6714153d7a944",
+          "compiled_body_sha256": "c87ee8fc1607bb3b1bd0c9215b6d019d826fa6d814fc765460f6714153d7a944",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/util_gcc_clang.h",
+          "source_function": "portUtilCountLeadingZeros32",
+          "compiled_function": "portUtilCountLeadingZeros32",
+          "source_body_sha256": "eeabd4d2302999c5d12fbf91bd356f4844e1341c82897622ddbaee0e7b883c94",
+          "compiled_body_sha256": "eeabd4d2302999c5d12fbf91bd356f4844e1341c82897622ddbaee0e7b883c94",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/util_gcc_clang.h",
+          "source_function": "portUtilCountTrailingZeros64",
+          "compiled_function": "portUtilCountTrailingZeros64",
+          "source_body_sha256": "4a91842ed5552ed688986328e1bf5766000f1eaa41bdb0130677ce2f0b071815",
+          "compiled_body_sha256": "4a91842ed5552ed688986328e1bf5766000f1eaa41bdb0130677ce2f0b071815",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/util_gcc_clang.h",
+          "source_function": "portUtilCountTrailingZeros32",
+          "compiled_function": "portUtilCountTrailingZeros32",
+          "source_body_sha256": "59b15f65c6f9d0b88cc569e0640c0eeef30159032fafbd8602ee31c971c7bc6a",
+          "compiled_body_sha256": "59b15f65c6f9d0b88cc569e0640c0eeef30159032fafbd8602ee31c971c7bc6a",
+          "changes": []
+        }
+      ],
+      "adaptations": [
+        "Explicit includes and fixed selected profile only; compiled function bodies are unchanged."
+      ]
+    }
+  ],
+  "unchanged_function_bodies": 38,
+  "unsigned_arithmetic": {
+    "path": "nvport_runtime_safe.h",
+    "sha256": "3c1fc7d1d07e1c2ca1962da3c272e34a0ba778e5cc00528bd3635839ce8001cd",
+    "source_reference": "../../nvidia-nvport-lifecycle/upstream/reference/safe_generic.h",
+    "macros": [
+      {
+        "name": "PORT_EXPAND",
+        "sha256": "ef6cee66693a385747856ffaef77aafa2ad69ba6c9c9412640c3abaa21bc345d"
+      },
+      {
+        "name": "PORT_SAFE_Add_IMPL_U",
+        "sha256": "4250e3e4a94019f9bb5c3b4397ac851e0a9a7da319bbf83571b355386aeac369"
+      },
+      {
+        "name": "PORT_SAFE_Sub_IMPL_U",
+        "sha256": "b74dfc24eb9439ed90b99cc42c5c548461291fb8757ff2519218f34695ff127b"
+      },
+      {
+        "name": "PORT_SAFE_Mul_IMPL_U",
+        "sha256": "92f0f3f73b923a4166853e352d98003697b04466b25176ac968cea392b1c92e7"
+      },
+      {
+        "name": "PORT_SAFE_DIV_IMPL",
+        "sha256": "ae10a95ed04340568fea321bb4a9485f0a6ad5fb746762ee4fc82afce837bc1f"
+      },
+      {
+        "name": "PORT_SAFE_Div_IMPL_U",
+        "sha256": "fd9c63ad40110628e05113a053b26678153f0015b925f34dac9e63ed9c981a4c"
+      },
+      {
+        "name": "PORT_SAFE_Add_IMPL_",
+        "sha256": "cec8c9c0bc30aac446d91f9d0c32508dfbb5ba66ccda8bdf3ce8c33db4706d9d"
+      },
+      {
+        "name": "PORT_SAFE_Sub_IMPL_",
+        "sha256": "825c2d30e07bba7ff66ca621443c7f562179d8cb361be17afae9aaba2289e02f"
+      },
+      {
+        "name": "PORT_SAFE_Mul_IMPL_",
+        "sha256": "81c2c7b101443bb52b88c5345ec20d6328366fb6c56414d4c31588d28ccca704"
+      },
+      {
+        "name": "PORT_SAFE_Div_IMPL_",
+        "sha256": "495c5b05626c027de6befc7b65561c7ec3939b0ddd0dd0cc88918f5d852bbf09"
+      },
+      {
+        "name": "PORT_SAFE_DEFINE_MATH_FUNC",
+        "sha256": "f0e57d10bc77b3487d76d0df6928084ca68fa5a6600ef30bcc35dc20164d523d"
+      }
+    ],
+    "new_functions": 15,
+    "reused_functions": [
+      "portSafeAddLength"
+    ],
+    "types": [
+      "U32",
+      "U64",
+      "UPtr",
+      "Length"
+    ],
+    "operations": [
+      "Add",
+      "Sub",
+      "Mul",
+      "Div"
+    ],
+    "signed_arithmetic": false,
+    "casts": false
+  },
+  "checked_core": {
+    "path": "nvport_runtime_core.c",
+    "sha256": "91e2308bef9a566f19d1827944fd8be351af2c121011ef804913d8a2a13e326f",
+    "source_reference": "reference/core.c",
+    "complete_upstream_core": false,
+    "adapted_functions": {
+      "portInitialize": "s540NvportRuntimeInitialize",
+      "portShutdown": "s540NvportRuntimeShutdown",
+      "portIsInitialized": "s540NvportRuntimeIsInitialized"
+    },
+    "adapter_introspection": [
+      "s540NvportRuntimeIsCold"
+    ],
+    "changes": [
+      "Externally serialized single-owner lifecycle; duplicate initialization is refused.",
+      "Checked memory bootstrap status; failed upstream PRNG allocation unwinds memory before publishing success.",
+      "Shutdown refuses outstanding consumer allocations or allocator objects before releasing any runtime resource.",
+      "Silent reverse PRNG/memory shutdown; no unsupported module is initialized."
+    ],
+    "initialization_order": [
+      "checked-memory",
+      "original-xorshift-prng"
+    ],
+    "shutdown_order": [
+      "original-xorshift-prng",
+      "memory"
+    ],
+    "failure_atomic": true
+  },
+  "profile_headers": [
+    {
+      "path": "nvport_runtime.h",
+      "sha256": "d93ca83b5f03c9da57399c2eb7ee0a27acb81be77b7f8d0ca6553102fb36737f"
+    }
+  ],
+  "profile": {
+    "cpu_only": true,
+    "external_serialization": true,
+    "ordinary_thread": true,
+    "security_cryptography": false,
+    "true_entropy": false,
+    "full_nvport": false,
+    "full_rm": false,
+    "gpu_access": false,
+    "strings_public_functions": 11,
+    "prng_public_functions": 11,
+    "inline_utility_functions": 12,
+    "excluded": [
+      "portStringBufferToHexGroups: upstream separator-write bounds are insufficient.",
+      "Pointer overlap, alignment and power-of-two utility routines: outside the selected consumer profile; upstream zero semantics are not repaired implicitly.",
+      "Signed SAFE arithmetic and casts: outside the selected profile.",
+      "CPU feature/hardware operations, hash/true-RNG services, scheduling, threads and full NVPort core."
+    ],
+    "inherited_allocator": "v6 32-slot reserve, 4 MiB total, 128 KiB request ceiling; metadata consumes slots",
+    "prng_constraints": [
+      "Deterministic xorshift128+ with splitmix64 seeding; not a CSPRNG.",
+      "Generators require external serialization and valid non-null objects.",
+      "Default reseeding may fail allocation and leave the default pointer null.",
+      "Fill buffer requires valid capacity and length <= NV_U64_MAX - 7."
+    ],
+    "string_constraints": [
+      "Valid non-null buffers and no unsupported overlap.",
+      "Copy requires destSize and srcSize greater than zero.",
+      "Cat requires catSize greater than zero and a destination terminator within strSize.",
+      "Hex conversion requires bufSize <= NV_U64_MAX / 2."
+    ]
+  }
+}

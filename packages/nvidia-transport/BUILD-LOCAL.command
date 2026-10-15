@@ -36,7 +36,7 @@ build_package() {
 }
 
 if build_package 2>&1 | /usr/bin/tee "$WORK/build.log"; then
-    printf '\nBuild completed. Share this ZIP for review before changing the test EFI:\n%s/output/S540-nvidia-transport-v6.zip\n' "$WORK"
+    printf '\nBuild completed. Share this ZIP for review before changing the test EFI:\n%s/output/S540-nvidia-transport-v7.zip\n' "$WORK"
 else
     printf '\nBuild failed. Share this log:\n%s/build.log\n' "$WORK" >&2
     exit 1

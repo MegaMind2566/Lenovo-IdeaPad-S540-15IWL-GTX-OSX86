@@ -15,9 +15,9 @@
     <key>CFBundlePackageType</key>
     <string>KEXT</string>
     <key>CFBundleShortVersionString</key>
-    <string>0.6.0</string>
+    <string>0.7.0</string>
     <key>CFBundleVersion</key>
-    <string>0.6.0</string>
+    <string>0.7.0</string>
     <key>IOKitPersonalities</key>
     <dict>
         <key>S540NvidiaPCIProbe</key>
@@ -39,7 +39,7 @@
         </dict>
     </dict>
     <key>OSBundleCompatibleVersion</key>
-    <string>0.6.0</string>
+    <string>0.7.0</string>
     <key>OSBundleLibraries</key>
     <dict>
         <key>com.apple.kpi.iokit</key>
