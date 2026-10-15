@@ -92,7 +92,9 @@ extern "C" NV_STATUS NV_API_CALL os_alloc_mem(void **output, NvU64 length) {
         - (reinterpret_cast<NvUPtr>(base) & mask)) & mask;
     auto *payload = static_cast<NvU8 *>(base) + padding + sizeof(AllocationHeader);
     const AllocationHeader header = {base, total};
-    memcpy(payload - sizeof(header), &header, sizeof(header));
+    // Parenthesized function calls bypass the SDK's fortify macro. Both ranges
+    // are exactly sizeof(header); retain the exported memcpy kernel ABI.
+    (memcpy)(payload - sizeof(header), &header, sizeof(header));
     *output = payload;
     return NV_OK;
 }
@@ -101,6 +103,6 @@ extern "C" void NV_API_CALL os_free_mem(void *memory) {
     if (memory == nullptr || !ordinaryThreadContext())
         return;
     AllocationHeader header = {};
-    memcpy(&header, static_cast<NvU8 *>(memory) - sizeof(header), sizeof(header));
+    (memcpy)(&header, static_cast<NvU8 *>(memory) - sizeof(header), sizeof(header));
     release(header.base, header.total);
 }
