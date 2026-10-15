@@ -2,7 +2,7 @@
 
 Reviewed on October 15, 2026. Target: Lenovo IdeaPad S540-15IWL GTX, Intel macOS Tahoe, NVIDIA GTX 1650 Max-Q, PCI `10DE:1F91`.
 
-**Status:** PCI visibility, the 0.1.0 attachment/configuration/resource milestone and the [transport prototype](../../packages/nvidia-transport/README.md) 0.2.0 BOOT_0 identification are confirmed on the laptop. Version 0.3.0 BOOT_42 cross-check and local pinned HAL table matching have passed the native build; laptop validation remains pending. HAL instantiation, resource-manager integration, GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
+**Status:** PCI visibility, 0.1.0 attachment/configuration/resource reads, 0.2.0 BOOT_0 identification and the [transport prototype](../../packages/nvidia-transport/README.md) 0.3.0 two-read/local HAL table match are confirmed on the laptop. The next stage is Darwin OS-adapter boundary assessment. HAL instantiation, resource-manager integration, GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
 
 ## Source baseline
 
@@ -94,15 +94,25 @@ The delivered 0.2.0 archive comes from the [successful native Intel build](https
 
 The laptop report from 0.2.0 returns `identified`, `complete=true`, `wegnoegpu_present=false` and no warnings, with the actual PCI provider identity verified. Its MMIO result records `read_count=1`, BAR0 offset zero, width 32, register value `0x167000A1`, architecture `0x16`, implementation `0x07` and reason `tu117-identified`. This establishes exactly one completed read of the expected TU117 identification register. It does not validate other registers, usable VRAM, initialization, DMA, firmware startup, execution or graphics acceleration. Runtime stop/unload remains untested; raw reports and private resource addresses remain excluded.
 
-### Next implementation: BOOT_42 and local HAL table match, 0.3.0
+### Confirmed BOOT_42 and local HAL table match, 0.3.0
 
 The pinned NVIDIA resource manager's [`_halmgrIsChipSupported`](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/src/kernel/core/hal_mgr.c#L125-L148) consumes `NV_PMC_BOOT_42` architecture and implementation fields for HAL matching. The [register definition](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/common/inc/swref/published/nv_ref.h#L150-L172) marks BAR0 offset `0xA00` as read-only. The [generated chip table](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/generated/g_chips2halspec_nvoc.c#L39-L43) maps architecture `0x16` and implementation `0x07` to the TU117 HAL variant.
 
 Version 0.3.0 implements BOOT_0 followed by one guarded BOOT_42 read only after BOOT_0 identifies TU117, for at most two total register loads. Each mapping/read retains the identity, BAR0, memory-decode, D0 and provider-ownership guards. The format-3 snapshot records both outcomes and a local HAL table-match result, including NVIDIA source commit `1a82fbfda8f321b056eb3568850f9316c5e465c5`. Architecture `0x16`, implementation `0x07` and chip `0x167` must agree before the matcher selects TU117 variant index `41`; there are no scans, retries or writes.
 
-This is a local comparison against the pinned table. It does not instantiate a HAL object, integrate the resource manager or initialize the GPU. The native build passed; laptop validation remains pending. The individual-load kernel-stall limitation remains; the confirmed 0.2.0 result does not validate BOOT_42 or the new matcher.
+The October 15 format-3 laptop report returns `hal_matched`, `complete=true`, `wegnoegpu_present=false` and no warnings, with the actual provider identity verified. BOOT_0 returned `0x167000A1` and BOOT_42 returned `0x167A1000`, one 32-bit load each and two total. Both decode to architecture `0x16` and implementation `0x07`; BOOT_42 chip `0x167` agrees with the pinned table match for TU117 variant index `41`. The HAL-selection result records NVIDIA source commit `1a82fbfda8f321b056eb3568850f9316c5e465c5`.
+
+This confirms two read-only identification loads and a local table comparison. It does not instantiate a HAL object, integrate the resource manager or initialize the GPU. Firmware, DMA, command execution and acceleration remain unimplemented. Runtime stop/unload remains untested, and the individual-load kernel-stall limitation remains. No wider register or memory access is validated by this result.
 
 The 0.3.0 [native Intel build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38666863926) passed at commit `dc21ecb52d0cde3b824d2ae692c0982d7e1cc972`, including compilation, signatures, policy/decoder checks and packaged reporter execution with the probe unloaded. Its ZIP SHA256 is `4b0c5c0634be2af65bcfd9fd01f91adb12fb7e6ef8d7fefd59027ccba51e6002`. CI did not load the kext or validate BOOT_42 on the laptop.
+
+## Next stage: Darwin OS-adapter boundary assessment
+
+Review the pinned resource manager's operating-system service contracts and the minimal Darwin interfaces they would require before implementing integration. Existing IOKit attachment and identification are the confirmed baseline, not an integrated NVIDIA OS adapter. This assessment selects no additional register or hardware operation and does not instantiate a HAL or start the GPU.
+
+The first candidate is the CPU-only monotonic-clock adapter: `os_get_monotonic_time_ns`, `os_get_monotonic_time_ns_hr` and `os_get_monotonic_tick_resolution_ns`. NVIDIA's actual [nvport time caller](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/src/libraries/nvport/time/time_unix_kernel_os.c#L68-L80) consumes these hooks, and its [GPU timeout code](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/src/kernel/gpu/gpu_timeout.c#L282-L302) uses uptime and resolution to form deadlines. The pinned Darwin [clock header](https://github.com/acidanthera/MacKernelSDK/blob/3f750085caa17ec3a7880f11c11bf4f48cd6a164/Headers/kern/clock.h#L86-L115) provides `clock_get_uptime`, `absolutetime_to_nanoseconds` and `clock_timebase_info` as the backend candidates.
+
+Acceptance requires the exact upstream C ABI, compilation of the actual pinned caller, documented timebase/resolution semantics, and checks of nondecreasing nanosecond values and deadline expiry. Unimplemented dependencies must not be replaced by success stubs. This adapter is not implemented yet and does not integrate the resource manager. Software deadlines cannot make a stalled MMIO load recoverable.
 
 ## Milestone status and remaining work
 
@@ -110,7 +120,8 @@ The 0.3.0 [native Intel build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S5
 |---|---|
 | Darwin PCI attachment | Confirmed laptop attachment, fixed configuration reads and assigned resource metadata; runtime stop/unload remains untested |
 | Single-read BAR0 identification | Confirmed on the laptop in 0.2.0: exactly one BOOT_0 read with expected TU117 fields; no broader hardware operation validated |
-| BOOT_42 and local HAL table match | Implemented in 0.3.0, format 3; native build passed; laptop validation pending. No HAL object or resource-manager integration |
+| BOOT_42 and local HAL table match | Confirmed on the laptop in 0.3.0: two read-only identification loads and local TU117 variant-41 match. No HAL object or resource-manager integration |
+| Darwin OS adapter | Next boundary assessment only; no resource-manager integration implemented |
 | Further hardware transport | Separate reviewed work for DMA and interrupts, with bounded access and failure handling |
 | GPU and GSP startup | Matching, hashed firmware; observed initialization with timeouts and cleanup; no success inferred from PCI enumeration |
 | Minimal execution | One deterministic command with a checked result and recoverable failure path |

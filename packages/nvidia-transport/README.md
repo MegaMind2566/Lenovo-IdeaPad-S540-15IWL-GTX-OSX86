@@ -2,7 +2,13 @@
 
 This experimental IOKit service targets the S540 GTX 1650 Max-Q (`10DE:1F91`, subsystem `17AA:3806`, revision `A1`). Version **0.1.0** PCI attachment and version **0.2.0** single-read `NV_PMC_BOOT_0` identification are confirmed on the laptop. The v0.2 report returned `0x167000A1`, architecture `0x16`, implementation `0x07`, and no warnings.
 
-Version **0.3.0** adds one conditional `NV_PMC_BOOT_42` read and a local match against NVIDIA's pinned TU117 HAL-selection table. Its laptop result is pending. Built archives include native-check provenance in BUILD.json. A table match does not instantiate NVIDIA's HAL or integrate the Linux resource manager. GPU initialization, firmware, DMA, command submission, display output and acceleration remain unimplemented.
+Version **0.3.0** is also confirmed on the laptop: one BOOT_0 read followed by one conditional `NV_PMC_BOOT_42` read, with a local match against NVIDIA's pinned TU117 HAL-selection table. Built archives include native-check provenance in BUILD.json. This match does not instantiate NVIDIA's HAL or integrate the resource manager. GPU initialization, firmware, DMA, command submission, display output and acceleration remain unimplemented.
+
+## Confirmed laptop result: October 15, 2026
+
+The format-3 report returns `hal_matched`, `complete=true`, `wegnoegpu_present=false` and no warnings, with the actual PCI provider identity verified. BOOT_0 returned `0x167000A1` and BOOT_42 returned `0x167A1000`, with one 32-bit read per phase and two total. Both decode to architecture `0x16` and implementation `0x07`; BOOT_42 chip `0x167` matches TU117 variant index `41` in the local pinned table. The selection records NVIDIA source commit `1a82fbfda8f321b056eb3568850f9316c5e465c5`.
+
+This establishes only those two read-only identification loads and local table matching. No HAL object is instantiated, no resource manager is integrated, and the GPU remains uninitialized. Firmware, DMA and acceleration remain unimplemented. Runtime stop/unload remains untested. The next stage is Darwin OS-adapter boundary assessment; no additional register is selected by this result. Raw reports and private resource addresses remain excluded.
 
 ## Upgrade the existing experiment
 
@@ -58,7 +64,7 @@ BOOT_42 is marked `not_attempted` when BOOT_0 is not identified. A HAL match req
 
 ## Build and source references
 
-The native Intel CI build compiles and links the kext, checks Mach-O types and module metadata, verifies ad-hoc signatures, and runs policy and native decoder tests. It executes the packaged reporter without loading the experimental kext. Version 0.2.0 passed its [native build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38664993966); the laptop BOOT_0 result was established separately. Each archive's BUILD.json records its completed native checks. Version 0.3.0 laptop validation is pending.
+The native Intel CI build compiles and links the kext, checks Mach-O types and module metadata, verifies ad-hoc signatures, and runs policy and native decoder tests. Version 0.3.0 passed its [native build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38666863926), which executed the packaged reporter without loading the experimental kext. Each archive's BUILD.json records its completed native checks. The subsequent laptop report independently confirms the two identification reads and local table match described above.
 
 An optional source bundle can be generated from an exact checkout with `builders/package_nvidia_local.py --source-commit FULL_SHA --output-dir OUTPUT`. The generated **S540-nvidia-build-local-v2.zip** supports Intel macOS with Apple Command Line Tools. Its wrapper fetches the pinned public SDK Git revision and performs native compile, signature and decoder checks. It does not install or load the probe. The explicit `--allow-legacy-probe` build option accepts an already-loaded 0.1.0 or 0.2.0 probe as outdated; CI remains strict about having no loaded probe.
 

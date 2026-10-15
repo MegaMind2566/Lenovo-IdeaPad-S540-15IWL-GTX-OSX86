@@ -6,7 +6,7 @@ ZIP packages. Builders and regression checks are kept separately.
 
 | Package | Purpose | Guide |
 | --- | --- | --- |
-| [nvidia-transport](nvidia-transport) | Version 0.2.0 BOOT_0 hardware read confirmed. Version 0.3.0 BOOT_42/local pinned HAL table matcher implemented; native build passed; laptop validation pending. No HAL instantiation, firmware or acceleration. | [PCI transport](nvidia-transport/README.md) |
+| [nvidia-transport](nvidia-transport) | Version 0.3.0 two-read identification and pinned local TU117 variant-41 table match confirmed on the laptop. No HAL instantiation, resource-manager integration, firmware or acceleration. | [PCI transport](nvidia-transport/README.md) |
 | [nvidia-visibility](nvidia-visibility) | Superseded for the reached visibility milestone. V1 automatic locator stopped at `Mounted`; subsequent manual removal of the disable argument produced a visible PCI service. | [Retained visibility experiment](nvidia-visibility/README.md) |
 | [nvidia-pci](nvidia-pci) | Read published PCI metadata; laptop visibility is confirmed for the exact target. No hardware access or GPU initialization. | [NVIDIA PCI inventory](nvidia-pci/README.md) |
 | [ssd-boot](ssd-boot) | Automatic transfer helper on hold after a mounted-target guard stop. Manual transfer and independent Samsung boot are confirmed. | [Independent SSD boot](../docs/guides/ssd-boot.md) |

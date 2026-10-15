@@ -178,7 +178,7 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                   'validation': ['native Intel kernel compile and link', 'thin x86_64 Mach-O and module entry metadata',
                                  'ad-hoc signature verification', 'native report decoder self-test',
                                  live_validation],
-                  'hardware_status': 'Laptop PCI attachment and version 0.2.0 BOOT0 identification are confirmed. Version 0.3.0 BOOT42 cross-check and local TU117 HAL-table match await laptop validation. The NVIDIA HAL is not instantiated; GPU initialization, firmware and acceleration remain unimplemented.'}
+                  'hardware_status': 'Laptop PCI attachment and version 0.3.0 two-register TU117 identification with a local pinned HAL-table match are confirmed. The NVIDIA HAL and resource manager are not instantiated; GPU initialization, firmware, DMA and acceleration remain unimplemented.'}
         payload['BUILD.json'] = (json.dumps(record, indent=2, sort_keys=True) + '\n').encode()
         payload['SHA256SUMS'] = ''.join(digest(data) + '  ' + name + '\n' for name, data in sorted(payload.items())).encode('ascii')
         pending = work / archive.name

@@ -47,7 +47,7 @@ Current status as of **October 15, 2026**. **Pending** means the feature has not
 | Touchpad and gestures | Working | ELAN0662 gestures confirmed in daily use; F6 toggle also works |
 | NVIDIA PCI attachment | Working diagnostic | Probe 0.1.0 attaches to `10DE:1F91`, verifies subsystem `17AA:3806`, reads fixed PCI configuration and assigned resource metadata; no GPU initialization or acceleration |
 | NVIDIA BAR0 identification | Working diagnostic | Probe 0.2.0 completed one read-only `NV_PMC_BOOT_0` read with the expected TU117 fields; no GPU initialization or acceleration |
-| NVIDIA HAL table match | Pending validation | Version 0.3.0 implements a guarded BOOT_42 cross-check and local pinned-table lookup; native build passed; laptop validation pending |
+| NVIDIA HAL table match | Working diagnostic | Version 0.3.0 completed two read-only identification loads and a pinned local TU117 variant-41 table match; no HAL object or GPU initialization |
 | Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; further icon-key investigation deferred |
 | USB-C video | Pending | No video test available; hardware video capability and routing remain unverified |
 | USB 2 device coverage / storage reliability | Pending | External USB 2 devices, measured throughput and sustained reliability |
@@ -64,13 +64,13 @@ Detailed hardware information is in [Hardware](docs/status/hardware.md).
 
 macOS and OpenCore use the external Samsung 960 EVO. Independent boot is confirmed after manually copying the current private EFI from the 240 GB HDD. The HDD remains available as a recovery route; Windows remains on the internal PM981a.
 
-NVIDIA probe 0.1.0 is confirmed to attach to the GTX 1650 Max-Q and read its fixed PCI configuration and assigned resource descriptors. Version 0.2.0 is also confirmed on the laptop: exactly one guarded read of the BAR0 identification register returned the expected TU117 fields. These are diagnostic milestones; GPU initialization and graphics acceleration remain unimplemented. Intel remains the operating display GPU; the reports do not audit the full current EFI.
+NVIDIA probe 0.1.0 is confirmed to attach to the GTX 1650 Max-Q and read its fixed PCI configuration and assigned resource descriptors. Version 0.2.0 is also confirmed on the laptop: exactly one guarded read of the BAR0 identification register returned the expected TU117 fields. Version 0.3.0 subsequently completed two read-only identification loads and a local pinned-table match for TU117 variant 41. These are diagnostic milestones; NVIDIA's HAL is not instantiated, its resource manager is not integrated, and GPU initialization and graphics acceleration remain unimplemented. Intel remains the operating display GPU; the reports do not audit the full current EFI.
 
 Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including the S540 microphone correction. The EFI alone does not install this extension. The audio guides document the existing installation and upgrade procedures; those helpers require their original rollback state.
 
 ## Development priorities
 
-- Validate the [NVIDIA transport prototype](packages/nvidia-transport/README.md) 0.3.0 BOOT_42 cross-check and local HAL table matcher. The native build passed; laptop validation is pending. The 0.2.0 BOOT_0 hardware milestone remains confirmed. HAL instantiation, resource-manager integration, DMA, firmware startup and acceleration remain unimplemented.
+- Assess the Darwin OS-adapter boundaries needed by NVIDIA's resource manager. The [transport prototype](packages/nvidia-transport/README.md) 0.3.0 two-read identification and local TU117 HAL table match are confirmed on the laptop. HAL instantiation, resource-manager integration, DMA, firmware startup and acceleration remain unimplemented.
 - Complete storage reliability and remaining USB 2 device checks. Both USB-A connectors and USB-C in both orientations negotiate 5 Gb/s with the tested hardware. Audio peripherals, battery power and independent SSD boot work; measured battery runtime remains open.
 - Complete Intel stability and power-management coverage; sustained cooling and fan telemetry remain open. External-display work is paused.
 - Complete remaining device support and investigate connection performance from the recorded Internet baseline; wired/Bluetooth microphones, headphone switching and wireless reconnection work.
@@ -87,7 +87,7 @@ Download the [first EFI release, v0.1.0](https://github.com/MegaMind2566/Lenovo-
 
 Generated packages are available in **Artifacts** from successful [GitHub Actions runs](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions). Current companion packages are `S540-microfono-fix-v2`, `S540-volume-fine-v1` and `S540-brightness-keys-v2`. The [function-key guide](docs/guides/function-keys.md) records the complete keyboard mapping and remaining work.
 
-The **S540-nvidia-transport-v3** package is available from its [successful native Intel build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38666863926). Version 0.1.0 PCI attachment and version 0.2.0 BOOT_0 identification remain confirmed on the laptop. Version 0.3.0 BOOT_42/local HAL table matching has passed the native build and awaits laptop validation. The [package guide](packages/nvidia-transport/README.md) records scope and deployment. Graphics acceleration remains unimplemented.
+The **S540-nvidia-transport-v3** package is available from its [successful native Intel build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38666863926). Version 0.1.0 PCI attachment and version 0.2.0 BOOT_0 identification remain confirmed on the laptop. Version 0.3.0 BOOT_42 cross-check and local TU117 HAL table matching are also confirmed on the laptop. The [package guide](packages/nvidia-transport/README.md) records scope and deployment. Graphics acceleration remains unimplemented.
 
 **Code → Download ZIP downloads source code, without compiled payloads. It is not an installer.** Builders assemble the feature sources into distributable ZIPs with their own launchers and runtime layout.
 

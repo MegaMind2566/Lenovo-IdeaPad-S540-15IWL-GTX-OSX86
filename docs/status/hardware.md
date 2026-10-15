@@ -10,7 +10,7 @@ Report received on 12 October 2026. Only data relevant to the project is include
 | CPU | Intel Core i7-8565U, Whiskey Lake-U, 4 cores / 8 threads | X86PlatformPlugin active; frequency/power response confirmed; idle temperatures 45–48 °C; activity session retains 57–82 °C with no missing readings and final 57 °C |
 | RAM | 12 GB DDR4-2400, 8 and 4 GB modules | Sufficient for the first test |
 | iGPU | Intel UHD 620, PCI 8086:3EA0 | IntelAccelerator detected and Metal 3 exposed; sustained load still to be tested |
-| dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91; subsystem 17AA:3806; revision A1 | Probe attachment, fixed PCI configuration/resource reads and one BAR0 TU117 identification read confirmed; GPU initialization, acceleration and electrical power management remain unverified |
+| dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91; subsystem 17AA:3806; revision A1 | Probe attachment, fixed PCI configuration/resource reads, two identification reads and local TU117 variant-41 table match confirmed; no HAL instance, initialized GPU or acceleration |
 | Display | BOE NV156FHM-N61, 1920×1080 | Panel, brightness slider and direct F11/F12 working; boot blackout delay eliminated with -igfxblr |
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Problematic PM981a family; compatibility is not assumed |
 | Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | itlwm 2.3.0 loaded and HeliPort reported working; Ethernet presentation is expected with this driver; disconnection, reconnection and network switching confirmed; Internet baseline 15.751 Mb/s down / 63.036 Mb/s up with Low loaded responsiveness; cause unresolved |
@@ -239,8 +239,17 @@ The format-2 laptop report from `nvidia-transport` 0.2.0 returns `identified`, `
 | Decoded architecture / implementation | `0x16` / `0x07`, TU117 |
 | Result reason | `tu117-identified` |
 
-This confirms the one bounded identification-register read. It does not establish general MMIO access, GPU initialization, usable VRAM, DMA, firmware operation, command execution or acceleration. Runtime stop/unload and power-management transitions remain untested. This confirmed 0.2.0 result remains the hardware baseline.
+This confirms the one bounded identification-register read. It does not establish general MMIO access, GPU initialization, usable VRAM, DMA, firmware operation, command execution or acceleration. Runtime stop/unload and power-management transitions remain untested. This confirms the 0.2.0 milestone; the separate 0.3.0 result is recorded below.
 
-## NVIDIA BOOT_42 and local HAL table matcher
+## NVIDIA BOOT_42 and local HAL table match: October 15, 2026
 
-Version 0.3.0 BOOT_42 cross-check and local HAL table matching have passed the native build; the laptop result remains pending. The format-3 path permits at most two total register loads, with BOOT_42 reached only after a successful BOOT_0 identification and repeated guards for each mapping/read. A table match does not establish HAL instantiation, resource-manager integration or GPU initialization. Private resource addresses and raw reports remain excluded.
+The format-3 laptop report from `nvidia-transport` 0.3.0 returns `hal_matched`, `complete=true`, `wegnoegpu_present=false` and no warnings. The actual PCI provider identity is verified.
+
+| Observation | BOOT_0 | BOOT_42 |
+|---|---|---|
+| Completed 32-bit reads | 1 | 1 |
+| Register value | `0x167000A1` | `0x167A1000` |
+| Decoded architecture / implementation | `0x16` / `0x07` | `0x16` / `0x07` |
+| Decoded chip ID | Not used in this phase | `0x167` |
+
+The result records two total loads and a local table match for TU117 variant index `41`, with NVIDIA source commit `1a82fbfda8f321b056eb3568850f9316c5e465c5`. It confirms only these two read-only identification loads and the pinned table match. No NVIDIA HAL object is instantiated, the resource manager is not integrated, and GPU initialization, firmware operation, DMA and acceleration remain unimplemented. Runtime stop/unload remains untested. The next stage is Darwin OS-adapter boundary assessment; no additional register operation is selected. Private resource addresses and raw reports remain excluded.
