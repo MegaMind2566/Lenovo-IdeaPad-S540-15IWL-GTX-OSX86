@@ -2,7 +2,7 @@
 
 Reviewed on October 15, 2026. Target: Lenovo IdeaPad S540-15IWL GTX, Intel macOS Tahoe, NVIDIA GTX 1650 Max-Q, PCI `10DE:1F91`.
 
-**Status:** PCI visibility, 0.1.0 attachment/configuration/resource reads, 0.2.0 BOOT_0 identification and the [transport prototype](../../packages/nvidia-transport/README.md) 0.3.0 two-read/local HAL table match are confirmed on the laptop. The CPU-only Darwin clock adapter is implemented; its GitHub validation is pending. HAL instantiation, resource-manager integration, GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
+**Status:** PCI visibility, 0.1.0 attachment/configuration/resource reads, 0.2.0 BOOT_0 identification and the [transport prototype](../../packages/nvidia-transport/README.md) 0.3.0 two-read/local HAL table match are confirmed on the laptop. The CPU-only Darwin clock adapter passed GitHub compile/link/import and native userspace checks; kernel runtime remains unvalidated. HAL instantiation, resource-manager integration, GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
 
 ## Source baseline
 
@@ -114,7 +114,9 @@ The implemented clock hooks are `os_get_monotonic_time_ns`, `os_get_monotonic_ti
 
 The source adapts four contiguous upstream uptime functions with their signatures and bodies unchanged, while narrowing includes and build guards. Three NVIDIA ABI headers are retained unchanged with pinned provenance and MIT notices. This is an adapted excerpt, not the complete upstream time module. The ordinary clock is rounded down to a logical 1 ms quantum and reports `1,000,000` ns resolution; the high-precision hook returns raw Darwin uptime in nanoseconds. The quantum is a software policy, not measured hardware precision.
 
-GitHub validation is pending: compile the caller and kernel backend, produce a relocatable link with an import audit, and execute a native userspace harness plus targeted clock checks. These checks will cover source/ABI compatibility and userspace clock behavior, not kernel runtime, suspend behavior or GPU deadlines. This component has no laptop installation package. Future laptop tests will combine components into meaningful integration milestones. Software deadlines cannot make a stalled MMIO load recoverable.
+The [GitHub validation run](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38694368596) at commit `dc815ca51058fd44561853df380cff9b2d55ca66` passed provenance and clock-policy checks, compiled both kernel objects, produced a relocatable link with exactly three Apple clock imports, and ran the native userspace caller/harness. The validation report SHA256 is `63ee09d3ca168a370395a03ec1a575ee2cc960c3b105df7e289b8cd51e3bf159`.
+
+These results establish compile/link compatibility and the tested userspace behavior, not kernel runtime, suspend behavior or GPU deadlines. No GPU operation occurred. This component has no laptop installation package. Future laptop tests will combine components into meaningful integration milestones. Software deadlines cannot make a stalled MMIO load recoverable.
 
 ## Milestone status and remaining work
 
@@ -123,7 +125,7 @@ GitHub validation is pending: compile the caller and kernel backend, produce a r
 | Darwin PCI attachment | Confirmed laptop attachment, fixed configuration reads and assigned resource metadata; runtime stop/unload remains untested |
 | Single-read BAR0 identification | Confirmed on the laptop in 0.2.0: exactly one BOOT_0 read with expected TU117 fields; no broader hardware operation validated |
 | BOOT_42 and local HAL table match | Confirmed on the laptop in 0.3.0: two read-only identification loads and local TU117 variant-41 match. No HAL object or resource-manager integration |
-| CPU-only Darwin clock adapter | Implemented with adapted upstream uptime caller; GitHub validation pending. No kernel runtime validation or resource-manager integration |
+| CPU-only Darwin clock adapter | GitHub provenance, kernel compile/link/import and native userspace checks passed. No kernel runtime validation or resource-manager integration |
 | Further hardware transport | Separate reviewed work for DMA and interrupts, with bounded access and failure handling |
 | GPU and GSP startup | Matching, hashed firmware; observed initialization with timeouts and cleanup; no success inferred from PCI enumeration |
 | Minimal execution | One deterministic command with a checked result and recoverable failure path |

@@ -1,6 +1,6 @@
 # NVIDIA Darwin OS adapter
 
-A CPU-only component for the S540 NVIDIA port. It connects NVIDIA's uptime caller to Darwin monotonic clocks. The implementation is present; GitHub validation is pending. The confirmed v0.3.0 PCI identification probe is unchanged.
+A CPU-only component for the S540 NVIDIA port. It connects NVIDIA's uptime caller to Darwin monotonic clocks. The clock implementation passed [GitHub validation](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38694368596); kernel runtime remains unvalidated. The confirmed v0.3.0 PCI identification probe is unchanged.
 
 This component has no laptop installer or standalone kext package. Build and CPU behavior checks run in GitHub Actions. The next laptop test will combine adapter components into a meaningful integration milestone.
 
@@ -20,7 +20,7 @@ The 1 ms value is a software policy, not measured hardware or scheduler precisio
 
 ## GitHub validation boundary
 
-The planned checks compile the adapted C caller and kernel backend against the pinned SDK, produce a relocatable link and audit imports. A native userspace harness will exercise the real caller and backend, with targeted checks for conversion, monotonicity, quantization and deadline behavior. Passing these checks will establish source/ABI compatibility and userspace behavior; kernel runtime and suspend behavior will remain unvalidated.
+The GitHub run passed provenance checks, compiled the adapted C caller and kernel backend, produced a relocatable link and verified the exact three Apple clock imports. The native userspace harness exercised the real caller and backend, with targeted checks for conversion, monotonicity, quantization and deadline behavior. These results establish compile/link compatibility and the tested userspace behavior. Kernel runtime, suspend behavior and GPU deadline operation remain unvalidated.
 
 The adapter performs no GPU access, register reads or writes, power operations, DMA or firmware loading. It does not instantiate a HAL, integrate NVIDIA's resource manager or initialize the GPU. Clock-based deadlines cannot make a stalled MMIO load recoverable.
 
