@@ -42,36 +42,50 @@ uses explicit platform and privileged-CPU fixtures. It does **not** establish
 Apple compiler execution, a kernel-stack budget, physical CPU register reads,
 adapter initialization, GSP initialization or GPU operation.
 
-Targeted allocation failures reproduced three upstream cleanup problems:
+Allocation failures reproduced upstream cleanup problems addressed by seven focused overlays:
 
 | Path | Adaptation | Development result |
 | --- | --- | --- |
 | Debug logging lock allocation | Balance the nested portable-runtime reference before returning failure | Fault 9 releases all allocations |
 | Assertion during GPU manager construction | Refuse GPU-presence probing before the manager exists | Fault 20 returns an error and releases all allocations |
 | Partial global thread-state allocation | Own the TLS reference explicitly and unwind through one idempotent cleanup path | Faults 100–105 release all allocations |
+| Portable-memory tracking lock | Propagate raw-storage and backing-lock failures through a checked internal initialization ABI | Fault 1 and both lock failure modes unwind; a same-process full startup retry succeeds |
+| Resource Server construction | Check acquisitions, publish construction last and release only acquired resources | Faults 124 and 128 release all allocations |
+| System construction failure | Retain system, children and TLS until real Resource Server cleanup completes | Faults 144–146 release all allocations |
+| RMAPI lock/TLS acquisition | Release the acquired RW lock after TLS refusal; never free a client through an unowned lock | Faults 147–148 complete genuine shutdown cleanup |
 
-The focused patches are in [upstream/adapted](upstream/adapted). They do not
-change device initialization or hardware operations. The first portable memory
-tracking-lock allocation still lacks a checked upstream initialization path;
-fault 1 can dereference a null lock. This is a **production-entry blocker**.
-A development sweep of all 148 allocation ordinals passed 140 cases. Eight
-remain failing: 1, 124, 128 and 144–148. Besides the early tracking-lock failure,
-the remaining failures include Resource Server destruction and client/TLS
-cleanup. The matrix has **not passed** and must not be treated as a safe kernel
-lifecycle.
+The [combined audit](upstream/adapted/COMBINED-ALLOCATION-AUDIT.json) records
+all seven overlays in one original-RM development image. All **148 allocation
+failure positions pass**, with zero live allocations, invalid frees or
+unavailable service calls after cleanup. The normal 22-check lifecycle and the
+29-check memory failure/retry control also pass. Original failure diagnostics
+remain visible. These are user-space controls with explicit platform/CPU
+fixtures; they do not establish safe execution in a Darwin kernel.
+
+The five newly adapted C translation units compile as x86-64 Darwin Mach-O
+with warnings treated as errors. The portable-memory overlay changes an
+internal declaration from `void` to `NV_STATUS`: all affected callers must be
+rebuilt against its checked header. The two `system.c` overlays are composed
+into one source unit. The unchanged baseline source audit does not
+implicitly apply these adaptations. No device initialization or hardware
+operation is added by the cleanup corrections.
 
 The separate host-allocator test passes 24 assertions in plain and fatal
 ASan/UBSan builds. It covers 2,048 concurrent allocations/frees with simultaneous
 snapshots and lock-free service observations, interrupt-context refusals, and
 foreign/duplicate free rejection. This evidence applies to the host facade,
-not to the original full-RM failure paths that remain blocked.
+and does not substitute for the separate original-RM failure controls.
 
 The native harness currently enters `coreInitializeRm` on a user-space stack.
-An enabled kernel implementation must instead preserve the original
-`rm_init_rm(nvidia_stack_t *)` runtime-stack contract, with correctly aligned,
-separately owned stack storage and complete unwind. A 4 KiB limit on individual
-compiler frames does not prove that the aggregate call chain fits a Darwin
-kernel stack. No kernel readiness is inferred from the development control.
+Kernel entry requires a verified compiled stack policy and aggregate stack
+budget. The pinned make profile does not define `__use_altstack__`; in that
+profile `NV_ENTER_RM_RUNTIME` is a no-op and the original
+`rm_init_rm(nvidia_stack_t *)` wrapper does not switch stacks. Passing an aligned
+heap stack buffer alone cannot establish alternate-stack execution. Enabling
+the conditional legacy mechanism also requires a separately reviewed compiler
+and runtime contract. A 4 KiB limit on individual frames does not prove that
+the aggregate call chain fits a Darwin kernel stack. No kernel readiness is
+inferred from the development control.
 
 ## External ABI boundary
 
@@ -89,7 +103,8 @@ blockers. It never supplies successful no-op services or guessed query values.
 The successful native global lifecycle must have zero refusal calls, including
 the lifetime-monotonic crypto counters.
 
-The facade, complete typed closure, exhaustive failure cleanup, original stack
-contract and authoritative Darwin build/execution must all be ready before
+The facade, complete typed closure, kernel validation of the adapted failure
+cleanup, compiled stack policy and authoritative Darwin build/execution must
+all be ready before
 kernel entry can be enabled. This module is not an installable GPU driver and
 does not request another laptop test.

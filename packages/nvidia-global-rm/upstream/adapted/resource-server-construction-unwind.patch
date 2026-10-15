@@ -1,0 +1,90 @@
+--- a/src/nvidia/src/libraries/resserv/src/rs_server.c
++++ b/src/nvidia/src/libraries/resserv/src/rs_server.c
+@@ -326,9 +326,22 @@
+ {
+     NvU32 i;
+     PORT_MEM_ALLOCATOR *pAllocator = portMemAllocatorCreateNonPaged();
++    NvBool bShareListsInitialized = NV_FALSE;
++
++    /* Preserve configuration installed by _rmapiLockAlloc. */
++    pServer->bConstructed = NV_FALSE;
++    pServer->pClientSortedList = NULL;
++    pServer->pClientListLock = NULL;
++    pServer->pShareMapLock = NULL;
++    pServer->pDisabledClientListLock = NULL;
++#if RS_STANDALONE
++    pServer->pTopLock = NULL;
++    pServer->pResLock = NULL;
++#endif
++    if (pAllocator == NULL)
++        goto fail;
+ 
+     pServer->privilegeLevel        = privilegeLevel;
+-    pServer->bConstructed          = NV_TRUE;
+     pServer->pAllocator            = pAllocator;
+     pServer->bDebugFreeList        = NV_FALSE;
+     pServer->bRsAccessEnabled      = NV_TRUE;
+@@ -370,25 +383,38 @@
+ #endif
+ 
+     pServer->pShareMapLock = portSyncSpinlockCreate(pAllocator);
++    if (pServer->pShareMapLock == NULL)
++        goto fail;
+ 
+     mapInitIntrusive(&pServer->shareMap);
+ 
+     listInit(&pServer->defaultInheritedSharePolicyList, pAllocator);
+     listInit(&pServer->globalInternalSharePolicyList, pAllocator);
++    bShareListsInitialized = NV_TRUE;
+ 
+     if (NV_OK != serverInitGlobalSharePolicies(pServer))
++    {
++        goto fail;
++    }
++
++    listInitIntrusive(&pServer->disabledClientList);
++    pServer->pDisabledClientListLock = portSyncSpinlockCreate(pAllocator);
++    if (pServer->pDisabledClientListLock == NULL)
++        goto fail;
++
++    pServer->bConstructed = NV_TRUE;
++    return NV_OK;
++fail:
++
++    if (pServer->pDisabledClientListLock != NULL)
++        portSyncSpinlockDestroy(pServer->pDisabledClientListLock);
++
++    if (bShareListsInitialized)
+     {
+         mapDestroy(&pServer->shareMap);
+         listDestroy(&pServer->defaultInheritedSharePolicyList);
+         listDestroy(&pServer->globalInternalSharePolicyList);
+-        goto fail;
+-    }
+-
+-    listInitIntrusive(&pServer->disabledClientList);
+-    pServer->pDisabledClientListLock = portSyncSpinlockCreate(pAllocator);
+-
+-    return NV_OK;
+-fail:
++    }
+ 
+ #if RS_STANDALONE
+     if (pServer->pResLock != NULL)
+@@ -415,6 +441,16 @@
+ 
+     if (pAllocator != NULL)
+         portMemAllocatorRelease(pAllocator);
++
++    pServer->pAllocator = NULL;
++    pServer->pClientSortedList = NULL;
++    pServer->pClientListLock = NULL;
++    pServer->pShareMapLock = NULL;
++    pServer->pDisabledClientListLock = NULL;
++#if RS_STANDALONE
++    pServer->pTopLock = NULL;
++    pServer->pResLock = NULL;
++#endif
+ 
+     return NV_ERR_INSUFFICIENT_RESOURCES;
+ }

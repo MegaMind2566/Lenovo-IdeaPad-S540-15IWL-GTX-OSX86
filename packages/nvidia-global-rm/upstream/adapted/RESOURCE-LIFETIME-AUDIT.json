@@ -1,0 +1,286 @@
+{
+  "format": 1,
+  "repository": "NVIDIA/open-gpu-kernel-modules",
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "release": "615.78.08",
+  "scope": "Genuine Resource Server construction ownership, system failure-unwind lifetime, and RMAPI lock/TLS allocation refusal cleanup. No hardware operations or kernel entry changes.",
+  "production_entry": "remains_disabled",
+  "sources": [
+    {
+      "path": "src/nvidia/src/libraries/resserv/src/rs_server.c",
+      "upstream_sha256": "3efe3eb513f012e7ccc0f55ab471ff935803a98acdb3b0e5637e39b139ad6d7a",
+      "adapted_sha256": "ebde13dca12a851560fe6e77de6b2013ccd2470787e0db4ceef219b9bf58ae36",
+      "patch": "resource-server-construction-unwind.patch",
+      "patch_sha256": "9c61e602194a9513db2c3435dbb0d82e44cf7f46d30a5a15221f884e7fa31f5a",
+      "functions": [
+        "serverConstruct",
+        "serverDestruct"
+      ]
+    },
+    {
+      "path": "src/nvidia/src/kernel/core/system.c",
+      "upstream_sha256": "bea78ffe5afd71df78bac6dc98c2c6077feea725d18df13680d258e7bf17f5c6",
+      "adapted_sha256": "4182cdecfb0065917ca6c5c30457cbbe4a20edafaf5930e77f0192c393830fb4",
+      "patch": "system-resource-lifetime-unwind.patch",
+      "patch_sha256": "db5eca4ed2bd62164de354540eb2cc85c0fda6539e455eeb4215003477d94b6e",
+      "functions": [
+        "_sysDestroyMemExportClient",
+        "sysConstruct_IMPL",
+        "sysDestruct_IMPL"
+      ]
+    },
+    {
+      "path": "src/nvidia/src/kernel/rmapi/rmapi.c",
+      "upstream_sha256": "cf0f6f8df903b9e39061ffa7cde0c528122c2aec7f10ba6ccbee82bcef6a6fe5",
+      "adapted_sha256": "b40df0b5df61ca81ae03322771550e14167b4c093d489a593b9861ad6c1e93ae",
+      "patch": "rmapi-lock-tls-failure-unwind.patch",
+      "patch_sha256": "3e677430c277f317cb9fa743861b9c437a62fc7e160aae214a8f922d3fe2de35",
+      "functions": [
+        "rmapiLockAcquire",
+        "rmapiLockRelease"
+      ]
+    }
+  ],
+  "changes": [
+    {
+      "function": "serverConstruct",
+      "cause": "Two spinlock acquisitions were unchecked, and bConstructed was published before all resources existed.",
+      "fix": "Check every owned acquisition, publish bConstructed last, and unwind only acquired locks, allocated client buckets, initialized policy lists and allocator ownership. Preserve configuration installed by _rmapiLockAlloc; do not clear the whole server object.",
+      "actual_failure_ordinals": [
+        124,
+        128
+      ]
+    },
+    {
+      "function": "sysConstruct_IMPL failed path",
+      "cause": "Failure cleanup destroyed child objects, cleared g_pSys and freed thread-state/TLS globals before rmapiShutdown; genuine resource free callbacks still needed those dependencies.",
+      "fix": "Run rmapiShutdown while system, child objects and TLS are live, then free thread state, RM locks and children, and finally clear g_pSys. This follows normal sysDestruct dependency order.",
+      "actual_failure_ordinals": [
+        144,
+        145,
+        146
+      ]
+    },
+    {
+      "function": "rmapiLockAcquire / _sysDestroyMemExportClient",
+      "cause": "Failed TLS allocation after acquiring the RW lock called ordinary release, which attempted to release a nonexistent TLS entry; the memory-export destructor then ignored the failed acquire and released an unowned lock.",
+      "fix": "Unwind the genuinely acquired RW lock without releasing nonexistent TLS. If acquisition refuses, leave the memory-export client owned by the existing rmapiShutdown/serverFreeDomain path, which performs its real resource-tree cleanup. Do not call Free or release a lock after failed acquire.",
+      "actual_failure_ordinals": [
+        147,
+        148
+      ],
+      "preserved_diagnostic": "The original TLS allocation-failure assertion remains visible; no failed case or diagnostic is suppressed."
+    }
+  ],
+  "targeted_validation": {
+    "status": "passed",
+    "control": "Original ELF full-RM development control with adapted translation units replacing their original definitions; actual native OS facade and explicit privileged CR4/platform fixtures.",
+    "normal_startup": {
+      "status": "passed",
+      "checks": 22,
+      "original_system_children": 15,
+      "original_memory_export_client": true,
+      "cleanup": true,
+      "host_allocations": 148,
+      "host_frees": 148,
+      "peak_host_allocations": 141,
+      "unavailable_calls": 0,
+      "crypto_calls": 0
+    },
+    "allocation_failures": [
+      {
+        "ordinal": 124,
+        "status": "passed",
+        "original_status": 26,
+        "live_allocations": 0,
+        "live_bytes": 0,
+        "allocation_failures": 1,
+        "invalid_frees": 0,
+        "unavailable_calls": 0,
+        "host_released": true
+      },
+      {
+        "ordinal": 128,
+        "status": "passed",
+        "original_status": 26,
+        "live_allocations": 0,
+        "live_bytes": 0,
+        "allocation_failures": 1,
+        "invalid_frees": 0,
+        "unavailable_calls": 0,
+        "host_released": true
+      },
+      {
+        "ordinal": 144,
+        "status": "passed",
+        "original_status": 81,
+        "live_allocations": 0,
+        "live_bytes": 0,
+        "allocation_failures": 1,
+        "invalid_frees": 0,
+        "unavailable_calls": 0,
+        "host_released": true
+      },
+      {
+        "ordinal": 145,
+        "status": "passed",
+        "original_status": 81,
+        "live_allocations": 0,
+        "live_bytes": 0,
+        "allocation_failures": 1,
+        "invalid_frees": 0,
+        "unavailable_calls": 0,
+        "host_released": true
+      },
+      {
+        "ordinal": 146,
+        "status": "passed",
+        "original_status": 81,
+        "live_allocations": 0,
+        "live_bytes": 0,
+        "allocation_failures": 1,
+        "invalid_frees": 0,
+        "unavailable_calls": 0,
+        "host_released": true
+      },
+      {
+        "ordinal": 147,
+        "status": "passed",
+        "original_status": 0,
+        "live_allocations": 0,
+        "live_bytes": 0,
+        "allocation_failures": 1,
+        "invalid_frees": 0,
+        "unavailable_calls": 0,
+        "host_released": true
+      },
+      {
+        "ordinal": 148,
+        "status": "passed",
+        "original_status": 0,
+        "live_allocations": 0,
+        "live_bytes": 0,
+        "allocation_failures": 1,
+        "invalid_frees": 0,
+        "unavailable_calls": 0,
+        "host_released": true
+      }
+    ],
+    "kernel_executed": false,
+    "gpu_access": false,
+    "adapter_initialized": false,
+    "gsp_initialized": false,
+    "darwin_native_execution": "not_established"
+  },
+  "darwin_cross_compile": {
+    "status": "passed",
+    "compiler": "Clang 22 through Zig cross compiler; not authoritative Apple compiler execution.",
+    "profile": "Actual x86_64 Darwin target, NV_UNIX=1, RS_STANDALONE=0, complete original make-declared flags and private full-RM namespace.",
+    "warnings_as_errors": true,
+    "frame_limit_bytes": 4096,
+    "translation_units": [
+      "src/nvidia/src/libraries/resserv/src/rs_server.c",
+      "src/nvidia/src/kernel/core/system.c",
+      "src/nvidia/src/kernel/rmapi/rmapi.c"
+    ]
+  },
+  "combined_integration": {
+    "status": "passed",
+    "additional_patch": "portable-memory-init-checked.patch",
+    "overlapping_source": "src/nvidia/src/kernel/core/system.c",
+    "source_profile": "All five adapted C translation units compiled with the same checked memory header; one combined system.c translation unit.",
+    "patches": [
+      {
+        "name": "portable-memory-init-checked.patch",
+        "sha256": "373a565ff932d4d3dbcc2bdcc5bdd00f6a416928acf009322432692966fb7a60"
+      },
+      {
+        "name": "resource-server-construction-unwind.patch",
+        "sha256": "9c61e602194a9513db2c3435dbb0d82e44cf7f46d30a5a15221f884e7fa31f5a"
+      },
+      {
+        "name": "system-resource-lifetime-unwind.patch",
+        "sha256": "db5eca4ed2bd62164de354540eb2cc85c0fda6539e455eeb4215003477d94b6e"
+      },
+      {
+        "name": "rmapi-lock-tls-failure-unwind.patch",
+        "sha256": "3e677430c277f317cb9fa743861b9c437a62fc7e160aae214a8f922d3fe2de35"
+      }
+    ],
+    "namespace_sha256": "cb79f788baddb7f046e870b1e2e09bfde310b4b12417ec8c737fad1ef440f7a1",
+    "sources": [
+      {
+        "darwin_cross_compile": "passed",
+        "elf": "passed",
+        "path": "src/nvidia/src/libraries/nvport/memory/memory_tracking.c",
+        "sha256": "2f0f0f56272725a6348bae85d04a1330bd7352d3421bf94a90fff2d9debf7618"
+      },
+      {
+        "darwin_cross_compile": "passed",
+        "elf": "passed",
+        "path": "src/nvidia/src/libraries/nvport/core/core.c",
+        "sha256": "ab654590c63b55dad276da4edf9d1ab5f621b2d2f956a71e0e28aca36811bd1c"
+      },
+      {
+        "darwin_cross_compile": "passed",
+        "elf": "passed",
+        "path": "src/nvidia/src/kernel/core/system.c",
+        "sha256": "3dc0e6682078cd1ac2179b04e7161a13a6b44fcf1ea5f8961af7a386173f0a33"
+      },
+      {
+        "darwin_cross_compile": "passed",
+        "elf": "passed",
+        "path": "src/nvidia/src/libraries/resserv/src/rs_server.c",
+        "sha256": "ebde13dca12a851560fe6e77de6b2013ccd2470787e0db4ceef219b9bf58ae36"
+      },
+      {
+        "darwin_cross_compile": "passed",
+        "elf": "passed",
+        "path": "src/nvidia/src/kernel/rmapi/rmapi.c",
+        "sha256": "b40df0b5df61ca81ae03322771550e14167b4c093d489a593b9861ad6c1e93ae"
+      }
+    ],
+    "checked_memory_header_sha256": "8c1741998b7990e40dda196492add447ddaf06d211cbc804c24e0f685c3ba4d0",
+    "darwin_cross_compile": "passed_with_Werror_and_4096_byte_frame_limit",
+    "elf_compile": "passed",
+    "regression": {
+      "status": "passed",
+      "allocation_ordinals": 148,
+      "passed": 148,
+      "failed_ordinals": [],
+      "each_failed_allocation_observed": true,
+      "all_allocations_freed": true,
+      "live_allocations": 0,
+      "live_bytes": 0,
+      "invalid_frees": 0,
+      "unavailable_calls": 0,
+      "host_released": true,
+      "explicit_refusals": 128,
+      "genuine_successful_fallbacks_or_shutdown_deferrals": 20,
+      "cases_suppressed": 0,
+      "normal_startup_checks": 22,
+      "normal_host_allocations": 148,
+      "normal_host_frees": 148,
+      "original_system_children": 15,
+      "original_memory_export_client": true,
+      "checked_memory_targeted_checks": 29,
+      "raw_tracking_lock_failure": true,
+      "backing_os_lock_failure": true,
+      "same_process_complete_global_rm_retry": true,
+      "control": "One combined original ELF development image, with explicit platform and privileged CPU fixtures. No Darwin kernel execution or GPU access.",
+      "darwin_native_execution": "not_established",
+      "kernel_executed": false,
+      "gpu_access": false
+    },
+    "complete_overlay_audit": {
+      "path": "COMBINED-ALLOCATION-AUDIT.json",
+      "sha256": "2dde334b5f90f052ec8b8e5db49ec7afdfa0a47452933278c8bb2750e67c2092",
+      "scope": "Authoritative combined seven-overlay source profile and one full 148-ordinal development-control regression."
+    }
+  },
+  "limits": [
+    "No firmware execution, adapter initialization, interrupt, DMA, GPU command or hardware lifecycle claim is made.",
+    "Development allocation ordinals describe this pinned control and platform fixture; they are not a stable hardware API.",
+    "All originals, including status propagation and actual client/resource destructors, remain present; no reserve allocation or successful no-op is introduced."
+  ]
+}

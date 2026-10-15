@@ -1,0 +1,51 @@
+--- a/src/nvidia/src/kernel/rmapi/rmapi.c
++++ b/src/nvidia/src/kernel/rmapi/rmapi.c
+@@ -63,6 +63,7 @@
+                                 NvBool bApiLockInternal, NvBool bGpuLockInternal);
+ static NV_STATUS _rmapiLockAlloc(void);
+ static void _rmapiLockFree(void);
++static void _rmapiLockRelease(NvBool bReleaseTls);
+ 
+ // from rmapi_stubs.c
+ void rmapiInitStubInterface(RM_API *pRmApi);
+@@ -694,7 +695,7 @@
+         else
+         {
+             // Consider the locking operation failed if we can't get the TLS entry
+-            rmapiLockRelease();
++            _rmapiLockRelease(NV_FALSE);
+             rmStatus = NV_ERR_INSUFFICIENT_RESOURCES;
+         }
+     }
+@@ -704,6 +705,12 @@
+ 
+ void
+ rmapiLockRelease(void)
++{
++    _rmapiLockRelease(NV_TRUE);
++}
++
++static void
++_rmapiLockRelease(NvBool bReleaseTls)
+ {
+     OBJSYS *pSys = SYS_GET_INSTANCE();
+     NvU64 threadId = portThreadGetCurrentThreadId();
+@@ -711,7 +718,7 @@
+     NvU64 startTime = 0;
+ 
+     // Fetch start of hold time from TLS if measuring lock times
+-    if (pSys->getProperty(pSys, PDB_PROP_SYS_RM_LOCK_TIME_COLLECT))
++    if (bReleaseTls && pSys->getProperty(pSys, PDB_PROP_SYS_RM_LOCK_TIME_COLLECT))
+         startTime = (NvU64) tlsEntryGet(g_RmApiLock.tlsEntryId);
+ 
+     timestamp = osGetMonotonicTimeNs();
+@@ -753,7 +760,8 @@
+         portSyncRwLockReleaseRead(g_RmApiLock.pLock);
+     }
+ 
+-    tlsEntryRelease(g_RmApiLock.tlsEntryId);
++    if (bReleaseTls)
++        tlsEntryRelease(g_RmApiLock.tlsEntryId);
+ }
+ 
+ NvBool

@@ -1,22 +1,34 @@
 {
   "allocation_fault_control": {
+    "allocation_failures_per_case": 1,
+    "audit": "upstream/adapted/COMBINED-ALLOCATION-AUDIT.json",
     "cases": 148,
-    "failed_ordinals": [
-      1,
-      124,
-      128,
-      144,
-      145,
-      146,
-      147,
-      148
-    ],
+    "failed_ordinals": [],
     "fixtures": "explicit user-space platform and CR4 fixture",
+    "gpu_operations": false,
+    "invalid_frees": 0,
     "kernel_execution": false,
-    "passed": 140,
-    "result": "blocked"
+    "live_allocations_after_cleanup": 0,
+    "passed": 148,
+    "result": "passed-development-control",
+    "unavailable_calls": 0
+  },
+  "checked_memory_retry_control": {
+    "assertions": 29,
+    "audit": "upstream/adapted/MEMORY-INIT-AUDIT.json",
+    "backing_os_lock_failure": true,
+    "kernel_execution": false,
+    "raw_tracking_lock_failure": true,
+    "result": "passed-development-control",
+    "same_process_full_rm_retry": true
   },
   "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "compiled_stack_policy": {
+    "kernel_aggregate_stack_budget": "not_validated",
+    "make_declared_translation_units_checked": 1100,
+    "stack_switch_inferred_from_buffer": false,
+    "use_altstack_defined": false
+  },
   "contract_tests": {
     "result": "passed",
     "tests": 5
@@ -148,10 +160,9 @@
   },
   "production_entry": "hard-refused-in-KERNEL-builds",
   "production_gates": [
-    "Complete checked portable-memory initialization; allocation ordinal 1 currently crashes.",
-    "Repair all remaining Resource Server/client/TLS allocation failure unwinds.",
+    "Integrate the seven explicit source overlays and checked memory header in the production source-substitution build; validate their lifecycle on the authoritative Darwin toolchain.",
     "Resolve or preflight-block every actual retained external ABI dependency; no scalar/void success placeholders.",
-    "Preserve the original rm_init_rm(nvidia_stack_t*) alternate-stack contract and measure aggregate stack depth.",
+    "Verify the compiled runtime stack policy and aggregate kernel stack budget; the pinned profile leaves __use_altstack__ undefined and the original wrapper does not switch stacks by itself.",
     "Complete authoritative Apple compiler/native lifecycle checks before considering one hardware checkpoint."
   ],
   "profile": "NV_UNIX=1; RS_STANDALONE=0; private s540Global_ namespace",

@@ -8,7 +8,7 @@ followed by controlled shutdown. The first GPU command is a later milestone.
 **This component is not enabled in the distributed EFI or v9 extension. No
 v10 installation package is available from this development work.** Native
 macOS validation and the complete operational OS callback profile remain
-requirements, alongside correct global RM allocation-failure cleanup.
+requirements, alongside compiled kernel stack policy and actual power ownership.
 
 ## Implemented components
 
@@ -33,6 +33,11 @@ The build embeds the unchanged approved `gsp_tu10x.bin` and
 input files and emitted section bytes. The runtime store independently hashes
 and parses those resident bytes before making them available to original RM.
 The complete NVIDIA driver agreement accompanies any future distribution.
+
+The exact original stack buffers are owned independently, but their presence
+does not prove a CPU stack switch. The pinned profile leaves
+`__use_altstack__` undefined; compiled runtime stack behavior and aggregate
+kernel stack use remain a separate admission requirement.
 
 TU117 selects original firmware family **TU11X**, enumeration value `2`.
 The original filename selector maps that family to these `tu10x` filenames.
@@ -85,9 +90,11 @@ platform, timers and transport have separate CPU/resource tests.
 The complete original RM compiles in the local Darwin cross-target audit.
 That is compilation evidence, not execution in the Tahoe kernel. A private
 native development control constructs and destroys the real global RM with
-explicit platform and privileged-CPU fixtures. Its allocation-failure tests
-exposed original cleanup defects that must be resolved before enabling kernel
-entry. Scalar or void OS callbacks cannot be filled with fabricated successful
+explicit platform and privileged-CPU fixtures. Seven explicit cleanup overlays
+now pass all 148 allocation-failure positions, normal startup and same-process
+memory-failure recovery in that control. The adapted source/header profile
+still requires production integration and authoritative Darwin validation.
+Scalar or void OS callbacks cannot be filled with fabricated successful
 defaults to make the adapter link.
 
 The development workflow emits validation records only. It cannot create an

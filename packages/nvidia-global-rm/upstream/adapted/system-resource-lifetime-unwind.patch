@@ -1,0 +1,43 @@
+--- a/src/nvidia/src/kernel/core/system.c
++++ b/src/nvidia/src/kernel/core/system.c
+@@ -136,13 +136,18 @@
+ _sysDestroyMemExportClient(OBJSYS *pSys)
+ {
+     RM_API *pRmApi;
++    NV_STATUS status;
+ 
+     if (pSys->hSysMemExportClient == 0)
+         return;
+ 
+     // Acquire lock to keep rmapiGetInterface() happy.
+-    NV_ASSERT(rmapiLockAcquire(API_LOCK_FLAGS_NONE,
+-                               RM_LOCK_MODULES_DESTROY) == NV_OK);
++    status = rmapiLockAcquire(API_LOCK_FLAGS_NONE, RM_LOCK_MODULES_DESTROY);
++    if (status != NV_OK)
++    {
++        /* rmapiShutdown's serverFreeDomain still owns this client. */
++        return;
++    }
+ 
+     pRmApi = rmapiGetInterface(RMAPI_GPU_LOCK_INTERNAL);
+ 
+@@ -253,14 +258,14 @@
+ 
+     opEventLogDestruct();
+ 
++    /* Resource callbacks require the live system, children and TLS database. */
++    rmapiShutdown();
++    threadStateGlobalFree();
++    rmLocksFree(pSys);
++
+     _sysDeleteChildObjects(pSys);
+ 
+     g_pSys = NULL;
+-
+-    threadStateGlobalFree();
+-
+-    rmapiShutdown();
+-    rmLocksFree(pSys);
+ 
+     return status;
+ }

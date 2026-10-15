@@ -40,23 +40,129 @@
       "source": "src/nvidia/src/kernel/core/thread_state.c",
       "upstream_sha256": "bf8738910a40463632d1ffb42d63689318152858e228ca9376b6d3ddbba569de",
       "validation": "targeted-original-ELF-lifecycle-control-with-explicit-platform-and-privileged-CPU-fixtures"
+    },
+    {
+      "development_fault_ordinals": [
+        1
+      ],
+      "internal_abi_change": "portMemInitialize changes from void to NV_STATUS inside the isolated full-RM image. All callers and declarations must be rebuilt with the checked overlay header.",
+      "native_apple_execution": "pending",
+      "patch": "upstream/adapted/portable-memory-init-checked.patch",
+      "patch_sha256": "373a565ff932d4d3dbcc2bdcc5bdd00f6a416928acf009322432692966fb7a60",
+      "sources": [
+        {
+          "adapted_sha256": "8c1741998b7990e40dda196492add447ddaf06d211cbc804c24e0f685c3ba4d0",
+          "path": "src/nvidia/inc/libraries/nvport/memory.h",
+          "upstream_sha256": "a700efeb580141a76680fd2def6622759759232e6b0e9a6e5e6a0cb863b41d90"
+        },
+        {
+          "adapted_sha256": "2f0f0f56272725a6348bae85d04a1330bd7352d3421bf94a90fff2d9debf7618",
+          "path": "src/nvidia/src/libraries/nvport/memory/memory_tracking.c",
+          "upstream_sha256": "c565c888ebc7b7a73474694097337a0ca5e8f692a94b7fb4974603bccf17b757"
+        },
+        {
+          "adapted_sha256": "ab654590c63b55dad276da4edf9d1ab5f621b2d2f956a71e0e28aca36811bd1c",
+          "path": "src/nvidia/src/libraries/nvport/core/core.c",
+          "upstream_sha256": "9c218913cff6c69dd74a42ac5321ee9e94849d11bf12963206b10f65f8db694d"
+        },
+        {
+          "adapted_sha256": "5224304891091c4634609d498db4053273f80557d7ddffc20d565054e7e34550",
+          "path": "src/nvidia/src/kernel/core/system.c",
+          "upstream_sha256": "bea78ffe5afd71df78bac6dc98c2c6077feea725d18df13680d258e7bf17f5c6"
+        }
+      ],
+      "validation": "combined-original-ELF-lifecycle-control-with-explicit-platform-and-privileged-CPU-fixtures"
+    },
+    {
+      "adapted_sha256": "ebde13dca12a851560fe6e77de6b2013ccd2470787e0db4ceef219b9bf58ae36",
+      "development_fault_ordinals": [
+        124,
+        128
+      ],
+      "native_apple_execution": "pending",
+      "patch": "upstream/adapted/resource-server-construction-unwind.patch",
+      "patch_sha256": "9c61e602194a9513db2c3435dbb0d82e44cf7f46d30a5a15221f884e7fa31f5a",
+      "source": "src/nvidia/src/libraries/resserv/src/rs_server.c",
+      "upstream_sha256": "3efe3eb513f012e7ccc0f55ab471ff935803a98acdb3b0e5637e39b139ad6d7a",
+      "validation": "combined-original-ELF-lifecycle-control-with-explicit-platform-and-privileged-CPU-fixtures"
+    },
+    {
+      "adapted_sha256": "4182cdecfb0065917ca6c5c30457cbbe4a20edafaf5930e77f0192c393830fb4",
+      "development_fault_ordinals": [
+        144,
+        145,
+        146,
+        147,
+        148
+      ],
+      "native_apple_execution": "pending",
+      "patch": "upstream/adapted/system-resource-lifetime-unwind.patch",
+      "patch_sha256": "db5eca4ed2bd62164de354540eb2cc85c0fda6539e455eeb4215003477d94b6e",
+      "source": "src/nvidia/src/kernel/core/system.c",
+      "upstream_sha256": "bea78ffe5afd71df78bac6dc98c2c6077feea725d18df13680d258e7bf17f5c6",
+      "validation": "combined-original-ELF-lifecycle-control-with-explicit-platform-and-privileged-CPU-fixtures"
+    },
+    {
+      "adapted_sha256": "b40df0b5df61ca81ae03322771550e14167b4c093d489a593b9861ad6c1e93ae",
+      "development_fault_ordinals": [
+        147,
+        148
+      ],
+      "native_apple_execution": "pending",
+      "patch": "upstream/adapted/rmapi-lock-tls-failure-unwind.patch",
+      "patch_sha256": "3e677430c277f317cb9fa743861b9c437a62fc7e160aae214a8f922d3fe2de35",
+      "source": "src/nvidia/src/kernel/rmapi/rmapi.c",
+      "upstream_sha256": "cf0f6f8df903b9e39061ffa7cde0c528122c2aec7f10ba6ccbee82bcef6a6fe5",
+      "validation": "combined-original-ELF-lifecycle-control-with-explicit-platform-and-privileged-CPU-fixtures"
     }
   ],
   "automatic_original_source_replacement": false,
+  "combined_development_validation": {
+    "allocation_failure_cases": 148,
+    "allocation_failures_passed": 148,
+    "audit": "upstream/adapted/COMBINED-ALLOCATION-AUDIT.json",
+    "audit_sha256": "2dde334b5f90f052ec8b8e5db49ec7afdfa0a47452933278c8bb2750e67c2092",
+    "combined_sources": [
+      {
+        "darwin_cross_compile": "passed",
+        "elf": "passed",
+        "path": "src/nvidia/src/libraries/nvport/memory/memory_tracking.c",
+        "sha256": "2f0f0f56272725a6348bae85d04a1330bd7352d3421bf94a90fff2d9debf7618"
+      },
+      {
+        "darwin_cross_compile": "passed",
+        "elf": "passed",
+        "path": "src/nvidia/src/libraries/nvport/core/core.c",
+        "sha256": "ab654590c63b55dad276da4edf9d1ab5f621b2d2f956a71e0e28aca36811bd1c"
+      },
+      {
+        "darwin_cross_compile": "passed",
+        "elf": "passed",
+        "path": "src/nvidia/src/kernel/core/system.c",
+        "sha256": "3dc0e6682078cd1ac2179b04e7161a13a6b44fcf1ea5f8961af7a386173f0a33"
+      },
+      {
+        "darwin_cross_compile": "passed",
+        "elf": "passed",
+        "path": "src/nvidia/src/libraries/resserv/src/rs_server.c",
+        "sha256": "ebde13dca12a851560fe6e77de6b2013ccd2470787e0db4ceef219b9bf58ae36"
+      },
+      {
+        "darwin_cross_compile": "passed",
+        "elf": "passed",
+        "path": "src/nvidia/src/kernel/rmapi/rmapi.c",
+        "sha256": "b40df0b5df61ca81ae03322771550e14167b4c093d489a593b9861ad6c1e93ae"
+      }
+    ],
+    "memory_failure_and_retry_checks": 29,
+    "normal_startup_checks": 22,
+    "scope": "ELF user-space development control with explicit platform and privileged CPU fixtures; no Darwin kernel or GPU execution."
+  },
   "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
   "format": 1,
-  "note": "The original baseline namespace audit compiles pinned sources unchanged. These overlays require an explicit checked source-substitution build; they do not enable kernel entry.",
+  "note": "The original baseline namespace audit compiles pinned sources unchanged. These overlays require an explicit checked source-substitution build; they do not enable kernel entry. Individual adapted hashes describe each patch applied alone. The combined audit records composed source hashes; both system.c patches must be present in one translation unit.",
   "production_entry": "disabled",
   "release": "615.78.08",
-  "remaining_failed_allocation_ordinals": [
-    1,
-    124,
-    128,
-    144,
-    145,
-    146,
-    147,
-    148
-  ],
+  "remaining_failed_allocation_ordinals": [],
   "status": "reviewed-development-overlays"
 }

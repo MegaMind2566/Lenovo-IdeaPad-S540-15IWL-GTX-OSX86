@@ -1,0 +1,138 @@
+--- a/src/nvidia/inc/libraries/nvport/memory.h
++++ b/src/nvidia/inc/libraries/nvport/memory.h
+@@ -77,7 +77,9 @@
+  * it is needed to initialize the MEMORY module without initializing all the
+  * others. e.g. for unit tests.
+  */
+-void portMemInitialize(void);
++// Full-RM Darwin overlay: initialization must report ownership failure before
++// any allocator-tracking operation can acquire the global tracking lock.
++NV_STATUS portMemInitialize(void);
+ /**
+  * @brief Destroys global Memory tracking structures, and checks for leaks
+  *
+--- a/src/nvidia/src/libraries/nvport/memory/memory_tracking.c
++++ b/src/nvidia/src/libraries/nvport/memory/memory_tracking.c
+@@ -124,11 +124,29 @@
+ }
+ #endif
+ 
+-#define PORT_MEM_LOCK_INIT(lock)                                               \
+-    do {                                                                       \
+-        lock = _portMemAllocNonPagedUntracked(portSyncSpinlockSize);           \
+-        portSyncSpinlockInitialize(lock);                                      \
+-    } while (0)
++// Initialize the raw tracking lock before memory tracking itself is usable.
++// A failed backing-lock initialization owns no live OS lock and must release
++// only the raw storage that was acquired here.
++static NV_STATUS
++_portMemTrackingLockInitialize(void **ppLock)
++{
++    NV_STATUS status;
++    void *pLock = _portMemAllocNonPagedUntracked(portSyncSpinlockSize);
++    *ppLock = NULL;
++    if (pLock == NULL)
++        return NV_ERR_NO_MEMORY;
++
++    status = portSyncSpinlockInitialize(pLock);
++    if (status != NV_OK)
++    {
++        _portMemFreeUntracked(pLock);
++        return status;
++    }
++
++    *ppLock = pLock;
++    return NV_OK;
++}
++#define PORT_MEM_LOCK_INIT(lock) _portMemTrackingLockInitialize(&(lock))
+ #define PORT_MEM_LOCK_DESTROY(lock)                                            \
+     do {                                                                       \
+         portSyncSpinlockDestroy(lock);                                         \
+@@ -834,21 +852,36 @@
+ }
+ 
+ 
+-void
++NV_STATUS
+ portMemInitialize(void)
+ {
++    NV_STATUS status;
++
++    // This overlay checks the published full-RM release profile. Allocation
++    // lists have separate fallible per-allocator locks and need their own
++    // checked initialization ABI before that profile can use this overlay.
++#if PORT_MEM_TRACK_USE_ALLOCLIST
++#error "Checked global memory initialization requires the reviewed allocation-list-disabled profile"
++#endif
+ #if PORT_MEM_TRACK_USE_CALLERINFO
+     PORT_MEM_CALLERINFO_TYPE_PARAM = PORT_MEM_CALLERINFO_MAKE;
+ #endif
+     if (PORT_MEM_ATOMIC_INC_U32(&portMemGlobals.initCount) != 1)
+-        return;
++        return NV_OK;
+ 
+     portMemGlobals.mainTracking.pAllocator = NULL;
+     portMemGlobals.mainTracking.pNext = &portMemGlobals.mainTracking;
+     portMemGlobals.mainTracking.pPrev = &portMemGlobals.mainTracking;
+     PORT_MEM_COUNTER_INIT(&portMemGlobals.mainTracking.counter);
+     PORT_MEM_LIST_INIT(&portMemGlobals.mainTracking);
+-    PORT_MEM_LOCK_INIT(portMemGlobals.trackingLock);
++    status = PORT_MEM_LOCK_INIT(portMemGlobals.trackingLock);
++    if (status != NV_OK)
++    {
++        // No allocator has been linked and no tracking lock is owned. Reset
++        // the reserved init reference before propagating the acquisition error.
++        portMemSet(&portMemGlobals, 0, sizeof(portMemGlobals));
++        return status;
++    }
+ 
+ #if PORT_MEM_TRACK_USE_LIMIT
+     // Initialize process heap limit to max int (i.e. no limit)
+@@ -891,6 +924,7 @@
+         portMemGlobals.alloc.nonPaged.pTracking = &portMemGlobals.alloc.pagedImpl.tracking;
+     }
+     PORT_MEM_LOG_INIT();
++    return NV_OK;
+ }
+ void
+ portMemShutdown(NvBool bForceSilent)
+--- a/src/nvidia/src/libraries/nvport/core/core.c
++++ b/src/nvidia/src/libraries/nvport/core/core.c
+@@ -62,7 +62,22 @@
+         portSyncInitialize();
+ #endif
+ #if PORT_IS_MODULE_SUPPORTED(memory)
+-        portMemInitialize();
++        {
++            NV_STATUS status = portMemInitialize();
++            if (status != NV_OK)
++            {
++                // Memory initialization already released its partial state.
++                // Only the earlier modules and this init reference are owned.
++#if PORT_IS_MODULE_SUPPORTED(sync)
++                portSyncShutdown();
++#endif
++#if PORT_IS_MODULE_SUPPORTED(debug)
++                portDbgShutdown();
++#endif
++                PORT_DEC(portState.initCount);
++                return status;
++            }
++        }
+ #endif
+ #if PORT_IS_MODULE_SUPPORTED(crypto)
+         portCryptoInitialize();
+--- a/src/nvidia/src/kernel/core/system.c
++++ b/src/nvidia/src/kernel/core/system.c
+@@ -585,6 +585,11 @@
+ {
+     OBJSYS *pSys = SYS_GET_INSTANCE();
+ 
++    // A checked portInitialize failure has already unwound its modules and
++    // owns no runtime reference. Failure cleanup must not decrement it again.
++    if (!portIsInitialized())
++        return;
++
+     //
+     // Destruct OBJSYS which frees all the RM internal modules
+     //

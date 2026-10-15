@@ -1,0 +1,1011 @@
+{
+  "allocation_failure_matrix": {
+    "accepted_outcome": "Original startup refuses and cleans up, or an original optional-allocation fallback retains every required global invariant and completes shutdown.",
+    "cases": 148,
+    "cases_original_status": [
+      {
+        "ordinal": 1,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 2,
+        "original_status": 0,
+        "status": "passed"
+      },
+      {
+        "ordinal": 3,
+        "original_status": 0,
+        "status": "passed"
+      },
+      {
+        "ordinal": 4,
+        "original_status": 0,
+        "status": "passed"
+      },
+      {
+        "ordinal": 5,
+        "original_status": 0,
+        "status": "passed"
+      },
+      {
+        "ordinal": 6,
+        "original_status": 0,
+        "status": "passed"
+      },
+      {
+        "ordinal": 7,
+        "original_status": 0,
+        "status": "passed"
+      },
+      {
+        "ordinal": 8,
+        "original_status": 0,
+        "status": "passed"
+      },
+      {
+        "ordinal": 9,
+        "original_status": 65535,
+        "status": "passed"
+      },
+      {
+        "ordinal": 10,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 11,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 12,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 13,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 14,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 15,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 16,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 17,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 18,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 19,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 20,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 21,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 22,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 23,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 24,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 25,
+        "original_status": 0,
+        "status": "passed"
+      },
+      {
+        "ordinal": 26,
+        "original_status": 0,
+        "status": "passed"
+      },
+      {
+        "ordinal": 27,
+        "original_status": 0,
+        "status": "passed"
+      },
+      {
+        "ordinal": 28,
+        "original_status": 0,
+        "status": "passed"
+      },
+      {
+        "ordinal": 29,
+        "original_status": 0,
+        "status": "passed"
+      },
+      {
+        "ordinal": 30,
+        "original_status": 0,
+        "status": "passed"
+      },
+      {
+        "ordinal": 31,
+        "original_status": 0,
+        "status": "passed"
+      },
+      {
+        "ordinal": 32,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 33,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 34,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 35,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 36,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 37,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 38,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 39,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 40,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 41,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 42,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 43,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 44,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 45,
+        "original_status": 0,
+        "status": "passed"
+      },
+      {
+        "ordinal": 46,
+        "original_status": 0,
+        "status": "passed"
+      },
+      {
+        "ordinal": 47,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 48,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 49,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 50,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 51,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 52,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 53,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 54,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 55,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 56,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 57,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 58,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 59,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 60,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 61,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 62,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 63,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 64,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 65,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 66,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 67,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 68,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 69,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 70,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 71,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 72,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 73,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 74,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 75,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 76,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 77,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 78,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 79,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 80,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 81,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 82,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 83,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 84,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 85,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 86,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 87,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 88,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 89,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 90,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 91,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 92,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 93,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 94,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 95,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 96,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 97,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 98,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 99,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 100,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 101,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 102,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 103,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 104,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 105,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 106,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 107,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 108,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 109,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 110,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 111,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 112,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 113,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 114,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 115,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 116,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 117,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 118,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 119,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 120,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 121,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 122,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 123,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 124,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 125,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 126,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 127,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 128,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 129,
+        "original_status": 0,
+        "status": "passed"
+      },
+      {
+        "ordinal": 130,
+        "original_status": 0,
+        "status": "passed"
+      },
+      {
+        "ordinal": 131,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 132,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 133,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 134,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 135,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 136,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 137,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 138,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 139,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 140,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 141,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 142,
+        "original_status": 26,
+        "status": "passed"
+      },
+      {
+        "ordinal": 143,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 144,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 145,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 146,
+        "original_status": 81,
+        "status": "passed"
+      },
+      {
+        "ordinal": 147,
+        "original_status": 0,
+        "status": "passed"
+      },
+      {
+        "ordinal": 148,
+        "original_status": 0,
+        "status": "passed"
+      }
+    ],
+    "failed_ordinals": [],
+    "failure_injection": "Exactly one full-RM host allocation request is refused at each ordinal from 1 through 148. The normal observed lifecycle contains 148 host allocation requests.",
+    "guarantees_checked_in_every_case": [
+      "Exactly one injected host allocation failure.",
+      "Zero live host allocations and bytes; allocation and free counts balance.",
+      "Zero invalid frees, unavailable OS calls or crypto refusals.",
+      "Zero live Darwin service objects; global RM is no longer initialized.",
+      "Host context shuts down successfully."
+    ],
+    "harness": "tests/check_global_rm_fault_native.cpp",
+    "original_diagnostics": "Expected upstream unsupported-capability and allocation-failure diagnostics remain visible. No failed case or diagnostic is suppressed.",
+    "passed": 148,
+    "passed_after_original_fallback": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      45,
+      46,
+      129,
+      130,
+      147,
+      148
+    ],
+    "process_model": "One fresh native child process per allocation ordinal; no reset of original global RM state.",
+    "status": "passed"
+  },
+  "checked_memory_failure_and_same_process_retry": {
+    "backing_lock_failure": true,
+    "checks": 29,
+    "cleanup": true,
+    "component": "nvidia-memory-init-native",
+    "execution": "native-user-space",
+    "failures": 0,
+    "format": 1,
+    "global_failure_cleanup": true,
+    "gpu_access": false,
+    "kernel_executed": false,
+    "kernel_runtime": "not_tested",
+    "original_system_children": 15,
+    "platform_facts_fixture": true,
+    "privileged_cpu_fixture": true,
+    "raw_lock_failure": true,
+    "same_process_full_rm_retry": true,
+    "status": "passed"
+  },
+  "checked_memory_header": {
+    "abi": "Internal isolated portMemInitialize returns NV_STATUS; all affected callers are compiled with this checked declaration.",
+    "path": "src/nvidia/inc/libraries/nvport/memory.h",
+    "sha256": "8c1741998b7990e40dda196492add447ddaf06d211cbc804c24e0f685c3ba4d0"
+  },
+  "combined_sources": [
+    {
+      "darwin_cross_compile": "passed",
+      "elf": "passed",
+      "path": "src/nvidia/src/libraries/nvport/memory/memory_tracking.c",
+      "sha256": "2f0f0f56272725a6348bae85d04a1330bd7352d3421bf94a90fff2d9debf7618"
+    },
+    {
+      "darwin_cross_compile": "passed",
+      "elf": "passed",
+      "path": "src/nvidia/src/libraries/nvport/core/core.c",
+      "sha256": "ab654590c63b55dad276da4edf9d1ab5f621b2d2f956a71e0e28aca36811bd1c"
+    },
+    {
+      "darwin_cross_compile": "passed",
+      "elf": "passed",
+      "path": "src/nvidia/src/kernel/core/system.c",
+      "sha256": "3dc0e6682078cd1ac2179b04e7161a13a6b44fcf1ea5f8961af7a386173f0a33"
+    },
+    {
+      "darwin_cross_compile": "passed",
+      "elf": "passed",
+      "path": "src/nvidia/src/libraries/resserv/src/rs_server.c",
+      "sha256": "ebde13dca12a851560fe6e77de6b2013ccd2470787e0db4ceef219b9bf58ae36"
+    },
+    {
+      "darwin_cross_compile": "passed",
+      "elf": "passed",
+      "path": "src/nvidia/src/kernel/rmapi/rmapi.c",
+      "sha256": "b40df0b5df61ca81ae03322771550e14167b4c093d489a593b9861ad6c1e93ae"
+    }
+  ],
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "control_source_hashes": [
+    {
+      "path": "tests/check_global_rm_fault_native.cpp",
+      "sha256": "9b769a42373b46ab0a3a7c82488cce2f338c572eef97e3bac7d03684e3b5d0b3"
+    },
+    {
+      "path": "tests/check_global_rm_native.cpp",
+      "sha256": "0b1c3b9378cb7cb08547f0b76bc624d0e1228c08254ce97092e2a05a4e9c202f"
+    },
+    {
+      "path": "tests/check_memory_init_native.cpp",
+      "sha256": "c8b459cb7e154d09f33f172cb0825b397f0e0a0fb977623a4c7b3d08a15a0c0a"
+    },
+    {
+      "path": "src/S540NvidiaGlobalRm.h",
+      "sha256": "9ccdd75000e1c475fe3cc1e6a93bc1de880e2f9b0fd1c2419707314278ff5cf8"
+    },
+    {
+      "path": "src/S540NvidiaGlobalRmHost.cpp",
+      "sha256": "ad1c4d567039faa5877b107f1113588e16c1b93f47174a30c5def445699f3d19"
+    },
+    {
+      "path": "src/S540NvidiaGlobalRmFormat.cpp",
+      "sha256": "2c65f4588ad833247946738d1d7d1bf2d7b2533273be8e55721dc7136aa6a54a"
+    },
+    {
+      "path": "src/S540NvidiaGlobalRmOs.c",
+      "sha256": "620260d220e3a58021abba1109232c9bb2332a6d90ff3593837fa99ef8f14a42"
+    },
+    {
+      "path": "src/S540NvidiaGlobalRmLifecycle.c",
+      "sha256": "8d7358f173162fedd49112f0009fc5fee91944187b3e9201fedd98db469ac48c"
+    }
+  ],
+  "darwin_cross_compile": {
+    "aggregate_kernel_stack_budget": "not_established",
+    "compiler": "Clang 22 through Zig cross compiler; not native Apple compiler execution.",
+    "frame_limit_bytes": 4096,
+    "profile": "Original make-declared full-RM flags with NV_UNIX=1, RS_STANDALONE=0 and private s540Global_ namespace.",
+    "status": "passed",
+    "target": "x86_64 Darwin Mach-O",
+    "translation_units": 5,
+    "warnings_as_errors": true
+  },
+  "format": 1,
+  "limits": [
+    "Native user-space ELF execution with explicit platform and privileged-CPU fixtures; no native Apple compiler or Darwin kernel execution is established.",
+    "The matrix covers the observed pinned global lifecycle allocation ordinals, not every possible architecture, resource class, OS allocation, concurrent path or later runtime operation.",
+    "No adapter initialization, GSP firmware execution, GPU command, interrupt or DMA operation was executed.",
+    "No full-original-closure sanitizer claim is made: reused original ELF objects are not all sanitizer-instrumented.",
+    "The five newly combined translation units were cross-compiled after composition. Earlier journal, thread-state and debug-init overlays remain part of the linked control and have their separate source audits."
+  ],
+  "normal_startup": {
+    "adapter_initialized": false,
+    "checks": 22,
+    "cleanup": true,
+    "component": "nvidia-global-rm-native",
+    "crypto_calls": 0,
+    "execution": "native-user-space",
+    "failures": 0,
+    "format": 1,
+    "full_rm_initialized": true,
+    "gpu_access": false,
+    "gpu_operations": false,
+    "gsp_initialized": false,
+    "host_allocations": 148,
+    "host_frees": 148,
+    "kernel_executed": false,
+    "kernel_execution": "not_tested",
+    "kernel_runtime": "not_tested",
+    "largest_allocation": 24604904,
+    "observed_services": 41,
+    "original_memory_export_client": true,
+    "original_system_children": 15,
+    "peak_host_allocations": 141,
+    "peak_host_bytes": 25372862,
+    "platform_facts_fixture": true,
+    "privileged_cpu_fixture": true,
+    "service_calls": {
+      "s540Global_nv_acpi_is_battery_present": 1,
+      "s540Global_nv_is_chassis_notebook": 1,
+      "s540Global_nv_platform_supports_s0ix": 1,
+      "s540Global_nv_printf": 1,
+      "s540Global_os_acquire_mutex": 2,
+      "s540Global_os_acquire_rwlock_write": 5,
+      "s540Global_os_acquire_spinlock": 61,
+      "s540Global_os_alloc_mem": 148,
+      "s540Global_os_alloc_mutex": 7,
+      "s540Global_os_alloc_rwlock": 12,
+      "s540Global_os_alloc_semaphore": 1,
+      "s540Global_os_alloc_spinlock": 11,
+      "s540Global_os_check_access": 1,
+      "s540Global_os_dbg_init": 1,
+      "s540Global_os_free_mem": 148,
+      "s540Global_os_free_mutex": 7,
+      "s540Global_os_free_rwlock": 12,
+      "s540Global_os_free_semaphore": 1,
+      "s540Global_os_free_spinlock": 11,
+      "s540Global_os_get_cpu_count": 1,
+      "s540Global_os_get_cpu_frequency": 1,
+      "s540Global_os_get_cpu_number": 3,
+      "s540Global_os_get_current_process": 1,
+      "s540Global_os_get_current_process_name": 1,
+      "s540Global_os_get_current_thread": 57,
+      "s540Global_os_get_monotonic_time_ns": 9,
+      "s540Global_os_get_monotonic_time_ns_hr": 1,
+      "s540Global_os_get_system_time": 4,
+      "s540Global_os_is_efi_enabled": 1,
+      "s540Global_os_is_isr": 52,
+      "s540Global_os_is_nvswitch_present": 1,
+      "s540Global_os_is_vgx_hyper": 2,
+      "s540Global_os_mem_cmp": 65,
+      "s540Global_os_mem_copy": 21761,
+      "s540Global_os_mem_set": 1387,
+      "s540Global_os_put_pid_info": 1,
+      "s540Global_os_registry_init": 1,
+      "s540Global_os_release_mutex": 2,
+      "s540Global_os_release_rwlock_write": 5,
+      "s540Global_os_release_spinlock": 61,
+      "s540Global_os_semaphore_may_sleep": 8
+    },
+    "status": "passed",
+    "unavailable_calls": 0
+  },
+  "patches": [
+    {
+      "path": "upstream/adapted/nvlog_printf-init-unwind.patch",
+      "sha256": "66e6e390aa7c7cd660ce93af8fdba12ae4ea52ce74a111531cf09022f8a2257e"
+    },
+    {
+      "path": "upstream/adapted/journal-construction-guard.patch",
+      "sha256": "0963b27f9e0845d661d39137a1ebe148b432d615194e55ad76349fc1292bec85"
+    },
+    {
+      "path": "upstream/adapted/thread-state-unwind.patch",
+      "sha256": "cad0f0b64d46f1772e7abccda349744964bfd4a0242baf7c100092327dc63cee"
+    },
+    {
+      "path": "upstream/adapted/portable-memory-init-checked.patch",
+      "sha256": "373a565ff932d4d3dbcc2bdcc5bdd00f6a416928acf009322432692966fb7a60"
+    },
+    {
+      "path": "upstream/adapted/resource-server-construction-unwind.patch",
+      "sha256": "9c61e602194a9513db2c3435dbb0d82e44cf7f46d30a5a15221f884e7fa31f5a"
+    },
+    {
+      "path": "upstream/adapted/system-resource-lifetime-unwind.patch",
+      "sha256": "db5eca4ed2bd62164de354540eb2cc85c0fda6539e455eeb4215003477d94b6e"
+    },
+    {
+      "path": "upstream/adapted/rmapi-lock-tls-failure-unwind.patch",
+      "sha256": "3e677430c277f317cb9fa743861b9c437a62fc7e160aae214a8f922d3fe2de35"
+    }
+  ],
+  "private_development_link": {
+    "fault_executable_sha256": "a8aa774c1397a3d69d85bfea351b7823edd557716e348814753c99dc301d7049",
+    "hard_trap_policy": "Private control only. Any invocation aborts rather than reporting a working service; these are not production OS bindings.",
+    "namespace_sha256": "cb79f788baddb7f046e870b1e2e09bfde310b4b12417ec8c737fad1ef440f7a1",
+    "normal_executable_sha256": "4861dcae5e8ff5e32a4c5bd5427570b82f2cf9afbf5305360030492ef3bf261a",
+    "original_object_profile": "Complete pinned original RS_STANDALONE=0 ELF root closure, with original privileged CR4 read replaced only by an explicit native test fixture.",
+    "replacement_strategy": "Weaken original public definitions from adapted translation units, then link the corresponding complete adapted translation units as strong definitions. No successful no-op substitutes are used.",
+    "unused_metadata_hard_traps": 127,
+    "weakened_original_definitions": 151
+  },
+  "production_entry": "remains_disabled",
+  "release": "615.78.08",
+  "repository": "NVIDIA/open-gpu-kernel-modules",
+  "scope": "One combined regression of the pinned original full-RM global construction and teardown path with seven checked source overlays. No adapter or hardware execution.",
+  "status": "passed-development-control",
+  "system_source_composition": "portable-memory-init-checked.patch and system-resource-lifetime-unwind.patch are applied with zero fuzz to one original system.c translation unit, not linked as competing replacements."
+}
