@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build bundled NVIDIA CPU runtime and hardware-transport preparation."""
+"""Build bundled NVIDIA RM subsystem, host services and verified firmware assets."""
 from __future__ import annotations
 
 import argparse
@@ -24,8 +24,11 @@ CALLERS = ROOT / 'packages/nvidia-caller-integration'
 LIFECYCLE = ROOT / 'packages/nvidia-nvport-lifecycle'
 RUNTIME = ROOT / 'packages/nvidia-nvport-runtime'
 HARDWARE = ROOT / 'packages/nvidia-hardware-transport'
-PACKAGE = 'S540-nvidia-transport-v8'
-VERSION = '0.8.0'
+RESOURCE_SERVER = ROOT / 'packages/nvidia-resource-server'
+RM_SERVICES = ROOT / 'packages/nvidia-rm-services'
+FIRMWARE_ASSETS = ROOT / 'packages/nvidia-firmware-assets'
+PACKAGE = 'S540-nvidia-transport-v9'
+VERSION = '0.9.0'
 SDK_COMMIT = '3f750085caa17ec3a7880f11c11bf4f48cd6a164'
 BUNDLE = 'S540NvidiaPCIProbe.kext'
 EXECUTABLE = 'S540NvidiaPCIProbe'
@@ -205,12 +208,61 @@ extern "C" UInt64 s540AuditPublishedMemoryGeometry(IOPCIDevice *provider,
 '''
 
 
+# Exact authored host-service operations, compiled against the same pinned SDK.
+# This reference is never executed and cannot grow from observed production imports.
+SERVICES_IMPORT_REFERENCE = r'''// SPDX-License-Identifier: MIT
+#include <IOKit/IOBufferMemoryDescriptor.h>
+#include <IOKit/IOLocks.h>
+#include <IOKit/IOMemoryDescriptor.h>
+#include <IOKit/pci/IOPCIDevice.h>
+#include <kern/thread.h>
+
+extern "C" IOBufferMemoryDescriptor *s540AuditRmPages(UInt64 bytes)
+{
+    return IOBufferMemoryDescriptor::withOptions(
+        kIODirectionInOut | kIOMemoryMapperNone, bytes, 4096);
+}
+extern "C" IOMemoryMap *s540AuditRmCpuMap(IOMemoryDescriptor *descriptor,
+    UInt64 offset, UInt64 bytes, UInt64 *physicalLength, UInt64 *physical)
+{
+    *physical = descriptor->getPhysicalSegment(0, physicalLength, kIOMemoryMapperNone);
+    return descriptor->createMappingInTask(kernel_task, 0,
+        kIOMapAnywhere | kIOMapCopybackCache, offset, bytes);
+}
+extern "C" IOLock *s540AuditRmLock(void) { return IOLockAlloc(); }
+extern "C" void s540AuditRmLockTransitions(IOLock *lock, void *event)
+{
+    IOLockLock(lock);
+    (void)IOLockSleep(lock, event, THREAD_UNINT);
+    IOLockWakeup(lock, event, false);
+    IOLockUnlock(lock);
+    IOLockFree(lock);
+}
+extern "C" thread_t s540AuditRmThread(void) { return current_thread(); }
+extern "C" UInt32 s540AuditRetainedPci(IOPCIDevice *provider,
+    IOByteCount offset, UInt8 *byte, UInt16 *word, UInt32 *bdf)
+{
+    provider->retain();
+    *bdf = provider->getBusNumber() << 8 |
+        provider->getDeviceNumber() << 3 | provider->getFunctionNumber();
+    *byte = provider->configRead8(offset);
+    *word = provider->configRead16(offset & ~IOByteCount{1});
+    const UInt32 value = provider->configRead32(offset & ~IOByteCount{3});
+    const bool unavailable = provider->isInactive() || provider->isOpen();
+    if (provider->lockForArbitration(false))
+        provider->unlockForArbitration();
+    provider->release();
+    return unavailable ? 0 : value;
+}
+'''
+
+
 def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def run(*args: str) -> subprocess.CompletedProcess:
-    return subprocess.run(args, check=True, capture_output=True, text=True, timeout=180)
+def run(*args: str, timeout: int = 180) -> subprocess.CompletedProcess:
+    return subprocess.run(args, check=True, capture_output=True, text=True, timeout=timeout)
 
 
 def plain(path: Path) -> None:
@@ -250,6 +302,21 @@ def compile_hardware_import_reference(work: Path, flags: list[str],
         raise ValueError('The pinned DMA API reference has an unexpected import contract.')
     return source, imports
 
+
+
+def compile_services_import_reference(work: Path, flags: list[str],
+                                       cpp_flags: list[str]) -> tuple[Path, set[str]]:
+    source = work / 'darwin-rm-services-import-reference.cpp'
+    source.write_text(SERVICES_IMPORT_REFERENCE, encoding='utf-8')
+    obj = work / 'darwin-rm-services-import-reference.o'
+    run('/usr/bin/xcrun', 'clang++', *flags, *cpp_flags,
+        '-c', str(source), '-o', str(obj))
+    macho(obj, 1)
+    verify_no_static_initializers(obj, 'The RM host-service API reference')
+    imports = kernel_imports(obj) - ADAPTER_IMPORTS
+    if not imports:
+        raise ValueError('The pinned RM host-service API reference has no imports.')
+    return source, imports
 
 def native_check(binary: Path) -> dict:
     macho(binary, 2)
@@ -298,11 +365,53 @@ def hardware_sources() -> tuple[list[Path], list[Path]]:
             HARDWARE / 'src/S540NvidiaHardwareRuntime.cpp'], []
 
 
-def full_sources() -> tuple[list[Path], list[Path]]:
+def preparation_sources() -> tuple[list[Path], list[Path]]:
     cpp, c = production_sources()
     extra_cpp, extra_c = hardware_sources()
     return [*cpp, *extra_cpp], [*c, *extra_c]
 
+
+
+def resource_server_sources() -> tuple[list[Path], list[Path]]:
+    """Compile the declared real standalone NVOC source profile once."""
+    build = json.loads((RESOURCE_SERVER / 'upstream/BUILD.json').read_text())
+    tree = RESOURCE_SERVER / 'upstream/tree'
+    substitutions = build.get('source_substitutions', {})
+    if substitutions != {'src/nvidia/src/libraries/resserv/src/rs_server.c':
+                         'upstream/adapted/rs_server.c'}:
+        raise ValueError('The reviewed checked ResourceServer constructor profile changed.')
+    c = [RESOURCE_SERVER / value if value.startswith('upstream/') else tree / value
+         for original in build['sources']
+         for value in [substitutions.get(original, original)]]
+    c += [RESOURCE_SERVER / path for path in build['adapter_c_sources']]
+    if len(c) != len(set(c)):
+        raise ValueError('The Resource Server source profile contains duplicates.')
+    return [RESOURCE_SERVER / path for path in build['adapter_cpp_sources']], c
+
+
+def rm_services_sources() -> tuple[list[Path], list[Path]]:
+    cpp, c = resource_server_sources()
+    return [*cpp, RM_SERVICES / 'memory/S540NvidiaRmMemory.cpp',
+            RM_SERVICES / 'pci/S540NvidiaProviderSession.cpp',
+            RM_SERVICES / 'pci/S540NvidiaProviderSessionCheck.cpp',
+            RM_SERVICES / 'src/S540NvidiaRmRuntime.cpp'], c
+
+
+def rm_full_sources() -> tuple[list[Path], list[Path]]:
+    cpp, c = preparation_sources()
+    extra_cpp, extra_c = rm_services_sources()
+    return [*cpp, *extra_cpp], [*c, *extra_c]
+
+
+def full_sources() -> tuple[list[Path], list[Path]]:
+    # Preserve the independently checked v8 closure for earlier checker callers.
+    return preparation_sources()
+
+
+def firmware_user_sources() -> list[Path]:
+    return [FIRMWARE_ASSETS / 'src/S540NvidiaFirmwareAssetsUser.cpp',
+            FIRMWARE_ASSETS / 'src/S540NvidiaFirmwareAssets.cpp',
+            HARDWARE / 'firmware/S540NvidiaFirmware.cpp']
 
 def native_flags() -> list[str]:
     return ['-arch', 'x86_64', '-mmacosx-version-min=15.0', '-O2',
@@ -312,10 +421,17 @@ def native_flags() -> list[str]:
             '-I', str(LIFECYCLE / 'src'), '-I', str(LIFECYCLE / 'upstream'),
             '-I', str(RUNTIME / 'src'), '-I', str(RUNTIME / 'upstream'),
             '-I', str(RUNTIME / 'upstream/consumer/include'),
-            '-I', str(HARDWARE / 'src'), '-I', str(HARDWARE / 'firmware')]
+            '-I', str(HARDWARE / 'src'), '-I', str(HARDWARE / 'firmware'),
+            '-I', str(RM_SERVICES / 'src'), '-I', str(RESOURCE_SERVER / 'src')]
 
 
 def source_flags(source: Path) -> list[str]:
+    if source.suffix == '.c' and RESOURCE_SERVER in source.parents:
+        build = json.loads((RESOURCE_SERVER / 'upstream/BUILD.json').read_text())
+        tree = RESOURCE_SERVER / 'upstream/tree'
+        return [flag for path in build['include_dirs'] for flag in ('-I', str(tree / path))] + [
+            '-D' + define for define in build['defines']] + [
+            '-include', str(tree / build['force_include'])]
     # These unchanged container translation units use the narrow consumer
     # NvPort profile. Other adapter units must retain the original nvport.h
     # first, particularly S540NvidiaAtomic.h and its pinned atomic headers.
@@ -335,6 +451,8 @@ def source_warning_flags(source: Path) -> list[str]:
     # templates accept unused container parameters; their bodies remain
     # unchanged. Only translation units that include this container closure
     # receive the exception.
+    if source.suffix == '.c' and RESOURCE_SERVER in source.parents:
+        return ['-Wno-unused-parameter']
     if source in {RUNTIME / 'upstream/consumer/vector.c',
                   RUNTIME / 'upstream/consumer/list.c',
                   RUNTIME / 'src/S540NvidiaRmConsumer.cpp',
@@ -346,11 +464,14 @@ def source_warning_flags(source: Path) -> list[str]:
 def compile_native_harness(work: Path, label: str, harness: Path,
                            sanitizer: list[str], *, with_runtime: bool = False,
                            with_preparation: bool = False,
+                           with_rm_services: bool = False,
                            source_closure: tuple[list[Path], list[Path]] | None = None) -> Path:
     if source_closure is not None:
         cpp_sources, c_sources = source_closure
+    elif with_rm_services:
+        cpp_sources, c_sources = rm_full_sources()
     elif with_preparation:
-        cpp_sources, c_sources = full_sources()
+        cpp_sources, c_sources = preparation_sources()
     else:
         cpp_sources, c_sources = production_sources() if with_runtime else adapter_sources()
     common = native_flags()
@@ -420,6 +541,7 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
     kernel_sources = [SOURCE / 'src/S540NvidiaPCIProbe.cpp', SOURCE / 'src/kmod_start.cpp']
     adapter_cpp, adapter_c = production_sources()
     hardware_cpp, hardware_c = hardware_sources()
+    services_cpp, services_c = rm_services_sources()
     # Preserve the entire adapter source subtree, including NVIDIA and LLVM
     # notices, exact upstream inputs, adaptation records, and test sources.
     source_inputs = [*sorted((ADAPTER / 'src').rglob('*')),
@@ -430,6 +552,9 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                      *sorted(LIFECYCLE.rglob('*')),
                      *sorted(RUNTIME.rglob('*')),
                      *sorted(HARDWARE.rglob('*')),
+                     *sorted(RESOURCE_SERVER.rglob('*')),
+                     *sorted(RM_SERVICES.rglob('*')),
+                     *sorted(FIRMWARE_ASSETS.rglob('*')),
                      ADAPTER / 'README.md',
                      ROOT / 'builders/build_nvidia_transport.py',
                      ROOT / 'builders/check_nvidia_foundations.py',
@@ -437,6 +562,9 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                      ROOT / 'builders/check_nvidia_lifecycle.py',
                      ROOT / 'builders/check_nvidia_runtime.py',
                      ROOT / 'builders/check_nvidia_transport_preparation.py',
+                     ROOT / 'builders/check_nvidia_rm_services.py',
+                     ROOT / 'builders/check_nvidia_firmware_assets.py',
+                     ROOT / 'builders/reference/nvidia-rm-full-closure.json',
                      ROOT / 'tests/test_nvidia_runtime_provenance.py',
                      ROOT / 'tests/test_nvidia_rm_consumer_provenance.py',
                      ROOT / 'tests/test_nvidia_lifecycle_provenance.py',
@@ -450,7 +578,8 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                      if item.is_file() and '__pycache__' not in item.parts
                      and item.suffix != '.pyc']
     required = [*kernel_sources, *adapter_cpp, *adapter_c,
-                *hardware_cpp, *hardware_c, *source_inputs,
+                *hardware_cpp, *hardware_c, *services_cpp, *services_c,
+                *firmware_user_sources(), *source_inputs,
                 SOURCE / 'src/S540NvidiaPCIProbe.hpp',
                 SOURCE / 'src/check_nvidia_transport.c', SOURCE / 'Info.plist',
                 SOURCE / 'CHECK-TRANSPORT.command', SOURCE / 'README.md',
@@ -522,6 +651,25 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
         if (preparation_record.get('status') != 'passed'
                 or preparation_record.get('github_sha') != commit):
             raise ValueError('The hardware transport checks do not match this source revision.')
+        services_output = work / 'rm-services-checks'
+        services_checks = run(sys.executable, str(ROOT / 'builders/check_nvidia_rm_services.py'),
+                              '--kernel-sdk', str(sdk), '--output-dir', str(services_output),
+                              timeout=900)
+        print(services_checks.stdout.strip())
+        services_record = json.loads((services_output / 'rm-services-checks.json').read_text())
+        if services_record.get('status') != 'passed' or services_record.get('github_sha') != commit:
+            raise ValueError('The actual ResourceServer/host-service checks differ from this revision.')
+        firmware_dir = work / 'verified-firmware'
+        firmware_output = work / 'firmware-assets-checks'
+        firmware_checked = run(sys.executable, str(ROOT / 'builders/check_nvidia_firmware_assets.py'),
+                               '--assets-dir', str(firmware_dir), '--build-dir', str(firmware_output),
+                               '--download', timeout=1200)
+        firmware_record = json.loads((firmware_output / 'firmware-assets-checks.json').read_text())
+        if (firmware_record.get('status') != 'passed'
+                or firmware_record.get('real_image_verified') is not True
+                or firmware_record.get('firmware_loaded') is not False):
+            raise ValueError('The actual pinned firmware pair did not pass byte/format validation.')
+        print('Actual pinned NVIDIA firmware and complete agreement verified; firmware not loaded.')
         flags = ['-arch', 'x86_64', '-mmacosx-version-min=15.0', '-mkernel',
                  '-fno-builtin', '-ffreestanding', '-fno-common', '-fno-stack-protector',
                  '-fno-asynchronous-unwind-tables', '-fno-unwind-tables',
@@ -533,17 +681,20 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                  '-I', str(LIFECYCLE / 'src'), '-I', str(LIFECYCLE / 'upstream'),
                  '-I', str(RUNTIME / 'src'), '-I', str(RUNTIME / 'upstream'),
                  '-I', str(RUNTIME / 'upstream/consumer/include'),
-                 '-I', str(HARDWARE / 'src'), '-I', str(HARDWARE / 'firmware')]
+                 '-I', str(HARDWARE / 'src'), '-I', str(HARDWARE / 'firmware'),
+                 '-I', str(RM_SERVICES / 'src'), '-I', str(RESOURCE_SERVER / 'src')]
         cpp_flags = ['-fapple-kext', '-fno-exceptions', '-fno-rtti',
                      '-fno-threadsafe-statics', '-nostdinc++', '-std=c++17']
-        objects, adapter_objects, hardware_objects = [], [], []
+        objects, adapter_objects, hardware_objects, services_objects = [], [], [], []
         for source in [*kernel_sources, *adapter_cpp, *adapter_c,
-                       *hardware_cpp, *hardware_c]:
+                       *hardware_cpp, *hardware_c, *services_cpp, *services_c]:
             obj = work / (source.stem + '.o')
             compiler = 'clang' if source.suffix == '.c' else 'clang++'
             language_flags = ['-std=gnu11'] if source.suffix == '.c' else cpp_flags
             run('/usr/bin/xcrun', compiler, *source_flags(source), *flags,
-                *source_warning_flags(source), *language_flags,
+                *source_warning_flags(source),
+                *(['-Wframe-larger-than=4096'] if source in services_cpp or source in services_c else []),
+                *language_flags,
                 '-c', str(source), '-o', str(obj))
             macho(obj, 1)
             objects.append(str(obj))
@@ -551,6 +702,8 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                 adapter_objects.append(str(obj))
             elif source in hardware_cpp or source in hardware_c:
                 hardware_objects.append(str(obj))
+            elif source in services_cpp or source in services_c:
+                services_objects.append(str(obj))
         linked_adapter = work / 'integrated-adapter.o'
         run('/usr/bin/xcrun', 'ld', '-r', '-arch', 'x86_64', *adapter_objects,
             '-o', str(linked_adapter))
@@ -606,6 +759,36 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                 raise ValueError('The exact NVIDIA read-only PCI ABI is absent: ' + symbol)
         if re.search(r'\bT _os_pci_write_[A-Za-z0-9_]+$', hardware_defined, re.M):
             raise ValueError('The preparation profile gained PCI write entry points.')
+        services_reference, approved_services_imports = compile_services_import_reference(
+            work, flags, cpp_flags)
+        linked_services = work / 'rm-services.o'
+        run('/usr/bin/xcrun', 'ld', '-r', '-arch', 'x86_64', *services_objects,
+            '-o', str(linked_services))
+        macho(linked_services, 1)
+        verify_no_static_initializers(linked_services, 'The ResourceServer and RM host services')
+        hardware_exports = set(run('/usr/bin/nm', '-g', '-j', '-U', str(linked_hardware)).stdout.split())
+        services_platform_imports = kernel_imports(linked_services) - cpu_exports - hardware_exports
+        new_services_imports = services_platform_imports - ADAPTER_IMPORTS
+        if new_services_imports != approved_services_imports:
+            raise ValueError('ResourceServer/RM host-service imports differ from pinned APIs: '
+                             'missing=' + str(sorted(approved_services_imports - new_services_imports))
+                             + ', unexpected=' + str(sorted(new_services_imports - approved_services_imports)))
+        services_defined = run('/usr/bin/nm', '-g', str(linked_services)).stdout
+        memory_symbols = ('nv_alloc_pages', 'nv_free_pages', 'nv_alloc_kernel_mapping',
+                          'nv_free_kernel_mapping', 'nv_dma_map_alloc', 'nv_dma_unmap_alloc')
+        for symbol in memory_symbols:
+            if not re.search(r'\bT _' + re.escape(symbol) + r'$', services_defined, re.M):
+                raise ValueError('An exact NVIDIA host-memory ABI is missing: ' + symbol)
+        resource_symbols = ('serverConstruct', 'serverDestruct', 'serverAllocClient',
+                            'serverAllocResource', 'serverFreeClient', 'serverControl',
+                            'serverShareResourceAccess', '__nvoc_objCreate_RsClient',
+                            '__nvoc_objCreate_RsResource')
+        for symbol in resource_symbols:
+            if not re.search(r'\bT _' + re.escape(symbol) + r'$', services_defined, re.M):
+                raise ValueError('An actual NVIDIA ResourceServer/NVOC entry is absent: ' + symbol)
+        for symbol in ('rm_init_rm', 'RmInitRm', 'coreInitializeRm', 'rm_init_adapter'):
+            if re.search(r'\bT _' + re.escape(symbol) + r'$', services_defined, re.M):
+                raise ValueError('The selected subsystem unexpectedly gained global RM/GPU startup.')
         binary = bundle / 'Contents/MacOS' / EXECUTABLE
         run('/usr/bin/xcrun', 'clang++', '-arch', 'x86_64',
             '-mmacosx-version-min=15.0', '-mkernel', '-nostdlib',
@@ -628,23 +811,42 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
         run('/usr/bin/codesign', '--force', '--sign', '-', str(bundle))
         run('/usr/bin/codesign', '--verify', '--strict', str(bundle))
         checker = work / 'check-nvidia-transport'
-        run('/usr/bin/xcrun', 'clang', '-std=gnu11', '-Wall', '-Wextra', '-Werror',
-            '-O2', '-fstack-protector-strong', '-arch', 'x86_64',
-            '-mmacosx-version-min=15.0', '-framework', 'IOKit', '-framework', 'CoreFoundation',
-            str(SOURCE / 'src/check_nvidia_transport.c'), '-o', str(checker))
+        reporter_object = work / 'check-nvidia-transport.o'
+        user_flags = ['-arch', 'x86_64', '-mmacosx-version-min=15.0', '-O2',
+                      '-Wall', '-Wextra', '-Werror', '-fstack-protector-strong',
+                      '-I', str(ADAPTER / 'upstream/include')]
+        run('/usr/bin/xcrun', 'clang', '-std=gnu11', *user_flags,
+            '-c', str(SOURCE / 'src/check_nvidia_transport.c'), '-o', str(reporter_object))
+        run('/usr/bin/xcrun', 'clang++', '-std=c++17', *user_flags,
+            '-framework', 'IOKit', '-framework', 'CoreFoundation',
+            str(reporter_object), *(str(path) for path in firmware_user_sources()),
+            '-o', str(checker))
         macho(checker, 2)
         run('/usr/bin/codesign', '--force', '--sign', '-', str(checker))
         run('/usr/bin/codesign', '--verify', '--strict', str(checker))
         self_test = run(str(checker), '--self-test')
         print(self_test.stdout.strip())
-        live = json.loads(run(str(checker)).stdout)
+        live = json.loads(run(str(checker), '--assets-dir', str(firmware_dir)).stdout)
         allowed_statuses = {'not_attached'}
         if allow_legacy_probe:
             allowed_statuses.add('outdated_probe')
-        if (live.get('format') != 8 or live.get('tool') != 'nvidia-transport'
+        if (live.get('format') != 9 or live.get('tool') != 'nvidia-transport'
                 or live.get('version') != VERSION or live.get('complete') is not True
                 or live.get('status') not in allowed_statuses):
             raise ValueError('The native reporter returned an unexpected report or loaded probe.')
+        asset_live = live.get('firmware_assets', {})
+        expected_assets = {'format': 1, 'status': 'passed', 'checks': 15,
+                           'present': True, 'hashes_verified': True,
+                           'container_parsed': True, 'ucodes_parsed': True,
+                           'pair_ready': True, 'cleanup': True,
+                           'gsp_size': 22901632, 'ucodes_size': 8837632,
+                           'image_size': 22887880, 'signature_size': 4096,
+                           'section_count': 10, 'ucodes_entry_count': 496,
+                           'ucodes_present_count': 38, 'reason': 'verified_cpu_only'}
+        if any(type(asset_live.get(key)) is not type(value) or asset_live[key] != value
+               for key, value in expected_assets.items()):
+            raise ValueError('The live C reporter did not verify the actual firmware pair: '
+                             + json.dumps(asset_live, sort_keys=True)[:2000])
         live_validation = ('native live enumeration without a loaded probe'
                            if live['status'] == 'not_attached' else
                            'native live recognition of an already-loaded earlier probe; '
@@ -670,6 +872,10 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
             'validation/transport-preparation-checks.json': (
                 preparation_output / 'transport-preparation-checks.json').read_bytes(),
             'validation/darwin-hardware-import-reference.cpp': import_reference.read_bytes(),
+            'validation/darwin-rm-services-import-reference.cpp': services_reference.read_bytes(),
+            'validation/rm-services-checks.json': (services_output / 'rm-services-checks.json').read_bytes(),
+            'validation/firmware-assets-checks.json': (firmware_output / 'firmware-assets-checks.json').read_bytes(),
+            'validation/full-rm-compile-closure.json': (ROOT / 'builders/reference/nvidia-rm-full-closure.json').read_bytes(),
             'THIRD-PARTY-NOTICES.txt': (
                 'The unmodified kernel module runtime is from MacKernelSDK.\n'
                 'Portions Copyright (c) 2000, 2008-2012 Apple Inc. All rights reserved.\n'
@@ -686,7 +892,10 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                 'source/packages/nvidia-caller-integration/ and\n'
                 'source/packages/nvidia-nvport-lifecycle/ and\n'
                 'source/packages/nvidia-nvport-runtime/ and\n'
-                'source/packages/nvidia-hardware-transport/.\n'
+                'source/packages/nvidia-hardware-transport/ and\n'
+                'source/packages/nvidia-resource-server/ and source/packages/nvidia-rm-services/.\n'
+                'The unmodified NVIDIA GSP/ucodes firmware and full matching driver agreement\n'
+                'are included under firmware/. They are byte-verified, never loaded by this package.\n'
                 'The pinned atomic header closure includes LLVM-derived declarations;\n'
                 'licenses/LLVM-LICENSE.txt supplies the accompanying license.\n'
                 'Project-authored adapters and probe source use the MIT license in LICENSE.\n').encode(),
@@ -697,6 +906,11 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                 'MaxKernel': '25.99.99', 'MinKernel': '25.0.0',
                 'PlistPath': 'Contents/Info.plist'}, sort_keys=False),
         }
+        for item in sorted(firmware_dir.iterdir()):
+            plain(item)
+            payload['firmware/' + item.name] = item.read_bytes()
+        if len([name for name in payload if name.startswith('firmware/')]) != 3:
+            raise ValueError('The verified firmware payload must contain exactly three declared files.')
         for item in source_inputs:
             payload['source/' + item.relative_to(ROOT).as_posix()] = item.read_bytes()
         for item in sorted(bundle.rglob('*')):
@@ -716,6 +930,9 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                   'native_adapter_checks': native_results,
                   'native_runtime_checks': runtime_record['native_execution'],
                   'native_transport_preparation_checks': preparation_record['native_execution'],
+                  'native_rm_services_checks': services_record['native_execution'],
+                  'actual_firmware_assets': firmware_record,
+                  'full_rm_compile_closure': services_record['full_rm_compile_inventory'],
                   'kernel_adapter_imports': sorted(adapter_imports),
                   'kernel_compiler_helpers': {
                       '___bzero': {
@@ -755,7 +972,7 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                           'kpi': 'com.apple.kpi.iokit',
                           'xnu_commit': 'f6217f891ac0bb64f3d375211650a4c1ff8ca1ea',
                           'export_reference': 'config/IOKit.exports',
-                          'serialized_by': 'nonblocking provider arbitration and shared startup lease',
+                          'serialized_by': 'provider arbitration and shared nonblocking startup lease',
                       },
                       'resolved_c_abi': list(HARDWARE_C_SYMBOLS),
                       'pci_standard_config_reads': {
@@ -774,6 +991,22 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                       },
                       'static_initializers': False,
                   },
+                  'kernel_rm_services': {
+                      'object_sha256': digest(linked_services.read_bytes()),
+                      'platform_imports': sorted(services_platform_imports),
+                      'existing_cpu_kpi_imports': sorted(services_platform_imports & ADAPTER_IMPORTS),
+                      'approved_reference_imports': sorted(approved_services_imports),
+                      'reference_source_sha256': digest(services_reference.read_bytes()),
+                      'reference_sdk_commit': SDK_COMMIT,
+                      'reference_xnu_commit': 'f6217f891ac0bb64f3d375211650a4c1ff8ca1ea',
+                      'reference_exports': ['config/IOKit.exports', 'config/Mach.exports',
+                                            'IOPCIFamily/config/IOPCIFamily.exports'],
+                      'host_memory_c_abi': list(memory_symbols),
+                      'actual_resource_server_entries': list(resource_symbols),
+                      'kernel_frame_warning_bytes': 4096,
+                      'static_initializers': False,
+                      'full_rm_initialized': False, 'device_dma_verified': False,
+                  },
                   'package_file_sha256_excluding_BUILD': {name: digest(data) for name, data in payload.items()},
                   'validation': ['targeted native memory, timer and C/C++ atomic foundational checks',
                                  'pinned provenance of original NVIDIA tracked/untracked allocation and owned synchronization callers',
@@ -786,14 +1019,18 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                                  'host-memory DMA preparation and cleanup with native stage-by-stage failures',
                                  'read-only PCI capability/IRQ inventory and malformed-chain refusals',
                                  'firmware image-layout/RPC bound checks with real-image readiness kept separate',
-                                 'separate CPU24 and SDK-derived DMA/PCI kernel import contracts',
+                                 'actual standalone NVIDIA ResourceServer/NVOC client/resource lifecycle and checked constructor unwind',
+                                 'host-page/CPU-mapping ownership, retained read-only PCI sessions and bounded backend TLS/RW exclusion',
+                                 'release-matched real GSP/ucodes bytes, complete NVIDIA agreement and C reporter bridge',
+                                 'normalized full original RM compile inventory, without claiming global RM execution',
+                                 'separate CPU24, SDK-derived DMA/PCI and host-service kernel import contracts',
                                  'same bounded startup entry point as probe, with reserve lifecycle cleanup',
                                  'address and undefined-behavior sanitizers with fatal recovery policy',
                                  'native Intel kernel compile and link with adapter import allowlist',
                                  'thin x86_64 Mach-O and module entry metadata',
                                  'ad-hoc signature verification', 'native report decoder self-test',
                                  live_validation],
-                  'hardware_status': 'Version 0.7.0 is confirmed on the laptop: 258 aggregate CPU-side checks and two-read TU117 identification. Version 0.8.0 adds host-memory DMA preparation/cleanup, read-only PCI capability/IRQ inventory, and firmware-layout/RPC bounds validation. Native tests do not establish the new Darwin kernel runtime. No real firmware image is included or started. GPU bus mastering, device DMA submission, interrupt registration/delivery, HAL/RM GPU initialization and acceleration remain unimplemented.'}
+                  'hardware_status': 'The confirmed v7 CPU and v8 preparation blocks are retained. Version 0.9.0 adds the actual standalone NVIDIA ResourceServer/NVOC lifecycle, host-page/CPU-mapping ABI, retained PCI sessions and the unmodified release-matched firmware pair with the complete NVIDIA agreement. Firmware bytes and container/RPC layouts are verified in userspace; no firmware is uploaded or executed. Native checks and kernel compilation do not establish new laptop kernel behavior. Global RM startup, device DMA submission, interrupt registration/delivery, GPU initialization and acceleration remain unimplemented.'}
         payload['BUILD.json'] = (json.dumps(record, indent=2, sort_keys=True) + '\n').encode()
         payload['SHA256SUMS'] = ''.join(digest(data) + '  ' + name + '\n' for name, data in sorted(payload.items())).encode('ascii')
         pending = work / archive.name

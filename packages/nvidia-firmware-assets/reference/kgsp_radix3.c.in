@@ -1,0 +1,193 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2019-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: MIT
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
+
+/* Exact reference-only function excerpt. */
+
+
+NV_STATUS
+kgspCreateRadix3_IMPL
+(
+    OBJGPU *pGpu,
+    KernelGsp *pKernelGsp,
+    MEMORY_DESCRIPTOR **ppMemdescRadix3,
+    MEMORY_DESCRIPTOR *pMemdescData,
+    const void *pData,
+    NvU64 size
+)
+{
+    const NvU64 entriesLog2 = LIBOS_MEMORY_REGION_RADIX_PAGE_LOG2 - 3;
+    NvU8 *pRadix3Buf;
+    NvP64 pVaKernel;
+    NvP64 pPrivKernel;
+    NvU64 ptSize;
+    NvU64 allocSize;
+    NvU64 nPages = 0;
+    NvU64 dataOffset = 0;
+    NvU32 i;
+    NV_STATUS status = NV_OK;
+    NvU64 flags = MEMDESC_FLAGS_KERNEL_MODE;
+
+    // radix3 working array.
+    struct
+    {
+        NvU64  nPages;
+        NvU64  offset;
+    } radix3[4];
+
+    NV_ASSERT_OR_RETURN(ppMemdescRadix3 != NULL, NV_ERR_INVALID_PARAMETER);
+    NV_ASSERT_OR_ELSE_STR(!((pMemdescData != NULL) && (pData != NULL)),
+                          "Specify pMemdescData or pData, or none, but not both",
+                          return NV_ERR_INVALID_PARAMETER);
+
+    // If the size is not specified, get it from the memory descriptor.
+    if ((size == 0) && (pMemdescData != NULL))
+        size = memdescGetSize(pMemdescData);
+    NV_ASSERT_OR_RETURN(size > 0, NV_ERR_OUT_OF_RANGE);
+
+    // Clear working structure.
+    portMemSet(radix3, 0, sizeof radix3);
+
+    // Populate npages, high to low.
+    i = NV_ARRAY_ELEMENTS(radix3) - 1;
+    radix3[i].nPages = (size + LIBOS_MEMORY_REGION_RADIX_PAGE_SIZE - 1) >>
+                       LIBOS_MEMORY_REGION_RADIX_PAGE_LOG2;
+    for (; i > 0; i--)
+        radix3[i - 1].nPages = ((radix3[i].nPages - 1) >> entriesLog2) + 1;
+
+    // Populate offset, low to high.
+    for (i = 1; i < NV_ARRAY_ELEMENTS(radix3); i++)
+    {
+        nPages += radix3[i - 1].nPages;
+        radix3[i].offset = nPages << LIBOS_MEMORY_REGION_RADIX_PAGE_LOG2;
+    }
+
+    NV_ASSERT_OR_RETURN(radix3[0].nPages == 1, NV_ERR_OUT_OF_RANGE);
+
+    // Allocate space for PTEs and PDEs.
+    ptSize = nPages << LIBOS_MEMORY_REGION_RADIX_PAGE_LOG2;
+    allocSize = ptSize;
+
+    if (pMemdescData == NULL)
+    {
+        // We don't have a separate descriptor for the data.  We need PTEs,
+        // so include space for data in the new descriptor.
+        allocSize += radix3[3].nPages << LIBOS_MEMORY_REGION_RADIX_PAGE_LOG2;
+    }
+
+    if (confComputeForceUnprotAlloc(pGpu))
+    {
+        flags |= MEMDESC_FLAGS_ALLOC_IN_UNPROTECTED_MEMORY;
+    }
+
+    NV_ASSERT_OK_OR_GOTO(status,
+        memdescCreate(ppMemdescRadix3, pGpu, allocSize,
+            LIBOS_MEMORY_REGION_RADIX_PAGE_SIZE,
+            NV_MEMORY_NONCONTIGUOUS,
+            ADDR_SYSMEM,
+            NV_MEMORY_CACHED,
+            flags),
+        done);
+
+    memdescSetPageSize(*ppMemdescRadix3, AT_GPU, RM_PAGE_SIZE_HUGE);
+    memdescTagAlloc(status,
+            NV_FB_ALLOC_RM_INTERNAL_OWNER_UNNAMED_TAG_17, (*ppMemdescRadix3));
+    if (status == NV_ERR_NO_MEMORY)
+    {
+        // TODO: Bug 5299603
+        NV_PRINTF(LEVEL_INFO, "memdescTagAllocate failed for huge pages, trying again with regular ones\n");
+        memdescSetPageSize(*ppMemdescRadix3, AT_GPU, RM_PAGE_SIZE);
+        memdescTagAlloc(status,
+                NV_FB_ALLOC_RM_INTERNAL_OWNER_UNNAMED_TAG_17, (*ppMemdescRadix3));
+    }
+    NV_ASSERT_OK_OR_GOTO(status, status, error_ret);
+
+    // Create kernel mapping.
+    NV_ASSERT_OK_OR_GOTO(status,
+        memdescMap(*ppMemdescRadix3, 0, allocSize, NV_TRUE, NV_PROTECT_WRITEABLE,
+            &pVaKernel, &pPrivKernel),
+        error_ret);
+
+    if (pVaKernel == NvP64_NULL)
+    {
+        NV_PRINTF(LEVEL_ERROR, "VA error for radix3 shared buffer\n");
+        status = NV_ERR_NO_MEMORY;
+        goto error_ret;
+    }
+
+    pRadix3Buf = KERNEL_POINTER_FROM_NvP64(NvU8 *, pVaKernel);
+
+    // Zap out page table.
+    portMemSet(pRadix3Buf, 0, ptSize);
+
+    // Fill in PDEs.
+    for (i = 0; i < NV_ARRAY_ELEMENTS(radix3) - 2; i++)
+    {
+        memdescGetPhysAddrs(*ppMemdescRadix3,
+            AT_GPU,                     // addressTranslation
+            radix3[i + 1].offset,       // offset
+            RM_PAGE_SIZE,               // stride
+            radix3[i + 1].nPages,       // count
+            (RmPhysAddr *)(pRadix3Buf + radix3[i].offset)); // physical address table
+    }
+
+    dataOffset = radix3[3].offset;
+
+    if (pData != NULL)
+    {
+        // Optionally copy data into the radix3 buffer.
+        portMemCopy(pRadix3Buf + dataOffset, size, pData, size);
+
+        // If we only have part of the last page, clear the rest.
+        NvU32 clearSize = allocSize - dataOffset - size;
+        if (clearSize != 0)
+            portMemSet(pRadix3Buf + dataOffset + size, 0, clearSize);
+
+        pMemdescData = *ppMemdescRadix3;
+    }
+
+    memdescGetPhysAddrs(*ppMemdescRadix3,
+        AT_GPU,                     // addressTranslation
+        dataOffset,                 // offset
+        RM_PAGE_SIZE,               // stride
+        radix3[3].nPages,           // count
+        (RmPhysAddr *)(pRadix3Buf + radix3[2].offset));  // physical address table
+
+    //
+    // No reason to keep this memory mapped on the CPU side.  Only GSP will
+    // access it after this point.
+    //
+    memdescUnmap(*ppMemdescRadix3, NV_TRUE,
+                  pVaKernel, pPrivKernel);
+done:
+    return status;
+
+error_ret:
+    if (*ppMemdescRadix3 != NULL)
+    {
+        memdescFree(*ppMemdescRadix3);
+        memdescDestroy(*ppMemdescRadix3);
+        *ppMemdescRadix3 = NULL;
+    }
+
+    return status;
+}

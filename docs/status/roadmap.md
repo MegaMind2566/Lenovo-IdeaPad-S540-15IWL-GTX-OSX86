@@ -35,6 +35,22 @@ The implemented test suites contain 309 DMA checks with 21 fault cases and 64 cy
 
 Host preparation reports `direct_untranslated`, 65,536 bytes, 16 segments and reason `none`. PCI inventory reports three capabilities, one MSI vector and zero MSI-X vectors; both observed enable bits are false. Untranslated preparation does not prove device DMA compatibility or absence of an IOMMU. All six later-activity fields remain false: device DMA verified, firmware image verified, firmware loaded, interrupts enabled, GPU initialized and RM initialized.
 
+### V9 candidate: original Resource Server and Darwin host services
+
+The [v9 services bundle](../../packages/nvidia-rm-services/README.md) combines the selected original NVIDIA `RS_STANDALONE`/NVOC Resource Server subsystem with real cached host allocation/kernel-mapping ABIs, retained read-only 4 KiB PCI sessions and the official matching GSP/UCODES pair. Version `0.9.0`, report format `9`, uses success status `resource_server_prepared`. It is a candidate: startup/failure-unwind integration is in progress, and native macOS CI, package verification and one combined laptop result are pending. V8 remains the confirmed 390-check kernel baseline; no repeat v8 checkpoint is requested.
+
+| Area | Included in the same candidate | Boundary |
+|---|---|---|
+| Original Resource Server | Real NVOC clients/resources, ownership and access isolation, sharing and original control/refusal paths | Selected standalone subsystem; no full `coreInitializeRm()` or global/GPU RM initialization |
+| Host memory | Four exact NVIDIA page allocation/free and kernel mapping/unmapping ABIs, authenticated ownership and cleanup | Wired cached host pages; device-DMA calls explicitly return unsupported |
+| Retained PCI session | Provider lifetime, generation-qualified handles, aligned 4 KiB read-only configuration access and quiescent stop | No provider open, guessed PCI segment, writes, MMIO widening or interrupt registration |
+| Actual firmware pair | Official release 615.78.08 GSP/UCODES bytes, exact hashes, parsing, checked layout and complete preserved license | Userspace immutable-file readiness only; no upload, GPU signature verification or firmware execution |
+| Combined reporting | Strict 16-field `RmServices` kernel dictionary plus separate userspace `firmware_assets` evidence | `FullRmInitialized` and all six existing kernel device-activity fields remain false |
+
+Implemented host-memory coverage contains 166 native checks and a 24-check startup sequence. Retained PCI coverage contains 252 native checks, a 20-check startup sequence and 4,000 concurrent fixture reads. Firmware coverage includes 15 userspace file/byte-validation checks and 16 acquisition/provenance tests. These counts do not replace the pending combined native CI and laptop evidence. The full Resource Server unwind path must pass before the candidate is presented as ready. Only the shared startup lease is nonblocking; framework `lockForArbitration(false)` and ordinary service mutexes may wait.
+
+The [normalized full-RM closure inventory](../../builders/reference/nvidia-rm-full-closure.json) records separate GNU/ELF diagnostics from all 1,099 original C units plus one generated identification unit. Selected `rm_init_rm`/`rm_shutdown_rm` roots retain 225 external symbols in the Linux control and 215 in the non-Linux `NV_UNIX` diagnostic, including 13 compiler retpoline helpers: 202 remaining host contracts. The diagnostic version-guard overlay is explicit. This is dependency analysis, not Mach-O linking, kernel execution or global RM initialization; the selected Resource Server candidate does not close that full boundary.
+
 ### Path to the first GPU initialization attempt
 
 After v8, the working estimate is three broad integration blocks:
@@ -51,7 +67,7 @@ The [CPU and sensor reports](cpu-thermal.md) confirm frequency/power response an
 
 | Order | Work | Remaining scope |
 |---|---|---|
-| Now | NVIDIA Resource Manager integration | [V8 preparation](../../packages/nvidia-hardware-transport/README.md) is complete: all 390 kernel checks passed, cleanup complete, two-read TU117 match retained and no warnings. Next, connect the actual selected RM startup path and its missing Darwin services. Device DMA/interrupts and real firmware/GPU startup follow as grouped work; no additional v8 laptop test is requested. |
+| Now | NVIDIA Resource Server and host-services bundle | Complete the [v9 candidate](../../packages/nvidia-rm-services/README.md), including original standalone Resource Server operations, host memory, retained PCI and matching real firmware byte verification. Finish combined native CI/package checks before one laptop checkpoint. V8 is complete at 390 kernel checks; full global RM and device/GPU startup remain separate. |
 | Remaining | Graphics, power and thermals | Sustained Intel graphics use and cooling, fan telemetry and measured battery runtime. Continuous temperature readings during desktop activity and basic battery power/discharge reporting are confirmed. NVIDIA electrical power-off is deferred until after the driver-port attempt. |
 | Complete / retained | Boot and EFI consolidation | Independent Samsung boot confirmed after manual EFI transfer. Keep the HDD as a recovery path and preserve the private working EFI. A later sanitized release remains separate from v0.1.0. |
 | 3 | Storage and USB reliability | USB-C at 5 Gb/s in both orientations and both tested USB-A connectors at 5 Gb/s are confirmed. File reads on both USB-A connectors are confirmed. External USB 2 devices, sustained SSD stability, shutdown and reboot remain separate checks. Move the system SSD cable only after shutdown. |
@@ -90,7 +106,7 @@ Priorities updated on 13 October 2026: the panel being off during boot is **reso
 | Fingerprint reader | Internal USB port mapped; support to be assessed | Assess drivers and macOS integration |
 | HDMI | No image; macOS display report lists only the internal panel | Identify the connected external display's owning GPU in Windows before selecting a fix |
 | USB-C video | No video test available; video capability and routing not verified; USB data works | Check hardware capability from documentation; keep separate from the observed HDMI failure |
-| NVIDIA GTX 1650 Max-Q | V8 confirmed: all 390 kernel checks, cleanup, untranslated 64 KiB host preparation and two-read TU117 match, with no warnings | Actual selected RM startup and missing Darwin services next; device DMA/interrupts, real firmware, GPU initialization and graphics remain open. No additional test for the completed v8 checkpoint |
+| NVIDIA GTX 1650 Max-Q | V8 confirmed: all 390 kernel checks, cleanup, untranslated 64 KiB host preparation and two-read TU117 match, with no warnings | V9 selected Resource Server/host-services candidate next; full global RM, device DMA/interrupts, firmware loading, GPU initialization and graphics remain open. No repeat v8 test |
 
 Recovery test results are not automatically extended to the installed system. Incomplete items remain open until a documented result is available.
 

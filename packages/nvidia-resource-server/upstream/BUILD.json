@@ -1,0 +1,106 @@
+{
+  "sources": [
+    "src/nvidia/src/libraries/resserv/src/rs_access_map.c",
+    "src/nvidia/src/libraries/resserv/src/rs_access_rights.c",
+    "src/nvidia/src/libraries/resserv/src/rs_client.c",
+    "src/nvidia/src/libraries/resserv/src/rs_domain.c",
+    "src/nvidia/src/libraries/resserv/src/rs_resource.c",
+    "src/nvidia/src/libraries/resserv/src/rs_server.c",
+    "src/nvidia/generated/g_rs_client_nvoc.c",
+    "src/nvidia/generated/g_rs_resource_nvoc.c",
+    "src/nvidia/generated/g_rs_server_nvoc.c",
+    "src/nvidia/generated/g_object_nvoc.c",
+    "src/nvidia/src/libraries/nvoc/src/runtime.c",
+    "src/nvidia/src/libraries/containers/map.c",
+    "src/nvidia/src/libraries/containers/multimap.c"
+  ],
+  "shared_sources": [
+    {
+      "upstream": "src/nvidia/src/libraries/containers/list.c",
+      "compiled": "../nvidia-nvport-runtime/upstream/consumer/list.c"
+    }
+  ],
+  "include_dirs": [
+    "src/nvidia/kernel/inc",
+    "src/nvidia/interface",
+    "src/common/sdk/nvidia/inc",
+    "src/common/sdk/nvidia/inc/hw",
+    "src/nvidia/arch/nvalloc/common/inc",
+    "src/nvidia/arch/nvalloc/common/inc/gsp",
+    "src/nvidia/arch/nvalloc/common/inc/deprecated",
+    "src/nvidia/arch/nvalloc/unix/include",
+    "src/nvidia/inc",
+    "src/nvidia/inc/os",
+    "src/common/shared/inc",
+    "src/common/inc",
+    "src/common/uproc/os/libos-v2.0.0/include",
+    "src/common/uproc/os/common/include",
+    "src/common/inc/swref",
+    "src/common/inc/swref/published",
+    "src/nvidia/generated",
+    "src/common/nvswitch/kernel/inc",
+    "src/common/nvswitch/interface",
+    "src/common/nvswitch/common/inc",
+    "src/common/inc/displayport",
+    "src/common/nvlink/interface",
+    "src/common/nvlink/inband/interface",
+    "src/nvidia/src/mm/uvm/interface",
+    "src/nvidia/inc/libraries",
+    "src/nvidia/src/libraries",
+    "src/nvidia/inc/kernel",
+    "src/nvidia/src/kernel/rmapi"
+  ],
+  "defines": [
+    "_LANGUAGE_C",
+    "__NO_CTYPE",
+    "NVRM",
+    "LOCK_VAL_ENABLED=0",
+    "PORT_ATOMIC_64_BIT_SUPPORTED=1",
+    "PORT_IS_KERNEL_BUILD=1",
+    "PORT_IS_CHECKED_BUILD=0",
+    "RS_STANDALONE=1",
+    "RS_STANDALONE_TEST=0",
+    "RS_COMPATABILITY_MODE=1",
+    "RS_PROVIDES_API_STATE=0",
+    "NV_CONTAINERS_NO_TEMPLATES",
+    "NV_PRINTF_STRINGS_ALLOWED=1",
+    "NV_ASSERT_FAILED_USES_STRINGS=1",
+    "PORT_ASSERT_FAILED_USES_STRINGS=1",
+    "PORT_MODULE_atomic=1",
+    "PORT_MODULE_core=1",
+    "PORT_MODULE_cpu=1",
+    "PORT_MODULE_crypto=1",
+    "PORT_MODULE_debug=1",
+    "PORT_MODULE_memory=1",
+    "PORT_MODULE_safe=1",
+    "PORT_MODULE_string=1",
+    "PORT_MODULE_sync=1",
+    "PORT_MODULE_thread=1",
+    "PORT_MODULE_time=1",
+    "PORT_MODULE_util=1",
+    "PORT_MODULE_example=0",
+    "PORT_MODULE_mmio=0",
+    "NV_UNIX=1"
+  ],
+  "force_include": "src/common/sdk/nvidia/inc/cpuopsys.h",
+  "language": "gnu11",
+  "source_substitutions": {
+    "src/nvidia/src/libraries/resserv/src/rs_server.c": "upstream/adapted/rs_server.c"
+  },
+  "adapter_c_sources": [
+    "src/S540NvidiaResourceExercise.c"
+  ],
+  "adapter_cpp_sources": [
+    "src/S540NvidiaResourceServer.cpp",
+    "src/S540NvidiaResourceBackend.cpp"
+  ],
+  "c_flags": [
+    "-std=gnu11",
+    "-ffreestanding"
+  ],
+  "native_harnesses": [
+    "tests/check_resource_server_native.cpp",
+    "tests/check_resource_backend_native.cpp",
+    "tests/check_resource_faults_native.cpp"
+  ]
+}

@@ -1,12 +1,10 @@
 /*
- * Read only the S540NvidiaPCIProbe snapshot and its direct provider identity.
- * No IOServiceOpen, PCI configuration access, BAR mapping, MMIO, DMA, writes,
- * firmware operations, or administrator privileges are used by this program.
- *
- * Build: clang -arch x86_64 -std=c11 -Wall -Wextra -Werror -O2 \
- *   check_nvidia_transport.c -framework IOKit -framework CoreFoundation \
- *   -o check-nvidia-transport
+ * Read the published snapshot/provider identity and approved packaged firmware
+ * bytes. No IOServiceOpen, PCI access, MMIO, DMA, writes, firmware upload or
+ * administrator privileges are used. Compile this C object and link it with
+ * the userspace C++ firmware-assets bridge, IOKit and CoreFoundation.
  */
+#include "../../nvidia-firmware-assets/src/S540NvidiaFirmwareAssets.h"
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
 #include <inttypes.h>
@@ -16,7 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TOOL_VERSION "0.8.0"
+#define TOOL_VERSION "0.9.0"
 #define PROBE_CLASS "S540NvidiaPCIProbe"
 #define SNAPSHOT_KEY "S540NvidiaPCIProbeSnapshot"
 #define ACCESS_POLICY "two-read-only-bar0-hal-identification"
@@ -26,6 +24,7 @@
 #define BAR_COUNT 6
 #define MAX_SERVICES 8
 #define MAX_BOOT_ARGUMENT_BYTES 4096
+#define RM_SERVICES_PROFILE "standalone-resource-server-cached-host-readonly-pci"
 
 struct bar_descriptor {
     uint8_t reg;
@@ -66,6 +65,25 @@ struct caller_integration_result {
     int allocation_callers;
     int mutex_callers;
     int reserve;
+};
+
+struct rm_services_result {
+    int valid;
+    uint32_t version;
+    uint32_t checks;
+    int passed;
+    int resource_server;
+    int host_memory;
+    int pci_session;
+    int clients;
+    int resources;
+    int sharing;
+    int control;
+    int cleanup;
+    uint32_t resource_server_checks;
+    uint32_t host_memory_checks;
+    uint32_t pci_session_checks;
+    int full_rm_initialized;
 };
 
 struct hardware_preparation_result {
@@ -156,6 +174,7 @@ struct snapshot {
     struct nvport_lifecycle_result nvport_lifecycle;
     struct nvport_support_result nvport_support;
     struct hardware_preparation_result hardware_preparation;
+    struct rm_services_result rm_services;
 };
 
 enum warning_code {
@@ -191,6 +210,9 @@ struct report {
     int wegnoegpu_known;
     int wegnoegpu_present;
     unsigned int warnings[WARNING_COUNT];
+    int firmware_assets_checked;
+    int firmware_assets_returned;
+    S540NvidiaFirmwareAssetResult firmware_assets;
 };
 
 static void warn_report(struct report *report, enum warning_code code,
@@ -751,6 +773,68 @@ static int decode_hardware_preparation(CFTypeRef object,
     return 1;
 }
 
+/* Selected standalone Resource Server services are distinct from full RM. */
+static int decode_rm_services(CFTypeRef object, struct rm_services_result *output)
+{
+    struct rm_services_result candidate;
+    memset(&candidate, 0, sizeof(candidate));
+    if (object == NULL || CFGetTypeID(object) != CFDictionaryGetTypeID())
+        return 0;
+    CFDictionaryRef dictionary = (CFDictionaryRef)object;
+    uint64_t value = 0;
+    if (CFDictionaryGetCount(dictionary) != 16 ||
+        !dictionary_number(dictionary, CFSTR("Version"), 1, &value) || value != 1 ||
+        !exact_string(CFDictionaryGetValue(dictionary, CFSTR("Profile")),
+                       CFSTR(RM_SERVICES_PROFILE)))
+        return 0;
+    candidate.version = (uint32_t)value;
+    if (!dictionary_number(dictionary, CFSTR("Checks"), UINT32_MAX, &value) || value == 0)
+        return 0;
+    candidate.checks = (uint32_t)value;
+#define READ_RM_COMPONENT(KEY, FIELD) do { \
+    CFTypeRef component = CFDictionaryGetValue(dictionary, CFSTR(KEY)); \
+    if (component == NULL || CFGetTypeID(component) != CFBooleanGetTypeID()) \
+        return 0; \
+    candidate.FIELD = CFBooleanGetValue((CFBooleanRef)component); \
+} while (0)
+    READ_RM_COMPONENT("ResourceServer", resource_server);
+    READ_RM_COMPONENT("HostMemory", host_memory);
+    READ_RM_COMPONENT("PciSession", pci_session);
+    READ_RM_COMPONENT("Clients", clients);
+    READ_RM_COMPONENT("Resources", resources);
+    READ_RM_COMPONENT("Sharing", sharing);
+    READ_RM_COMPONENT("Control", control);
+    READ_RM_COMPONENT("Cleanup", cleanup);
+    READ_RM_COMPONENT("FullRmInitialized", full_rm_initialized);
+#undef READ_RM_COMPONENT
+    if (candidate.full_rm_initialized)
+        return 0;
+#define READ_RM_COUNT(KEY, FIELD) do { \
+    if (!dictionary_number(dictionary, CFSTR(KEY), UINT32_MAX, &value)) \
+        return 0; \
+    candidate.FIELD = (uint32_t)value; \
+} while (0)
+    READ_RM_COUNT("ResourceServerChecks", resource_server_checks);
+    READ_RM_COUNT("HostMemoryChecks", host_memory_checks);
+    READ_RM_COUNT("PciSessionChecks", pci_session_checks);
+#undef READ_RM_COUNT
+    if ((candidate.resource_server && candidate.resource_server_checks == 0) ||
+        (candidate.host_memory && candidate.host_memory_checks == 0) ||
+        (candidate.pci_session && candidate.pci_session_checks == 0) ||
+        (uint64_t)candidate.resource_server_checks + candidate.host_memory_checks +
+            candidate.pci_session_checks > candidate.checks)
+        return 0;
+    candidate.passed = candidate.resource_server && candidate.host_memory &&
+        candidate.pci_session && candidate.clients && candidate.resources &&
+        candidate.sharing && candidate.control && candidate.cleanup;
+    if (!exact_string(CFDictionaryGetValue(dictionary, CFSTR("Status")),
+                       candidate.passed ? CFSTR("passed") : CFSTR("failed")))
+        return 0;
+    candidate.valid = 1;
+    *output = candidate;
+    return 1;
+}
+
 /* Legacy format is decoded only to identify an old loaded kext, never emitted. */
 static int decode_snapshot(CFTypeRef object, struct snapshot *output)
 {
@@ -760,8 +844,8 @@ static int decode_snapshot(CFTypeRef object, struct snapshot *output)
         return 0;
     CFDictionaryRef dictionary = (CFDictionaryRef)object;
     uint64_t value = 0;
-    if (!dictionary_number(dictionary, CFSTR("Format"), 8, &value) ||
-        (value != 1 && value != 2 && value != 3 && value != 4 && value != 5 && value != 6 && value != 7 && value != 8))
+    if (!dictionary_number(dictionary, CFSTR("Format"), 9, &value) ||
+        (value != 1 && value != 2 && value != 3 && value != 4 && value != 5 && value != 6 && value != 7 && value != 8 && value != 9))
         return 0;
     candidate.format = (uint32_t)value;
     int legacy = candidate.format == 1;
@@ -770,7 +854,8 @@ static int decode_snapshot(CFTypeRef object, struct snapshot *output)
     int callers_format = candidate.format >= 5;
     int lifecycle_format = candidate.format >= 6;
     int support_format = candidate.format >= 7;
-    int current = candidate.format == 8;
+    int preparation_format = candidate.format >= 8;
+    int current = candidate.format == 9;
     if (!exact_string(CFDictionaryGetValue(dictionary, CFSTR("Stage")),
                        CFSTR("attached")) ||
         !exact_string(CFDictionaryGetValue(dictionary, CFSTR("AccessPolicy")),
@@ -780,7 +865,7 @@ static int decode_snapshot(CFTypeRef object, struct snapshot *output)
                          candidate.probe_version,
                          sizeof(candidate.probe_version)) ||
         strcmp(candidate.probe_version, legacy ? "0.1.0" : current ? TOOL_VERSION :
-            support_format ? "0.7.0" : lifecycle_format ? "0.6.0" : callers_format ? "0.5.0" : foundations_format ? "0.4.0" : two_reads ? "0.3.0" : "0.2.0") != 0)
+            preparation_format ? "0.8.0" : support_format ? "0.7.0" : lifecycle_format ? "0.6.0" : callers_format ? "0.5.0" : foundations_format ? "0.4.0" : two_reads ? "0.3.0" : "0.2.0") != 0)
         return 0;
     if (!legacy && !decode_mmio(CFDictionaryGetValue(dictionary, CFSTR("MMIOResult")),
                                 &candidate.mmio))
@@ -805,8 +890,11 @@ static int decode_snapshot(CFTypeRef object, struct snapshot *output)
     if (support_format)
         (void)decode_nvport_support(support, &candidate.nvport_support);
     CFTypeRef preparation = CFDictionaryGetValue(dictionary, CFSTR("HardwarePreparation"));
-    if (current)
+    if (preparation_format)
         (void)decode_hardware_preparation(preparation, &candidate.hardware_preparation);
+    CFTypeRef services = CFDictionaryGetValue(dictionary, CFSTR("RmServices"));
+    if (current)
+        (void)decode_rm_services(services, &candidate.rm_services);
     CFIndex expected_keys = legacy ? 13 : two_reads ? 16 : 14;
     if (foundations_format && foundations != NULL)
         ++expected_keys;
@@ -816,7 +904,9 @@ static int decode_snapshot(CFTypeRef object, struct snapshot *output)
         ++expected_keys;
     if (support_format && support != NULL)
         ++expected_keys;
-    if (current && preparation != NULL)
+    if (preparation_format && preparation != NULL)
+        ++expected_keys;
+    if (current && services != NULL)
         ++expected_keys;
     if (missing_bars_allowed)
         --expected_keys;
@@ -966,7 +1056,7 @@ static void read_probe(io_registry_entry_t service, struct report *report)
         return;
     }
     report->attached = 1;
-    report->outdated = report->snapshot.format < 8;
+    report->outdated = report->snapshot.format < 9;
 }
 
 static void read_context(struct report *report)
@@ -1169,7 +1259,78 @@ static void write_snapshot(FILE *out, const struct snapshot *snapshot)
             preparation->msix_observed_enabled ? "true" : "false");
     else
         fputs("null", out);
+    fputs(",\"rm_services\":", out);
+    const struct rm_services_result *services = &snapshot->rm_services;
+    if (services->valid)
+        fprintf(out, "{\"version\":%" PRIu32 ",\"status\":\"%s\",\"checks\":%" PRIu32
+            ",\"resource_server\":%s,\"host_memory\":%s,\"pci_session\":%s,"
+            "\"clients\":%s,\"resources\":%s,\"sharing\":%s,\"control\":%s,\"cleanup\":%s,"
+            "\"resource_server_checks\":%" PRIu32 ",\"host_memory_checks\":%" PRIu32 ",\"pci_session_checks\":%" PRIu32
+            ",\"profile\":\"" RM_SERVICES_PROFILE "\",\"full_rm_initialized\":false}",
+            services->version, services->passed ? "passed" : "failed", services->checks,
+            services->resource_server ? "true" : "false", services->host_memory ? "true" : "false",
+            services->pci_session ? "true" : "false", services->clients ? "true" : "false",
+            services->resources ? "true" : "false", services->sharing ? "true" : "false",
+            services->control ? "true" : "false", services->cleanup ? "true" : "false",
+            services->resource_server_checks, services->host_memory_checks, services->pci_session_checks);
+    else
+        fputs("null", out);
     fputc('}', out);
+}
+
+static int report_assets_valid(const struct report *report)
+{
+    const S540NvidiaFirmwareAssetResult *assets = &report->firmware_assets;
+    if (!report->firmware_assets_checked || assets->format != 1 ||
+        report->firmware_assets_returned != (assets->pairReady ? 1 : 0) ||
+        (int)assets->reason < (int)S540_NVIDIA_ASSETS_VERIFIED ||
+        assets->reason > S540_NVIDIA_ASSETS_CLEANUP_FAILED || assets->checks > 64 ||
+        assets->gspSize > UINT64_C(22901632) || assets->ucodesSize > UINT64_C(8837632) ||
+        assets->imageSize > assets->gspSize || assets->signatureSize > assets->gspSize ||
+        assets->sectionCount > 512 || assets->ucodesEntryCount > 4096 ||
+        assets->ucodesPresentCount > assets->ucodesEntryCount)
+        return 0;
+    if (assets->pairReady && (!assets->present || !assets->hashesVerified ||
+        !assets->containerParsed || !assets->ucodesParsed || !assets->cleanup ||
+        assets->checks != 15 || assets->gspSize != UINT64_C(22901632) ||
+        assets->ucodesSize != UINT64_C(8837632) || assets->imageSize != UINT64_C(22887880) ||
+        assets->signatureSize != 4096 || assets->sectionCount != 10 ||
+        assets->ucodesEntryCount != 496 || assets->ucodesPresentCount != 38 ||
+        assets->reason != S540_NVIDIA_ASSETS_VERIFIED))
+        return 0;
+    if ((assets->reason == S540_NVIDIA_ASSETS_VERIFIED) != assets->pairReady)
+        return 0;
+    return 1;
+}
+
+static int report_assets_ready(const struct report *report)
+{
+    return report_assets_valid(report) && report->firmware_assets.pairReady;
+}
+
+static void write_firmware_assets(FILE *out, const struct report *report)
+{
+    if (!report->firmware_assets_checked) {
+        fputs("null", out);
+        return;
+    }
+    if (!report_assets_valid(report)) {
+        fputs("{\"format\":1,\"status\":\"invalid\",\"reason\":\"invalid_asset_evidence\"}", out);
+        return;
+    }
+    const S540NvidiaFirmwareAssetResult *assets = &report->firmware_assets;
+    fprintf(out, "{\"format\":1,\"status\":\"%s\",\"checks\":%" PRIu32
+        ",\"present\":%s,\"hashes_verified\":%s,\"container_parsed\":%s,\"ucodes_parsed\":%s,"
+        "\"pair_ready\":%s,\"cleanup\":%s,\"gsp_size\":%" PRIu64 ",\"ucodes_size\":%" PRIu64
+        ",\"image_size\":%" PRIu64 ",\"signature_size\":%" PRIu64 ",\"section_count\":%" PRIu32
+        ",\"ucodes_entry_count\":%" PRIu32 ",\"ucodes_present_count\":%" PRIu32 ",\"reason\":\"%s\"}",
+        assets->pairReady ? "passed" : "failed", assets->checks,
+        assets->present ? "true" : "false", assets->hashesVerified ? "true" : "false",
+        assets->containerParsed ? "true" : "false", assets->ucodesParsed ? "true" : "false",
+        assets->pairReady ? "true" : "false", assets->cleanup ? "true" : "false",
+        assets->gspSize, assets->ucodesSize, assets->imageSize, assets->signatureSize,
+        assets->sectionCount, assets->ucodesEntryCount, assets->ucodesPresentCount,
+        s540_nvidia_firmware_assets_reason(assets->reason));
 }
 
 static const char *report_status(const struct report *report)
@@ -1200,8 +1361,19 @@ static const char *report_status(const struct report *report)
         return "invalid_preparation";
     if (!report->snapshot.hardware_preparation.passed)
         return "preparation_failed";
-    if (report->snapshot.hal_matched)
-        return "transport_prepared";
+    if (!report->snapshot.rm_services.valid)
+        return "invalid_rm_services";
+    if (!report->snapshot.rm_services.passed)
+        return "rm_services_failed";
+    if (report->snapshot.hal_matched) {
+        if (!report->firmware_assets_checked)
+            return "firmware_assets_unavailable";
+        if (!report_assets_valid(report))
+            return "invalid_firmware_assets";
+        if (!report_assets_ready(report))
+            return "firmware_assets_failed";
+        return "resource_server_prepared";
+    }
     return report->snapshot.mmio.status == MMIO_REFUSED ||
            report->snapshot.boot42.status == MMIO_REFUSED ? "refused" : "failed";
 }
@@ -1214,13 +1386,15 @@ static int report_exit_code(const struct report *report)
          report->snapshot.nvport_lifecycle.valid && report->snapshot.nvport_lifecycle.passed &&
          report->snapshot.nvport_support.valid && report->snapshot.nvport_support.passed &&
          report->snapshot.hardware_preparation.valid && report->snapshot.hardware_preparation.passed &&
+         report->snapshot.rm_services.valid && report->snapshot.rm_services.passed &&
+         report_assets_ready(report) &&
          report->snapshot.mmio.status != MMIO_FAILED &&
          report->snapshot.boot42.status != MMIO_FAILED)) ? 0 : 1;
 }
 
 static void write_report(FILE *out, const struct report *report)
 {
-    fprintf(out, "{\"format\":8,\"tool\":\"nvidia-transport\",\"version\":\"%s\","
+    fprintf(out, "{\"format\":9,\"tool\":\"nvidia-transport\",\"version\":\"%s\","
         "\"target\":{\"vendor_id\":\"0x10de\",\"device_id\":\"0x1f91\","
         "\"subsystem_vendor_id\":\"0x17aa\",\"subsystem_device_id\":\"0x3806\"},"
         "\"status\":\"%s\",\"complete\":%s,"
@@ -1238,8 +1412,10 @@ static void write_report(FILE *out, const struct report *report)
     } else {
         fputs("null", out);
     }
+    fputs(",\"firmware_assets\":", out);
+    write_firmware_assets(out, report);
     fputs(",\"reason\":", out);
-    fputs(report->outdated ? "\"The loaded probe is an older version. Replace the kext on the EFI used for this boot with version 0.8.0.\"" : "null", out);
+    fputs(report->outdated ? "\"The loaded probe is an older version. Replace the kext on the EFI used for this boot with version 0.9.0.\"" : "null", out);
     fputs(",\"warnings\":[", out);
     int emitted = 0;
     for (size_t index = 0; index < WARNING_COUNT; ++index) {
@@ -1455,6 +1631,50 @@ static CFMutableDictionaryRef fixture_hardware_preparation(void)
     return dictionary;
 }
 
+static CFMutableDictionaryRef fixture_rm_services(void)
+{
+    CFMutableDictionaryRef dictionary = CFDictionaryCreateMutable(kCFAllocatorDefault,
+        0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    if (dictionary == NULL) {
+        fputs("Self-test allocation failed.\n", stderr);
+        exit(1);
+    }
+    fixture_number(dictionary, CFSTR("Version"), 1);
+    fixture_number(dictionary, CFSTR("Checks"), 32);
+    CFDictionarySetValue(dictionary, CFSTR("Status"), CFSTR("passed"));
+    const CFStringRef components[] = {CFSTR("ResourceServer"), CFSTR("HostMemory"),
+        CFSTR("PciSession"), CFSTR("Clients"), CFSTR("Resources"), CFSTR("Sharing"),
+        CFSTR("Control"), CFSTR("Cleanup")};
+    for (size_t index = 0; index < sizeof(components) / sizeof(components[0]); ++index)
+        CFDictionarySetValue(dictionary, components[index], kCFBooleanTrue);
+    fixture_number(dictionary, CFSTR("ResourceServerChecks"), 10);
+    fixture_number(dictionary, CFSTR("HostMemoryChecks"), 10);
+    fixture_number(dictionary, CFSTR("PciSessionChecks"), 10);
+    CFDictionarySetValue(dictionary, CFSTR("Profile"), CFSTR(RM_SERVICES_PROFILE));
+    CFDictionarySetValue(dictionary, CFSTR("FullRmInitialized"), kCFBooleanFalse);
+    return dictionary;
+}
+
+static void fixture_report_assets(struct report *report)
+{
+    report->firmware_assets_checked = 1;
+    report->firmware_assets_returned = 1;
+    S540NvidiaFirmwareAssetResult *assets = &report->firmware_assets;
+    memset(assets, 0, sizeof(*assets));
+    assets->format = 1;
+    assets->present = assets->hashesVerified = assets->containerParsed = true;
+    assets->ucodesParsed = assets->pairReady = assets->cleanup = true;
+    assets->gspSize = UINT64_C(22901632);
+    assets->ucodesSize = UINT64_C(8837632);
+    assets->imageSize = UINT64_C(22887880);
+    assets->signatureSize = 4096;
+    assets->sectionCount = 10;
+    assets->ucodesEntryCount = 496;
+    assets->ucodesPresentCount = 38;
+    assets->checks = 15;
+    assets->reason = S540_NVIDIA_ASSETS_VERIFIED;
+}
+
 static CFMutableDictionaryRef valid_fixture(void)
 {
     CFMutableDictionaryRef dictionary = CFDictionaryCreateMutable(
@@ -1466,7 +1686,7 @@ static CFMutableDictionaryRef valid_fixture(void)
         fputs("Self-test allocation failed.\n", stderr);
         exit(1);
     }
-    fixture_number(dictionary, CFSTR("Format"), 8);
+    fixture_number(dictionary, CFSTR("Format"), 9);
     CFDictionarySetValue(dictionary, CFSTR("ProbeVersion"), CFSTR(TOOL_VERSION));
     CFDictionarySetValue(dictionary, CFSTR("Stage"), CFSTR("attached"));
     CFDictionarySetValue(dictionary, CFSTR("AccessPolicy"), CFSTR(ACCESS_POLICY));
@@ -1518,6 +1738,9 @@ static CFMutableDictionaryRef valid_fixture(void)
     CFMutableDictionaryRef preparation = fixture_hardware_preparation();
     CFDictionarySetValue(dictionary, CFSTR("HardwarePreparation"), preparation);
     CFRelease(preparation);
+    CFMutableDictionaryRef services = fixture_rm_services();
+    CFDictionarySetValue(dictionary, CFSTR("RmServices"), services);
+    CFRelease(services);
     return dictionary;
 }
 
@@ -1622,6 +1845,7 @@ static void test_caller_integration(unsigned int *count)
     struct report classified;
     memset(&classified, 0, sizeof(classified));
     classified.complete = 1;
+    fixture_report_assets(&classified);
     classified.attached = 1;
     classified.snapshot = snapshot;
     require_test(strcmp(report_status(&classified), "invalid_callers") == 0 &&
@@ -1635,7 +1859,7 @@ static void test_caller_integration(unsigned int *count)
     require_test(decode_snapshot(fixture, &snapshot) && snapshot.caller_integration.passed,
         "caller evidence restored", count);
     classified.snapshot = snapshot;
-    require_test(strcmp(report_status(&classified), "transport_prepared") == 0 &&
+    require_test(strcmp(report_status(&classified), "resource_server_prepared") == 0 &&
         report_exit_code(&classified) == 0,
         "both foundation and caller evidence enable integrated success", count);
     CFDictionarySetValue(callers, CFSTR("Reserve"), kCFBooleanFalse);
@@ -1655,14 +1879,14 @@ static void test_caller_integration(unsigned int *count)
     write_report(serialized, &classified);
     require_test(fflush(serialized) == 0 && fseek(serialized, 0, SEEK_SET) == 0,
         "caller serialization rewind", count);
-    char text[4096];
+    char text[16384];
     size_t bytes = fread(text, 1, sizeof(text) - 1, serialized);
     text[bytes] = '\0';
-    require_test(!ferror(serialized) && strstr(text, "\"format\":8") != NULL &&
+    require_test(!ferror(serialized) && strstr(text, "\"format\":9") != NULL &&
         strstr(text, "\"caller_integration\":{\"version\":1,\"status\":\"passed\",\"checks\":3,"
             "\"allocation_callers\":true,\"mutex_callers\":true,\"reserve\":true}") != NULL &&
-        strstr(text, "\"status\":\"transport_prepared\"") != NULL,
-        "serialized v8 report includes independent caller evidence", count);
+        strstr(text, "\"status\":\"resource_server_prepared\"") != NULL,
+        "serialized v9 report includes independent caller evidence", count);
     fclose(serialized);
     CFRelease(fixture);
     CFRelease(callers);
@@ -1762,6 +1986,7 @@ static void test_nvport_lifecycle(unsigned int *count)
     struct report classified;
     memset(&classified, 0, sizeof(classified));
     classified.complete = 1;
+    fixture_report_assets(&classified);
     classified.attached = 1;
     classified.snapshot = snapshot;
     require_test(strcmp(report_status(&classified), "invalid_lifecycle") == 0 &&
@@ -1775,7 +2000,7 @@ static void test_nvport_lifecycle(unsigned int *count)
     require_test(decode_snapshot(fixture, &snapshot) && snapshot.nvport_lifecycle.passed,
         "lifecycle evidence restored", count);
     classified.snapshot = snapshot;
-    require_test(strcmp(report_status(&classified), "transport_prepared") == 0 &&
+    require_test(strcmp(report_status(&classified), "resource_server_prepared") == 0 &&
         report_exit_code(&classified) == 0,
         "lifecycle evidence completes the valid four-block fixture", count);
     CFDictionarySetValue(lifecycle, CFSTR("Cleanup"), kCFBooleanFalse);
@@ -1795,15 +2020,15 @@ static void test_nvport_lifecycle(unsigned int *count)
     write_report(serialized, &classified);
     require_test(fflush(serialized) == 0 && fseek(serialized, 0, SEEK_SET) == 0,
         "lifecycle serialization rewind", count);
-    char text[4096];
+    char text[16384];
     size_t bytes = fread(text, 1, sizeof(text) - 1, serialized);
     text[bytes] = '\0';
-    require_test(!ferror(serialized) && strstr(text, "\"format\":8") != NULL &&
+    require_test(!ferror(serialized) && strstr(text, "\"format\":9") != NULL &&
         strstr(text, "\"nvport_lifecycle\":{\"version\":1,\"status\":\"passed\",\"checks\":5,"
             "\"lifecycle\":true,\"tracked_allocation\":true,\"owned_mutex\":true,"
             "\"spinlocks\":true,\"cleanup\":true}") != NULL &&
-        strstr(text, "\"status\":\"transport_prepared\"") != NULL,
-        "serialized v8 report includes independent lifecycle evidence", count);
+        strstr(text, "\"status\":\"resource_server_prepared\"") != NULL,
+        "serialized v9 report includes independent lifecycle evidence", count);
     fclose(serialized);
     CFRelease(fixture);
     CFRelease(lifecycle);
@@ -1902,6 +2127,7 @@ static void test_nvport_support(unsigned int *count)
     struct report classified;
     memset(&classified, 0, sizeof(classified));
     classified.complete = 1;
+    fixture_report_assets(&classified);
     classified.attached = 1;
     classified.snapshot = snapshot;
     require_test(strcmp(report_status(&classified), "invalid_support") == 0 &&
@@ -1915,7 +2141,7 @@ static void test_nvport_support(unsigned int *count)
     require_test(decode_snapshot(fixture, &snapshot) && snapshot.nvport_support.passed,
         "support evidence restored", count);
     classified.snapshot = snapshot;
-    require_test(strcmp(report_status(&classified), "transport_prepared") == 0 &&
+    require_test(strcmp(report_status(&classified), "resource_server_prepared") == 0 &&
         report_exit_code(&classified) == 0,
         "four independent CPU blocks enable v7 integrated success", count);
     CFDictionarySetValue(support, CFSTR("Cleanup"), kCFBooleanFalse);
@@ -1935,14 +2161,14 @@ static void test_nvport_support(unsigned int *count)
     write_report(serialized, &classified);
     require_test(fflush(serialized) == 0 && fseek(serialized, 0, SEEK_SET) == 0,
         "support serialization rewind", count);
-    char text[4096];
+    char text[16384];
     size_t bytes = fread(text, 1, sizeof(text) - 1, serialized);
     text[bytes] = '\0';
-    require_test(!ferror(serialized) && strstr(text, "\"format\":8") != NULL &&
+    require_test(!ferror(serialized) && strstr(text, "\"format\":9") != NULL &&
         strstr(text, "\"nvport_support\":{\"version\":1,\"status\":\"passed\",\"checks\":4,"
             "\"core\":true,\"utilities\":true,\"consumer\":true,\"cleanup\":true}") != NULL &&
-        strstr(text, "\"status\":\"transport_prepared\"") != NULL,
-        "serialized v8 report includes independent support evidence", count);
+        strstr(text, "\"status\":\"resource_server_prepared\"") != NULL,
+        "serialized v9 report includes independent support evidence", count);
     fclose(serialized);
     CFRelease(fixture);
     CFRelease(support);
@@ -1986,7 +2212,7 @@ static void test_hardware_preparation(unsigned int *count)
     for (size_t index = 0; index < sizeof(bad_versions) / sizeof(bad_versions[0]); ++index) {
         fixture_number(preparation, CFSTR("Version"), bad_versions[index]);
         require_test(!decode_hardware_preparation(preparation, &decoded),
-            "unpreparationed hardware preparation version", count);
+            "unsupported hardware preparation version", count);
     }
     fixture_number(preparation, CFSTR("Version"), 1);
     const int64_t bad_checks[] = {0, -1, INT64_C(0x100000000)};
@@ -2206,6 +2432,7 @@ static void test_hardware_preparation(unsigned int *count)
     struct report classified;
     memset(&classified, 0, sizeof(classified));
     classified.complete = 1;
+    fixture_report_assets(&classified);
     classified.attached = 1;
     classified.snapshot = snapshot;
     require_test(strcmp(report_status(&classified), "invalid_preparation") == 0 &&
@@ -2219,7 +2446,7 @@ static void test_hardware_preparation(unsigned int *count)
     require_test(decode_snapshot(fixture, &snapshot) && snapshot.hardware_preparation.passed,
         "preparation evidence restored", count);
     classified.snapshot = snapshot;
-    require_test(strcmp(report_status(&classified), "transport_prepared") == 0 &&
+    require_test(strcmp(report_status(&classified), "resource_server_prepared") == 0 &&
         report_exit_code(&classified) == 0,
         "all preparation and prior CPU blocks enable the bounded transport result", count);
     CFDictionarySetValue(preparation, CFSTR("Cleanup"), kCFBooleanFalse);
@@ -2239,10 +2466,10 @@ static void test_hardware_preparation(unsigned int *count)
     write_report(serialized, &classified);
     require_test(fflush(serialized) == 0 && fseek(serialized, 0, SEEK_SET) == 0,
         "preparation serialization rewind", count);
-    char text[4096];
+    char text[16384];
     size_t bytes = fread(text, 1, sizeof(text) - 1, serialized);
     text[bytes] = '\0';
-    require_test(!ferror(serialized) && strstr(text, "\"format\":8") != NULL &&
+    require_test(!ferror(serialized) && strstr(text, "\"format\":9") != NULL &&
         strstr(text, "\"hardware_preparation\":{\"version\":1,\"status\":\"passed\",\"checks\":5,"
             "\"host_dma\":true,\"pci_read_adapter\":true,\"interrupt_inventory\":true,"
             "\"firmware_parser\":true,\"firmware_rpc\":true,\"cleanup\":true,"
@@ -2251,11 +2478,285 @@ static void test_hardware_preparation(unsigned int *count)
             "\"msi_observed_enabled\":false,\"msix_observed_enabled\":false,"
             "\"firmware_loaded\":false,\"firmware_image_verified\":false,\"interrupts_enabled\":false,"
             "\"gpu_initialized\":false,\"rm_initialized\":false,\"device_dma_verified\":false}") != NULL &&
-        strstr(text, "\"status\":\"transport_prepared\"") != NULL,
-        "serialized v8 report distinguishes preparation from GPU startup", count);
+        strstr(text, "\"status\":\"resource_server_prepared\"") != NULL,
+        "serialized v9 report distinguishes preparation from GPU startup", count);
     fclose(serialized);
     CFRelease(fixture);
     CFRelease(preparation);
+}
+
+static void test_rm_services(unsigned int *count)
+{
+    struct rm_services_result decoded;
+    memset(&decoded, 0, sizeof(decoded));
+    require_test(!decode_rm_services(NULL, &decoded),
+        "missing selected RM services dictionary", count);
+    require_test(!decode_rm_services(kCFBooleanTrue, &decoded),
+        "wrong selected RM services type", count);
+    CFMutableDictionaryRef services = fixture_rm_services();
+    require_test(decode_rm_services(services, &decoded) && decoded.valid &&
+        decoded.passed && decoded.version == 1 && decoded.checks == 32,
+        "valid selected RM services wire contract", count);
+    CFDictionarySetValue(services, CFSTR("Extra"), kCFBooleanTrue);
+    require_test(!decode_rm_services(services, &decoded),
+        "extra selected RM services key", count);
+    CFDictionaryRemoveValue(services, CFSTR("Extra"));
+    const CFStringRef numeric_keys[] = {CFSTR("Version"), CFSTR("Checks")};
+    for (size_t index = 0; index < sizeof(numeric_keys) / sizeof(numeric_keys[0]); ++index) {
+        CFDictionaryRemoveValue(services, numeric_keys[index]);
+        require_test(!decode_rm_services(services, &decoded),
+            "missing services numeric field", count);
+        CFDictionarySetValue(services, numeric_keys[index], kCFBooleanTrue);
+        require_test(!decode_rm_services(services, &decoded),
+            "boolean services numeric field", count);
+        double fractional = 1.0;
+        CFNumberRef floating = CFNumberCreate(kCFAllocatorDefault,
+            kCFNumberDoubleType, &fractional);
+        require_test(floating != NULL, "floating services fixture allocation", count);
+        CFDictionarySetValue(services, numeric_keys[index], floating);
+        CFRelease(floating);
+        require_test(!decode_rm_services(services, &decoded),
+            "floating services numeric field", count);
+        fixture_number(services, numeric_keys[index], index == 0 ? 1 : 32);
+    }
+    const int64_t bad_versions[] = {0, -1, 2, INT64_C(0x100000000)};
+    for (size_t index = 0; index < sizeof(bad_versions) / sizeof(bad_versions[0]); ++index) {
+        fixture_number(services, CFSTR("Version"), bad_versions[index]);
+        require_test(!decode_rm_services(services, &decoded),
+            "unsupported selected RM services version", count);
+    }
+    fixture_number(services, CFSTR("Version"), 1);
+    const int64_t bad_checks[] = {0, -1, INT64_C(0x100000000)};
+    for (size_t index = 0; index < sizeof(bad_checks) / sizeof(bad_checks[0]); ++index) {
+        fixture_number(services, CFSTR("Checks"), bad_checks[index]);
+        require_test(!decode_rm_services(services, &decoded),
+            "services check count range", count);
+    }
+    fixture_number(services, CFSTR("Checks"), UINT32_MAX);
+    require_test(decode_rm_services(services, &decoded) &&
+        decoded.checks == UINT32_MAX, "maximum services check count", count);
+    fixture_number(services, CFSTR("Checks"), 32);
+    const CFStringRef component_keys[] = {
+        CFSTR("ResourceServer"), CFSTR("HostMemory"), CFSTR("PciSession"), CFSTR("Clients"),
+        CFSTR("Resources"), CFSTR("Sharing"), CFSTR("Control"), CFSTR("Cleanup")
+    };
+    for (size_t index = 0; index < sizeof(component_keys) / sizeof(component_keys[0]); ++index) {
+        CFDictionaryRemoveValue(services, component_keys[index]);
+        require_test(!decode_rm_services(services, &decoded),
+            "missing services component", count);
+        fixture_number(services, component_keys[index], 1);
+        require_test(!decode_rm_services(services, &decoded),
+            "services component requires CFBoolean", count);
+        CFDictionarySetValue(services, component_keys[index], kCFBooleanFalse);
+        require_test(!decode_rm_services(services, &decoded),
+            "passed services status cannot hide a false component", count);
+        CFDictionarySetValue(services, CFSTR("Status"), CFSTR("failed"));
+        require_test(decode_rm_services(services, &decoded) && decoded.valid &&
+            !decoded.passed, "services component failure is valid evidence", count);
+        CFDictionarySetValue(services, component_keys[index], kCFBooleanTrue);
+        require_test(!decode_rm_services(services, &decoded),
+            "failed services status requires a false component", count);
+        CFDictionarySetValue(services, CFSTR("Status"), CFSTR("passed"));
+    }
+    const CFStringRef subcount_keys[] = {CFSTR("ResourceServerChecks"),
+        CFSTR("HostMemoryChecks"), CFSTR("PciSessionChecks")};
+    const CFStringRef parent_keys[] = {CFSTR("ResourceServer"), CFSTR("HostMemory"), CFSTR("PciSession")};
+    for (size_t index = 0; index < sizeof(subcount_keys) / sizeof(subcount_keys[0]); ++index) {
+        CFDictionaryRemoveValue(services, subcount_keys[index]);
+        require_test(!decode_rm_services(services, &decoded), "missing selected service subcount", count);
+        CFDictionarySetValue(services, subcount_keys[index], kCFBooleanTrue);
+        require_test(!decode_rm_services(services, &decoded), "Boolean selected service subcount", count);
+        double fractional = 1.0;
+        CFNumberRef floating = CFNumberCreate(kCFAllocatorDefault,
+            kCFNumberDoubleType, &fractional);
+        require_test(floating != NULL, "service subcount floating fixture", count);
+        CFDictionarySetValue(services, subcount_keys[index], floating);
+        CFRelease(floating);
+        require_test(!decode_rm_services(services, &decoded), "floating selected service subcount", count);
+        fixture_number(services, subcount_keys[index], -1);
+        require_test(!decode_rm_services(services, &decoded), "negative selected service subcount", count);
+        fixture_number(services, subcount_keys[index], INT64_C(0x100000000));
+        require_test(!decode_rm_services(services, &decoded), "oversized selected service subcount", count);
+        fixture_number(services, subcount_keys[index], UINT32_MAX);
+        require_test(!decode_rm_services(services, &decoded), "service subcount sum cannot overflow or exceed total", count);
+        fixture_number(services, subcount_keys[index], 0);
+        require_test(!decode_rm_services(services, &decoded), "passing selected service requires a subcount", count);
+        CFDictionarySetValue(services, parent_keys[index], kCFBooleanFalse);
+        CFDictionarySetValue(services, CFSTR("Status"), CFSTR("failed"));
+        require_test(decode_rm_services(services, &decoded) && !decoded.passed,
+            "unrun selected service retains valid failed evidence", count);
+        fixture_number(services, subcount_keys[index], 10);
+        CFDictionarySetValue(services, parent_keys[index], kCFBooleanTrue);
+        CFDictionarySetValue(services, CFSTR("Status"), CFSTR("passed"));
+    }
+    CFDictionaryRemoveValue(services, CFSTR("Profile"));
+    require_test(!decode_rm_services(services, &decoded), "missing Resource Server profile", count);
+    CFDictionarySetValue(services, CFSTR("Profile"), kCFBooleanTrue);
+    require_test(!decode_rm_services(services, &decoded), "profile requires a string", count);
+    CFDictionarySetValue(services, CFSTR("Profile"), CFSTR("full-rm"));
+    require_test(!decode_rm_services(services, &decoded), "unreviewed Resource Server profile rejected", count);
+    CFDictionarySetValue(services, CFSTR("Profile"), CFSTR(RM_SERVICES_PROFILE));
+    CFDictionaryRemoveValue(services, CFSTR("FullRmInitialized"));
+    require_test(!decode_rm_services(services, &decoded), "missing full RM activity boundary", count);
+    fixture_number(services, CFSTR("FullRmInitialized"), 0);
+    require_test(!decode_rm_services(services, &decoded), "full RM activity requires CFBoolean", count);
+    CFDictionarySetValue(services, CFSTR("FullRmInitialized"), kCFBooleanTrue);
+    require_test(!decode_rm_services(services, &decoded), "selected services cannot claim full RM startup", count);
+    CFDictionarySetValue(services, CFSTR("FullRmInitialized"), kCFBooleanFalse);
+    CFDictionaryRemoveValue(services, CFSTR("Status"));
+    require_test(!decode_rm_services(services, &decoded),
+        "missing services status", count);
+    CFDictionarySetValue(services, CFSTR("Status"), kCFBooleanTrue);
+    require_test(!decode_rm_services(services, &decoded),
+        "wrong services status type", count);
+    CFDictionarySetValue(services, CFSTR("Status"), CFSTR("unknown"));
+    require_test(!decode_rm_services(services, &decoded),
+        "unknown services status", count);
+    CFDictionarySetValue(services, CFSTR("Status"), CFSTR("passed"));
+
+    struct snapshot snapshot;
+    CFMutableDictionaryRef fixture = valid_fixture();
+    CFDictionaryRemoveValue(fixture, CFSTR("RmServices"));
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.hal_matched &&
+        snapshot.os_foundations.passed && snapshot.caller_integration.passed &&
+        snapshot.nvport_lifecycle.passed && snapshot.nvport_support.passed &&
+        snapshot.hardware_preparation.passed && !snapshot.rm_services.valid,
+        "missing services preserves independent v8 evidence", count);
+    struct report classified;
+    memset(&classified, 0, sizeof(classified));
+    classified.complete = 1;
+    fixture_report_assets(&classified);
+    classified.attached = 1;
+    classified.snapshot = snapshot;
+    require_test(strcmp(report_status(&classified), "invalid_rm_services") == 0 &&
+        report_exit_code(&classified) != 0,
+        "v8 success alone cannot report v9 Resource Server preparation", count);
+    CFDictionarySetValue(fixture, CFSTR("RmServices"), kCFBooleanTrue);
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.hal_matched &&
+        !snapshot.rm_services.valid,
+        "invalid services preserves independent GPU evidence", count);
+    CFDictionarySetValue(fixture, CFSTR("RmServices"), services);
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.rm_services.passed,
+        "services evidence restored", count);
+    classified.snapshot = snapshot;
+    require_test(strcmp(report_status(&classified), "resource_server_prepared") == 0 &&
+        report_exit_code(&classified) == 0,
+        "selected RM services complete the current aggregate fixture", count);
+    CFDictionarySetValue(services, CFSTR("Cleanup"), kCFBooleanFalse);
+    CFDictionarySetValue(services, CFSTR("Status"), CFSTR("failed"));
+    require_test(decode_snapshot(fixture, &snapshot) && !snapshot.rm_services.passed,
+        "cleanup failure remains explicit services evidence", count);
+    classified.snapshot = snapshot;
+    require_test(strcmp(report_status(&classified), "rm_services_failed") == 0 &&
+        report_exit_code(&classified) != 0,
+        "cleanup failure rejects integrated success", count);
+    CFDictionarySetValue(services, CFSTR("Cleanup"), kCFBooleanTrue);
+    CFDictionarySetValue(services, CFSTR("Status"), CFSTR("passed"));
+    require_test(decode_snapshot(fixture, &snapshot), "services serialization fixture", count);
+    classified.snapshot = snapshot;
+    FILE *serialized = tmpfile();
+    require_test(serialized != NULL, "services serialization allocation", count);
+    write_report(serialized, &classified);
+    require_test(fflush(serialized) == 0 && fseek(serialized, 0, SEEK_SET) == 0,
+        "services serialization rewind", count);
+    char text[16384];
+    size_t bytes = fread(text, 1, sizeof(text) - 1, serialized);
+    text[bytes] = '\0';
+    require_test(!ferror(serialized) && strstr(text, "\"format\":9") != NULL &&
+        strstr(text, "\"rm_services\":{\"version\":1,\"status\":\"passed\",\"checks\":32,"
+            "\"resource_server\":true,\"host_memory\":true,\"pci_session\":true,"
+            "\"clients\":true,\"resources\":true,\"sharing\":true,\"control\":true,\"cleanup\":true,"
+            "\"resource_server_checks\":10,\"host_memory_checks\":10,\"pci_session_checks\":10,"
+            "\"profile\":\"" RM_SERVICES_PROFILE "\",\"full_rm_initialized\":false}") != NULL &&
+        strstr(text, "\"status\":\"resource_server_prepared\"") != NULL,
+        "serialized v9 report includes selected RM services without full RM startup", count);
+    fclose(serialized);
+    CFRelease(fixture);
+    CFRelease(services);
+}
+
+static void test_firmware_assets_report(unsigned int *count)
+{
+    struct report classified;
+    memset(&classified, 0, sizeof(classified));
+    classified.complete = 1;
+    classified.attached = 1;
+    CFMutableDictionaryRef fixture = valid_fixture();
+    require_test(decode_snapshot(fixture, &classified.snapshot), "asset report kernel fixture", count);
+    require_test(strcmp(report_status(&classified), "firmware_assets_unavailable") == 0 &&
+        report_exit_code(&classified) != 0, "kernel success alone cannot verify packaged firmware", count);
+    fixture_report_assets(&classified);
+    require_test(report_assets_ready(&classified) &&
+        strcmp(report_status(&classified), "resource_server_prepared") == 0 &&
+        report_exit_code(&classified) == 0, "verified CPU pair completes selected Resource Server result", count);
+    bool *components[] = {&classified.firmware_assets.present, &classified.firmware_assets.hashesVerified,
+        &classified.firmware_assets.containerParsed, &classified.firmware_assets.ucodesParsed,
+        &classified.firmware_assets.cleanup};
+    for (size_t index = 0; index < sizeof(components) / sizeof(components[0]); ++index) {
+        *components[index] = false;
+        require_test(!report_assets_valid(&classified) &&
+            strcmp(report_status(&classified), "invalid_firmware_assets") == 0,
+            "ready firmware pair requires every C bridge component", count);
+        *components[index] = true;
+    }
+    classified.firmware_assets_returned = 0;
+    require_test(!report_assets_valid(&classified), "bridge return must agree with pair readiness", count);
+    classified.firmware_assets_returned = 2;
+    require_test(!report_assets_valid(&classified), "bridge return is exactly zero or one", count);
+    fixture_report_assets(&classified);
+    classified.firmware_assets.format = 2;
+    require_test(!report_assets_valid(&classified), "unsupported asset evidence format", count);
+    fixture_report_assets(&classified);
+    classified.firmware_assets.checks = 14;
+    require_test(!report_assets_valid(&classified), "approved pair requires the pinned 15-check contract", count);
+    fixture_report_assets(&classified);
+    classified.firmware_assets.gspSize -= 1;
+    require_test(!report_assets_valid(&classified), "approved pair requires exact GSP size", count);
+    fixture_report_assets(&classified);
+    classified.firmware_assets.ucodesSize += 1;
+    require_test(!report_assets_valid(&classified), "oversized UCODES evidence rejected", count);
+    fixture_report_assets(&classified);
+    classified.firmware_assets.imageSize += 1;
+    require_test(!report_assets_valid(&classified), "approved image extent is pinned", count);
+    fixture_report_assets(&classified);
+    classified.firmware_assets.signatureSize = 0;
+    require_test(!report_assets_valid(&classified), "approved signature extent is pinned", count);
+    fixture_report_assets(&classified);
+    classified.firmware_assets.sectionCount = 513;
+    require_test(!report_assets_valid(&classified), "section count is bounded", count);
+    fixture_report_assets(&classified);
+    classified.firmware_assets.ucodesEntryCount = 4097;
+    require_test(!report_assets_valid(&classified), "UCODES directory count is bounded", count);
+    fixture_report_assets(&classified);
+    classified.firmware_assets.ucodesPresentCount = 497;
+    require_test(!report_assets_valid(&classified), "UCODES present count cannot exceed entries", count);
+    fixture_report_assets(&classified);
+    classified.firmware_assets.reason = (S540NvidiaFirmwareAssetReason)99;
+    require_test(!report_assets_valid(&classified), "unknown asset reason rejected", count);
+    fixture_report_assets(&classified);
+    classified.firmware_assets.pairReady = false;
+    classified.firmware_assets_returned = 0;
+    require_test(!report_assets_valid(&classified), "verified reason cannot claim an unready pair", count);
+    classified.firmware_assets.reason = S540_NVIDIA_ASSETS_HASH_MISMATCH;
+    classified.firmware_assets.hashesVerified = false;
+    require_test(report_assets_valid(&classified) &&
+        strcmp(report_status(&classified), "firmware_assets_failed") == 0 &&
+        report_exit_code(&classified) != 0, "valid hash failure blocks final success", count);
+    FILE *serialized = tmpfile();
+    require_test(serialized != NULL, "asset serialization allocation", count);
+    write_report(serialized, &classified);
+    require_test(fflush(serialized) == 0 && fseek(serialized, 0, SEEK_SET) == 0,
+        "asset serialization rewind", count);
+    char text[16384];
+    size_t bytes = fread(text, 1, sizeof(text) - 1, serialized);
+    text[bytes] = '\0';
+    require_test(!ferror(serialized) && strstr(text, "\"firmware_assets\":{\"format\":1,\"status\":\"failed\"") != NULL &&
+        strstr(text, "\"reason\":\"hash_mismatch\"") != NULL &&
+        strstr(text, "\"firmware_image_verified\":false") != NULL &&
+        strstr(text, "\"full_rm_initialized\":false") != NULL,
+        "userspace asset failure remains separate from inactive kernel GPU stages", count);
+    fclose(serialized);
+    CFRelease(fixture);
 }
 
 static int run_self_tests(void)
@@ -2264,7 +2765,9 @@ static int run_self_tests(void)
     test_caller_integration(&count);
     test_nvport_lifecycle(&count);
     test_nvport_support(&count);
+    test_rm_services(&count);
     test_hardware_preparation(&count);
+    test_firmware_assets_report(&count);
     struct snapshot snapshot;
     CFMutableDictionaryRef fixture = valid_fixture();
     require_test(decode_snapshot(fixture, &snapshot) &&
@@ -2279,9 +2782,9 @@ static int run_self_tests(void)
     CFDictionaryRemoveValue(fixture, CFSTR("Extra"));
     CFDictionaryRemoveValue(fixture, CFSTR("Format"));
     require_test(!decode_snapshot(fixture, &snapshot), "missing format", &count);
-    fixture_number(fixture, CFSTR("Format"), 9);
+    fixture_number(fixture, CFSTR("Format"), 10);
     require_test(!decode_snapshot(fixture, &snapshot), "unsupported format", &count);
-    fixture_number(fixture, CFSTR("Format"), 8);
+    fixture_number(fixture, CFSTR("Format"), 9);
     CFDictionarySetValue(fixture, CFSTR("VendorID"), kCFBooleanTrue);
     require_test(!decode_snapshot(fixture, &snapshot), "boolean numeric field", &count);
     fixture_number(fixture, CFSTR("VendorID"), -1);
@@ -2296,7 +2799,7 @@ static int run_self_tests(void)
     CFDictionarySetValue(fixture, CFSTR("Format"), floating);
     CFRelease(floating);
     require_test(!decode_snapshot(fixture, &snapshot), "floating numeric field", &count);
-    fixture_number(fixture, CFSTR("Format"), 8);
+    fixture_number(fixture, CFSTR("Format"), 9);
     fixture_number(fixture, CFSTR("SubsystemID"), 0x3807);
     require_test(!decode_snapshot(fixture, &snapshot), "wrong subsystem", &count);
     fixture_number(fixture, CFSTR("SubsystemID"), 0x3806);
@@ -2464,6 +2967,7 @@ static int run_self_tests(void)
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortLifecycle"));
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortSupport"));
     CFDictionaryRemoveValue(fixture, CFSTR("HardwarePreparation"));
+    CFDictionaryRemoveValue(fixture, CFSTR("RmServices"));
     fixture_number(fixture, CFSTR("Format"), 1);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.1.0"));
     CFDictionarySetValue(fixture, CFSTR("AccessPolicy"), CFSTR(LEGACY_ACCESS_POLICY));
@@ -2481,6 +2985,7 @@ static int run_self_tests(void)
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortLifecycle"));
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortSupport"));
     CFDictionaryRemoveValue(fixture, CFSTR("HardwarePreparation"));
+    CFDictionaryRemoveValue(fixture, CFSTR("RmServices"));
     fixture_number(fixture, CFSTR("Format"), 2);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.2.0"));
     CFDictionarySetValue(fixture, CFSTR("AccessPolicy"), CFSTR(LEGACY_MMIO_ACCESS_POLICY));
@@ -2496,6 +3001,7 @@ static int run_self_tests(void)
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortLifecycle"));
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortSupport"));
     CFDictionaryRemoveValue(fixture, CFSTR("HardwarePreparation"));
+    CFDictionaryRemoveValue(fixture, CFSTR("RmServices"));
     fixture_number(fixture, CFSTR("Format"), 3);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.3.0"));
     require_test(decode_snapshot(fixture, &snapshot) && snapshot.format == 3 &&
@@ -2510,6 +3016,7 @@ static int run_self_tests(void)
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortLifecycle"));
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortSupport"));
     CFDictionaryRemoveValue(fixture, CFSTR("HardwarePreparation"));
+    CFDictionaryRemoveValue(fixture, CFSTR("RmServices"));
     fixture_number(fixture, CFSTR("Format"), 4);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.4.0"));
     require_test(decode_snapshot(fixture, &snapshot) && snapshot.format == 4 &&
@@ -2524,6 +3031,7 @@ static int run_self_tests(void)
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortLifecycle"));
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortSupport"));
     CFDictionaryRemoveValue(fixture, CFSTR("HardwarePreparation"));
+    CFDictionaryRemoveValue(fixture, CFSTR("RmServices"));
     fixture_number(fixture, CFSTR("Format"), 5);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.5.0"));
     require_test(decode_snapshot(fixture, &snapshot) && snapshot.format == 5 &&
@@ -2537,6 +3045,7 @@ static int run_self_tests(void)
     fixture = valid_fixture();
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortSupport"));
     CFDictionaryRemoveValue(fixture, CFSTR("HardwarePreparation"));
+    CFDictionaryRemoveValue(fixture, CFSTR("RmServices"));
     fixture_number(fixture, CFSTR("Format"), 6);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.6.0"));
     require_test(decode_snapshot(fixture, &snapshot) && snapshot.format == 6 &&
@@ -2558,6 +3067,7 @@ static int run_self_tests(void)
 
     fixture = valid_fixture();
     CFDictionaryRemoveValue(fixture, CFSTR("HardwarePreparation"));
+    CFDictionaryRemoveValue(fixture, CFSTR("RmServices"));
     fixture_number(fixture, CFSTR("Format"), 7);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.7.0"));
     require_test(decode_snapshot(fixture, &snapshot) && snapshot.format == 7 &&
@@ -2575,6 +3085,28 @@ static int run_self_tests(void)
         "successful v7 cannot be classified as v8 transport preparation", &count);
     CFDictionarySetValue(fixture, CFSTR("Extra"), CFSTR("not allowed"));
     require_test(!decode_snapshot(fixture, &snapshot), "version 0.7.0 extra rejected", &count);
+    CFRelease(fixture);
+
+    fixture = valid_fixture();
+    CFDictionaryRemoveValue(fixture, CFSTR("RmServices"));
+    fixture_number(fixture, CFSTR("Format"), 8);
+    CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.8.0"));
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.format == 8 &&
+        snapshot.hal_matched && snapshot.os_foundations.passed &&
+        snapshot.caller_integration.passed && snapshot.nvport_lifecycle.passed &&
+        snapshot.nvport_support.passed && snapshot.hardware_preparation.passed &&
+        !snapshot.rm_services.valid,
+        "strict version 0.8.0 snapshot recognized without selected RM services", &count);
+    struct report old_services;
+    memset(&old_services, 0, sizeof(old_services));
+    old_services.complete = 1;
+    old_services.attached = 1;
+    old_services.outdated = snapshot.format < 9;
+    old_services.snapshot = snapshot;
+    require_test(strcmp(report_status(&old_services), "outdated_probe") == 0,
+        "successful v8 cannot be classified as v9 Resource Server preparation", &count);
+    CFDictionarySetValue(fixture, CFSTR("Extra"), CFSTR("not allowed"));
+    require_test(!decode_snapshot(fixture, &snapshot), "version 0.8.0 extra rejected", &count);
     CFRelease(fixture);
 
     fixture = valid_fixture();
@@ -2699,6 +3231,7 @@ static int run_self_tests(void)
     struct report classified;
     memset(&classified, 0, sizeof(classified));
     classified.complete = 1;
+    fixture_report_assets(&classified);
     require_test(strcmp(report_status(&classified), "not_attached") == 0 &&
         report_exit_code(&classified) == 0, "not attached result is complete", &count);
     classified.attached = 1;
@@ -2712,6 +3245,8 @@ static int run_self_tests(void)
     classified.snapshot.nvport_support.passed = 1;
     classified.snapshot.hardware_preparation.valid = 1;
     classified.snapshot.hardware_preparation.passed = 1;
+    classified.snapshot.rm_services.valid = 1;
+    classified.snapshot.rm_services.passed = 1;
     classified.snapshot.mmio.status = MMIO_REFUSED;
     classified.snapshot.boot42.status = MMIO_NOT_ATTEMPTED;
     require_test(strcmp(report_status(&classified), "refused") == 0 &&
@@ -2722,7 +3257,7 @@ static int run_self_tests(void)
     classified.snapshot.mmio.status = MMIO_IDENTIFIED;
     classified.snapshot.boot42.status = MMIO_IDENTIFIED;
     classified.snapshot.hal_matched = 1;
-    require_test(strcmp(report_status(&classified), "transport_prepared") == 0 &&
+    require_test(strcmp(report_status(&classified), "resource_server_prepared") == 0 &&
         report_exit_code(&classified) == 0, "identified result", &count);
     classified.snapshot.os_foundations.passed = 0;
     require_test(strcmp(report_status(&classified), "foundations_failed") == 0 &&
@@ -2759,11 +3294,11 @@ static int run_self_tests(void)
     write_report(serialized, &classified);
     require_test(fflush(serialized) == 0 && fseek(serialized, 0, SEEK_SET) == 0,
         "serialization fixture rewind", &count);
-    char serialized_report[4096];
+    char serialized_report[16384];
     size_t serialized_size = fread(serialized_report, 1, sizeof(serialized_report) - 1, serialized);
     serialized_report[serialized_size] = '\0';
     require_test(!ferror(serialized) && strstr(serialized_report, "\"probe\":null") != NULL &&
-        strstr(serialized_report, "version 0.8.0") != NULL &&
+        strstr(serialized_report, "version 0.9.0") != NULL &&
         strstr(serialized_report, "raw_value") == NULL,
         "legacy report emits fixed instruction without snapshot", &count);
     fclose(serialized);
@@ -2853,6 +3388,7 @@ static int run_self_tests(void)
         "restored integrated snapshot", &count);
     memset(&classified, 0, sizeof(classified));
     classified.complete = 1;
+    fixture_report_assets(&classified);
     classified.attached = 1;
     classified.snapshot = snapshot;
     serialized = tmpfile();
@@ -2865,7 +3401,7 @@ static int run_self_tests(void)
     require_test(!ferror(serialized) && strstr(serialized_report,
         "\"os_foundations\":{\"version\":1,\"status\":\"passed\",\"checks\":5,"
         "\"timer\":true,\"memory\":true,\"atomics\":true,\"allocation\":true,\"mutex\":true}") != NULL &&
-        strstr(serialized_report, "\"status\":\"transport_prepared\"") != NULL,
+        strstr(serialized_report, "\"status\":\"resource_server_prepared\"") != NULL,
         "serialized integrated report includes all foundation evidence", &count);
     fclose(serialized);
     CFRelease(foundations);
@@ -2905,20 +3441,28 @@ int main(int argc, char **argv)
         return 0;
     }
     if (argc == 2 && strcmp(argv[1], "--help") == 0) {
-        puts("Usage: nvidia-transport [--help | --version | --self-test]\n"
-             "Read the S540 NVIDIA transport probe snapshot and verify its provider.\n"
-             "No administrator privileges or device access are required.\n"
+        puts("Usage: nvidia-transport [--assets-dir DIRECTORY | --help | --version | --self-test]\n"
+             "Read the NVIDIA snapshot and verify the packaged firmware pair and full license.\n"
+             "Firmware verification reads CPU files only; no administrator privileges or GPU access.\n"
              "not_attached is an observation, not a diagnosis of the GPU.");
         return 0;
     }
-    if (argc != 1) {
-        fputs("Usage: nvidia-transport [--help | --version | --self-test]\n", stderr);
+    const char *assets_directory = NULL;
+    if (argc == 3 && strcmp(argv[1], "--assets-dir") == 0)
+        assets_directory = argv[2];
+    else if (argc != 1) {
+        fputs("Usage: nvidia-transport [--assets-dir DIRECTORY | --help | --version | --self-test]\n", stderr);
         return 64;
     }
     struct report report;
     memset(&report, 0, sizeof(report));
     report.complete = 1;
     collect_report(&report);
+    if (assets_directory != NULL) {
+        report.firmware_assets_checked = 1;
+        report.firmware_assets_returned = s540_nvidia_firmware_assets_check(
+            assets_directory, &report.firmware_assets);
+    }
     write_report(stdout, &report);
     if (fflush(stdout) == EOF || ferror(stdout))
         return 74;

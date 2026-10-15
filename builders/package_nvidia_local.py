@@ -10,7 +10,7 @@ import stat
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-NAME = 'S540-nvidia-build-local-v8'
+NAME = 'S540-nvidia-build-local-v9'
 SOURCE_FILES = [
     'builders/build_nvidia_transport.py',
     'builders/check_nvidia_foundations.py',
@@ -18,6 +18,9 @@ SOURCE_FILES = [
     'builders/check_nvidia_lifecycle.py',
     'builders/check_nvidia_runtime.py',
     'builders/check_nvidia_transport_preparation.py',
+    'builders/check_nvidia_rm_services.py',
+    'builders/check_nvidia_firmware_assets.py',
+    'builders/reference/nvidia-rm-full-closure.json',
     'tests/test_nvidia_runtime_provenance.py',
     'tests/test_nvidia_rm_consumer_provenance.py',
     'tests/test_nvidia_lifecycle_provenance.py',
@@ -37,7 +40,8 @@ SOURCE_FILES = [
 ]
 for component in ('nvidia-os-adapter', 'nvidia-caller-integration',
                   'nvidia-nvport-lifecycle', 'nvidia-nvport-runtime',
-                  'nvidia-hardware-transport'):
+                  'nvidia-hardware-transport', 'nvidia-resource-server',
+                  'nvidia-rm-services', 'nvidia-firmware-assets'):
     SOURCE_FILES.extend(path.relative_to(ROOT).as_posix()
                         for path in sorted((ROOT / 'packages' / component).rglob('*'))
                         if path.is_file() and '__pycache__' not in path.parts
@@ -63,9 +67,12 @@ def package(commit: str, destination: Path) -> Path:
         raise ValueError('The launcher source commit placeholder is not unique.')
     payload['BUILD-LOCAL.command'] = launcher.replace(token, commit).encode()
     payload['README.txt'] = (
-        'S540 NVIDIA 0.8.0 bundled hardware transport preparation local native build\n\n'
+        'S540 NVIDIA 0.9.0 bundled RM subsystem and host services local native build\n\n'
         'This archive contains source code, not a compiled kext.\n'
-        'Intel macOS and Apple Command Line Tools are required.\n'
+        'Intel macOS, Apple Command Line Tools and Python zstandard 0.25.0 are required.\n'
+        'The build downloads the pinned NVIDIA archive (about 409 MB), extracts only\n'
+        'two unchanged firmware images and their complete matching agreement,\n'
+        'and verifies their exact bytes. No installer is executed.\n'
         'Extract the complete folder into Downloads, then run:\n\n'
         'bash "$HOME/Downloads/' + NAME + '/BUILD-LOCAL.command"\n\n'
         'If developer tools are missing, run xcode-select --install, finish the\n'
@@ -74,10 +81,10 @@ def package(commit: str, destination: Path) -> Path:
         'policy tests, compiles and signs the native package, and runs its\n'
         'decoder self-tests. It never installs or loads the new kext, changes\n'
         'EFI, or requests an administrator password for the build.\n'
-        'An already-loaded probe older than 0.8.0 is allowed as outdated;\n'
-        'this does not claim that the new 0.8.0 probe has run.\n\n'
+        'An already-loaded probe older than 0.9.0 is allowed as outdated;\n'
+        'this does not claim that the new 0.9.0 probe has run.\n\n'
         'Outputs are kept in a private NVIDIA-BUILD folder on the Desktop.\n'
-        'On success, share output/S540-nvidia-transport-v8.zip for review.\n'
+        'On success, share output/S540-nvidia-transport-v9.zip for review.\n'
         'On failure, share build.log from that folder.\n\n'
         'Project source commit: ' + commit + '\n'
     ).encode()

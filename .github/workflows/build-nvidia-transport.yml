@@ -1,4 +1,4 @@
-name: Build bundled NVIDIA hardware transport preparation
+name: Build bundled NVIDIA RM subsystem and host services
 
 on:
   push:
@@ -15,13 +15,24 @@ on:
       - 'builders/check_nvidia_lifecycle.py'
       - 'builders/check_nvidia_runtime.py'
       - 'builders/check_nvidia_transport_preparation.py'
+      - 'builders/check_nvidia_rm_services.py'
+      - 'builders/check_nvidia_firmware_assets.py'
+      - 'builders/reference/nvidia-rm-full-closure.json'
       - 'packages/nvidia-nvport-lifecycle/**'
       - 'packages/nvidia-nvport-runtime/**'
       - 'packages/nvidia-hardware-transport/**'
+      - 'packages/nvidia-resource-server/**'
+      - 'packages/nvidia-rm-services/**'
+      - 'packages/nvidia-firmware-assets/**'
       - 'tests/test_nvidia_transport*'
       - 'tests/test_nvidia_*_provenance.py'
       - '.github/workflows/build-nvidia-transport.yml'
   workflow_dispatch:
+    inputs:
+      analyze_full_rm:
+        description: Reproduce the full original RM GNU/ELF compile inventory
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -29,7 +40,7 @@ permissions:
 jobs:
   build:
     runs-on: macos-15-intel
-    timeout-minutes: 20
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -42,19 +53,44 @@ jobs:
           persist-credentials: false
       - name: Check PCI identity, BAR0 and power-state refusal policy
         run: python3 tests/test_nvidia_transport_kernel.py
-      - name: Check CPU regressions, DMA, PCI inventory, firmware bounds and bundled rollback
+      - name: Install the pinned bounded firmware archive decoder
+        run: python3 -m pip install --disable-pip-version-check zstandard==0.25.0
+      - name: Check RM resources, host services, firmware assets and all prior regressions
         run: python3 builders/build_nvidia_transport.py --kernel-sdk build-src/MacKernelSDK --output-dir build/nvidia-transport
       - name: Run the packaged reporter without loading the kernel probe
         shell: bash
         run: |
           set -euo pipefail
-          /usr/bin/unzip -q build/nvidia-transport/S540-nvidia-transport-v8.zip -d "$RUNNER_TEMP/nvidia-transport-package"
-          /bin/bash "$RUNNER_TEMP/nvidia-transport-package/S540-nvidia-transport-v8/CHECK-TRANSPORT.command" --output-dir "$RUNNER_TEMP"
+          /usr/bin/unzip -q build/nvidia-transport/S540-nvidia-transport-v9.zip -d "$RUNNER_TEMP/nvidia-transport-package"
+          /bin/bash "$RUNNER_TEMP/nvidia-transport-package/S540-nvidia-transport-v9/CHECK-TRANSPORT.command" --output-dir "$RUNNER_TEMP"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: S540-nvidia-transport-v8
+          name: S540-nvidia-transport-v9
           path: |
-            build/nvidia-transport/S540-nvidia-transport-v8.zip
-            build/nvidia-transport/S540-nvidia-transport-v8.zip.sha256
+            build/nvidia-transport/S540-nvidia-transport-v9.zip
+            build/nvidia-transport/S540-nvidia-transport-v9.zip.sha256
+          if-no-files-found: error
+          retention-days: 30
+
+  full-rm-compile-inventory:
+    if: github.event_name == 'workflow_dispatch' && inputs.analyze_full_rm
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: NVIDIA/open-gpu-kernel-modules
+          ref: 1a82fbfda8f321b056eb3568850f9316c5e465c5
+          path: build-src/nvidia-upstream
+          persist-credentials: false
+      - name: Recompile all original RM sources and compare normalized external contracts
+        run: python3 builders/check_nvidia_rm_services.py --analyze-full-rm-upstream build-src/nvidia-upstream --output-dir build/full-rm-analysis
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: NVIDIA-full-RM-compile-inventory
+          path: build/full-rm-analysis/full-rm-closure-reproduction.json
           if-no-files-found: error
           retention-days: 30

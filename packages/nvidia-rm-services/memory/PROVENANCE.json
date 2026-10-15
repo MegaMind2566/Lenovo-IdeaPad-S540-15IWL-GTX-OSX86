@@ -1,0 +1,49 @@
+{
+  "format": 1,
+  "component": "nvidia-rm-memory-services",
+  "upstream_repository": "https://github.com/NVIDIA/open-gpu-kernel-modules",
+  "upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "inputs": [
+    {
+      "upstream_path": "kernel-open/common/inc/nv.h",
+      "reference_path": "reference/nv.h",
+      "sha256": "ae47af242f37db76255094628d79c31ac0a63906452a71a4df6390f76f7585d2"
+    },
+    {
+      "upstream_path": "src/nvidia/inc/kernel/os/nv_memory_type.h",
+      "reference_path": "reference/nv_memory_type.h",
+      "sha256": "c6472e939ac912d5df5e2e17dab35f8444269b964e2b1536f05df874990354cb"
+    }
+  ],
+  "interface_header": "nv_memory_services.h",
+  "implementation": "S540NvidiaRmMemory.cpp",
+  "implementation_kind": "Darwin adapter with exact selected NVIDIA C ABI; not copied Linux implementation bodies",
+  "implemented": [
+    "nv_alloc_pages",
+    "nv_free_pages",
+    "nv_alloc_kernel_mapping",
+    "nv_free_kernel_mapping"
+  ],
+  "explicitly_unsupported": [
+    "nv_dma_map_alloc",
+    "nv_dma_unmap_alloc"
+  ],
+  "opaque_tags": [
+    "nv_state_t",
+    "nv_dma_device"
+  ],
+  "profile": {
+    "device": "deviceless only",
+    "page_bytes": 4096,
+    "maximum_pages": 16,
+    "maximum_allocations": 8,
+    "maximum_mappings": 32,
+    "cache_type": 0,
+    "numa_node": -1,
+    "physically_contiguous": false,
+    "unencrypted_transition": false,
+    "execution_context": "ordinary thread; interrupts enabled; no spin lock held"
+  },
+  "darwin_sdk_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+  "darwin_lifecycle_reference_commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea"
+}

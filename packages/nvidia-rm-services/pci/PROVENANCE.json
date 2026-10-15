@@ -1,0 +1,73 @@
+{
+  "format": 1,
+  "component": "nvidia-provider-session",
+  "implementation": "authored Darwin adapter; no upstream function body copied",
+  "c_exports_added": [],
+  "scope": {
+    "retained_read_only_provider": true,
+    "configuration_bytes": 4096,
+    "production_segment_verified": false,
+    "provider_opened": false,
+    "pci_writes": false,
+    "gpu_bar_access": false,
+    "interrupt_registration": false,
+    "rm_initialized": false
+  },
+  "references": [
+    {
+      "repository": "NVIDIA/open-gpu-kernel-modules",
+      "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+      "path": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "git_blob_sha1": "03de89a28a2611bca2fb2a3d85c7f617a681a20a",
+      "lines": [102, 108],
+      "role": "PCI handle/read/write ABI reference; existing C hooks remain unchanged"
+    },
+    {
+      "repository": "NVIDIA/open-gpu-kernel-modules",
+      "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+      "path": "kernel-open/nvidia/os-pci.c",
+      "git_blob_sha1": "4190c59e634aacf896fac102b87018dc20c1045f",
+      "role": "Linux opaque PCI handle and full configuration-space reference; not compiled"
+    },
+    {
+      "repository": "acidanthera/MacKernelSDK",
+      "commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+      "path": "Headers/IOKit/pci/IOPCIDevice.h",
+      "git_blob_sha1": "20b3d8a3959288e84d049cb64e48178938e623e8",
+      "role": "Public configuration-read wrappers and bus/device/function getters"
+    },
+    {
+      "repository": "acidanthera/MacKernelSDK",
+      "commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+      "path": "Headers/IOKit/IOLocks.h",
+      "git_blob_sha1": "aa4951e1ce7ca345aae7b0eaf012b464710a813a",
+      "role": "IOLock allocation, ordinary-thread lock and atomic sleep/wakeup contracts"
+    },
+    {
+      "repository": "apple-oss-distributions/IOPCIFamily",
+      "commit": "4822b27a36e2de70e231ecf2bf3021384fab6ec2",
+      "path": "IOPCIDevice.cpp",
+      "role": "Configuration access implementation and BDF getter semantics"
+    },
+    {
+      "repository": "apple-oss-distributions/IOPCIFamily",
+      "commit": "4822b27a36e2de70e231ecf2bf3021384fab6ec2",
+      "path": "config/IOPCIFamily.exports",
+      "git_blob_sha1": "1e7e8f11e5d3e40545580bab8cc6fd13b5cf7d67",
+      "role": "Exported read8/16/32 and bus/device/function getters"
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "path": "iokit/Kernel/IOService.cpp",
+      "role": "Recursive provider arbitration can wait; isOpen and isInactive semantics"
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "path": "config/IOKit.exports",
+      "git_blob_sha1": "03822d86c54a5affe32259444d53a4e68d8f044f",
+      "role": "Provider arbitration/state APIs and IOLock exports"
+    }
+  ]
+}

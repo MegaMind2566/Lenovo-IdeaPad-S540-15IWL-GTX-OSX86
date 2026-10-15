@@ -213,17 +213,42 @@ void runPreparation(void *opaque)
           os_pci_read_dword(&pci, 0, &dword) == NV_ERR_INVALID_STATE && dword == 0);
     check(r, r.cleanup, firmware.cleanup);
 }
+
+struct ContinuationContext {
+    PreparationContext preparation;
+    S540NvidiaHardwareRuntime::StartupContinuation continuation;
+    void *context;
+};
+
+void runWithContinuation(void *opaque)
+{
+    auto &next = *static_cast<ContinuationContext *>(opaque);
+    runPreparation(&next.preparation);
+    // runPreparation has released provider arbitration and every DMA object.
+    // Keep the existing CPU startup lease while executing the next whole block.
+    if (next.preparation.result->passed() && next.continuation)
+        next.continuation(next.context);
+}
 }
 
 S540NvidiaHardwareRuntime::IntegratedResult
 S540NvidiaHardwareRuntime::checkIntegrated(IOPCIDevice *provider)
 {
+    return checkIntegrated(provider, nullptr, nullptr);
+}
+
+S540NvidiaHardwareRuntime::IntegratedResult
+S540NvidiaHardwareRuntime::checkIntegrated(IOPCIDevice *provider,
+                                        StartupContinuation continuation,
+                                        void *nextContext)
+{
     IntegratedResult result{};
     result.preparation = {1, 1, false, false, false, false, false, false,
                           "unavailable", "not_run", 0, 0,
                           "pci-context-unbound", 0, 0, 0, false, false};
-    PreparationContext context{provider, &result.preparation};
-    result.v7 = S540NvidiaSupportRuntime::checkIntegrated(runPreparation, &context);
+    ContinuationContext context{{provider, &result.preparation}, continuation,
+                                nextContext};
+    result.v7 = S540NvidiaSupportRuntime::checkIntegrated(runWithContinuation, &context);
     result.acquired = result.v7.acquired;
     return result;
 }

@@ -1,0 +1,83 @@
+{
+  "format": 1,
+  "release": "615.78.08",
+  "source_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "source_repository": "NVIDIA/open-gpu-kernel-modules",
+  "archive": {
+    "url": "https://us.download.nvidia.com/XFree86/Linux-x86_64/615.78.08/NVIDIA-Linux-x86_64-615.78.08-no-compat32.run",
+    "checksum_url": "https://us.download.nvidia.com/XFree86/Linux-x86_64/615.78.08/NVIDIA-Linux-x86_64-615.78.08-no-compat32.run.sha256sum",
+    "sha256": "e9d5167f4ca67f58b2b3447584b1e4273218d5088aba210d3aef2a407e522892",
+    "size": 408754604,
+    "skip_line": 1015,
+    "payload_offset": 160219,
+    "compression": "zstd"
+  },
+  "assets": [
+    {
+      "archive_path": "firmware/gsp_tu10x.bin",
+      "filename": "gsp_tu10x.bin",
+      "size": 22901632,
+      "sha256": "0c6124c11d59900a05ab5461e5fc7087fc6687a1badead49a7eeca6ed13eeb3b"
+    },
+    {
+      "archive_path": "firmware/ucodes_tu10x.bin",
+      "filename": "ucodes_tu10x.bin",
+      "size": 8837632,
+      "sha256": "6027ab3736f733b5a06e6e61aaae957d1f990426a263849ebcfa8a49eeb4a5d0"
+    },
+    {
+      "archive_path": "LICENSE",
+      "filename": "LICENSE",
+      "size": 22653,
+      "sha256": "c692fb14ad4f499c6aee1b9e144e6905148c420e6225b17cb2937366c1e507ad"
+    }
+  ],
+  "approved_pair": {
+    "gsp": "gsp_tu10x.bin",
+    "ucodes": "ucodes_tu10x.bin",
+    "signature_section": ".fwsignature_tu11x",
+    "gsp_build_id": "4c2b93ff78c815828bdf2bb36cbf3b17c9f0e41b",
+    "ucodes_version": 1,
+    "ucodes_entry_count": 496,
+    "ucodes_present_entries": 38,
+    "ucodes_fingerprint": "0x8d1990ab6b98ae2b"
+  },
+  "redistribution": {
+    "automatic_asset_packaging": true,
+    "notice_path": "NVIDIA-DRIVER-LICENSE.txt",
+    "notice_sha256": "c692fb14ad4f499c6aee1b9e144e6905148c420e6225b17cb2937366c1e507ad",
+    "policy": "Package only the three SHA256-verified, unmodified firmware/notice files for NVIDIA GPU use with the XNU open-source kernel. Preserve the complete driver agreement. Firmware source/hash verification does not authenticate or execute GPU code.",
+    "grant_reference": "NVIDIA Driver License Agreement 1.1(d), limitations in section 2 apply"
+  },
+  "references": [
+    {
+      "upstream_path": "src/nvidia/src/kernel/core/bin_data_pvt.h",
+      "local_path": "reference/bin_data_pvt.h",
+      "sha256": "0a46eff1c9db21f4b19d23d42c75d411685755f98f08b76247ace36a4fe1691a",
+      "git_blob_sha1": "5cfb5727d339b7a86d78835cd83971ea7f985ce9",
+      "mode": "verbatim"
+    },
+    {
+      "upstream_path": "src/nvidia/arch/nvalloc/common/inc/gsp/gsp_fw_wpr_meta_v1.h",
+      "local_path": "reference/gsp_fw_wpr_meta_v1.h",
+      "sha256": "04e2da01f1c1cedc6b740b1bab881f868419d93fb4701fbe1885bed09063f2b3",
+      "git_blob_sha1": "39502c4bc91672ac91aa596a9bf3bfd57a55d62c",
+      "mode": "verbatim"
+    },
+    {
+      "upstream_path": "src/nvidia/arch/nvalloc/common/inc/nv-firmware.h",
+      "local_path": "reference/nv-firmware.h",
+      "sha256": "377e737e101085ef2acdba4998fb128b2e40bf2d256a69418bd34484877de5a3",
+      "git_blob_sha1": "000aa3820cf340218fc6a1746334ad8308338327",
+      "mode": "verbatim"
+    },
+    {
+      "upstream_path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+      "local_path": "reference/kgsp_radix3.c.in",
+      "sha256": "887872b5ab93ae85fa1f13b9fb1bc5fa28b56fe262bbc3db36cbe0640f486d2c",
+      "git_blob_sha1": "7e89ef468d35807018f8cbd6c044960607e8244f",
+      "mode": "exact-function-excerpt",
+      "function": "kgspCreateRadix3_IMPL"
+    }
+  ]
+}

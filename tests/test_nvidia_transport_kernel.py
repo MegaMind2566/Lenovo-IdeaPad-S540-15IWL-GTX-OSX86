@@ -258,7 +258,7 @@ int main() {
         with (PACKAGE / "Info.plist").open("rb") as stream:
             info = plistlib.load(stream)
         self.assertEqual(info["CFBundleIdentifier"], "org.osx86.S540NvidiaPCIProbe")
-        self.assertEqual(info["CFBundleVersion"], "0.8.0")
+        self.assertEqual(info["CFBundleVersion"], "0.9.0")
         self.assertEqual(set(info["IOKitPersonalities"]), {"S540NvidiaPCIProbe"})
         personality = info["IOKitPersonalities"]["S540NvidiaPCIProbe"]
         self.assertEqual(personality, {

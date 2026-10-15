@@ -1,0 +1,496 @@
+{
+  "repository": "https://github.com/NVIDIA/open-gpu-kernel-modules",
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "release": "615.78.08",
+  "files": [
+    {
+      "path": "src/common/inc/nv_speculation_barrier.h",
+      "sha256": "96125691e91c0bc14c53170266ec32805e6be05386b2c9bce54bd8a3e77241f2",
+      "git_blob": "8f9121bcfa717d241baa9c91984dc05088e58a75"
+    },
+    {
+      "path": "src/common/inc/nvctassert.h",
+      "sha256": "d5ab688eb078b2bd2ad0ffaf21c851ce520450a4eb8bc758ae77cf330ad495ce",
+      "git_blob": "89a70832d691c363b35165c32ddc0fce9c992b59"
+    },
+    {
+      "path": "src/common/inc/nvlog_inc.h",
+      "sha256": "35ca7a18aa2f555886f46572581ac59096ef77b6d92d46f6aa9fa8c4a49b77c3",
+      "git_blob": "c40c64fd2ac8863ec7da4358f4bfe790b9249c57"
+    },
+    {
+      "path": "src/common/inc/nvlog_inc2.h",
+      "sha256": "b77cee5759abb9adca858e4523dcdd78abceac8204bb75bfcd52471e94f94a47",
+      "git_blob": "7f10150c244a0e20c32eadb6428095e7759e675f"
+    },
+    {
+      "path": "src/common/sdk/nvidia/inc/class/cl9010.h",
+      "sha256": "f388882c995687540d7515e25f68613e3f8a67a35add99d761afd005656a49c7",
+      "git_blob": "ad901c789e2412830d35324b37358e68bcf64220"
+    },
+    {
+      "path": "src/common/sdk/nvidia/inc/class/cl9010_callback.h",
+      "sha256": "2571a29472ad80a60c60f2bcaedc8354179b45c6248c98792503349dae419ba8",
+      "git_blob": "1945b686b924b2b3e487b378decad40645ce3bed"
+    },
+    {
+      "path": "src/common/sdk/nvidia/inc/cpuopsys.h",
+      "sha256": "329ab764372bace3e1445315bb7a3766d4f60aacb8523ac3e3c760c79358f4fb",
+      "git_blob": "6467b396a696a47fa71d4ad41e32d27f344fcdce"
+    },
+    {
+      "path": "src/common/sdk/nvidia/inc/nv-kernel-interface-api.h",
+      "sha256": "1cf34c1dcd1abf535fb27387145374972a43ec9cd6f6c9ef927777431bda3cc4",
+      "git_blob": "183f9b4312eb0913c0a0a97e4db1f62a50b442c5"
+    },
+    {
+      "path": "src/common/sdk/nvidia/inc/nv_stdarg.h",
+      "sha256": "bd61b81589cfff85ac7af809d792af63f1e48f5648038e27576983a7ecf5ce4d",
+      "git_blob": "b23f7f7b80027464a33a2bd0f2b366e0d8fbeda6"
+    },
+    {
+      "path": "src/common/sdk/nvidia/inc/nv_stddef.h",
+      "sha256": "140f320650bff616aa8afd81930af063d562a51c83d211b2d4384d95c5411858",
+      "git_blob": "a69b28c023b06cd98f49dccfadf1097f762a83ab"
+    },
+    {
+      "path": "src/common/sdk/nvidia/inc/nvcfg_sdk.h",
+      "sha256": "cb9b9ddf1d9d55527e182c1864fb45dcc7331e6de1498a71814cfc5bbe0c62c8",
+      "git_blob": "4ce8d4b66739f3b2c4a1187de8169b436f3c75a1"
+    },
+    {
+      "path": "src/common/sdk/nvidia/inc/nvgputypes.h",
+      "sha256": "dcb4bf6a0eae9883ef36438dac4765a47a90555a01e887c380caf0690c7be08d",
+      "git_blob": "d018414673fd5e181ca6b47d6936ff238d98b59a"
+    },
+    {
+      "path": "src/common/sdk/nvidia/inc/nvmisc.h",
+      "sha256": "52fa10e9d9d35e0e5c7b71621eda632a97af29f7ca7117b0f4b91704ca1ce775",
+      "git_blob": "4f23e392d9eaeb2736235150cdf75906fe56f38d"
+    },
+    {
+      "path": "src/common/sdk/nvidia/inc/nvos.h",
+      "sha256": "27adc076fe1a265d41374f7c865a6afb6a2f1025fc4e136d03431a638570f35c",
+      "git_blob": "6688d736cd88ed6cc94559062bdc213da052e039"
+    },
+    {
+      "path": "src/common/sdk/nvidia/inc/nvsecurityinfo.h",
+      "sha256": "5614686e8fb70bb647c23dba7903916536ea69386e41ef7f5b0242a36db1621c",
+      "git_blob": "dfdc92f8a977dcb8ba9ef9c1e967103212bc7a06"
+    },
+    {
+      "path": "src/common/sdk/nvidia/inc/nvstatus.h",
+      "sha256": "e8267172a1f7a56420d612c6734b3554b9ff6a3d33fdda21b1371ff4ce4b8675",
+      "git_blob": "4f5284db2b1e6af1c2c0c85bc39dfc14daccc9fd"
+    },
+    {
+      "path": "src/common/sdk/nvidia/inc/nvstatuscodes.h",
+      "sha256": "4a9a39b51862d21cfa446414135386616a4a4914dd34dc83f98099295fea7b56",
+      "git_blob": "430eed77a03f2f15bf058d3c49931a9f89ace08e"
+    },
+    {
+      "path": "src/common/sdk/nvidia/inc/nvtypes.h",
+      "sha256": "da23dbc28805c390d62338dba5603eb12b2e94c8aaf873c1c42c1a5f10f26b79",
+      "git_blob": "cb6d906a34cf6ace3d852657cf8dde4a587d7721"
+    },
+    {
+      "path": "src/common/sdk/nvidia/inc/rs_access.h",
+      "sha256": "ee3174aa565a08594f66c325b06d24bd8e798d933bf74ff12c803cf3614bb117",
+      "git_blob": "7020677422f7616d049dbae969b9730ab3962083"
+    },
+    {
+      "path": "src/nvidia/arch/nvalloc/unix/include/nv-dev-printf.h",
+      "sha256": "0585b5d49b1bcaa6ec1fe07511c337cfa77ddf45b4aa9076ca5a02a516b1ec5d",
+      "git_blob": "52f825521d60ddf9c0a481567d0e06592da83ae9"
+    },
+    {
+      "path": "src/nvidia/generated/g_object_nvoc.c",
+      "sha256": "a2fda394bc0ca25a93c041b57492521c1d07dfb0adfd4a0198662866ce07ad9a",
+      "git_blob": "27d89fd24d224f7ef1cd02f409ddac2f504b8ede"
+    },
+    {
+      "path": "src/nvidia/generated/g_object_nvoc.h",
+      "sha256": "8d962b70f3c988a27a0d5bf5ed7e0e38124f5ef87775602da063e8fecd749c8b",
+      "git_blob": "cde6fcceaeb0aa14337b830edcf9ba3dc4e92f51"
+    },
+    {
+      "path": "src/nvidia/generated/g_resserv_nvoc.h",
+      "sha256": "c4b62ac9349f1b0ee1dd8ae44781cd09bef937e224a7b0ba93122dc0c05a71fc",
+      "git_blob": "dafe850b30d181cdeddccff3fe2a42ab35a93978"
+    },
+    {
+      "path": "src/nvidia/generated/g_rs_client_nvoc.c",
+      "sha256": "50566cac95a5a6177fb0dc12209077074a6a732ab7fe7233e64535e14a8c1f2f",
+      "git_blob": "7f9276f5d849eb860b1ea72a8cc1248ecac10ce3"
+    },
+    {
+      "path": "src/nvidia/generated/g_rs_client_nvoc.h",
+      "sha256": "8b8901e937dc2264eede28b3dc96e75505160d8b86f26d12c2a30a68ff29752a",
+      "git_blob": "894c056fe7a8bb3494ec10ded1f424ad3fa01871"
+    },
+    {
+      "path": "src/nvidia/generated/g_rs_resource_nvoc.c",
+      "sha256": "8abcd15e30e38613cbf7d54bfcbbd6d955a9d41e4ac8f6bc9b408174f54fe23d",
+      "git_blob": "4298a8ee8c1faa1a046901b91beacbb75cb5c81d"
+    },
+    {
+      "path": "src/nvidia/generated/g_rs_resource_nvoc.h",
+      "sha256": "da5382d35f932fa408a7e19263162ce9260c7669141b901c10a6655795849ae2",
+      "git_blob": "809086cc620b91017899fdba7abdb809016fd5a1"
+    },
+    {
+      "path": "src/nvidia/generated/g_rs_server_nvoc.c",
+      "sha256": "893949305aec3ddc8e90c4c18082e645a5cb48c5cdd08969a58506fad5ac53da",
+      "git_blob": "2eb23c486e6aff1d16378bb3c322ffe2091c0a97"
+    },
+    {
+      "path": "src/nvidia/generated/g_rs_server_nvoc.h",
+      "sha256": "bc15e1357f5480b2184a65c98153d3a67c650a1bea896ee3fecf401023988810",
+      "git_blob": "3bdf87ca5de6b3d995aad319a879fa8e7538a550"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/containers/list.h",
+      "sha256": "1a9d50463b9356fd4e90feda7412e02b9577b07c9e232c8f218da0c037bc58d2",
+      "git_blob": "629f33c3c857e8e006054b2e998018c1dcedcf88"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/containers/map.h",
+      "sha256": "a558fd93b36e8dfbd64d8ec6d54643b762cb499ff92aeb7de646cd6daebfc4a2",
+      "git_blob": "861ab1d3499c629893a1c0f71f7145018a968a63"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/containers/multimap.h",
+      "sha256": "9425b606882c48d145652a99ba83cdc2e1155f49979eea08b05a028d4df1502e",
+      "git_blob": "c6c961c419b64df19241c001129dd0bb9ede6588"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/containers/type_safety.h",
+      "sha256": "d40049a95769128933be549bfbd3b8270014970c7533624c093aac6434e4644f",
+      "git_blob": "90a9afa9abfc7646f4ac8a829a67f74abd187b55"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvlog/internal/nvlog_printf_internal.h",
+      "sha256": "f6cb1cf707cc52ede61ea8d399a2fad15af05d4ec526bbd1ec0c0b4878f23e93",
+      "git_blob": "8465949020f8a5b975e932e2b03e22d56b24a45c"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvlog/nvlog_printf.h",
+      "sha256": "1f0124e1abc74e2178298f20f10c14ea0b19e182dc64f052310b76618913ef61",
+      "git_blob": "fbce4b3dcbeeb4faa4f05739695ab6b6bc2e9f43"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvoc/object.h",
+      "sha256": "6913d5ad3259a37bb9184dc55b15a7fe0c5a424e1c6b83aeda1d2b1fb678be3e",
+      "git_blob": "771b7da1c95340386f9114d67604861890b38e68"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvoc/prelude.h",
+      "sha256": "831459de38939fca6da78b1ffebe5f77e600039c242cc7b63e81b5fe2e9b66c5",
+      "git_blob": "a34e0988f04ef401904b7a3329de8392277d1d6c"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvoc/rtti.h",
+      "sha256": "28f8c2b2fda36785aad3b83fd97bb464d6aee4744cf7fd2c40db064f01f3d9cf",
+      "git_blob": "c0cac58ab4611678e4e1c353e38ae75a3f5fc814"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvoc/runtime.h",
+      "sha256": "f066bdc669638264974430b1570ee9be2969f660488fd0087547fd40d38177c6",
+      "git_blob": "93c70240c310f1e2df81740c08a6fe1c9772790b"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/atomic.h",
+      "sha256": "b4df4d845bc4c912a575f173a88fe0a57ec37f952a01e6a00edb0fd4eee00523",
+      "git_blob": "2ad6f6a7e353f174f16ffbfb80b9ee8f9fb269ac"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/clang/stdatomic.h",
+      "sha256": "97596786f1e36f94340d448023cb019b34565cb6c320b7cb9df65fe22096bccf",
+      "git_blob": "e796a36c02a751780724696a28220195e451378c"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/core.h",
+      "sha256": "f4a2c178a681264300c307ea0a18d3b9df22c14bd34d71d8a74115ae73c09137",
+      "git_blob": "26f8ec10f15e0bd4a53c3e899dcde9195b4de0ef"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/cpu.h",
+      "sha256": "56176e8f6ee5ee29a47de10a494493af05a1926d1fcb3ef96548893251d97a72",
+      "git_blob": "2380fb7ca2c301a2adc005d980ddb62dfa988ca0"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/crypto.h",
+      "sha256": "cfc33b7347157c532611b5484b69263a018011d4fcbf682ae802275e2fa8be21",
+      "git_blob": "adda6c9c7756500787f2beaff674fcc4b7eaa147"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/debug.h",
+      "sha256": "864a4080c67ab9037a300feb6d4a998a9e38df12db130acf5a292234351b2df5",
+      "git_blob": "c2929200e628022149e6c2fb1581469946ffe05a"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/inline/atomic_c11.h",
+      "sha256": "a83671660b5e8a8783a35d9dd6f3ca6910c65fb6cdef19c080a3bfbca83554c2",
+      "git_blob": "a1dffba035f155a42db28d1ae6dc3ecd93bf5cef"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/inline/debug_unix_kernel_os.h",
+      "sha256": "39ed6cb914def5c239959520e70b7d70b59b05a7efedb7fed6f6cfe2a119fac4",
+      "git_blob": "2cdafd09e8ab78c74f0a8a67b6f07e1fd3645d6d"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/inline/memory_tracking.h",
+      "sha256": "9732d626c2387c84dc6832ae640a986baac40361e018881b577db646e9cbb2eb",
+      "git_blob": "37f11e95b6d6d4a02eefe1d66a0567a6baaed070"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/inline/safe_generic.h",
+      "sha256": "8e8ca640cade42f204d2afd699c3fe399d0fca82507e0c4adb869c768e51d85e",
+      "git_blob": "e701c2cecde7816760291c78b3fea5507acc82a5"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/inline/sync_tracking.h",
+      "sha256": "d8b0d2d656bec191746f2f3de736aebd994e39b1a0c7a694659924d98afbca86",
+      "git_blob": "7c40db716ae19cd949e7f128dcfd85744dca0cdd"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/inline/time_timer.h",
+      "sha256": "67efba1c1c0040d1c422dcfe06cd2fd45a171c467f7e318133fb1aded2300048",
+      "git_blob": "54fac2a749a8c2e2753517890450f9357c7936ac"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/inline/util_gcc_clang.h",
+      "sha256": "82cb3492de7ca3cb28f9066c9bd559f914fbb1886b06e4216e760926cde5f107",
+      "git_blob": "be58d89a333b139dd44bd7e94c8dc668cb29cfcb"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/inline/util_generic.h",
+      "sha256": "d76fd0f11f329bcbcdab9f3e390b945c405be51fa1efb611454be67b5ff0c611",
+      "git_blob": "c5e6e371e3805bb4e5c24838513339b423fda9b0"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/inline/util_valist.h",
+      "sha256": "c36b3c60e271a1acfe01fea9c55c1f8dfa1290e634980041631f514e8d4cdf75",
+      "git_blob": "4d293c3fd2876347edc8767f38de87000e3bbb59"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/memory.h",
+      "sha256": "a700efeb580141a76680fd2def6622759759232e6b0e9a6e5e6a0cb863b41d90",
+      "git_blob": "595eafee880dccd54ca2f382fb77afc918793e1d"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/nvport.h",
+      "sha256": "7e4fa997b9a3835b96e48f081460b7be4f0d52e0c5d3c7414470ee7a8904e3d4",
+      "git_blob": "f9cd603d3a920534a1c4ddec10b8ebb4ad7e526b"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/safe.h",
+      "sha256": "5c0ab8a43edd1eba3e7e7d7903bd8c17222320452608efce82e0f3ad00db4e67",
+      "git_blob": "2847c71fffa39623abdd2748dadabb1f47deed45"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/string.h",
+      "sha256": "e39544b30acc096963b09453254f7335a9e8f4276aee055edf93aeba386aeb10",
+      "git_blob": "32ab84eef9dff9cb99a5f8a2a0c4b1d0bb7abaf2"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/sync.h",
+      "sha256": "e5fb2dba02d14f3e8a3ca73c56dcf9c5da3c8ca8815c2aee3118134d13801694",
+      "git_blob": "29e472dedf677501e11c22cb043431750c9f8f30"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/thread.h",
+      "sha256": "a80e19d397a25a09d047becf7639ebc51edad1266f32afd0a25e3f055b542087",
+      "git_blob": "5b9234f9c6c3034f8980852bb45738102d728ad8"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/time.h",
+      "sha256": "4e4235041b9a3d5b52550dd5c0a2081df8353bec79465033093b30686e797061",
+      "git_blob": "9c9b6c7c9b376b000293c5046dbca47550cdeb9b"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/util.h",
+      "sha256": "aa586f83501ed5fcac774ca747c690b526909f31c59c90d0705200514f2ec1d5",
+      "git_blob": "177e5d03b9ff8c4e76aeb02cf83b44983e1a43f5"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/resserv/resserv.h",
+      "sha256": "5ea9fee6f9414fe8f7e49895fd51d16d8baf7bdb60f742c3436f7e0c36d0429c",
+      "git_blob": "6ac6d2261b7db686c07a44d930bfcddff6d55882"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/resserv/rs_access_map.h",
+      "sha256": "1681b342102485cfbe4b08fed11997ca23ca73489cd2519061f0313735dccc1f",
+      "git_blob": "e75da749ae3e99e6670b6806ecdcb61244db907c"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/resserv/rs_access_rights.h",
+      "sha256": "2c0225b20b215862db43639c51c0b48d02d48e6ebe970215375fa252c48567f0",
+      "git_blob": "9ff6397e02d8454239358e8c6f1117145a61f509"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/resserv/rs_client.h",
+      "sha256": "7319e8dd98e88fa7b9e50d2dda1afe7636fe88a931574e53ca4b9729bcbd64e7",
+      "git_blob": "e5e544dab4984b1fa792a09eabaa1f722aea2c64"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/resserv/rs_domain.h",
+      "sha256": "a37b9232824ae3b4594550e4b72ef28fd99e75683a6676f54d7d69d7b70fabaa",
+      "git_blob": "856568c44e4c7ccf8aa29b2d5e720b48fdfa226a"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/resserv/rs_resource.h",
+      "sha256": "7956fbcf78d7cf7ade46f560241949cf3225d0e570ca65291d5fa2907999f4f1",
+      "git_blob": "4785d9f6bb939ffdc727f725caa523dfc2720251"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/resserv/rs_server.h",
+      "sha256": "0d9304e9a54948b880fa94f8196e8cac55bad2df9e354bef117b5e3380b522f5",
+      "git_blob": "c659c4981bee1f697e986c68bee9807337efef30"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/tls/tls.h",
+      "sha256": "1b9b99aa03f4cc5165d7af431da354cb37054d5d7a8c54179aa28e32694fe457",
+      "git_blob": "872e562a93c933138b83793103f3d11fcc68b4e6"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/utils/nvassert.h",
+      "sha256": "817c434764c12fcb3340aeb53e8c595a2d1818ef3b76473639bf15d303ac41fc",
+      "git_blob": "b1a8b2d8763e7542b8802a091862116e3664ea6e"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/utils/nvmacro.h",
+      "sha256": "e0a1cc9c8be20cf3708f4d0fc8791e733c22baf159f881f9b91ed0354c7ae524",
+      "git_blob": "86f670a7aa94774227a1f3a8422cab86d2b6a456"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/utils/nvprintf.h",
+      "sha256": "3d30449c22fc30233ba32ddcc2f3776e59886ad3f049d1b5bb972d9980a6f342",
+      "git_blob": "70d4bca08d94ee856932d0d4bbfdbe22ae64dfe8"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/utils/nvprintf_level.h",
+      "sha256": "2df1afaf435178e7182b8298f2f9fef25a4667e5910d33fc1740529f92668b79",
+      "git_blob": "2d6f275cc373dc108ebe89eac81d60289cf837cc"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/utils/nvrange.h",
+      "sha256": "8d15a602d5a949499eef2842867049d70de0708bb27783edff114ac13bce9914",
+      "git_blob": "1bc36429544c9523e0055733192e20153cbc820e"
+    },
+    {
+      "path": "src/nvidia/src/kernel/rmapi/alloc_free.c",
+      "sha256": "2f1f6c47d2368b996a3f8eb175eac59153c709b5445ff2f86985e63f6564f424",
+      "git_blob": "ae9b6352f2fb3e9a6b3a5177adcd11523a05e16e"
+    },
+    {
+      "path": "src/nvidia/src/kernel/rmapi/resource_desc.h",
+      "sha256": "b403a0bbce87019538578d244fb3cc0a11d09089f5e3e7b41d5527f8f758f8cb",
+      "git_blob": "87f303753b71466fa9d58bdd504d12f9b83409ea"
+    },
+    {
+      "path": "src/nvidia/src/kernel/rmapi/resource_desc_flags.h",
+      "sha256": "2cf9a47c390778da5345ec0c9e7c064c0f070828571c6ffdfc510645d1321b07",
+      "git_blob": "779d53846090b8e06ba0e3c4e9e5a7d1052a31e4"
+    },
+    {
+      "path": "src/nvidia/src/kernel/rmapi/sharing.c",
+      "sha256": "1ea4682c52dc41692f585c2865ec84de29b934d329d322720c51d377a2bec5b6",
+      "git_blob": "086085915d97700d616edd1fb737771ad8584ec1"
+    },
+    {
+      "path": "src/nvidia/src/libraries/containers/list.c",
+      "sha256": "3758b82c26dd95daa47be41a6bbe9ffb690b417d1599182b5fdc77fd6e298edc",
+      "git_blob": "4f5155b7be4b6da05d077b7f1100ae082054d916"
+    },
+    {
+      "path": "src/nvidia/src/libraries/containers/map.c",
+      "sha256": "40c3f3906053a4f13dd43bd9d03a079428d8c5346fabd7f399c9402dd9d2d77c",
+      "git_blob": "cfc153fdbe5e4feff31851c7e7017868840d3dfa"
+    },
+    {
+      "path": "src/nvidia/src/libraries/containers/multimap.c",
+      "sha256": "76a1b6b323b7c1a183d3860cb3930dadb688ce545f8700e55ce58047f72827e7",
+      "git_blob": "ae19915b186049bff7ea28de865cb14da3c9396e"
+    },
+    {
+      "path": "src/nvidia/src/libraries/nvoc/src/runtime.c",
+      "sha256": "d1eb84ef953c81cbc8fdd8ddfea5298a93401992c98e41adae6dfe18b14db80d",
+      "git_blob": "63590ad2e4abeec802f5247763a94c1faa7e3e4d"
+    },
+    {
+      "path": "src/nvidia/src/libraries/resserv/src/rs_access_map.c",
+      "sha256": "a4468c06cfb94de2c186eedfd3e6f2f3dbd111b03cc4d26dfedbd5765f03b5f0",
+      "git_blob": "2f53c049c3f224ab5cd7d8e8d1d26993bdea2eff"
+    },
+    {
+      "path": "src/nvidia/src/libraries/resserv/src/rs_access_rights.c",
+      "sha256": "f6a545e421ee012ff7f0fcaa2f787bb46e9485e48515d4bb3813ae494f9a0702",
+      "git_blob": "eca1b4d9a830e1e59a4cb9e5b126f0d488600dd3"
+    },
+    {
+      "path": "src/nvidia/src/libraries/resserv/src/rs_client.c",
+      "sha256": "8658e31561093e0fef2554eef99328193f52e4d8ffef2c7b58b57fe9c8683eb4",
+      "git_blob": "0fa885c984f806703b927eb4c61db3f82020d8a8"
+    },
+    {
+      "path": "src/nvidia/src/libraries/resserv/src/rs_domain.c",
+      "sha256": "d5216e78908e78329e97414bca40e4e69c468d9e1781d49c8dea10a5008ca076",
+      "git_blob": "bbbc84d13a38237042ff90270760560c67e07905"
+    },
+    {
+      "path": "src/nvidia/src/libraries/resserv/src/rs_resource.c",
+      "sha256": "e116e8614bb0d990dd7281987dfddf9e8231a5ef3e86599b0370d627ab8a4624",
+      "git_blob": "a01fef1dfa30d1f1ca68b1a594b4ea33052819c7"
+    },
+    {
+      "path": "src/nvidia/src/libraries/resserv/src/rs_server.c",
+      "sha256": "3efe3eb513f012e7ccc0f55ab471ff935803a98acdb3b0e5637e39b139ad6d7a",
+      "git_blob": "4396ee257104372ee85c155eb1b90ecb2522b9a8"
+    },
+    {
+      "path": "src/nvidia/src/libraries/tls/tls.c",
+      "sha256": "93616683de4ac1c51d458c7c3f25f7ecee3ddae06e3c22e2bae7a84fd61c8f9c",
+      "git_blob": "755a0400d4d9407815141e651ad5688319a1c11f"
+    }
+  ],
+  "adaptations": [
+    {
+      "output": "upstream/adapted/rs_server.c",
+      "reference": "src/nvidia/src/libraries/resserv/src/rs_server.c",
+      "replacement": "upstream/adapted/server_construct.c.inc",
+      "function": "serverConstruct",
+      "reason": "Check every acquired lock, publish constructed only after success, reverse unwind all partial acquisitions and clear ownership on constructor failure.",
+      "additional_replacement": {
+        "function": "serverInitGlobalSharePolicies",
+        "reference": "src/nvidia/src/kernel/rmapi/sharing.c",
+        "reason": "Replace the original standalone empty policy hook with the complete verbatim upstream RM policy initializer."
+      },
+      "failure_lock_fix": {
+        "function": "serverFreeResourceTree",
+        "reason": "Track the actually acquired first top-lock mode on missing-handle/failure paths and after relock, initialize local modes; original compatibility status is preserved."
+      }
+    },
+    {
+      "output": "upstream/adapted/share_policies.c",
+      "reference": "src/nvidia/src/kernel/rmapi/sharing.c",
+      "function": "serverInitGlobalSharePolicies",
+      "reason": "Verbatim complete function and license extracted to avoid unrelated GPU RM closure.",
+      "compiled": false
+    }
+  ],
+  "profile": {
+    "RS_STANDALONE": 1,
+    "RS_COMPATABILITY_MODE": 1,
+    "RS_PROVIDES_API_STATE": 0,
+    "LOCK_VAL_ENABLED": 0,
+    "PORT_IS_KERNEL_BUILD": 1,
+    "PORT_IS_CHECKED_BUILD": 0,
+    "NV_UNIX": 1
+  },
+  "application_adapter": {
+    "factories": "Original NVOC RsClient/RsClientResource/RsResource only; two explicit application descriptors; no handmade classes.",
+    "parameters": "Only known parameterless classes with explicit kernel-pointer location; owned API_STATE allocation released after each request. User/mixed/nonzero parameters are refused.",
+    "unsupported": "Original base resource copy and control refusals are preserved; no GPU API success is fabricated."
+  }
+}

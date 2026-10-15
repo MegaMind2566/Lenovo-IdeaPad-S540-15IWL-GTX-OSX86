@@ -40,10 +40,15 @@ struct IntegratedResult {
     bool acquired;
 };
 
-// The kernel path uses the actual borrowed PCI provider and its nonblocking
-// arbitration guard. Native CI substitutes an explicit PCI fixture and host
-// DMA backend. Both execute the same finite aggregate and shared lease.
+// The kernel path uses the actual borrowed PCI provider and ordinary-thread
+// IOKit arbitration. lockForArbitration(false) may wait on another owner;
+// false permits deadlock/interruption refusal, not a nonblocking try-lock.
+// Native CI substitutes an explicit PCI fixture and host DMA backend.
+// Both execute the same finite aggregate under the nonblocking startup lease.
 // No GPU command, interrupt enable, firmware load or MMIO operation is added.
 IntegratedResult checkIntegrated(IOPCIDevice *provider);
+using StartupContinuation = S540NvidiaSupportRuntime::StartupContinuation;
+IntegratedResult checkIntegrated(IOPCIDevice *provider,
+                                StartupContinuation continuation, void *context);
 }
 #endif

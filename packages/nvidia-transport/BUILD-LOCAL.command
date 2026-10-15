@@ -22,6 +22,11 @@ WORK=$(/usr/bin/mktemp -d "$HOME/Desktop/NVIDIA-BUILD.XXXXXX") || stop 'Cannot c
 printf 'Building the integrated NVIDIA OS-adapter prototype. No administrator password is required.\nBuild folder: %s\n' "$WORK"
 
 build_package() {
+    printf 'Preparing the private build environment and pinned firmware-extraction dependency.\n'
+    /usr/bin/python3 -m venv "$WORK/python" || return $?
+    BUILD_PYTHON="$WORK/python/bin/python3"
+    "$BUILD_PYTHON" -m pip --isolated install --disable-pip-version-check \
+        --requirement "$PACKAGE/source/packages/nvidia-firmware-assets/requirements-build.txt" || return $?
     printf 'Fetching the pinned public MacKernelSDK source.\n'
     export GIT_TERMINAL_PROMPT=0
     /usr/bin/git init -q "$WORK/MacKernelSDK" || return $?
@@ -29,14 +34,14 @@ build_package() {
     /usr/bin/git -c credential.helper= -c core.hooksPath=/dev/null -C "$WORK/MacKernelSDK" fetch --no-tags --depth=1 origin "$SDK_COMMIT" || return $?
     /usr/bin/git -c core.hooksPath=/dev/null -C "$WORK/MacKernelSDK" checkout --detach FETCH_HEAD || return $?
     printf 'Running the host policy tests.\n'
-    CXX=/usr/bin/clang++ /usr/bin/python3 "$PACKAGE/source/tests/test_nvidia_transport_kernel.py" || return $?
+    CXX=/usr/bin/clang++ "$BUILD_PYTHON" "$PACKAGE/source/tests/test_nvidia_transport_kernel.py" || return $?
     printf 'Compiling and verifying the native Intel package.\n'
-    GITHUB_SHA="$SOURCE_COMMIT" /usr/bin/python3 "$PACKAGE/source/builders/build_nvidia_transport.py" \
+    GITHUB_SHA="$SOURCE_COMMIT" "$BUILD_PYTHON" "$PACKAGE/source/builders/build_nvidia_transport.py" \
         --kernel-sdk "$WORK/MacKernelSDK" --output-dir "$WORK/output" --allow-legacy-probe
 }
 
 if build_package 2>&1 | /usr/bin/tee "$WORK/build.log"; then
-    printf '\nBuild completed. Share this ZIP for review before changing the test EFI:\n%s/output/S540-nvidia-transport-v8.zip\n' "$WORK"
+    printf '\nBuild completed. Share this ZIP for review before changing the test EFI:\n%s/output/S540-nvidia-transport-v9.zip\n' "$WORK"
 else
     printf '\nBuild failed. Share this log:\n%s/build.log\n' "$WORK" >&2
     exit 1

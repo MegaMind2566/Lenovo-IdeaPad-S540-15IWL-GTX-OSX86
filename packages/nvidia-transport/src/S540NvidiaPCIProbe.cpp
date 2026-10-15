@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 #include "S540NvidiaPCIProbe.hpp"
-#include "../../nvidia-hardware-transport/src/S540NvidiaHardwareRuntime.hpp"
+#include "../../nvidia-rm-services/src/S540NvidiaRmRuntime.hpp"
 
 #include <IOKit/IOMemoryDescriptor.h>
 #include <kern/task.h>
@@ -314,15 +314,15 @@ OSDictionary *copyHALSelection(const IdentificationOutcome &result) {
 
 OSDictionary *copySnapshot(IOPCIDevice *device,
                           const S540NvidiaPCIProbePolicy::Identity &identity) {
-    OSDictionary *snapshot = OSDictionary::withCapacity(21);
+    OSDictionary *snapshot = OSDictionary::withCapacity(22);
     if (!snapshot)
         return nullptr;
 
     // One additional fixed config read captures command/status without changing
     // memory decoding, I/O decoding, bus mastering, or any status bits.
     const uint32_t commandStatus = device->configRead32(0x04);
-    bool ok = setNumber(snapshot, "Format", 8, 32)
-        && setString(snapshot, "ProbeVersion", "0.8.0")
+    bool ok = setNumber(snapshot, "Format", 9, 32)
+        && setString(snapshot, "ProbeVersion", "0.9.0")
         && setString(snapshot, "Stage", "attached")
         && setString(snapshot, "AccessPolicy", "two-read-only-bar0-hal-identification")
         && setNumber(snapshot, "VendorID", identity.vendorDevice & 0xffffU, 16)
@@ -342,13 +342,14 @@ OSDictionary *copySnapshot(IOPCIDevice *device,
     // CPU entry point runs in native CI. Its nonblocking singleton lease
     // protects the reserve lifecycle. The preparation layer separately guards
     // provider access and releases owned resources before the two MMIO reads.
-    const S540NvidiaHardwareRuntime::IntegratedResult integrated =
-        S540NvidiaHardwareRuntime::checkIntegrated(device);
+    // Provider arbitration can wait; only the shared startup lease is a try-lock.
+    const S540NvidiaRmRuntime::IntegratedResult integrated =
+        S540NvidiaRmRuntime::checkIntegrated(device);
     if (!integrated.acquired) {
         snapshot->release();
         return nullptr;
     }
-    const S540NvidiaRuntime::Result &foundations = integrated.v7.v6.v5.foundations;
+    const S540NvidiaRuntime::Result &foundations = integrated.v8.v7.v6.v5.foundations;
     ScopedRelease<OSDictionary> foundationSnapshot(OSDictionary::withCapacity(8));
     OSDictionary *foundation = foundationSnapshot.get();
     ok = foundation
@@ -361,7 +362,7 @@ OSDictionary *copySnapshot(IOPCIDevice *device,
         && foundation->setObject("Allocation", foundations.allocation ? kOSBooleanTrue : kOSBooleanFalse)
         && foundation->setObject("Mutex", foundations.mutex ? kOSBooleanTrue : kOSBooleanFalse)
         && snapshot->setObject("OSFoundations", foundation);
-    const S540NvidiaCallerRuntime::Result &callers = integrated.v7.v6.v5.callers;
+    const S540NvidiaCallerRuntime::Result &callers = integrated.v8.v7.v6.v5.callers;
     ScopedRelease<OSDictionary> callerSnapshot(OSDictionary::withCapacity(6));
     OSDictionary *caller = callerSnapshot.get();
     ok = ok && caller
@@ -372,7 +373,7 @@ OSDictionary *copySnapshot(IOPCIDevice *device,
         && caller->setObject("MutexCallers", callers.mutexCallers ? kOSBooleanTrue : kOSBooleanFalse)
         && caller->setObject("Reserve", callers.reserve ? kOSBooleanTrue : kOSBooleanFalse)
         && snapshot->setObject("CallerIntegration", caller);
-    const S540NvidiaLifecycleRuntime::Result &lifecycle = integrated.v7.v6.lifecycle;
+    const S540NvidiaLifecycleRuntime::Result &lifecycle = integrated.v8.v7.v6.lifecycle;
     ScopedRelease<OSDictionary> lifecycleSnapshot(OSDictionary::withCapacity(8));
     OSDictionary *nvport = lifecycleSnapshot.get();
     ok = ok && nvport
@@ -385,7 +386,7 @@ OSDictionary *copySnapshot(IOPCIDevice *device,
         && nvport->setObject("Spinlocks", lifecycle.spinlocks ? kOSBooleanTrue : kOSBooleanFalse)
         && nvport->setObject("Cleanup", lifecycle.cleanup ? kOSBooleanTrue : kOSBooleanFalse)
         && snapshot->setObject("NvPortLifecycle", nvport);
-    const S540NvidiaSupportRuntime::Result &support = integrated.v7.support;
+    const S540NvidiaSupportRuntime::Result &support = integrated.v8.v7.support;
     ScopedRelease<OSDictionary> supportSnapshot(OSDictionary::withCapacity(7));
     OSDictionary *runtime = supportSnapshot.get();
     ok = ok && runtime
@@ -397,7 +398,7 @@ OSDictionary *copySnapshot(IOPCIDevice *device,
         && runtime->setObject("Consumer", support.consumer ? kOSBooleanTrue : kOSBooleanFalse)
         && runtime->setObject("Cleanup", support.cleanup ? kOSBooleanTrue : kOSBooleanFalse)
         && snapshot->setObject("NvPortSupport", runtime);
-    const S540NvidiaHardwareRuntime::Result &preparation = integrated.preparation;
+    const S540NvidiaHardwareRuntime::Result &preparation = integrated.v8.preparation;
     ScopedRelease<OSDictionary> preparationSnapshot(OSDictionary::withCapacity(25));
     OSDictionary *hardware = preparationSnapshot.get();
     ok = ok && hardware
@@ -427,6 +428,27 @@ OSDictionary *copySnapshot(IOPCIDevice *device,
         && hardware->setObject("RmInitialized", kOSBooleanFalse)
         && hardware->setObject("DeviceDmaVerified", kOSBooleanFalse)
         && snapshot->setObject("HardwarePreparation", hardware);
+    const S540NvidiaRmRuntime::Result &services = integrated.services;
+    ScopedRelease<OSDictionary> servicesSnapshot(OSDictionary::withCapacity(16));
+    OSDictionary *rm = servicesSnapshot.get();
+    ok = ok && rm
+        && setNumber(rm, "Version", 1, 32)
+        && setString(rm, "Status", services.passed() ? "passed" : "failed")
+        && setNumber(rm, "Checks", services.checks, 32)
+        && rm->setObject("ResourceServer", services.resourceServer ? kOSBooleanTrue : kOSBooleanFalse)
+        && rm->setObject("HostMemory", services.hostMemory ? kOSBooleanTrue : kOSBooleanFalse)
+        && rm->setObject("PciSession", services.pciSession ? kOSBooleanTrue : kOSBooleanFalse)
+        && rm->setObject("Clients", services.clients ? kOSBooleanTrue : kOSBooleanFalse)
+        && rm->setObject("Resources", services.resources ? kOSBooleanTrue : kOSBooleanFalse)
+        && rm->setObject("Sharing", services.sharing ? kOSBooleanTrue : kOSBooleanFalse)
+        && rm->setObject("Control", services.control ? kOSBooleanTrue : kOSBooleanFalse)
+        && rm->setObject("Cleanup", services.cleanup ? kOSBooleanTrue : kOSBooleanFalse)
+        && setNumber(rm, "ResourceServerChecks", services.resourceServerChecks, 32)
+        && setNumber(rm, "HostMemoryChecks", services.hostMemoryChecks, 32)
+        && setNumber(rm, "PciSessionChecks", services.pciSessionChecks, 32)
+        && setString(rm, "Profile", services.profile)
+        && rm->setObject("FullRmInitialized", kOSBooleanFalse)
+        && snapshot->setObject("RmServices", rm);
     if (!ok) {
         snapshot->release();
         return nullptr;

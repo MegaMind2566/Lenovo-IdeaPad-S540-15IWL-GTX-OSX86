@@ -8,12 +8,15 @@ Reviewed on October 15, 2026. Target: Lenovo IdeaPad S540-15IWL GTX, Intel macOS
 
 **V7 confirmed:** The [combined CPU support runtime](../../packages/nvidia-nvport-runtime/README.md) now links checked memory/PRNG initialization, original string/unsigned utilities and real vector/list consumers. An explicit vector reallocation correction prevents old-buffer loss for an empty container. [Native CI](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38740433010) passed 258 combined startup checks, container/fault coverage, fatal sanitizers, kernel/import/signature checks and 390 reporter checks. The compiled package and embedded hashes were verified. The format-7 laptop report confirms version `0.7.0`, `integrated_passed`, all 258 kernel startup checks passed, all four CPU blocks passed, cleanup complete, verified provider identity, the same two-read TU117 variant-41 match and no warnings. This combined checkpoint is complete; no repeat laptop test is required. This is a selected CPU profile, not full NVPort/RM or GPU initialization.
 
+**V9 candidate:** the [services bundle](../../packages/nvidia-rm-services/README.md) integrates the selected original `RS_STANDALONE`/NVOC Resource Server with Darwin host allocation/mapping, retained read-only PCI sessions and separate userspace checks over the official matching firmware pair. Native CI, compiled-package verification and one combined laptop checkpoint are pending while startup/failure-unwind integration is completed. The proposed `resource_server_prepared` result is subsystem preparation, not full `coreInitializeRm()`, global RM or GPU initialization. V8 remains the confirmed 390-check baseline.
+
 ## Source baseline
 
 | Input | Inspected baseline | Meaning |
 |---|---|---|
 | NVIDIA open GPU kernel modules | Release `615.78.08`, commit `1a82fbfda8f321b056eb3568850f9316c5e465c5` | `version.mk` confirms the version; the compatible-GPU table includes device `1F91` |
-| GSP firmware and NVIDIA userspace | Corresponding `615.78.08` release required by NVIDIA | No firmware or userspace binary has been downloaded, packaged or validated for Darwin |
+| GSP firmware | Official matching `615.78.08` GSP/UCODES pair, pinned archive and per-file hashes | Actual bytes acquired, hashed and parsed for the v9 candidate with the full NVIDIA license preserved; userspace readiness only, no GPU upload or execution |
+| Graphics userspace | Corresponding release or a separately selected graphics implementation required | No Darwin graphics userspace or Metal driver is integrated |
 | Apple IOPCIFamily | Commit `4822b27a36e2de70e231ecf2bf3021384fab6ec2` | Public API reference; it does not establish binary compatibility with the laptop's installed kernel |
 | Mesa NVK | Official documentation inspected on the review date | An alternative Vulkan research path; no Mesa build or source revision has been selected |
 | Nouveau ABI reference | Linux `v6.6`, `include/uapi/drm/nouveau_drm.h` | Defines VM initialization, VM binding and command-execution interfaces; not a Darwin interface |
@@ -180,6 +183,22 @@ This combined v8 kernel-startup checkpoint is complete; no additional laptop tes
 
 The plan after this block groups actual RM startup and missing Darwin services, device DMA/interrupt/real-firmware integration, and the first bounded GPU/GSP initialization attempt into three broad work areas. This estimate is not a guaranteed number of versions; dependency failures may change the split. Graphics userspace and Metal integration remain later work.
 
+## V9 candidate: selected Resource Server and host-service integration
+
+The [original Resource Server closure](../../packages/nvidia-resource-server/README.md) supplies the `RS_STANDALONE` NVOC subsystem, with real client/resource creation and destruction, ownership/access isolation, sharing and original control/refusal dispatch. This is actual selected NVIDIA subsystem integration rather than a successful no-op replacement. Full `coreInitializeRm()` and global/GPU RM construction are outside the candidate; the full-run unwind issue must be resolved before readiness can be claimed.
+
+The [host-services bundle](../../packages/nvidia-rm-services/README.md) adds the exact `nv_alloc_pages`, `nv_free_pages`, `nv_alloc_kernel_mapping` and `nv_free_kernel_mapping` interfaces over bounded wired cached host memory. Device DMA mapping/unmapping explicitly return unsupported without fabricating device addresses. The retained PCI session holds provider lifetime, authenticates generation-qualified handles, permits aligned reads within the 4 KiB configuration aperture and drains accepted reads before release. It does not open the provider, guess its PCI segment, write configuration or widen GPU MMIO. Only the shared startup lease is nonblocking: framework `lockForArbitration(false)` may wait.
+
+The [firmware-assets component](../../packages/nvidia-firmware-assets/README.md) validates the actual matching official GSP/UCODES pair from release `615.78.08`, including exact byte hashes, container/directory parsing and checked bootstrap layout. The complete NVIDIA license remains with the unmodified binaries. Userspace `firmware_assets` evidence is separate from the strict 16-field kernel `RmServices` dictionary. Format `9`, version `0.9.0`, targets `resource_server_prepared`; `FullRmInitialized` and all six existing kernel device-activity flags remain false. Firmware byte approval does not establish GPU signature verification, device transfer or GSP startup.
+
+Memory coverage is implemented as 166 native checks and 24 startup checks; retained PCI coverage contains 252 native checks, 20 startup checks and 4,000 concurrent fixture reads. The real firmware path adds 15 userspace C ABI file/byte-validation checks and 16 acquisition/provenance tests. Native macOS CI, package verification and one combined laptop result remain pending. Additional Resource Server and aggregate counts will be recorded from the completed build rather than inferred. No repeat v8 checkpoint is requested.
+
+### Full-RM dependency diagnostic
+
+The [normalized inventory](../../builders/reference/nvidia-rm-full-closure.json) records full GNU/ELF source builds of 1,099 original C units and one generated identification unit. The Linux control retains 401 external symbols across all exports and 225 for the selected `rm_init_rm`/`rm_shutdown_rm` roots. The non-Linux `NV_UNIX` diagnostic retains 387 across all exports and 215 for those roots; 13 are GCC retpoline helpers, leaving 202 host contracts in that diagnostic. An explicit overlay bypasses only the upstream version-header OS guard and supplies the exact release string.
+
+This is a reproducible dependency inventory, not a Darwin profile, Mach-O kernel link or runtime initialization. Original NVOC metadata retains broad resource/GPU/HAL dependencies even before `rm_init_adapter`. The remaining contracts must be implemented or deliberately excluded through a reviewed source/profile change; successful no-op stubs do not close them. Optional build-host reproduction is documented by `builders/check_nvidia_rm_services.py`; it requires no laptop test.
+
 ## Milestone status and remaining work
 
 | Milestone | Required result |
@@ -192,6 +211,7 @@ The plan after this block groups actual RM startup and missing Darwin services, 
 | Tracked memory and owned-object lifecycle | Confirmed on the laptop in v0.6.0: all 130 combined kernel startup checks passed, cleanup complete, two-read TU117 match retained and no warnings; bounded sequential startup only |
 | CPU support runtime and RM library consumers | Confirmed on the laptop in v0.7.0: all 258 combined kernel startup checks passed, including 128 support checks, complete cleanup and no warnings; bounded sequential startup only |
 | Hardware-transport preparation | V8 confirmed on the laptop: all 390 kernel checks passed, cleanup complete, 64 KiB untranslated host preparation, two-read TU117 match and no warnings; no additional test required for this checkpoint |
+| Selected Resource Server and host services | V9 candidate: original standalone NVOC Resource Server, exact host allocation/mapping ABIs, retained read-only PCI and actual matching firmware byte checks; combined native CI/package/laptop results pending |
 | Actual RM and device transport | Integrate the selected RM startup path, remaining Darwin services, device DMA and interrupt registration/delivery with complete failure cleanup |
 | GPU and GSP startup | Matching, hashed firmware; observed initialization with timeouts and cleanup; no success inferred from PCI enumeration |
 | Minimal execution | One deterministic command with a checked result and recoverable failure path |

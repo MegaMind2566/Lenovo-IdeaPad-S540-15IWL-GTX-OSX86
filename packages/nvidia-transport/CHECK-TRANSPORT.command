@@ -24,14 +24,14 @@ ACTUAL_SHA=$(/usr/bin/shasum -a 256 "$BINARY" | /usr/bin/awk '{print $1}')
 /usr/bin/codesign --verify --strict "$BINARY" || stop 'The executable signature could not be verified.'
 REPORT_DIR=$(/usr/bin/mktemp -d "$REPORT_PARENT/NVIDIA-TRANSPORT.XXXXXX") || stop 'Cannot create a private report folder.'
 REPORT="$REPORT_DIR/nvidia-transport.json"
-printf 'Reading GPU identification, CPU runtime, host-memory transport preparation, PCI inventory and firmware parser results. No administrator password is required.\n'
+printf 'Reading the combined Resource Server, host-service and transport results, then verifying the packaged firmware pair and full license. No administrator password is required.\n'
 RESULT=0
-"$BINARY" > "$REPORT" || RESULT=$?
+"$BINARY" --assets-dir "$PACKAGE/firmware" > "$REPORT" || RESULT=$?
 /bin/chmod 600 "$REPORT"
 /bin/cat "$REPORT"
 printf '\nReport saved: %s\n' "$REPORT"
 if [ "$RESULT" -ne 0 ]; then
-    printf 'GPU identification, CPU runtime or hardware transport preparation did not complete successfully. Keep the report for diagnosis.\n' >&2
+    printf 'Resource Server, host services, transport or firmware asset verification did not complete successfully. Keep the report for diagnosis.\n' >&2
     exit "$RESULT"
 fi
-printf 'Share nvidia-transport.json to review the combined preparation result. Host-memory DMA preparation is not device DMA verification. Firmware remains unloaded; interrupts, GPU initialization, RM and graphics acceleration remain inactive.\n'
+printf 'Share nvidia-transport.json to review the combined selected Resource Server and verified CPU firmware-file result. Device DMA, live interrupts, firmware loading, full RM/GPU initialization and graphics acceleration remain inactive.\n'
