@@ -9,6 +9,7 @@
 
 #include "include/nvtypes.h"
 #include "include/nv-kernel-interface-api.h"
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {

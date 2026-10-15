@@ -96,7 +96,7 @@
   "interface": {
     "path": "nvport_memory_primitives.h",
     "declarations_reference": "reference/os-interface.h",
-    "sha256": "cb144237601ed9062624e73b548b87b271849c5626c26c79a565147439cfd9da",
+    "sha256": "70dcad94fe078acfc4207885124ce56ba520754f5fd75953b545be9b875c420a",
     "hooks": [
       "os_mem_copy",
       "os_mem_set",
