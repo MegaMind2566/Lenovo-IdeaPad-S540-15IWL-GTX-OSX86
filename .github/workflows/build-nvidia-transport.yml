@@ -53,8 +53,14 @@ jobs:
           persist-credentials: false
       - name: Check PCI identity, BAR0 and power-state refusal policy
         run: python3 tests/test_nvidia_transport_kernel.py
-      - name: Install the pinned bounded firmware archive decoder
-        run: python3 -m pip install --disable-pip-version-check zstandard==0.25.0
+      - name: Install the pinned bounded firmware archive decoder in a private environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          NVIDIA_BUILD_VENV="$RUNNER_TEMP/nvidia-build-python"
+          python3 -m venv "$NVIDIA_BUILD_VENV"
+          "$NVIDIA_BUILD_VENV/bin/python3" -m pip install --disable-pip-version-check -r packages/nvidia-firmware-assets/requirements-build.txt
+          printf '%s\n' "$NVIDIA_BUILD_VENV/bin" >> "$GITHUB_PATH"
       - name: Check RM resources, host services, firmware assets and all prior regressions
         run: python3 builders/build_nvidia_transport.py --kernel-sdk build-src/MacKernelSDK --output-dir build/nvidia-transport
       - name: Run the packaged reporter without loading the kernel probe
