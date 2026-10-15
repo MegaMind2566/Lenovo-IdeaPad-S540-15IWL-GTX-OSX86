@@ -15,7 +15,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 
 | Guide | Purpose |
 |---|---|
-| [NVIDIA hardware-transport preparation](../packages/nvidia-hardware-transport/README.md) | V8 candidate: one combined host DMA, read-only PCI/interrupt inventory and synthetic firmware/RPC block; native CI and one laptop checkpoint pending |
+| [NVIDIA hardware-transport preparation](../packages/nvidia-hardware-transport/README.md) | V8 candidate: one combined host DMA, read-only PCI/interrupt inventory and synthetic firmware/RPC block; native CI and package verification passed; one laptop checkpoint pending |
 | [Passive CPU sensors](../packages/cpu-sensors/README.md) | A continuous sensor reading with no CPU workload; complete temperature readings at idle and during desktop activity |
 | [NVIDIA CPU support runtime](../packages/nvidia-nvport-runtime/README.md) | V7 confirmed in the Tahoe kernel: checked memory/PRNG startup, original utilities and vector/list consumers; all 258 combined checks passed, cleanup complete and no warnings |
 | [CPU, temperature and power](../packages/cpu-thermal/README.md) | Grouped idle, short-load and recovery collector; sustained-cooling validation remains separate from the successful activity readings |

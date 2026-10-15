@@ -2,7 +2,7 @@
 
 This component implements the combined v8 preparation block for the S540's NVIDIA GTX 1650 Max-Q (`10DE:1F91`, subsystem `17AA:3806`, revision `A1`). It is delivered inside **S540-nvidia-transport-v8**, version `0.8.0`, report format `8`. A successful result is `transport_prepared`.
 
-**Candidate status:** native macOS CI, compiled-package verification and one combined laptop checkpoint are pending. Version 0.7.0 remains the confirmed kernel baseline: all 258 startup checks passed, with complete cleanup, verified provider identity, the two-read TU117 variant-41 match and no warnings.
+**Hardware candidate:** [native Intel CI](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38752519794) and compiled-package verification passed. One combined laptop checkpoint remains pending. Version 0.7.0 remains the confirmed kernel baseline: all 258 startup checks passed, with complete cleanup, verified provider identity, the two-read TU117 variant-41 match and no warnings.
 
 ## Combined scope
 
@@ -41,7 +41,7 @@ SHA256 hashes actual bytes and has standard-vector coverage. Firmware assets and
 
 ## Validation implemented for the combined build
 
-These are implemented candidate test suites; native macOS CI results are pending.
+[Native Intel CI](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38752519794) passed these suites, plain and with fatal AddressSanitizer/UndefinedBehaviorSanitizer. The extension was not loaded in CI.
 
 | Suite | Coverage |
 |---|---|
@@ -50,9 +50,9 @@ These are implemented candidate test suites; native macOS CI results are pending
 | Firmware native harness | 349 checks, including malformed/truncated inputs and SHA256 vectors; 89 production startup self-checks |
 | Firmware provenance | Seven checks over pinned references and empty real-image approval state |
 | Aggregate failure harness | 47 checks, seven cross-stage fault cases and four workers with eight mixed v7/v8 attempts each |
-| Production aggregate | Existing 258 CPU checks plus the complete new preparation callback, cold-state and resource-release accounting |
+| Production aggregate | 258 CPU regressions and 131 native preparation checks, with cold-state and resource-release accounting |
 
-GitHub builds the production kernel closure and native harnesses, checks plain and fatal AddressSanitizer/UndefinedBehaviorSanitizer execution, audits imports against the pinned SDK contract, validates reporting and assembles one compiled ZIP. Native userspace simulation does not validate kernel DMA mappings, actual interrupt delivery or GPU responses. CI does not load the extension.
+The verified build source is `70f798c2269cff5dd3e50546afe7ffe713e2c6ac`. Kernel compilation/linking, signatures, the unchanged 24 CPU imports and 11 additional reviewed SDK imports passed. All 535 reporter checks passed. The aggregate failure harness covered seven cross-stage faults; its 32 mixed startup attempts completed eight and correctly refused 24, plain and sanitized. The downloaded 639,644-byte ZIP, all 195 files and 176 embedded source hashes were verified. ZIP SHA256: `5218be643594d60a050d59d1c856d39b82d1836fd0534d7a1159fa58a139c776`. Native userspace simulation does not validate kernel DMA mappings, actual interrupt delivery or GPU responses. CI does not load the extension.
 
 ## One laptop checkpoint
 

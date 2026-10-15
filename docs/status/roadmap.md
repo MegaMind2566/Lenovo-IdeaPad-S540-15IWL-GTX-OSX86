@@ -22,7 +22,7 @@ All independent implementation and validation stay in GitHub. Only a complete bu
 
 ### V8 candidate: combined hardware-transport preparation
 
-The [v8 component](../../packages/nvidia-hardware-transport/README.md) is implemented as a candidate awaiting native macOS CI, compiled-package verification and one combined laptop checkpoint. Version `0.8.0` uses report format `8` and success status `transport_prepared`. The same startup lease retains the 258 confirmed CPU checks and adds all of the following work in one package:
+The [v8 component](../../packages/nvidia-hardware-transport/README.md) is a hardware candidate that has passed native macOS CI and compiled-package verification; one combined laptop checkpoint remains pending. Version `0.8.0` uses report format `8` and success status `transport_prepared`. The same startup lease retains the 258 confirmed CPU checks and adds all of the following work in one package:
 
 | Work area | Included implementation |
 |---|---|
@@ -31,7 +31,7 @@ The [v8 component](../../packages/nvidia-hardware-transport/README.md) is implem
 | Firmware and RPC preflight | Pinned ELF64 container/signature-family parsing, SHA256, buffer layout, plain RPC framing, sequences, cancellation and deadline state, using synthetic fixtures. No real firmware image or approved hash is included. |
 | Failure handling and integration | One startup/report with cleanup accounting, injected failures and mixed v7/v8 lease attempts in native CI. The GPU policy remains exactly two read-only identification loads. |
 
-The implemented test suites contain 309 DMA checks with 21 fault cases and 64 cycles; 172 PCI checks; 349 firmware native checks and 89 startup self-checks; and 47 aggregate fault checks with 32 mixed startup attempts. These are candidate coverage counts, not completed native macOS CI or laptop results. No device DMA, interrupt registration or delivery, real firmware loading, RM construction or GPU initialization is claimed.
+The implemented test suites contain 309 DMA checks with 21 fault cases and 64 cycles; 172 PCI checks; 349 firmware native checks and 89 startup self-checks; and 47 aggregate fault checks with 32 mixed startup attempts. Native macOS CI passed these suites, plain and with fatal sanitizers; the extension was not loaded in CI and laptop execution remains pending. No device DMA, interrupt registration or delivery, real firmware loading, RM construction or GPU initialization is claimed.
 
 ### Path to the first GPU initialization attempt
 
@@ -49,7 +49,7 @@ The [CPU and sensor reports](cpu-thermal.md) confirm frequency/power response an
 
 | Order | Work | Remaining scope |
 |---|---|---|
-| Now | NVIDIA hardware transport and resource-manager integration | [V8 preparation](../../packages/nvidia-hardware-transport/README.md) combines host DMA preparation, read-only PCI/interrupt inventory and synthetic firmware/RPC preflight; native CI and one combined laptop checkpoint pending. V7 remains the confirmed 258-check kernel baseline. Actual RM integration, device DMA/interrupts and real firmware/GPU startup are the next broad blocks. |
+| Now | NVIDIA hardware transport and resource-manager integration | [V8 preparation](../../packages/nvidia-hardware-transport/README.md) combines host DMA preparation, read-only PCI/interrupt inventory and synthetic firmware/RPC preflight; native CI and compiled-package verification passed; one combined laptop checkpoint pending. V7 remains the confirmed 258-check kernel baseline. Actual RM integration, device DMA/interrupts and real firmware/GPU startup are the next broad blocks. |
 | Remaining | Graphics, power and thermals | Sustained Intel graphics use and cooling, fan telemetry and measured battery runtime. Continuous temperature readings during desktop activity and basic battery power/discharge reporting are confirmed. NVIDIA electrical power-off is deferred until after the driver-port attempt. |
 | Complete / retained | Boot and EFI consolidation | Independent Samsung boot confirmed after manual EFI transfer. Keep the HDD as a recovery path and preserve the private working EFI. A later sanitized release remains separate from v0.1.0. |
 | 3 | Storage and USB reliability | USB-C at 5 Gb/s in both orientations and both tested USB-A connectors at 5 Gb/s are confirmed. File reads on both USB-A connectors are confirmed. External USB 2 devices, sustained SSD stability, shutdown and reboot remain separate checks. Move the system SSD cable only after shutdown. |
@@ -88,7 +88,7 @@ Priorities updated on 13 October 2026: the panel being off during boot is **reso
 | Fingerprint reader | Internal USB port mapped; support to be assessed | Assess drivers and macOS integration |
 | HDMI | No image; macOS display report lists only the internal panel | Identify the connected external display's owning GPU in Windows before selecting a fix |
 | USB-C video | No video test available; video capability and routing not verified; USB data works | Check hardware capability from documentation; keep separate from the observed HDMI failure |
-| NVIDIA GTX 1650 Max-Q | V7 confirmed: all 258 kernel checks, cleanup and two-read TU117 match. V8 host transport and synthetic firmware preflight implemented as a candidate | Native CI, package verification and one combined v8 laptop checkpoint; actual RM, device DMA/interrupts, real firmware, GPU initialization and graphics remain open |
+| NVIDIA GTX 1650 Max-Q | V7 confirmed: all 258 kernel checks, cleanup and two-read TU117 match. V8 host transport and synthetic firmware preflight passed native CI and package verification; laptop checkpoint pending | One combined v8 laptop checkpoint; actual RM, device DMA/interrupts, real firmware, GPU initialization and graphics remain open |
 
 Recovery test results are not automatically extended to the installed system. Incomplete items remain open until a documented result is available.
 
