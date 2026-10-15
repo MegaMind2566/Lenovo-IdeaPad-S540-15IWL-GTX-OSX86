@@ -1,0 +1,15 @@
+--- a/src/nvidia/src/kernel/diagnostics/nvlog_printf.c
++++ b/src/nvidia/src/kernel/diagnostics/nvlog_printf.c
+@@ -106,7 +106,12 @@
+ 
+     _nv_dbg_lock = portSyncSpinlockCreate(portMemAllocatorGetGlobalNonPaged());
+     if (_nv_dbg_lock == NULL)
++    {
++        // Balance the nested portable-runtime reference acquired above. There
++        // is no debug lock for nvDbgDestroy() to release on this failure path.
++        portShutdown();
+         return NV_FALSE;
++    }
+     else
+         return NV_TRUE;
+ }

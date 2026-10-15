@@ -1,0 +1,112 @@
+/* SPDX-License-Identifier: MIT */
+/* Compile the exact unmodified upstream signatures before the facade. */
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#define LIBSPDM_SHA256_SUPPORT 1
+#define LIBSPDM_AEAD_GCM_SUPPORT 1
+#define LIBSPDM_AEAD_SM4_SUPPORT 0
+#define LIBSPDM_CERT_PARSE_SUPPORT 1
+#define LIBSPDM_FIPS_MODE 0
+#define LIBSPDM_ADDITIONAL_CHECK_CERT 0
+#define LIBSPDM_SM2_DSA_SUPPORT 0
+#define LIBSPDM_SHA384_SUPPORT 1
+#define LIBSPDM_SHA512_SUPPORT 0
+#define LIBSPDM_SHA3_256_SUPPORT 0
+#define LIBSPDM_SHA3_384_SUPPORT 0
+#define LIBSPDM_SHA3_512_SUPPORT 0
+#define LIBSPDM_SM3_256_SUPPORT 0
+#define LIBSPDM_AEAD_AES_128_GCM_SUPPORT 1
+#define LIBSPDM_AEAD_AES_256_GCM_SUPPORT 1
+#define LIBSPDM_AEAD_CHACHA20_POLY1305_SUPPORT 0
+#define LIBSPDM_RSA_SSA_SUPPORT 1
+#define LIBSPDM_RSA_PSS_SUPPORT 1
+#define LIBSPDM_ECDSA_SUPPORT 1
+#define LIBSPDM_EDDSA_ED25519_SUPPORT 0
+#define LIBSPDM_EDDSA_ED448_SUPPORT 0
+#define LIBSPDM_ECDHE_SUPPORT 1
+#define libspdm_aead_aes_gcm_decrypt_prealloc s540Global_libspdm_aead_aes_gcm_decrypt_prealloc
+#define libspdm_aead_aes_gcm_encrypt_prealloc s540Global_libspdm_aead_aes_gcm_encrypt_prealloc
+#define libspdm_aead_free s540Global_libspdm_aead_free
+#define libspdm_aead_gcm_prealloc s540Global_libspdm_aead_gcm_prealloc
+#define libspdm_hkdf_sha256_expand s540Global_libspdm_hkdf_sha256_expand
+#define libspdm_hkdf_sha384_expand s540Global_libspdm_hkdf_sha384_expand
+#define libspdm_hmac_sha256_final s540Global_libspdm_hmac_sha256_final
+#define libspdm_hmac_sha256_free s540Global_libspdm_hmac_sha256_free
+#define libspdm_hmac_sha256_new s540Global_libspdm_hmac_sha256_new
+#define libspdm_hmac_sha256_set_key s540Global_libspdm_hmac_sha256_set_key
+#define libspdm_hmac_sha256_update s540Global_libspdm_hmac_sha256_update
+#define libspdm_random_bytes s540Global_libspdm_random_bytes
+#define libspdm_sha256_free s540Global_libspdm_sha256_free
+#define libspdm_sha384_free s540Global_libspdm_sha384_free
+#define libspdm_aead_aes_gcm_decrypt s540Global_libspdm_aead_aes_gcm_decrypt
+#define libspdm_aead_aes_gcm_encrypt s540Global_libspdm_aead_aes_gcm_encrypt
+#define libspdm_asn1_get_tag s540Global_libspdm_asn1_get_tag
+#define libspdm_check_crypto_backend s540Global_libspdm_check_crypto_backend
+#define libspdm_decode_base64 s540Global_libspdm_decode_base64
+#define libspdm_ec_compute_key s540Global_libspdm_ec_compute_key
+#define libspdm_ec_free s540Global_libspdm_ec_free
+#define libspdm_ec_generate_key s540Global_libspdm_ec_generate_key
+#define libspdm_ec_get_public_key_from_x509 s540Global_libspdm_ec_get_public_key_from_x509
+#define libspdm_ec_new_by_nid s540Global_libspdm_ec_new_by_nid
+#define libspdm_ecdsa_sign s540Global_libspdm_ecdsa_sign
+#define libspdm_ecdsa_verify s540Global_libspdm_ecdsa_verify
+#define libspdm_encode_base64 s540Global_libspdm_encode_base64
+#define libspdm_hkdf_sha256_extract s540Global_libspdm_hkdf_sha256_extract
+#define libspdm_hkdf_sha384_extract s540Global_libspdm_hkdf_sha384_extract
+#define libspdm_hmac_sha256_all s540Global_libspdm_hmac_sha256_all
+#define libspdm_hmac_sha384_all s540Global_libspdm_hmac_sha384_all
+#define libspdm_rsa_free s540Global_libspdm_rsa_free
+#define libspdm_rsa_get_public_key_from_x509 s540Global_libspdm_rsa_get_public_key_from_x509
+#define libspdm_rsa_new s540Global_libspdm_rsa_new
+#define libspdm_rsa_pss_sign s540Global_libspdm_rsa_pss_sign
+#define libspdm_rsa_pss_verify s540Global_libspdm_rsa_pss_verify
+#define libspdm_rsa_set_key s540Global_libspdm_rsa_set_key
+#define libspdm_sha256_duplicate s540Global_libspdm_sha256_duplicate
+#define libspdm_sha256_final s540Global_libspdm_sha256_final
+#define libspdm_sha256_hash_all s540Global_libspdm_sha256_hash_all
+#define libspdm_sha256_init s540Global_libspdm_sha256_init
+#define libspdm_sha256_new s540Global_libspdm_sha256_new
+#define libspdm_sha256_update s540Global_libspdm_sha256_update
+#define libspdm_sha384_duplicate s540Global_libspdm_sha384_duplicate
+#define libspdm_sha384_final s540Global_libspdm_sha384_final
+#define libspdm_sha384_hash_all s540Global_libspdm_sha384_hash_all
+#define libspdm_sha384_init s540Global_libspdm_sha384_init
+#define libspdm_sha384_new s540Global_libspdm_sha384_new
+#define libspdm_sha384_update s540Global_libspdm_sha384_update
+#define libspdm_x509_compare_date_time s540Global_libspdm_x509_compare_date_time
+#define libspdm_x509_get_cert_from_cert_chain s540Global_libspdm_x509_get_cert_from_cert_chain
+#define libspdm_x509_get_extended_basic_constraints s540Global_libspdm_x509_get_extended_basic_constraints
+#define libspdm_x509_get_extended_key_usage s540Global_libspdm_x509_get_extended_key_usage
+#define libspdm_x509_get_extension_data s540Global_libspdm_x509_get_extension_data
+#define libspdm_x509_get_issuer_name s540Global_libspdm_x509_get_issuer_name
+#define libspdm_x509_get_key_usage s540Global_libspdm_x509_get_key_usage
+#define libspdm_x509_get_serial_number s540Global_libspdm_x509_get_serial_number
+#define libspdm_x509_get_signature_algorithm s540Global_libspdm_x509_get_signature_algorithm
+#define libspdm_x509_get_subject_name s540Global_libspdm_x509_get_subject_name
+#define libspdm_x509_get_validity s540Global_libspdm_x509_get_validity
+#define libspdm_x509_get_version s540Global_libspdm_x509_get_version
+#define libspdm_x509_set_date_time s540Global_libspdm_x509_set_date_time
+#define libspdm_x509_verify_cert s540Global_libspdm_x509_verify_cert
+#define libspdm_x509_verify_cert_chain s540Global_libspdm_x509_verify_cert_chain
+#define libspdm_rsa_key_tag_t S540GlobalRsaKeyTag
+#define LIBSPDM_RSA_KEY_N S540_GLOBAL_RSA_KEY_N
+#define LIBSPDM_RSA_KEY_E S540_GLOBAL_RSA_KEY_E
+#define LIBSPDM_RSA_KEY_D S540_GLOBAL_RSA_KEY_D
+#define LIBSPDM_RSA_KEY_P S540_GLOBAL_RSA_KEY_P
+#define LIBSPDM_RSA_KEY_Q S540_GLOBAL_RSA_KEY_Q
+#define LIBSPDM_RSA_KEY_DP S540_GLOBAL_RSA_KEY_DP
+#define LIBSPDM_RSA_KEY_DQ S540_GLOBAL_RSA_KEY_DQ
+#define LIBSPDM_RSA_KEY_Q_INV S540_GLOBAL_RSA_KEY_Q_INV
+#include "../upstream/reference/cryptlib_hash.h"
+#include "../upstream/reference/cryptlib_mac.h"
+#include "../upstream/reference/cryptlib_hkdf.h"
+#include "../upstream/reference/cryptlib_rng.h"
+#include "../upstream/reference/nvspdm_cryptlib_extensions.h"
+#include "../upstream/reference/cryptlib_aead.h"
+#include "../upstream/reference/cryptlib_cert.h"
+#include "../upstream/reference/cryptlib_ec.h"
+#include "../upstream/reference/cryptlib_rsa.h"
+#define S540_GLOBAL_RSA_TYPE_FROM_UPSTREAM 1
+#include "../src/S540NvidiaGlobalCrypto.h"
+int s540Global_crypto_abi_headers_agree(void) { return 64; }

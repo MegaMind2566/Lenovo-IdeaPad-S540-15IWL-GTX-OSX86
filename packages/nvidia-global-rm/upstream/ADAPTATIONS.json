@@ -1,0 +1,62 @@
+{
+  "adaptations": [
+    {
+      "adapted_sha256": "a1119ce4254b17bf6ce541b25ba3c9fc222690b9551be654e7aa8018b745aee8",
+      "development_fault_ordinals": [
+        9
+      ],
+      "native_apple_execution": "pending",
+      "patch": "upstream/adapted/nvlog_printf-init-unwind.patch",
+      "patch_sha256": "66e6e390aa7c7cd660ce93af8fdba12ae4ea52ce74a111531cf09022f8a2257e",
+      "source": "src/nvidia/src/kernel/diagnostics/nvlog_printf.c",
+      "upstream_sha256": "9dc3b7e985b9979c00338c5f764fee6fccb688d97252d3ae18142b911b9f63b6",
+      "validation": "targeted-original-ELF-lifecycle-control-with-explicit-platform-and-privileged-CPU-fixtures"
+    },
+    {
+      "adapted_sha256": "4a191f030403e1fd4e2382d44c3082b564ee259d07878b6985bd92b5fc75ab39",
+      "development_fault_ordinals": [
+        20
+      ],
+      "native_apple_execution": "pending",
+      "patch": "upstream/adapted/journal-construction-guard.patch",
+      "patch_sha256": "0963b27f9e0845d661d39137a1ebe148b432d615194e55ad76349fc1292bec85",
+      "source": "src/nvidia/src/kernel/diagnostics/journal.c",
+      "upstream_sha256": "e60e49ec4c03be92fa5acb4077970d8d5835021e58eb72d31b7201730d5fb104",
+      "validation": "targeted-original-ELF-lifecycle-control-with-explicit-platform-and-privileged-CPU-fixtures"
+    },
+    {
+      "adapted_sha256": "a412e2070fa2bb49d56941415d07e6176dedd4776c817aa66e36f78d8d9e8f66",
+      "development_fault_ordinals": [
+        100,
+        101,
+        102,
+        103,
+        104,
+        105
+      ],
+      "native_apple_execution": "pending",
+      "patch": "upstream/adapted/thread-state-unwind.patch",
+      "patch_sha256": "cad0f0b64d46f1772e7abccda349744964bfd4a0242baf7c100092327dc63cee",
+      "source": "src/nvidia/src/kernel/core/thread_state.c",
+      "upstream_sha256": "bf8738910a40463632d1ffb42d63689318152858e228ca9376b6d3ddbba569de",
+      "validation": "targeted-original-ELF-lifecycle-control-with-explicit-platform-and-privileged-CPU-fixtures"
+    }
+  ],
+  "automatic_original_source_replacement": false,
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "format": 1,
+  "note": "The original baseline namespace audit compiles pinned sources unchanged. These overlays require an explicit checked source-substitution build; they do not enable kernel entry.",
+  "production_entry": "disabled",
+  "release": "615.78.08",
+  "remaining_failed_allocation_ordinals": [
+    1,
+    124,
+    128,
+    144,
+    145,
+    146,
+    147,
+    148
+  ],
+  "status": "reviewed-development-overlays"
+}

@@ -1,0 +1,74 @@
+{
+  "format": 1,
+  "implementation": "independent Darwin query and bounded parser adapter",
+  "hardware_actions": ["optional endpoint _ROM ACPI evaluation requested by original RM"],
+  "public_output": "known bits, component presence, finite counters; no raw tables or resource addresses",
+  "references": [
+    {
+      "publisher": "UEFI Forum",
+      "specification": "ACPI 6.4, section 6.5.6 _SEG",
+      "url": "https://uefi.org/htmlspecs/ACPI_Spec_6_4_html/06_Device_Configuration/Device_Configuration.html",
+      "contract": "_SEG belongs to a PCI host bridge; an absent _SEG defaults to PCI Segment Group 0"
+    },
+    {
+      "repository": "acidanthera/MacKernelSDK",
+      "commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+      "paths": [
+        "Headers/IOKit/acpi/IOACPIPlatformDevice.h",
+        "Headers/IOKit/IORegistryEntry.h",
+        "Headers/IOKit/IOService.h",
+        "Headers/IOKit/graphics/IOFramebuffer.h",
+        "Headers/libkern/c++/OSSerialize.h",
+        "Headers/libkern/c++/OSUnserialize.h",
+        "Headers/libkern/version.h",
+        "Headers/pexpert/pexpert.h"
+      ]
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "anchors": [
+        "osfmk/i386/mp.h: real_ncpus exact unsigned-int declaration",
+        "osfmk/i386/cpu_threads.c: registered-processor/MADT count semantics",
+        "pexpert/i386/pe_init.c: gPEClockFrequencyInfo and gPEEFISystemTable definitions",
+        "config/Unsupported.exports: gPEClockFrequencyInfo export",
+        "config/Unsupported.x86_64.exports: real_ncpus and gPEEFISystemTable exports"
+      ]
+    },
+    {
+      "repository": "apple-oss-distributions/IOPCIFamily",
+      "commit": "4822b27a36e2de70e231ecf2bf3021384fab6ec2",
+      "path": "IOPCIConfigurator.cpp",
+      "anchor": "IOPCICopyACPIDevice: endpoint acpi-path property, fromPath and IOACPIPlatformDevice type check"
+    },
+    {
+      "repository": "apple-oss-distributions/AppleSMBIOS",
+      "commit": "9079d961c4dc99768745adc8208a24fda4678b4d",
+      "path": "AppleSMBIOS.cpp",
+      "anchors": ["SMBIOS serializer property", "serializeSMBIOS", "SMBIOS-EPS publication"]
+    },
+    {
+      "repository": "NVIDIA/open-gpu-kernel-modules",
+      "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+      "release": "615.78.08",
+      "anchors": [
+        "kernel-open/nvidia/nv-acpi.c: nv_acpi_rom_method two integer arguments and buffer copy",
+        "kernel-open/nvidia/nv-acpi.c: _BIX index4/_BIF index3 rechargeable battery predicate",
+        "kernel-open/nvidia/nv.c: nv_is_chassis_notebook SMBIOS9/10",
+        "kernel-open/nvidia/nv.c: nv_platform_supports_s0ix FADT low-power-S0 hardware flag",
+        "kernel-open/nvidia/nv-pci.c: nv_init_coherent_gpu_info returns immediately on non-AArch64",
+        "kernel-open/nvidia/os-interface.c: os_is_vgx_hyper build-profile predicate",
+        "kernel-open/nvidia/os-interface.c: os_is_nvswitch_present NVIDIA bridge-other PCI predicate"
+      ]
+    }
+  ],
+  "policy": {
+    "vgpu_hypervisor_profile": false,
+    "s0ix_operational_policy_enabled": false,
+    "s0ix_hardware_evidence_separate": true,
+    "missing_required_facts_refuse_startup": true,
+    "rom_required_universally": false,
+    "rom_window_bytes": 16777216,
+    "rom_request_maximum_bytes": 65536
+  }
+}

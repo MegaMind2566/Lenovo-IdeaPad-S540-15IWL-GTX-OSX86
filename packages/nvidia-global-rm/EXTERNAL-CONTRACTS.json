@@ -1,0 +1,5262 @@
+{
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "contracts": [
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_acpi_d3cold_dsm_for_upstream_port (nv_state_t *, NvU8 *, NvU32, NvU32, NvU32 *);",
+      "kind": "FunctionDecl",
+      "line": 1023,
+      "namespace_symbol": "s540Global_nv_acpi_d3cold_dsm_for_upstream_port",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU8 *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32"
+        },
+        {
+          "name": "p3",
+          "type": "NvU32"
+        },
+        {
+          "name": "p4",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_acpi_d3cold_dsm_for_upstream_port",
+      "type": "NV_STATUS (nv_state_t *, NvU8 *, NvU32, NvU32, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_acpi_ddc_method (nv_state_t *, void *, NvU32 *, NvBool);",
+      "kind": "FunctionDecl",
+      "line": 1025,
+      "namespace_symbol": "s540Global_nv_acpi_ddc_method",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "void *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32 *"
+        },
+        {
+          "name": "p3",
+          "type": "NvBool"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_acpi_ddc_method",
+      "type": "NV_STATUS (nv_state_t *, void *, NvU32 *, NvBool)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_acpi_dod_method (nv_state_t *, NvU32 *, NvU32 *);",
+      "kind": "FunctionDecl",
+      "line": 1026,
+      "namespace_symbol": "s540Global_nv_acpi_dod_method",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32 *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_acpi_dod_method",
+      "type": "NV_STATUS (nv_state_t *, NvU32 *, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_acpi_dsm_method (nv_state_t *, NvU8 *, NvU32, NvBool, NvU32, void *, NvU16, NvU32 *, void *, NvU16 *);",
+      "kind": "FunctionDecl",
+      "line": 1024,
+      "namespace_symbol": "s540Global_nv_acpi_dsm_method",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU8 *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32"
+        },
+        {
+          "name": "p3",
+          "type": "NvBool"
+        },
+        {
+          "name": "p4",
+          "type": "NvU32"
+        },
+        {
+          "name": "p5",
+          "type": "void *"
+        },
+        {
+          "name": "p6",
+          "type": "NvU16"
+        },
+        {
+          "name": "p7",
+          "type": "NvU32 *"
+        },
+        {
+          "name": "p8",
+          "type": "void *"
+        },
+        {
+          "name": "p9",
+          "type": "NvU16 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_acpi_dsm_method",
+      "type": "NV_STATUS (nv_state_t *, NvU8 *, NvU32, NvBool, NvU32, void *, NvU16, NvU32 *, void *, NvU16 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_acpi_get_powersource (NvU32 *);",
+      "kind": "FunctionDecl",
+      "line": 1028,
+      "namespace_symbol": "s540Global_nv_acpi_get_powersource",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_acpi_get_powersource",
+      "type": "NV_STATUS (NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NvBool NV_API_CALL nv_acpi_is_battery_present(void);",
+      "kind": "FunctionDecl",
+      "line": 1029,
+      "namespace_symbol": "s540Global_nv_acpi_is_battery_present",
+      "parameters": [],
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_acpi_is_battery_present",
+      "type": "NvBool (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_acpi_methods_init (NvU32 *);",
+      "kind": "FunctionDecl",
+      "line": 1019,
+      "namespace_symbol": "s540Global_nv_acpi_methods_init",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_acpi_methods_init",
+      "type": "void (NvU32 *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_acpi_methods_uninit (void);",
+      "kind": "FunctionDecl",
+      "line": 1020,
+      "namespace_symbol": "s540Global_nv_acpi_methods_uninit",
+      "parameters": [],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_acpi_methods_uninit",
+      "type": "void (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_acpi_mux_method (nv_state_t *, NvU32 *, NvU32, const char *);",
+      "kind": "FunctionDecl",
+      "line": 1031,
+      "namespace_symbol": "s540Global_nv_acpi_mux_method",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32 *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32"
+        },
+        {
+          "name": "p3",
+          "type": "const char *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_acpi_mux_method",
+      "type": "NV_STATUS (nv_state_t *, NvU32 *, NvU32, const char *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_acpi_rom_method (nv_state_t *, NvU32 *, NvU32 *);",
+      "kind": "FunctionDecl",
+      "line": 1027,
+      "namespace_symbol": "s540Global_nv_acpi_rom_method",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32 *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_acpi_rom_method",
+      "type": "NV_STATUS (nv_state_t *, NvU32 *, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_acquire_fabric_mgmt_cap (int, int*);",
+      "kind": "FunctionDecl",
+      "line": 1068,
+      "namespace_symbol": "s540Global_nv_acquire_fabric_mgmt_cap",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "int"
+        },
+        {
+          "name": "p1",
+          "type": "int *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_acquire_fabric_mgmt_cap",
+      "type": "NV_STATUS (int, int *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_acquire_mmap_lock (nv_state_t *);",
+      "kind": "FunctionDecl",
+      "line": 1050,
+      "namespace_symbol": "s540Global_nv_acquire_mmap_lock",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_acquire_mmap_lock",
+      "type": "void (nv_state_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_alias_pages (nv_state_t *, NvU32, NvU64, NvU32, NvU32, NvU64, NvU64 *, NvBool, void **);",
+      "kind": "FunctionDecl",
+      "line": 974,
+      "namespace_symbol": "s540Global_nv_alias_pages",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64"
+        },
+        {
+          "name": "p3",
+          "type": "NvU32"
+        },
+        {
+          "name": "p4",
+          "type": "NvU32"
+        },
+        {
+          "name": "p5",
+          "type": "NvU64"
+        },
+        {
+          "name": "p6",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p7",
+          "type": "NvBool"
+        },
+        {
+          "name": "p8",
+          "type": "void **"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_alias_pages",
+      "type": "NV_STATUS (nv_state_t *, NvU32, NvU64, NvU32, NvU32, NvU64, NvU64 *, NvBool, void **)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void* NV_API_CALL nv_alloc_kernel_mapping (nv_state_t *, void *, NvU64, NvU32, NvU64, void **);",
+      "kind": "FunctionDecl",
+      "line": 961,
+      "namespace_symbol": "s540Global_nv_alloc_kernel_mapping",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "void *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64"
+        },
+        {
+          "name": "p3",
+          "type": "NvU32"
+        },
+        {
+          "name": "p4",
+          "type": "NvU64"
+        },
+        {
+          "name": "p5",
+          "type": "void **"
+        }
+      ],
+      "return_type": "void *",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_alloc_kernel_mapping",
+      "type": "void *(nv_state_t *, void *, NvU64, NvU32, NvU64, void **)",
+      "unavailable_policy": "output-preserving-NULL",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_alloc_pages (nv_state_t *, NvU32, NvU64, NvBool, NvU32, NvBool, NvBool, NvS32, NvU64 *, void **);",
+      "kind": "FunctionDecl",
+      "line": 975,
+      "namespace_symbol": "s540Global_nv_alloc_pages",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64"
+        },
+        {
+          "name": "p3",
+          "type": "NvBool"
+        },
+        {
+          "name": "p4",
+          "type": "NvU32"
+        },
+        {
+          "name": "p5",
+          "type": "NvBool"
+        },
+        {
+          "name": "p6",
+          "type": "NvBool"
+        },
+        {
+          "name": "p7",
+          "type": "NvS32"
+        },
+        {
+          "name": "p8",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p9",
+          "type": "void **"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_alloc_pages",
+      "type": "NV_STATUS (nv_state_t *, NvU32, NvU64, NvBool, NvU32, NvBool, NvBool, NvS32, NvU64 *, void **)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_alloc_user_mapping (nv_state_t *, void *, NvU64, NvU32, NvU64, NvU32, NvU64 *, void **);",
+      "kind": "FunctionDecl",
+      "line": 963,
+      "namespace_symbol": "s540Global_nv_alloc_user_mapping",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "void *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64"
+        },
+        {
+          "name": "p3",
+          "type": "NvU32"
+        },
+        {
+          "name": "p4",
+          "type": "NvU64"
+        },
+        {
+          "name": "p5",
+          "type": "NvU32"
+        },
+        {
+          "name": "p6",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p7",
+          "type": "void **"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_alloc_user_mapping",
+      "type": "NV_STATUS (nv_state_t *, void *, NvU64, NvU32, NvU64, NvU32, NvU64 *, void **)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_audio_dynamic_power (nv_state_t *);",
+      "kind": "FunctionDecl",
+      "line": 1063,
+      "namespace_symbol": "s540Global_nv_audio_dynamic_power",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_audio_dynamic_power",
+      "type": "void (nv_state_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_cancel_nano_timer(nv_state_t *, nv_nano_timer_t *);",
+      "kind": "FunctionDecl",
+      "line": 1344,
+      "namespace_symbol": "s540Global_nv_cancel_nano_timer",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "nv_nano_timer_t *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_cancel_nano_timer",
+      "type": "void (nv_state_t *, nv_nano_timer_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_control_soc_irqs (nv_state_t *, NvBool bEnable);",
+      "kind": "FunctionDecl",
+      "line": 1065,
+      "namespace_symbol": "s540Global_nv_control_soc_irqs",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvBool"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_control_soc_irqs",
+      "type": "void (nv_state_t *, NvBool)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_create_nano_timer(nv_state_t *, void *pTmrEvent, nv_nano_timer_t **);",
+      "kind": "FunctionDecl",
+      "line": 1341,
+      "namespace_symbol": "s540Global_nv_create_nano_timer",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "void *"
+        },
+        {
+          "name": "p2",
+          "type": "nv_nano_timer_t **"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_create_nano_timer",
+      "type": "void (nv_state_t *, void *, nv_nano_timer_t **)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_destroy_nano_timer(nv_state_t *nv, nv_nano_timer_t *);",
+      "kind": "FunctionDecl",
+      "line": 1345,
+      "namespace_symbol": "s540Global_nv_destroy_nano_timer",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "nv_nano_timer_t *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_destroy_nano_timer",
+      "type": "void (nv_state_t *, nv_nano_timer_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "int NV_API_CALL nv_dev_vprintf(struct nv_state_t *, NV_LOG_LEVEL, const char *, va_list);",
+      "kind": "FunctionDecl",
+      "line": 31,
+      "namespace_symbol": "s540Global_nv_dev_vprintf",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "struct nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NV_LOG_LEVEL"
+        },
+        {
+          "name": "p2",
+          "type": "const char *"
+        },
+        {
+          "name": "p3",
+          "type": "struct __va_list_tag *"
+        }
+      ],
+      "return_type": "int",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv-dev-printf.h",
+      "symbol": "nv_dev_vprintf",
+      "type": "int (struct nv_state_t *, NV_LOG_LEVEL, const char *, struct __va_list_tag *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_disable_clk (nv_state_t *, TEGRASOC_WHICH_CLK);",
+      "kind": "FunctionDecl",
+      "line": 1166,
+      "namespace_symbol": "s540Global_nv_disable_clk",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "TEGRASOC_WHICH_CLK"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_disable_clk",
+      "type": "void (nv_state_t *, TEGRASOC_WHICH_CLK)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_dma_cache_invalidate (nv_dma_device_t *, void *);",
+      "kind": "FunctionDecl",
+      "line": 1003,
+      "namespace_symbol": "s540Global_nv_dma_cache_invalidate",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_dma_device_t *"
+        },
+        {
+          "name": "p1",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_dma_cache_invalidate",
+      "type": "void (nv_dma_device_t *, void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_dma_destroy_sysmem_window_for_fabric_access (nv_state_t *, NvU64, NvU64);",
+      "kind": "FunctionDecl",
+      "line": 1007,
+      "namespace_symbol": "s540Global_nv_dma_destroy_sysmem_window_for_fabric_access",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_dma_destroy_sysmem_window_for_fabric_access",
+      "type": "void (nv_state_t *, NvU64, NvU64)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_dma_import_dma_buf (nv_dma_device_t *, struct dma_buf *, NvBool, NvU32 *, struct sg_table **, nv_dma_buf_t **);",
+      "kind": "FunctionDecl",
+      "line": 1085,
+      "namespace_symbol": "s540Global_nv_dma_import_dma_buf",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_dma_device_t *"
+        },
+        {
+          "name": "p1",
+          "type": "struct dma_buf *"
+        },
+        {
+          "name": "p2",
+          "type": "NvBool"
+        },
+        {
+          "name": "p3",
+          "type": "NvU32 *"
+        },
+        {
+          "name": "p4",
+          "type": "struct sg_table **"
+        },
+        {
+          "name": "p5",
+          "type": "nv_dma_buf_t **"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_dma_import_dma_buf",
+      "type": "NV_STATUS (nv_dma_device_t *, struct dma_buf *, NvBool, NvU32 *, struct sg_table **, nv_dma_buf_t **)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_dma_import_from_fd (nv_dma_device_t *, NvS32, NvBool, NvU32 *, struct sg_table **, nv_dma_buf_t **);",
+      "kind": "FunctionDecl",
+      "line": 1086,
+      "namespace_symbol": "s540Global_nv_dma_import_from_fd",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_dma_device_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvS32"
+        },
+        {
+          "name": "p2",
+          "type": "NvBool"
+        },
+        {
+          "name": "p3",
+          "type": "NvU32 *"
+        },
+        {
+          "name": "p4",
+          "type": "struct sg_table **"
+        },
+        {
+          "name": "p5",
+          "type": "nv_dma_buf_t **"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_dma_import_from_fd",
+      "type": "NV_STATUS (nv_dma_device_t *, NvS32, NvBool, NvU32 *, struct sg_table **, nv_dma_buf_t **)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_dma_import_sgt (nv_dma_device_t *, struct sg_table *, struct drm_gem_object *);",
+      "kind": "FunctionDecl",
+      "line": 1083,
+      "namespace_symbol": "s540Global_nv_dma_import_sgt",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_dma_device_t *"
+        },
+        {
+          "name": "p1",
+          "type": "struct sg_table *"
+        },
+        {
+          "name": "p2",
+          "type": "struct drm_gem_object *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_dma_import_sgt",
+      "type": "NV_STATUS (nv_dma_device_t *, struct sg_table *, struct drm_gem_object *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_dma_init_sysmem_window_for_fabric_access (nv_state_t *, NvU64, NvU64 *, NvU64 *, NvBool *);",
+      "kind": "FunctionDecl",
+      "line": 1006,
+      "namespace_symbol": "s540Global_nv_dma_init_sysmem_window_for_fabric_access",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p3",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p4",
+          "type": "NvBool *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_dma_init_sysmem_window_for_fabric_access",
+      "type": "NV_STATUS (nv_state_t *, NvU64, NvU64 *, NvU64 *, NvBool *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_dma_map_alloc (nv_dma_device_t *, NvU64, NvU64 *, NvBool, NvBool, void **);",
+      "kind": "FunctionDecl",
+      "line": 994,
+      "namespace_symbol": "s540Global_nv_dma_map_alloc",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_dma_device_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p3",
+          "type": "NvBool"
+        },
+        {
+          "name": "p4",
+          "type": "NvBool"
+        },
+        {
+          "name": "p5",
+          "type": "void **"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_dma_map_alloc",
+      "type": "NV_STATUS (nv_dma_device_t *, NvU64, NvU64 *, NvBool, NvBool, void **)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_dma_map_mmio (nv_dma_device_t *, NvU64, NvU64 *);",
+      "kind": "FunctionDecl",
+      "line": 1000,
+      "namespace_symbol": "s540Global_nv_dma_map_mmio",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_dma_device_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_dma_map_mmio",
+      "type": "NV_STATUS (nv_dma_device_t *, NvU64, NvU64 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_dma_map_peer (nv_dma_device_t *, nv_dma_device_t *, NvU8, NvU64, NvU64 *);",
+      "kind": "FunctionDecl",
+      "line": 997,
+      "namespace_symbol": "s540Global_nv_dma_map_peer",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_dma_device_t *"
+        },
+        {
+          "name": "p1",
+          "type": "nv_dma_device_t *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU8"
+        },
+        {
+          "name": "p3",
+          "type": "NvU64"
+        },
+        {
+          "name": "p4",
+          "type": "NvU64 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_dma_map_peer",
+      "type": "NV_STATUS (nv_dma_device_t *, nv_dma_device_t *, NvU8, NvU64, NvU64 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_dma_release_dma_buf (nv_dma_buf_t *);",
+      "kind": "FunctionDecl",
+      "line": 1087,
+      "namespace_symbol": "s540Global_nv_dma_release_dma_buf",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_dma_buf_t *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_dma_release_dma_buf",
+      "type": "void (nv_dma_buf_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_dma_release_sgt(struct sg_table *, struct drm_gem_object *);",
+      "kind": "FunctionDecl",
+      "line": 1084,
+      "namespace_symbol": "s540Global_nv_dma_release_sgt",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "struct sg_table *"
+        },
+        {
+          "name": "p1",
+          "type": "struct drm_gem_object *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_dma_release_sgt",
+      "type": "void (struct sg_table *, struct drm_gem_object *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_dma_unmap_alloc (nv_dma_device_t *, NvU64, NvU64 *, void **);",
+      "kind": "FunctionDecl",
+      "line": 995,
+      "namespace_symbol": "s540Global_nv_dma_unmap_alloc",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_dma_device_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p3",
+          "type": "void **"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_dma_unmap_alloc",
+      "type": "NV_STATUS (nv_dma_device_t *, NvU64, NvU64 *, void **)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_dma_unmap_mmio (nv_dma_device_t *, NvU64, NvU64);",
+      "kind": "FunctionDecl",
+      "line": 1001,
+      "namespace_symbol": "s540Global_nv_dma_unmap_mmio",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_dma_device_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_dma_unmap_mmio",
+      "type": "void (nv_dma_device_t *, NvU64, NvU64)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_dma_unmap_peer (nv_dma_device_t *, NvU64, NvU64);",
+      "kind": "FunctionDecl",
+      "line": 998,
+      "namespace_symbol": "s540Global_nv_dma_unmap_peer",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_dma_device_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_dma_unmap_peer",
+      "type": "void (nv_dma_device_t *, NvU64, NvU64)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_enable_clk (nv_state_t *, TEGRASOC_WHICH_CLK);",
+      "kind": "FunctionDecl",
+      "line": 1165,
+      "namespace_symbol": "s540Global_nv_enable_clk",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "TEGRASOC_WHICH_CLK"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_enable_clk",
+      "type": "NV_STATUS (nv_state_t *, TEGRASOC_WHICH_CLK)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_flush_coherent_cpu_cache_range(nv_state_t *nv, NvU64 cpu_virtual, NvU64 size);",
+      "kind": "FunctionDecl",
+      "line": 1324,
+      "namespace_symbol": "s540Global_nv_flush_coherent_cpu_cache_range",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_flush_coherent_cpu_cache_range",
+      "type": "void (nv_state_t *, NvU64, NvU64)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_free_kernel_mapping (nv_state_t *, void *, void *, void *);",
+      "kind": "FunctionDecl",
+      "line": 962,
+      "namespace_symbol": "s540Global_nv_free_kernel_mapping",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "void *"
+        },
+        {
+          "name": "p2",
+          "type": "void *"
+        },
+        {
+          "name": "p3",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_free_kernel_mapping",
+      "type": "void (nv_state_t *, void *, void *, void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_free_pages (nv_state_t *, NvU32, NvBool, NvU32, void *);",
+      "kind": "FunctionDecl",
+      "line": 976,
+      "namespace_symbol": "s540Global_nv_free_pages",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32"
+        },
+        {
+          "name": "p2",
+          "type": "NvBool"
+        },
+        {
+          "name": "p3",
+          "type": "NvU32"
+        },
+        {
+          "name": "p4",
+          "type": "void *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_free_pages",
+      "type": "NV_STATUS (nv_state_t *, NvU32, NvBool, NvU32, void *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_free_user_mapping (nv_state_t *, void *, NvU64, void *);",
+      "kind": "FunctionDecl",
+      "line": 964,
+      "namespace_symbol": "s540Global_nv_free_user_mapping",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "void *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64"
+        },
+        {
+          "name": "p3",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_free_user_mapping",
+      "type": "void (nv_state_t *, void *, NvU64, void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvBool NV_API_CALL nv_get_all_mappings_revoked_locked (nv_state_t *);",
+      "kind": "FunctionDecl",
+      "line": 1052,
+      "namespace_symbol": "s540Global_nv_get_all_mappings_revoked_locked",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        }
+      ],
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_get_all_mappings_revoked_locked",
+      "type": "NvBool (nv_state_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "nv_state_t* NV_API_CALL nv_get_ctl_state (void);",
+      "kind": "FunctionDecl",
+      "line": 970,
+      "namespace_symbol": "s540Global_nv_get_ctl_state",
+      "parameters": [],
+      "return_type": "nv_state_t *",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_get_ctl_state",
+      "type": "nv_state_t *(void)",
+      "unavailable_policy": "output-preserving-NULL",
+      "variadic": false
+    },
+    {
+      "declaration": "nv_soc_irq_type_t NV_API_CALL nv_get_current_irq_type(nv_state_t*);",
+      "kind": "FunctionDecl",
+      "line": 1323,
+      "namespace_symbol": "s540Global_nv_get_current_irq_type",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        }
+      ],
+      "return_type": "nv_soc_irq_type_t",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_get_current_irq_type",
+      "type": "nv_soc_irq_type_t (nv_state_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvU32 NV_API_CALL nv_get_dev_minor (nv_state_t *);",
+      "kind": "FunctionDecl",
+      "line": 960,
+      "namespace_symbol": "s540Global_nv_get_dev_minor",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        }
+      ],
+      "return_type": "NvU32",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_get_dev_minor",
+      "type": "NvU32 (nv_state_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_get_device_memory_config(nv_state_t *, NvU64 *, NvU64 *, NvU64 *, NvU64 *, NvU32 *, NvS32 *);",
+      "kind": "FunctionDecl",
+      "line": 1044,
+      "namespace_symbol": "s540Global_nv_get_device_memory_config",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p3",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p4",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p5",
+          "type": "NvU32 *"
+        },
+        {
+          "name": "p6",
+          "type": "NvS32 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_get_device_memory_config",
+      "type": "NV_STATUS (nv_state_t *, NvU64 *, NvU64 *, NvU64 *, NvU64 *, NvU32 *, NvS32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_get_disp_smmu_stream_ids (nv_state_t *, NvU32 *, NvU32 *);",
+      "kind": "FunctionDecl",
+      "line": 1110,
+      "namespace_symbol": "s540Global_nv_get_disp_smmu_stream_ids",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32 *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_get_disp_smmu_stream_ids",
+      "type": "void (nv_state_t *, NvU32 *, NvU32 *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_get_egm_info(nv_state_t *, NvU64 *, NvU64 *, NvS32 *);",
+      "kind": "FunctionDecl",
+      "line": 1045,
+      "namespace_symbol": "s540Global_nv_get_egm_info",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p3",
+          "type": "NvS32 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_get_egm_info",
+      "type": "NV_STATUS (nv_state_t *, NvU64 *, NvU64 *, NvS32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "nv_file_private_t* NV_API_CALL nv_get_file_private(NvS32, NvBool, void **);",
+      "kind": "FunctionDecl",
+      "line": 1041,
+      "namespace_symbol": "s540Global_nv_get_file_private",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvS32"
+        },
+        {
+          "name": "p1",
+          "type": "NvBool"
+        },
+        {
+          "name": "p2",
+          "type": "void **"
+        }
+      ],
+      "return_type": "nv_file_private_t *",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_get_file_private",
+      "type": "nv_file_private_t *(NvS32, NvBool, void **)",
+      "unavailable_policy": "output-preserving-NULL",
+      "variadic": false
+    },
+    {
+      "declaration": "const void*NV_API_CALL nv_get_firmware(nv_state_t *, nv_firmware_type_t, nv_firmware_chip_family_t, const void **, NvU32 *);",
+      "kind": "FunctionDecl",
+      "line": 1038,
+      "namespace_symbol": "s540Global_nv_get_firmware",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "nv_firmware_type_t"
+        },
+        {
+          "name": "p2",
+          "type": "nv_firmware_chip_family_t"
+        },
+        {
+          "name": "p3",
+          "type": "const void **"
+        },
+        {
+          "name": "p4",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "const void *",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_get_firmware",
+      "type": "const void *(nv_state_t *, nv_firmware_type_t, nv_firmware_chip_family_t, const void **, NvU32 *)",
+      "unavailable_policy": "output-preserving-NULL",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_get_max_freq (nv_state_t *, TEGRASOC_WHICH_CLK, NvU32 *);",
+      "kind": "FunctionDecl",
+      "line": 1168,
+      "namespace_symbol": "s540Global_nv_get_max_freq",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "TEGRASOC_WHICH_CLK"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_get_max_freq",
+      "type": "NV_STATUS (nv_state_t *, TEGRASOC_WHICH_CLK, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_get_num_phys_pages (void *, NvU32 *);",
+      "kind": "FunctionDecl",
+      "line": 1108,
+      "namespace_symbol": "s540Global_nv_get_num_phys_pages",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_get_num_phys_pages",
+      "type": "NV_STATUS (void *, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_get_phys_pages (void *, void *, NvU32 *);",
+      "kind": "FunctionDecl",
+      "line": 1109,
+      "namespace_symbol": "s540Global_nv_get_phys_pages",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "void *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_get_phys_pages",
+      "type": "NV_STATUS (void *, void *, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_get_screen_info(nv_state_t *, NvU64 *, NvU32 *, NvU32 *, NvU32 *, NvU32 *, NvU64 *);",
+      "kind": "FunctionDecl",
+      "line": 1075,
+      "namespace_symbol": "s540Global_nv_get_screen_info",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32 *"
+        },
+        {
+          "name": "p3",
+          "type": "NvU32 *"
+        },
+        {
+          "name": "p4",
+          "type": "NvU32 *"
+        },
+        {
+          "name": "p5",
+          "type": "NvU32 *"
+        },
+        {
+          "name": "p6",
+          "type": "NvU64 *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_get_screen_info",
+      "type": "void (nv_state_t *, NvU64 *, NvU32 *, NvU32 *, NvU32 *, NvU32 *, NvU64 *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_get_syncpoint_aperture(NvU32, NvU64 *, NvU64 *, NvU32 *);",
+      "kind": "FunctionDecl",
+      "line": 1348,
+      "namespace_symbol": "s540Global_nv_get_syncpoint_aperture",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p3",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_get_syncpoint_aperture",
+      "type": "NV_STATUS (NvU32, NvU64 *, NvU64 *, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_get_updated_emu_seg(NvU32 *start, NvU32 *end);",
+      "kind": "FunctionDecl",
+      "line": 1074,
+      "namespace_symbol": "s540Global_nv_get_updated_emu_seg",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32 *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_get_updated_emu_seg",
+      "type": "void (NvU32 *, NvU32 *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void* NV_API_CALL nv_i2c_add_adapter (nv_state_t *, NvU32);",
+      "kind": "FunctionDecl",
+      "line": 1016,
+      "namespace_symbol": "s540Global_nv_i2c_add_adapter",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "void *",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_i2c_add_adapter",
+      "type": "void *(nv_state_t *, NvU32)",
+      "unavailable_policy": "output-preserving-NULL",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_imp_get_import_data (TEGRA_IMP_IMPORT_DATA *);",
+      "kind": "FunctionDecl",
+      "line": 1119,
+      "namespace_symbol": "s540Global_nv_imp_get_import_data",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "TEGRA_IMP_IMPORT_DATA *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_imp_get_import_data",
+      "type": "NV_STATUS (TEGRA_IMP_IMPORT_DATA *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_imp_get_uefi_data (nv_state_t *nv, NvU32 *iso_bw_kbps, NvU32 *floor_bw_kbps);",
+      "kind": "FunctionDecl",
+      "line": 1120,
+      "namespace_symbol": "s540Global_nv_imp_get_uefi_data",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32 *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_imp_get_uefi_data",
+      "type": "NV_STATUS (nv_state_t *, NvU32 *, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_imp_icc_set_bw (nv_state_t *nv, NvU32 avg_bw_kbps, NvU32 floor_bw_kbps);",
+      "kind": "FunctionDecl",
+      "line": 1122,
+      "namespace_symbol": "s540Global_nv_imp_icc_set_bw",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_imp_icc_set_bw",
+      "type": "NV_STATUS (nv_state_t *, NvU32, NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_indicate_idle (nv_state_t *);",
+      "kind": "FunctionDecl",
+      "line": 1058,
+      "namespace_symbol": "s540Global_nv_indicate_idle",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_indicate_idle",
+      "type": "NV_STATUS (nv_state_t *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_indicate_not_idle (nv_state_t *);",
+      "kind": "FunctionDecl",
+      "line": 1059,
+      "namespace_symbol": "s540Global_nv_indicate_not_idle",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_indicate_not_idle",
+      "type": "NV_STATUS (nv_state_t *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NvBool NV_API_CALL nv_is_chassis_notebook (void);",
+      "kind": "FunctionDecl",
+      "line": 1102,
+      "namespace_symbol": "s540Global_nv_is_chassis_notebook",
+      "parameters": [],
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_is_chassis_notebook",
+      "type": "NvBool (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvBool NV_API_CALL nv_is_gpu_accessible(nv_state_t *);",
+      "kind": "FunctionDecl",
+      "line": 1071,
+      "namespace_symbol": "s540Global_nv_is_gpu_accessible",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        }
+      ],
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_is_gpu_accessible",
+      "type": "NvBool (nv_state_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_log_error (nv_state_t *, NvU32, const char *, va_list);",
+      "kind": "FunctionDecl",
+      "line": 1033,
+      "namespace_symbol": "s540Global_nv_log_error",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32"
+        },
+        {
+          "name": "p2",
+          "type": "const char *"
+        },
+        {
+          "name": "p3",
+          "type": "struct __va_list_tag *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_log_error",
+      "type": "NV_STATUS (nv_state_t *, NvU32, const char *, struct __va_list_tag *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NvBool NV_API_CALL nv_match_gpu_os_info(nv_state_t *, void *);",
+      "kind": "FunctionDecl",
+      "line": 1072,
+      "namespace_symbol": "s540Global_nv_match_gpu_os_info",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "void *"
+        }
+      ],
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_match_gpu_os_info",
+      "type": "NvBool (nv_state_t *, void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_pci_cxl_set_caching(nv_state_t *, NvBool);",
+      "kind": "FunctionDecl",
+      "line": 1172,
+      "namespace_symbol": "s540Global_nv_pci_cxl_set_caching",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvBool"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_pci_cxl_set_caching",
+      "type": "void (nv_state_t *, NvBool)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_pci_read_gpu_pdi_from_dvsec(nv_state_t *, NvU64 *);",
+      "kind": "FunctionDecl",
+      "line": 1100,
+      "namespace_symbol": "s540Global_nv_pci_read_gpu_pdi_from_dvsec",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_pci_read_gpu_pdi_from_dvsec",
+      "type": "NV_STATUS (nv_state_t *, NvU64 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NvBool NV_API_CALL nv_platform_supports_s0ix (void);",
+      "kind": "FunctionDecl",
+      "line": 1094,
+      "namespace_symbol": "s540Global_nv_platform_supports_s0ix",
+      "parameters": [],
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_platform_supports_s0ix",
+      "type": "NvBool (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_post_event (nv_event_t *, NvHandle, NvU32, NvU32, NvU16, NvBool);",
+      "kind": "FunctionDecl",
+      "line": 1013,
+      "namespace_symbol": "s540Global_nv_post_event",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_event_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvHandle"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32"
+        },
+        {
+          "name": "p3",
+          "type": "NvU32"
+        },
+        {
+          "name": "p4",
+          "type": "NvU16"
+        },
+        {
+          "name": "p5",
+          "type": "NvBool"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_post_event",
+      "type": "void (nv_event_t *, NvHandle, NvU32, NvU32, NvU16, NvBool)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "int NV_API_CALL nv_printf(NvU32 debuglevel, const char *printf_format, ...);",
+      "kind": "FunctionDecl",
+      "line": 263,
+      "namespace_symbol": "s540Global_nv_printf",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32"
+        },
+        {
+          "name": "p1",
+          "type": "const char *"
+        }
+      ],
+      "return_type": "int",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "nv_printf",
+      "type": "int (NvU32, const char *, ...)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": true
+    },
+    {
+      "declaration": "void NV_API_CALL nv_put_file_private(void *);",
+      "kind": "FunctionDecl",
+      "line": 1042,
+      "namespace_symbol": "s540Global_nv_put_file_private",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_put_file_private",
+      "type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_put_firmware(const void *);",
+      "kind": "FunctionDecl",
+      "line": 1039,
+      "namespace_symbol": "s540Global_nv_put_firmware",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "const void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_put_firmware",
+      "type": "void (const void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_register_peer_io_mem (nv_state_t *, NvU64 *, NvU64, void **);",
+      "kind": "FunctionDecl",
+      "line": 981,
+      "namespace_symbol": "s540Global_nv_register_peer_io_mem",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64"
+        },
+        {
+          "name": "p3",
+          "type": "void **"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_register_peer_io_mem",
+      "type": "NV_STATUS (nv_state_t *, NvU64 *, NvU64, void **)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_register_phys_pages (nv_state_t *, NvU64 *, NvU64, NvU32, void **);",
+      "kind": "FunctionDecl",
+      "line": 989,
+      "namespace_symbol": "s540Global_nv_register_phys_pages",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64"
+        },
+        {
+          "name": "p3",
+          "type": "NvU32"
+        },
+        {
+          "name": "p4",
+          "type": "void **"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_register_phys_pages",
+      "type": "NV_STATUS (nv_state_t *, NvU64 *, NvU64, NvU32, void **)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_register_sgt (nv_state_t *, NvU64 *, NvU64, NvU32, void **, struct sg_table *, void *, NvBool);",
+      "kind": "FunctionDecl",
+      "line": 986,
+      "namespace_symbol": "s540Global_nv_register_sgt",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64"
+        },
+        {
+          "name": "p3",
+          "type": "NvU32"
+        },
+        {
+          "name": "p4",
+          "type": "void **"
+        },
+        {
+          "name": "p5",
+          "type": "struct sg_table *"
+        },
+        {
+          "name": "p6",
+          "type": "void *"
+        },
+        {
+          "name": "p7",
+          "type": "NvBool"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_register_sgt",
+      "type": "NV_STATUS (nv_state_t *, NvU64 *, NvU64, NvU32, void **, struct sg_table *, void *, NvBool)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_register_user_pages (nv_state_t *, NvU64, NvU64 *, void *, void **, NvBool);",
+      "kind": "FunctionDecl",
+      "line": 978,
+      "namespace_symbol": "s540Global_nv_register_user_pages",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p3",
+          "type": "void *"
+        },
+        {
+          "name": "p4",
+          "type": "void **"
+        },
+        {
+          "name": "p5",
+          "type": "NvBool"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_register_user_pages",
+      "type": "NV_STATUS (nv_state_t *, NvU64, NvU64 *, void *, void **, NvBool)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_release_mmap_lock (nv_state_t *);",
+      "kind": "FunctionDecl",
+      "line": 1051,
+      "namespace_symbol": "s540Global_nv_release_mmap_lock",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_release_mmap_lock",
+      "type": "void (nv_state_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_revoke_gpu_mappings (nv_state_t *);",
+      "kind": "FunctionDecl",
+      "line": 1049,
+      "namespace_symbol": "s540Global_nv_revoke_gpu_mappings",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_revoke_gpu_mappings",
+      "type": "NV_STATUS (nv_state_t *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_schedule_uvm_drain_p2p (NvU8 *);",
+      "kind": "FunctionDecl",
+      "line": 1091,
+      "namespace_symbol": "s540Global_nv_schedule_uvm_drain_p2p",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU8 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_schedule_uvm_drain_p2p",
+      "type": "NV_STATUS (NvU8 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_schedule_uvm_isr (nv_state_t *);",
+      "kind": "FunctionDecl",
+      "line": 1089,
+      "namespace_symbol": "s540Global_nv_schedule_uvm_isr",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_schedule_uvm_isr",
+      "type": "void (nv_state_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_schedule_uvm_resume_p2p (NvU8 *);",
+      "kind": "FunctionDecl",
+      "line": 1092,
+      "namespace_symbol": "s540Global_nv_schedule_uvm_resume_p2p",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU8 *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_schedule_uvm_resume_p2p",
+      "type": "void (NvU8 *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_set_dma_address_size (nv_state_t *, NvU32 );",
+      "kind": "FunctionDecl",
+      "line": 972,
+      "namespace_symbol": "s540Global_nv_set_dma_address_size",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_set_dma_address_size",
+      "type": "void (nv_state_t *, NvU32)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_set_freq (nv_state_t *, TEGRASOC_WHICH_CLK, NvU32);",
+      "kind": "FunctionDecl",
+      "line": 1170,
+      "namespace_symbol": "s540Global_nv_set_freq",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "TEGRASOC_WHICH_CLK"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_set_freq",
+      "type": "NV_STATUS (nv_state_t *, TEGRASOC_WHICH_CLK, NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_set_safe_to_mmap_locked (nv_state_t *, NvBool);",
+      "kind": "FunctionDecl",
+      "line": 1053,
+      "namespace_symbol": "s540Global_nv_set_safe_to_mmap_locked",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvBool"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_set_safe_to_mmap_locked",
+      "type": "void (nv_state_t *, NvBool)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_start_nano_timer(nv_state_t *nv, nv_nano_timer_t *, NvU64 timens);",
+      "kind": "FunctionDecl",
+      "line": 1342,
+      "namespace_symbol": "s540Global_nv_start_nano_timer",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "nv_nano_timer_t *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_start_nano_timer",
+      "type": "void (nv_state_t *, nv_nano_timer_t *, NvU64)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvS32 NV_API_CALL nv_start_rc_timer (nv_state_t *);",
+      "kind": "FunctionDecl",
+      "line": 1010,
+      "namespace_symbol": "s540Global_nv_start_rc_timer",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        }
+      ],
+      "return_type": "NvS32",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_start_rc_timer",
+      "type": "NvS32 (nv_state_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvS32 NV_API_CALL nv_stop_rc_timer (nv_state_t *);",
+      "kind": "FunctionDecl",
+      "line": 1011,
+      "namespace_symbol": "s540Global_nv_stop_rc_timer",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        }
+      ],
+      "return_type": "NvS32",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_stop_rc_timer",
+      "type": "NvS32 (nv_state_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_tegra_dce_client_ipc_send_recv(NvU32, void *, NvU32);",
+      "kind": "FunctionDecl",
+      "line": 1139,
+      "namespace_symbol": "s540Global_nv_tegra_dce_client_ipc_send_recv",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32"
+        },
+        {
+          "name": "p1",
+          "type": "void *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_tegra_dce_client_ipc_send_recv",
+      "type": "NV_STATUS (NvU32, void *, NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_tegra_dce_register_ipc_client(NvU32, void *, nvTegraDceClientIpcCallback, NvU32 *);",
+      "kind": "FunctionDecl",
+      "line": 1138,
+      "namespace_symbol": "s540Global_nv_tegra_dce_register_ipc_client",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32"
+        },
+        {
+          "name": "p1",
+          "type": "void *"
+        },
+        {
+          "name": "p2",
+          "type": "nvTegraDceClientIpcCallback"
+        },
+        {
+          "name": "p3",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_tegra_dce_register_ipc_client",
+      "type": "NV_STATUS (NvU32, void *, nvTegraDceClientIpcCallback, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL nv_tegra_dce_unregister_ipc_client(NvU32);",
+      "kind": "FunctionDecl",
+      "line": 1140,
+      "namespace_symbol": "s540Global_nv_tegra_dce_unregister_ipc_client",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_tegra_dce_unregister_ipc_client",
+      "type": "NV_STATUS (NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NvU32 NV_API_CALL nv_tegra_get_rm_interface_type(NvU32);",
+      "kind": "FunctionDecl",
+      "line": 1137,
+      "namespace_symbol": "s540Global_nv_tegra_get_rm_interface_type",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "NvU32",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_tegra_get_rm_interface_type",
+      "type": "NvU32 (NvU32)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_unregister_peer_io_mem(nv_state_t *, void *);",
+      "kind": "FunctionDecl",
+      "line": 982,
+      "namespace_symbol": "s540Global_nv_unregister_peer_io_mem",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_unregister_peer_io_mem",
+      "type": "void (nv_state_t *, void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_unregister_phys_pages (nv_state_t *, void *);",
+      "kind": "FunctionDecl",
+      "line": 990,
+      "namespace_symbol": "s540Global_nv_unregister_phys_pages",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_unregister_phys_pages",
+      "type": "void (nv_state_t *, void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_unregister_sgt (nv_state_t *, struct sg_table **, void **, void *);",
+      "kind": "FunctionDecl",
+      "line": 988,
+      "namespace_symbol": "s540Global_nv_unregister_sgt",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "struct sg_table **"
+        },
+        {
+          "name": "p2",
+          "type": "void **"
+        },
+        {
+          "name": "p3",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_unregister_sgt",
+      "type": "void (nv_state_t *, struct sg_table **, void **, void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL nv_unregister_user_pages (nv_state_t *, NvU64, void **, void **);",
+      "kind": "FunctionDecl",
+      "line": 979,
+      "namespace_symbol": "s540Global_nv_unregister_user_pages",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64"
+        },
+        {
+          "name": "p2",
+          "type": "void **"
+        },
+        {
+          "name": "p3",
+          "type": "void **"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nv_unregister_user_pages",
+      "type": "void (nv_state_t *, NvU64, void **, void **)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "extern nv_cap_t *nvidia_caps_root;",
+      "kind": "VarDecl",
+      "line": 51,
+      "namespace_symbol": "s540Global_nvidia_caps_root",
+      "return_type": "nv_cap_t *",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "symbol": "nvidia_caps_root",
+      "type": "nv_cap_t *",
+      "unavailable_policy": "not-a-function"
+    },
+    {
+      "declaration": "void nvlink_assert(int expression);",
+      "kind": "FunctionDecl",
+      "line": 63,
+      "namespace_symbol": "s540Global_nvlink_assert",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "int"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/common/nvlink/interface/nvlink_os.h",
+      "symbol": "nvlink_assert",
+      "type": "void (int)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void nvlink_free(void *);",
+      "kind": "FunctionDecl",
+      "line": 40,
+      "namespace_symbol": "s540Global_nvlink_free",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/common/nvlink/interface/nvlink_os.h",
+      "symbol": "nvlink_free",
+      "type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void * nvlink_malloc(NvLength);",
+      "kind": "FunctionDecl",
+      "line": 39,
+      "namespace_symbol": "s540Global_nvlink_malloc",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvLength"
+        }
+      ],
+      "return_type": "void *",
+      "source": "src/common/nvlink/interface/nvlink_os.h",
+      "symbol": "nvlink_malloc",
+      "type": "void *(NvLength)",
+      "unavailable_policy": "output-preserving-NULL",
+      "variadic": false
+    },
+    {
+      "declaration": "void * nvlink_memcpy(void *, const void *, NvLength);",
+      "kind": "FunctionDecl",
+      "line": 42,
+      "namespace_symbol": "s540Global_nvlink_memcpy",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "const void *"
+        },
+        {
+          "name": "p2",
+          "type": "NvLength"
+        }
+      ],
+      "return_type": "void *",
+      "source": "src/common/nvlink/interface/nvlink_os.h",
+      "symbol": "nvlink_memcpy",
+      "type": "void *(void *, const void *, NvLength)",
+      "unavailable_policy": "output-preserving-NULL",
+      "variadic": false
+    },
+    {
+      "declaration": "void * nvlink_memset(void *, int, NvLength);",
+      "kind": "FunctionDecl",
+      "line": 41,
+      "namespace_symbol": "s540Global_nvlink_memset",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "int"
+        },
+        {
+          "name": "p2",
+          "type": "NvLength"
+        }
+      ],
+      "return_type": "void *",
+      "source": "src/common/nvlink/interface/nvlink_os.h",
+      "symbol": "nvlink_memset",
+      "type": "void *(void *, int, NvLength)",
+      "unavailable_policy": "output-preserving-NULL",
+      "variadic": false
+    },
+    {
+      "declaration": "void nvlink_sleep(unsigned int ms);",
+      "kind": "FunctionDecl",
+      "line": 64,
+      "namespace_symbol": "s540Global_nvlink_sleep",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "unsigned int"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/common/nvlink/interface/nvlink_os.h",
+      "symbol": "nvlink_sleep",
+      "type": "void (unsigned int)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_acquire_mutex (void *);",
+      "kind": "FunctionDecl",
+      "line": 143,
+      "namespace_symbol": "s540Global_os_acquire_mutex",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_acquire_mutex",
+      "type": "NV_STATUS (void *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_acquire_rwlock_read (void *);",
+      "kind": "FunctionDecl",
+      "line": 153,
+      "namespace_symbol": "s540Global_os_acquire_rwlock_read",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_acquire_rwlock_read",
+      "type": "NV_STATUS (void *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_acquire_rwlock_write (void *);",
+      "kind": "FunctionDecl",
+      "line": 154,
+      "namespace_symbol": "s540Global_os_acquire_rwlock_write",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_acquire_rwlock_write",
+      "type": "NV_STATUS (void *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_acquire_semaphore (void *);",
+      "kind": "FunctionDecl",
+      "line": 148,
+      "namespace_symbol": "s540Global_os_acquire_semaphore",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_acquire_semaphore",
+      "type": "NV_STATUS (void *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NvU64 NV_API_CALL os_acquire_spinlock (void *);",
+      "kind": "FunctionDecl",
+      "line": 136,
+      "namespace_symbol": "s540Global_os_acquire_spinlock",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "NvU64",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_acquire_spinlock",
+      "type": "NvU64 (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_add_record_for_crashLog (void *, NvU32);",
+      "kind": "FunctionDecl",
+      "line": 179,
+      "namespace_symbol": "s540Global_os_add_record_for_crashLog",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_add_record_for_crashLog",
+      "type": "void (void *, NvU32)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_alloc_mem (void **, NvU64);",
+      "kind": "FunctionDecl",
+      "line": 78,
+      "namespace_symbol": "s540Global_os_alloc_mem",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void **"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_alloc_mem",
+      "type": "NV_STATUS (void **, NvU64)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_alloc_mutex (void **);",
+      "kind": "FunctionDecl",
+      "line": 141,
+      "namespace_symbol": "s540Global_os_alloc_mutex",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void **"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_alloc_mutex",
+      "type": "NV_STATUS (void **)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_alloc_pages_node (NvS32, NvU32, NvU32, NvU64 *);",
+      "kind": "FunctionDecl",
+      "line": 184,
+      "namespace_symbol": "s540Global_os_alloc_pages_node",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvS32"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32"
+        },
+        {
+          "name": "p3",
+          "type": "NvU64 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_alloc_pages_node",
+      "type": "NV_STATUS (NvS32, NvU32, NvU32, NvU64 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void* NV_API_CALL os_alloc_rwlock (void);",
+      "kind": "FunctionDecl",
+      "line": 151,
+      "namespace_symbol": "s540Global_os_alloc_rwlock",
+      "parameters": [],
+      "return_type": "void *",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_alloc_rwlock",
+      "type": "void *(void)",
+      "unavailable_policy": "output-preserving-NULL",
+      "variadic": false
+    },
+    {
+      "declaration": "void* NV_API_CALL os_alloc_semaphore (NvU32);",
+      "kind": "FunctionDecl",
+      "line": 146,
+      "namespace_symbol": "s540Global_os_alloc_semaphore",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "void *",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_alloc_semaphore",
+      "type": "void *(NvU32)",
+      "unavailable_policy": "output-preserving-NULL",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_alloc_spinlock (void **);",
+      "kind": "FunctionDecl",
+      "line": 134,
+      "namespace_symbol": "s540Global_os_alloc_spinlock",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void **"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_alloc_spinlock",
+      "type": "NV_STATUS (void **)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_alloc_wait_queue (os_wait_queue **);",
+      "kind": "FunctionDecl",
+      "line": 199,
+      "namespace_symbol": "s540Global_os_alloc_wait_queue",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "os_wait_queue **"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_alloc_wait_queue",
+      "type": "NV_STATUS (os_wait_queue **)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_allocate_temporary_file (void **, NvU64);",
+      "kind": "FunctionDecl",
+      "line": 190,
+      "namespace_symbol": "s540Global_os_allocate_temporary_file",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void **"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_allocate_temporary_file",
+      "type": "NV_STATUS (void **, NvU64)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_bug_check (NvU32, const char *);",
+      "kind": "FunctionDecl",
+      "line": 171,
+      "namespace_symbol": "s540Global_os_bug_check",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32"
+        },
+        {
+          "name": "p1",
+          "type": "const char *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_bug_check",
+      "type": "void (NvU32, const char *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_call_vgpu_vfio (void *, NvU32);",
+      "kind": "FunctionDecl",
+      "line": 181,
+      "namespace_symbol": "s540Global_os_call_vgpu_vfio",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_call_vgpu_vfio",
+      "type": "NV_STATUS (void *, NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "extern NvBool os_cc_enabled;",
+      "kind": "VarDecl",
+      "line": 239,
+      "namespace_symbol": "s540Global_os_cc_enabled",
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_cc_enabled",
+      "type": "NvBool",
+      "unavailable_policy": "not-a-function"
+    },
+    {
+      "declaration": "extern NvBool os_cc_sev_snp_enabled;",
+      "kind": "VarDecl",
+      "line": 240,
+      "namespace_symbol": "s540Global_os_cc_sev_snp_enabled",
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_cc_sev_snp_enabled",
+      "type": "NvBool",
+      "unavailable_policy": "not-a-function"
+    },
+    {
+      "declaration": "extern NvBool os_cc_sme_enabled;",
+      "kind": "VarDecl",
+      "line": 241,
+      "namespace_symbol": "s540Global_os_cc_sme_enabled",
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_cc_sme_enabled",
+      "type": "NvBool",
+      "unavailable_policy": "not-a-function"
+    },
+    {
+      "declaration": "extern NvBool os_cc_snp_vtom_enabled;",
+      "kind": "VarDecl",
+      "line": 242,
+      "namespace_symbol": "s540Global_os_cc_snp_vtom_enabled",
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_cc_snp_vtom_enabled",
+      "type": "NvBool",
+      "unavailable_policy": "not-a-function"
+    },
+    {
+      "declaration": "extern NvBool os_cc_tdx_enabled;",
+      "kind": "VarDecl",
+      "line": 243,
+      "namespace_symbol": "s540Global_os_cc_tdx_enabled",
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_cc_tdx_enabled",
+      "type": "NvBool",
+      "unavailable_policy": "not-a-function"
+    },
+    {
+      "declaration": "void* NV_API_CALL os_cgroup_for_pid(int pid, void *pidInfo, int impl);",
+      "kind": "FunctionDecl",
+      "line": 291,
+      "namespace_symbol": "s540Global_os_cgroup_for_pid",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "int"
+        },
+        {
+          "name": "p1",
+          "type": "void *"
+        },
+        {
+          "name": "p2",
+          "type": "int"
+        }
+      ],
+      "return_type": "void *",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_cgroup_for_pid",
+      "type": "void *(int, void *, int)",
+      "unavailable_policy": "output-preserving-NULL",
+      "variadic": false
+    },
+    {
+      "declaration": "NvBool NV_API_CALL os_check_access (RsAccessRight accessRight);",
+      "kind": "FunctionDecl",
+      "line": 123,
+      "namespace_symbol": "s540Global_os_check_access",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "RsAccessRight"
+        }
+      ],
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_check_access",
+      "type": "NvBool (RsAccessRight)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_close_file (void *);",
+      "kind": "FunctionDecl",
+      "line": 191,
+      "namespace_symbol": "s540Global_os_close_file",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_close_file",
+      "type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_cond_acquire_rwlock_read (void *);",
+      "kind": "FunctionDecl",
+      "line": 155,
+      "namespace_symbol": "s540Global_os_cond_acquire_rwlock_read",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_cond_acquire_rwlock_read",
+      "type": "NV_STATUS (void *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_cond_acquire_rwlock_write (void *);",
+      "kind": "FunctionDecl",
+      "line": 156,
+      "namespace_symbol": "s540Global_os_cond_acquire_rwlock_write",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_cond_acquire_rwlock_write",
+      "type": "NV_STATUS (void *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NvU32 NV_API_CALL os_count_tail_pages (NvU64 address);",
+      "kind": "FunctionDecl",
+      "line": 188,
+      "namespace_symbol": "s540Global_os_count_tail_pages",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU64"
+        }
+      ],
+      "return_type": "NvU32",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_count_tail_pages",
+      "type": "NvU32 (NvU64)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_dbg_breakpoint (void);",
+      "kind": "FunctionDecl",
+      "line": 125,
+      "namespace_symbol": "s540Global_os_dbg_breakpoint",
+      "parameters": [],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_dbg_breakpoint",
+      "type": "void (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_dbg_init (void);",
+      "kind": "FunctionDecl",
+      "line": 124,
+      "namespace_symbol": "s540Global_os_dbg_init",
+      "parameters": [],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_dbg_init",
+      "type": "void (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_dbg_set_level (NvU32);",
+      "kind": "FunctionDecl",
+      "line": 126,
+      "namespace_symbol": "s540Global_os_dbg_set_level",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_dbg_set_level",
+      "type": "void (NvU32)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_delay (NvU32);",
+      "kind": "FunctionDecl",
+      "line": 84,
+      "namespace_symbol": "s540Global_os_delay",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_delay",
+      "type": "NV_STATUS (NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_delay_us (NvU32);",
+      "kind": "FunctionDecl",
+      "line": 85,
+      "namespace_symbol": "s540Global_os_delay_us",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_delay_us",
+      "type": "NV_STATUS (NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_delete_record_for_crashLog (void *);",
+      "kind": "FunctionDecl",
+      "line": 180,
+      "namespace_symbol": "s540Global_os_delete_record_for_crashLog",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_delete_record_for_crashLog",
+      "type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_device_vm_present (void);",
+      "kind": "FunctionDecl",
+      "line": 182,
+      "namespace_symbol": "s540Global_os_device_vm_present",
+      "parameters": [],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_device_vm_present",
+      "type": "NV_STATUS (void)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_disable_console_access (void);",
+      "kind": "FunctionDecl",
+      "line": 129,
+      "namespace_symbol": "s540Global_os_disable_console_access",
+      "parameters": [],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_disable_console_access",
+      "type": "void (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "extern NvBool os_dma_buf_enabled;",
+      "kind": "VarDecl",
+      "line": 244,
+      "namespace_symbol": "s540Global_os_dma_buf_enabled",
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_dma_buf_enabled",
+      "type": "NvBool",
+      "unavailable_policy": "not-a-function"
+    },
+    {
+      "declaration": "void NV_API_CALL os_dump_stack (void);",
+      "kind": "FunctionDecl",
+      "line": 164,
+      "namespace_symbol": "s540Global_os_dump_stack",
+      "parameters": [],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_dump_stack",
+      "type": "void (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_enable_console_access (void);",
+      "kind": "FunctionDecl",
+      "line": 130,
+      "namespace_symbol": "s540Global_os_enable_console_access",
+      "parameters": [],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_enable_console_access",
+      "type": "void (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_enable_pci_req_atomics (void *, enum os_pci_req_atomics_type);",
+      "kind": "FunctionDecl",
+      "line": 220,
+      "namespace_symbol": "s540Global_os_enable_pci_req_atomics",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "enum os_pci_req_atomics_type"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_enable_pci_req_atomics",
+      "type": "NV_STATUS (void *, enum os_pci_req_atomics_type)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_find_ns_pid(void *pid_info, NvU32 *ns_pid);",
+      "kind": "FunctionDecl",
+      "line": 229,
+      "namespace_symbol": "s540Global_os_find_ns_pid",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_find_ns_pid",
+      "type": "NV_STATUS (void *, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_flush_cpu_cache_all (void);",
+      "kind": "FunctionDecl",
+      "line": 113,
+      "namespace_symbol": "s540Global_os_flush_cpu_cache_all",
+      "parameters": [],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_flush_cpu_cache_all",
+      "type": "NV_STATUS (void)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_flush_cpu_write_combine_buffer(void);",
+      "kind": "FunctionDecl",
+      "line": 115,
+      "namespace_symbol": "s540Global_os_flush_cpu_write_combine_buffer",
+      "parameters": [],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_flush_cpu_write_combine_buffer",
+      "type": "void (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_flush_user_cache (void);",
+      "kind": "FunctionDecl",
+      "line": 114,
+      "namespace_symbol": "s540Global_os_flush_user_cache",
+      "parameters": [],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_flush_user_cache",
+      "type": "NV_STATUS (void)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_flush_work_queue (struct os_work_queue *, NvBool);",
+      "kind": "FunctionDecl",
+      "line": 139,
+      "namespace_symbol": "s540Global_os_flush_work_queue",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "struct os_work_queue *"
+        },
+        {
+          "name": "p1",
+          "type": "NvBool"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_flush_work_queue",
+      "type": "NV_STATUS (struct os_work_queue *, NvBool)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_free_mem (void *);",
+      "kind": "FunctionDecl",
+      "line": 79,
+      "namespace_symbol": "s540Global_os_free_mem",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_free_mem",
+      "type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_free_mutex (void *);",
+      "kind": "FunctionDecl",
+      "line": 142,
+      "namespace_symbol": "s540Global_os_free_mutex",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_free_mutex",
+      "type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_free_rwlock (void *);",
+      "kind": "FunctionDecl",
+      "line": 152,
+      "namespace_symbol": "s540Global_os_free_rwlock",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_free_rwlock",
+      "type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_free_semaphore (void *);",
+      "kind": "FunctionDecl",
+      "line": 147,
+      "namespace_symbol": "s540Global_os_free_semaphore",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_free_semaphore",
+      "type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_free_spinlock (void *);",
+      "kind": "FunctionDecl",
+      "line": 135,
+      "namespace_symbol": "s540Global_os_free_spinlock",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_free_spinlock",
+      "type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_free_wait_queue (os_wait_queue *);",
+      "kind": "FunctionDecl",
+      "line": 200,
+      "namespace_symbol": "s540Global_os_free_wait_queue",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "os_wait_queue *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_free_wait_queue",
+      "type": "void (os_wait_queue *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_get_acpi_rsdp_from_uefi (NvU32 *);",
+      "kind": "FunctionDecl",
+      "line": 178,
+      "namespace_symbol": "s540Global_os_get_acpi_rsdp_from_uefi",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_acpi_rsdp_from_uefi",
+      "type": "NV_STATUS (NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NvU32 NV_API_CALL os_get_cpu_count (void);",
+      "kind": "FunctionDecl",
+      "line": 127,
+      "namespace_symbol": "s540Global_os_get_cpu_count",
+      "parameters": [],
+      "return_type": "NvU32",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_cpu_count",
+      "type": "NvU32 (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvU64 NV_API_CALL os_get_cpu_frequency (void);",
+      "kind": "FunctionDecl",
+      "line": 86,
+      "namespace_symbol": "s540Global_os_get_cpu_frequency",
+      "parameters": [],
+      "return_type": "NvU64",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_cpu_frequency",
+      "type": "NvU64 (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvU32 NV_API_CALL os_get_cpu_number (void);",
+      "kind": "FunctionDecl",
+      "line": 128,
+      "namespace_symbol": "s540Global_os_get_cpu_number",
+      "parameters": [],
+      "return_type": "NvU32",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_cpu_number",
+      "type": "NvU32 (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvU32 NV_API_CALL os_get_current_process (void);",
+      "kind": "FunctionDecl",
+      "line": 87,
+      "namespace_symbol": "s540Global_os_get_current_process",
+      "parameters": [],
+      "return_type": "NvU32",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_current_process",
+      "type": "NvU32 (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvU32 NV_API_CALL os_get_current_process_flags (void);",
+      "kind": "FunctionDecl",
+      "line": 198,
+      "namespace_symbol": "s540Global_os_get_current_process_flags",
+      "parameters": [],
+      "return_type": "NvU32",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_current_process_flags",
+      "type": "NvU32 (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_get_current_process_name (char *, NvU32);",
+      "kind": "FunctionDecl",
+      "line": 88,
+      "namespace_symbol": "s540Global_os_get_current_process_name",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "char *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_current_process_name",
+      "type": "void (char *, NvU32)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_get_current_thread (NvU64 *);",
+      "kind": "FunctionDecl",
+      "line": 89,
+      "namespace_symbol": "s540Global_os_get_current_thread",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU64 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_current_thread",
+      "type": "NV_STATUS (NvU64 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_get_euid (NvU32 *);",
+      "kind": "FunctionDecl",
+      "line": 176,
+      "namespace_symbol": "s540Global_os_get_euid",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_euid",
+      "type": "NV_STATUS (NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NvU32 NV_API_CALL os_get_grid_csp_support (void);",
+      "kind": "FunctionDecl",
+      "line": 170,
+      "namespace_symbol": "s540Global_os_get_grid_csp_support",
+      "parameters": [],
+      "return_type": "NvU32",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_grid_csp_support",
+      "type": "NvU32 (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvU64 NV_API_CALL os_get_max_user_va (void);",
+      "kind": "FunctionDecl",
+      "line": 132,
+      "namespace_symbol": "s540Global_os_get_max_user_va",
+      "parameters": [],
+      "return_type": "NvU64",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_max_user_va",
+      "type": "NvU64 (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvU64 NV_API_CALL os_get_monotonic_tick_resolution_ns (void);",
+      "kind": "FunctionDecl",
+      "line": 83,
+      "namespace_symbol": "s540Global_os_get_monotonic_tick_resolution_ns",
+      "parameters": [],
+      "return_type": "NvU64",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_monotonic_tick_resolution_ns",
+      "type": "NvU64 (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvU64 NV_API_CALL os_get_monotonic_time_ns (void);",
+      "kind": "FunctionDecl",
+      "line": 81,
+      "namespace_symbol": "s540Global_os_get_monotonic_time_ns",
+      "parameters": [],
+      "return_type": "NvU64",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_monotonic_time_ns",
+      "type": "NvU64 (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvU64 NV_API_CALL os_get_monotonic_time_ns_hr (void);",
+      "kind": "FunctionDecl",
+      "line": 82,
+      "namespace_symbol": "s540Global_os_get_monotonic_time_ns_hr",
+      "parameters": [],
+      "return_type": "NvU64",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_monotonic_time_ns_hr",
+      "type": "NvU64 (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_get_numa_node_memory_usage (NvS32, NvU64 *, NvU64 *);",
+      "kind": "FunctionDecl",
+      "line": 223,
+      "namespace_symbol": "s540Global_os_get_numa_node_memory_usage",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvS32"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64 *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_numa_node_memory_usage",
+      "type": "NV_STATUS (NvS32, NvU64 *, NvU64 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_get_page (NvU64 address);",
+      "kind": "FunctionDecl",
+      "line": 185,
+      "namespace_symbol": "s540Global_os_get_page",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU64"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_page",
+      "type": "NV_STATUS (NvU64)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NvU32 NV_API_CALL os_get_page_refcount (NvU64 address);",
+      "kind": "FunctionDecl",
+      "line": 187,
+      "namespace_symbol": "s540Global_os_get_page_refcount",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU64"
+        }
+      ],
+      "return_type": "NvU32",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_page_refcount",
+      "type": "NvU32 (NvU64)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void* NV_API_CALL os_get_pid_info(void);",
+      "kind": "FunctionDecl",
+      "line": 227,
+      "namespace_symbol": "s540Global_os_get_pid_info",
+      "parameters": [],
+      "return_type": "void *",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_pid_info",
+      "type": "void *(void)",
+      "unavailable_policy": "output-preserving-NULL",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_get_random_bytes (NvU8 *, NvU16);",
+      "kind": "FunctionDecl",
+      "line": 197,
+      "namespace_symbol": "s540Global_os_get_random_bytes",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU8 *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU16"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_random_bytes",
+      "type": "NV_STATUS (NvU8 *, NvU16)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NvU64 NV_API_CALL os_get_reclaimable_memory_usage(void);",
+      "kind": "FunctionDecl",
+      "line": 222,
+      "namespace_symbol": "s540Global_os_get_reclaimable_memory_usage",
+      "parameters": [],
+      "return_type": "NvU64",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_reclaimable_memory_usage",
+      "type": "NvU64 (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_get_system_time (NvU32 *, NvU32 *);",
+      "kind": "FunctionDecl",
+      "line": 80,
+      "namespace_symbol": "s540Global_os_get_system_time",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32 *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_system_time",
+      "type": "NV_STATUS (NvU32 *, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_get_version_info (os_version_info*);",
+      "kind": "FunctionDecl",
+      "line": 160,
+      "namespace_symbol": "s540Global_os_get_version_info",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "os_version_info *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_get_version_info",
+      "type": "NV_STATUS (os_version_info *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NvS32 NV_API_CALL os_imex_channel_count (void);",
+      "kind": "FunctionDecl",
+      "line": 211,
+      "namespace_symbol": "s540Global_os_imex_channel_count",
+      "parameters": [],
+      "return_type": "NvS32",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_imex_channel_count",
+      "type": "NvS32 (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvS32 NV_API_CALL os_imex_channel_get (NvU64);",
+      "kind": "FunctionDecl",
+      "line": 210,
+      "namespace_symbol": "s540Global_os_imex_channel_get",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU64"
+        }
+      ],
+      "return_type": "NvS32",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_imex_channel_get",
+      "type": "NvS32 (NvU64)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "extern NvBool os_imex_channel_is_supported;",
+      "kind": "VarDecl",
+      "line": 245,
+      "namespace_symbol": "s540Global_os_imex_channel_is_supported",
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_imex_channel_is_supported",
+      "type": "NvBool",
+      "unavailable_policy": "not-a-function"
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_inject_vgx_msi (NvU16, NvU64, NvU32);",
+      "kind": "FunctionDecl",
+      "line": 168,
+      "namespace_symbol": "s540Global_os_inject_vgx_msi",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU16"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_inject_vgx_msi",
+      "type": "NV_STATUS (NvU16, NvU64, NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NvU8 NV_API_CALL os_io_read_byte (NvU32);",
+      "kind": "FunctionDecl",
+      "line": 116,
+      "namespace_symbol": "s540Global_os_io_read_byte",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "NvU8",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_io_read_byte",
+      "type": "NvU8 (NvU32)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvU32 NV_API_CALL os_io_read_dword (NvU32);",
+      "kind": "FunctionDecl",
+      "line": 118,
+      "namespace_symbol": "s540Global_os_io_read_dword",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "NvU32",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_io_read_dword",
+      "type": "NvU32 (NvU32)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvU16 NV_API_CALL os_io_read_word (NvU32);",
+      "kind": "FunctionDecl",
+      "line": 117,
+      "namespace_symbol": "s540Global_os_io_read_word",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "NvU16",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_io_read_word",
+      "type": "NvU16 (NvU32)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_io_write_byte (NvU32, NvU8);",
+      "kind": "FunctionDecl",
+      "line": 119,
+      "namespace_symbol": "s540Global_os_io_write_byte",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32"
+        },
+        {
+          "name": "p1",
+          "type": "NvU8"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_io_write_byte",
+      "type": "void (NvU32, NvU8)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_io_write_dword (NvU32, NvU32);",
+      "kind": "FunctionDecl",
+      "line": 121,
+      "namespace_symbol": "s540Global_os_io_write_dword",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_io_write_dword",
+      "type": "void (NvU32, NvU32)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_io_write_word (NvU32, NvU16);",
+      "kind": "FunctionDecl",
+      "line": 120,
+      "namespace_symbol": "s540Global_os_io_write_word",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32"
+        },
+        {
+          "name": "p1",
+          "type": "NvU16"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_io_write_word",
+      "type": "void (NvU32, NvU16)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_iommu_sva_bind(void *arg, void **handle, NvU32 *pasid);",
+      "kind": "FunctionDecl",
+      "line": 231,
+      "namespace_symbol": "s540Global_os_iommu_sva_bind",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "void **"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_iommu_sva_bind",
+      "type": "NV_STATUS (void *, void **, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_iommu_sva_unbind(void *handle);",
+      "kind": "FunctionDecl",
+      "line": 232,
+      "namespace_symbol": "s540Global_os_iommu_sva_unbind",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_iommu_sva_unbind",
+      "type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvBool NV_API_CALL os_is_administrator (void);",
+      "kind": "FunctionDecl",
+      "line": 122,
+      "namespace_symbol": "s540Global_os_is_administrator",
+      "parameters": [],
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_is_administrator",
+      "type": "NvBool (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvBool NV_API_CALL os_is_bif_reset_supported (void *);",
+      "kind": "FunctionDecl",
+      "line": 162,
+      "namespace_symbol": "s540Global_os_is_bif_reset_supported",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_is_bif_reset_supported",
+      "type": "NvBool (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvBool NV_API_CALL os_is_efi_enabled (void);",
+      "kind": "FunctionDecl",
+      "line": 165,
+      "namespace_symbol": "s540Global_os_is_efi_enabled",
+      "parameters": [],
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_is_efi_enabled",
+      "type": "NvBool (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvBool NV_API_CALL os_is_grid_supported (void);",
+      "kind": "FunctionDecl",
+      "line": 169,
+      "namespace_symbol": "s540Global_os_is_grid_supported",
+      "parameters": [],
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_is_grid_supported",
+      "type": "NvBool (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvBool NV_API_CALL os_is_init_ns(void);",
+      "kind": "FunctionDecl",
+      "line": 230,
+      "namespace_symbol": "s540Global_os_is_init_ns",
+      "parameters": [],
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_is_init_ns",
+      "type": "NvBool (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvBool NV_API_CALL os_is_isr (void);",
+      "kind": "FunctionDecl",
+      "line": 163,
+      "namespace_symbol": "s540Global_os_is_isr",
+      "parameters": [],
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_is_isr",
+      "type": "NvBool (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvBool NV_API_CALL os_is_nvswitch_present (void);",
+      "kind": "FunctionDecl",
+      "line": 196,
+      "namespace_symbol": "s540Global_os_is_nvswitch_present",
+      "parameters": [],
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_is_nvswitch_present",
+      "type": "NvBool (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvBool NV_API_CALL os_is_vgx_hyper (void);",
+      "kind": "FunctionDecl",
+      "line": 167,
+      "namespace_symbol": "s540Global_os_is_vgx_hyper",
+      "parameters": [],
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_is_vgx_hyper",
+      "type": "NvBool (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void* NV_API_CALL os_map_kernel_space (NvU64, NvU64, NvU32);",
+      "kind": "FunctionDecl",
+      "line": 111,
+      "namespace_symbol": "s540Global_os_map_kernel_space",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU64"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "void *",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_map_kernel_space",
+      "type": "void *(NvU64, NvU64, NvU32)",
+      "unavailable_policy": "output-preserving-NULL",
+      "variadic": false
+    },
+    {
+      "declaration": "extern NvU64 os_max_page_size;",
+      "kind": "VarDecl",
+      "line": 236,
+      "namespace_symbol": "s540Global_os_max_page_size",
+      "return_type": "NvU64",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_max_page_size",
+      "type": "NvU64",
+      "unavailable_policy": "not-a-function"
+    },
+    {
+      "declaration": "NvS32 NV_API_CALL os_mem_cmp (const NvU8 *, const NvU8 *, NvU32);",
+      "kind": "FunctionDecl",
+      "line": 101,
+      "namespace_symbol": "s540Global_os_mem_cmp",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "const NvU8 *"
+        },
+        {
+          "name": "p1",
+          "type": "const NvU8 *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "NvS32",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_mem_cmp",
+      "type": "NvS32 (const NvU8 *, const NvU8 *, NvU32)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void* NV_API_CALL os_mem_copy (void *, const void *, NvU32);",
+      "kind": "FunctionDecl",
+      "line": 97,
+      "namespace_symbol": "s540Global_os_mem_copy",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "const void *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "void *",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_mem_copy",
+      "type": "void *(void *, const void *, NvU32)",
+      "unavailable_policy": "output-preserving-NULL",
+      "variadic": false
+    },
+    {
+      "declaration": "void* NV_API_CALL os_mem_set (void *, NvU8, NvU32);",
+      "kind": "FunctionDecl",
+      "line": 100,
+      "namespace_symbol": "s540Global_os_mem_set",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU8"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "void *",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_mem_set",
+      "type": "void *(void *, NvU8, NvU32)",
+      "unavailable_policy": "output-preserving-NULL",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_memcpy_from_user (void *, const void *, NvU32);",
+      "kind": "FunctionDecl",
+      "line": 98,
+      "namespace_symbol": "s540Global_os_memcpy_from_user",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "const void *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_memcpy_from_user",
+      "type": "NV_STATUS (void *, const void *, NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_memcpy_to_user (void *, const void *, NvU32);",
+      "kind": "FunctionDecl",
+      "line": 99,
+      "namespace_symbol": "s540Global_os_memcpy_to_user",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "const void *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_memcpy_to_user",
+      "type": "NV_STATUS (void *, const void *, NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_numa_add_gpu_memory (void *, NvU64, NvU64, NvU32 *);",
+      "kind": "FunctionDecl",
+      "line": 224,
+      "namespace_symbol": "s540Global_os_numa_add_gpu_memory",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64"
+        },
+        {
+          "name": "p3",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_numa_add_gpu_memory",
+      "type": "NV_STATUS (void *, NvU64, NvU64, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_numa_memblock_size (NvU64 *);",
+      "kind": "FunctionDecl",
+      "line": 183,
+      "namespace_symbol": "s540Global_os_numa_memblock_size",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU64 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_numa_memblock_size",
+      "type": "NV_STATUS (NvU64 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_numa_remove_gpu_memory (void *, NvU64, NvU64, NvU32);",
+      "kind": "FunctionDecl",
+      "line": 225,
+      "namespace_symbol": "s540Global_os_numa_remove_gpu_memory",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64"
+        },
+        {
+          "name": "p3",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_numa_remove_gpu_memory",
+      "type": "NV_STATUS (void *, NvU64, NvU64, NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_nv_cap_close_fd (int);",
+      "kind": "FunctionDecl",
+      "line": 209,
+      "namespace_symbol": "s540Global_os_nv_cap_close_fd",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "int"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_nv_cap_close_fd",
+      "type": "void (int)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "nv_cap_t* NV_API_CALL os_nv_cap_create_dir_entry (nv_cap_t *, const char *, int);",
+      "kind": "FunctionDecl",
+      "line": 205,
+      "namespace_symbol": "s540Global_os_nv_cap_create_dir_entry",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_cap_t *"
+        },
+        {
+          "name": "p1",
+          "type": "const char *"
+        },
+        {
+          "name": "p2",
+          "type": "int"
+        }
+      ],
+      "return_type": "nv_cap_t *",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_nv_cap_create_dir_entry",
+      "type": "nv_cap_t *(nv_cap_t *, const char *, int)",
+      "unavailable_policy": "output-preserving-NULL",
+      "variadic": false
+    },
+    {
+      "declaration": "nv_cap_t* NV_API_CALL os_nv_cap_create_file_entry (nv_cap_t *, const char *, int);",
+      "kind": "FunctionDecl",
+      "line": 206,
+      "namespace_symbol": "s540Global_os_nv_cap_create_file_entry",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_cap_t *"
+        },
+        {
+          "name": "p1",
+          "type": "const char *"
+        },
+        {
+          "name": "p2",
+          "type": "int"
+        }
+      ],
+      "return_type": "nv_cap_t *",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_nv_cap_create_file_entry",
+      "type": "nv_cap_t *(nv_cap_t *, const char *, int)",
+      "unavailable_policy": "output-preserving-NULL",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_nv_cap_destroy_entry (nv_cap_t *);",
+      "kind": "FunctionDecl",
+      "line": 207,
+      "namespace_symbol": "s540Global_os_nv_cap_destroy_entry",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_cap_t *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_nv_cap_destroy_entry",
+      "type": "void (nv_cap_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "int NV_API_CALL os_nv_cap_validate_and_dup_fd (const nv_cap_t *, int);",
+      "kind": "FunctionDecl",
+      "line": 208,
+      "namespace_symbol": "s540Global_os_nv_cap_validate_and_dup_fd",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "const nv_cap_t *"
+        },
+        {
+          "name": "p1",
+          "type": "int"
+        }
+      ],
+      "return_type": "int",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_nv_cap_validate_and_dup_fd",
+      "type": "int (const nv_cap_t *, int)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_offline_page_at_address(NvU64 address);",
+      "kind": "FunctionDecl",
+      "line": 226,
+      "namespace_symbol": "s540Global_os_offline_page_at_address",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU64"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_offline_page_at_address",
+      "type": "NV_STATUS (NvU64)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "extern NvU64 os_page_mask;",
+      "kind": "VarDecl",
+      "line": 237,
+      "namespace_symbol": "s540Global_os_page_mask",
+      "return_type": "NvU64",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_page_mask",
+      "type": "NvU64",
+      "unavailable_policy": "not-a-function"
+    },
+    {
+      "declaration": "extern NvU8 os_page_shift;",
+      "kind": "VarDecl",
+      "line": 238,
+      "namespace_symbol": "s540Global_os_page_shift",
+      "return_type": "NvU8",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_page_shift",
+      "type": "NvU8",
+      "unavailable_policy": "not-a-function"
+    },
+    {
+      "declaration": "extern NvU64 os_page_size;",
+      "kind": "VarDecl",
+      "line": 235,
+      "namespace_symbol": "s540Global_os_page_size",
+      "return_type": "NvU64",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_page_size",
+      "type": "NvU64",
+      "unavailable_policy": "not-a-function"
+    },
+    {
+      "declaration": "void* NV_API_CALL os_pci_init_handle (NvU32, NvU8, NvU8, NvU8, NvU16 *, NvU16 *);",
+      "kind": "FunctionDecl",
+      "line": 102,
+      "namespace_symbol": "s540Global_os_pci_init_handle",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU32"
+        },
+        {
+          "name": "p1",
+          "type": "NvU8"
+        },
+        {
+          "name": "p2",
+          "type": "NvU8"
+        },
+        {
+          "name": "p3",
+          "type": "NvU8"
+        },
+        {
+          "name": "p4",
+          "type": "NvU16 *"
+        },
+        {
+          "name": "p5",
+          "type": "NvU16 *"
+        }
+      ],
+      "return_type": "void *",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_pci_init_handle",
+      "type": "void *(NvU32, NvU8, NvU8, NvU8, NvU16 *, NvU16 *)",
+      "unavailable_policy": "output-preserving-NULL",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_pci_read_byte (void *, NvU32, NvU8 *);",
+      "kind": "FunctionDecl",
+      "line": 103,
+      "namespace_symbol": "s540Global_os_pci_read_byte",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32"
+        },
+        {
+          "name": "p2",
+          "type": "NvU8 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_pci_read_byte",
+      "type": "NV_STATUS (void *, NvU32, NvU8 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_pci_read_dword (void *, NvU32, NvU32 *);",
+      "kind": "FunctionDecl",
+      "line": 105,
+      "namespace_symbol": "s540Global_os_pci_read_dword",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_pci_read_dword",
+      "type": "NV_STATUS (void *, NvU32, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_pci_read_word (void *, NvU32, NvU16 *);",
+      "kind": "FunctionDecl",
+      "line": 104,
+      "namespace_symbol": "s540Global_os_pci_read_word",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32"
+        },
+        {
+          "name": "p2",
+          "type": "NvU16 *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_pci_read_word",
+      "type": "NV_STATUS (void *, NvU32, NvU16 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_pci_remove (void *);",
+      "kind": "FunctionDecl",
+      "line": 110,
+      "namespace_symbol": "s540Global_os_pci_remove",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_pci_remove",
+      "type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvBool NV_API_CALL os_pci_remove_supported (void);",
+      "kind": "FunctionDecl",
+      "line": 109,
+      "namespace_symbol": "s540Global_os_pci_remove_supported",
+      "parameters": [],
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_pci_remove_supported",
+      "type": "NvBool (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_pci_write_dword (void *, NvU32, NvU32);",
+      "kind": "FunctionDecl",
+      "line": 108,
+      "namespace_symbol": "s540Global_os_pci_write_dword",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_pci_write_dword",
+      "type": "NV_STATUS (void *, NvU32, NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_pci_write_word (void *, NvU32, NvU16);",
+      "kind": "FunctionDecl",
+      "line": 107,
+      "namespace_symbol": "s540Global_os_pci_write_word",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32"
+        },
+        {
+          "name": "p2",
+          "type": "NvU16"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_pci_write_word",
+      "type": "NV_STATUS (void *, NvU32, NvU16)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_put_page (NvU64 address);",
+      "kind": "FunctionDecl",
+      "line": 186,
+      "namespace_symbol": "s540Global_os_put_page",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU64"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_put_page",
+      "type": "NV_STATUS (NvU64)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_put_pid_info(void *pid_info);",
+      "kind": "FunctionDecl",
+      "line": 228,
+      "namespace_symbol": "s540Global_os_put_pid_info",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_put_pid_info",
+      "type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_queue_work_item (struct os_work_queue *, void *);",
+      "kind": "FunctionDecl",
+      "line": 138,
+      "namespace_symbol": "s540Global_os_queue_work_item",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "struct os_work_queue *"
+        },
+        {
+          "name": "p1",
+          "type": "void *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_queue_work_item",
+      "type": "NV_STATUS (struct os_work_queue *, void *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_read_file (void *, NvU8 *, NvU64, NvU64);",
+      "kind": "FunctionDecl",
+      "line": 193,
+      "namespace_symbol": "s540Global_os_read_file",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU8 *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64"
+        },
+        {
+          "name": "p3",
+          "type": "NvU64"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_read_file",
+      "type": "NV_STATUS (void *, NvU8 *, NvU64, NvU64)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_registry_init (void);",
+      "kind": "FunctionDecl",
+      "line": 131,
+      "namespace_symbol": "s540Global_os_registry_init",
+      "parameters": [],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_registry_init",
+      "type": "NV_STATUS (void)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_release_mutex (void *);",
+      "kind": "FunctionDecl",
+      "line": 145,
+      "namespace_symbol": "s540Global_os_release_mutex",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_release_mutex",
+      "type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_release_rwlock_read (void *);",
+      "kind": "FunctionDecl",
+      "line": 157,
+      "namespace_symbol": "s540Global_os_release_rwlock_read",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_release_rwlock_read",
+      "type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_release_rwlock_write (void *);",
+      "kind": "FunctionDecl",
+      "line": 158,
+      "namespace_symbol": "s540Global_os_release_rwlock_write",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_release_rwlock_write",
+      "type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_release_semaphore (void *);",
+      "kind": "FunctionDecl",
+      "line": 150,
+      "namespace_symbol": "s540Global_os_release_semaphore",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_release_semaphore",
+      "type": "NV_STATUS (void *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_release_spinlock (void *, NvU64);",
+      "kind": "FunctionDecl",
+      "line": 137,
+      "namespace_symbol": "s540Global_os_release_spinlock",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_release_spinlock",
+      "type": "void (void *, NvU64)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_schedule (void);",
+      "kind": "FunctionDecl",
+      "line": 133,
+      "namespace_symbol": "s540Global_os_schedule",
+      "parameters": [],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_schedule",
+      "type": "NV_STATUS (void)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NvBool NV_API_CALL os_semaphore_may_sleep (void);",
+      "kind": "FunctionDecl",
+      "line": 159,
+      "namespace_symbol": "s540Global_os_semaphore_may_sleep",
+      "parameters": [],
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_semaphore_may_sleep",
+      "type": "NvBool (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NvS32 NV_API_CALL os_snprintf (char *, NvU32, const char *, ...);",
+      "kind": "FunctionDecl",
+      "line": 94,
+      "namespace_symbol": "s540Global_os_snprintf",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "char *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU32"
+        },
+        {
+          "name": "p2",
+          "type": "const char *"
+        }
+      ],
+      "return_type": "NvS32",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_snprintf",
+      "type": "NvS32 (char *, NvU32, const char *, ...)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": true
+    },
+    {
+      "declaration": "NvBool NV_API_CALL os_supports_kernel_suspend_notifiers(void);",
+      "kind": "FunctionDecl",
+      "line": 233,
+      "namespace_symbol": "s540Global_os_supports_kernel_suspend_notifiers",
+      "parameters": [],
+      "return_type": "NvBool",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_supports_kernel_suspend_notifiers",
+      "type": "NvBool (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_tegra_igpu_perf_boost (void *, NvBool, NvU32, int);",
+      "kind": "FunctionDecl",
+      "line": 212,
+      "namespace_symbol": "s540Global_os_tegra_igpu_perf_boost",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "NvBool"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32"
+        },
+        {
+          "name": "p3",
+          "type": "int"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_tegra_igpu_perf_boost",
+      "type": "NV_STATUS (void *, NvBool, NvU32, int)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_unlock_user_pages (NvU64, void *, NvU32);",
+      "kind": "FunctionDecl",
+      "line": 174,
+      "namespace_symbol": "s540Global_os_unlock_user_pages",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "NvU64"
+        },
+        {
+          "name": "p1",
+          "type": "void *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU32"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_unlock_user_pages",
+      "type": "NV_STATUS (NvU64, void *, NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_unmap_kernel_space (void *, NvU64);",
+      "kind": "FunctionDecl",
+      "line": 112,
+      "namespace_symbol": "s540Global_os_unmap_kernel_space",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU64"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_unmap_kernel_space",
+      "type": "void (void *, NvU64)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_wait_interruptible (os_wait_queue *);",
+      "kind": "FunctionDecl",
+      "line": 202,
+      "namespace_symbol": "s540Global_os_wait_interruptible",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "os_wait_queue *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_wait_interruptible",
+      "type": "void (os_wait_queue *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL os_wake_up (os_wait_queue *);",
+      "kind": "FunctionDecl",
+      "line": 203,
+      "namespace_symbol": "s540Global_os_wake_up",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "os_wait_queue *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_wake_up",
+      "type": "void (os_wait_queue *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    },
+    {
+      "declaration": "NV_STATUS NV_API_CALL os_write_file (void *, NvU8 *, NvU64, NvU64);",
+      "kind": "FunctionDecl",
+      "line": 192,
+      "namespace_symbol": "s540Global_os_write_file",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "void *"
+        },
+        {
+          "name": "p1",
+          "type": "NvU8 *"
+        },
+        {
+          "name": "p2",
+          "type": "NvU64"
+        },
+        {
+          "name": "p3",
+          "type": "NvU64"
+        }
+      ],
+      "return_type": "NV_STATUS",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "os_write_file",
+      "type": "NV_STATUS (void *, NvU8 *, NvU64, NvU64)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "variadic": false
+    },
+    {
+      "declaration": "void NV_API_CALL out_string(const char *str);",
+      "kind": "FunctionDecl",
+      "line": 262,
+      "namespace_symbol": "s540Global_out_string",
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "const char *"
+        }
+      ],
+      "return_type": "void",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "symbol": "out_string",
+      "type": "void (const char *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "variadic": false
+    }
+  ],
+  "format": 1,
+  "root_set": [
+    "rm_init_rm",
+    "rm_shutdown_rm",
+    "rm_init_adapter",
+    "rm_disable_adapter",
+    "rm_shutdown_adapter",
+    "rm_isr",
+    "rm_isr_bh"
+  ],
+  "scope": "Exact original non-crypto external declarations retained by the complete Darwin adapter/startup root closure. This inventory does not establish implementations or runtime readiness.",
+  "source_sha256": {
+    "src/common/nvlink/interface/nvlink_os.h": "d4b1d8e3fcf365b39c0b90708ca4465bf3b642b89e9e13f400800989c9418037",
+    "src/nvidia/arch/nvalloc/unix/include/nv-dev-printf.h": "0585b5d49b1bcaa6ec1fe07511c337cfa77ddf45b4aa9076ca5a02a516b1ec5d",
+    "src/nvidia/arch/nvalloc/unix/include/nv.h": "02ce4b371e0a8dd26f62a320e88c8382dcf31a21b727503a66abcaea9eecf09b",
+    "src/nvidia/arch/nvalloc/unix/include/os-interface.h": "bd281e48ff06b481033fc2fb29a891710a2b4d66fb009cc2b752ab6e90f2113b"
+  }
+}

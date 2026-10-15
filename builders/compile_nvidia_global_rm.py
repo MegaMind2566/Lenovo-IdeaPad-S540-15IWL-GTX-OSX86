@@ -60,7 +60,7 @@ def original_bridge_flags(upstream: Path, output: Path, compiler: Path,
         normalized.append(flag)
         if flag in ('-I', '-include'):
             index += 1
-            normalized.append(str((source_root / flags[index]).resolve(strict=True)))
+            normalized.append(str((source_root / flags[index]).resolve(strict=flag == '-include')))
         index += 1
     return [*normalized, '-DNV_UNIX=1', '-D__NV_UNIX_VERSION_H__',
             '-DNV_VERSION_STRING="' + RELEASE + '"', '-include', str(namespace.resolve(strict=True))]
@@ -293,6 +293,8 @@ def compile_original(upstream: Path, output: Path, compiler: Path,
               'namespace_contract': contract, 'global_rm_executed': False,
               'adapter_initialized': False, 'firmware_loaded': False,
               'compiler_version': execute([str(compiler), '--version']).stdout.splitlines()[0],
+              'object_sha256': {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+                                for path in objects},
               'source_sha256': {
                   (str((source_root / item['source']).resolve().relative_to(upstream))
                    if not Path(item['source']).is_absolute() else 'generated/g_nvid_string.c'):

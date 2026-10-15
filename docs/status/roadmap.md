@@ -51,15 +51,21 @@ Implemented host-memory coverage contains 166 native checks and a 24-check start
 
 The [normalized full-RM closure inventory](../../builders/reference/nvidia-rm-full-closure.json) records separate GNU/ELF diagnostics from all 1,099 original C units plus one generated identification unit. Selected `rm_init_rm`/`rm_shutdown_rm` roots retain 225 external symbols in the Linux control and 215 in the non-Linux `NV_UNIX` diagnostic, including 13 compiler retpoline helpers: 202 remaining host contracts. The diagnostic version-guard overlay is explicit. This is dependency analysis, not Mach-O linking, kernel execution or global RM initialization; the selected Resource Server integration does not close that full boundary.
 
-### Path to the first GPU initialization attempt
+### Combined global RM, transport and GSP milestone
 
-After v8, the working estimate is three broad integration blocks:
+The next integration block includes all three work areas together. Development sources are in [original GSP bootstrap integration](../../packages/nvidia-gsp-bootstrap/README.md); the distributed v9 package stays at its confirmed checkpoint.
 
-1. Compile and connect the actual selected Resource Manager startup path, implementing its remaining macOS services and failure cleanup.
-2. Connect device DMA and interrupt handling, and integrate the matching real GSP firmware with reviewed provenance and hashes.
-3. Attempt bounded GPU/GSP initialization and capture an observable response or a precise failure, with timeout and teardown handling.
+| Work area | Current development evidence | Required before a laptop candidate |
+|---|---|---|
+| Original global RM | All 1,100 source units compile in the local Darwin cross-target audit; a private native control constructs the actual global system and Resource Server with explicit platform/CPU fixtures | Complete real OS callback coverage and correct allocation-failure unwind; native Apple compiler/linker and actual kernel lifecycle |
+| Device transport | Retained PCI ownership, bounded mappings, DMA address/alias checks, exact ABI callbacks and controller/deferred-work lifecycle | Platform power ownership, complete adapter integration and physical DMA/interrupt evidence |
+| GSP and adapter initialization | Approved immutable firmware embedding and lease delivery; exact original context, timers and adapter calls; locked observation of the original decoded-init marker | Successful original adapter startup and actual GSP_INIT response, followed by complete teardown |
 
-These are work areas, not a promise of three releases. RM integration can expose additional dependencies. The first GPU/GSP response is the target of this sequence; minimal command execution and graphics acceleration follow separately.
+Firmware delivery, controller registration and compilation are separate from GPU execution. The original `gspRmInitialized` marker is set only after the GSP-init request succeeds and its returned static information decodes. Adapter-ready reporting also requires completed and stable original GPU state. No marker is synthesized.
+
+The development workflow produces validation records only, with `production_candidate_allowed: false`. Current native GitHub attempts stopped before a runner started; local cross-target and native CPU checks do not replace that missing validation. Real allocation-failure defects in the original global startup are also tracked as blockers. No v10 ZIP or additional laptop test is offered while these gates remain open.
+
+After this complete block succeeds, the next milestone is the first actual GPU command with completion/fence and readback. Graphics/userspace integration and Metal support remain later work. These are implementation milestones, without a promised number of packages.
 
 ## Work order and retained backlog
 

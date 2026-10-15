@@ -1,0 +1,70 @@
+{
+  "component": "nvidia-darwin-services",
+  "cpu_index": {
+    "dependency": "com.apple.kpi.unsupported",
+    "export": "reference/apple-unsupported-x86_64.exports",
+    "function": "int cpu_number(void)",
+    "native_darwin": "explicit-test-fixture-only",
+    "source": "reference/apple-cpu-number.h"
+  },
+  "format": 1,
+  "kernel_activity": {
+    "gpu_initialization": false,
+    "hardware_writes": false,
+    "irq_registration": false
+  },
+  "limits": {
+    "pending_work_items_per_queue": 64,
+    "queue_overflow": "NV_ERR_NO_MEMORY; ownership stays with caller",
+    "synchronization_objects": "dynamic OS allocations; no v9 reserve limit"
+  },
+  "namespace": "s540Darwin_",
+  "native_backend": "POSIX functional backend; Darwin kernel execution established separately",
+  "nvidia_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "nvidia_release": "615.78.08",
+  "profile": "dynamic-host-synchronization-serialized-work-one-shot-timer",
+  "reference_files": [
+    {
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "local": "reference/APPLE_LICENSE",
+      "repository": "apple-oss-distributions/xnu",
+      "sha256": "e5881019d8766c1e88a5fe1dbca4ba40c78011d41fcb18f6e9f50df60182685b",
+      "upstream_path": "APPLE_LICENSE"
+    },
+    {
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "local": "reference/apple-cpu-number.h",
+      "repository": "apple-oss-distributions/xnu",
+      "sha256": "ea2bc28fe9f7d3de8fa1a497c6e20e382ffd2d3c4490a3a0df672cb155c01c26",
+      "upstream_path": "osfmk/i386/cpu_number.h"
+    },
+    {
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "local": "reference/apple-unsupported-x86_64.exports",
+      "repository": "apple-oss-distributions/xnu",
+      "sha256": "e84136681c161e8eb5b93f8cf5a010013955351ff93c1791634d3aa35f630e0b",
+      "upstream_path": "config/Unsupported.x86_64.exports"
+    },
+    {
+      "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+      "local": "reference/nv-kthread-q.c",
+      "repository": "NVIDIA/open-gpu-kernel-modules",
+      "sha256": "b6d45a8394ae412237a5e0b8c5032ab490715e3ee1a63d62a69f9b61526e0814",
+      "upstream_path": "kernel-open/nvidia/nv-kthread-q.c"
+    },
+    {
+      "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+      "local": "reference/os-interface.c",
+      "repository": "NVIDIA/open-gpu-kernel-modules",
+      "sha256": "0c8fe2749ec4ee12f1dbbd884cfbc8f1c8a7750903de7453b01c2f6b92e0f6d6",
+      "upstream_path": "kernel-open/nvidia/os-interface.c"
+    },
+    {
+      "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+      "local": "reference/os-interface.h",
+      "repository": "NVIDIA/open-gpu-kernel-modules",
+      "sha256": "bd281e48ff06b481033fc2fb29a891710a2b4d66fb009cc2b752ab6e90f2113b",
+      "upstream_path": "src/nvidia/arch/nvalloc/unix/include/os-interface.h"
+    }
+  ]
+}

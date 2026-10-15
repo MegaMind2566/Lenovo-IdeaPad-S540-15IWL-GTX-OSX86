@@ -1,0 +1,24 @@
+{
+  "format": 1,
+  "repository": "NVIDIA/open-gpu-kernel-modules",
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "release": "615.78.08",
+  "production_entry": "disabled_until_fault_cleanup_is_complete",
+  "fixed_source": {
+    "path": "src/nvidia/src/kernel/diagnostics/nvlog_printf.c",
+    "upstream_sha256": "9dc3b7e985b9979c00338c5f764fee6fccb688d97252d3ae18142b911b9f63b6",
+    "adapted_sha256": "a1119ce4254b17bf6ce541b25ba3c9fc222690b9551be654e7aa8018b745aee8",
+    "patch": "nvlog_printf-init-unwind.patch",
+    "function": "nvDbgInit",
+    "change": "Balance the nested portInitialize reference before returning false after debug spinlock allocation failure.",
+    "actual_global_fault_ordinal": 9,
+    "runtime_validation": "pending_owner_integrated_actual_global_fault_rebuild"
+  },
+  "remaining_gate": {
+    "actual_global_fault_ordinal": 1,
+    "source_path": "src/nvidia/src/libraries/nvport/memory/memory_tracking.c",
+    "cause": "PORT_MEM_LOCK_INIT ignores allocation/initialization failure; portMemInitialize continues and portMemInitializeAllocatorTracking acquires the NULL tracking lock.",
+    "required_fix": "An explicit checked memory initialization failure path with balanced port/core lifecycle stages; do not bypass allocation failure using a reserve or report successful initialization.",
+    "void_original_initialization_abi": true
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "adaptations": [
+    "RC stop closes private callback/rearm admission, waits for the original callback and then clears rc_timer_enabled before returning, avoiding a data race with its unmodified plain read.",
+    "Darwin callbacks execute in ordinary thread context through serialized thread_call objects, rather than Linux hrtimer hard interrupt context.",
+    "A failed synchronous cancellation quarantines and retains ownership; it is never reported as clean teardown."
+  ],
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "component": "nvidia-gsp-timers",
+  "device_state": "real nv_state_t rc_timer_enabled, no duplicated layout",
+  "format": 1,
+  "native_callback_tests": "explicit typed RM callback fixture; does not establish actual RM callback or GPU behavior",
+  "ownership": "failed synchronous cancellation retains timer, callback data and device binding; Unbind refuses quarantine",
+  "profile": "full-nv-h-typed-bridge; s540Global_-namespace; ordinary-thread Darwin callbacks",
+  "reference_files": [
+    {
+      "local": "reference/nv-nano-timer.c",
+      "path": "kernel-open/nvidia/nv-nano-timer.c",
+      "ranges": null,
+      "sha256": "acb7c1d66e062d1c006b6d963214cd64ed7cbbeb6e95975ca283b7b5fd850549",
+      "source_sha256": "acb7c1d66e062d1c006b6d963214cd64ed7cbbeb6e95975ca283b7b5fd850549"
+    },
+    {
+      "local": "reference/nv-rc-timer.c",
+      "path": "kernel-open/nvidia/nv.c",
+      "ranges": [
+        [
+          1,
+          28
+        ],
+        [
+          3260,
+          3283
+        ],
+        [
+          4424,
+          4462
+        ]
+      ],
+      "sha256": "f27d3583384c38a2eca7118ad409a8f7cce450b19ed59f27e5eb6d662ce5f452",
+      "source_sha256": "ce04946d288cf0251668a2d847acceb2a39af9dac2f13bb005f53759c774dbf7"
+    },
+    {
+      "local": "reference/nv-stack-abi.h",
+      "path": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "ranges": [
+        [
+          1,
+          28
+        ],
+        [
+          327,
+          343
+        ]
+      ],
+      "sha256": "3cae3c3d98c17e4b91f5ada904ad5093d26e29f2ce5419749cff3ecf4e1af893",
+      "source_sha256": "02ce4b371e0a8dd26f62a320e88c8382dcf31a21b727503a66abcaea9eecf09b"
+    },
+    {
+      "local": "reference/nv-stack-init.h",
+      "path": "kernel-open/common/inc/nv-linux.h",
+      "ranges": [
+        [
+          1,
+          28
+        ],
+        [
+          830,
+          861
+        ]
+      ],
+      "sha256": "d589321bbe6d550162dc9482cb9c0af8de298876e59b15eca8a762c563f2e872",
+      "source_sha256": "b652154742225a92a808797b75e595ee5707cf6a9e8c2f0987ca78616f22a5b5"
+    }
+  ],
+  "release": "615.78.08",
+  "stack": "separate tracked heap nvidia_stack_t plus 15 alignment bytes for each callback; explicit 16-byte alignment; size=sizeof(stack member), top=end; original allocation base freed"
+}

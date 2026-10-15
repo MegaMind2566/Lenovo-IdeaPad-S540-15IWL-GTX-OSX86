@@ -1,0 +1,14 @@
+--- a/src/nvidia/src/kernel/diagnostics/journal.c
++++ b/src/nvidia/src/kernel/diagnostics/journal.c
+@@ -3160,6 +3160,11 @@
+     OBJGPU *pGpu;
+     NvU32   gpuMask;
+     NvU32   gpuIndex = 0;
++
++    // A constructor can assert before the global GPU manager is published.
++    // There is no GPU attachment state to probe in that partial lifecycle.
++    if (pSys == NULL || SYS_GET_GPUMGR(pSys) == NULL)
++        return NV_FALSE;
+ 
+     if (pSys->getProperty(pSys, PDB_PROP_SYS_DESTRUCTING))
+     {

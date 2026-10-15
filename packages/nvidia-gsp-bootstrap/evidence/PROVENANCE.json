@@ -1,0 +1,143 @@
+{
+  "format": 1,
+  "repository": "NVIDIA/open-gpu-kernel-modules",
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "release": "615.78.08",
+  "upstream_semantic_patch": false,
+  "operation": "Field observation under original API and device GPU locks; original lock interrupt mask/restore behavior is preserved.",
+  "success_marker": "OBJGPU.gspRmInitialized",
+  "success_marker_meaning": "The original GSP_INIT command and its returned static-info decode both completed successfully.",
+  "unsupported_inferences": [
+    "request_fw_client_rm alone is not a GPU response",
+    "firmware byte delivery alone is not GPU execution",
+    "no IRQ delivery or first GPU job completion count is inferred"
+  ],
+  "sources": [
+    {
+      "source_path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+      "sha256": "ed6d7020a8a1772bc44608178aa13a77a72b8bf0eabe3293c12bc9d2b122c6c9",
+      "anchors": [
+        {
+          "text": "status = gmcapiCommand(pGpu, GMCAPI_CMD_GSP_INIT,",
+          "line": 5328
+        },
+        {
+          "text": "status = _kgspDecodeGspStaticInfo(pGpu, pKVStaticInfoData,",
+          "line": 5338
+        },
+        {
+          "text": "pGpu->gspRmInitialized = NV_TRUE;",
+          "line": 5343
+        }
+      ]
+    },
+    {
+      "source_path": "src/nvidia/src/kernel/gpu/gpu.c",
+      "sha256": "287b204497d90139836f15b1d05a5abca50a67cd2c235e0351194c00153a2257",
+      "anchors": [
+        {
+          "text": "pGpu->gspRmInitialized = NV_FALSE;",
+          "line": 647
+        },
+        {
+          "text": "pGpu->bFullyConstructed = NV_TRUE;",
+          "line": 2207
+        },
+        {
+          "text": "pGpu->bStateLoaded = NV_TRUE;",
+          "line": 2786
+        },
+        {
+          "text": "pGpu->bStateLoaded = NV_FALSE;",
+          "line": 3986
+        }
+      ]
+    },
+    {
+      "source_path": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+      "sha256": "dda3b014833c2e94680e5adea152011ffce72c8067782aceeecaefc28b7394d3",
+      "anchors": [
+        {
+          "text": "nvp->flags |= NV_INIT_FLAG_GPU_STATE;",
+          "line": 1301
+        },
+        {
+          "text": "nvp->flags |= NV_INIT_FLAG_GPU_STATE_LOAD;",
+          "line": 1330
+        }
+      ]
+    },
+    {
+      "source_path": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+      "sha256": "e4336f0e3bb55122680e0d344f970c123664122c2415134b7a6b517c98fcbe75",
+      "anchors": [
+        {
+          "text": "NV_STATUS NV_API_CALL rm_acquire_api_lock(",
+          "line": 1983
+        },
+        {
+          "text": "NV_STATUS NV_API_CALL rm_acquire_gpu_lock(",
+          "line": 2022
+        },
+        {
+          "text": "NV_STATUS NV_API_CALL rm_release_api_lock(",
+          "line": 2003
+        },
+        {
+          "text": "NV_STATUS NV_API_CALL rm_release_gpu_lock(",
+          "line": 2045
+        }
+      ]
+    },
+    {
+      "source_path": "src/nvidia/arch/nvalloc/unix/include/nv-priv.h",
+      "sha256": "6d1978f87474a13f1bf3c4836aeca6855dff03f04e9f5fa18897e440acd84b50",
+      "anchors": [
+        {
+          "text": "#define NV_GET_NV_PRIV_PGPU(nv)",
+          "line": 354
+        },
+        {
+          "text": "#define NV_INIT_FLAG_GPU_STATE_LOAD",
+          "line": 89
+        }
+      ]
+    },
+    {
+      "source_path": "src/nvidia/generated/g_kernel_gsp_nvoc.h",
+      "sha256": "efac7b363ef50c4a97f91b8395115822b4b7a32d3f6272fa722da7f639217b78",
+      "anchors": [
+        {
+          "text": "NvBool bInInit;",
+          "line": 595
+        },
+        {
+          "text": "NvBool bGspRmUnloaded;",
+          "line": 601
+        },
+        {
+          "text": "NvBool bFatalError;",
+          "line": 598
+        }
+      ]
+    },
+    {
+      "source_path": "src/nvidia/arch/nvalloc/unix/src/unix_intr.c",
+      "sha256": "952e1ccb8b3214c83cfb54748324131900eaff68986169ad7e794be29ef86819",
+      "anchors": [
+        {
+          "text": "NvBool osLockShouldToggleInterrupts(OBJGPU *pGpu)",
+          "line": 607
+        },
+        {
+          "text": "void osEnableInterrupts(OBJGPU *pGpu)",
+          "line": 618
+        },
+        {
+          "text": "void osDisableInterrupts(",
+          "line": 642
+        }
+      ]
+    }
+  ]
+}

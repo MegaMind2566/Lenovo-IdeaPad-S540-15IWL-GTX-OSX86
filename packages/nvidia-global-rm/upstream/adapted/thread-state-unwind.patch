@@ -1,0 +1,76 @@
+--- a/src/nvidia/src/kernel/core/thread_state.c
++++ b/src/nvidia/src/kernel/core/thread_state.c
+@@ -48,6 +48,9 @@
+ 
+ THREAD_STATE_DB threadStateDatabase;
+ 
++// Track only the TLS reference owned by this global thread-state lifecycle.
++static NvBool threadStateTlsInitialized = NV_FALSE;
++
+ static void _threadStatePrintInfo(THREAD_STATE_NODE *pThreadNode)
+ {
+     if ((threadStateDatabase.setupFlags & THREAD_STATE_SETUP_FLAGS_PRINT_INFO_ENABLED) == 0)
+@@ -154,7 +157,10 @@
+     NV_STATUS rmStatus;
+     NvU32 allocSize;
+ 
+-    NV_ASSERT(tlsInitialize() == NV_OK);
++    rmStatus = tlsInitialize();
++    if (rmStatus != NV_OK)
++        return rmStatus;
++    threadStateTlsInitialized = NV_TRUE;
+ 
+     // Init the thread sequencer id counter to 0.
+     threadStateDatabase.threadSeqCntr = 0;
+@@ -163,35 +169,44 @@
+     threadStateDatabase.spinlock = portSyncSpinlockCreate(portMemAllocatorGetGlobalNonPaged());
+     if (threadStateDatabase.spinlock == NULL)
+     {
+-        return NV_ERR_INSUFFICIENT_RESOURCES;
++        rmStatus = NV_ERR_INSUFFICIENT_RESOURCES;
++        goto failed;
+     }
+ 
+     allocSize = NV_MAX_DEVICES * sizeof(THREAD_STATE_NODE *);
+     threadStateDatabase.ppISRDeferredIntHandlerThreadNode = portMemAllocNonPaged(allocSize);
+     if (threadStateDatabase.ppISRDeferredIntHandlerThreadNode == NULL)
+     {
+-        portSyncSpinlockDestroy(threadStateDatabase.spinlock);
+-        return NV_ERR_NO_MEMORY;
++        rmStatus = NV_ERR_NO_MEMORY;
++        goto failed;
+     }
+     portMemSet(threadStateDatabase.ppISRDeferredIntHandlerThreadNode, 0, allocSize);
+ 
+     rmStatus = _threadStateAllocPerCpuPerGpu(&threadStateDatabase.pIsrlocklessThreadNode);
+     if (rmStatus != NV_OK)
+     {
+-        portMemFree(threadStateDatabase.ppISRDeferredIntHandlerThreadNode);
+-        portSyncSpinlockDestroy(threadStateDatabase.spinlock);
+-        return rmStatus;
++        goto failed;
+     }
+ 
+     mapInitIntrusive(&threadStateDatabase.dbRoot);
+ 
+     return rmStatus;
++
++failed:
++    threadStateGlobalFree();
++    return rmStatus;
+ }
+ 
+ void threadStateGlobalFree(void)
+ {
+-    // Disable all threadState usage once the spinlock is freed
++    // Disable usage even when construction failed before this module started.
+     threadStateDatabase.setupFlags = THREAD_STATE_SETUP_FLAGS_NONE;
++
++    // sysConstruct may unwind before allocation began, or after Alloc already
++    // unwound its partial state. Do not decrement an unowned TLS reference.
++    if (!threadStateTlsInitialized)
++        return;
++    threadStateTlsInitialized = NV_FALSE;
+ 
+     // Free any memory we allocated
+     _threadStateFreePerCpuPerGpu(threadStateDatabase.pIsrlocklessThreadNode);

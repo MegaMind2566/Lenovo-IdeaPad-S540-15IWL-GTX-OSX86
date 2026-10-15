@@ -1,0 +1,635 @@
+{
+  "format": 1,
+  "upstream": {
+    "repository": "NVIDIA/open-gpu-kernel-modules",
+    "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+    "release": "615.78.08",
+    "libspdm_version": "3.5.0"
+  },
+  "profile": "tu117-no-spdm-crypto-backend",
+  "crypto_implemented": false,
+  "success_requires_lifetime_unavailable_calls_zero": true,
+  "counter_reset_supported": false,
+  "references": [
+    {
+      "path": "reference/cryptlib_hash.h",
+      "source_path": "src/nvidia/src/libraries/libspdm/3.5.0/include/hal/library/cryptlib/cryptlib_hash.h",
+      "sha256": "f2446057144cc6c995da672ce64152ec5a1d0d7a7082badb7c1aed64c4e98db0"
+    },
+    {
+      "path": "reference/cryptlib_mac.h",
+      "source_path": "src/nvidia/src/libraries/libspdm/3.5.0/include/hal/library/cryptlib/cryptlib_mac.h",
+      "sha256": "507c39e6a98571d88f56ac45d313fb56b871491baebbda572d60d3080de5fd94"
+    },
+    {
+      "path": "reference/cryptlib_hkdf.h",
+      "source_path": "src/nvidia/src/libraries/libspdm/3.5.0/include/hal/library/cryptlib/cryptlib_hkdf.h",
+      "sha256": "05da38cec8b015b86119206a56fea605cffad9833b58200e7b033fb0e0cdeb6f"
+    },
+    {
+      "path": "reference/cryptlib_rng.h",
+      "source_path": "src/nvidia/src/libraries/libspdm/3.5.0/include/hal/library/cryptlib/cryptlib_rng.h",
+      "sha256": "78188ce408bf8fd90a1d7b16806a0bc466257825b120a8a774d2b0b7bffdf061"
+    },
+    {
+      "path": "reference/nvspdm_cryptlib_extensions.h",
+      "source_path": "src/nvidia/src/libraries/libspdm/nvidia/nvspdm_cryptlib_extensions.h",
+      "sha256": "f28d4697eea2040332e53cef9a025455a9515b9a4cdefea0b8321cfe74417f25"
+    },
+    {
+      "path": "reference/cryptlib_aead.h",
+      "source_path": "src/nvidia/src/libraries/libspdm/3.5.0/include/hal/library/cryptlib/cryptlib_aead.h",
+      "sha256": "c7333d8228fb9c390cf02d11e73eb31de105cfd424e26548197f4f503798e7c3"
+    },
+    {
+      "path": "reference/cryptlib_cert.h",
+      "source_path": "src/nvidia/src/libraries/libspdm/3.5.0/include/hal/library/cryptlib/cryptlib_cert.h",
+      "sha256": "3a39a3db5b6f1f9af17191fcd3b1c83ce1d1f2f2de5064b00cd6d102e31deaa2"
+    },
+    {
+      "path": "reference/cryptlib_ec.h",
+      "source_path": "src/nvidia/src/libraries/libspdm/3.5.0/include/hal/library/cryptlib/cryptlib_ec.h",
+      "sha256": "6d1a2449b444625b1333f98c34be597c1b9b0f36fe4f2642dcf9e613410a685d"
+    },
+    {
+      "path": "reference/cryptlib_rsa.h",
+      "source_path": "src/nvidia/src/libraries/libspdm/3.5.0/include/hal/library/cryptlib/cryptlib_rsa.h",
+      "sha256": "ab80ee411363a51bb98eec22dae1ede9c5db7f06df6c2606790de2970483c35e"
+    }
+  ],
+  "source_evidence": [
+    {
+      "source_path": "src/nvidia/generated/g_gpu_nvoc.c",
+      "sha256": "1ac5687a07fb6c22eab9d314603d6750caf5fe317a92f973ba4a68cac161f823",
+      "anchor": "PDB_PROP_GPU_CC_FEATURE_CAPABLE",
+      "line": 523
+    },
+    {
+      "source_path": "src/nvidia/generated/g_conf_compute_nvoc.c",
+      "sha256": "43d7c166c8c73980a2ecb89159ad3f7bc3a410e857f0c6ce77e5cf818b5872bf",
+      "anchor": "confComputeIsSpdmSupported --",
+      "line": 481
+    },
+    {
+      "source_path": "src/nvidia/generated/g_conf_compute_nvoc.h",
+      "sha256": "d7713db1d827bf4bc0ebfde6bb5c1c4fe26afb060fd5fac031f0c2b63b8ffb55",
+      "anchor": "confComputeIsSpdmSupported_d69453",
+      "line": 1007
+    },
+    {
+      "source_path": "src/nvidia/src/kernel/gpu/conf_compute/ccsl.c",
+      "sha256": "f5509fb1ca2c876d047014c31c9f277fa11610945277c8244e90e238f55a22c5",
+      "anchor": "This guard is here until we fix",
+      "line": 35
+    },
+    {
+      "source_path": "src/nvidia/src/libraries/libspdm/nvidia/nvspdm_crypt_null.c",
+      "sha256": "746d56893c90d52df968cf6aa868ab86e39e23503484cb60ef1f23a8454991ec",
+      "anchor": "SPDM_NULL_PRESENT",
+      "line": 78
+    },
+    {
+      "source_path": "src/nvidia/src/libraries/nvport/crypto/crypto_random_xorshift.c",
+      "sha256": "ecadfacde4334a54756595075a75f7164808e1fc18ff467cd30757d2ce0a724f",
+      "anchor": "void portCryptoInitialize(void)",
+      "line": 56
+    }
+  ],
+  "symbols": [
+    {
+      "original": "libspdm_aead_aes_gcm_decrypt_prealloc",
+      "facade": "s540Global_libspdm_aead_aes_gcm_decrypt_prealloc",
+      "bit": 0,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_aead_aes_gcm_encrypt_prealloc",
+      "facade": "s540Global_libspdm_aead_aes_gcm_encrypt_prealloc",
+      "bit": 1,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_aead_free",
+      "facade": "s540Global_libspdm_aead_free",
+      "bit": 2,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "void_refusal_counted"
+    },
+    {
+      "original": "libspdm_aead_gcm_prealloc",
+      "facade": "s540Global_libspdm_aead_gcm_prealloc",
+      "bit": 3,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_hkdf_sha256_expand",
+      "facade": "s540Global_libspdm_hkdf_sha256_expand",
+      "bit": 4,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_hkdf_sha384_expand",
+      "facade": "s540Global_libspdm_hkdf_sha384_expand",
+      "bit": 5,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_hmac_sha256_final",
+      "facade": "s540Global_libspdm_hmac_sha256_final",
+      "bit": 6,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_hmac_sha256_free",
+      "facade": "s540Global_libspdm_hmac_sha256_free",
+      "bit": 7,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "void_refusal_counted"
+    },
+    {
+      "original": "libspdm_hmac_sha256_new",
+      "facade": "s540Global_libspdm_hmac_sha256_new",
+      "bit": 8,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "NULL"
+    },
+    {
+      "original": "libspdm_hmac_sha256_set_key",
+      "facade": "s540Global_libspdm_hmac_sha256_set_key",
+      "bit": 9,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_hmac_sha256_update",
+      "facade": "s540Global_libspdm_hmac_sha256_update",
+      "bit": 10,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_random_bytes",
+      "facade": "s540Global_libspdm_random_bytes",
+      "bit": 11,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_sha256_free",
+      "facade": "s540Global_libspdm_sha256_free",
+      "bit": 12,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "void_refusal_counted"
+    },
+    {
+      "original": "libspdm_sha384_free",
+      "facade": "s540Global_libspdm_sha384_free",
+      "bit": 13,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "void_refusal_counted"
+    },
+    {
+      "original": "libspdm_aead_aes_gcm_decrypt",
+      "facade": "s540Global_libspdm_aead_aes_gcm_decrypt",
+      "bit": 14,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_aead_aes_gcm_encrypt",
+      "facade": "s540Global_libspdm_aead_aes_gcm_encrypt",
+      "bit": 15,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_asn1_get_tag",
+      "facade": "s540Global_libspdm_asn1_get_tag",
+      "bit": 16,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_check_crypto_backend",
+      "facade": "s540Global_libspdm_check_crypto_backend",
+      "bit": 17,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_decode_base64",
+      "facade": "s540Global_libspdm_decode_base64",
+      "bit": 18,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_ec_compute_key",
+      "facade": "s540Global_libspdm_ec_compute_key",
+      "bit": 19,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_ec_free",
+      "facade": "s540Global_libspdm_ec_free",
+      "bit": 20,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "void_refusal_counted"
+    },
+    {
+      "original": "libspdm_ec_generate_key",
+      "facade": "s540Global_libspdm_ec_generate_key",
+      "bit": 21,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_ec_get_public_key_from_x509",
+      "facade": "s540Global_libspdm_ec_get_public_key_from_x509",
+      "bit": 22,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_ec_new_by_nid",
+      "facade": "s540Global_libspdm_ec_new_by_nid",
+      "bit": 23,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "NULL"
+    },
+    {
+      "original": "libspdm_ecdsa_sign",
+      "facade": "s540Global_libspdm_ecdsa_sign",
+      "bit": 24,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_ecdsa_verify",
+      "facade": "s540Global_libspdm_ecdsa_verify",
+      "bit": 25,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_encode_base64",
+      "facade": "s540Global_libspdm_encode_base64",
+      "bit": 26,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_hkdf_sha256_extract",
+      "facade": "s540Global_libspdm_hkdf_sha256_extract",
+      "bit": 27,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_hkdf_sha384_extract",
+      "facade": "s540Global_libspdm_hkdf_sha384_extract",
+      "bit": 28,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_hmac_sha256_all",
+      "facade": "s540Global_libspdm_hmac_sha256_all",
+      "bit": 29,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_hmac_sha384_all",
+      "facade": "s540Global_libspdm_hmac_sha384_all",
+      "bit": 30,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_rsa_free",
+      "facade": "s540Global_libspdm_rsa_free",
+      "bit": 31,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "void_refusal_counted"
+    },
+    {
+      "original": "libspdm_rsa_get_public_key_from_x509",
+      "facade": "s540Global_libspdm_rsa_get_public_key_from_x509",
+      "bit": 32,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_rsa_new",
+      "facade": "s540Global_libspdm_rsa_new",
+      "bit": 33,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "NULL"
+    },
+    {
+      "original": "libspdm_rsa_pss_sign",
+      "facade": "s540Global_libspdm_rsa_pss_sign",
+      "bit": 34,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_rsa_pss_verify",
+      "facade": "s540Global_libspdm_rsa_pss_verify",
+      "bit": 35,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_rsa_set_key",
+      "facade": "s540Global_libspdm_rsa_set_key",
+      "bit": 36,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_sha256_duplicate",
+      "facade": "s540Global_libspdm_sha256_duplicate",
+      "bit": 37,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_sha256_final",
+      "facade": "s540Global_libspdm_sha256_final",
+      "bit": 38,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_sha256_hash_all",
+      "facade": "s540Global_libspdm_sha256_hash_all",
+      "bit": 39,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_sha256_init",
+      "facade": "s540Global_libspdm_sha256_init",
+      "bit": 40,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_sha256_new",
+      "facade": "s540Global_libspdm_sha256_new",
+      "bit": 41,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "NULL"
+    },
+    {
+      "original": "libspdm_sha256_update",
+      "facade": "s540Global_libspdm_sha256_update",
+      "bit": 42,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_sha384_duplicate",
+      "facade": "s540Global_libspdm_sha384_duplicate",
+      "bit": 43,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_sha384_final",
+      "facade": "s540Global_libspdm_sha384_final",
+      "bit": 44,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_sha384_hash_all",
+      "facade": "s540Global_libspdm_sha384_hash_all",
+      "bit": 45,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_sha384_init",
+      "facade": "s540Global_libspdm_sha384_init",
+      "bit": 46,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_sha384_new",
+      "facade": "s540Global_libspdm_sha384_new",
+      "bit": 47,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "NULL"
+    },
+    {
+      "original": "libspdm_sha384_update",
+      "facade": "s540Global_libspdm_sha384_update",
+      "bit": 48,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_x509_compare_date_time",
+      "facade": "s540Global_libspdm_x509_compare_date_time",
+      "bit": 49,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "-2"
+    },
+    {
+      "original": "libspdm_x509_get_cert_from_cert_chain",
+      "facade": "s540Global_libspdm_x509_get_cert_from_cert_chain",
+      "bit": 50,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_x509_get_extended_basic_constraints",
+      "facade": "s540Global_libspdm_x509_get_extended_basic_constraints",
+      "bit": 51,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_x509_get_extended_key_usage",
+      "facade": "s540Global_libspdm_x509_get_extended_key_usage",
+      "bit": 52,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_x509_get_extension_data",
+      "facade": "s540Global_libspdm_x509_get_extension_data",
+      "bit": 53,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_x509_get_issuer_name",
+      "facade": "s540Global_libspdm_x509_get_issuer_name",
+      "bit": 54,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_x509_get_key_usage",
+      "facade": "s540Global_libspdm_x509_get_key_usage",
+      "bit": 55,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_x509_get_serial_number",
+      "facade": "s540Global_libspdm_x509_get_serial_number",
+      "bit": 56,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_x509_get_signature_algorithm",
+      "facade": "s540Global_libspdm_x509_get_signature_algorithm",
+      "bit": 57,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_x509_get_subject_name",
+      "facade": "s540Global_libspdm_x509_get_subject_name",
+      "bit": 58,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_x509_get_validity",
+      "facade": "s540Global_libspdm_x509_get_validity",
+      "bit": 59,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_x509_get_version",
+      "facade": "s540Global_libspdm_x509_get_version",
+      "bit": 60,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_x509_set_date_time",
+      "facade": "s540Global_libspdm_x509_set_date_time",
+      "bit": 61,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_x509_verify_cert",
+      "facade": "s540Global_libspdm_x509_verify_cert",
+      "bit": 62,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    },
+    {
+      "original": "libspdm_x509_verify_cert_chain",
+      "facade": "s540Global_libspdm_x509_verify_cert_chain",
+      "bit": 63,
+      "behavior": "refuse_without_modifying_caller_memory",
+      "failure_value": "false"
+    }
+  ],
+  "license": {
+    "path": "DMTF-LICENSE.md",
+    "source_url": "https://raw.githubusercontent.com/DMTF/libspdm/3.5.0/LICENSE.md",
+    "sha256": "c6ffa7e6889e63893078cb21b89594070183f7e2cf5b4ea01a4fb23eac59ed32"
+  },
+  "selected_global_only_symbols": [
+    "libspdm_aead_aes_gcm_decrypt_prealloc",
+    "libspdm_aead_aes_gcm_encrypt_prealloc",
+    "libspdm_aead_free",
+    "libspdm_aead_gcm_prealloc",
+    "libspdm_hkdf_sha256_expand",
+    "libspdm_hkdf_sha384_expand",
+    "libspdm_hmac_sha256_final",
+    "libspdm_hmac_sha256_free",
+    "libspdm_hmac_sha256_new",
+    "libspdm_hmac_sha256_set_key",
+    "libspdm_hmac_sha256_update",
+    "libspdm_random_bytes",
+    "libspdm_sha256_free",
+    "libspdm_sha384_free"
+  ],
+  "selected_global_adapter_isr_symbols": [
+    "libspdm_aead_aes_gcm_decrypt",
+    "libspdm_aead_aes_gcm_decrypt_prealloc",
+    "libspdm_aead_aes_gcm_encrypt",
+    "libspdm_aead_aes_gcm_encrypt_prealloc",
+    "libspdm_aead_free",
+    "libspdm_aead_gcm_prealloc",
+    "libspdm_asn1_get_tag",
+    "libspdm_check_crypto_backend",
+    "libspdm_decode_base64",
+    "libspdm_ec_compute_key",
+    "libspdm_ec_free",
+    "libspdm_ec_generate_key",
+    "libspdm_ec_get_public_key_from_x509",
+    "libspdm_ec_new_by_nid",
+    "libspdm_ecdsa_sign",
+    "libspdm_ecdsa_verify",
+    "libspdm_encode_base64",
+    "libspdm_hkdf_sha256_expand",
+    "libspdm_hkdf_sha256_extract",
+    "libspdm_hkdf_sha384_expand",
+    "libspdm_hkdf_sha384_extract",
+    "libspdm_hmac_sha256_all",
+    "libspdm_hmac_sha256_final",
+    "libspdm_hmac_sha256_free",
+    "libspdm_hmac_sha256_new",
+    "libspdm_hmac_sha256_set_key",
+    "libspdm_hmac_sha256_update",
+    "libspdm_hmac_sha384_all",
+    "libspdm_random_bytes",
+    "libspdm_rsa_free",
+    "libspdm_rsa_get_public_key_from_x509",
+    "libspdm_rsa_new",
+    "libspdm_rsa_pss_sign",
+    "libspdm_rsa_pss_verify",
+    "libspdm_rsa_set_key",
+    "libspdm_sha256_duplicate",
+    "libspdm_sha256_final",
+    "libspdm_sha256_free",
+    "libspdm_sha256_hash_all",
+    "libspdm_sha256_init",
+    "libspdm_sha256_new",
+    "libspdm_sha256_update",
+    "libspdm_sha384_duplicate",
+    "libspdm_sha384_final",
+    "libspdm_sha384_free",
+    "libspdm_sha384_hash_all",
+    "libspdm_sha384_init",
+    "libspdm_sha384_new",
+    "libspdm_sha384_update",
+    "libspdm_x509_compare_date_time",
+    "libspdm_x509_get_cert_from_cert_chain",
+    "libspdm_x509_get_extended_basic_constraints",
+    "libspdm_x509_get_extended_key_usage",
+    "libspdm_x509_get_extension_data",
+    "libspdm_x509_get_issuer_name",
+    "libspdm_x509_get_key_usage",
+    "libspdm_x509_get_serial_number",
+    "libspdm_x509_get_signature_algorithm",
+    "libspdm_x509_get_subject_name",
+    "libspdm_x509_get_validity",
+    "libspdm_x509_get_version",
+    "libspdm_x509_set_date_time",
+    "libspdm_x509_verify_cert",
+    "libspdm_x509_verify_cert_chain"
+  ]
+}

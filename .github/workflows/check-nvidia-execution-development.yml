@@ -1,0 +1,98 @@
+name: Check NVIDIA global RM and GSP development sources
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/nvidia-global-rm/**'
+      - 'packages/nvidia-global-rm-crypto/**'
+      - 'packages/nvidia-darwin-services/**'
+      - 'packages/nvidia-device-transport/**'
+      - 'packages/nvidia-gsp-bootstrap/**'
+      - 'builders/compile_nvidia_global_rm.py'
+      - 'builders/embed_nvidia_firmware.py'
+      - 'builders/check_nvidia_global_crypto.py'
+      - 'builders/check_nvidia_execution.py'
+      - 'builders/build_nvidia_execution.py'
+      - '.github/workflows/check-nvidia-execution-development.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-development:
+    runs-on: macos-15-intel
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: NVIDIA/open-gpu-kernel-modules
+          ref: 1a82fbfda8f321b056eb3568850f9316c5e465c5
+          path: build-src/nvidia-upstream
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: acidanthera/MacKernelSDK
+          ref: 3f750085caa17ec3a7880f11c11bf4f48cd6a164
+          path: build-src/MacKernelSDK
+          persist-credentials: false
+      - name: Compile every original RM unit in its isolated Darwin namespace
+        run: >-
+          python3 builders/compile_nvidia_global_rm.py
+          --upstream build-src/nvidia-upstream --generate-namespace
+          --output-dir build/nvidia-execution/original-rm
+      - name: Install the pinned bounded archive decoder in a private environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          NVIDIA_BUILD_VENV="$RUNNER_TEMP/nvidia-execution-python"
+          python3 -m venv "$NVIDIA_BUILD_VENV"
+          "$NVIDIA_BUILD_VENV/bin/python3" -m pip install --disable-pip-version-check -r packages/nvidia-firmware-assets/requirements-build.txt
+          printf '%s\n' "$NVIDIA_BUILD_VENV/bin" >> "$GITHUB_PATH"
+      - name: Verify the actual unmodified firmware pair and complete license
+        run: >-
+          python3 builders/check_nvidia_firmware_assets.py --download
+          --assets-dir build/nvidia-execution/firmware
+          --build-dir build/nvidia-execution/firmware-checks
+      - name: Check production CPU services and explicit native backend fixtures
+        run: >-
+          python3 builders/check_nvidia_execution.py
+          --upstream build-src/nvidia-upstream
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --assets-dir build/nvidia-execution/firmware
+          --output-dir build/nvidia-execution/native-checks
+      - name: Compile the actual Darwin execution bridges without making a candidate
+        run: >-
+          python3 builders/build_nvidia_execution.py
+          --upstream build-src/nvidia-upstream
+          --kernel-sdk build-src/MacKernelSDK
+          --assets-dir build/nvidia-execution/firmware
+          --compiled-directory build/nvidia-execution/original-rm
+          --output-dir build/nvidia-execution/kernel-checks
+      - name: Record the unresolved production milestone explicitly
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          record = json.loads(Path('build/nvidia-execution/kernel-checks/execution-kernel-build.json').read_text())
+          assert record['production_candidate_allowed'] is False
+          print('Development validation only: full adapter/GSP runtime closure remains unresolved.')
+          print('No candidate ZIP, firmware upload, GPU initialization, or kernel runtime success is produced by this workflow.')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: NVIDIA-execution-development-validation
+          path: |
+            build/nvidia-execution/original-rm/darwin-compile.json
+            build/nvidia-execution/original-rm/dependency-controls.json
+            build/nvidia-execution/firmware-checks/firmware-assets-checks.json
+            build/nvidia-execution/native-checks/execution-checks.json
+            build/nvidia-execution/kernel-checks/execution-kernel-build.json
+          if-no-files-found: error
+          retention-days: 30

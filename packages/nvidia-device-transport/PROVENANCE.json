@@ -1,0 +1,93 @@
+{
+  "format": 1,
+  "status": "development",
+  "nvidia": {
+    "repository": "NVIDIA/open-gpu-kernel-modules",
+    "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+    "release": "615.78.08",
+    "license": "MIT",
+    "references": [
+      {
+        "path": "kernel-open/common/inc/nv.h",
+        "sha256": "ae47af242f37db76255094628d79c31ac0a63906452a71a4df6390f76f7585d2"
+      },
+      {
+        "path": "kernel-open/nvidia/nv.c",
+        "sha256": "ce04946d288cf0251668a2d847acceb2a39af9dac2f13bb005f53759c774dbf7"
+      },
+      {
+        "path": "kernel-open/nvidia/nv-dma.c",
+        "sha256": "7912d6cf000450848b9c54b20b580958e7698f91fc6107c10b4e0fc502cd8942"
+      },
+      {
+        "path": "kernel-open/nvidia/nv-pci.c",
+        "sha256": "6a5e39f37d86bd6d09cc5867647ecbc8e240298bc138bf651ad7d9346bc1b1c8"
+      },
+      {
+        "path": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+        "sha256": "bd281e48ff06b481033fc2fb29a891710a2b4d66fb009cc2b752ab6e90f2113b"
+      },
+      {
+        "path": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+        "sha256": "dda3b014833c2e94680e5adea152011ffce72c8067782aceeecaefc28b7394d3"
+      },
+      {
+        "path": "src/nvidia/inc/kernel/os/nv_memory_type.h",
+        "sha256": "c6472e939ac912d5df5e2e17dab35f8444269b964e2b1536f05df874990354cb"
+      }
+    ]
+  },
+  "darwin": {
+    "sdk_repository": "acidanthera/MacKernelSDK",
+    "sdk_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+    "xnu_repository": "apple-oss-distributions/xnu",
+    "xnu_commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+    "pci_repository": "apple-oss-distributions/IOPCIFamily",
+    "pci_commit": "4822b27a36e2de70e231ecf2bf3021384fab6ec2"
+  },
+  "profile": {
+    "target_vendor": "0x10de",
+    "target_device": "0x1f91",
+    "target_revision": "0xa1",
+    "target_subsystem_vendor": "0x17aa",
+    "target_subsystem_device": "0x3806",
+    "maximum_pages": 8192,
+    "maximum_allocations": 32,
+    "maximum_host_bytes": 134217728,
+    "supported_cache_values": [
+      0,
+      1,
+      2
+    ],
+    "device_dma_verified": false,
+    "kernel_execution": "not_tested",
+    "gpu_initialized": false
+  },
+  "interfaces": {
+    "symbol_prefix": "s540Global_",
+    "private_linux_layouts_redefined": false,
+    "failure_preserves_inout_ownership": true,
+    "successful_dma_mapping_has_distinct_token": true,
+    "quarantine_on_failed_completion": true
+  },
+  "source_anchors": {
+    "dma_ownership": "kernel-open/nvidia/nv-dma.c:480-741",
+    "cache_policy": "kernel-open/nvidia/nv-dma.c:898-928 and kernel-open/nvidia/nv.c:6346",
+    "file_authorization": "kernel-open/nvidia/nv.c:6058-6094",
+    "device_dma_width": "kernel-open/nvidia/nv-pci.c:2313 and src/nvidia/arch/nvalloc/unix/src/osinit.c:1612",
+    "initial_configuration_writes": "src/nvidia/arch/nvalloc/unix/src/osinit.c:osInitMapping",
+    "mapper_state": "xnu/iokit/Kernel/IOMapper.cpp and IOPlatformExpert.cpp",
+    "initial_interrupt_mask": "xnu/iokit/Kernel/IOInterruptController.cpp and IOPCIFamily/IOPCIMessagedInterruptController.cpp"
+  },
+  "local_evidence": {
+    "native_assertions": 242,
+    "lifecycle_cycles": 128,
+    "mapped_exercise_checks": 21,
+    "unavailable_mapper_exercise_checks": 19,
+    "sdk_imports": 32,
+    "sdk_reference_exact_match": true,
+    "native_kernel_execution": false,
+    "native_gpu_access": false,
+    "leak_sanitizer": "unavailable-local-container"
+  }
+}
