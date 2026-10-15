@@ -203,10 +203,14 @@ def source_flags(source: Path) -> list[str]:
 def source_warning_flags(source: Path) -> list[str]:
     # Apply the narrow exception after -Wextra/-Werror. Clang otherwise
     # re-enables the warning through the later umbrella warning option.
-    # The original release-profile validity functions accept an unused
-    # container parameter under GNU typeof; their bodies remain unchanged.
+    # The original release-profile validity functions and type-safety header
+    # templates accept unused container parameters; their bodies remain
+    # unchanged. Only translation units that include this container closure
+    # receive the exception.
     if source in {RUNTIME / 'upstream/consumer/vector.c',
-                  RUNTIME / 'upstream/consumer/list.c'}:
+                  RUNTIME / 'upstream/consumer/list.c',
+                  RUNTIME / 'src/S540NvidiaRmConsumer.cpp',
+                  RUNTIME / 'tests/check_rm_consumer_native.cpp'}:
         return ['-Wno-unused-parameter']
     return []
 
@@ -226,10 +230,12 @@ def compile_native_harness(work: Path, label: str, harness: Path,
     for source in cpp_sources:
         obj = work / (label + '-' + source.stem + '.o')
         run('/usr/bin/xcrun', 'clang++', *source_flags(source), *common,
+            *source_warning_flags(source),
             '-std=c++17', *sanitizer, '-pthread', '-c', str(source), '-o', str(obj))
         objects.append(str(obj))
     binary = work / ('check-' + label)
     run('/usr/bin/xcrun', 'clang++', *source_flags(harness), *common,
+        *source_warning_flags(harness),
         '-std=c++17', *sanitizer, '-pthread', str(harness), *objects,
         '-o', str(binary))
     return binary
