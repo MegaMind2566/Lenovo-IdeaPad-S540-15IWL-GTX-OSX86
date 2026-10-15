@@ -15,7 +15,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 
 | Guide | Purpose |
 |---|---|
-| [NVIDIA Resource Server and host services](../packages/nvidia-rm-services/README.md) | V9 candidate: original standalone Resource Server, cached host allocation/mapping, retained read-only PCI and separately verified official firmware; combined validation and one laptop checkpoint pending |
+| [NVIDIA Resource Server and host services](../packages/nvidia-rm-services/README.md) | V9 candidate: original standalone Resource Server, cached host allocation/mapping, retained read-only PCI and separately verified official firmware; native CI/package verification passed, one combined laptop checkpoint pending |
 | [Original NVIDIA Resource Server](../packages/nvidia-resource-server/README.md) | Selected NVOC/library subsystem, real client/resource/access/sharing paths and explicit adaptations; not full global RM startup |
 | [Matching NVIDIA firmware assets](../packages/nvidia-firmware-assets/README.md) | Official release 615.78.08 GSP/UCODES byte hashes, parsing, provenance and full license; no device upload or execution |
 | [NVIDIA hardware-transport preparation](../packages/nvidia-hardware-transport/README.md) | V8 confirmed in the Tahoe kernel: all 390 combined startup checks passed, cleanup complete and no warnings; untranslated host preparation is not device DMA verification |
