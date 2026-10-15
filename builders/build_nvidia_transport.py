@@ -96,10 +96,15 @@ def build(sdk: Path, output: Path) -> Path:
             '-Wl,-kext', '-Wl,-no_source_version', *objects,
             str(sdk / 'Library/x86_64/libkmod.a'), '-o', str(binary))
         macho(binary, 11)
-        symbols = run('/usr/bin/nm', '-g', str(binary)).stdout
+        # The linker localizes hidden _realmain/_antimain pointers. They must
+        # remain defined data symbols, but need not be external exports.
+        symbols = run('/usr/bin/nm', '-a', str(binary)).stdout
         for symbol in ('_kmod_info', '__realmain', '__antimain'):
-            if not re.search(r'\b[SD] ' + re.escape(symbol) + r'$', symbols, re.M):
+            if not re.search(r'\b[SDsd] ' + re.escape(symbol) + r'$', symbols, re.M):
                 raise ValueError('The kext entry metadata is missing: ' + symbol)
+        for symbol in ('__start', '__stop'):
+            if not re.search(r'\b[Tt] ' + re.escape(symbol) + r'$', symbols, re.M):
+                raise ValueError('The module runtime entry is missing: ' + symbol)
         if b'S540NvidiaPCIProbeSnapshot' not in binary.read_bytes():
             raise ValueError('The kernel snapshot marker is absent.')
         if b'Source available under APSL 2.0:' not in binary.read_bytes():
