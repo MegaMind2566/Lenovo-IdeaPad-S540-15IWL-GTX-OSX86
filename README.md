@@ -70,7 +70,7 @@ Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including t
 
 ## Development priorities
 
-- Assess the Darwin OS-adapter boundaries needed by NVIDIA's resource manager. The [transport prototype](packages/nvidia-transport/README.md) 0.3.0 two-read identification and local TU117 HAL table match are confirmed on the laptop. HAL instantiation, resource-manager integration, DMA, firmware startup and acceleration remain unimplemented.
+- Validate the implemented CPU-only [Darwin clock adapter](packages/nvidia-os-adapter/README.md), its adapted upstream caller, exact ABI and clock behavior in GitHub Actions. The confirmed v0.3.0 transport stays unchanged. Laptop tests will combine components into meaningful milestones. HAL instantiation, resource-manager integration, DMA, firmware startup and acceleration remain unimplemented.
 - Complete storage reliability and remaining USB 2 device checks. Both USB-A connectors and USB-C in both orientations negotiate 5 Gb/s with the tested hardware. Audio peripherals, battery power and independent SSD boot work; measured battery runtime remains open.
 - Complete Intel stability and power-management coverage; sustained cooling and fan telemetry remain open. External-display work is paused.
 - Complete remaining device support and investigate connection performance from the recorded Internet baseline; wired/Bluetooth microphones, headphone switching and wireless reconnection work.
@@ -80,6 +80,8 @@ Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including t
 See the [Roadmap](docs/status/roadmap.md) for the implementation plan.
 
 ## Documentation and downloads
+
+The CPU-only OS adapter is a source component awaiting GitHub validation; it has no laptop installation package.
 
 The [documentation index](docs/README.md) links to setup, maintenance, and recovery procedures. Main guides: [Intel graphics](docs/guides/intel-graphics.md), [Tahoe audio](docs/guides/tahoe-audio.md), and [microphone correction](docs/guides/microphone-fix.md).
 

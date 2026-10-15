@@ -1,0 +1,39 @@
+name: Check NVIDIA Darwin clock adapter
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/nvidia-os-adapter/**'
+      - 'builders/check_nvidia_clock.py'
+      - 'tests/test_nvidia_clock*'
+      - '.github/workflows/check-nvidia-clock.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  clock:
+    runs-on: macos-15-intel
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: acidanthera/MacKernelSDK
+          ref: 3f750085caa17ec3a7880f11c11bf4f48cd6a164
+          path: build-src/MacKernelSDK
+          persist-credentials: false
+      - name: Check provenance, policy, native caller and kernel compilation
+        run: python3 builders/check_nvidia_clock.py --kernel-sdk build-src/MacKernelSDK --output-dir build/nvidia-clock
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: NVIDIA-clock-targeted-checks
+          path: |
+            build/nvidia-clock/clock-adapter-checks.json
+            build/nvidia-clock/clock-adapter-checks.json.sha256
+          if-no-files-found: error
+          retention-days: 30

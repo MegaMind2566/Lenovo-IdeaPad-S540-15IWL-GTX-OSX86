@@ -1,11 +1,13 @@
-# Runtime packages
+# Packages and development components
 
-Source files are grouped by feature. Each group keeps its launchers at the top
-level and its runtime helpers in `tools/`, matching the layout of the distributed
-ZIP packages. Builders and regression checks are kept separately.
+Sources are grouped by feature. Installable packages retain their launchers and
+runtime helpers together. The CPU-only OS adapter is a development component
+whose checks belong in GitHub; it has no laptop installation package. Builders and
+regression checks are kept separately.
 
 | Package | Purpose | Guide |
 | --- | --- | --- |
+| [nvidia-os-adapter](nvidia-os-adapter) | CPU-only Darwin clock implementation; GitHub checks pending. No laptop installer; future hardware tests combine components. | [OS adapter](nvidia-os-adapter/README.md) |
 | [nvidia-transport](nvidia-transport) | Version 0.3.0 two-read identification and pinned local TU117 variant-41 table match confirmed on the laptop. No HAL instantiation, resource-manager integration, firmware or acceleration. | [PCI transport](nvidia-transport/README.md) |
 | [nvidia-visibility](nvidia-visibility) | Superseded for the reached visibility milestone. V1 automatic locator stopped at `Mounted`; subsequent manual removal of the disable argument produced a visible PCI service. | [Retained visibility experiment](nvidia-visibility/README.md) |
 | [nvidia-pci](nvidia-pci) | Read published PCI metadata; laptop visibility is confirmed for the exact target. No hardware access or GPU initialization. | [NVIDIA PCI inventory](nvidia-pci/README.md) |

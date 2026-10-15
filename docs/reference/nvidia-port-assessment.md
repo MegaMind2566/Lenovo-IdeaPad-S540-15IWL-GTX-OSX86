@@ -2,7 +2,7 @@
 
 Reviewed on October 15, 2026. Target: Lenovo IdeaPad S540-15IWL GTX, Intel macOS Tahoe, NVIDIA GTX 1650 Max-Q, PCI `10DE:1F91`.
 
-**Status:** PCI visibility, 0.1.0 attachment/configuration/resource reads, 0.2.0 BOOT_0 identification and the [transport prototype](../../packages/nvidia-transport/README.md) 0.3.0 two-read/local HAL table match are confirmed on the laptop. The next stage is Darwin OS-adapter boundary assessment. HAL instantiation, resource-manager integration, GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
+**Status:** PCI visibility, 0.1.0 attachment/configuration/resource reads, 0.2.0 BOOT_0 identification and the [transport prototype](../../packages/nvidia-transport/README.md) 0.3.0 two-read/local HAL table match are confirmed on the laptop. The CPU-only Darwin clock adapter is implemented; its GitHub validation is pending. HAL instantiation, resource-manager integration, GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
 
 ## Source baseline
 
@@ -106,13 +106,15 @@ This confirms two read-only identification loads and a local table comparison. I
 
 The 0.3.0 [native Intel build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38666863926) passed at commit `dc21ecb52d0cde3b824d2ae692c0982d7e1cc972`, including compilation, signatures, policy/decoder checks and packaged reporter execution with the probe unloaded. Its ZIP SHA256 is `4b0c5c0634be2af65bcfd9fd01f91adb12fb7e6ef8d7fefd59027ccba51e6002`. CI did not load the kext or validate BOOT_42 on the laptop.
 
-## Next stage: Darwin OS-adapter boundary assessment
+## Darwin OS adapter: CPU-only clock component
 
-Review the pinned resource manager's operating-system service contracts and the minimal Darwin interfaces they would require before implementing integration. Existing IOKit attachment and identification are the confirmed baseline, not an integrated NVIDIA OS adapter. This assessment selects no additional register or hardware operation and does not instantiate a HAL or start the GPU.
+The [OS-adapter component](../../packages/nvidia-os-adapter/README.md) is separate from the unchanged, confirmed v0.3.0 transport. It implements CPU-only monotonic-clock hooks for an adapted NVIDIA uptime caller. The full resource manager and HAL remain unintegrated; this component adds no GPU reads, writes or initialization.
 
-The first candidate is the CPU-only monotonic-clock adapter: `os_get_monotonic_time_ns`, `os_get_monotonic_time_ns_hr` and `os_get_monotonic_tick_resolution_ns`. NVIDIA's actual [nvport time caller](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/src/libraries/nvport/time/time_unix_kernel_os.c#L68-L80) consumes these hooks, and its [GPU timeout code](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/src/kernel/gpu/gpu_timeout.c#L282-L302) uses uptime and resolution to form deadlines. The pinned Darwin [clock header](https://github.com/acidanthera/MacKernelSDK/blob/3f750085caa17ec3a7880f11c11bf4f48cd6a164/Headers/kern/clock.h#L86-L115) provides `clock_get_uptime`, `absolutetime_to_nanoseconds` and `clock_timebase_info` as the backend candidates.
+The implemented clock hooks are `os_get_monotonic_time_ns`, `os_get_monotonic_time_ns_hr` and `os_get_monotonic_tick_resolution_ns`. NVIDIA's actual [nvport time caller](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/src/libraries/nvport/time/time_unix_kernel_os.c#L68-L80) consumes these hooks, and its [GPU timeout code](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/src/kernel/gpu/gpu_timeout.c#L282-L302) uses uptime and resolution to form deadlines. The pinned Darwin [clock header](https://github.com/acidanthera/MacKernelSDK/blob/3f750085caa17ec3a7880f11c11bf4f48cd6a164/Headers/kern/clock.h#L86-L115) provides `clock_get_uptime`, `absolutetime_to_nanoseconds` and `clock_timebase_info` for the kernel backend; the native userspace harness uses `mach_absolute_time` and its timebase.
 
-Acceptance requires the exact upstream C ABI, compilation of the actual pinned caller, documented timebase/resolution semantics, and checks of nondecreasing nanosecond values and deadline expiry. Unimplemented dependencies must not be replaced by success stubs. This adapter is not implemented yet and does not integrate the resource manager. Software deadlines cannot make a stalled MMIO load recoverable.
+The source adapts four contiguous upstream uptime functions with their signatures and bodies unchanged, while narrowing includes and build guards. Three NVIDIA ABI headers are retained unchanged with pinned provenance and MIT notices. This is an adapted excerpt, not the complete upstream time module. The ordinary clock is rounded down to a logical 1 ms quantum and reports `1,000,000` ns resolution; the high-precision hook returns raw Darwin uptime in nanoseconds. The quantum is a software policy, not measured hardware precision.
+
+GitHub validation is pending: compile the caller and kernel backend, produce a relocatable link with an import audit, and execute a native userspace harness plus targeted clock checks. These checks will cover source/ABI compatibility and userspace clock behavior, not kernel runtime, suspend behavior or GPU deadlines. This component has no laptop installation package. Future laptop tests will combine components into meaningful integration milestones. Software deadlines cannot make a stalled MMIO load recoverable.
 
 ## Milestone status and remaining work
 
@@ -121,7 +123,7 @@ Acceptance requires the exact upstream C ABI, compilation of the actual pinned c
 | Darwin PCI attachment | Confirmed laptop attachment, fixed configuration reads and assigned resource metadata; runtime stop/unload remains untested |
 | Single-read BAR0 identification | Confirmed on the laptop in 0.2.0: exactly one BOOT_0 read with expected TU117 fields; no broader hardware operation validated |
 | BOOT_42 and local HAL table match | Confirmed on the laptop in 0.3.0: two read-only identification loads and local TU117 variant-41 match. No HAL object or resource-manager integration |
-| Darwin OS adapter | Next boundary assessment only; no resource-manager integration implemented |
+| CPU-only Darwin clock adapter | Implemented with adapted upstream uptime caller; GitHub validation pending. No kernel runtime validation or resource-manager integration |
 | Further hardware transport | Separate reviewed work for DMA and interrupts, with bounded access and failure handling |
 | GPU and GSP startup | Matching, hashed firmware; observed initialization with timeouts and cleanup; no success inferred from PCI enumeration |
 | Minimal execution | One deterministic command with a checked result and recoverable failure path |

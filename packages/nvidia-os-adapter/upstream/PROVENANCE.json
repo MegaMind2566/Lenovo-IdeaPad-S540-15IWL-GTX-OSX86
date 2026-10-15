@@ -1,0 +1,86 @@
+{
+  "format": 1,
+  "repository": "NVIDIA/open-gpu-kernel-modules",
+  "release": "615.78.08",
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "upstream_files": [
+    {
+      "path": "include/nvtypes.h",
+      "source_path": "src/common/sdk/nvidia/inc/nvtypes.h",
+      "git_blob_sha1": "cb6d906a34cf6ace3d852657cf8dde4a587d7721",
+      "sha256": "da23dbc28805c390d62338dba5603eb12b2e94c8aaf873c1c42c1a5f10f26b79",
+      "bytes": 30226,
+      "license": "MIT",
+      "modified": false
+    },
+    {
+      "path": "include/cpuopsys.h",
+      "source_path": "src/common/sdk/nvidia/inc/cpuopsys.h",
+      "git_blob_sha1": "6467b396a696a47fa71d4ad41e32d27f344fcdce",
+      "sha256": "329ab764372bace3e1445315bb7a3766d4f60aacb8523ac3e3c760c79358f4fb",
+      "bytes": 11713,
+      "license": "MIT",
+      "modified": false
+    },
+    {
+      "path": "include/nv-kernel-interface-api.h",
+      "source_path": "kernel-open/common/inc/nv-kernel-interface-api.h",
+      "git_blob_sha1": "183f9b4312eb0913c0a0a97e4db1f62a50b442c5",
+      "sha256": "1cf34c1dcd1abf535fb27387145374972a43ec9cd6f6c9ef927777431bda3cc4",
+      "bytes": 1810,
+      "license": "MIT",
+      "modified": false
+    },
+    {
+      "path": "reference/time_unix_kernel_os.c",
+      "source_path": "src/nvidia/src/libraries/nvport/time/time_unix_kernel_os.c",
+      "git_blob_sha1": "abfec8d3aa0b94a9d53e18134a66655dc7179e43",
+      "sha256": "9a522aa0d8fb7e28f908dea00e2544e9e921a0925a3f7084d7e6af8c5817fdf0",
+      "bytes": 2311,
+      "license": "MIT",
+      "modified": false
+    },
+    {
+      "path": "reference/os-interface.h",
+      "source_path": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "git_blob_sha1": "03de89a28a2611bca2fb2a3d85c7f617a681a20a",
+      "sha256": "bd281e48ff06b481033fc2fb29a891710a2b4d66fb009cc2b752ab6e90f2113b",
+      "bytes": 17357,
+      "license": "MIT",
+      "modified": false
+    }
+  ],
+  "adapted_caller": {
+    "path": "nvport_time_uptime.c",
+    "sha256": "9bf1044a9e96fc577e84e5807ef96243b52e00762578b65208368808b8db5794",
+    "source_reference": "reference/time_unix_kernel_os.c",
+    "source_lines": [
+      63,
+      81
+    ],
+    "source_body_sha256": "efbd6d0109442bf15f755a80361c392fd48c20c9621e98d6a316f97300e41329",
+    "functions": [
+      "portTimeGetUptimeMicroseconds",
+      "portTimeGetUptimeNanoseconds",
+      "portTimeGetUptimeNanosecondsHighPrecision",
+      "portTimeGetUptimeResolution"
+    ],
+    "adaptation": "The full MIT copyright and license notice and the four contiguous function signatures and bodies are retained exactly. Original includes, platform build guards, documentation, and wall-clock functions are omitted. A narrow interface header and an explicit adaptation notice are added.",
+    "complete_upstream_translation_unit": false
+  },
+  "interface": {
+    "path": "nvport_time_uptime.h",
+    "sha256": "daa2a8f22a89eb63844d3a4edde00bea0d88c1df04532b9a92a94933a72423b8",
+    "declarations_reference": "reference/os-interface.h",
+    "declaration_lines": [
+      81,
+      83
+    ],
+    "hooks": [
+      "os_get_monotonic_time_ns",
+      "os_get_monotonic_time_ns_hr",
+      "os_get_monotonic_tick_resolution_ns"
+    ],
+    "adaptation": "Narrow interface authored for this adapter. NVIDIA NvU64 and NV_API_CALL definitions come from the unmodified included headers. Hook types and signatures match the pinned upstream declarations."
+  }
+}

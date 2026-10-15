@@ -8,7 +8,7 @@ The [CPU and sensor reports](cpu-thermal.md) confirm frequency/power response an
 
 | Order | Work | Remaining scope |
 |---|---|---|
-| Now | NVIDIA Darwin monotonic-clock adapter assessment | Version 0.3.0 two-read identification and local TU117 variant-41 table match confirmed. Next candidate: the upstream time hooks used for driver deadlines; exact ABI, units and resolution require validation before integration. |
+| Now | NVIDIA Darwin clock adapter | CPU-only clock implementation; GitHub validation pending for the adapted upstream caller, exact ABI, kernel imports and native clock behavior. No laptop installation package; next hardware milestone combines components. Confirmed v0.3.0 transport is unchanged. |
 | Remaining | Graphics, power and thermals | Sustained Intel graphics use and cooling, fan telemetry and measured battery runtime. Continuous temperature readings during desktop activity and basic battery power/discharge reporting are confirmed. NVIDIA electrical power-off is deferred until after the driver-port attempt. |
 | Complete / retained | Boot and EFI consolidation | Independent Samsung boot confirmed after manual EFI transfer. Keep the HDD as a recovery path and preserve the private working EFI. A later sanitized release remains separate from v0.1.0. |
 | 3 | Storage and USB reliability | USB-C at 5 Gb/s in both orientations and both tested USB-A connectors at 5 Gb/s are confirmed. File reads on both USB-A connectors are confirmed. External USB 2 devices, sustained SSD stability, shutdown and reboot remain separate checks. Move the system SSD cable only after shutdown. |
@@ -47,7 +47,7 @@ Priorities updated on 13 October 2026: the panel being off during boot is **reso
 | Fingerprint reader | Internal USB port mapped; support to be assessed | Assess drivers and macOS integration |
 | HDMI | No image; macOS display report lists only the internal panel | Identify the connected external display's owning GPU in Windows before selecting a fix |
 | USB-C video | No video test available; video capability and routing not verified; USB data works | Check hardware capability from documentation; keep separate from the observed HDMI failure |
-| NVIDIA GTX 1650 Max-Q | Probe 0.1.0 attachment, 0.2.0 BOOT_0 read and 0.3.0 two-read/local HAL table match confirmed; no HAL instance or initialized GPU | Darwin OS-adapter boundary assessment next. Runtime stop/unload, resource-manager integration, DMA, startup, execution and graphics integration remain separate |
+| NVIDIA GTX 1650 Max-Q | Probe 0.1.0 attachment, 0.2.0 BOOT_0 read and 0.3.0 two-read/local HAL table match confirmed; no HAL instance or initialized GPU | CPU-only OS-adapter development and GitHub checks next, without changing the confirmed transport. Runtime stop/unload, resource-manager integration, DMA, startup, execution and graphics integration remain separate |
 
 Recovery test results are not automatically extended to the installed system. Incomplete items remain open until a documented result is available.
 
@@ -71,9 +71,9 @@ On October 15, version 0.2.0 returned `identified`, `complete=true` and no warni
 
 On October 15, version 0.3.0 returned `hal_matched`, `complete=true` and no warnings on the laptop. It completed one BOOT_0 and one BOOT_42 read, two total. Both decode to architecture `0x16` and implementation `0x07`; BOOT_42 chip `0x167` matches the pinned local table for TU117 variant `41`. This confirms two read-only identification loads and local table matching. It does not instantiate NVIDIA's HAL, integrate its resource manager or initialize the GPU.
 
-The next stage is Darwin OS-adapter boundary assessment before expanding the prototype. No additional register or hardware operation is selected here. DMA, firmware loading and acceleration remain unimplemented. Runtime stop/unload remains untested. Intel display operation and the recovery EFI are retained.
+The next stage is the separate CPU-only Darwin OS adapter. The confirmed v0.3.0 transport is unchanged, and no additional GPU register or operation is selected. All build and CPU behavior checks run in GitHub; laptop tests are reserved for combined integration milestones. DMA, firmware loading and acceleration remain unimplemented. Runtime stop/unload remains untested. Intel display operation and the recovery EFI are retained.
 
-The first CPU-only candidate is NVIDIA's monotonic-clock interface, used by the actual nvport time caller and GPU timeout code. Acceptance requires compiling that pinned caller against the exact hook ABI and checking units, timebase resolution and deadline behavior. This work remains unimplemented; it does not provide a recoverable timeout for a stalled MMIO load.
+The [clock component](../../packages/nvidia-os-adapter/README.md) adapts four upstream uptime function bodies and retains NVIDIA's exact hook ABI. Its ordinary clock uses a logical 1 ms quantum, while the high-precision hook returns raw Darwin uptime in nanoseconds. The implementation is present and GitHub validation is pending: kernel object/relocatable-link import checks plus a native userspace harness and targeted clock checks. There is no standalone laptop installer. Kernel runtime, suspend behavior and resource-manager integration remain unvalidated. Clock deadlines do not make a stalled MMIO load recoverable.
 
 The GTX 1650, PCI `10DE:1F91`, is listed among the GPUs compatible with NVIDIA's open source kernel modules. The repository contains operating system independent parts and Linux-specific interfaces. The modules also require GSP firmware and userspace driver components of the same version.
 
@@ -82,7 +82,7 @@ Mesa/NVK provides an open Vulkan driver for NVIDIA, but its current implementati
 The proposed path is a technical assessment, not an already validated port:
 
 1. Source assessment complete: pinned Linux dependencies, firmware/userspace requirements and candidate reusable code are recorded in the assessment.
-2. PCI visibility, probe 0.1.0 attachment/configuration/resource reads, 0.2.0 BOOT_0 identification and 0.3.0 BOOT_42/local HAL table matching complete on the laptop. Assess Darwin OS-adapter contracts before widening scope. Stop/unload remains untested; DMA and interrupts require separate work.
+2. PCI visibility, probe 0.1.0 attachment/configuration/resource reads, 0.2.0 BOOT_0 identification and 0.3.0 BOOT_42/local HAL table matching complete on the laptop. Develop and validate the CPU-only OS-adapter components in GitHub; reserve laptop checks for combined milestones before widening scope. Stop/unload remains untested; DMA and interrupts require separate work.
 3. Test GPU initialisation and execution of a minimal command, with observable results on the laptop.
 4. Assess the userspace component and the path towards Vulkan or other experimental functions.
 5. Address Metal integration, the macOS graphics system, power management and video outputs separately.
