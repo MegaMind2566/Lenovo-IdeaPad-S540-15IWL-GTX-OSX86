@@ -156,7 +156,10 @@ def check(sdk: Path, destination: Path) -> Path:
                 'atomic_platform_or_runtime_imports': [], 'sha256': sha(linked.read_bytes()),
             }
             executable = work / ('check-atomic-' + safe_mode)
-            run('/usr/bin/xcrun', compiler, *common, '-ffreestanding', '-std=' + standard,
+            # Only C needs the freestanding profile to select the pinned C11
+            # header. Hosted C++ retains the standard executable entry point.
+            native_profile = ['-ffreestanding'] if mode == 'c11' else []
+            run('/usr/bin/xcrun', compiler, *common, *native_profile, '-std=' + standard,
                 str(SOURCE / 'tests' / native_name), '-pthread', '-o', str(executable))
             atomic_results[mode] = native_result(executable, mode)
 
