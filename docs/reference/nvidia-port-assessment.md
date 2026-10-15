@@ -2,9 +2,9 @@
 
 Reviewed on October 15, 2026. Target: Lenovo IdeaPad S540-15IWL GTX, Intel macOS Tahoe, NVIDIA GTX 1650 Max-Q, PCI `10DE:1F91`.
 
-**Status:** PCI visibility, attachment, the two-read TU117 match and the integrated v0.4.0 CPU-foundation startup are confirmed on the laptop. The [v0.5.0 transport package](../../packages/nvidia-transport/README.md) adds eight original allocation/mutex callers, a bounded reserve and a shared startup sequence; native CI, kernel compilation and package verification passed. Its format-5 laptop report confirms all 35 original-caller/reserve checks and 23 foundation checks, with the same two-read TU117 match and no warnings. Concurrent kernel execution, interrupt behavior and full NVIDIA caller compatibility remain unvalidated. HAL instantiation, resource-manager integration, GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
+**Status:** PCI visibility, attachment, the two-read TU117 match and the integrated v0.6.0 sequential CPU startup are confirmed on the laptop. The [transport package](../../packages/nvidia-transport/README.md) combines foundations, original allocation/mutex callers, a bounded reserve and tracked memory/owned-object lifecycle. All 130 kernel startup checks passed, including cleanup, with no warnings. Concurrent kernel execution, interrupt behavior and full NVIDIA caller compatibility remain unvalidated. HAL instantiation, resource-manager integration, GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
 
-**V6 development:** The combined [NVPort lifecycle block](../../packages/nvidia-nvport-lifecycle/README.md), source `a6f6555624b4395454045bbce710c08cf7b6309e`, passed [native Intel CI and package verification](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38732985934). One combined v6 laptop result is pending. The confirmed v5 result will not be repeated as a separate laptop task.
+**V6 confirmed:** The combined [NVPort lifecycle block](../../packages/nvidia-nvport-lifecycle/README.md), source `a6f6555624b4395454045bbce710c08cf7b6309e`, passed [native Intel CI and package verification](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38732985934). The format-6 laptop report confirms all 130 kernel startup checks (72 lifecycle, 35 caller/reserve, 23 foundations), cleanup complete, verified provider identity, the two-read TU117 variant-41 match and no warnings. No repeat laptop test is required. Full RM operation and GPU initialization remain unimplemented.
 
 ## Source baseline
 
@@ -156,7 +156,7 @@ The [native Intel run passed](https://github.com/MegaMind2566/Lenovo-IdeaPad-S54
 
 Those userspace backends do not validate kernel interrupt behavior or blocking waits. CI did not load the extension. The kernel startup creates no workers and does not intentionally contend a mutex. Diagnostic/callback paths that traverse tracking state while holding a spinlock are explicitly excluded from this kernel profile; the startup uses silent shutdown without an OOM callback.
 
-The verified compiled package is ready for one combined laptop checkpoint covering this entire block; its hardware result remains pending. There are no isolated PC tests for individual allocation, spinlock or mutex wrappers, and no separate v5 rerun. The hardware policy is unchanged: two read-only identification loads, no HAL/RM instantiation, GPU initialization, firmware, DMA or graphics acceleration.
+The format-6 laptop report confirms version `0.6.0`, `integrated_passed` and `complete=true`. All 72 lifecycle, 35 caller/reserve and 23 foundation checks passed in the Tahoe kernel, with every component true, including cleanup. The actual PCI provider identity is verified; TU117 variant 41 matched through exactly two read-only identification loads. The report has no warnings and a null reason. This completes the bounded sequential startup checkpoint; no repeat laptop test is required. Raw reports and resource addresses remain private. The hardware policy is unchanged: no HAL/RM instantiation, GPU initialization, firmware, DMA or graphics acceleration.
 
 ## Milestone status and remaining work
 
@@ -167,7 +167,7 @@ The verified compiled package is ready for one combined laptop checkpoint coveri
 | BOOT_42 and local HAL table match | Confirmed on the laptop in 0.3.0: two read-only identification loads and local TU117 variant-41 match. No HAL object or resource-manager integration |
 | CPU-only Darwin OS foundations | Integrated v0.4.0 kernel startup check confirmed: 23 assertions across clocks, ordinary RAM, original C++ atomics, allocation and thread mutexes. No concurrent kernel or resource-manager validation |
 | Original allocation/mutex caller startup | Confirmed on the laptop in v0.5.0: 35 caller/reserve checks and 23 foundation checks passed; bounded sequential startup only |
-| Tracked memory and owned-object lifecycle | V6 native CI and package verification passed; one combined laptop result pending, with v5 retained as the confirmed kernel baseline |
+| Tracked memory and owned-object lifecycle | Confirmed on the laptop in v0.6.0: all 130 combined kernel startup checks passed, cleanup complete, two-read TU117 match retained and no warnings; bounded sequential startup only |
 | Further hardware transport | Separate reviewed work for DMA and interrupts, with bounded access and failure handling |
 | GPU and GSP startup | Matching, hashed firmware; observed initialization with timeouts and cleanup; no success inferred from PCI enumeration |
 | Minimal execution | One deterministic command with a checked result and recoverable failure path |

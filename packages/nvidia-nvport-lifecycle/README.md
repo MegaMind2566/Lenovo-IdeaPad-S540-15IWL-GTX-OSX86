@@ -1,6 +1,6 @@
 # NVIDIA NVPort memory and object lifecycle
 
-This component extends the confirmed v5 caller checkpoint with tracked allocator lifecycle, real allocator-owned mutex/spinlock creation and destruction, checked bootstrap failure, and resource accounting. It is integrated into the [v6 transport package](../nvidia-transport/README.md), with one combined laptop checkpoint after native CI. Version 0.5.0 remains the confirmed hardware milestone until a v6 report is received.
+This component extends the v5 caller checkpoint with tracked allocator lifecycle, real allocator-owned mutex/spinlock creation and destruction, checked bootstrap failure, and resource accounting. It is integrated into the [v6 transport package](../nvidia-transport/README.md). The format-6 laptop report confirms version 0.6.0: all 72 lifecycle, 35 caller/reserve and 23 foundation checks passed in the Tahoe kernel, including cleanup, with no warnings. This bounded sequential startup checkpoint is complete; no repeat laptop test is required. It does not establish kernel contention, interrupt behavior, full RM operation or GPU initialization.
 
 It is not a full NVPort core or NVIDIA resource-manager implementation. It adds no GPU access, firmware, DMA or graphics acceleration.
 
