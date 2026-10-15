@@ -1,48 +1,63 @@
-# NVIDIA PCI attachment prototype
+# NVIDIA PCI and BAR0 identification prototype
 
-This is the first kernel attachment experiment for the S540 NVIDIA port. The laptop now publishes its GTX 1650 Max-Q (`10DE:1F91`, subsystem `17AA:3806`) in IOService with `-wegnoegpu` absent. This package provides an IOKit service that attaches to that exact PCI device, reads fixed configuration registers and publishes the already-assigned BAR resource descriptors.
+This experimental IOKit service targets the S540 GTX 1650 Max-Q (`10DE:1F91`, subsystem `17AA:3806`, revision `A1`). Version **0.1.0** successfully attached to its PCI provider and reported fixed configuration reads and assigned resource descriptors on the laptop. Version **0.2.0** adds one read-only `NV_PMC_BOOT_0` identification read and awaits laptop validation.
 
-**Status:** kernel attachment, fixed PCI configuration reads and assigned resource metadata are confirmed on the laptop. This prototype provides no graphics acceleration, GPU command submission, display output or GSP initialization. It is independent of NVIDIA's Linux resource manager, which has not been integrated yet.
+The prototype does not initialize the GPU or provide acceleration, command submission, display output, DMA or GSP firmware support. NVIDIA's Linux resource manager has not been integrated.
 
-## Laptop result: October 15, 2026
+## Upgrade the existing experiment
 
-The report returns `attached`, `complete=true`, `wegnoegpu_present=false` and no warnings. The reporter verifies the actual `IOPCIDevice` provider as `10DE:1F91`, subsystem `17AA:3806`, revision `A1`, class `030000`. The kernel probe successfully attaches and reads its fixed PCI configuration snapshot.
+Use the complete **S540-nvidia-transport-v2.zip**, extracted into Downloads. Keep the working Samsung EFI available. Apply the upgrade only to the separate EFI on the **240 GB test boot HDD**.
 
-Already-assigned resource descriptors are reported at BAR registers `0x10` (16 MiB), `0x14` (256 MiB), `0x1C` (32 MiB) and `0x24` (128 bytes). These are resource metadata, not mapped register reads or usable VRAM measurements. No descriptor is retained for `0x18` or `0x20`; the snapshot lacks raw BAR type/width flags, so no missing-resource diagnosis follows from those gaps. Resource addresses and raw reports remain private.
+1. Save the existing `EFI/OC/Kexts/S540NvidiaPCIProbe.kext` outside the EFI directory as a private backup.
+2. Replace that one kext with **S540NvidiaPCIProbe.kext** from this package. The existing `Kernel → Add` entry remains valid; **no config edit is required**.
+3. Boot the HDD from the firmware's one-time boot menu, then select the existing Tahoe installation.
+4. Run:
 
-The probe does not write PCI configuration or enable bus mastering/DMA. Source stop/teardown removes the snapshot, but runtime stop or unload has not been tested. The next gate is a bounded read-only MMIO assessment: review a documented register, mapping bounds and read semantics before implementing register access. MMIO, DMA, GSP and acceleration remain unimplemented.
+   ```bash
+   bash "$HOME/Downloads/S540-nvidia-transport-v2/CHECK-TRANSPORT.command"
+   ```
 
-## Boot the experiment
+5. Share **nvidia-transport.json** from the new **NVIDIA-TRANSPORT…** folder on the Desktop.
 
-Use the complete built **S540-nvidia-transport-v1.zip**. Keep the working Samsung EFI available and make the following changes only to the separate EFI on the 240 GB boot HDD.
+This is the first hardware test of the MMIO read. A single MMIO load can hang or fault the kernel, and a software timeout cannot make that load recoverable. Use the separate test EFI and retain the unchanged Samsung boot path. If the experiment fails to boot, boot from Samsung and restore the previous kext on the test HDD. Do not attempt a live unload.
 
-1. Copy **S540NvidiaPCIProbe.kext** into the test EFI's `EFI/OC/Kexts/` directory.
-2. Add the dictionary in **Kernel-Add-entry.plist** as one entry in the test `config.plist` under `Kernel → Add`. This file is an entry fragment, not a replacement configuration.
-3. Keep `-wegnoegpu` absent and `SSDT-DGPU-OFF.aml` disabled. Preserve `-igfxblr` and the working Intel settings.
-4. Validate the edited configuration with the matching OpenCore validator, then boot the HDD from the firmware's one-time boot menu and select the existing Tahoe installation.
+No administrator command, system installation, SIP change, NVRAM reset or kernel collection rebuild is part of this procedure. The reporter requires no developer tools.
 
-The entry uses `Arch=x86_64`, `BundlePath=S540NvidiaPCIProbe.kext`, `ExecutablePath=Contents/MacOS/S540NvidiaPCIProbe`, `PlistPath=Contents/Info.plist`, `Enabled=true`, `MinKernel=25.0.0` and `MaxKernel=25.99.99`.
+## New experimental EFI installations
 
-No system installation, administrator command, SIP change, NVRAM reset or kernel collection rebuild is part of this procedure.
+If the previous probe was never added, copy the kext into `EFI/OC/Kexts/` and add the dictionary from **Kernel-Add-entry.plist** under `Kernel → Add`. This fragment is not a replacement config. It uses `Arch=x86_64`, `Enabled=true`, `MinKernel=25.0.0`, `MaxKernel=25.99.99`, `BundlePath=S540NvidiaPCIProbe.kext`, `ExecutablePath=Contents/MacOS/S540NvidiaPCIProbe` and `PlistPath=Contents/Info.plist`.
 
-## Collect the result
+Keep `-wegnoegpu` absent and `SSDT-DGPU-OFF.aml` disabled. Preserve `-igfxblr` and the working Intel settings. Validate the configuration with the matching OpenCore validator before booting the separate test EFI.
 
-After the experimental boot, extract the package into Downloads and run:
+## Read policy
 
-```bash
-bash "$HOME/Downloads/S540-nvidia-transport-v1/CHECK-TRANSPORT.command"
-```
+The service uses a private match category and verifies the exact PCI identity from configuration space. It reads the provider's retained, already-published `IODeviceMemory` array directly. It does not call `IOPCIDevice::open()` or the resource convenience getters, which can alter provider resource or link-power state.
 
-The native Intel reporter verifies its packaged executable, reads only the probe's bounded IORegistry snapshot and verifies the actual parent device identity. It saves **nvidia-transport.json** in a new private **NVIDIA-TRANSPORT…** folder on the Desktop. Share that JSON to choose the next implementation step. No developer tools or administrator password are required.
+Before mapping, it requires an unambiguous BAR0 descriptor, the expected 16 MiB aperture, matching assigned address and resource tag, a non-prefetchable 32-bit memory BAR, memory decoding already enabled, and PCI D0. A bounded conventional capability walk establishes D0 without issuing a power transition. Framework arbitration serializes compliant ownership and termination, and an already-open provider causes refusal. Arbitration can block and does not freeze power management.
 
-An `attached` result establishes the kernel attachment and configuration-read milestone. `not_attached` means the probe service was not found; it does not establish why loading or matching failed. Invalid snapshots or unexpected providers are reported as errors. BAR descriptors are resource metadata; their presence does not prove that GPU register access, VRAM, power transitions or firmware initialization work.
+The mapping requests offset `0`, length `4`, read-only access, inhibited caching and a unique mapping. VM mappings still have page granularity. The service rechecks identity, BAR0, memory decoding and D0 immediately before exactly one aligned volatile 32-bit load. It releases the mapping immediately afterward. It performs no retries, scans, polling, register writes, PCI writes, BAR sizing, ACPI calls, resets, firmware operations, interrupt setup or DMA allocation.
 
-## Return to the working configuration
+The decoded architecture must be `0x16` and implementation `0x07` for TU117. Zero, all-ones and mismatching results are explicit failures. Matching these fields identifies the register response; it does not establish GPU initialization or usable VRAM.
 
-Boot the unchanged Samsung EFI. To remove the experiment from the test HDD, remove its `Kernel → Add` entry and `S540NvidiaPCIProbe.kext`, then reboot. The package does not install anything into macOS. Do not attempt a live unload while investigating an unexpected boot failure.
+## Report outcomes
 
-## Implementation boundary
+The native Intel reporter validates the actual parent PCI device and a strict Format 2 snapshot. It opens no hardware user client and never writes registry properties.
 
-The service uses a private match category and an exact PCI identity match. It takes one snapshot at startup and removes it at stop. It does not open the provider exclusively, map BARs, read or write MMIO, change PCI command bits, enable bus mastering, allocate DMA, install interrupts, invoke ACPI methods or alter device power. Its user-space reporter opens no hardware client. The access policy and strict snapshot decoder are checked during the native Intel build; CI does not load this experimental kext.
+| Status | Meaning |
+| --- | --- |
+| `identified` | One read returned the expected TU117 architecture and implementation fields. |
+| `refused` | A prerequisite failed; zero MMIO reads were performed. The fixed reason selects the next investigation. |
+| `failed` | One read completed but returned zero, all-ones or unexpected identification fields. |
+| `outdated_probe` | Version 0.1.0 is still loaded; replace the kext on the EFI actually used to boot and reboot. |
+| `not_attached` | The probe service was not found; the report does not establish why loading or matching failed. |
+| `error` | The snapshot, provider or report could not be validated. |
 
-The reproducible build pins **acidanthera/MacKernelSDK** to `3f750085caa17ec3a7880f11c11bf4f48cd6a164`. Its unmodified kernel module runtime contains Apple code released under APSL 2.0. The built archive includes that license and the corresponding source location in **THIRD-PARTY-NOTICES.txt**. Project source is under the adjacent MIT license.
+Refusal is a complete diagnostic outcome. Failed reads and invalid reports return a nonzero exit status. Raw reports and resource addresses remain private. Source teardown removes the snapshot, but runtime unload has not been validated.
+
+## Build and source references
+
+The native Intel CI build compiles and links the kext, checks its Mach-O type and module metadata, verifies ad-hoc signatures, and runs decoder and policy tests. It does not load the experimental kext or validate the laptop's MMIO response.
+
+The build pins [MacKernelSDK](https://github.com/acidanthera/MacKernelSDK/tree/3f750085caa17ec3a7880f11c11bf4f48cd6a164). Its unmodified module runtime includes Apple code under APSL 2.0; the archive includes the license and source location in **THIRD-PARTY-NOTICES.txt**. Project source is under the adjacent MIT license.
+
+Register semantics and decoding are based on NVIDIA's pinned [nv_ref.h](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/common/inc/swref/published/nv_ref.h) and [nv_arch.h](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/common/inc/swref/published/nv_arch.h). Apple API behavior was reviewed against [IOPCIFamily](https://github.com/apple-oss-distributions/IOPCIFamily/tree/4822b27a36e2de70e231ecf2bf3021384fab6ec2) and [XNU](https://github.com/apple-oss-distributions/xnu/tree/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea).

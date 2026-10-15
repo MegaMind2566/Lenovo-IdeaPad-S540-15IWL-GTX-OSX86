@@ -31,7 +31,7 @@ RESULT=0
 /bin/cat "$REPORT"
 printf '\nReport saved: %s\n' "$REPORT"
 if [ "$RESULT" -ne 0 ]; then
-    printf 'The snapshot is incomplete. Keep the report for diagnosis.\n' >&2
+    printf 'GPU identification did not complete successfully. Keep the report for diagnosis.\n' >&2
     exit "$RESULT"
 fi
-printf 'Share nvidia-transport.json to review the transport milestone.\n'
+printf 'Share nvidia-transport.json to review the GPU identification result.\n'

@@ -18,9 +18,95 @@ inline bool matches(const Identity &identity) {
         && identity.revisionClass == 0x030000a1U
         && identity.subsystem == 0x380617aaU;
 }
+
+// A descriptor must describe the already assigned, non-prefetchable, 32-bit
+// BAR0 aperture observed on this exact laptop. Never size or repair a BAR.
+inline const char *validateBar0(uint32_t rawBar, uint64_t tag,
+                                uint64_t address, uint64_t length) {
+    if (rawBar == UINT32_MAX || (rawBar & 0xfU) != 0 || rawBar == 0)
+        return "bar0-configuration-invalid";
+    if ((tag & 0xffU) != 0x10U
+        || (tag & 0x03000000U) != 0x02000000U
+        || (tag & 0x40000000U) != 0
+        || length != 0x01000000U || address == 0
+        || (address & 0x00ffffffU) != 0
+        || address != static_cast<uint64_t>(rawBar & 0xfffffff0U))
+        return "bar0-descriptor-invalid";
+    return nullptr;
+}
+
+// Config reads are injected for host negative tests. The kernel reader rejects
+// unaligned/out-of-range offsets. Walk only the standard PCI capability list;
+// there is no polling, extended config access, or power-state transition.
+template <typename Reader>
+const char *requireD0(Reader &read) {
+    uint32_t commandStatus = 0, header = 0, pointerWord = 0;
+    if (!read(0x04, commandStatus) || !read(0x0c, header))
+        return "pci-config-unavailable";
+    if ((commandStatus & 0x00100000U) == 0)
+        return "pm-capability-unavailable";
+    if (((header >> 16) & 0x7fU) != 0)
+        return "pm-capability-malformed";
+    if (!read(0x34, pointerWord))
+        return "pci-config-unavailable";
+    uint32_t offset = pointerWord & 0xffU;
+    uint64_t visited = 0;
+    for (unsigned int links = 0; links < 48; ++links) {
+        if (offset == 0)
+            return "pm-capability-unavailable";
+        if (offset < 0x40 || offset > 0xfc || (offset & 3U) != 0)
+            return "pm-capability-malformed";
+        const uint64_t bit = UINT64_C(1) << ((offset - 0x40) / 4);
+        if ((visited & bit) != 0)
+            return "pm-capability-malformed";
+        visited |= bit;
+        uint32_t capability = 0;
+        if (!read(offset, capability))
+            return "pci-config-unavailable";
+        const uint32_t identifier = capability & 0xffU;
+        if (identifier == 0 || identifier == 0xffU)
+            return "pm-capability-malformed";
+        if (identifier == 1) {
+            const uint32_t version = (capability >> 16) & 7U;
+            if (version < 1 || version > 3)
+                return "pm-capability-unsupported";
+            if (offset > 0xf8)
+                return "pm-capability-malformed";
+            uint32_t pmcsr = 0;
+            if (!read(offset + 4, pmcsr))
+                return "pci-config-unavailable";
+            return (pmcsr & 3U) == 0 ? nullptr : "pci-not-d0";
+        }
+        offset = (capability >> 8) & 0xffU;
+    }
+    return "pm-capability-malformed";
+}
+
+inline uint32_t architecture(uint32_t boot0) {
+    return (((boot0 >> 8) & 1U) << 5) | ((boot0 >> 24) & 0x1fU);
+}
+
+inline uint32_t implementation(uint32_t boot0) {
+    return (boot0 >> 20) & 0xfU;
+}
+
+inline const char *identifyBoot0(uint32_t boot0) {
+    if (boot0 == 0)
+        return "zero-value";
+    if (boot0 == UINT32_MAX)
+        return "all-ones-value";
+    if (architecture(boot0) != 0x16U)
+        return "architecture-mismatch";
+    if (implementation(boot0) != 7U)
+        return "implementation-mismatch";
+    return "tu117-identified";
+}
 }
 
 #if defined(KERNEL)
+#if !defined(__x86_64__)
+#error "The single-read PCI prototype supports Intel x86_64 only."
+#endif
 #include <IOKit/IOService.h>
 #include <IOKit/pci/IOPCIDevice.h>
 

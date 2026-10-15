@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the bounded Intel PCI attachment probe; never load or install it."""
+"""Build the single-read Intel NVIDIA identification probe; never load or install it."""
 from __future__ import annotations
 
 import argparse
@@ -19,8 +19,8 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'packages/nvidia-transport'
-PACKAGE = 'S540-nvidia-transport-v1'
-VERSION = '0.1.0'
+PACKAGE = 'S540-nvidia-transport-v2'
+VERSION = '0.2.0'
 SDK_COMMIT = '3f750085caa17ec3a7880f11c11bf4f48cd6a164'
 BUNDLE = 'S540NvidiaPCIProbe.kext'
 EXECUTABLE = 'S540NvidiaPCIProbe'
@@ -121,7 +121,7 @@ def build(sdk: Path, output: Path) -> Path:
         run('/usr/bin/codesign', '--verify', '--strict', str(checker))
         run(str(checker), '--self-test')
         live = json.loads(run(str(checker)).stdout)
-        if live.get('format') != 1 or live.get('complete') is not True or live.get('status') != 'not_attached':
+        if live.get('format') != 2 or live.get('complete') is not True or live.get('status') != 'not_attached':
             raise ValueError('The native runner must complete without a loaded probe.')
         imports = run('/usr/bin/nm', '-u', str(checker)).stdout
         if any(name in imports for name in ('IOServiceOpen', 'IOConnectCall', 'IOConnectMapMemory', 'IORegistryEntrySetCFProperty', 'IORegistryEntrySetCFProperties')):
@@ -165,7 +165,7 @@ def build(sdk: Path, output: Path) -> Path:
                   'validation': ['native Intel kernel compile and link', 'thin x86_64 Mach-O and module entry metadata',
                                  'ad-hoc signature verification', 'native report decoder self-test',
                                  'native live enumeration without a loaded probe'],
-                  'hardware_status': 'Laptop PCI attachment and configuration/resource snapshot confirmed; MMIO and GPU initialization remain unverified.'}
+                  'hardware_status': 'Version 0.1.0 laptop PCI attachment confirmed. Version 0.2.0 single BAR0 identification read awaits laptop validation; GPU initialization remains unimplemented.'}
         payload['BUILD.json'] = (json.dumps(record, indent=2, sort_keys=True) + '\n').encode()
         payload['SHA256SUMS'] = ''.join(digest(data) + '  ' + name + '\n' for name, data in sorted(payload.items())).encode('ascii')
         pending = work / archive.name
@@ -192,7 +192,7 @@ def main() -> int:
     args = parser.parse_args()
     try:
         archive = build(args.kernel_sdk, args.output_dir)
-        print('Verified NVIDIA PCI attachment package: ' + str(archive))
+        print('Verified NVIDIA single-read identification package: ' + str(archive))
         print('ZIP SHA256: ' + digest(archive.read_bytes()))
         return 0
     except (OSError, ValueError, subprocess.SubprocessError, zipfile.BadZipFile, plistlib.InvalidFileException) as error:

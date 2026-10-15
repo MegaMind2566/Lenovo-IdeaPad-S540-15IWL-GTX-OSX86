@@ -2,6 +2,7 @@
 #include "S540NvidiaPCIProbe.hpp"
 
 #include <IOKit/IOMemoryDescriptor.h>
+#include <kern/task.h>
 #include <libkern/c++/OSArray.h>
 #include <libkern/c++/OSBoolean.h>
 #include <libkern/c++/OSDictionary.h>
@@ -13,6 +14,45 @@ OSDefineMetaClassAndStructors(S540NvidiaPCIProbe, IOService)
 
 namespace {
 const char * const kSnapshotKey = "S540NvidiaPCIProbeSnapshot";
+
+template <typename T> class ScopedRelease {
+    T *object;
+public:
+    explicit ScopedRelease(T *value = nullptr) : object(value) {}
+    ~ScopedRelease() { if (object) object->release(); }
+    T *get() const { return object; }
+    void reset() { if (object) object->release(); object = nullptr; }
+private:
+    ScopedRelease(const ScopedRelease &) = delete;
+    ScopedRelease &operator=(const ScopedRelease &) = delete;
+};
+
+class ScopedArbitration {
+    IOService *provider;
+    bool locked;
+public:
+    explicit ScopedArbitration(IOService *value) : provider(value),
+        locked(value->lockForArbitration(false)) {}
+    ~ScopedArbitration() { if (locked) provider->unlockForArbitration(); }
+    bool acquired() const { return locked; }
+private:
+    ScopedArbitration(const ScopedArbitration &) = delete;
+    ScopedArbitration &operator=(const ScopedArbitration &) = delete;
+};
+
+class ConfigReader {
+    IOPCIDevice *device;
+public:
+    explicit ConfigReader(IOPCIDevice *value) : device(value) {}
+    bool operator()(uint32_t offset, uint32_t &value) const {
+        // Standard PCI configuration only, never extended space or unaligned
+        // reads. The capability walker has a separate strict 48-link bound.
+        if (offset > 0xfc || (offset & 3U) != 0)
+            return false;
+        value = device->configRead32(static_cast<UInt8>(offset));
+        return value != UINT32_MAX;
+    }
+};
 
 S540NvidiaPCIProbePolicy::Identity readIdentity(IOPCIDevice *device) {
     // Exactly three fixed configuration-space dwords; never write config space.
@@ -43,11 +83,13 @@ bool setString(OSDictionary *dictionary, const char *key, const char *value) {
     return result;
 }
 
-OSArray *copyResourceMetadata(IOPCIDevice *device) {
+OSArray *copyResourceMetadata(IOPCIDevice *device, IOMemoryDescriptor **bar0) {
     // Read the already-published resource array directly. PCI convenience
     // getters can change tunnel link power policy; this path avoids them.
-    // The array and its descriptors are borrowed. Do not release or mutate them.
-    OSArray *published = OSDynamicCast(OSArray, device->getProperty("IODeviceMemory"));
+    // copyProperty retains the published array while it is examined. Retain
+    // BAR0 independently for the bounded mapping, without provider helpers.
+    ScopedRelease<OSObject> property(device->copyProperty("IODeviceMemory"));
+    OSArray *published = OSDynamicCast(OSArray, property.get());
     if (!published)
         return nullptr;
     const unsigned int count = published->getCount();
@@ -104,23 +146,137 @@ OSArray *copyResourceMetadata(IOPCIDevice *device) {
             return nullptr;
         }
     }
+    if (bars[0]) {
+        bars[0]->retain();
+        *bar0 = bars[0];
+    }
     return resources;
+}
+
+struct MMIOOutcome {
+    const char *status;
+    const char *reason;
+    uint32_t readCount;
+    uint32_t rawValue;
+};
+
+const char *checkReadPrerequisites(IOPCIDevice *device,
+                                   IOMemoryDescriptor *bar0) {
+    if (!S540NvidiaPCIProbePolicy::matches(readIdentity(device)))
+        return "pci-identity-changed";
+    ConfigReader read(device);
+    uint32_t commandStatus = 0, rawBar0 = 0;
+    if (!read(0x04, commandStatus) || !read(0x10, rawBar0))
+        return "pci-config-unavailable";
+    if ((commandStatus & 2U) == 0)
+        return "memory-decoding-disabled";
+    const char *reason = S540NvidiaPCIProbePolicy::validateBar0(rawBar0,
+        bar0->getTag(), bar0->getPhysicalAddress(), bar0->getLength());
+    if (reason)
+        return reason;
+    return S540NvidiaPCIProbePolicy::requireD0(read);
+}
+
+MMIOOutcome attemptIdentificationRead(IOPCIDevice *device,
+                                      IOMemoryDescriptor *bar0,
+                                      bool metadataAvailable) {
+    MMIOOutcome result = {"refused", "resource-metadata-unavailable", 0, 0};
+    if (!metadataAvailable)
+        return result;
+    if (!bar0) {
+        result.reason = "bar0-descriptor-missing";
+        return result;
+    }
+
+    // Arbitration serializes compliant open/close/termination, without opening
+    // the PCI provider (whose open path may change hardware resource state).
+    // It does not freeze platform power management. D0 is rechecked below.
+    ScopedArbitration arbitration(device);
+    if (!arbitration.acquired()) {
+        result.reason = "provider-arbitration-unavailable";
+        return result;
+    }
+    if (device->isOpen()) {
+        result.reason = "provider-already-open";
+        return result;
+    }
+    const char *reason = checkReadPrerequisites(device, bar0);
+    if (reason) {
+        result.reason = reason;
+        return result;
+    }
+
+    // Request only BOOT0. The VM mapping itself has page granularity; this
+    // request does not make a four-byte physical aperture or a recoverable
+    // hardware timeout. A single stalled MMIO load can still stall the kernel.
+    ScopedRelease<IOMemoryMap> mapping(bar0->createMappingInTask(kernel_task, 0,
+        kIOMapAnywhere | kIOMapReadOnly | kIOMapInhibitCache | kIOMapUnique, 0, 4));
+    if (!mapping.get()) {
+        result.reason = "mapping-unavailable";
+        return result;
+    }
+    const mach_vm_address_t address = mapping.get()->getVirtualAddress();
+    if (address == 0 || (address & 3U) != 0 || mapping.get()->getLength() != 4) {
+        result.reason = "mapping-invalid";
+        return result;
+    }
+    reason = checkReadPrerequisites(device, bar0);
+    if (reason) {
+        result.reason = reason;
+        return result;
+    }
+
+    // Intel x86_64, exactly one aligned 32-bit volatile load. No retries,
+    // registers beyond NV_PMC_BOOT_0, writes, polling, or arbitrary offsets.
+    const volatile uint32_t *boot0 = reinterpret_cast<const volatile uint32_t *>(address);
+    result.rawValue = *boot0;
+    result.readCount = 1;
+    mapping.reset();
+    result.reason = S540NvidiaPCIProbePolicy::identifyBoot0(result.rawValue);
+    result.status = S540NvidiaPCIProbePolicy::architecture(result.rawValue) == 0x16U
+        && S540NvidiaPCIProbePolicy::implementation(result.rawValue) == 7U
+        && result.rawValue != 0 && result.rawValue != UINT32_MAX
+        ? "identified" : "failed";
+    return result;
+}
+
+OSDictionary *copyMMIOResult(const MMIOOutcome &result) {
+    OSDictionary *dictionary = OSDictionary::withCapacity(9);
+    if (!dictionary)
+        return nullptr;
+    bool ok = setString(dictionary, "Status", result.status)
+        && setString(dictionary, "Reason", result.reason)
+        && setNumber(dictionary, "ReadCount", result.readCount, 32)
+        && setNumber(dictionary, "BarIndex", 0, 32)
+        && setNumber(dictionary, "Offset", 0, 32)
+        && setNumber(dictionary, "Width", 32, 32);
+    if (ok && result.readCount == 1) {
+        ok = setNumber(dictionary, "RawValue", result.rawValue, 32)
+            && setNumber(dictionary, "Architecture",
+                         S540NvidiaPCIProbePolicy::architecture(result.rawValue), 32)
+            && setNumber(dictionary, "Implementation",
+                         S540NvidiaPCIProbePolicy::implementation(result.rawValue), 32);
+    }
+    if (!ok) {
+        dictionary->release();
+        return nullptr;
+    }
+    return dictionary;
 }
 
 OSDictionary *copySnapshot(IOPCIDevice *device,
                           const S540NvidiaPCIProbePolicy::Identity &identity) {
-    OSDictionary *snapshot = OSDictionary::withCapacity(14);
+    OSDictionary *snapshot = OSDictionary::withCapacity(15);
     if (!snapshot)
         return nullptr;
 
     // One additional fixed config read captures command/status without changing
     // memory decoding, I/O decoding, bus mastering, or any status bits.
     const uint32_t commandStatus = device->configRead32(0x04);
-    bool ok = commandStatus != UINT32_MAX
-        && setNumber(snapshot, "Format", 1, 32)
-        && setString(snapshot, "ProbeVersion", "0.1.0")
+    bool ok = setNumber(snapshot, "Format", 2, 32)
+        && setString(snapshot, "ProbeVersion", "0.2.0")
         && setString(snapshot, "Stage", "attached")
-        && setString(snapshot, "AccessPolicy", "config-read-and-resource-metadata-only")
+        && setString(snapshot, "AccessPolicy", "single-read-only-bar0-identification")
         && setNumber(snapshot, "VendorID", identity.vendorDevice & 0xffffU, 16)
         && setNumber(snapshot, "DeviceID", identity.vendorDevice >> 16, 16)
         && setNumber(snapshot, "SubsystemVendorID", identity.subsystem & 0xffffU, 16)
@@ -134,10 +290,24 @@ OSDictionary *copySnapshot(IOPCIDevice *device,
         return nullptr;
     }
 
-    OSArray *resources = copyResourceMetadata(device);
+    IOMemoryDescriptor *bar0 = nullptr;
+    OSArray *resources = copyResourceMetadata(device, &bar0);
+    ScopedRelease<IOMemoryDescriptor> bar0Owner(bar0);
     if (resources) {
         ok = snapshot->setObject("BARDescriptors", resources);
         resources->release();
+    }
+    if (!ok) {
+        snapshot->release();
+        return nullptr;
+    }
+    // The service remains attached on MMIO refusal. Missing resource metadata
+    // is explicit and is not fabricated as a list of absent BARs.
+    const MMIOOutcome outcome = attemptIdentificationRead(device, bar0, resources != nullptr);
+    OSDictionary *mmio = copyMMIOResult(outcome);
+    if (mmio) {
+        ok = ok && snapshot->setObject("MMIOResult", mmio);
+        mmio->release();
     } else {
         ok = false;
     }
