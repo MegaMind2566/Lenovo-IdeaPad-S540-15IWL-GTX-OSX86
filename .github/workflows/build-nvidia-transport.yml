@@ -1,4 +1,4 @@
-name: Build integrated NVIDIA OS-adapter prototype
+name: Build integrated NVIDIA caller prototype
 
 on:
   push:
@@ -6,8 +6,12 @@ on:
     paths:
       - 'packages/nvidia-transport/**'
       - 'packages/nvidia-os-adapter/**'
+      - 'packages/nvidia-caller-integration/src/**'
+      - 'packages/nvidia-caller-integration/upstream/**'
+      - 'packages/nvidia-caller-integration/tests/**'
       - 'builders/build_nvidia_transport.py'
       - 'builders/check_nvidia_foundations.py'
+      - 'builders/check_nvidia_callers.py'
       - 'tests/test_nvidia_transport*'
       - 'tests/test_nvidia_*_provenance.py'
       - '.github/workflows/build-nvidia-transport.yml'
@@ -19,7 +23,7 @@ permissions:
 jobs:
   build:
     runs-on: macos-15-intel
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -32,19 +36,19 @@ jobs:
           persist-credentials: false
       - name: Check PCI identity, BAR0 and power-state refusal policy
         run: python3 tests/test_nvidia_transport_kernel.py
-      - name: Check CPU adapters, compile the kernel integration and verify the native package
+      - name: Check original NVIDIA callers, compile the kernel integration and verify the native package
         run: python3 builders/build_nvidia_transport.py --kernel-sdk build-src/MacKernelSDK --output-dir build/nvidia-transport
       - name: Run the packaged reporter without loading the kernel probe
         shell: bash
         run: |
           set -euo pipefail
-          /usr/bin/unzip -q build/nvidia-transport/S540-nvidia-transport-v4.zip -d "$RUNNER_TEMP/nvidia-transport-package"
-          /bin/bash "$RUNNER_TEMP/nvidia-transport-package/S540-nvidia-transport-v4/CHECK-TRANSPORT.command" --output-dir "$RUNNER_TEMP"
+          /usr/bin/unzip -q build/nvidia-transport/S540-nvidia-transport-v5.zip -d "$RUNNER_TEMP/nvidia-transport-package"
+          /bin/bash "$RUNNER_TEMP/nvidia-transport-package/S540-nvidia-transport-v5/CHECK-TRANSPORT.command" --output-dir "$RUNNER_TEMP"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: S540-nvidia-transport-v4
+          name: S540-nvidia-transport-v5
           path: |
-            build/nvidia-transport/S540-nvidia-transport-v4.zip
-            build/nvidia-transport/S540-nvidia-transport-v4.zip.sha256
+            build/nvidia-transport/S540-nvidia-transport-v5.zip
+            build/nvidia-transport/S540-nvidia-transport-v5.zip.sha256
           if-no-files-found: error
           retention-days: 30

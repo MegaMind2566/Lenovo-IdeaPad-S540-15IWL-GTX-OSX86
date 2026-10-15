@@ -20,7 +20,7 @@ kern_return_t nvidia_transport_stop(kmod_info_t *, void *) {
     return KMOD_RETURN_SUCCESS;
 }
 
-KMOD_EXPLICIT_DECL(org.osx86.S540NvidiaPCIProbe, "0.3.0", _start, _stop)
+KMOD_EXPLICIT_DECL(org.osx86.S540NvidiaPCIProbe, "0.5.0", _start, _stop)
 __attribute__((visibility("hidden"))) kmod_start_func_t *_realmain = nvidia_transport_start;
 __attribute__((visibility("hidden"))) kmod_stop_func_t *_antimain = nvidia_transport_stop;
 __attribute__((visibility("hidden"))) int _kext_apple_cc = __APPLE_CC__;

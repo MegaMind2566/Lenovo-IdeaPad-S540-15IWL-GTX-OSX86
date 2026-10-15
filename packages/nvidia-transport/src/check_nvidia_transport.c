@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TOOL_VERSION "0.4.0"
+#define TOOL_VERSION "0.5.0"
 #define PROBE_CLASS "S540NvidiaPCIProbe"
 #define SNAPSHOT_KEY "S540NvidiaPCIProbeSnapshot"
 #define ACCESS_POLICY "two-read-only-bar0-hal-identification"
@@ -58,6 +58,16 @@ struct os_foundations_result {
     int mutex;
 };
 
+struct caller_integration_result {
+    int valid;
+    uint32_t version;
+    uint32_t checks;
+    int passed;
+    int allocation_callers;
+    int mutex_callers;
+    int reserve;
+};
+
 static const char *const mmio_reasons[] = {
     "resource-metadata-unavailable", "bar0-descriptor-missing",
     "pci-identity-changed", "pci-config-unavailable",
@@ -90,6 +100,7 @@ struct snapshot {
     int hal_matched;
     uint32_t total_read_count;
     struct os_foundations_result os_foundations;
+    struct caller_integration_result caller_integration;
 };
 
 enum warning_code {
@@ -438,6 +449,44 @@ static int decode_os_foundations(CFTypeRef object,
     return 1;
 }
 
+/* Real NVPort callers exercise the bounded reserve and mutex adapters in RAM.
+ * No caller evidence may be substituted with the direct foundation checks. */
+static int decode_caller_integration(CFTypeRef object,
+                                     struct caller_integration_result *output)
+{
+    struct caller_integration_result candidate;
+    memset(&candidate, 0, sizeof(candidate));
+    if (object == NULL || CFGetTypeID(object) != CFDictionaryGetTypeID())
+        return 0;
+    CFDictionaryRef dictionary = (CFDictionaryRef)object;
+    uint64_t value = 0;
+    if (CFDictionaryGetCount(dictionary) != 6 ||
+        !dictionary_number(dictionary, CFSTR("Version"), 1, &value) || value != 1)
+        return 0;
+    candidate.version = (uint32_t)value;
+    if (!dictionary_number(dictionary, CFSTR("Checks"), UINT32_MAX, &value) || value == 0)
+        return 0;
+    candidate.checks = (uint32_t)value;
+#define READ_CALLER_COMPONENT(KEY, FIELD) do { \
+    CFTypeRef component = CFDictionaryGetValue(dictionary, CFSTR(KEY)); \
+    if (component == NULL || CFGetTypeID(component) != CFBooleanGetTypeID()) \
+        return 0; \
+    candidate.FIELD = CFBooleanGetValue((CFBooleanRef)component); \
+} while (0)
+    READ_CALLER_COMPONENT("AllocationCallers", allocation_callers);
+    READ_CALLER_COMPONENT("MutexCallers", mutex_callers);
+    READ_CALLER_COMPONENT("Reserve", reserve);
+#undef READ_CALLER_COMPONENT
+    candidate.passed = candidate.allocation_callers && candidate.mutex_callers &&
+                       candidate.reserve;
+    if (!exact_string(CFDictionaryGetValue(dictionary, CFSTR("Status")),
+                       candidate.passed ? CFSTR("passed") : CFSTR("failed")))
+        return 0;
+    candidate.valid = 1;
+    *output = candidate;
+    return 1;
+}
+
 /* Legacy format is decoded only to identify an old loaded kext, never emitted. */
 static int decode_snapshot(CFTypeRef object, struct snapshot *output)
 {
@@ -447,13 +496,14 @@ static int decode_snapshot(CFTypeRef object, struct snapshot *output)
         return 0;
     CFDictionaryRef dictionary = (CFDictionaryRef)object;
     uint64_t value = 0;
-    if (!dictionary_number(dictionary, CFSTR("Format"), 4, &value) ||
-        (value != 1 && value != 2 && value != 3 && value != 4))
+    if (!dictionary_number(dictionary, CFSTR("Format"), 5, &value) ||
+        (value != 1 && value != 2 && value != 3 && value != 4 && value != 5))
         return 0;
     candidate.format = (uint32_t)value;
     int legacy = candidate.format == 1;
     int two_reads = candidate.format >= 3;
-    int current = candidate.format == 4;
+    int foundations_format = candidate.format >= 4;
+    int current = candidate.format == 5;
     if (!exact_string(CFDictionaryGetValue(dictionary, CFSTR("Stage")),
                        CFSTR("attached")) ||
         !exact_string(CFDictionaryGetValue(dictionary, CFSTR("AccessPolicy")),
@@ -463,7 +513,7 @@ static int decode_snapshot(CFTypeRef object, struct snapshot *output)
                          candidate.probe_version,
                          sizeof(candidate.probe_version)) ||
         strcmp(candidate.probe_version, legacy ? "0.1.0" : current ? TOOL_VERSION :
-            two_reads ? "0.3.0" : "0.2.0") != 0)
+            foundations_format ? "0.4.0" : two_reads ? "0.3.0" : "0.2.0") != 0)
         return 0;
     if (!legacy && !decode_mmio(CFDictionaryGetValue(dictionary, CFSTR("MMIOResult")),
                                 &candidate.mmio))
@@ -476,10 +526,15 @@ static int decode_snapshot(CFTypeRef object, struct snapshot *output)
     int missing_bars_allowed = !legacy && candidate.mmio.status == MMIO_REFUSED &&
                               candidate.mmio.reason == 0;
     CFTypeRef foundations = CFDictionaryGetValue(dictionary, CFSTR("OSFoundations"));
-    if (current)
+    CFTypeRef callers = CFDictionaryGetValue(dictionary, CFSTR("CallerIntegration"));
+    if (foundations_format)
         (void)decode_os_foundations(foundations, &candidate.os_foundations);
+    if (current)
+        (void)decode_caller_integration(callers, &candidate.caller_integration);
     CFIndex expected_keys = legacy ? 13 : two_reads ? 16 : 14;
-    if (current && foundations != NULL)
+    if (foundations_format && foundations != NULL)
+        ++expected_keys;
+    if (current && callers != NULL)
         ++expected_keys;
     if (missing_bars_allowed)
         --expected_keys;
@@ -629,7 +684,7 @@ static void read_probe(io_registry_entry_t service, struct report *report)
         return;
     }
     report->attached = 1;
-    report->outdated = report->snapshot.format < 4;
+    report->outdated = report->snapshot.format < 5;
 }
 
 static void read_context(struct report *report)
@@ -780,6 +835,16 @@ static void write_snapshot(FILE *out, const struct snapshot *snapshot)
             foundations->allocation ? "true" : "false", foundations->mutex ? "true" : "false");
     else
         fputs("null", out);
+    fputs(",\"caller_integration\":", out);
+    const struct caller_integration_result *callers = &snapshot->caller_integration;
+    if (callers->valid)
+        fprintf(out, "{\"version\":%" PRIu32 ",\"status\":\"%s\",\"checks\":%" PRIu32
+            ",\"allocation_callers\":%s,\"mutex_callers\":%s,\"reserve\":%s}",
+            callers->version, callers->passed ? "passed" : "failed", callers->checks,
+            callers->allocation_callers ? "true" : "false",
+            callers->mutex_callers ? "true" : "false", callers->reserve ? "true" : "false");
+    else
+        fputs("null", out);
     fputc('}', out);
 }
 
@@ -795,6 +860,10 @@ static const char *report_status(const struct report *report)
         return "invalid_foundations";
     if (!report->snapshot.os_foundations.passed)
         return "foundations_failed";
+    if (!report->snapshot.caller_integration.valid)
+        return "invalid_callers";
+    if (!report->snapshot.caller_integration.passed)
+        return "callers_failed";
     if (report->snapshot.hal_matched)
         return "integrated_passed";
     return report->snapshot.mmio.status == MMIO_REFUSED ||
@@ -805,13 +874,14 @@ static int report_exit_code(const struct report *report)
 {
     return report->complete && (!report->attached || report->outdated ||
         (report->snapshot.os_foundations.valid && report->snapshot.os_foundations.passed &&
+         report->snapshot.caller_integration.valid && report->snapshot.caller_integration.passed &&
          report->snapshot.mmio.status != MMIO_FAILED &&
          report->snapshot.boot42.status != MMIO_FAILED)) ? 0 : 1;
 }
 
 static void write_report(FILE *out, const struct report *report)
 {
-    fprintf(out, "{\"format\":4,\"tool\":\"nvidia-transport\",\"version\":\"%s\","
+    fprintf(out, "{\"format\":5,\"tool\":\"nvidia-transport\",\"version\":\"%s\","
         "\"target\":{\"vendor_id\":\"0x10de\",\"device_id\":\"0x1f91\","
         "\"subsystem_vendor_id\":\"0x17aa\",\"subsystem_device_id\":\"0x3806\"},"
         "\"status\":\"%s\",\"complete\":%s,"
@@ -830,7 +900,7 @@ static void write_report(FILE *out, const struct report *report)
         fputs("null", out);
     }
     fputs(",\"reason\":", out);
-    fputs(report->outdated ? "\"The loaded probe is an older version. Replace the kext on the EFI used for this boot with version 0.4.0.\"" : "null", out);
+    fputs(report->outdated ? "\"The loaded probe is an older version. Replace the kext on the EFI used for this boot with version 0.5.0.\"" : "null", out);
     fputs(",\"warnings\":[", out);
     int emitted = 0;
     for (size_t index = 0; index < WARNING_COUNT; ++index) {
@@ -956,6 +1026,23 @@ static CFMutableDictionaryRef fixture_os_foundations(void)
     return dictionary;
 }
 
+static CFMutableDictionaryRef fixture_caller_integration(void)
+{
+    CFMutableDictionaryRef dictionary = CFDictionaryCreateMutable(kCFAllocatorDefault,
+        0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    if (dictionary == NULL) {
+        fputs("Self-test allocation failed.\n", stderr);
+        exit(1);
+    }
+    fixture_number(dictionary, CFSTR("Version"), 1);
+    fixture_number(dictionary, CFSTR("Checks"), 3);
+    CFDictionarySetValue(dictionary, CFSTR("Status"), CFSTR("passed"));
+    CFDictionarySetValue(dictionary, CFSTR("AllocationCallers"), kCFBooleanTrue);
+    CFDictionarySetValue(dictionary, CFSTR("MutexCallers"), kCFBooleanTrue);
+    CFDictionarySetValue(dictionary, CFSTR("Reserve"), kCFBooleanTrue);
+    return dictionary;
+}
+
 static CFMutableDictionaryRef valid_fixture(void)
 {
     CFMutableDictionaryRef dictionary = CFDictionaryCreateMutable(
@@ -967,7 +1054,7 @@ static CFMutableDictionaryRef valid_fixture(void)
         fputs("Self-test allocation failed.\n", stderr);
         exit(1);
     }
-    fixture_number(dictionary, CFSTR("Format"), 4);
+    fixture_number(dictionary, CFSTR("Format"), 5);
     CFDictionarySetValue(dictionary, CFSTR("ProbeVersion"), CFSTR(TOOL_VERSION));
     CFDictionarySetValue(dictionary, CFSTR("Stage"), CFSTR("attached"));
     CFDictionarySetValue(dictionary, CFSTR("AccessPolicy"), CFSTR(ACCESS_POLICY));
@@ -1007,6 +1094,9 @@ static CFMutableDictionaryRef valid_fixture(void)
     CFMutableDictionaryRef foundations = fixture_os_foundations();
     CFDictionarySetValue(dictionary, CFSTR("OSFoundations"), foundations);
     CFRelease(foundations);
+    CFMutableDictionaryRef callers = fixture_caller_integration();
+    CFDictionarySetValue(dictionary, CFSTR("CallerIntegration"), callers);
+    CFRelease(callers);
     return dictionary;
 }
 
@@ -1019,9 +1109,148 @@ static void require_test(int condition, const char *name, unsigned int *count)
     ++*count;
 }
 
+static void test_caller_integration(unsigned int *count)
+{
+    struct caller_integration_result decoded;
+    memset(&decoded, 0, sizeof(decoded));
+    require_test(!decode_caller_integration(NULL, &decoded),
+        "missing caller integration dictionary", count);
+    require_test(!decode_caller_integration(kCFBooleanTrue, &decoded),
+        "wrong caller integration type", count);
+    CFMutableDictionaryRef callers = fixture_caller_integration();
+    require_test(decode_caller_integration(callers, &decoded) && decoded.valid &&
+        decoded.passed && decoded.version == 1 && decoded.checks == 3,
+        "valid caller integration wire contract", count);
+    CFDictionarySetValue(callers, CFSTR("Extra"), kCFBooleanTrue);
+    require_test(!decode_caller_integration(callers, &decoded),
+        "extra caller integration key", count);
+    CFDictionaryRemoveValue(callers, CFSTR("Extra"));
+    const CFStringRef numeric_keys[] = {CFSTR("Version"), CFSTR("Checks")};
+    for (size_t index = 0; index < sizeof(numeric_keys) / sizeof(numeric_keys[0]); ++index) {
+        CFDictionaryRemoveValue(callers, numeric_keys[index]);
+        require_test(!decode_caller_integration(callers, &decoded),
+            "missing caller numeric field", count);
+        CFDictionarySetValue(callers, numeric_keys[index], kCFBooleanTrue);
+        require_test(!decode_caller_integration(callers, &decoded),
+            "boolean caller numeric field", count);
+        double fractional = 1.0;
+        CFNumberRef floating = CFNumberCreate(kCFAllocatorDefault,
+            kCFNumberDoubleType, &fractional);
+        require_test(floating != NULL, "floating caller fixture allocation", count);
+        CFDictionarySetValue(callers, numeric_keys[index], floating);
+        CFRelease(floating);
+        require_test(!decode_caller_integration(callers, &decoded),
+            "floating caller numeric field", count);
+        fixture_number(callers, numeric_keys[index], index == 0 ? 1 : 3);
+    }
+    const int64_t bad_versions[] = {0, -1, 2, INT64_C(0x100000000)};
+    for (size_t index = 0; index < sizeof(bad_versions) / sizeof(bad_versions[0]); ++index) {
+        fixture_number(callers, CFSTR("Version"), bad_versions[index]);
+        require_test(!decode_caller_integration(callers, &decoded),
+            "unsupported caller integration version", count);
+    }
+    fixture_number(callers, CFSTR("Version"), 1);
+    const int64_t bad_checks[] = {0, -1, INT64_C(0x100000000)};
+    for (size_t index = 0; index < sizeof(bad_checks) / sizeof(bad_checks[0]); ++index) {
+        fixture_number(callers, CFSTR("Checks"), bad_checks[index]);
+        require_test(!decode_caller_integration(callers, &decoded),
+            "caller check count range", count);
+    }
+    fixture_number(callers, CFSTR("Checks"), UINT32_MAX);
+    require_test(decode_caller_integration(callers, &decoded) &&
+        decoded.checks == UINT32_MAX, "maximum caller check count", count);
+    fixture_number(callers, CFSTR("Checks"), 3);
+    const CFStringRef component_keys[] = {
+        CFSTR("AllocationCallers"), CFSTR("MutexCallers"), CFSTR("Reserve")
+    };
+    for (size_t index = 0; index < sizeof(component_keys) / sizeof(component_keys[0]); ++index) {
+        CFDictionaryRemoveValue(callers, component_keys[index]);
+        require_test(!decode_caller_integration(callers, &decoded),
+            "missing caller component", count);
+        fixture_number(callers, component_keys[index], 1);
+        require_test(!decode_caller_integration(callers, &decoded),
+            "caller component requires CFBoolean", count);
+        CFDictionarySetValue(callers, component_keys[index], kCFBooleanFalse);
+        require_test(!decode_caller_integration(callers, &decoded),
+            "passed caller status cannot hide a false component", count);
+        CFDictionarySetValue(callers, CFSTR("Status"), CFSTR("failed"));
+        require_test(decode_caller_integration(callers, &decoded) && decoded.valid &&
+            !decoded.passed, "caller component failure is valid evidence", count);
+        CFDictionarySetValue(callers, component_keys[index], kCFBooleanTrue);
+        require_test(!decode_caller_integration(callers, &decoded),
+            "failed caller status requires a false component", count);
+        CFDictionarySetValue(callers, CFSTR("Status"), CFSTR("passed"));
+    }
+    CFDictionaryRemoveValue(callers, CFSTR("Status"));
+    require_test(!decode_caller_integration(callers, &decoded),
+        "missing caller status", count);
+    CFDictionarySetValue(callers, CFSTR("Status"), kCFBooleanTrue);
+    require_test(!decode_caller_integration(callers, &decoded),
+        "wrong caller status type", count);
+    CFDictionarySetValue(callers, CFSTR("Status"), CFSTR("unknown"));
+    require_test(!decode_caller_integration(callers, &decoded),
+        "unknown caller status", count);
+    CFDictionarySetValue(callers, CFSTR("Status"), CFSTR("passed"));
+
+    struct snapshot snapshot;
+    CFMutableDictionaryRef fixture = valid_fixture();
+    CFDictionaryRemoveValue(fixture, CFSTR("CallerIntegration"));
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.hal_matched &&
+        snapshot.os_foundations.passed && !snapshot.caller_integration.valid,
+        "missing caller integration preserves GPU and foundation evidence", count);
+    struct report classified;
+    memset(&classified, 0, sizeof(classified));
+    classified.complete = 1;
+    classified.attached = 1;
+    classified.snapshot = snapshot;
+    require_test(strcmp(report_status(&classified), "invalid_callers") == 0 &&
+        report_exit_code(&classified) != 0,
+        "foundation success alone cannot report integrated success", count);
+    CFDictionarySetValue(fixture, CFSTR("CallerIntegration"), kCFBooleanTrue);
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.hal_matched &&
+        !snapshot.caller_integration.valid,
+        "invalid caller dictionary preserves GPU evidence", count);
+    CFDictionarySetValue(fixture, CFSTR("CallerIntegration"), callers);
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.caller_integration.passed,
+        "caller evidence restored", count);
+    classified.snapshot = snapshot;
+    require_test(strcmp(report_status(&classified), "integrated_passed") == 0 &&
+        report_exit_code(&classified) == 0,
+        "both foundation and caller evidence enable integrated success", count);
+    CFDictionarySetValue(callers, CFSTR("Reserve"), kCFBooleanFalse);
+    CFDictionarySetValue(callers, CFSTR("Status"), CFSTR("failed"));
+    require_test(decode_snapshot(fixture, &snapshot) && !snapshot.caller_integration.passed,
+        "reserve failure remains explicit caller evidence", count);
+    classified.snapshot = snapshot;
+    require_test(strcmp(report_status(&classified), "callers_failed") == 0 &&
+        report_exit_code(&classified) != 0,
+        "reserve failure rejects integrated success", count);
+    CFDictionarySetValue(callers, CFSTR("Reserve"), kCFBooleanTrue);
+    CFDictionarySetValue(callers, CFSTR("Status"), CFSTR("passed"));
+    require_test(decode_snapshot(fixture, &snapshot), "caller serialization fixture", count);
+    classified.snapshot = snapshot;
+    FILE *serialized = tmpfile();
+    require_test(serialized != NULL, "caller serialization allocation", count);
+    write_report(serialized, &classified);
+    require_test(fflush(serialized) == 0 && fseek(serialized, 0, SEEK_SET) == 0,
+        "caller serialization rewind", count);
+    char text[4096];
+    size_t bytes = fread(text, 1, sizeof(text) - 1, serialized);
+    text[bytes] = '\0';
+    require_test(!ferror(serialized) && strstr(text, "\"format\":5") != NULL &&
+        strstr(text, "\"caller_integration\":{\"version\":1,\"status\":\"passed\",\"checks\":3,"
+            "\"allocation_callers\":true,\"mutex_callers\":true,\"reserve\":true}") != NULL &&
+        strstr(text, "\"status\":\"integrated_passed\"") != NULL,
+        "serialized v5 report includes independent caller evidence", count);
+    fclose(serialized);
+    CFRelease(fixture);
+    CFRelease(callers);
+}
+
 static int run_self_tests(void)
 {
     unsigned int count = 0;
+    test_caller_integration(&count);
     struct snapshot snapshot;
     CFMutableDictionaryRef fixture = valid_fixture();
     require_test(decode_snapshot(fixture, &snapshot) &&
@@ -1036,9 +1265,9 @@ static int run_self_tests(void)
     CFDictionaryRemoveValue(fixture, CFSTR("Extra"));
     CFDictionaryRemoveValue(fixture, CFSTR("Format"));
     require_test(!decode_snapshot(fixture, &snapshot), "missing format", &count);
-    fixture_number(fixture, CFSTR("Format"), 5);
+    fixture_number(fixture, CFSTR("Format"), 6);
     require_test(!decode_snapshot(fixture, &snapshot), "unsupported format", &count);
-    fixture_number(fixture, CFSTR("Format"), 4);
+    fixture_number(fixture, CFSTR("Format"), 5);
     CFDictionarySetValue(fixture, CFSTR("VendorID"), kCFBooleanTrue);
     require_test(!decode_snapshot(fixture, &snapshot), "boolean numeric field", &count);
     fixture_number(fixture, CFSTR("VendorID"), -1);
@@ -1053,7 +1282,7 @@ static int run_self_tests(void)
     CFDictionarySetValue(fixture, CFSTR("Format"), floating);
     CFRelease(floating);
     require_test(!decode_snapshot(fixture, &snapshot), "floating numeric field", &count);
-    fixture_number(fixture, CFSTR("Format"), 4);
+    fixture_number(fixture, CFSTR("Format"), 5);
     fixture_number(fixture, CFSTR("SubsystemID"), 0x3807);
     require_test(!decode_snapshot(fixture, &snapshot), "wrong subsystem", &count);
     fixture_number(fixture, CFSTR("SubsystemID"), 0x3806);
@@ -1217,6 +1446,7 @@ static int run_self_tests(void)
     CFDictionaryRemoveValue(fixture, CFSTR("BOOT42Result"));
     CFDictionaryRemoveValue(fixture, CFSTR("HALSelection"));
     CFDictionaryRemoveValue(fixture, CFSTR("OSFoundations"));
+    CFDictionaryRemoveValue(fixture, CFSTR("CallerIntegration"));
     fixture_number(fixture, CFSTR("Format"), 1);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.1.0"));
     CFDictionarySetValue(fixture, CFSTR("AccessPolicy"), CFSTR(LEGACY_ACCESS_POLICY));
@@ -1230,6 +1460,7 @@ static int run_self_tests(void)
     CFDictionaryRemoveValue(fixture, CFSTR("BOOT42Result"));
     CFDictionaryRemoveValue(fixture, CFSTR("HALSelection"));
     CFDictionaryRemoveValue(fixture, CFSTR("OSFoundations"));
+    CFDictionaryRemoveValue(fixture, CFSTR("CallerIntegration"));
     fixture_number(fixture, CFSTR("Format"), 2);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.2.0"));
     CFDictionarySetValue(fixture, CFSTR("AccessPolicy"), CFSTR(LEGACY_MMIO_ACCESS_POLICY));
@@ -1241,6 +1472,7 @@ static int run_self_tests(void)
 
     fixture = valid_fixture();
     CFDictionaryRemoveValue(fixture, CFSTR("OSFoundations"));
+    CFDictionaryRemoveValue(fixture, CFSTR("CallerIntegration"));
     fixture_number(fixture, CFSTR("Format"), 3);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.3.0"));
     require_test(decode_snapshot(fixture, &snapshot) && snapshot.format == 3 &&
@@ -1248,6 +1480,18 @@ static int run_self_tests(void)
         "strict version 0.3.0 snapshot recognized", &count);
     CFDictionarySetValue(fixture, CFSTR("Extra"), CFSTR("not allowed"));
     require_test(!decode_snapshot(fixture, &snapshot), "version 0.3.0 extra rejected", &count);
+    CFRelease(fixture);
+
+    fixture = valid_fixture();
+    CFDictionaryRemoveValue(fixture, CFSTR("CallerIntegration"));
+    fixture_number(fixture, CFSTR("Format"), 4);
+    CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.4.0"));
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.format == 4 &&
+        snapshot.hal_matched && snapshot.os_foundations.passed &&
+        !snapshot.caller_integration.valid,
+        "strict version 0.4.0 snapshot recognized without caller evidence", &count);
+    CFDictionarySetValue(fixture, CFSTR("Extra"), CFSTR("not allowed"));
+    require_test(!decode_snapshot(fixture, &snapshot), "version 0.4.0 extra rejected", &count);
     CFRelease(fixture);
 
     fixture = valid_fixture();
@@ -1377,6 +1621,8 @@ static int run_self_tests(void)
     classified.attached = 1;
     classified.snapshot.os_foundations.valid = 1;
     classified.snapshot.os_foundations.passed = 1;
+    classified.snapshot.caller_integration.valid = 1;
+    classified.snapshot.caller_integration.passed = 1;
     classified.snapshot.mmio.status = MMIO_REFUSED;
     classified.snapshot.boot42.status = MMIO_NOT_ATTEMPTED;
     require_test(strcmp(report_status(&classified), "refused") == 0 &&
@@ -1399,6 +1645,16 @@ static int run_self_tests(void)
         "invalid foundation cannot report integrated success", &count);
     classified.snapshot.os_foundations.valid = 1;
     classified.snapshot.os_foundations.passed = 1;
+    classified.snapshot.caller_integration.passed = 0;
+    require_test(strcmp(report_status(&classified), "callers_failed") == 0 &&
+        report_exit_code(&classified) != 0,
+        "failed caller integration cannot report integrated success", &count);
+    classified.snapshot.caller_integration.valid = 0;
+    require_test(strcmp(report_status(&classified), "invalid_callers") == 0 &&
+        report_exit_code(&classified) != 0,
+        "missing caller integration cannot report integrated success", &count);
+    classified.snapshot.caller_integration.valid = 1;
+    classified.snapshot.caller_integration.passed = 1;
     classified.snapshot.hal_matched = 0;
     classified.snapshot.boot42.status = MMIO_REFUSED;
     require_test(strcmp(report_status(&classified), "refused") == 0 &&
@@ -1418,7 +1674,7 @@ static int run_self_tests(void)
     size_t serialized_size = fread(serialized_report, 1, sizeof(serialized_report) - 1, serialized);
     serialized_report[serialized_size] = '\0';
     require_test(!ferror(serialized) && strstr(serialized_report, "\"probe\":null") != NULL &&
-        strstr(serialized_report, "version 0.4.0") != NULL &&
+        strstr(serialized_report, "version 0.5.0") != NULL &&
         strstr(serialized_report, "raw_value") == NULL,
         "legacy report emits fixed instruction without snapshot", &count);
     fclose(serialized);

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 #include "S540NvidiaPCIProbe.hpp"
-#include "../../nvidia-os-adapter/src/S540NvidiaRuntime.hpp"
+#include "../../nvidia-caller-integration/src/S540NvidiaCallerRuntime.hpp"
 
 #include <IOKit/IOMemoryDescriptor.h>
 #include <kern/task.h>
@@ -314,15 +314,15 @@ OSDictionary *copyHALSelection(const IdentificationOutcome &result) {
 
 OSDictionary *copySnapshot(IOPCIDevice *device,
                           const S540NvidiaPCIProbePolicy::Identity &identity) {
-    OSDictionary *snapshot = OSDictionary::withCapacity(16);
+    OSDictionary *snapshot = OSDictionary::withCapacity(18);
     if (!snapshot)
         return nullptr;
 
     // One additional fixed config read captures command/status without changing
     // memory decoding, I/O decoding, bus mastering, or any status bits.
     const uint32_t commandStatus = device->configRead32(0x04);
-    bool ok = setNumber(snapshot, "Format", 4, 32)
-        && setString(snapshot, "ProbeVersion", "0.4.0")
+    bool ok = setNumber(snapshot, "Format", 5, 32)
+        && setString(snapshot, "ProbeVersion", "0.5.0")
         && setString(snapshot, "Stage", "attached")
         && setString(snapshot, "AccessPolicy", "two-read-only-bar0-hal-identification")
         && setNumber(snapshot, "VendorID", identity.vendorDevice & 0xffffU, 16)
@@ -338,10 +338,16 @@ OSDictionary *copySnapshot(IOPCIDevice *device,
         return nullptr;
     }
 
-    // IOService::start is a sleepable thread context. Finish the CPU-only
-    // check before taking the PCI provider arbitration used for identification.
-    // Each object is freed before publishing the immutable result dictionary.
-    const S540NvidiaRuntime::Result foundations = S540NvidiaRuntime::check();
+    // IOService::start is a sleepable thread context. The same finite combined
+    // entry point runs in native CI. Its nonblocking singleton lease protects
+    // the reserve lifecycle, and all resources are released before PCI reads.
+    const S540NvidiaCallerRuntime::IntegratedResult integrated =
+        S540NvidiaCallerRuntime::checkIntegrated();
+    if (!integrated.acquired) {
+        snapshot->release();
+        return nullptr;
+    }
+    const S540NvidiaRuntime::Result &foundations = integrated.foundations;
     ScopedRelease<OSDictionary> foundationSnapshot(OSDictionary::withCapacity(8));
     OSDictionary *foundation = foundationSnapshot.get();
     ok = foundation
@@ -354,6 +360,17 @@ OSDictionary *copySnapshot(IOPCIDevice *device,
         && foundation->setObject("Allocation", foundations.allocation ? kOSBooleanTrue : kOSBooleanFalse)
         && foundation->setObject("Mutex", foundations.mutex ? kOSBooleanTrue : kOSBooleanFalse)
         && snapshot->setObject("OSFoundations", foundation);
+    const S540NvidiaCallerRuntime::Result &callers = integrated.callers;
+    ScopedRelease<OSDictionary> callerSnapshot(OSDictionary::withCapacity(6));
+    OSDictionary *caller = callerSnapshot.get();
+    ok = ok && caller
+        && setNumber(caller, "Version", S540NvidiaCallerRuntime::kFormatVersion, 32)
+        && setString(caller, "Status", callers.passed() ? "passed" : "failed")
+        && setNumber(caller, "Checks", callers.checks, 32)
+        && caller->setObject("AllocationCallers", callers.allocationCallers ? kOSBooleanTrue : kOSBooleanFalse)
+        && caller->setObject("MutexCallers", callers.mutexCallers ? kOSBooleanTrue : kOSBooleanFalse)
+        && caller->setObject("Reserve", callers.reserve ? kOSBooleanTrue : kOSBooleanFalse)
+        && snapshot->setObject("CallerIntegration", caller);
     if (!ok) {
         snapshot->release();
         return nullptr;

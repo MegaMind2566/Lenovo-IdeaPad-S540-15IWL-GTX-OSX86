@@ -1,59 +1,65 @@
-# NVIDIA integrated OS-adapter prototype
+# NVIDIA integrated NVPort prototype
 
-Version **0.4.0** combines the bounded TU117 identification probe with the Darwin clock, ordinary-RAM memory operations, NVIDIA atomics, host-RAM allocator and ordinary-thread mutex adapter. One startup self-check exercises those CPU components inside the kernel. The GPU identification remains the same two read-only register loads used by the confirmed v0.3.0 probe.
+Version **0.5.0** combines the existing two-read TU117 identification with a bounded kernel startup check of original NVIDIA allocation and mutex callers, backed by a preallocated memory reserve and a new mutex implementation. The earlier timer, RAM and atomic checks run against these same backends.
 
-**This is a development checkpoint. It does not initialize the GPU or provide graphics acceleration.** The NVIDIA HAL and resource manager are not instantiated. Firmware, DMA, command submission and display output remain unimplemented. Successful CI checks establish compilation and native user-space behavior; the laptop report establishes the kernel execution result separately.
+**This is an experimental integration checkpoint, not a complete NVIDIA driver.** It does not instantiate NVIDIA HAL/RM objects, initialize the GPU, load firmware, perform DMA, submit GPU commands or provide rendering/Metal/display acceleration.
 
-## Confirmed laptop result
+## One laptop test
 
-The October 15, 2026 format-4 laptop report returns `integrated_passed`, `complete=true`, and no warnings. The actual PCI provider identity is verified. All 23 startup assertions passed across the five CPU components: timer, ordinary-RAM operations, original C++ atomics, ordinary host-RAM allocation and thread mutexes. BOOT_0 and BOOT_42 each completed one read and retained the TU117 variant-41 match.
+Use the separate EFI on the **240 GB test disk**. Keep the working Samsung EFI available.
 
-This confirms the bounded startup check in the real Tahoe kernel. It runs on one thread, uses small RAM buffers and one 256-byte allocation, and releases its allocations and mutex before publishing the snapshot. It does not validate kernel contention, interrupt-context allocation, suspend behavior, full NVIDIA caller compatibility or GPU initialization. Raw reports and resource addresses remain private. No repeated laptop test is needed for this checkpoint.
-
-## Deployment and reporter
-
-Extract **S540-nvidia-transport-v4.zip** into Downloads. Keep the working Samsung EFI available. Use only the separate EFI on the **240 GB test disk**.
-
-1. Save the existing `EFI/OC/Kexts/S540NvidiaPCIProbe.kext` outside the EFI directory.
-2. Replace that kext with the one in this package. **Keep the existing config: no edit is required.**
-3. Boot from the 240 GB disk, then select Tahoe.
-4. Run this one command:
+1. Extract **S540-nvidia-transport-v5.zip** into Downloads.
+2. Back up the current `EFI/OC/Kexts/S540NvidiaPCIProbe.kext` outside the EFI directory.
+3. Replace that kext with the new one. **Keep the current config.plist unchanged.**
+4. Boot from the 240 GB EFI, then select Tahoe.
+5. Run:
 
    ```bash
-   bash "$HOME/Downloads/S540-nvidia-transport-v4/CHECK-TRANSPORT.command"
+   bash "$HOME/Downloads/S540-nvidia-transport-v5/CHECK-TRANSPORT.command"
    ```
 
-5. Share **nvidia-transport.json** from the new **NVIDIA-TRANSPORT…** folder on the Desktop.
+Share **nvidia-transport.json** from the new **NVIDIA-TRANSPORT…** folder on the Desktop.
 
-The expected result is **`integrated_passed`**: all five CPU-component checks passed in the kernel, and both identification registers still select TU117 variant 41. This result does not establish GPU initialization or acceleration. If boot fails, boot from Samsung and restore the previous kext on the test disk. Runtime unload remains untested; rollback uses a reboot.
+Expected success is **`integrated_passed`** from version **`0.5.0`**, format **5**. The result requires both CPU blocks to pass and the same two identification registers to select TU117 variant 41. A successful startup normally records **23 foundation checks and 35 caller/reserve checks**.
 
-The reporter needs no administrator password or developer tools. It does not install a kext or change EFI, SIP, NVRAM or kernel collections.
+If startup fails, boot from the working Samsung EFI and restore the previous kext on the test disk. Runtime unload is untested; rollback uses a reboot. No NVRAM reset, SIP change or config edit is required by this package.
 
-## Boundaries and report results
+## What the startup check covers
 
-The PCI gate remains `10DE:1F91`, subsystem `17AA:3806`, revision `A1`. The probe requires an already-enabled memory decoder, D0 and a matching 16 MiB BAR0 descriptor. It opens no GPU user client and performs no power transitions, GPU writes, firmware operations, interrupt setup or DMA allocation.
+- All three original allocation callers and five original mutex callers execute in the kernel.
+- The 4 MiB reserve supplies 32 fixed slots, with a 128 KiB request limit and 16-byte alignment.
+- Allocation failure, full-reserve refusal, live-allocation shutdown refusal, reuse and quiescent cleanup are checked.
+- Caller-owned mutex initialization, available/busy conditional acquisition, ordinary uncontended acquisition, release and destruction are checked.
+- Timer, small-buffer RAM operations and original C++ atomics run against the new backends.
 
-The probe performs at most one aligned 32-bit BOOT_0 load and one conditional BOOT_42 load. Both must identify TU117. Each uses a unique read-only, cache-inhibited mapping released after the load; prerequisites are checked again before each mapping and load. An MMIO load can fault or hang the kernel; software cannot provide a recoverable timeout for that load.
+The same production `checkIntegrated()` entry point runs in native CI and in probe startup. A nonblocking singleton lease serializes reserve lifecycle operations. All successful startup allocations are released before the immutable report is published.
 
-The new self-check uses ordinary CPU RAM. The allocator uses `IOMalloc`/`IOFree`; the mutex uses `IOLock` in a sleepable thread context. Allocation and lock resources created by the check are released before the report is published. No worker threads or GPU operations are added.
+The startup sequence is finite and single-threaded. It creates no workers and does not intentionally enter the kernel mutex wait path. Kernel contention, interrupt-context allocation, suspend/wake and full NVIDIA caller compatibility are not established by this test. The reserve is not a general RM heap or VRAM/DMA allocation service.
 
-| Format-4 status | Meaning |
-| --- | --- |
-| `integrated_passed` | CPU-component self-checks passed in the kernel and both GPU IDs select TU117 variant 41. |
-| `refused` | A hardware prerequisite failed before the corresponding load. |
-| `foundations_failed` | At least one CPU-component check failed. |
-| `invalid_foundations` | The CPU-component result is absent or invalid. |
-| `failed` | An identification read failed. |
-| `outdated_probe` | An earlier probe is loaded. Replace the kext on the EFI actually used to boot, then reboot. |
-| `not_attached` | The service was not found; the report does not establish the cause. |
-| `error` | Snapshot, actual PCI provider or report validation failed. |
+## GPU access boundary
 
-The format-4 report records component checks separately from GPU identification. Older snapshots remain recognizable as outdated. Raw reports and resource addresses remain private.
+The PCI gate remains `10DE:1F91`, subsystem `17AA:3806`, revision `A1`. The existing memory-decode, D0, BAR0, provider-ownership and mapping guards remain in place. The only GPU register accesses are one aligned read-only BOOT_0 load and one conditional BOOT_42 load. There are no added GPU reads, writes, power transitions, firmware, DMA or interrupt setup.
+
+Each read uses a unique read-only cache-inhibited mapping released after its single load. An MMIO load can fault or hang the kernel; software cannot provide a recoverable timeout for that individual load.
+
+## Report results
+
+| Format-5 status | Meaning |
+|---|---|
+| `integrated_passed` | Foundations and original callers passed; two-register TU117 identification matched. |
+| `foundations_failed` / `callers_failed` | A CPU startup block failed. Preserve the report. |
+| `invalid_foundations` / `invalid_callers` | A CPU result is absent or malformed. |
+| `refused` / `failed` | A GPU identification prerequisite or load failed. |
+| `outdated_probe` | An earlier probe, including v4, is loaded. Replace the kext on the EFI actually used to boot and reboot. |
+| `not_attached` | The probe service is absent; the report does not identify the cause. |
+| `error` | Snapshot, provider or report validation failed. |
+
+The reporter requires no administrator password or developer tools. It does not install a kext or change EFI, SIP, NVRAM or kernel collections. Raw reports and resource addresses remain private.
 
 ## Build and provenance
 
-The native Intel CI build runs the existing timer, memory and C/C++ atomic checks; allocator alignment, allocation failure and exact-size free checks; mutex contention and publication checks; and the same integrated CPU self-check used by the kernel probe. Address and undefined-behavior sanitizers instrument the new backends and integration. The build also compiles and links the real kernel sources, audits adapter imports, checks Intel Mach-O metadata, verifies ad-hoc signatures, and runs the report decoder. CI does not load the experimental kext.
+**BUILD.json** records the exact project commit, source/output hashes, native results, kernel imports and module version. The complete package checks thin x86_64 Mach-O output, matching kmod/Info versions, KPI dependencies, signatures, decoder fixtures and the packaged launcher.
 
-**BUILD.json** records the exact project commit, source and output hashes, native results and kernel import audit. The archive includes the corresponding adapter/probe source, NVIDIA reference inputs and provenance records under **source/**. NVIDIA source is pinned to commit `1a82fbfda8f321b056eb3568850f9316c5e465c5`. MIT notices remain in the original and adapted files. LLVM and MacKernelSDK license texts and source references are included in **licenses/** and **THIRD-PARTY-NOTICES.txt**.
+Native tests exercise actual callers, reserve exhaustion/reuse/concurrent churn, mutex contention/publication, the mandatory failed-acquisition assertion and the same integrated startup sequence. AddressSanitizer and UndefinedBehaviorSanitizer instrument production sources with fatal diagnostics. CI compiles and links the kernel code but does not load it.
 
-MacKernelSDK is pinned to commit `3f750085caa17ec3a7880f11c11bf4f48cd6a164`. An optional source-only local-build bundle can be generated with `builders/package_nvidia_local.py`; the ready-built CI package is intended for the laptop test above.
+The archive includes source, reference bytes, adaptation/provenance records, validation reports and NVIDIA/LLVM/MacKernelSDK licenses. NVIDIA is pinned to `1a82fbfda8f321b056eb3568850f9316c5e465c5`; MacKernelSDK to `3f750085caa17ec3a7880f11c11bf4f48cd6a164`. These build checks do not establish v5 laptop execution or graphics acceleration.

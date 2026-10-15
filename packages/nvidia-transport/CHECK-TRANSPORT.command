@@ -24,14 +24,14 @@ ACTUAL_SHA=$(/usr/bin/shasum -a 256 "$BINARY" | /usr/bin/awk '{print $1}')
 /usr/bin/codesign --verify --strict "$BINARY" || stop 'The executable signature could not be verified.'
 REPORT_DIR=$(/usr/bin/mktemp -d "$REPORT_PARENT/NVIDIA-TRANSPORT.XXXXXX") || stop 'Cannot create a private report folder.'
 REPORT="$REPORT_DIR/nvidia-transport.json"
-printf 'Reading GPU identification and kernel OS foundation results. No administrator password is required.\n'
+printf 'Reading GPU identification, kernel OS foundations and original NVIDIA caller results. No administrator password is required.\n'
 RESULT=0
 "$BINARY" > "$REPORT" || RESULT=$?
 /bin/chmod 600 "$REPORT"
 /bin/cat "$REPORT"
 printf '\nReport saved: %s\n' "$REPORT"
 if [ "$RESULT" -ne 0 ]; then
-    printf 'GPU identification or kernel OS foundation verification did not complete successfully. Keep the report for diagnosis.\n' >&2
+    printf 'GPU identification, kernel OS foundation or NVIDIA caller verification did not complete successfully. Keep the report for diagnosis.\n' >&2
     exit "$RESULT"
 fi
-printf 'Share nvidia-transport.json to review GPU identification and the integrated OS foundation result. This is not GPU initialization or graphics acceleration.\n'
+printf 'Share nvidia-transport.json to review GPU identification, OS foundations and the original NVIDIA caller result. This is not GPU initialization or graphics acceleration.\n'
