@@ -33,6 +33,10 @@ struct IntegratedResult {
 // nonblocking lease. This finite ordinary-thread startup creates no workers,
 // performs no GPU access and returns all owned resources cold on success.
 IntegratedResult checkIntegrated();
+using StartupContinuation = void (*)(void *);
+// Continue only after this complete CPU profile is cold, while retaining the
+// same nonblocking startup lease. The continuation owns all of its cleanup.
+IntegratedResult checkIntegrated(StartupContinuation, void *context);
 
 } // namespace S540NvidiaSupportRuntime
 

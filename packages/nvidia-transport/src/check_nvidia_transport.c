@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TOOL_VERSION "0.7.0"
+#define TOOL_VERSION "0.8.0"
 #define PROBE_CLASS "S540NvidiaPCIProbe"
 #define SNAPSHOT_KEY "S540NvidiaPCIProbeSnapshot"
 #define ACCESS_POLICY "two-read-only-bar0-hal-identification"
@@ -66,6 +66,35 @@ struct caller_integration_result {
     int allocation_callers;
     int mutex_callers;
     int reserve;
+};
+
+struct hardware_preparation_result {
+    int valid;
+    uint32_t version;
+    uint32_t checks;
+    int passed;
+    int host_dma;
+    int pci_read_adapter;
+    int interrupt_inventory;
+    int firmware_parser;
+    int firmware_rpc;
+    int cleanup;
+    char dma_mode[32];
+    char dma_reason[64];
+    uint64_t dma_bytes;
+    uint32_t dma_segments;
+    char pci_reason[64];
+    uint32_t pci_capabilities;
+    uint32_t msi_vectors;
+    uint32_t msix_vectors;
+    int msi_observed_enabled;
+    int msix_observed_enabled;
+    int firmware_loaded;
+    int firmware_image_verified;
+    int device_dma_verified;
+    int interrupts_enabled;
+    int gpu_initialized;
+    int rm_initialized;
 };
 
 struct nvport_support_result {
@@ -126,6 +155,7 @@ struct snapshot {
     struct caller_integration_result caller_integration;
     struct nvport_lifecycle_result nvport_lifecycle;
     struct nvport_support_result nvport_support;
+    struct hardware_preparation_result hardware_preparation;
 };
 
 enum warning_code {
@@ -591,6 +621,136 @@ static int decode_nvport_support(CFTypeRef object,
     return 1;
 }
 
+static int decode_fixed_choice(CFTypeRef object, char *output, size_t capacity,
+                                 const char *const *choices, size_t count)
+{
+    if (object == NULL || CFGetTypeID(object) != CFStringGetTypeID() ||
+        CFStringGetLength((CFStringRef)object) <= 0 ||
+        CFStringGetLength((CFStringRef)object) >= (CFIndex)capacity ||
+        !CFStringGetCString((CFStringRef)object, output, (CFIndex)capacity,
+                             kCFStringEncodingASCII) ||
+        strlen(output) != (size_t)CFStringGetLength((CFStringRef)object))
+        return 0;
+    for (size_t index = 0; index < count; ++index)
+        if (strcmp(output, choices[index]) == 0)
+            return 1;
+    return 0;
+}
+
+/* Preparation is separate from GPU/RM startup. The current policy explicitly
+ * forbids firmware loading, enabled interrupts and GPU/RM initialization. */
+static int decode_hardware_preparation(CFTypeRef object,
+                                        struct hardware_preparation_result *output)
+{
+    struct hardware_preparation_result candidate;
+    memset(&candidate, 0, sizeof(candidate));
+    if (object == NULL || CFGetTypeID(object) != CFDictionaryGetTypeID())
+        return 0;
+    CFDictionaryRef dictionary = (CFDictionaryRef)object;
+    uint64_t value = 0;
+    if (CFDictionaryGetCount(dictionary) != 25 ||
+        !dictionary_number(dictionary, CFSTR("Version"), 1, &value) || value != 1)
+        return 0;
+    candidate.version = (uint32_t)value;
+    if (!dictionary_number(dictionary, CFSTR("Checks"), UINT32_MAX, &value) || value == 0)
+        return 0;
+    candidate.checks = (uint32_t)value;
+    static const char *const dma_modes[] = {
+        "provider_mapped", "direct_untranslated", "unavailable"
+    };
+    static const char *const dma_reasons[] = {
+        "none", "invalid_context", "mapper_unavailable", "allocation_failed",
+        "contents_unavailable", "descriptor_prepare_failed", "command_allocation_failed",
+        "attach_failed", "command_prepare_failed", "segments_invalid", "pattern_mismatch",
+        "command_complete_failed", "clear_failed", "descriptor_complete_failed",
+        "not_run", "pci_unavailable"
+    };
+    if (!decode_fixed_choice(CFDictionaryGetValue(dictionary, CFSTR("DmaMode")),
+            candidate.dma_mode, sizeof(candidate.dma_mode), dma_modes,
+            sizeof(dma_modes) / sizeof(dma_modes[0])) ||
+        !decode_fixed_choice(CFDictionaryGetValue(dictionary, CFSTR("DmaReason")),
+            candidate.dma_reason, sizeof(candidate.dma_reason), dma_reasons,
+            sizeof(dma_reasons) / sizeof(dma_reasons[0])) ||
+        !dictionary_number(dictionary, CFSTR("DmaBytes"), UINT64_C(65536), &candidate.dma_bytes) ||
+        !dictionary_number(dictionary, CFSTR("DmaSegments"), 32, &value))
+        return 0;
+    candidate.dma_segments = (uint32_t)value;
+    static const char *const pci_reasons[] = {
+        "pci-context-unbound", "pci-config-unavailable",
+        "pci-capability-list-unavailable", "pci-capability-offset-invalid",
+        "pci-capability-cycle", "pci-capability-unavailable",
+        "pci-capability-id-invalid", "pci-capability-id-duplicate",
+        "pci-pm-capability-invalid", "pci-pm-unavailable",
+        "pci-msi-capability-invalid", "pci-msix-capability-invalid",
+        "pci-msix-bar-invalid", "pci-capability-overlap",
+        "pci-capability-list-exhausted", "pci-not-d0",
+        "pci-read-only-inventory-complete", "pci-arbitration-unavailable",
+        "pci-msix-geometry-invalid"
+    };
+    if (!decode_fixed_choice(CFDictionaryGetValue(dictionary, CFSTR("PciReason")),
+            candidate.pci_reason, sizeof(candidate.pci_reason), pci_reasons,
+            sizeof(pci_reasons) / sizeof(pci_reasons[0])) ||
+        !dictionary_number(dictionary, CFSTR("PciCapabilities"), 48, &value))
+        return 0;
+    candidate.pci_capabilities = (uint32_t)value;
+    if (!dictionary_number(dictionary, CFSTR("MsiVectors"), 32, &value) ||
+        (value != 0 && (value & (value - 1)) != 0))
+        return 0;
+    candidate.msi_vectors = (uint32_t)value;
+    if (!dictionary_number(dictionary, CFSTR("MsixVectors"), 2048, &value))
+        return 0;
+    candidate.msix_vectors = (uint32_t)value;
+    if ((candidate.dma_segments == 0) != (candidate.dma_bytes == 0))
+        return 0;
+#define READ_PREPARATION_COMPONENT(KEY, FIELD) do { \
+    CFTypeRef component = CFDictionaryGetValue(dictionary, CFSTR(KEY)); \
+    if (component == NULL || CFGetTypeID(component) != CFBooleanGetTypeID()) \
+        return 0; \
+    candidate.FIELD = CFBooleanGetValue((CFBooleanRef)component); \
+} while (0)
+    READ_PREPARATION_COMPONENT("HostDma", host_dma);
+    READ_PREPARATION_COMPONENT("PciReadAdapter", pci_read_adapter);
+    READ_PREPARATION_COMPONENT("InterruptInventory", interrupt_inventory);
+    READ_PREPARATION_COMPONENT("FirmwareParser", firmware_parser);
+    READ_PREPARATION_COMPONENT("FirmwareRpc", firmware_rpc);
+    READ_PREPARATION_COMPONENT("Cleanup", cleanup);
+    READ_PREPARATION_COMPONENT("MsiObservedEnabled", msi_observed_enabled);
+    READ_PREPARATION_COMPONENT("MsixObservedEnabled", msix_observed_enabled);
+    READ_PREPARATION_COMPONENT("FirmwareLoaded", firmware_loaded);
+    READ_PREPARATION_COMPONENT("FirmwareImageVerified", firmware_image_verified);
+    READ_PREPARATION_COMPONENT("DeviceDmaVerified", device_dma_verified);
+    READ_PREPARATION_COMPONENT("InterruptsEnabled", interrupts_enabled);
+    READ_PREPARATION_COMPONENT("GpuInitialized", gpu_initialized);
+    READ_PREPARATION_COMPONENT("RmInitialized", rm_initialized);
+#undef READ_PREPARATION_COMPONENT
+    if (candidate.firmware_loaded || candidate.firmware_image_verified ||
+        candidate.device_dma_verified || candidate.interrupts_enabled ||
+        candidate.gpu_initialized || candidate.rm_initialized)
+        return 0;
+    if ((candidate.interrupt_inventory &&
+         (strcmp(candidate.pci_reason, "pci-read-only-inventory-complete") != 0 ||
+          candidate.pci_capabilities == 0)) ||
+        (candidate.msi_observed_enabled && candidate.msi_vectors == 0) ||
+        (candidate.msix_observed_enabled && candidate.msix_vectors == 0))
+        return 0;
+    const int unavailable = strcmp(candidate.dma_mode, "unavailable") == 0;
+    const int no_dma_error = strcmp(candidate.dma_reason, "none") == 0;
+    if (candidate.host_dma != no_dma_error ||
+        (candidate.host_dma && (unavailable || candidate.dma_bytes != UINT64_C(65536) ||
+                               candidate.dma_segments < 16)) ||
+        (unavailable && (candidate.dma_bytes != 0 || candidate.dma_segments != 0)))
+        return 0;
+    candidate.passed = candidate.host_dma && candidate.pci_read_adapter &&
+                       candidate.interrupt_inventory && candidate.firmware_parser &&
+                       candidate.firmware_rpc && candidate.cleanup;
+    if (!exact_string(CFDictionaryGetValue(dictionary, CFSTR("Status")),
+                       candidate.passed ? CFSTR("passed") : CFSTR("failed")))
+        return 0;
+    candidate.valid = 1;
+    *output = candidate;
+    return 1;
+}
+
 /* Legacy format is decoded only to identify an old loaded kext, never emitted. */
 static int decode_snapshot(CFTypeRef object, struct snapshot *output)
 {
@@ -600,8 +760,8 @@ static int decode_snapshot(CFTypeRef object, struct snapshot *output)
         return 0;
     CFDictionaryRef dictionary = (CFDictionaryRef)object;
     uint64_t value = 0;
-    if (!dictionary_number(dictionary, CFSTR("Format"), 7, &value) ||
-        (value != 1 && value != 2 && value != 3 && value != 4 && value != 5 && value != 6 && value != 7))
+    if (!dictionary_number(dictionary, CFSTR("Format"), 8, &value) ||
+        (value != 1 && value != 2 && value != 3 && value != 4 && value != 5 && value != 6 && value != 7 && value != 8))
         return 0;
     candidate.format = (uint32_t)value;
     int legacy = candidate.format == 1;
@@ -609,7 +769,8 @@ static int decode_snapshot(CFTypeRef object, struct snapshot *output)
     int foundations_format = candidate.format >= 4;
     int callers_format = candidate.format >= 5;
     int lifecycle_format = candidate.format >= 6;
-    int current = candidate.format == 7;
+    int support_format = candidate.format >= 7;
+    int current = candidate.format == 8;
     if (!exact_string(CFDictionaryGetValue(dictionary, CFSTR("Stage")),
                        CFSTR("attached")) ||
         !exact_string(CFDictionaryGetValue(dictionary, CFSTR("AccessPolicy")),
@@ -619,7 +780,7 @@ static int decode_snapshot(CFTypeRef object, struct snapshot *output)
                          candidate.probe_version,
                          sizeof(candidate.probe_version)) ||
         strcmp(candidate.probe_version, legacy ? "0.1.0" : current ? TOOL_VERSION :
-            lifecycle_format ? "0.6.0" : callers_format ? "0.5.0" : foundations_format ? "0.4.0" : two_reads ? "0.3.0" : "0.2.0") != 0)
+            support_format ? "0.7.0" : lifecycle_format ? "0.6.0" : callers_format ? "0.5.0" : foundations_format ? "0.4.0" : two_reads ? "0.3.0" : "0.2.0") != 0)
         return 0;
     if (!legacy && !decode_mmio(CFDictionaryGetValue(dictionary, CFSTR("MMIOResult")),
                                 &candidate.mmio))
@@ -641,8 +802,11 @@ static int decode_snapshot(CFTypeRef object, struct snapshot *output)
     if (lifecycle_format)
         (void)decode_nvport_lifecycle(lifecycle, &candidate.nvport_lifecycle);
     CFTypeRef support = CFDictionaryGetValue(dictionary, CFSTR("NvPortSupport"));
-    if (current)
+    if (support_format)
         (void)decode_nvport_support(support, &candidate.nvport_support);
+    CFTypeRef preparation = CFDictionaryGetValue(dictionary, CFSTR("HardwarePreparation"));
+    if (current)
+        (void)decode_hardware_preparation(preparation, &candidate.hardware_preparation);
     CFIndex expected_keys = legacy ? 13 : two_reads ? 16 : 14;
     if (foundations_format && foundations != NULL)
         ++expected_keys;
@@ -650,7 +814,9 @@ static int decode_snapshot(CFTypeRef object, struct snapshot *output)
         ++expected_keys;
     if (lifecycle_format && lifecycle != NULL)
         ++expected_keys;
-    if (current && support != NULL)
+    if (support_format && support != NULL)
+        ++expected_keys;
+    if (current && preparation != NULL)
         ++expected_keys;
     if (missing_bars_allowed)
         --expected_keys;
@@ -800,7 +966,7 @@ static void read_probe(io_registry_entry_t service, struct report *report)
         return;
     }
     report->attached = 1;
-    report->outdated = report->snapshot.format < 7;
+    report->outdated = report->snapshot.format < 8;
 }
 
 static void read_context(struct report *report)
@@ -982,6 +1148,27 @@ static void write_snapshot(FILE *out, const struct snapshot *snapshot)
             support->consumer ? "true" : "false", support->cleanup ? "true" : "false");
     else
         fputs("null", out);
+    fputs(",\"hardware_preparation\":", out);
+    const struct hardware_preparation_result *preparation = &snapshot->hardware_preparation;
+    if (preparation->valid)
+        fprintf(out, "{\"version\":%" PRIu32 ",\"status\":\"%s\",\"checks\":%" PRIu32
+            ",\"host_dma\":%s,\"pci_read_adapter\":%s,\"interrupt_inventory\":%s,"
+            "\"firmware_parser\":%s,\"firmware_rpc\":%s,\"cleanup\":%s,"
+            "\"dma_mode\":\"%s\",\"dma_bytes\":%" PRIu64 ",\"dma_segments\":%" PRIu32 ",\"dma_reason\":\"%s\","
+            "\"pci_reason\":\"%s\",\"pci_capabilities\":%" PRIu32 ",\"msi_vectors\":%" PRIu32 ",\"msix_vectors\":%" PRIu32 ","
+            "\"msi_observed_enabled\":%s,\"msix_observed_enabled\":%s,"
+            "\"firmware_loaded\":false,\"firmware_image_verified\":false,\"interrupts_enabled\":false,"
+            "\"gpu_initialized\":false,\"rm_initialized\":false,\"device_dma_verified\":false}",
+            preparation->version, preparation->passed ? "passed" : "failed", preparation->checks,
+            preparation->host_dma ? "true" : "false", preparation->pci_read_adapter ? "true" : "false",
+            preparation->interrupt_inventory ? "true" : "false", preparation->firmware_parser ? "true" : "false",
+            preparation->firmware_rpc ? "true" : "false", preparation->cleanup ? "true" : "false",
+            preparation->dma_mode, preparation->dma_bytes, preparation->dma_segments, preparation->dma_reason,
+            preparation->pci_reason, preparation->pci_capabilities, preparation->msi_vectors, preparation->msix_vectors,
+            preparation->msi_observed_enabled ? "true" : "false",
+            preparation->msix_observed_enabled ? "true" : "false");
+    else
+        fputs("null", out);
     fputc('}', out);
 }
 
@@ -1009,8 +1196,12 @@ static const char *report_status(const struct report *report)
         return "invalid_support";
     if (!report->snapshot.nvport_support.passed)
         return "support_failed";
+    if (!report->snapshot.hardware_preparation.valid)
+        return "invalid_preparation";
+    if (!report->snapshot.hardware_preparation.passed)
+        return "preparation_failed";
     if (report->snapshot.hal_matched)
-        return "integrated_passed";
+        return "transport_prepared";
     return report->snapshot.mmio.status == MMIO_REFUSED ||
            report->snapshot.boot42.status == MMIO_REFUSED ? "refused" : "failed";
 }
@@ -1022,13 +1213,14 @@ static int report_exit_code(const struct report *report)
          report->snapshot.caller_integration.valid && report->snapshot.caller_integration.passed &&
          report->snapshot.nvport_lifecycle.valid && report->snapshot.nvport_lifecycle.passed &&
          report->snapshot.nvport_support.valid && report->snapshot.nvport_support.passed &&
+         report->snapshot.hardware_preparation.valid && report->snapshot.hardware_preparation.passed &&
          report->snapshot.mmio.status != MMIO_FAILED &&
          report->snapshot.boot42.status != MMIO_FAILED)) ? 0 : 1;
 }
 
 static void write_report(FILE *out, const struct report *report)
 {
-    fprintf(out, "{\"format\":7,\"tool\":\"nvidia-transport\",\"version\":\"%s\","
+    fprintf(out, "{\"format\":8,\"tool\":\"nvidia-transport\",\"version\":\"%s\","
         "\"target\":{\"vendor_id\":\"0x10de\",\"device_id\":\"0x1f91\","
         "\"subsystem_vendor_id\":\"0x17aa\",\"subsystem_device_id\":\"0x3806\"},"
         "\"status\":\"%s\",\"complete\":%s,"
@@ -1047,7 +1239,7 @@ static void write_report(FILE *out, const struct report *report)
         fputs("null", out);
     }
     fputs(",\"reason\":", out);
-    fputs(report->outdated ? "\"The loaded probe is an older version. Replace the kext on the EFI used for this boot with version 0.7.0.\"" : "null", out);
+    fputs(report->outdated ? "\"The loaded probe is an older version. Replace the kext on the EFI used for this boot with version 0.8.0.\"" : "null", out);
     fputs(",\"warnings\":[", out);
     int emitted = 0;
     for (size_t index = 0; index < WARNING_COUNT; ++index) {
@@ -1227,6 +1419,42 @@ static CFMutableDictionaryRef fixture_nvport_support(void)
     return dictionary;
 }
 
+static CFMutableDictionaryRef fixture_hardware_preparation(void)
+{
+    CFMutableDictionaryRef dictionary = CFDictionaryCreateMutable(kCFAllocatorDefault,
+        0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    if (dictionary == NULL) {
+        fputs("Self-test allocation failed.\n", stderr);
+        exit(1);
+    }
+    fixture_number(dictionary, CFSTR("Version"), 1);
+    fixture_number(dictionary, CFSTR("Checks"), 5);
+    CFDictionarySetValue(dictionary, CFSTR("Status"), CFSTR("passed"));
+    CFDictionarySetValue(dictionary, CFSTR("HostDma"), kCFBooleanTrue);
+    CFDictionarySetValue(dictionary, CFSTR("PciReadAdapter"), kCFBooleanTrue);
+    CFDictionarySetValue(dictionary, CFSTR("InterruptInventory"), kCFBooleanTrue);
+    CFDictionarySetValue(dictionary, CFSTR("FirmwareParser"), kCFBooleanTrue);
+    CFDictionarySetValue(dictionary, CFSTR("FirmwareRpc"), kCFBooleanTrue);
+    CFDictionarySetValue(dictionary, CFSTR("Cleanup"), kCFBooleanTrue);
+    CFDictionarySetValue(dictionary, CFSTR("DmaMode"), CFSTR("provider_mapped"));
+    fixture_number(dictionary, CFSTR("DmaBytes"), 65536);
+    fixture_number(dictionary, CFSTR("DmaSegments"), 16);
+    CFDictionarySetValue(dictionary, CFSTR("DmaReason"), CFSTR("none"));
+    CFDictionarySetValue(dictionary, CFSTR("PciReason"), CFSTR("pci-read-only-inventory-complete"));
+    fixture_number(dictionary, CFSTR("PciCapabilities"), 4);
+    fixture_number(dictionary, CFSTR("MsiVectors"), 8);
+    fixture_number(dictionary, CFSTR("MsixVectors"), 0);
+    CFDictionarySetValue(dictionary, CFSTR("MsiObservedEnabled"), kCFBooleanFalse);
+    CFDictionarySetValue(dictionary, CFSTR("MsixObservedEnabled"), kCFBooleanFalse);
+    CFDictionarySetValue(dictionary, CFSTR("FirmwareLoaded"), kCFBooleanFalse);
+    CFDictionarySetValue(dictionary, CFSTR("FirmwareImageVerified"), kCFBooleanFalse);
+    CFDictionarySetValue(dictionary, CFSTR("DeviceDmaVerified"), kCFBooleanFalse);
+    CFDictionarySetValue(dictionary, CFSTR("InterruptsEnabled"), kCFBooleanFalse);
+    CFDictionarySetValue(dictionary, CFSTR("GpuInitialized"), kCFBooleanFalse);
+    CFDictionarySetValue(dictionary, CFSTR("RmInitialized"), kCFBooleanFalse);
+    return dictionary;
+}
+
 static CFMutableDictionaryRef valid_fixture(void)
 {
     CFMutableDictionaryRef dictionary = CFDictionaryCreateMutable(
@@ -1238,7 +1466,7 @@ static CFMutableDictionaryRef valid_fixture(void)
         fputs("Self-test allocation failed.\n", stderr);
         exit(1);
     }
-    fixture_number(dictionary, CFSTR("Format"), 7);
+    fixture_number(dictionary, CFSTR("Format"), 8);
     CFDictionarySetValue(dictionary, CFSTR("ProbeVersion"), CFSTR(TOOL_VERSION));
     CFDictionarySetValue(dictionary, CFSTR("Stage"), CFSTR("attached"));
     CFDictionarySetValue(dictionary, CFSTR("AccessPolicy"), CFSTR(ACCESS_POLICY));
@@ -1287,6 +1515,9 @@ static CFMutableDictionaryRef valid_fixture(void)
     CFMutableDictionaryRef support = fixture_nvport_support();
     CFDictionarySetValue(dictionary, CFSTR("NvPortSupport"), support);
     CFRelease(support);
+    CFMutableDictionaryRef preparation = fixture_hardware_preparation();
+    CFDictionarySetValue(dictionary, CFSTR("HardwarePreparation"), preparation);
+    CFRelease(preparation);
     return dictionary;
 }
 
@@ -1404,7 +1635,7 @@ static void test_caller_integration(unsigned int *count)
     require_test(decode_snapshot(fixture, &snapshot) && snapshot.caller_integration.passed,
         "caller evidence restored", count);
     classified.snapshot = snapshot;
-    require_test(strcmp(report_status(&classified), "integrated_passed") == 0 &&
+    require_test(strcmp(report_status(&classified), "transport_prepared") == 0 &&
         report_exit_code(&classified) == 0,
         "both foundation and caller evidence enable integrated success", count);
     CFDictionarySetValue(callers, CFSTR("Reserve"), kCFBooleanFalse);
@@ -1427,11 +1658,11 @@ static void test_caller_integration(unsigned int *count)
     char text[4096];
     size_t bytes = fread(text, 1, sizeof(text) - 1, serialized);
     text[bytes] = '\0';
-    require_test(!ferror(serialized) && strstr(text, "\"format\":7") != NULL &&
+    require_test(!ferror(serialized) && strstr(text, "\"format\":8") != NULL &&
         strstr(text, "\"caller_integration\":{\"version\":1,\"status\":\"passed\",\"checks\":3,"
             "\"allocation_callers\":true,\"mutex_callers\":true,\"reserve\":true}") != NULL &&
-        strstr(text, "\"status\":\"integrated_passed\"") != NULL,
-        "serialized v7 report includes independent caller evidence", count);
+        strstr(text, "\"status\":\"transport_prepared\"") != NULL,
+        "serialized v8 report includes independent caller evidence", count);
     fclose(serialized);
     CFRelease(fixture);
     CFRelease(callers);
@@ -1544,7 +1775,7 @@ static void test_nvport_lifecycle(unsigned int *count)
     require_test(decode_snapshot(fixture, &snapshot) && snapshot.nvport_lifecycle.passed,
         "lifecycle evidence restored", count);
     classified.snapshot = snapshot;
-    require_test(strcmp(report_status(&classified), "integrated_passed") == 0 &&
+    require_test(strcmp(report_status(&classified), "transport_prepared") == 0 &&
         report_exit_code(&classified) == 0,
         "lifecycle evidence completes the valid four-block fixture", count);
     CFDictionarySetValue(lifecycle, CFSTR("Cleanup"), kCFBooleanFalse);
@@ -1567,12 +1798,12 @@ static void test_nvport_lifecycle(unsigned int *count)
     char text[4096];
     size_t bytes = fread(text, 1, sizeof(text) - 1, serialized);
     text[bytes] = '\0';
-    require_test(!ferror(serialized) && strstr(text, "\"format\":7") != NULL &&
+    require_test(!ferror(serialized) && strstr(text, "\"format\":8") != NULL &&
         strstr(text, "\"nvport_lifecycle\":{\"version\":1,\"status\":\"passed\",\"checks\":5,"
             "\"lifecycle\":true,\"tracked_allocation\":true,\"owned_mutex\":true,"
             "\"spinlocks\":true,\"cleanup\":true}") != NULL &&
-        strstr(text, "\"status\":\"integrated_passed\"") != NULL,
-        "serialized v7 report includes independent lifecycle evidence", count);
+        strstr(text, "\"status\":\"transport_prepared\"") != NULL,
+        "serialized v8 report includes independent lifecycle evidence", count);
     fclose(serialized);
     CFRelease(fixture);
     CFRelease(lifecycle);
@@ -1684,7 +1915,7 @@ static void test_nvport_support(unsigned int *count)
     require_test(decode_snapshot(fixture, &snapshot) && snapshot.nvport_support.passed,
         "support evidence restored", count);
     classified.snapshot = snapshot;
-    require_test(strcmp(report_status(&classified), "integrated_passed") == 0 &&
+    require_test(strcmp(report_status(&classified), "transport_prepared") == 0 &&
         report_exit_code(&classified) == 0,
         "four independent CPU blocks enable v7 integrated success", count);
     CFDictionarySetValue(support, CFSTR("Cleanup"), kCFBooleanFalse);
@@ -1707,14 +1938,324 @@ static void test_nvport_support(unsigned int *count)
     char text[4096];
     size_t bytes = fread(text, 1, sizeof(text) - 1, serialized);
     text[bytes] = '\0';
-    require_test(!ferror(serialized) && strstr(text, "\"format\":7") != NULL &&
+    require_test(!ferror(serialized) && strstr(text, "\"format\":8") != NULL &&
         strstr(text, "\"nvport_support\":{\"version\":1,\"status\":\"passed\",\"checks\":4,"
             "\"core\":true,\"utilities\":true,\"consumer\":true,\"cleanup\":true}") != NULL &&
-        strstr(text, "\"status\":\"integrated_passed\"") != NULL,
-        "serialized v7 report includes independent support evidence", count);
+        strstr(text, "\"status\":\"transport_prepared\"") != NULL,
+        "serialized v8 report includes independent support evidence", count);
     fclose(serialized);
     CFRelease(fixture);
     CFRelease(support);
+}
+
+static void test_hardware_preparation(unsigned int *count)
+{
+    struct hardware_preparation_result decoded;
+    memset(&decoded, 0, sizeof(decoded));
+    require_test(!decode_hardware_preparation(NULL, &decoded),
+        "missing hardware preparation dictionary", count);
+    require_test(!decode_hardware_preparation(kCFBooleanTrue, &decoded),
+        "wrong hardware preparation type", count);
+    CFMutableDictionaryRef preparation = fixture_hardware_preparation();
+    require_test(decode_hardware_preparation(preparation, &decoded) && decoded.valid &&
+        decoded.passed && decoded.version == 1 && decoded.checks == 5,
+        "valid hardware preparation wire contract", count);
+    CFDictionarySetValue(preparation, CFSTR("Extra"), kCFBooleanTrue);
+    require_test(!decode_hardware_preparation(preparation, &decoded),
+        "extra hardware preparation key", count);
+    CFDictionaryRemoveValue(preparation, CFSTR("Extra"));
+    const CFStringRef numeric_keys[] = {CFSTR("Version"), CFSTR("Checks")};
+    for (size_t index = 0; index < sizeof(numeric_keys) / sizeof(numeric_keys[0]); ++index) {
+        CFDictionaryRemoveValue(preparation, numeric_keys[index]);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "missing preparation numeric field", count);
+        CFDictionarySetValue(preparation, numeric_keys[index], kCFBooleanTrue);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "boolean preparation numeric field", count);
+        double fractional = 1.0;
+        CFNumberRef floating = CFNumberCreate(kCFAllocatorDefault,
+            kCFNumberDoubleType, &fractional);
+        require_test(floating != NULL, "floating preparation fixture allocation", count);
+        CFDictionarySetValue(preparation, numeric_keys[index], floating);
+        CFRelease(floating);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "floating preparation numeric field", count);
+        fixture_number(preparation, numeric_keys[index], index == 0 ? 1 : 5);
+    }
+    const int64_t bad_versions[] = {0, -1, 2, INT64_C(0x100000000)};
+    for (size_t index = 0; index < sizeof(bad_versions) / sizeof(bad_versions[0]); ++index) {
+        fixture_number(preparation, CFSTR("Version"), bad_versions[index]);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "unpreparationed hardware preparation version", count);
+    }
+    fixture_number(preparation, CFSTR("Version"), 1);
+    const int64_t bad_checks[] = {0, -1, INT64_C(0x100000000)};
+    for (size_t index = 0; index < sizeof(bad_checks) / sizeof(bad_checks[0]); ++index) {
+        fixture_number(preparation, CFSTR("Checks"), bad_checks[index]);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "preparation check count range", count);
+    }
+    fixture_number(preparation, CFSTR("Checks"), UINT32_MAX);
+    require_test(decode_hardware_preparation(preparation, &decoded) &&
+        decoded.checks == UINT32_MAX, "maximum preparation check count", count);
+    fixture_number(preparation, CFSTR("Checks"), 5);
+    const CFStringRef component_keys[] = {
+        CFSTR("HostDma"), CFSTR("PciReadAdapter"), CFSTR("InterruptInventory"),
+        CFSTR("FirmwareParser"), CFSTR("FirmwareRpc"), CFSTR("Cleanup")
+    };
+    for (size_t index = 0; index < sizeof(component_keys) / sizeof(component_keys[0]); ++index) {
+        CFDictionaryRemoveValue(preparation, component_keys[index]);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "missing preparation component", count);
+        fixture_number(preparation, component_keys[index], 1);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "preparation component requires CFBoolean", count);
+        CFDictionarySetValue(preparation, component_keys[index], kCFBooleanFalse);
+        if (index == 0) {
+            CFDictionarySetValue(preparation, CFSTR("DmaReason"), CFSTR("allocation_failed"));
+            fixture_number(preparation, CFSTR("DmaBytes"), 0);
+            fixture_number(preparation, CFSTR("DmaSegments"), 0);
+        }
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "passed preparation status cannot hide a false component", count);
+        CFDictionarySetValue(preparation, CFSTR("Status"), CFSTR("failed"));
+        require_test(decode_hardware_preparation(preparation, &decoded) && decoded.valid &&
+            !decoded.passed, "preparation component failure is valid evidence", count);
+        CFDictionarySetValue(preparation, component_keys[index], kCFBooleanTrue);
+        if (index == 0) {
+            CFDictionarySetValue(preparation, CFSTR("DmaReason"), CFSTR("none"));
+            fixture_number(preparation, CFSTR("DmaBytes"), 65536);
+            fixture_number(preparation, CFSTR("DmaSegments"), 16);
+        }
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "failed preparation status requires a false component", count);
+        CFDictionarySetValue(preparation, CFSTR("Status"), CFSTR("passed"));
+    }
+    const CFStringRef dma_strings[] = {CFSTR("DmaMode"), CFSTR("DmaReason")};
+    for (size_t index = 0; index < sizeof(dma_strings) / sizeof(dma_strings[0]); ++index) {
+        CFDictionaryRemoveValue(preparation, dma_strings[index]);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "missing DMA mode or reason", count);
+        CFDictionarySetValue(preparation, dma_strings[index], kCFBooleanTrue);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "DMA mode or reason requires a string", count);
+        CFDictionarySetValue(preparation, dma_strings[index], CFSTR("unknown"));
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "unknown DMA mode or reason rejected", count);
+        CFDictionarySetValue(preparation, dma_strings[index],
+            index == 0 ? CFSTR("provider_mapped") : CFSTR("none"));
+    }
+    const CFStringRef dma_numbers[] = {CFSTR("DmaBytes"), CFSTR("DmaSegments")};
+    for (size_t index = 0; index < sizeof(dma_numbers) / sizeof(dma_numbers[0]); ++index) {
+        CFDictionaryRemoveValue(preparation, dma_numbers[index]);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "missing DMA geometry", count);
+        CFDictionarySetValue(preparation, dma_numbers[index], kCFBooleanFalse);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "DMA geometry cannot be Boolean", count);
+        double fractional = 1.0;
+        CFNumberRef floating = CFNumberCreate(kCFAllocatorDefault,
+            kCFNumberDoubleType, &fractional);
+        require_test(floating != NULL, "DMA geometry floating fixture", count);
+        CFDictionarySetValue(preparation, dma_numbers[index], floating);
+        CFRelease(floating);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "DMA geometry cannot be floating point", count);
+        fixture_number(preparation, dma_numbers[index], -1);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "DMA geometry cannot be negative", count);
+        fixture_number(preparation, dma_numbers[index], index == 0 ? 65537 : 33);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "DMA geometry cannot exceed preparation bounds", count);
+        fixture_number(preparation, dma_numbers[index], index == 0 ? 65536 : 16);
+    }
+    CFDictionarySetValue(preparation, CFSTR("DmaMode"), CFSTR("direct_untranslated"));
+    require_test(decode_hardware_preparation(preparation, &decoded) && decoded.passed &&
+        !decoded.device_dma_verified, "untranslated preparation is explicit without device DMA proof", count);
+    CFDictionarySetValue(preparation, CFSTR("DmaMode"), CFSTR("unavailable"));
+    require_test(!decode_hardware_preparation(preparation, &decoded),
+        "successful host DMA cannot use unavailable mode", count);
+    CFDictionarySetValue(preparation, CFSTR("DmaMode"), CFSTR("provider_mapped"));
+    CFDictionarySetValue(preparation, CFSTR("DmaReason"), CFSTR("allocation_failed"));
+    require_test(!decode_hardware_preparation(preparation, &decoded),
+        "successful host DMA cannot hide a failure reason", count);
+    CFDictionarySetValue(preparation, CFSTR("DmaReason"), CFSTR("none"));
+    fixture_number(preparation, CFSTR("DmaBytes"), 1);
+    require_test(!decode_hardware_preparation(preparation, &decoded),
+        "successful host DMA requires complete buffer coverage", count);
+    fixture_number(preparation, CFSTR("DmaBytes"), 65536);
+    fixture_number(preparation, CFSTR("DmaSegments"), 0);
+    require_test(!decode_hardware_preparation(preparation, &decoded),
+        "successful host DMA cannot omit its segments", count);
+    fixture_number(preparation, CFSTR("DmaSegments"), 16);
+    CFDictionaryRemoveValue(preparation, CFSTR("PciReason"));
+    require_test(!decode_hardware_preparation(preparation, &decoded),
+        "missing PCI inventory reason", count);
+    CFDictionarySetValue(preparation, CFSTR("PciReason"), kCFBooleanTrue);
+    require_test(!decode_hardware_preparation(preparation, &decoded),
+        "PCI inventory reason requires a string", count);
+    CFDictionarySetValue(preparation, CFSTR("PciReason"), CFSTR("unknown"));
+    require_test(!decode_hardware_preparation(preparation, &decoded),
+        "unknown PCI inventory reason", count);
+    CFDictionarySetValue(preparation, CFSTR("PciReason"), CFSTR("pci-context-unbound"));
+    require_test(!decode_hardware_preparation(preparation, &decoded),
+        "successful interrupt inventory requires complete PCI reason", count);
+    CFDictionarySetValue(preparation, CFSTR("InterruptInventory"), kCFBooleanFalse);
+    CFDictionarySetValue(preparation, CFSTR("Status"), CFSTR("failed"));
+    require_test(decode_hardware_preparation(preparation, &decoded) && !decoded.passed,
+        "failed inventory retains its explicit PCI reason", count);
+    CFDictionarySetValue(preparation, CFSTR("PciReason"), CFSTR("pci-read-only-inventory-complete"));
+    CFDictionarySetValue(preparation, CFSTR("InterruptInventory"), kCFBooleanTrue);
+    CFDictionarySetValue(preparation, CFSTR("Status"), CFSTR("passed"));
+    const CFStringRef pci_numbers[] = {CFSTR("PciCapabilities"), CFSTR("MsiVectors"), CFSTR("MsixVectors")};
+    const int64_t pci_limits[] = {48, 32, 2048};
+    const int64_t pci_valid[] = {4, 8, 0};
+    for (size_t index = 0; index < sizeof(pci_numbers) / sizeof(pci_numbers[0]); ++index) {
+        CFDictionaryRemoveValue(preparation, pci_numbers[index]);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "missing PCI inventory number", count);
+        CFDictionarySetValue(preparation, pci_numbers[index], kCFBooleanFalse);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "PCI inventory number cannot be Boolean", count);
+        double fractional = 1.0;
+        CFNumberRef floating = CFNumberCreate(kCFAllocatorDefault,
+            kCFNumberDoubleType, &fractional);
+        require_test(floating != NULL, "PCI inventory floating fixture", count);
+        CFDictionarySetValue(preparation, pci_numbers[index], floating);
+        CFRelease(floating);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "PCI inventory number cannot be floating point", count);
+        fixture_number(preparation, pci_numbers[index], -1);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "PCI inventory number cannot be negative", count);
+        fixture_number(preparation, pci_numbers[index], pci_limits[index] + 1);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "PCI inventory number exceeds its bound", count);
+        fixture_number(preparation, pci_numbers[index], pci_limits[index]);
+        require_test(decode_hardware_preparation(preparation, &decoded),
+            "PCI inventory maximum accepted", count);
+        fixture_number(preparation, pci_numbers[index], pci_valid[index]);
+    }
+    fixture_number(preparation, CFSTR("PciCapabilities"), 0);
+    require_test(!decode_hardware_preparation(preparation, &decoded),
+        "successful interrupt inventory requires a capability", count);
+    fixture_number(preparation, CFSTR("PciCapabilities"), 4);
+    fixture_number(preparation, CFSTR("MsiVectors"), 3);
+    require_test(!decode_hardware_preparation(preparation, &decoded),
+        "MSI vector count must be zero or a bounded power of two", count);
+    fixture_number(preparation, CFSTR("MsiVectors"), 8);
+    const CFStringRef observed_keys[] = {CFSTR("MsiObservedEnabled"), CFSTR("MsixObservedEnabled")};
+    const CFStringRef vector_keys[] = {CFSTR("MsiVectors"), CFSTR("MsixVectors")};
+    for (size_t index = 0; index < sizeof(observed_keys) / sizeof(observed_keys[0]); ++index) {
+        CFDictionaryRemoveValue(preparation, observed_keys[index]);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "missing observed interrupt enable bit", count);
+        fixture_number(preparation, observed_keys[index], 0);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "observed enable bit requires CFBoolean", count);
+        CFDictionarySetValue(preparation, observed_keys[index], kCFBooleanTrue);
+        fixture_number(preparation, vector_keys[index], 0);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "observed enabled interrupt requires vectors", count);
+        fixture_number(preparation, vector_keys[index], 1);
+        require_test(decode_hardware_preparation(preparation, &decoded) && decoded.passed &&
+            !decoded.interrupts_enabled,
+            "observed firmware enable bit does not claim this probe armed interrupts", count);
+        CFDictionarySetValue(preparation, observed_keys[index], kCFBooleanFalse);
+        fixture_number(preparation, vector_keys[index], index == 0 ? 8 : 0);
+    }
+    fixture_number(preparation, CFSTR("DmaSegments"), 15);
+    require_test(!decode_hardware_preparation(preparation, &decoded),
+        "64 KiB preparation requires at least sixteen bounded 4 KiB segments", count);
+    fixture_number(preparation, CFSTR("DmaSegments"), 16);
+    const CFStringRef blocked_keys[] = {
+        CFSTR("FirmwareLoaded"), CFSTR("FirmwareImageVerified"), CFSTR("InterruptsEnabled"),
+        CFSTR("GpuInitialized"), CFSTR("RmInitialized"), CFSTR("DeviceDmaVerified")
+    };
+    for (size_t index = 0; index < sizeof(blocked_keys) / sizeof(blocked_keys[0]); ++index) {
+        CFDictionaryRemoveValue(preparation, blocked_keys[index]);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "missing activity boundary flag", count);
+        fixture_number(preparation, blocked_keys[index], 0);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "activity boundary requires CFBoolean false", count);
+        CFDictionarySetValue(preparation, blocked_keys[index], kCFBooleanTrue);
+        require_test(!decode_hardware_preparation(preparation, &decoded),
+            "preparation cannot claim forbidden GPU activity", count);
+        CFDictionarySetValue(preparation, blocked_keys[index], kCFBooleanFalse);
+    }
+    CFDictionaryRemoveValue(preparation, CFSTR("Status"));
+    require_test(!decode_hardware_preparation(preparation, &decoded),
+        "missing preparation status", count);
+    CFDictionarySetValue(preparation, CFSTR("Status"), kCFBooleanTrue);
+    require_test(!decode_hardware_preparation(preparation, &decoded),
+        "wrong preparation status type", count);
+    CFDictionarySetValue(preparation, CFSTR("Status"), CFSTR("unknown"));
+    require_test(!decode_hardware_preparation(preparation, &decoded),
+        "unknown preparation status", count);
+    CFDictionarySetValue(preparation, CFSTR("Status"), CFSTR("passed"));
+
+    struct snapshot snapshot;
+    CFMutableDictionaryRef fixture = valid_fixture();
+    CFDictionaryRemoveValue(fixture, CFSTR("HardwarePreparation"));
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.hal_matched &&
+        snapshot.os_foundations.passed && snapshot.caller_integration.passed &&
+        snapshot.nvport_lifecycle.passed && snapshot.nvport_support.passed &&
+        !snapshot.hardware_preparation.valid,
+        "missing preparation preserves independent v7 evidence", count);
+    struct report classified;
+    memset(&classified, 0, sizeof(classified));
+    classified.complete = 1;
+    classified.attached = 1;
+    classified.snapshot = snapshot;
+    require_test(strcmp(report_status(&classified), "invalid_preparation") == 0 &&
+        report_exit_code(&classified) != 0,
+        "v7 success alone cannot report v8 transport preparation", count);
+    CFDictionarySetValue(fixture, CFSTR("HardwarePreparation"), kCFBooleanTrue);
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.hal_matched &&
+        !snapshot.hardware_preparation.valid,
+        "invalid preparation preserves independent GPU evidence", count);
+    CFDictionarySetValue(fixture, CFSTR("HardwarePreparation"), preparation);
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.hardware_preparation.passed,
+        "preparation evidence restored", count);
+    classified.snapshot = snapshot;
+    require_test(strcmp(report_status(&classified), "transport_prepared") == 0 &&
+        report_exit_code(&classified) == 0,
+        "all preparation and prior CPU blocks enable the bounded transport result", count);
+    CFDictionarySetValue(preparation, CFSTR("Cleanup"), kCFBooleanFalse);
+    CFDictionarySetValue(preparation, CFSTR("Status"), CFSTR("failed"));
+    require_test(decode_snapshot(fixture, &snapshot) && !snapshot.hardware_preparation.passed,
+        "cleanup failure remains explicit preparation evidence", count);
+    classified.snapshot = snapshot;
+    require_test(strcmp(report_status(&classified), "preparation_failed") == 0 &&
+        report_exit_code(&classified) != 0,
+        "cleanup failure rejects integrated success", count);
+    CFDictionarySetValue(preparation, CFSTR("Cleanup"), kCFBooleanTrue);
+    CFDictionarySetValue(preparation, CFSTR("Status"), CFSTR("passed"));
+    require_test(decode_snapshot(fixture, &snapshot), "preparation serialization fixture", count);
+    classified.snapshot = snapshot;
+    FILE *serialized = tmpfile();
+    require_test(serialized != NULL, "preparation serialization allocation", count);
+    write_report(serialized, &classified);
+    require_test(fflush(serialized) == 0 && fseek(serialized, 0, SEEK_SET) == 0,
+        "preparation serialization rewind", count);
+    char text[4096];
+    size_t bytes = fread(text, 1, sizeof(text) - 1, serialized);
+    text[bytes] = '\0';
+    require_test(!ferror(serialized) && strstr(text, "\"format\":8") != NULL &&
+        strstr(text, "\"hardware_preparation\":{\"version\":1,\"status\":\"passed\",\"checks\":5,"
+            "\"host_dma\":true,\"pci_read_adapter\":true,\"interrupt_inventory\":true,"
+            "\"firmware_parser\":true,\"firmware_rpc\":true,\"cleanup\":true,"
+            "\"dma_mode\":\"provider_mapped\",\"dma_bytes\":65536,\"dma_segments\":16,\"dma_reason\":\"none\","
+            "\"pci_reason\":\"pci-read-only-inventory-complete\",\"pci_capabilities\":4,\"msi_vectors\":8,\"msix_vectors\":0,"
+            "\"msi_observed_enabled\":false,\"msix_observed_enabled\":false,"
+            "\"firmware_loaded\":false,\"firmware_image_verified\":false,\"interrupts_enabled\":false,"
+            "\"gpu_initialized\":false,\"rm_initialized\":false,\"device_dma_verified\":false}") != NULL &&
+        strstr(text, "\"status\":\"transport_prepared\"") != NULL,
+        "serialized v8 report distinguishes preparation from GPU startup", count);
+    fclose(serialized);
+    CFRelease(fixture);
+    CFRelease(preparation);
 }
 
 static int run_self_tests(void)
@@ -1723,6 +2264,7 @@ static int run_self_tests(void)
     test_caller_integration(&count);
     test_nvport_lifecycle(&count);
     test_nvport_support(&count);
+    test_hardware_preparation(&count);
     struct snapshot snapshot;
     CFMutableDictionaryRef fixture = valid_fixture();
     require_test(decode_snapshot(fixture, &snapshot) &&
@@ -1737,9 +2279,9 @@ static int run_self_tests(void)
     CFDictionaryRemoveValue(fixture, CFSTR("Extra"));
     CFDictionaryRemoveValue(fixture, CFSTR("Format"));
     require_test(!decode_snapshot(fixture, &snapshot), "missing format", &count);
-    fixture_number(fixture, CFSTR("Format"), 8);
+    fixture_number(fixture, CFSTR("Format"), 9);
     require_test(!decode_snapshot(fixture, &snapshot), "unsupported format", &count);
-    fixture_number(fixture, CFSTR("Format"), 7);
+    fixture_number(fixture, CFSTR("Format"), 8);
     CFDictionarySetValue(fixture, CFSTR("VendorID"), kCFBooleanTrue);
     require_test(!decode_snapshot(fixture, &snapshot), "boolean numeric field", &count);
     fixture_number(fixture, CFSTR("VendorID"), -1);
@@ -1754,7 +2296,7 @@ static int run_self_tests(void)
     CFDictionarySetValue(fixture, CFSTR("Format"), floating);
     CFRelease(floating);
     require_test(!decode_snapshot(fixture, &snapshot), "floating numeric field", &count);
-    fixture_number(fixture, CFSTR("Format"), 7);
+    fixture_number(fixture, CFSTR("Format"), 8);
     fixture_number(fixture, CFSTR("SubsystemID"), 0x3807);
     require_test(!decode_snapshot(fixture, &snapshot), "wrong subsystem", &count);
     fixture_number(fixture, CFSTR("SubsystemID"), 0x3806);
@@ -1921,6 +2463,7 @@ static int run_self_tests(void)
     CFDictionaryRemoveValue(fixture, CFSTR("CallerIntegration"));
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortLifecycle"));
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortSupport"));
+    CFDictionaryRemoveValue(fixture, CFSTR("HardwarePreparation"));
     fixture_number(fixture, CFSTR("Format"), 1);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.1.0"));
     CFDictionarySetValue(fixture, CFSTR("AccessPolicy"), CFSTR(LEGACY_ACCESS_POLICY));
@@ -1937,6 +2480,7 @@ static int run_self_tests(void)
     CFDictionaryRemoveValue(fixture, CFSTR("CallerIntegration"));
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortLifecycle"));
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortSupport"));
+    CFDictionaryRemoveValue(fixture, CFSTR("HardwarePreparation"));
     fixture_number(fixture, CFSTR("Format"), 2);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.2.0"));
     CFDictionarySetValue(fixture, CFSTR("AccessPolicy"), CFSTR(LEGACY_MMIO_ACCESS_POLICY));
@@ -1951,6 +2495,7 @@ static int run_self_tests(void)
     CFDictionaryRemoveValue(fixture, CFSTR("CallerIntegration"));
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortLifecycle"));
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortSupport"));
+    CFDictionaryRemoveValue(fixture, CFSTR("HardwarePreparation"));
     fixture_number(fixture, CFSTR("Format"), 3);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.3.0"));
     require_test(decode_snapshot(fixture, &snapshot) && snapshot.format == 3 &&
@@ -1964,6 +2509,7 @@ static int run_self_tests(void)
     CFDictionaryRemoveValue(fixture, CFSTR("CallerIntegration"));
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortLifecycle"));
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortSupport"));
+    CFDictionaryRemoveValue(fixture, CFSTR("HardwarePreparation"));
     fixture_number(fixture, CFSTR("Format"), 4);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.4.0"));
     require_test(decode_snapshot(fixture, &snapshot) && snapshot.format == 4 &&
@@ -1977,6 +2523,7 @@ static int run_self_tests(void)
     fixture = valid_fixture();
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortLifecycle"));
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortSupport"));
+    CFDictionaryRemoveValue(fixture, CFSTR("HardwarePreparation"));
     fixture_number(fixture, CFSTR("Format"), 5);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.5.0"));
     require_test(decode_snapshot(fixture, &snapshot) && snapshot.format == 5 &&
@@ -1989,6 +2536,7 @@ static int run_self_tests(void)
 
     fixture = valid_fixture();
     CFDictionaryRemoveValue(fixture, CFSTR("NvPortSupport"));
+    CFDictionaryRemoveValue(fixture, CFSTR("HardwarePreparation"));
     fixture_number(fixture, CFSTR("Format"), 6);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.6.0"));
     require_test(decode_snapshot(fixture, &snapshot) && snapshot.format == 6 &&
@@ -2006,6 +2554,27 @@ static int run_self_tests(void)
         "successful v6 cannot be classified as v7 integrated success", &count);
     CFDictionarySetValue(fixture, CFSTR("Extra"), CFSTR("not allowed"));
     require_test(!decode_snapshot(fixture, &snapshot), "version 0.6.0 extra rejected", &count);
+    CFRelease(fixture);
+
+    fixture = valid_fixture();
+    CFDictionaryRemoveValue(fixture, CFSTR("HardwarePreparation"));
+    fixture_number(fixture, CFSTR("Format"), 7);
+    CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.7.0"));
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.format == 7 &&
+        snapshot.hal_matched && snapshot.os_foundations.passed &&
+        snapshot.caller_integration.passed && snapshot.nvport_lifecycle.passed &&
+        snapshot.nvport_support.passed && !snapshot.hardware_preparation.valid,
+        "strict version 0.7.0 snapshot recognized without hardware preparation", &count);
+    struct report old_preparation;
+    memset(&old_preparation, 0, sizeof(old_preparation));
+    old_preparation.complete = 1;
+    old_preparation.attached = 1;
+    old_preparation.outdated = snapshot.format < 8;
+    old_preparation.snapshot = snapshot;
+    require_test(strcmp(report_status(&old_preparation), "outdated_probe") == 0,
+        "successful v7 cannot be classified as v8 transport preparation", &count);
+    CFDictionarySetValue(fixture, CFSTR("Extra"), CFSTR("not allowed"));
+    require_test(!decode_snapshot(fixture, &snapshot), "version 0.7.0 extra rejected", &count);
     CFRelease(fixture);
 
     fixture = valid_fixture();
@@ -2141,6 +2710,8 @@ static int run_self_tests(void)
     classified.snapshot.nvport_lifecycle.passed = 1;
     classified.snapshot.nvport_support.valid = 1;
     classified.snapshot.nvport_support.passed = 1;
+    classified.snapshot.hardware_preparation.valid = 1;
+    classified.snapshot.hardware_preparation.passed = 1;
     classified.snapshot.mmio.status = MMIO_REFUSED;
     classified.snapshot.boot42.status = MMIO_NOT_ATTEMPTED;
     require_test(strcmp(report_status(&classified), "refused") == 0 &&
@@ -2151,7 +2722,7 @@ static int run_self_tests(void)
     classified.snapshot.mmio.status = MMIO_IDENTIFIED;
     classified.snapshot.boot42.status = MMIO_IDENTIFIED;
     classified.snapshot.hal_matched = 1;
-    require_test(strcmp(report_status(&classified), "integrated_passed") == 0 &&
+    require_test(strcmp(report_status(&classified), "transport_prepared") == 0 &&
         report_exit_code(&classified) == 0, "identified result", &count);
     classified.snapshot.os_foundations.passed = 0;
     require_test(strcmp(report_status(&classified), "foundations_failed") == 0 &&
@@ -2192,7 +2763,7 @@ static int run_self_tests(void)
     size_t serialized_size = fread(serialized_report, 1, sizeof(serialized_report) - 1, serialized);
     serialized_report[serialized_size] = '\0';
     require_test(!ferror(serialized) && strstr(serialized_report, "\"probe\":null") != NULL &&
-        strstr(serialized_report, "version 0.7.0") != NULL &&
+        strstr(serialized_report, "version 0.8.0") != NULL &&
         strstr(serialized_report, "raw_value") == NULL,
         "legacy report emits fixed instruction without snapshot", &count);
     fclose(serialized);
@@ -2294,7 +2865,7 @@ static int run_self_tests(void)
     require_test(!ferror(serialized) && strstr(serialized_report,
         "\"os_foundations\":{\"version\":1,\"status\":\"passed\",\"checks\":5,"
         "\"timer\":true,\"memory\":true,\"atomics\":true,\"allocation\":true,\"mutex\":true}") != NULL &&
-        strstr(serialized_report, "\"status\":\"integrated_passed\"") != NULL,
+        strstr(serialized_report, "\"status\":\"transport_prepared\"") != NULL,
         "serialized integrated report includes all foundation evidence", &count);
     fclose(serialized);
     CFRelease(foundations);

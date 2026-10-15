@@ -15,13 +15,14 @@ Start with the [project README](../README.md) for the current state and scope. D
 
 | Guide | Purpose |
 |---|---|
+| [NVIDIA hardware-transport preparation](../packages/nvidia-hardware-transport/README.md) | V8 candidate: one combined host DMA, read-only PCI/interrupt inventory and synthetic firmware/RPC block; native CI and one laptop checkpoint pending |
 | [Passive CPU sensors](../packages/cpu-sensors/README.md) | A continuous sensor reading with no CPU workload; complete temperature readings at idle and during desktop activity |
 | [NVIDIA CPU support runtime](../packages/nvidia-nvport-runtime/README.md) | V7 confirmed in the Tahoe kernel: checked memory/PRNG startup, original utilities and vector/list consumers; all 258 combined checks passed, cleanup complete and no warnings |
 | [CPU, temperature and power](../packages/cpu-thermal/README.md) | Grouped idle, short-load and recovery collector; sustained-cooling validation remains separate from the successful activity readings |
 | [NVIDIA NVPort lifecycle](../packages/nvidia-nvport-lifecycle/README.md) | V6 tracked memory, spinlocks and allocator-owned mutex lifecycle confirmed in the Tahoe kernel: 72 lifecycle checks passed, including cleanup, with no warnings |
 | [NVIDIA NVPort callers](../packages/nvidia-caller-integration/README.md) | Original allocation/mutex caller integration with bounded reserve and mutex backend; v5 kernel startup confirmed with 35 caller/reserve checks and 23 foundation checks |
 | [NVIDIA Darwin OS adapter](../packages/nvidia-os-adapter/README.md) | CPU-only clock, RAM, atomics, allocation and thread mutexes; integrated v4 kernel startup check confirmed on the laptop; native/sanitizer checks and kernel packaging passed |
-| [NVIDIA PCI transport](../packages/nvidia-transport/README.md) | V7 confirmed in the Tahoe kernel: 128 support, 72 lifecycle, 35 caller/reserve and 23 foundation checks; two-read TU117 match retained; no GPU initialization or acceleration |
+| [NVIDIA PCI transport](../packages/nvidia-transport/README.md) | V8 candidate delivery and format-8 reporting; v7 remains the confirmed 258-check kernel baseline, with the same two-read TU117 match |
 | [NVIDIA PCI inventory](../packages/nvidia-pci/README.md) | Native read-only inventory; active target PCI visibility is confirmed |
 | [Intel graphics](guides/intel-graphics.md) | Acceleration and stability checks |
 | [Boot and networking](guides/boot-network.md) | Backlight boot fix, HeliPort and Bluetooth |
@@ -37,7 +38,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 
 ## Reference
 
-- [NVIDIA port assessment](reference/nvidia-port-assessment.md): pinned source, confirmed two-read identification/local HAL table match and CPU-only OS-adapter validation scope.
+- [NVIDIA port assessment](reference/nvidia-port-assessment.md): pinned source, confirmed CPU baseline, v8 transport-preparation scope and remaining RM/GSP integration boundaries.
 - [ACPI analysis](reference/acpi-analysis.md), [ACPI patch review](reference/acpi-patch-review.md) and [initial EFI delivery review](reference/efi-review.md).
 - [External disk installation](reference/installation.md) and [initial EFI instructions](reference/first-boot.md), written before the working configuration.
 - [Repository layout](reference/repository-layout.md), including the distinction between source modules and generated ZIP packages.

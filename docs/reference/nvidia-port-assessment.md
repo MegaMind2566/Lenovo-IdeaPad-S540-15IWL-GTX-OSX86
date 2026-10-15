@@ -2,7 +2,7 @@
 
 Reviewed on October 15, 2026. Target: Lenovo IdeaPad S540-15IWL GTX, Intel macOS Tahoe, NVIDIA GTX 1650 Max-Q, PCI `10DE:1F91`.
 
-**Status:** PCI visibility, attachment, the two-read TU117 match and the integrated v0.7.0 sequential CPU startup are confirmed on the laptop. The [transport package](../../packages/nvidia-transport/README.md) combines foundations, original allocation/mutex callers, a bounded reserve and tracked memory/owned-object lifecycle. All 258 kernel startup checks passed, including checked support-core initialization, utilities, vector/list consumers and cleanup, with no warnings. Concurrent kernel execution, interrupt behavior and full NVIDIA caller compatibility remain unvalidated. HAL instantiation, resource-manager integration, GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
+**Status:** PCI visibility, attachment, the two-read TU117 match and integrated v0.7.0 sequential CPU startup are confirmed on the laptop. All 258 kernel startup checks passed, including checked support-core initialization, utilities, vector/list consumers and cleanup, with no warnings. The [v8 hardware-transport preparation](../../packages/nvidia-hardware-transport/README.md) is implemented as a candidate awaiting native macOS CI, compiled-package verification and one combined laptop checkpoint. It adds host DMA preparation, read-only PCI/interrupt inventory and synthetic firmware/RPC preflight. Device DMA, interrupt registration/delivery, full RM/HAL construction, real firmware loading, GPU initialization and acceleration remain unimplemented. Runtime stop/unload and concurrent kernel execution remain untested. Intel graphics remains the operating display configuration.
 
 **V6 confirmed:** The combined [NVPort lifecycle block](../../packages/nvidia-nvport-lifecycle/README.md), source `a6f6555624b4395454045bbce710c08cf7b6309e`, passed [native Intel CI and package verification](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38732985934). The format-6 laptop report confirms all 130 kernel startup checks (72 lifecycle, 35 caller/reserve, 23 foundations), cleanup complete, verified provider identity, the two-read TU117 variant-41 match and no warnings. No repeat laptop test is required. Full RM operation and GPU initialization remain unimplemented.
 
@@ -160,6 +160,20 @@ Those userspace backends do not validate kernel interrupt behavior or blocking w
 
 The format-6 laptop report confirms version `0.6.0`, `integrated_passed` and `complete=true`. All 72 lifecycle, 35 caller/reserve and 23 foundation checks passed in the Tahoe kernel, with every component true, including cleanup. The actual PCI provider identity is verified; TU117 variant 41 matched through exactly two read-only identification loads. The report has no warnings and a null reason. This completes the bounded sequential startup checkpoint; no repeat laptop test is required. Raw reports and resource addresses remain private. The hardware policy is unchanged: no HAL/RM instantiation, GPU initialization, firmware, DMA or graphics acceleration.
 
+## V8 candidate: host transport and firmware preflight
+
+Version `0.8.0` / report format `8` groups transport preparation and the next stage's compatible preflight checks under the existing startup lease. Its successful result is `transport_prepared`, separate from earlier `integrated_passed` CPU milestones. The 258 confirmed CPU checks remain automatic regression coverage in the same startup. Exactly two read-only GPU identification loads are retained; the new PCI adapter reads standard configuration space without writes.
+
+The Darwin path allocates a wired 64 KiB IOBufferMemoryDescriptor and explicitly prepares an IODMACommand, enumerates bounded segments, checks a CPU pattern and completes/releases its resources. It uses a resolved provider IOMapper when published. An absent mapper property selects explicit untranslated preparation; this does not establish the absence of an IOMMU or a usable device DMA mapping. An unresolved mapper is refused rather than entering an unbounded mapper-resolution wait. No address or command is submitted to the GPU.
+
+The exact NVIDIA `os_pci_read_byte`, `os_pci_read_word` and `os_pci_read_dword` signatures are implemented over borrowed, authenticated provider context. A bounded capability walk checks PM, MSI and MSI-X structure, loops, ranges and overlap; MSI-X table/PBA spans are checked against already-published BAR descriptors and validated BAR type/width. The report distinguishes observed MSI/MSI-X enable bits from enabling or registering interrupts, which this component does not perform.
+
+The [firmware preflight](../../packages/nvidia-hardware-transport/firmware/README.md) pins eleven NVIDIA source inputs at release `615.78.08`. Its hardened ELF64 parser checks the required version, image, TU11x signature and build-id sections. Actual-byte SHA256, checked buffer layout and plain MCTP/NVDM/RPC framing run on CPU fixtures, with sequence, deadline and cancellation handling. No real firmware asset or approved hash is included, so real-image readiness remains false. This is not a live GSP queue.
+
+Implemented candidate coverage includes 309 DMA checks, 21 DMA fault cases and 64 cycles; 172 PCI checks; 349 firmware native checks, 89 startup self-checks and seven provenance tests; and 47 aggregate fault checks with 32 mixed v7/v8 startup attempts. Native macOS CI and laptop execution remain pending. The report carries 25 preparation metadata fields, finite failure reasons and explicit false fields for device DMA verification, firmware verification/loading, interrupt enabling, GPU initialization and RM initialization. Raw resource addresses are excluded from these fields.
+
+The plan after this block groups actual RM startup and missing Darwin services, device DMA/interrupt/real-firmware integration, and the first bounded GPU/GSP initialization attempt into three broad work areas. This estimate is not a guaranteed number of versions; dependency failures may change the split. Graphics userspace and Metal integration remain later work.
+
 ## Milestone status and remaining work
 
 | Milestone | Required result |
@@ -171,7 +185,8 @@ The format-6 laptop report confirms version `0.6.0`, `integrated_passed` and `co
 | Original allocation/mutex caller startup | Confirmed on the laptop in v0.5.0: 35 caller/reserve checks and 23 foundation checks passed; bounded sequential startup only |
 | Tracked memory and owned-object lifecycle | Confirmed on the laptop in v0.6.0: all 130 combined kernel startup checks passed, cleanup complete, two-read TU117 match retained and no warnings; bounded sequential startup only |
 | CPU support runtime and RM library consumers | Confirmed on the laptop in v0.7.0: all 258 combined kernel startup checks passed, including 128 support checks, complete cleanup and no warnings; bounded sequential startup only |
-| Further hardware transport | Grouped reviewed work for PCI, DMA and interrupts, with bounded access and failure handling |
+| Hardware-transport preparation | V8 candidate implemented: host DMA preparation, read-only PCI/interrupt inventory and synthetic firmware/RPC preflight; native CI and one combined laptop checkpoint pending |
+| Actual RM and device transport | Integrate the selected RM startup path, remaining Darwin services, device DMA and interrupt registration/delivery with complete failure cleanup |
 | GPU and GSP startup | Matching, hashed firmware; observed initialization with timeouts and cleanup; no success inferred from PCI enumeration |
 | Minimal execution | One deterministic command with a checked result and recoverable failure path |
 | Graphics userspace | An explicit kernel/application ABI and a selected rendering or compute target |

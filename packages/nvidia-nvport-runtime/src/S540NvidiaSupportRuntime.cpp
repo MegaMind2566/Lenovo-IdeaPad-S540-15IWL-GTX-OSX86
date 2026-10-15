@@ -273,16 +273,47 @@ void runSupport(void *context)
           S540NvidiaSpinlock::liveObjects() == spinlockBaseline);
 }
 
+struct ContinuationContext {
+    Result *support;
+    S540NvidiaSupportRuntime::StartupContinuation continuation;
+    void *context;
+};
+
+void runWithContinuation(void *context)
+{
+    auto &next = *static_cast<ContinuationContext *>(context);
+    runSupport(next.support);
+    if (!next.support->passed() || next.continuation == nullptr)
+        return;
+    if (s540NvportRuntimeIsCold() != NV_TRUE ||
+        S540NvidiaReserve::ready() || S540NvidiaReserve::liveSlots() != 0) {
+        next.support->cleanup = false;
+        return;
+    }
+    next.continuation(next.context);
+    if (s540NvportRuntimeIsCold() != NV_TRUE ||
+        S540NvidiaReserve::ready() || S540NvidiaReserve::liveSlots() != 0)
+        next.support->cleanup = false;
+}
+
 } // namespace
 
 S540NvidiaSupportRuntime::IntegratedResult
 S540NvidiaSupportRuntime::checkIntegrated()
 {
+    return checkIntegrated(nullptr, nullptr);
+}
+
+S540NvidiaSupportRuntime::IntegratedResult
+S540NvidiaSupportRuntime::checkIntegrated(StartupContinuation continuation,
+                                       void *context)
+{
     IntegratedResult result{};
     // A refused lease or previous lifecycle leaves explicit failed evidence.
     result.support = {1, 1, false, false, false, false};
+    ContinuationContext next{&result.support, continuation, context};
     result.v6 = S540NvidiaLifecycleRuntime::checkIntegrated(
-        runSupport, &result.support);
+        runWithContinuation, &next);
     result.acquired = result.v6.acquired;
     return result;
 }

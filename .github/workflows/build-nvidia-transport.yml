@@ -1,4 +1,4 @@
-name: Build integrated NVIDIA runtime and RM consumer prototype
+name: Build bundled NVIDIA hardware transport preparation
 
 on:
   push:
@@ -14,8 +14,10 @@ on:
       - 'builders/check_nvidia_callers.py'
       - 'builders/check_nvidia_lifecycle.py'
       - 'builders/check_nvidia_runtime.py'
+      - 'builders/check_nvidia_transport_preparation.py'
       - 'packages/nvidia-nvport-lifecycle/**'
       - 'packages/nvidia-nvport-runtime/**'
+      - 'packages/nvidia-hardware-transport/**'
       - 'tests/test_nvidia_transport*'
       - 'tests/test_nvidia_*_provenance.py'
       - '.github/workflows/build-nvidia-transport.yml'
@@ -40,19 +42,19 @@ jobs:
           persist-credentials: false
       - name: Check PCI identity, BAR0 and power-state refusal policy
         run: python3 tests/test_nvidia_transport_kernel.py
-      - name: Check NVIDIA runtime, real RM consumer and rollback; verify the integrated native package
+      - name: Check CPU regressions, DMA, PCI inventory, firmware bounds and bundled rollback
         run: python3 builders/build_nvidia_transport.py --kernel-sdk build-src/MacKernelSDK --output-dir build/nvidia-transport
       - name: Run the packaged reporter without loading the kernel probe
         shell: bash
         run: |
           set -euo pipefail
-          /usr/bin/unzip -q build/nvidia-transport/S540-nvidia-transport-v7.zip -d "$RUNNER_TEMP/nvidia-transport-package"
-          /bin/bash "$RUNNER_TEMP/nvidia-transport-package/S540-nvidia-transport-v7/CHECK-TRANSPORT.command" --output-dir "$RUNNER_TEMP"
+          /usr/bin/unzip -q build/nvidia-transport/S540-nvidia-transport-v8.zip -d "$RUNNER_TEMP/nvidia-transport-package"
+          /bin/bash "$RUNNER_TEMP/nvidia-transport-package/S540-nvidia-transport-v8/CHECK-TRANSPORT.command" --output-dir "$RUNNER_TEMP"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: S540-nvidia-transport-v7
+          name: S540-nvidia-transport-v8
           path: |
-            build/nvidia-transport/S540-nvidia-transport-v7.zip
-            build/nvidia-transport/S540-nvidia-transport-v7.zip.sha256
+            build/nvidia-transport/S540-nvidia-transport-v8.zip
+            build/nvidia-transport/S540-nvidia-transport-v8.zip.sha256
           if-no-files-found: error
           retention-days: 30

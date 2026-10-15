@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 #include "S540NvidiaPCIProbe.hpp"
-#include "../../nvidia-nvport-runtime/src/S540NvidiaSupportRuntime.hpp"
+#include "../../nvidia-hardware-transport/src/S540NvidiaHardwareRuntime.hpp"
 
 #include <IOKit/IOMemoryDescriptor.h>
 #include <kern/task.h>
@@ -314,15 +314,15 @@ OSDictionary *copyHALSelection(const IdentificationOutcome &result) {
 
 OSDictionary *copySnapshot(IOPCIDevice *device,
                           const S540NvidiaPCIProbePolicy::Identity &identity) {
-    OSDictionary *snapshot = OSDictionary::withCapacity(20);
+    OSDictionary *snapshot = OSDictionary::withCapacity(21);
     if (!snapshot)
         return nullptr;
 
     // One additional fixed config read captures command/status without changing
     // memory decoding, I/O decoding, bus mastering, or any status bits.
     const uint32_t commandStatus = device->configRead32(0x04);
-    bool ok = setNumber(snapshot, "Format", 7, 32)
-        && setString(snapshot, "ProbeVersion", "0.7.0")
+    bool ok = setNumber(snapshot, "Format", 8, 32)
+        && setString(snapshot, "ProbeVersion", "0.8.0")
         && setString(snapshot, "Stage", "attached")
         && setString(snapshot, "AccessPolicy", "two-read-only-bar0-hal-identification")
         && setNumber(snapshot, "VendorID", identity.vendorDevice & 0xffffU, 16)
@@ -339,15 +339,16 @@ OSDictionary *copySnapshot(IOPCIDevice *device,
     }
 
     // IOService::start is a sleepable thread context. The same finite combined
-    // entry point runs in native CI. Its nonblocking singleton lease protects
-    // the reserve lifecycle, and all resources are released before PCI reads.
-    const S540NvidiaSupportRuntime::IntegratedResult integrated =
-        S540NvidiaSupportRuntime::checkIntegrated();
+    // CPU entry point runs in native CI. Its nonblocking singleton lease
+    // protects the reserve lifecycle. The preparation layer separately guards
+    // provider access and releases owned resources before the two MMIO reads.
+    const S540NvidiaHardwareRuntime::IntegratedResult integrated =
+        S540NvidiaHardwareRuntime::checkIntegrated(device);
     if (!integrated.acquired) {
         snapshot->release();
         return nullptr;
     }
-    const S540NvidiaRuntime::Result &foundations = integrated.v6.v5.foundations;
+    const S540NvidiaRuntime::Result &foundations = integrated.v7.v6.v5.foundations;
     ScopedRelease<OSDictionary> foundationSnapshot(OSDictionary::withCapacity(8));
     OSDictionary *foundation = foundationSnapshot.get();
     ok = foundation
@@ -360,7 +361,7 @@ OSDictionary *copySnapshot(IOPCIDevice *device,
         && foundation->setObject("Allocation", foundations.allocation ? kOSBooleanTrue : kOSBooleanFalse)
         && foundation->setObject("Mutex", foundations.mutex ? kOSBooleanTrue : kOSBooleanFalse)
         && snapshot->setObject("OSFoundations", foundation);
-    const S540NvidiaCallerRuntime::Result &callers = integrated.v6.v5.callers;
+    const S540NvidiaCallerRuntime::Result &callers = integrated.v7.v6.v5.callers;
     ScopedRelease<OSDictionary> callerSnapshot(OSDictionary::withCapacity(6));
     OSDictionary *caller = callerSnapshot.get();
     ok = ok && caller
@@ -371,7 +372,7 @@ OSDictionary *copySnapshot(IOPCIDevice *device,
         && caller->setObject("MutexCallers", callers.mutexCallers ? kOSBooleanTrue : kOSBooleanFalse)
         && caller->setObject("Reserve", callers.reserve ? kOSBooleanTrue : kOSBooleanFalse)
         && snapshot->setObject("CallerIntegration", caller);
-    const S540NvidiaLifecycleRuntime::Result &lifecycle = integrated.v6.lifecycle;
+    const S540NvidiaLifecycleRuntime::Result &lifecycle = integrated.v7.v6.lifecycle;
     ScopedRelease<OSDictionary> lifecycleSnapshot(OSDictionary::withCapacity(8));
     OSDictionary *nvport = lifecycleSnapshot.get();
     ok = ok && nvport
@@ -384,7 +385,7 @@ OSDictionary *copySnapshot(IOPCIDevice *device,
         && nvport->setObject("Spinlocks", lifecycle.spinlocks ? kOSBooleanTrue : kOSBooleanFalse)
         && nvport->setObject("Cleanup", lifecycle.cleanup ? kOSBooleanTrue : kOSBooleanFalse)
         && snapshot->setObject("NvPortLifecycle", nvport);
-    const S540NvidiaSupportRuntime::Result &support = integrated.support;
+    const S540NvidiaSupportRuntime::Result &support = integrated.v7.support;
     ScopedRelease<OSDictionary> supportSnapshot(OSDictionary::withCapacity(7));
     OSDictionary *runtime = supportSnapshot.get();
     ok = ok && runtime
@@ -396,6 +397,36 @@ OSDictionary *copySnapshot(IOPCIDevice *device,
         && runtime->setObject("Consumer", support.consumer ? kOSBooleanTrue : kOSBooleanFalse)
         && runtime->setObject("Cleanup", support.cleanup ? kOSBooleanTrue : kOSBooleanFalse)
         && snapshot->setObject("NvPortSupport", runtime);
+    const S540NvidiaHardwareRuntime::Result &preparation = integrated.preparation;
+    ScopedRelease<OSDictionary> preparationSnapshot(OSDictionary::withCapacity(25));
+    OSDictionary *hardware = preparationSnapshot.get();
+    ok = ok && hardware
+        && setNumber(hardware, "Version", S540NvidiaHardwareRuntime::kFormatVersion, 32)
+        && setString(hardware, "Status", preparation.passed() ? "passed" : "failed")
+        && setNumber(hardware, "Checks", preparation.checks, 32)
+        && hardware->setObject("HostDma", preparation.hostDma ? kOSBooleanTrue : kOSBooleanFalse)
+        && hardware->setObject("PciReadAdapter", preparation.pciReadAdapter ? kOSBooleanTrue : kOSBooleanFalse)
+        && hardware->setObject("InterruptInventory", preparation.interruptInventory ? kOSBooleanTrue : kOSBooleanFalse)
+        && hardware->setObject("FirmwareParser", preparation.firmwareParser ? kOSBooleanTrue : kOSBooleanFalse)
+        && hardware->setObject("FirmwareRpc", preparation.firmwareRpc ? kOSBooleanTrue : kOSBooleanFalse)
+        && hardware->setObject("Cleanup", preparation.cleanup ? kOSBooleanTrue : kOSBooleanFalse)
+        && setString(hardware, "DmaMode", preparation.dmaMode)
+        && setNumber(hardware, "DmaBytes", preparation.dmaBytes, 64)
+        && setNumber(hardware, "DmaSegments", preparation.dmaSegments, 32)
+        && setString(hardware, "DmaReason", preparation.dmaReason)
+        && setString(hardware, "PciReason", preparation.pciReason)
+        && setNumber(hardware, "PciCapabilities", preparation.pciCapabilities, 32)
+        && setNumber(hardware, "MsiVectors", preparation.msiVectors, 32)
+        && setNumber(hardware, "MsixVectors", preparation.msixVectors, 32)
+        && hardware->setObject("MsiObservedEnabled", preparation.msiObservedEnabled ? kOSBooleanTrue : kOSBooleanFalse)
+        && hardware->setObject("MsixObservedEnabled", preparation.msixObservedEnabled ? kOSBooleanTrue : kOSBooleanFalse)
+        && hardware->setObject("FirmwareLoaded", kOSBooleanFalse)
+        && hardware->setObject("FirmwareImageVerified", kOSBooleanFalse)
+        && hardware->setObject("InterruptsEnabled", kOSBooleanFalse)
+        && hardware->setObject("GpuInitialized", kOSBooleanFalse)
+        && hardware->setObject("RmInitialized", kOSBooleanFalse)
+        && hardware->setObject("DeviceDmaVerified", kOSBooleanFalse)
+        && snapshot->setObject("HardwarePreparation", hardware);
     if (!ok) {
         snapshot->release();
         return nullptr;

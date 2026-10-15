@@ -1,0 +1,106 @@
+{
+  "format": 1,
+  "repository": "NVIDIA/open-gpu-kernel-modules",
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "release": "615.78.08",
+  "license": "MIT",
+  "implementation": "Explicit hardened CPU parser and preflight; reference functions are not compiled",
+  "firmware_assets": [],
+  "approved_image_hashes": [],
+  "synthetic_fixture_only": true,
+  "inputs": [
+    {
+      "upstream_path": "src/common/uproc/os/common/include/libelf.h",
+      "local_path": "reference/libelf.h",
+      "blob_sha": "e75a7b28fe5e06f7a1a16d19918dce7d87aac524",
+      "local_sha256": "2e3a85893d5e854b9380898ce5cb8c480c359d4f3f2aa133f00437df490f5b41",
+      "mode": "verbatim",
+      "functions": []
+    },
+    {
+      "upstream_path": "src/nvidia/arch/nvalloc/common/inc/nv-firmware.h",
+      "local_path": "reference/nv-firmware.h",
+      "blob_sha": "000aa3820cf340218fc6a1746334ad8308338327",
+      "local_sha256": "377e737e101085ef2acdba4998fb128b2e40bf2d256a69418bd34484877de5a3",
+      "mode": "verbatim",
+      "functions": []
+    },
+    {
+      "upstream_path": "src/nvidia/arch/nvalloc/common/inc/nv-firmware-chip-family-select.h",
+      "local_path": "reference/nv-firmware-chip-family-select.h",
+      "blob_sha": "962776acf5c761bb8aeeeaaadb40726f7fab9b13",
+      "local_sha256": "b2d199bdd7ed8a54863418080cb736cd425f7112aa42a96c4d0f6406bf45b159",
+      "mode": "verbatim",
+      "functions": []
+    },
+    {
+      "upstream_path": "src/nvidia/generated/g_rpc-message-header.h",
+      "local_path": "reference/g_rpc-message-header.h",
+      "blob_sha": "8ee6a9e576e89d1a1af5fd30dc35481a363dad1e",
+      "local_sha256": "33c7938331caf100923fcec0d8791f1f9366bdd35f3eee2971bf0c755031f6aa",
+      "mode": "verbatim",
+      "functions": []
+    },
+    {
+      "upstream_path": "src/nvidia/inc/kernel/vgpu/rpc_headers.h",
+      "local_path": "reference/rpc_headers.h",
+      "blob_sha": "df5889a2c2af6b2ad7391c661d0c71017e50eed6",
+      "local_sha256": "2584aac978469a1a997b537e1a42c74d440820f6b6b6f5e9822fa58faef59b65",
+      "mode": "verbatim",
+      "functions": []
+    },
+    {
+      "upstream_path": "src/nvidia/inc/kernel/gpu/gsp/message_queue_priv.h",
+      "local_path": "reference/message_queue_priv.h",
+      "blob_sha": "a6d99fdb0cda1fe0ec55a824c074642a7f2a8d22",
+      "local_sha256": "1092964a631de3af4b0f111be5dd9f04b37c7e7d1e9e7a6871c1da9d577089f3",
+      "mode": "verbatim",
+      "functions": []
+    },
+    {
+      "upstream_path": "src/nvidia/arch/nvalloc/common/inc/mctp_format.h",
+      "local_path": "reference/mctp_format.h",
+      "blob_sha": "672e03ad18f821934b8713d6205a7d80e13e5dc4",
+      "local_sha256": "be81f35c45ebe660886c39628d95c40ad542cea7892e9b746a554ddf5db74df3",
+      "mode": "verbatim",
+      "functions": []
+    },
+    {
+      "upstream_path": "src/nvidia/arch/nvalloc/common/inc/nvdm_format.h",
+      "local_path": "reference/nvdm_format.h",
+      "blob_sha": "5a6b644a9f44573676febfabf7cec73ad4a24749",
+      "local_sha256": "297e25b61816bda3df451464a96a64c728587ed5c107f9ee89093637965eca74",
+      "mode": "verbatim",
+      "functions": []
+    },
+    {
+      "upstream_path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+      "local_path": "reference/kernel_gsp_container.c.in",
+      "blob_sha": "7e89ef468d35807018f8cbd6c044960607e8244f",
+      "local_sha256": "1459d658275df731a755fd265771aca83d3c51e4f53ad712fc5f7907c9ac2887",
+      "mode": "exact-function-excerpts",
+      "functions": [
+        "_kgspFwContainerVerifyVersion",
+        "_kgspGetSectionNameForPrefix",
+        "_kgspPrepareGspRmBinaryImage",
+        "_kgspFwContainerGetSection"
+      ]
+    },
+    {
+      "upstream_path": "src/nvidia/generated/g_kernel_gsp_nvoc.h",
+      "local_path": "reference/gsp_section_names.h.in",
+      "blob_sha": "51b5d798eb810366fd3444c27784e5c596ca7da2",
+      "local_sha256": "e0bc812724050df557c33089a48331276adb4f32937e067a5aa9b82015734424",
+      "mode": "exact-defines-excerpt",
+      "functions": []
+    },
+    {
+      "upstream_path": "src/common/inc/swref/published/nv_arch.h",
+      "local_path": "reference/target_arch.h.in",
+      "blob_sha": "c8da3877be92c0b831c17d55fb2939529bc9ddb9",
+      "local_sha256": "5ecd42319e96eff6bdaebac99bb0f0c5695555b96bbe38440f19fb664c6883c1",
+      "mode": "exact-defines-excerpt",
+      "functions": []
+    }
+  ]
+}

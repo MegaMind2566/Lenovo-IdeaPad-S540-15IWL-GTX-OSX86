@@ -1,74 +1,87 @@
-# NVIDIA integrated CPU support runtime prototype
+# NVIDIA hardware transport preparation prototype
 
-Version **0.7.0** combines the existing foundation/caller/object-lifecycle blocks with a checked CPU runtime, NVIDIA string and pseudorandom utilities, and real vector/list library consumers used by the resource manager. Startup, failure cleanup, reporting and delivery are integrated into one package.
+Version **0.8.0** combines the existing CPU runtime with bounded host-memory DMA preparation, read-only PCI/interrupt inventory, and firmware/RPC preflight. One package and one report cover the complete sequence.
 
-**This is an experimental CPU-side integration milestone.** NVIDIA HAL/RM construction, GPU initialization, firmware, DMA, GPU commands and graphics/Metal acceleration remain unimplemented.
+**This is transport preparation.** NVIDIA HAL/RM construction, GPU initialization, verified device DMA, live interrupt delivery, firmware loading and graphics/Metal acceleration remain unimplemented.
 
-The format-7 laptop report confirms all 258 combined startup checks in the Tahoe kernel: 128 support, 72 lifecycle, 35 caller/reserve and 23 foundations. Every CPU block passed, including cleanup, with verified provider identity, the same two-read TU117 variant-41 match and no warnings. The bounded sequential startup checkpoint is complete; no repeat laptop test is required.
+The confirmed v7 laptop baseline passed all 258 CPU startup checks: 128 support, 72 lifecycle, 35 caller/reserve and 23 foundations. V8 retains those blocks as automatic regression coverage. A v8 hardware result is not yet recorded; no separate v7 rerun is required.
 
-## Installation and combined checkpoint
+## One combined laptop checkpoint
 
-Use the EFI on the **240 GB test disk** and retain the working Samsung EFI as the fallback.
+Use the EFI on the **240 GB test disk**. Retain the working Samsung EFI as the fallback.
 
-1. Extract **S540-nvidia-transport-v7.zip** into Downloads.
+1. Extract **S540-nvidia-transport-v8.zip** into Downloads.
 2. Save the previous `EFI/OC/Kexts/S540NvidiaPCIProbe.kext` outside the EFI directory.
-3. Replace that kext with the new one. **Keep config.plist unchanged.**
+3. Replace that kext with the packaged version. **Keep config.plist unchanged.**
 4. Boot from the 240 GB EFI and select Tahoe.
 5. Run:
 
    ```bash
-   bash "$HOME/Downloads/S540-nvidia-transport-v7/CHECK-TRANSPORT.command"
+   bash "$HOME/Downloads/S540-nvidia-transport-v8/CHECK-TRANSPORT.command"
    ```
 
-Share **nvidia-transport.json** from the new **NVIDIA-TRANSPORT…** folder on the Desktop. Expected success is **`integrated_passed`**, version **`0.7.0`**, format **7**, with all four CPU evidence blocks passed. Version 0.6.0 is already confirmed; its checks remain automatic regression coverage within this report and require no separate test.
+Share **nvidia-transport.json** from the new **NVIDIA-TRANSPORT…** folder on the Desktop. Expected success is **`transport_prepared`**, version **`0.8.0`**, format **8**, with all four CPU blocks and `hardware_preparation` passed. The six GPU/device activity flags remain false even on success.
 
-If startup fails, boot using the Samsung EFI and restore the previous test-disk kext. Rollback uses a reboot; runtime unload is untested. This package requires no NVRAM reset, SIP change or new OpenCore entry.
+This single checkpoint includes startup, host-memory preparation, PCI capabilities, observed interrupt configuration, parser/RPC checks and cleanup. No additional package or individual primitive test is needed.
 
-## Combined scope
+If startup fails, boot using the Samsung EFI and restore the previous test-disk kext. Rollback uses a reboot; runtime unload is untested. This package requires no NVRAM reset, SIP change or new OpenCore entry. The reporter requires no administrator password or developer tools.
 
-- The existing 23 foundation and 35 original-caller/reserve checks remain in the same startup sequence.
-- Real NVPort allocator dispatch and count tracking cover global/custom allocation and release.
-- Original allocator-owned synchronization callers create and destroy their own NVPort storage and Darwin backing objects.
-- Spinlocks preserve the prior interrupt state in the kernel backend.
-- The bounded startup verifies lifecycle transitions and returns tracked allocations, reserve slots and OS backing-object counts to their initial state.
-- One nonblocking startup lease covers both the existing checks and the new lifecycle. No worker thread or intentionally contended mutex wait runs during kernel startup.
-- The [support runtime](../nvidia-nvport-runtime/README.md) adds original string and xorshift utilities, checked memory/PRNG initialization and reverse-order shutdown.
-- Original vector/list consumers exercise tracked allocation, growth, insertion, iteration, removal and destruction. An explicit vector correction fixes old-buffer release when an allocated vector is empty; allocation failure preserves the previous container.
-- Support initialization, utilities, consumers and cleanup have independent evidence. Success requires every component, not only the previous 130 startup assertions.
+## Combined implementation
 
-The memory entry point is an explicit, status-returning adaptation of NVIDIA's bootstrap. It checks lock-storage allocation and spinlock initialization before publishing initialized state. The support core then checks actual PRNG allocation and refuses shutdown while consumer allocations or custom allocators remain live. Adaptations and exact source provenance are recorded in the manifests. This is a selected CPU profile, not full NvPort core or RM initialization.
+- **CPU runtime:** existing timer, memory, atomics, allocation, mutex, tracked lifecycle, string/PRNG and real vector/list consumer checks. One nonblocking lease covers the complete sequence.
+- **Host-memory DMA preparation:** allocate a bounded 64 KiB host buffer, prepare its descriptor and DMA command, enumerate bounded segments, verify the CPU pattern, then complete and release every owned resource. No GPU command uses these segments and their addresses are never published.
+- **Read-only PCI adapter:** the exact NVIDIA `os_pci_read_byte`, `os_pci_read_word` and `os_pci_read_dword` ABI operates on the authenticated, borrowed provider in standard configuration space.
+- **Interrupt inventory:** walk the bounded capability list and inspect PM, MSI and MSI-X metadata and geometry. Published enable bits describe observed configuration. The probe registers and arms no interrupt source.
+- **Firmware/RPC preflight:** a hardened parser checks the pinned ELF64 GSP container layout, TU117 signature-family selection, bounded MCTP/NVDM/RPC framing, local request ownership and layout arithmetic using CPU fixtures. [Firmware scope and provenance](../nvidia-hardware-transport/firmware/README.md) describe its limits.
+- **Failure cleanup:** all blocks retain separate evidence. Native fault cases exercise partial initialization and cleanup; the kernel checkpoint runs a finite sequential startup without worker threads or intentional mutex contention.
 
-The selected release profile enables allocation counters. Fenceposts, allocation lists, caller information, GSP limits and log instrumentation are excluded. Active allocation counts are real; this profile does not provide active/peak allocation byte sizes. Reserve and OS-object accounting provide separate cleanup evidence.
+DMA mode is explicit. `provider_mapped` uses the published provider mapper; `direct_untranslated` prepares untranslated host segments. Both can pass this bounded preparation stage. Neither establishes GPU DMA compatibility, and `device_dma_verified` remains false. An unresolved mapper is reported as unavailable instead of entering an unbounded mapper lookup.
 
-The backing reserve remains bounded: **4 MiB**, **32 slots**, **128 KiB per request**, **16-byte alignment**. Tracking and allocator metadata also consume slots. Oversize and exhausted requests fail explicitly. This is not a general RM heap, pageable-memory implementation, VRAM or DMA service. The public Unix allocation profile is non-interrupt context and no sleeping; a lock-free bitmap does not establish interrupt-context support.
+No real firmware image or approved firmware hash is included. Parser success does not authenticate a real firmware image. The readiness gate keeps firmware loading blocked; `firmware_image_verified` and `firmware_loaded` remain false.
 
-## GPU and hardware boundary
+The existing allocation reserve remains **4 MiB**, with **32 slots**, **128 KiB per request** and **16-byte alignment**. Tracking metadata consumes reserve space. This is a selected CPU allocation profile, not a general RM heap, VRAM allocator or pageable-memory service.
 
-The exact PCI gate and existing D0, memory-decode, BAR0, mapping and provider-ownership guards remain in place. The only GPU accesses are one read-only BOOT_0 load and one conditional read-only BOOT_42 load. No new MMIO operation, register write, firmware, DMA, hardware interrupt registration or power transition is added.
+## Preparation evidence
 
-Each identification mapping is read-only and released after its single load. A hardware MMIO load can fault or stall the kernel; a software deadline cannot make that individual load recoverable.
+The kernel publishes an exact **25-key `HardwarePreparation` dictionary**. The reporter emits it as `hardware_preparation`, using snake_case field names.
 
-The startup uses silent shutdown and registers no OOM report callback. Non-silent tracking-registry reports hold a spinlock and are outside the selected kernel diagnostic profile; the real diagnostic bridge rejects unsupported interrupt/interrupt-disabled contexts.
+| Fields | Contract |
+|---|---|
+| `Version`, `Status`, `Checks` | Version 1, a positive check count, and a status consistent with all six preparation components. |
+| `HostDma`, `PciReadAdapter`, `InterruptInventory`, `FirmwareParser`, `FirmwareRpc`, `Cleanup` | Strict Booleans. Every component must pass for preparation success. |
+| `DmaMode`, `DmaBytes`, `DmaSegments`, `DmaReason` | Finite mode/reason codes; 0–65,536 bytes and 0–32 segments. Successful host preparation requires 65,536 bytes, 16–32 segments, an available mode and reason `none`. |
+| `PciReason`, `PciCapabilities` | Finite inventory reason and 0–48 capabilities. Successful interrupt inventory requires the complete-inventory reason and at least one capability. |
+| `MsiVectors`, `MsixVectors` | MSI is zero or a power of two up to 32; MSI-X is 0–2,048. |
+| `MsiObservedEnabled`, `MsixObservedEnabled` | Strict observed configuration bits. An enabled bit requires a nonzero corresponding vector count. These are separate from probe interrupt activation. |
+| `FirmwareLoaded`, `FirmwareImageVerified`, `InterruptsEnabled`, `GpuInitialized`, `RmInitialized`, `DeviceDmaVerified` | All six must be Boolean false. Preparation cannot claim these later stages are complete. |
 
-Kernel contention, interrupt-context execution, suspend/wake, runtime stop/unload and full RM compatibility remain unvalidated. Native concurrency tests cover the functional userspace backends and do not prove those kernel behaviors.
+Raw reports and resource addresses remain private. The new DMA/inventory evidence contains bounded counts and reasons, not DMA addresses, MSI-X table addresses or firmware buffers.
+
+## GPU access boundary
+
+The exact-device gate, D0, memory-decode, BAR0, mapping and provider-ownership guards remain in place. The only GPU MMIO accesses are one read-only BOOT_0 load and one conditional read-only BOOT_42 load. Each identification mapping is read-only and released after its single load.
+
+Preparation uses its own nonblocking provider-arbitration scope and releases it before the existing identification scope. It adds no register write, bus-master enable, firmware upload, interrupt registration or power transition. A hardware MMIO load can still fault or stall the kernel; a software deadline cannot make that individual load recoverable.
+
+Kernel contention, interrupt-context operation, suspend/wake, runtime stop/unload and full RM compatibility remain unvalidated. Native concurrency tests exercise userspace backends and do not establish those kernel behaviors.
 
 ## Report states
 
-| Format-7 status | Meaning |
+| Format-8 status | Meaning |
 |---|---|
-| `integrated_passed` | Foundation, original-caller, NVPort lifecycle and support-runtime blocks passed; TU117 identification matched. |
-| `foundations_failed` / `callers_failed` / `lifecycle_failed` / `support_failed` | A CPU startup block reported failure. Preserve the report. |
-| `invalid_foundations` / `invalid_callers` / `invalid_lifecycle` / `invalid_support` | CPU evidence is absent or malformed. |
-| `outdated_probe` | An earlier probe is loaded. Replace the kext on the EFI actually used for boot and reboot. |
-| `not_attached` | The probe service is absent; the report alone does not identify the cause. |
-| `refused` / `failed` / `error` | A hardware prerequisite, identification operation or report validation failed. |
-
-The reporter needs no administrator password or developer tools. It reads published evidence and does not install software or change EFI, SIP, NVRAM or kernel collections. Raw reports and resource addresses remain private.
+| `transport_prepared` | All four CPU blocks and all preparation components passed; the two-read TU117 identification matched. GPU/device readiness flags remain false. |
+| `preparation_failed` | Valid preparation evidence records a component failure. Preserve the report. |
+| `invalid_preparation` | Preparation evidence is missing, malformed, inconsistent or claims activity outside this version's scope. |
+| `foundations_failed` / `callers_failed` / `lifecycle_failed` / `support_failed` | A preceding CPU startup block failed. |
+| `invalid_foundations` / `invalid_callers` / `invalid_lifecycle` / `invalid_support` | Preceding CPU evidence is absent or malformed. |
+| `outdated_probe` | A format 1–7 probe is loaded. Replace the kext on the EFI actually used for boot and reboot. |
+| `not_attached` | The probe service is absent; this report alone does not identify the cause. |
+| `refused` / `failed` / `error` | An identification prerequisite, hardware identification operation or report validation failed. |
 
 ## Build and provenance
 
-**BUILD.json** records the exact source revision, validation results, source/output hashes, module metadata, platform imports and kernel dependencies. The archive includes source, original reference bytes, adaptation records and NVIDIA/LLVM/MacKernelSDK licenses.
+**BUILD.json** records the source revision, validation results, hashes, module metadata, audited platform imports and kernel dependencies. The archive includes source, pinned reference inputs, adaptation records and required licenses. It contains no real firmware image or approved firmware-image hash.
 
-One native Intel macOS CI builds the complete package. It runs original-caller and lifecycle checks, allocation overflow/exhaustion and partial-initialization cases, synchronization failure cleanup, native concurrent execution, fatal assertion subprocesses and AddressSanitizer/UndefinedBehaviorSanitizer. The actual combined startup entry point is also executed natively. Kernel compilation/linking, exact import auditing, signatures, strict decoder tests and the packaged launcher are checked. CI does not load the extension.
+Native Intel macOS CI builds the complete package and runs the combined startup through explicit host fixtures, failure injection, native concurrency checks, fatal assertion cases and sanitizers. It checks kernel compilation/linking, imports, signatures, strict reporter decoding and the packaged launcher. **CI does not load the extension or validate GPU operation.**
 
-NVIDIA is pinned to `1a82fbfda8f321b056eb3568850f9316c5e465c5`; MacKernelSDK to `3f750085caa17ec3a7880f11c11bf4f48cd6a164`. The compiler's `__bzero` RAM helper (Mach-O `___bzero`) is an explicitly reviewed libkern export. All new dependencies must be audited before the package is accepted.
+NVIDIA is pinned to `1a82fbfda8f321b056eb3568850f9316c5e465c5`; MacKernelSDK to `3f750085caa17ec3a7880f11c11bf4f48cd6a164`. New kernel imports require an explicit audit. Reference parser inputs document provenance; the hardened firmware parser is an adaptation rather than an unchanged NVIDIA parser.

@@ -1,0 +1,328 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2019-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: MIT
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
+
+/* Exact reference-only function excerpts; not compiled. */
+
+static NV_STATUS
+_kgspFwContainerVerifyVersion
+(
+    OBJGPU *pGpu,
+    KernelGsp *pKernelGsp,
+    const void *pElfData,
+    NvU64 elfDataSize,
+    const char *pNameInMsg
+)
+{
+    const char *pFwversion;
+    NvU64 fwversionSize;
+    NvBool bIsVersionValid;
+
+    {
+        const void *pFwversionRaw;
+
+        NV_CHECK_OK_OR_RETURN(LEVEL_ERROR,
+            _kgspFwContainerGetSection(pGpu, pKernelGsp,
+                pElfData,
+                elfDataSize,
+                GSP_VERSION_SECTION_NAME,
+                &pFwversionRaw,
+                &fwversionSize));
+
+        pFwversion = (const char *) pFwversionRaw;
+    }
+
+    // Sanity check .fwversion before attempting to print it
+    bIsVersionValid =
+        ((fwversionSize > 0) &&
+         (fwversionSize < 64) &&
+         (pFwversion[fwversionSize - 1] == '\0'));
+
+    NvU64 expectedVersionLength = portStringLength(NV_VERSION_STRING);
+
+    // Check that text in .fwversion section of ELF matches our NV_VERSION_STRING
+    if ((fwversionSize != expectedVersionLength + 1) ||
+        (portStringCompare(pFwversion, NV_VERSION_STRING, expectedVersionLength) != 0))
+    {
+        if (bIsVersionValid)
+        {
+            NV_PRINTF(LEVEL_ERROR, "%s version mismatch: got version %s, expected version %s\n",
+                      pNameInMsg, pFwversion, NV_VERSION_STRING);
+        }
+        else
+        {
+            NV_PRINTF(LEVEL_ERROR, "%s version unknown or malformed, expected version %s\n",
+                      pNameInMsg, NV_VERSION_STRING);
+        }
+
+        return NV_ERR_INVALID_DATA;
+    }
+
+    return NV_OK;
+}
+
+static NV_STATUS
+_kgspGetSectionNameForPrefix
+(
+    OBJGPU *pGpu,
+    KernelGsp *pKernelGsp,
+    char *pSectionNameBuf,  // out
+    NvLength sectionNameBufSize,
+    const char *pSectionPrefix
+)
+{
+    NvLength sectionPrefixLength;
+
+    nv_firmware_chip_family_t chipFamily;
+    const char *pChipFamilyName;
+    NvLength chipFamilyNameLength;
+
+    NvLength totalSize;
+
+    NV_ASSERT_OR_RETURN(pSectionNameBuf != NULL, NV_ERR_INVALID_ARGUMENT);
+    NV_ASSERT_OR_RETURN(sectionNameBufSize > 0, NV_ERR_INVALID_ARGUMENT);
+    NV_ASSERT_OR_RETURN(pSectionPrefix != NULL, NV_ERR_INVALID_ARGUMENT);
+
+    chipFamily = nv_firmware_get_chip_family(gpuGetChipArch(pGpu),
+                                             gpuGetChipImpl(pGpu));
+    NV_ASSERT_OR_RETURN(chipFamily != NV_FIRMWARE_CHIP_FAMILY_NULL,
+                        NV_ERR_INVALID_STATE);
+
+    pChipFamilyName = nv_firmware_chip_family_to_string(chipFamily);
+    NV_ASSERT_OR_RETURN(portStringLength(pChipFamilyName) != 0, NV_ERR_INVALID_STATE);
+
+    sectionPrefixLength = portStringLength(pSectionPrefix);
+    chipFamilyNameLength = portStringLength(pChipFamilyName);
+
+    totalSize = sectionPrefixLength + chipFamilyNameLength + 1;
+    NV_ASSERT_OR_RETURN(sectionNameBufSize >= sectionPrefixLength + 1,
+                        NV_ERR_BUFFER_TOO_SMALL);
+    NV_ASSERT_OR_RETURN(sectionNameBufSize >= totalSize,
+                        NV_ERR_BUFFER_TOO_SMALL);
+
+    portStringCopy(pSectionNameBuf, sectionNameBufSize,
+                   pSectionPrefix, sectionPrefixLength + 1);
+    portStringCat(pSectionNameBuf, sectionNameBufSize,
+                  pChipFamilyName, chipFamilyNameLength + 1);
+
+    return NV_OK;
+}
+
+static NV_STATUS
+_kgspPrepareGspRmBinaryImage
+(
+    OBJGPU *pGpu,
+    KernelGsp *pKernelGsp,
+    GSP_FIRMWARE *pGspFw
+)
+{
+    char signatureSectionName[32];
+    const void *pFwVersionSectionData = NULL;
+    NvU64 fwVersionSectionSize = 0;
+
+    NV_CHECK_OK_OR_RETURN(LEVEL_ERROR,
+        _kgspFwContainerVerifyVersion(pGpu, pKernelGsp,
+            pGspFw->pBuf,
+            pGspFw->size,
+            "GSP firmware image"));
+
+    portMemSet(pKernelGsp->gspRmFwVersionStr, 0,
+               sizeof(pKernelGsp->gspRmFwVersionStr));
+
+    NV_CHECK_OK_OR_RETURN(LEVEL_ERROR,
+        _kgspFwContainerGetSection(pGpu, pKernelGsp,
+            pGspFw->pBuf,
+            pGspFw->size,
+            GSP_VERSION_SECTION_NAME,
+            &pFwVersionSectionData,
+            &fwVersionSectionSize));
+
+    NV_CHECK_OR_RETURN(LEVEL_ERROR,
+        (fwVersionSectionSize > 0) &&
+        (((const char *)pFwVersionSectionData)[fwVersionSectionSize - 1] == '\0'),
+        NV_ERR_INVALID_DATA);
+
+    portStringCopy(pKernelGsp->gspRmFwVersionStr,
+                   sizeof(pKernelGsp->gspRmFwVersionStr),
+                   (const char *)pFwVersionSectionData,
+                   (NvLength)fwVersionSectionSize);
+
+    NV_CHECK_OK_OR_RETURN(LEVEL_ERROR,
+        _kgspFwContainerGetSection(pGpu, pKernelGsp,
+            pGspFw->pBuf,
+            pGspFw->size,
+            GSP_IMAGE_SECTION_NAME,
+            &pGspFw->pImageData,
+            &pGspFw->imageSize));
+
+    NV_CHECK_OK_OR_RETURN(LEVEL_ERROR,
+        _kgspGetSectionNameForPrefix(pGpu, pKernelGsp,
+            signatureSectionName, sizeof(signatureSectionName),
+            kgspGetSignatureSectionNamePrefix_HAL(pGpu, pKernelGsp)));
+
+    NV_CHECK_OK_OR_RETURN(LEVEL_ERROR,
+        _kgspFwContainerGetSection(pGpu, pKernelGsp,
+            pGspFw->pBuf,
+            pGspFw->size,
+            signatureSectionName,
+            &pGspFw->pSignatureData,
+            &pGspFw->signatureSize));
+
+    NV_CHECK_OK_OR_RETURN(LEVEL_ERROR,
+        _kgspCreateSignatureMemdesc(pGpu, pKernelGsp,
+            pGspFw));
+
+    NV_CHECK_OK_OR_RETURN(LEVEL_ERROR,
+        kgspCreateRadix3(pGpu, pKernelGsp, &pKernelGsp->pGspUCodeRadix3Descriptor,
+            NULL, pGspFw->pImageData, pGspFw->imageSize));
+
+    if (pGspFw->pUcodesBin)
+    {
+        NV_CHECK_OK_OR_RETURN(LEVEL_ERROR,
+            kgspCreateRadix3(pGpu, pKernelGsp, &pKernelGsp->pExternalBindata,
+                NULL, pGspFw->pUcodesBin, pGspFw->ucodesBinSize));
+
+        pKernelGsp->externalBindataSize = pGspFw->ucodesBinSize;
+    }
+
+    {
+        // read build-id
+        const void *pBuildIdSectionData = NULL;
+        NvU64 buildIdSectionSize = 0;
+
+        NV_ASSERT_OK_OR_RETURN(
+            _kgspFwContainerGetSection(pGpu, pKernelGsp,
+                pGspFw->pBuf,
+                pGspFw->size,
+                GSP_BUILD_ID_SECTION_NAME,
+                &pBuildIdSectionData,
+                &buildIdSectionSize));
+
+        pKernelGsp->pBuildIdSection = portMemAllocNonPaged(buildIdSectionSize);
+
+        NV_ASSERT_OR_RETURN(pKernelGsp->pBuildIdSection != NULL, NV_ERR_NO_MEMORY);
+
+        pKernelGsp->buildIdSectionSize = buildIdSectionSize;
+
+        portMemCopy(pKernelGsp->pBuildIdSection, buildIdSectionSize, pBuildIdSectionData, buildIdSectionSize);
+    }
+
+    return NV_OK;
+}
+
+static NV_STATUS
+_kgspFwContainerGetSection
+(
+    OBJGPU *pGpu,
+    KernelGsp *pKernelGsp,
+    const void *pElfData,
+    NvU64 elfDataSize,
+    const char *pSectionName,
+    const void **ppSectionData,
+    NvU64 *pSectionSize
+)
+{
+    const NvU8 *pGspBuf = pElfData;
+    const LibosElf64Header *pElfHeader;
+    const LibosElf64SectionHeader *pElfSectionHeader;
+    NvU64 elfSectionHeaderTableLength;
+    NvU64 elfSectionHeaderMaxIdx;
+    NvU64 elfSectionNamesTableOffset;
+    NvU64 elfSectionNamesTableSize;
+    NvU64 elfSectionNamesTableMaxIdx;
+    static const NvU32 elfMagicNumber = 0x464C457F;
+    static const NvU8 elfClass64 = 0x2;
+    static const NvU8 elfLittleEndian = 0x1;
+    const char *pCurrentSectionName;
+    NvLength sectionNameLength;
+    NvS16 idx;
+
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, pElfData != NULL, NV_ERR_INVALID_ARGUMENT);
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, elfDataSize > 0, NV_ERR_INVALID_ARGUMENT);
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, pSectionName != NULL, NV_ERR_INVALID_ARGUMENT);
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, ppSectionData != NULL, NV_ERR_INVALID_ARGUMENT);
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, pSectionSize != NULL, NV_ERR_INVALID_ARGUMENT);
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, elfDataSize >= sizeof(LibosElf64Header), NV_ERR_INVALID_DATA);
+
+    sectionNameLength = portStringLength(pSectionName);
+
+    pElfHeader = (const LibosElf64Header*) pGspBuf;
+
+    // Check for the elf identifier at the beginning of the file
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, *(NvU32*)&pElfHeader->ident == elfMagicNumber, NV_ERR_INVALID_DATA);
+    // Make sure the data is formatted as little endian
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, pElfHeader->ident[5] == elfLittleEndian, NV_ERR_INVALID_DATA);
+    // Check the class type, only ELFCLASS64 is supported
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, pElfHeader->ident[4] == elfClass64, NV_ERR_INVALID_DATA);
+
+    // Make sure that the elf section header table is valid
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, pElfHeader->shentsize == sizeof(LibosElf64SectionHeader), NV_ERR_INVALID_DATA);
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, portSafeMulU64(pElfHeader->shentsize, pElfHeader->shnum, &elfSectionHeaderTableLength), NV_ERR_INVALID_DATA);
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, portSafeAddU64(pElfHeader->shoff, elfSectionHeaderTableLength - 1, &elfSectionHeaderMaxIdx), NV_ERR_INVALID_DATA);
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, elfDataSize >= elfSectionHeaderMaxIdx, NV_ERR_INVALID_DATA);
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, pElfHeader->shstrndx <= pElfHeader->shnum, NV_ERR_INVALID_DATA);
+
+    // Get the offset and size of the table that holds the section names and make sure they are valid
+    pElfSectionHeader = (const LibosElf64SectionHeader*) &pGspBuf[pElfHeader->shoff + (pElfHeader->shstrndx * pElfHeader->shentsize)];
+    elfSectionNamesTableOffset = pElfSectionHeader->offset;
+    elfSectionNamesTableSize = pElfSectionHeader->size;
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, portSafeAddU64(elfSectionNamesTableOffset, elfSectionNamesTableSize - 1, &elfSectionNamesTableMaxIdx), NV_ERR_INVALID_DATA);
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, elfDataSize >= elfSectionNamesTableMaxIdx, NV_ERR_INVALID_DATA);
+
+    // Iterate through all of the section headers to find the signatures
+    pElfSectionHeader = (const LibosElf64SectionHeader*) &pGspBuf[elfSectionHeaderMaxIdx + 1 - sizeof(*pElfSectionHeader)];
+
+    for (idx = pElfHeader->shnum - 1; idx >= 0; idx--, pElfSectionHeader--)
+    {
+        NvU64 currentSectionNameMaxLength;
+        NvU64 elfSectionMaxIdx;
+
+        // Make sure the header name index fits within the section names table
+        NV_CHECK_OR_RETURN(LEVEL_ERROR, elfSectionNamesTableSize - 1 >= pElfSectionHeader->name, NV_ERR_INVALID_DATA);
+        currentSectionNameMaxLength = elfSectionNamesTableSize - pElfSectionHeader->name - 1;
+        pCurrentSectionName = (const char *) &pGspBuf[elfSectionNamesTableOffset + pElfSectionHeader->name];
+
+        // Make sure the elf section size and offset are valid
+        if (pElfSectionHeader->size > 0)
+        {
+            NV_CHECK_OR_RETURN(LEVEL_ERROR, portSafeAddU64(pElfSectionHeader->offset, pElfSectionHeader->size - 1, &elfSectionMaxIdx), NV_ERR_INVALID_DATA);
+        }
+        else
+        {
+            elfSectionMaxIdx = pElfSectionHeader->offset;
+        }
+        NV_CHECK_OR_RETURN(LEVEL_ERROR, elfDataSize >= elfSectionMaxIdx, NV_ERR_INVALID_DATA);
+
+        // Check whether the section name matches the expected section name
+        if ((sectionNameLength <= currentSectionNameMaxLength) &&
+            (portStringCompare(pCurrentSectionName, pSectionName, sectionNameLength) == 0) &&
+            (pCurrentSectionName[sectionNameLength] == '\0'))
+        {
+            *ppSectionData = &pGspBuf[pElfSectionHeader->offset];
+            *pSectionSize = pElfSectionHeader->size;
+
+            return NV_OK;
+        }
+    }
+
+    return NV_ERR_OBJECT_NOT_FOUND;
+}
