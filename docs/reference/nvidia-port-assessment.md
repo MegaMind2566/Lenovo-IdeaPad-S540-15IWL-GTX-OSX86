@@ -2,7 +2,7 @@
 
 Reviewed on October 15, 2026. Target: Lenovo IdeaPad S540-15IWL GTX, Intel macOS Tahoe, NVIDIA GTX 1650 Max-Q, PCI `10DE:1F91`.
 
-**Status:** PCI visibility, attachment, the two-read TU117 match and the integrated v0.4.0 CPU-foundation startup are confirmed on the laptop. The [v0.5.0 transport package](../../packages/nvidia-transport/README.md) adds eight original allocation/mutex callers, a bounded reserve and a shared startup sequence; native CI, kernel compilation and package verification passed, while its combined laptop result is pending. Concurrent kernel execution, interrupt behavior and full NVIDIA caller compatibility remain unvalidated. HAL instantiation, resource-manager integration, GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
+**Status:** PCI visibility, attachment, the two-read TU117 match and the integrated v0.4.0 CPU-foundation startup are confirmed on the laptop. The [v0.5.0 transport package](../../packages/nvidia-transport/README.md) adds eight original allocation/mutex callers, a bounded reserve and a shared startup sequence; native CI, kernel compilation and package verification passed. Its format-5 laptop report confirms all 35 original-caller/reserve checks and 23 foundation checks, with the same two-read TU117 match and no warnings. Concurrent kernel execution, interrupt behavior and full NVIDIA caller compatibility remain unvalidated. HAL instantiation, resource-manager integration, GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
 
 ## Source baseline
 
@@ -130,7 +130,7 @@ The check runs once on a sleepable thread. It uses small buffers, a single 256-b
 
 ## Original-caller integration: bounded allocation and mutex contracts
 
-The [caller component](../../packages/nvidia-caller-integration/README.md) retains three allocation and five mutex function bodies from the pinned NVIDIA source. It is a narrow, explicitly adapted extraction, not complete NVPort or RM integration. Version 0.4.0 remains the confirmed laptop checkpoint; v0.5.0 integrates these callers into the transport candidate.
+The [caller component](../../packages/nvidia-caller-integration/README.md) retains three allocation and five mutex function bodies from the pinned NVIDIA source. It is a narrow, explicitly adapted extraction, not complete NVPort or RM integration. Version 0.5.0 confirms these callers and the bounded startup sequence in the laptop kernel.
 
 NVIDIA's nonpaged allocation/free contract excludes sleeping. Candidate hooks therefore use a 32-slot, 4 MiB preallocated reserve with a 128 KiB request ceiling and bounded lock-free bitmap operations. Initialization/shutdown require ordinary thread context and external quiescence. Requests may fail for size, exhaustion or contention. Larger RM allocations require a later design; this is not a general RM heap.
 
@@ -140,7 +140,9 @@ The NVPort mutex caller profile requires ordinary threads, same-owner release an
 
 The [v0.5.0 native build passed](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38726407067) from source `81c1529a31fcc1b61fa3a466442e73fef0fc3aa9`. Its shared entry point serializes the reserve lifecycle; all 35 caller/reserve checks and 23 foundation checks passed plain and with fatal sanitizer diagnostics. The combined kernel object resolved the 16 caller/hook symbols and retained 22 reviewed platform imports. These include the compiler's RAM-zeroing helper `___bzero`, explicitly exported by the pinned [XNU libkern symbol set](https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/config/Libkern.exports#L666). The signed package, 272 decoder checks and contained file hashes were verified.
 
-The startup creates no workers and does not intentionally enter the kernel wait path. CI did not load the extension. This build does not establish laptop execution, kernel contention, interrupt-context allocation, full RM semantics or graphics support; one combined laptop result remains required.
+The subsequent format-5 laptop report returns version `0.5.0`, `integrated_passed`, `complete=true`, no warnings and verified provider identity. All 35 original-caller/reserve checks and 23 foundation checks passed in the Tahoe kernel. The same two read-only loads selected TU117 variant `41`. This completes the combined startup milestone; no repeated laptop test is required.
+
+The startup creates no workers and does not intentionally enter the kernel wait path. The report does not validate kernel contention, interrupt-context allocation, suspend/wake, full RM semantics or graphics support. Raw reports and resource addresses remain private.
 
 ## Milestone status and remaining work
 
@@ -150,6 +152,7 @@ The startup creates no workers and does not intentionally enter the kernel wait 
 | Single-read BAR0 identification | Confirmed on the laptop in 0.2.0: exactly one BOOT_0 read with expected TU117 fields; no broader hardware operation validated |
 | BOOT_42 and local HAL table match | Confirmed on the laptop in 0.3.0: two read-only identification loads and local TU117 variant-41 match. No HAL object or resource-manager integration |
 | CPU-only Darwin OS foundations | Integrated v0.4.0 kernel startup check confirmed: 23 assertions across clocks, ordinary RAM, original C++ atomics, allocation and thread mutexes. No concurrent kernel or resource-manager validation |
+| Original allocation/mutex caller startup | Confirmed on the laptop in v0.5.0: 35 caller/reserve checks and 23 foundation checks passed; bounded sequential startup only |
 | Further hardware transport | Separate reviewed work for DMA and interrupts, with bounded access and failure handling |
 | GPU and GSP startup | Matching, hashed firmware; observed initialization with timeouts and cleanup; no success inferred from PCI enumeration |
 | Minimal execution | One deterministic command with a checked result and recoverable failure path |

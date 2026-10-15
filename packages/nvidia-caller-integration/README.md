@@ -2,7 +2,7 @@
 
 This development component connects three original NVIDIA allocation callers and five original mutex callers to candidate Darwin backends. Function bodies come from NVIDIA release `615.78.08`, commit `1a82fbfda8f321b056eb3568850f9316c5e465c5`; includes and interface profiles are explicitly adapted. This is not the complete NVPort library or NVIDIA resource manager.
 
-[The earlier targeted Intel macOS CI passed](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38722294509), including original-caller execution, sanitizers, mandatory assertion failure and kernel compile/link/import checks. The component is now included in the [v0.5.0 transport candidate](../nvidia-transport/README.md), whose exact build results accompany the package. One combined laptop result remains required. Version 0.4.0 remains the confirmed laptop checkpoint. Kernel and interrupt execution of the new backends remain untested.
+[The earlier targeted Intel macOS CI passed](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38722294509), including original-caller execution, sanitizers, mandatory assertion failure and kernel compile/link/import checks. The component is now included in the [v0.5.0 transport candidate](../nvidia-transport/README.md), whose exact build results accompany the package. The v0.5.0 laptop report confirms the bounded sequential kernel startup: 35 caller/reserve checks and 23 foundation checks passed with no warnings. Kernel contention and interrupt-context execution remain untested.
 
 ## Allocation without sleeping
 
@@ -33,7 +33,7 @@ The [successful CI run](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IW
 
 The v0.5.0 candidate records its exact source revision and native validation results in the transport package's `BUILD.json`. The shared startup entry point uses a nonblocking singleton lease, runs 35 caller/reserve checks and 23 foundation checks, and releases its resources before the transport's two read-only TU117 identification loads. The startup creates no workers and does not intentionally enter a blocking mutex wait. The deliberate mandatory-assertion failure is exercised only by a separate native CI process.
 
-No new GPU access, firmware, DMA, GPU commands, HAL objects or RM objects are added. The v4 laptop result remains the confirmed hardware checkpoint. The v5 result is pending; kernel contention, interrupt-context allocation, suspend/wake and full RM compatibility remain unvalidated.
+No new GPU access, firmware, DMA, GPU commands, HAL objects or RM objects are added. The v5 laptop result is confirmed: `integrated_passed`, complete, exact provider identity verified, no warnings, and the same two-read TU117 variant-41 match. No repeated laptop test is needed for this milestone. Kernel contention, interrupt-context allocation, suspend/wake and full RM compatibility remain unvalidated.
 
 ## Primary references
 
