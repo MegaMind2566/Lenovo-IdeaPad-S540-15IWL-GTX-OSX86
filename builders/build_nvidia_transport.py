@@ -129,7 +129,7 @@ def adapter_sources() -> tuple[list[Path], list[Path]]:
 
 def native_flags() -> list[str]:
     return ['-arch', 'x86_64', '-mmacosx-version-min=15.0', '-O2',
-            '-Wall', '-Wextra', '-Werror', '-ffreestanding',
+            '-Wall', '-Wextra', '-Werror',
             '-I', str(ADAPTER / 'upstream/include'),
             '-I', str(ADAPTER / 'src'), '-I', str(CALLERS / 'src'),
             '-I', str(LIFECYCLE / 'src'), '-I', str(LIFECYCLE / 'upstream')]
@@ -142,7 +142,7 @@ def compile_native_harness(work: Path, label: str, harness: Path,
     objects = []
     for source in c_sources:
         obj = work / (label + '-' + source.stem + '.o')
-        run('/usr/bin/xcrun', 'clang', *common, '-std=gnu11', *sanitizer,
+        run('/usr/bin/xcrun', 'clang', *common, '-std=gnu11', '-ffreestanding', *sanitizer,
             '-c', str(source), '-o', str(obj))
         objects.append(str(obj))
     binary = work / ('check-' + label)
