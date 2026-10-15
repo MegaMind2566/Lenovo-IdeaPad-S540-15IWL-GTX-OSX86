@@ -58,7 +58,9 @@ Refusal is a complete diagnostic outcome. Failed reads and invalid reports retur
 
 The native Intel CI build compiles and links the kext, checks its Mach-O type and module metadata, verifies ad-hoc signatures, and runs decoder and policy tests. It does not load the experimental kext or validate the laptop's MMIO response.
 
-The current GitHub build is blocked by an account billing/spending-limit error before any job steps execute. Version 0.2.0 has therefore not passed native compilation yet. The local source bundle **S540-nvidia-build-local-v1.zip** provides an alternative on Intel macOS with Apple Command Line Tools. Extract it into Downloads and run:
+Version 0.2.0 passed the [native Intel build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38664620193) at commit `a463601d5d876899bbd7b4ee17d5d81972f697b6`. Compilation, signatures, 116 native decoder checks, the host policy tests and packaged reporter execution passed. CI does not load the experimental kext; the laptop MMIO result remains pending.
+
+The optional local source bundle **S540-nvidia-build-local-v1.zip** provides an alternative on Intel macOS with Apple Command Line Tools. Extract it into Downloads and run:
 
 ```bash
 bash "$HOME/Downloads/S540-nvidia-build-local-v1/BUILD-LOCAL.command"
