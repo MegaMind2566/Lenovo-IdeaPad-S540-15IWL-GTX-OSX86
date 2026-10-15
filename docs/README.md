@@ -17,9 +17,10 @@ Start with the [project README](../README.md) for the current state and scope. D
 |---|---|
 | [Passive CPU sensors](../packages/cpu-sensors/README.md) | A continuous sensor reading with no CPU workload; complete temperature readings at idle and during desktop activity |
 | [CPU, temperature and power](../packages/cpu-thermal/README.md) | Grouped idle, short-load and recovery collector; sustained-cooling validation remains separate from the successful activity readings |
+| [NVIDIA NVPort lifecycle](../packages/nvidia-nvport-lifecycle/README.md) | V6 tracked memory, spinlocks, allocator-owned mutexes, failure cleanup and resource accounting; native CI/package verification passed, one combined laptop result pending |
 | [NVIDIA NVPort callers](../packages/nvidia-caller-integration/README.md) | Original allocation/mutex caller integration with bounded reserve and mutex backend; v5 kernel startup confirmed with 35 caller/reserve checks and 23 foundation checks |
 | [NVIDIA Darwin OS adapter](../packages/nvidia-os-adapter/README.md) | CPU-only clock, RAM, atomics, allocation and thread mutexes; integrated v4 kernel startup check confirmed on the laptop; native/sanitizer checks and kernel packaging passed |
-| [NVIDIA PCI transport](../packages/nvidia-transport/README.md) | Integrated v5 original-caller/foundation startup and two-read TU117 identification confirmed on the laptop; no initialized GPU |
+| [NVIDIA PCI transport](../packages/nvidia-transport/README.md) | V5 startup and two-read TU117 match confirmed; v6 compiled and verified with 72 lifecycle, 35 caller/reserve and 23 foundation checks; v6 laptop result pending |
 | [NVIDIA PCI inventory](../packages/nvidia-pci/README.md) | Native read-only inventory; active target PCI visibility is confirmed |
 | [Intel graphics](guides/intel-graphics.md) | Acceleration and stability checks |
 | [Boot and networking](guides/boot-network.md) | Backlight boot fix, HeliPort and Bluetooth |

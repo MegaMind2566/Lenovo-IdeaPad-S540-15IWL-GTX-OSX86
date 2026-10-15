@@ -4,6 +4,8 @@ Reviewed on October 15, 2026. Target: Lenovo IdeaPad S540-15IWL GTX, Intel macOS
 
 **Status:** PCI visibility, attachment, the two-read TU117 match and the integrated v0.4.0 CPU-foundation startup are confirmed on the laptop. The [v0.5.0 transport package](../../packages/nvidia-transport/README.md) adds eight original allocation/mutex callers, a bounded reserve and a shared startup sequence; native CI, kernel compilation and package verification passed. Its format-5 laptop report confirms all 35 original-caller/reserve checks and 23 foundation checks, with the same two-read TU117 match and no warnings. Concurrent kernel execution, interrupt behavior and full NVIDIA caller compatibility remain unvalidated. HAL instantiation, resource-manager integration, GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
 
+**V6 development:** The combined [NVPort lifecycle block](../../packages/nvidia-nvport-lifecycle/README.md), source `a6f6555624b4395454045bbce710c08cf7b6309e`, passed [native Intel CI and package verification](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38732985934). One combined v6 laptop result is pending. The confirmed v5 result will not be repeated as a separate laptop task.
+
 ## Source baseline
 
 | Input | Inspected baseline | Meaning |
@@ -144,6 +146,18 @@ The subsequent format-5 laptop report returns version `0.5.0`, `integrated_passe
 
 The startup creates no workers and does not intentionally enter the kernel wait path. The report does not validate kernel contention, interrupt-context allocation, suspend/wake, full RM semantics or graphics support. Raw reports and resource addresses remain private.
 
+## V6 tracked-memory and owned-object lifecycle
+
+The [lifecycle component](../../packages/nvidia-nvport-lifecycle/README.md) combines 31 memory functions and 11 synchronization functions from the pinned NVIDIA release. Forty-one bodies are unchanged. The remaining memory-bootstrap function is explicitly adapted to return checked status, unwind allocation/OS-spinlock initialization failures and publish initialized state only after success. This extraction is not the complete NVPort `core.c` or resource manager.
+
+The block adds global/custom allocator dispatch, tracked allocation/free and original counters, allocator release, real spinlocks, allocator-owned mutex/spinlock creation and destruction, bounded exhaustion/reuse and complete cleanup. The same startup lease covers existing v5 checks and the new lifecycle sequence. Reserve slots, tracked allocations and actual OS mutex/spinlock object counts must return to their starting values. The 4 MiB fixed-slot reserve and its 128 KiB request ceiling remain; metadata consumes slots. This is not a general RM heap, VRAM or DMA allocator.
+
+The [native Intel run passed](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38732985934) from source `a6f6555624b4395454045bbce710c08cf7b6309e`. The production sequence passed 72 lifecycle, 35 caller/reserve and 23 foundation checks, plain and with fatal sanitizers. Native lifecycle coverage passed 107 fault checks and four-thread stress with 4,000 completed cycles; spinlock coverage passed 23 checks and four-thread stress with 16,000 updates, plain and sanitized. Bootstrap/owned-object failure cleanup and fatal assertion paths were checked. The reporter passed 333 decoder checks. Kernel linking resolved 51 functions and two constants with exactly 24 reviewed platform imports. Signatures, all 122 packaged files and 106 source hashes were verified. ZIP SHA256: `fa593618c4174fd505b4f284ee244f1bad109067bf53f0f81565fecdae001891`.
+
+Those userspace backends do not validate kernel interrupt behavior or blocking waits. CI did not load the extension. The kernel startup creates no workers and does not intentionally contend a mutex. Diagnostic/callback paths that traverse tracking state while holding a spinlock are explicitly excluded from this kernel profile; the startup uses silent shutdown without an OOM callback.
+
+The verified compiled package is ready for one combined laptop checkpoint covering this entire block; its hardware result remains pending. There are no isolated PC tests for individual allocation, spinlock or mutex wrappers, and no separate v5 rerun. The hardware policy is unchanged: two read-only identification loads, no HAL/RM instantiation, GPU initialization, firmware, DMA or graphics acceleration.
+
 ## Milestone status and remaining work
 
 | Milestone | Required result |
@@ -153,6 +167,7 @@ The startup creates no workers and does not intentionally enter the kernel wait 
 | BOOT_42 and local HAL table match | Confirmed on the laptop in 0.3.0: two read-only identification loads and local TU117 variant-41 match. No HAL object or resource-manager integration |
 | CPU-only Darwin OS foundations | Integrated v0.4.0 kernel startup check confirmed: 23 assertions across clocks, ordinary RAM, original C++ atomics, allocation and thread mutexes. No concurrent kernel or resource-manager validation |
 | Original allocation/mutex caller startup | Confirmed on the laptop in v0.5.0: 35 caller/reserve checks and 23 foundation checks passed; bounded sequential startup only |
+| Tracked memory and owned-object lifecycle | V6 native CI and package verification passed; one combined laptop result pending, with v5 retained as the confirmed kernel baseline |
 | Further hardware transport | Separate reviewed work for DMA and interrupts, with bounded access and failure handling |
 | GPU and GSP startup | Matching, hashed firmware; observed initialization with timeouts and cleanup; no success inferred from PCI enumeration |
 | Minimal execution | One deterministic command with a checked result and recoverable failure path |
