@@ -123,24 +123,32 @@ class CheckedSourceTests(unittest.TestCase):
             output = Path(directory)
             namespace = output / 'namespace-fixture.h'
             namespace.write_text('#define portMemInitialize s540CheckedFixture_portMemInitialize\n')
-            for checked in (False, True):
-                source = output / ('abi-%s.c' % checked)
-                source.write_text('#include "nvport/nvport.h"\n'
-                                  '_Static_assert(__builtin_types_compatible_p('
-                                  '__typeof__(&portMemInitialize), ' +
-                                  ('NV_STATUS' if checked else 'void') +
-                                  ' (*)(void)), "Memory ABI mismatch");\n')
-                flags = BUILDER.original_bridge_flags(UPSTREAM, output, compiler, namespace,
-                                                       checked_source=self.source if checked else None)
-                if checked:
-                    self.assertIn(str(self.source / 'src/nvidia/inc/libraries'), flags)
-                    self.assertNotIn(str(UPSTREAM / 'src/nvidia/inc/libraries'), flags)
-                flags += (['-mkernel', '-arch', 'x86_64', '-mmacosx-version-min=15.0'] if native
-                          else ['-target', 'x86_64-macos-none', '-fPIC'])
-                obj = output / ('abi-%s.o' % checked)
-                BUILDER.execute([str(compiler), *flags, '-c', str(source), '-o', str(obj)],
-                                diagnostic_log=output / ('abi-%s.log' % checked))
-                BUILDER.macho_symbols(obj)
+            # macOS temp directories may use /var while the compiler flags use
+            # /private/var. Exercise an equivalent parent alias on every host.
+            alias = output / 'checked-parent-alias'
+            alias.symlink_to(self.root, target_is_directory=True)
+            cases = (('baseline', None), ('checked', self.source),
+                     ('checked-parent-alias', alias / self.source.name))
+            for name, checked_source in cases:
+                with self.subTest(source=name):
+                    checked = checked_source is not None
+                    source = output / ('abi-%s.c' % name)
+                    source.write_text('#include "nvport/nvport.h"\n'
+                                      '_Static_assert(__builtin_types_compatible_p('
+                                      '__typeof__(&portMemInitialize), ' +
+                                      ('NV_STATUS' if checked else 'void') +
+                                      ' (*)(void)), "Memory ABI mismatch");\n')
+                    flags = BUILDER.original_bridge_flags(UPSTREAM, output, compiler, namespace,
+                                                           checked_source=checked_source)
+                    if checked:
+                        self.assertIn(str((checked_source / 'src/nvidia/inc/libraries').resolve(strict=True)), flags)
+                        self.assertNotIn(str((UPSTREAM / 'src/nvidia/inc/libraries').resolve(strict=True)), flags)
+                    flags += (['-mkernel', '-arch', 'x86_64', '-mmacosx-version-min=15.0'] if native
+                              else ['-target', 'x86_64-macos-none', '-fPIC'])
+                    obj = output / ('abi-%s.o' % name)
+                    BUILDER.execute([str(compiler), *flags, '-c', str(source), '-o', str(obj)],
+                                    diagnostic_log=output / ('abi-%s.log' % name))
+                    BUILDER.macho_symbols(obj)
 
     def test_pending_and_cross_summaries_cannot_be_native_reused(self):
         with tempfile.TemporaryDirectory() as directory:
