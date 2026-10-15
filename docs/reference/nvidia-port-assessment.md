@@ -6,6 +6,8 @@ Reviewed on October 15, 2026. Target: Lenovo IdeaPad S540-15IWL GTX, Intel macOS
 
 **V6 confirmed:** The combined [NVPort lifecycle block](../../packages/nvidia-nvport-lifecycle/README.md), source `a6f6555624b4395454045bbce710c08cf7b6309e`, passed [native Intel CI and package verification](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38732985934). The format-6 laptop report confirms all 130 kernel startup checks (72 lifecycle, 35 caller/reserve, 23 foundations), cleanup complete, verified provider identity, the two-read TU117 variant-41 match and no warnings. No repeat laptop test is required. Full RM operation and GPU initialization remain unimplemented.
 
+**V7 native build passed:** The [combined CPU support runtime](../../packages/nvidia-nvport-runtime/README.md) now links checked memory/PRNG initialization, original string/unsigned utilities and real vector/list consumers. An explicit vector reallocation correction prevents old-buffer loss for an empty container. [Native CI](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38740433010) passed 258 combined startup checks, container/fault coverage, fatal sanitizers, kernel/import/signature checks and 390 reporter checks. The compiled package and embedded hashes were verified. One combined laptop result is pending; v6 remains the confirmed hardware baseline. This is a selected CPU profile, not full NVPort/RM or GPU initialization.
+
 ## Source baseline
 
 | Input | Inspected baseline | Meaning |

@@ -16,7 +16,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 | Guide | Purpose |
 |---|---|
 | [Passive CPU sensors](../packages/cpu-sensors/README.md) | A continuous sensor reading with no CPU workload; complete temperature readings at idle and during desktop activity |
-| [NVIDIA CPU support runtime](../packages/nvidia-nvport-runtime/README.md) | V7 checked memory/PRNG startup, original string utilities and vector/list consumers; native verification in progress, v6 remains the confirmed kernel baseline |
+| [NVIDIA CPU support runtime](../packages/nvidia-nvport-runtime/README.md) | V7 checked memory/PRNG startup, original utilities and vector/list consumers; native CI and package verification passed with 258 combined startup checks; laptop result pending |
 | [CPU, temperature and power](../packages/cpu-thermal/README.md) | Grouped idle, short-load and recovery collector; sustained-cooling validation remains separate from the successful activity readings |
 | [NVIDIA NVPort lifecycle](../packages/nvidia-nvport-lifecycle/README.md) | V6 tracked memory, spinlocks and allocator-owned mutex lifecycle confirmed in the Tahoe kernel: 72 lifecycle checks passed, including cleanup, with no warnings |
 | [NVIDIA NVPort callers](../packages/nvidia-caller-integration/README.md) | Original allocation/mutex caller integration with bounded reserve and mutex backend; v5 kernel startup confirmed with 35 caller/reserve checks and 23 foundation checks |
