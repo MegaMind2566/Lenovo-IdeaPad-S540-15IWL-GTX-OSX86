@@ -13,6 +13,7 @@ import struct
 import sys
 
 import build_nvidia_transport as transport
+import nvidia_execution_commands as commands
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE = ROOT / 'packages/nvidia-global-rm-crypto'
@@ -38,8 +39,8 @@ def verify_binary(path: Path, kind: int, host_control: bool) -> None:
     if not host_control:
         transport.macho(path, kind)
         if kind == 2:
-            transport.run('/usr/bin/codesign', '--force', '--sign', '-', str(path))
-            transport.run('/usr/bin/codesign', '--verify', '--strict', str(path))
+            commands.run('/usr/bin/codesign', '--force', '--sign', '-', str(path))
+            commands.run('/usr/bin/codesign', '--verify', '--strict', str(path))
         return
     header = path.read_bytes()[:20]
     if (len(header) != 20 or header[:6] != b'\x7fELF\x02\x01'
@@ -48,15 +49,20 @@ def verify_binary(path: Path, kind: int, host_control: bool) -> None:
         raise ValueError('A host-control output is not the expected x86_64 ELF object/executable.')
 
 
+@commands.logged(report='global-crypto-checks.json')
 def check(output: Path, upstream: Path | None = None, *, host_control: bool = False) -> dict:
     if not host_control and (sys.platform != 'darwin' or platform.machine() != 'x86_64'):
         raise ValueError('Authoritative crypto boundary checks require Intel macOS.')
     output = output.absolute()
     output.mkdir(parents=True, exist_ok=True)
+    partial = {'format': 1, 'component': 'nvidia-global-rm-crypto', 'status': 'running',
+               'native_execution': {}, 'kernel_runtime': 'not_tested', 'gpu_access': False}
+    report = output / 'global-crypto-checks.json'
+    report.write_text(json.dumps(partial, indent=2, sort_keys=True) + '\n')
     provenance = [sys.executable, str(PACKAGE / 'tests/test_crypto_provenance.py')]
     if upstream is not None:
         provenance += ['--upstream', str(upstream.resolve(strict=True))]
-    checked = transport.run(*provenance)
+    checked = commands.run(*provenance)
     print((checked.stdout + checked.stderr).strip())
     cc, cxx = compiler_pair(host_control)
     target = [] if host_control else ['-arch', 'x86_64', '-mmacosx-version-min=15.0']
@@ -73,21 +79,24 @@ def check(output: Path, upstream: Path | None = None, *, host_control: bool = Fa
         for source in (PACKAGE / 'tests/check_crypto_abi.c',
                        PACKAGE / 'src/S540NvidiaGlobalCrypto.c'):
             obj = work / (source.stem + '.o')
-            transport.run(*cc, '-std=c11', *common,
-                          *instrumentation, '-c', str(source), '-o', str(obj))
+            commands.run(*cc, '-std=c11', *common,
+                          *instrumentation, '-c', str(source), '-o', str(obj),
+                          diagnostic_log=work / (source.stem + '-compile.log'))
             verify_binary(obj, 1, host_control)
             objects.append(str(obj))
         binary = work / 'check-crypto-unavailable'
-        transport.run(*cxx, '-std=c++17', '-pthread',
+        commands.run(*cxx, '-std=c++17', '-pthread',
                       *common, *instrumentation,
                       str(PACKAGE / 'tests/check_crypto_unavailable_native.cpp'),
-                      *objects, '-o', str(binary))
+                      *objects, '-o', str(binary), diagnostic_log=work / 'link.log')
         verify_binary(binary, 2, host_control)
-        result = json.loads(transport.run(str(binary)).stdout)
+        result = json.loads(commands.run(str(binary), diagnostic_log=work / 'run.log').stdout)
         for key, value in EXPECTED.items():
             if type(result.get(key)) is not type(value) or result[key] != value:
                 raise ValueError('The exact crypto refusal checks changed: ' + label + '/' + key)
         results[label] = result
+        partial['native_execution'][label] = result
+        report.write_text(json.dumps(partial, indent=2, sort_keys=True) + '\n')
     inputs = [path for path in PACKAGE.rglob('*') if path.is_file()
               and '__pycache__' not in path.parts and path.suffix != '.pyc']
     record = {'format': 1, 'component': 'nvidia-global-rm-crypto',

@@ -12,7 +12,7 @@ class Provenance(unittest.TestCase):
     def test_pinned_references(self):
         record = json.loads((ROOT / 'PROVENANCE.json').read_text())
         self.assertEqual(record['nvidia_commit'], '1a82fbfda8f321b056eb3568850f9316c5e465c5')
-        self.assertEqual(len(record['reference_files']), 6)
+        self.assertEqual(len(record['reference_files']), 7)
         for item in record['reference_files']:
             data = (ROOT / item['local']).read_bytes()
             self.assertEqual(hashlib.sha256(data).hexdigest(), item['sha256'])

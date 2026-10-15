@@ -5,6 +5,10 @@
 #else
 #include <cerrno>
 #include <unistd.h>
+#if defined(__APPLE__)
+// Darwin declares userspace getentropy in sys/random.h, not unistd.h.
+#include <sys/random.h>
+#endif
 #endif
 extern "C" NV_STATUS NV_API_CALL s540Darwin_os_get_random_bytes(NvU8 *output, NvU16 count) {
     if (count != 0 && output == nullptr) return NV_ERR_INVALID_ARGUMENT;

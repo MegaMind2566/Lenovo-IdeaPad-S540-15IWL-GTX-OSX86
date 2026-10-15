@@ -95,8 +95,12 @@ non-PIC kernel objects, and rejects dylib load commands. The explicitly PIC
 cross-probe keeps its separate dynamic-bundle format; its result cannot
 validate the native kernel link. Exact retained roots, undefined imports and
 dead stripping are inspected for both profiles. These diagnostic images are
-never loaded, and the complete corrected native workflow remains pending.
-Source compilation does not validate the cleanup overlays or execute RM.
+never loaded. Native Apple linking now passes with 204 global and 310 adapter
+imports, with no dylib dependencies. Firmware asset verification also passes.
+The complete development workflow is still blocked at native CPU-control
+compilation; those controls now run before full RM compilation and preserve
+command diagnostics. Source compilation does not validate the cleanup overlays
+or execute RM.
 
 ## External ABI boundary
 

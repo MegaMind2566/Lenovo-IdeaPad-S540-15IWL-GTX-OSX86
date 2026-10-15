@@ -23,6 +23,22 @@
   "nvidia_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
   "nvidia_release": "615.78.08",
   "profile": "dynamic-host-synchronization-serialized-work-one-shot-timer",
+  "random_api": {
+    "kernel": {
+      "function": "void read_random(void *, u_int)",
+      "header": "sys/random.h"
+    },
+    "native_darwin": {
+      "function": "int getentropy(void *, size_t)",
+      "header": "sys/random.h",
+      "minimum_macos": "10.12"
+    },
+    "native_linux": {
+      "function": "int getentropy(void *, size_t)",
+      "header": "unistd.h"
+    },
+    "source": "reference/apple-random.h"
+  },
   "reference_files": [
     {
       "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
@@ -65,6 +81,13 @@
       "repository": "NVIDIA/open-gpu-kernel-modules",
       "sha256": "bd281e48ff06b481033fc2fb29a891710a2b4d66fb009cc2b752ab6e90f2113b",
       "upstream_path": "src/nvidia/arch/nvalloc/unix/include/os-interface.h"
+    },
+    {
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "local": "reference/apple-random.h",
+      "repository": "apple-oss-distributions/xnu",
+      "sha256": "e9bd91c0eece75af7c44d0c89ceb2911da6929e884329c5777c870a9aa11573c",
+      "upstream_path": "bsd/sys/random.h"
     }
   ]
 }

@@ -15,6 +15,7 @@ import platform
 import sys
 
 import compile_nvidia_global_rm as original
+import nvidia_execution_commands as commands
 import embed_nvidia_firmware as firmware
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -71,7 +72,7 @@ def audit_platform_imports(output: Path, kernel_flags: list[str], cpp_flags: lis
     approved, component_imports = set(), {}
     for index, source in enumerate(references):
         obj = output / ('execution-sdk-reference-' + str(index) + '.o')
-        transport.run('/usr/bin/xcrun', 'clang++', *kernel_flags, *cpp_flags,
+        commands.run('/usr/bin/xcrun', 'clang++', *kernel_flags, *cpp_flags,
                       '-c', str(source), '-o', str(obj))
         transport.macho(obj, 1)
         transport.verify_no_static_initializers(obj, 'An independent execution SDK reference')
@@ -83,10 +84,10 @@ def audit_platform_imports(output: Path, kernel_flags: list[str], cpp_flags: lis
                     ROOT / 'packages/nvidia-hardware-transport/firmware/S540NvidiaFirmware.cpp']
     for source in dependencies:
         obj = output / ('prior-dependency-' + source.stem + '.o')
-        transport.run('/usr/bin/xcrun', 'clang++', *kernel_flags, *cpp_flags,
+        commands.run('/usr/bin/xcrun', 'clang++', *kernel_flags, *cpp_flags,
                       '-c', str(source), '-o', str(obj))
         transport.macho(obj, 1)
-        previous_exports.update(transport.run('/usr/bin/nm', '-g', '-j', '-U', str(obj)).stdout.split())
+        previous_exports.update(commands.run('/usr/bin/nm', '-g', '-j', '-U', str(obj)).stdout.split())
     platform_imports = (transport.kernel_imports(linked_project) - previous_exports -
                         {'_' + symbol for symbol in original_definitions})
     actual_new = platform_imports - baseline
@@ -108,12 +109,21 @@ def audit_platform_imports(output: Path, kernel_flags: list[str], cpp_flags: lis
                 for source in [*references, *dependencies]}}
 
 
+@commands.logged(output_argument=1, report='execution-kernel-build.json')
 def kernel_objects(upstream: Path, output: Path, assets: Path,
                    kernel_flags: list[str], cpp_flags: list[str],
                    *, compiled_directory: Path | None = None) -> KernelBuild:
     import build_nvidia_transport as transport
     output = output.absolute()
     output.mkdir(parents=True, exist_ok=True)
+    partial = {'format': 1, 'status': 'running', 'phase': 'verify-original-compilation',
+               'completed_project_sources': [], 'production_candidate_allowed': False,
+               'global_rm_executed': False, 'adapter_initialized': False,
+               'gsp_initialized': False, 'gpu_operations': False}
+    report = output / 'execution-kernel-build.json'
+    def save_partial() -> None:
+        report.write_text(json.dumps(partial, indent=2, sort_keys=True) + '\n')
+    save_partial()
     upstream = upstream.resolve(strict=True)
     if original.execute(['git', '-C', str(upstream), 'rev-parse', 'HEAD']).stdout.strip() != original.COMMIT:
         raise ValueError('The full original RM source differs from its pinned revision.')
@@ -143,6 +153,8 @@ def kernel_objects(upstream: Path, output: Path, assets: Path,
     if actual_namespace != compiled['namespace_contract']:
         raise ValueError('The reused original RM private namespace changed.')
     cpp, c, plain_c = project_sources()
+    partial.update(phase='compile-project-bridges', original_source_objects=len(original_objects))
+    save_partial()
     bridge = original.original_bridge_flags(upstream, compilation_root / 'namespaced',
                                              Path('/usr/bin/clang'), namespace)
     objects = list(original_objects)
@@ -162,17 +174,23 @@ def kernel_objects(upstream: Path, output: Path, assets: Path,
         else:
             flags = [*kernel_flags, *cpp_flags, '-Wframe-larger-than=4096']
             compiler = 'clang++'
-        transport.run('/usr/bin/xcrun', compiler, *flags,
-                      '-c', str(source), '-o', str(obj))
+        commands.run('/usr/bin/xcrun', compiler, *flags,
+                      '-c', str(source), '-o', str(obj),
+                      diagnostic_log=output / (source.stem + '-compile.log'))
         transport.macho(obj, 1)
         transport.verify_no_static_initializers(obj, 'The actual Darwin execution bridge')
         objects.append(obj)
         project_objects.append(obj)
+        partial['completed_project_sources'].append(source.relative_to(ROOT).as_posix())
+        save_partial()
+    partial['phase'] = 'embed-firmware'
+    save_partial()
     assembly, embedding = firmware.emit_assembly(assets, output)
     firmware_object = output / 'S540NvidiaFirmwareBytes.o'
-    original.execute(['/usr/bin/xcrun', 'clang', '-arch', 'x86_64',
-                      '-mmacosx-version-min=15.0', '-c', str(assembly),
-                      '-o', str(firmware_object)], cwd=assets.resolve(strict=True))
+    commands.run('/usr/bin/xcrun', 'clang', '-arch', 'x86_64',
+                 '-mmacosx-version-min=15.0', '-c', str(assembly),
+                 '-o', str(firmware_object), cwd=assets.resolve(strict=True),
+                 diagnostic_log=output / 'firmware-compile.log')
     embedded = firmware.verify_embedded_firmware(firmware_object)
     objects.append(firmware_object)
     defined = compiled['namespace_contract']['defined']
@@ -181,10 +199,13 @@ def kernel_objects(upstream: Path, output: Path, assets: Path,
     hidden = output / 'original-rm-private-symbols.txt'
     hidden.write_text(''.join('_' + symbol + '\n' for symbol in defined))
     linked = output / 'execution-bridge.o'
-    transport.run('/usr/bin/xcrun', 'ld', '-r', '-arch', 'x86_64',
-                  *(str(path) for path in project_objects), '-o', str(linked))
+    commands.run('/usr/bin/xcrun', 'ld', '-r', '-arch', 'x86_64',
+                  *(str(path) for path in project_objects), '-o', str(linked),
+                  diagnostic_log=output / 'execution-bridge-link.log')
     transport.macho(linked, 1)
     transport.verify_no_static_initializers(linked, 'The complete actual Darwin execution bridge')
+    partial['phase'] = 'audit-platform-imports'
+    save_partial()
     platform_import_audit = audit_platform_imports(output, kernel_flags, cpp_flags, linked, defined)
     record = {'format': 1, 'status': 'compiled', 'architecture': 'x86_64',
               'production_candidate_allowed': False,
@@ -219,7 +240,7 @@ def main() -> int:
     if sys.platform != 'darwin' or platform.machine() != 'x86_64':
         raise ValueError('Authoritative kernel compilation requires Intel macOS.')
     sdk = args.kernel_sdk.resolve(strict=True)
-    if transport.run('/usr/bin/git', '-C', str(sdk), 'rev-parse', 'HEAD').stdout.strip() != transport.SDK_COMMIT:
+    if commands.run('/usr/bin/git', '-C', str(sdk), 'rev-parse', 'HEAD').stdout.strip() != transport.SDK_COMMIT:
         raise ValueError('The development kernel SDK differs from its pinned revision.')
     flags = ['-arch', 'x86_64', '-mmacosx-version-min=15.0', '-mkernel',
              '-fno-builtin', '-ffreestanding', '-fno-common', '-fno-stack-protector',

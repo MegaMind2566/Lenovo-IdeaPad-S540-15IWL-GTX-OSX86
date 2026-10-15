@@ -71,6 +71,11 @@ checks verify original ABI signatures, reference bytes and the source-backed
 CPU SPI. Native macOS execution is established by the macOS build workflow;
 local Linux validation alone does not establish that result.
 
+Native Darwin obtains the `getentropy` declaration from `<sys/random.h>`;
+Linux obtains it from `<unistd.h>`. The separate kernel branch uses
+`read_random`. The exact Apple declarations and their availability are retained
+in the pinned `reference/apple-random.h` source.
+
 This component performs no GPU register writes, interrupt registration,
 device DMA setup, firmware upload or GPU initialization.
 

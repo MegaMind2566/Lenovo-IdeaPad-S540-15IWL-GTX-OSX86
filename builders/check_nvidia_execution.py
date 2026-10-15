@@ -16,6 +16,7 @@ import sys
 import build_nvidia_transport as transport
 import check_nvidia_global_crypto as crypto
 import compile_nvidia_global_rm as original
+import nvidia_execution_commands as commands
 
 ROOT = Path(__file__).resolve().parents[1]
 SERVICES = ROOT / 'packages/nvidia-darwin-services'
@@ -50,16 +51,43 @@ def native_case(output: Path, name: str, sources: list[Path], harness: Path,
         binary = work / 'check'
         flags = ['-ffunction-sections', '-fdata-sections',
                  '-Wl,--gc-sections' if host_control else '-Wl,-dead_strip'] if dead_strip else []
-        transport.run(*cxx, *common, *instrumentation, *flags,
+        commands.run(*cxx, *common, *instrumentation, *flags,
                       *(str(path) for path in sources), str(harness), '-o', str(binary),
-                      timeout=300)
+                      timeout=300, diagnostic_log=work / 'compile.log')
         crypto.verify_binary(binary, 2, host_control)
-        record = json.loads(transport.run(str(binary), *(arguments or []), timeout=180).stdout)
+        record = json.loads(commands.run(str(binary), *(arguments or []), timeout=180,
+                                        diagnostic_log=work / 'run.log').stdout)
         expect(record, {'format': 1, 'status': 'passed', 'failures': 0,
                        'execution': 'native-user-space', 'kernel_execution': 'not_tested',
                        'gpu_access': False, **expected}, name + '/' + label)
         results[label] = record
     return results
+
+
+def services_case(output: Path, *, host_control: bool = False) -> dict:
+    return native_case(output, 'darwin-services', [
+        SERVICES / ('src/S540NvidiaDarwin' + name + '.cpp') for name in SERVICE_NAMES],
+        SERVICES / 'tests/check_darwin_services_native.cpp',
+        {'component': 'nvidia-darwin-services', 'checks': 166,
+         'production_checks': 37, 'mutex_updates': 12000,
+         'concurrent_work_items': 4000, 'fault_paths': 17, 'cleanup': True},
+        host_control=host_control)
+
+
+@commands.logged(report='services-preflight.json')
+def services_preflight(output: Path, *, host_control: bool = False) -> dict:
+    if not host_control and (sys.platform != 'darwin' or platform.machine() != 'x86_64'):
+        raise ValueError('Authoritative services preflight requires Intel macOS.')
+    output = output.absolute()
+    output.mkdir(parents=True, exist_ok=True)
+    progress = commands.ComponentProgress(output / 'services-preflight.json', {
+        'component': 'nvidia-services-preflight', 'host_system': platform.system(),
+        'authoritative_darwin_execution': not host_control,
+        'production_candidate_allowed': False, 'kernel_runtime': 'not_tested', 'gpu_access': False})
+    progress.component('darwin_services', lambda: services_case(output, host_control=host_control))
+    progress.record['status'] = 'passed'
+    progress.save()
+    return progress.record
 
 
 def timer_case(output: Path, upstream: Path, namespace: Path,
@@ -88,21 +116,24 @@ def timer_case(output: Path, upstream: Path, namespace: Path,
         for source in (GSP / 'timers/S540NvidiaGspTimersOriginal.c',
                        GSP / 'timers/tests/check_gsp_timers_native.c'):
             obj = work / (source.stem + '.o')
-            transport.run(*cc, *bridge, '-O1', '-g', *instrumentation,
-                          '-c', str(source), '-o', str(obj))
+            commands.run(*cc, *bridge, '-O1', '-g', *instrumentation,
+                          '-c', str(source), '-o', str(obj),
+                          diagnostic_log=work / (source.stem + '-compile.log'))
             crypto.verify_binary(obj, 1, host_control)
             objects.append(str(obj))
         for name in SERVICE_NAMES:
             source = SERVICES / ('src/S540NvidiaDarwin' + name + '.cpp')
             obj = work / (source.stem + '.o')
-            transport.run(*cxx, *common, '-std=c++17', *instrumentation,
-                          '-c', str(source), '-o', str(obj))
+            commands.run(*cxx, *common, '-std=c++17', *instrumentation,
+                          '-c', str(source), '-o', str(obj),
+                          diagnostic_log=work / (source.stem + '-compile.log'))
             crypto.verify_binary(obj, 1, host_control)
             objects.append(str(obj))
         binary = work / 'check'
-        transport.run(*cxx, *common, *instrumentation, *objects, '-o', str(binary))
+        commands.run(*cxx, *common, *instrumentation, *objects, '-o', str(binary),
+                     diagnostic_log=work / 'link.log')
         crypto.verify_binary(binary, 2, host_control)
-        record = json.loads(transport.run(str(binary)).stdout)
+        record = json.loads(commands.run(str(binary), diagnostic_log=work / 'run.log').stdout)
         expect(record, {'component': 'nvidia-gsp-timers', 'format': 1,
                        'status': 'passed', 'checks': 34, 'failures': 0,
                        'rc_callbacks': 1, 'nano_callbacks': 2, 'callback_fixture': True,
@@ -114,26 +145,25 @@ def timer_case(output: Path, upstream: Path, namespace: Path,
     return results
 
 
+@commands.logged(report='execution-checks.json')
 def check(output: Path, assets: Path, *, upstream: Path | None = None,
           host_control: bool = False, namespace: Path | None = None) -> dict:
     if not host_control and (sys.platform != 'darwin' or platform.machine() != 'x86_64'):
         raise ValueError('Authoritative combined execution checks require Intel macOS.')
     output = output.absolute()
     output.mkdir(parents=True, exist_ok=True)
+    progress = commands.ComponentProgress(output / 'execution-checks.json', {
+        'component': 'nvidia-execution-native', 'host_system': platform.system(),
+        'authoritative_darwin_execution': not host_control,
+        'production_candidate_allowed': False, 'kernel_runtime': 'not_tested', 'gpu_access': False})
     for package in (SERVICES, DEVICE, GLOBAL, GSP):
         for test in sorted(package.rglob('test_*.py')):
-            result = transport.run(sys.executable, str(test))
+            result = commands.run(sys.executable, str(test))
             print((result.stdout + result.stderr).strip())
-    records = {'crypto': crypto.check(output / 'crypto', upstream, host_control=host_control)}
-    records['darwin_services'] = native_case(output, 'darwin-services', [
-        SERVICES / ('src/S540NvidiaDarwin' + name + '.cpp') for name in
-        SERVICE_NAMES],
-        SERVICES / 'tests/check_darwin_services_native.cpp',
-        {'component': 'nvidia-darwin-services', 'checks': 166,
-         'production_checks': 37, 'mutex_updates': 12000,
-         'concurrent_work_items': 4000, 'fault_paths': 17, 'cleanup': True},
-        host_control=host_control)
-    records['global_host'] = native_case(output, 'global-host', [
+    records = progress.record['native_execution']
+    progress.component('crypto', lambda: crypto.check(output / 'crypto', upstream, host_control=host_control))
+    progress.component('darwin_services', lambda: services_case(output, host_control=host_control))
+    progress.component('global_host', lambda: native_case(output, 'global-host', [
         GLOBAL / 'src/S540NvidiaGlobalRmHost.cpp',
         GLOBAL / 'src/S540NvidiaGlobalRmFormat.cpp',
         *(SERVICES / ('src/S540NvidiaDarwin' + name + '.cpp') for name in SERVICE_NAMES)],
@@ -141,8 +171,8 @@ def check(output: Path, assets: Path, *, upstream: Path | None = None,
         {'component': 'nvidia-global-host-native', 'checks': 24,
          'concurrent_allocations': 2048, 'service_calls': 2048,
          'context_refusals': 3, 'foreign_or_duplicate_frees': 2, 'cleanup': True},
-        host_control=host_control)
-    records['device_transport'] = native_case(output, 'device-transport', [
+        host_control=host_control))
+    progress.component('device_transport', lambda: native_case(output, 'device-transport', [
         DEVICE / ('src/S540Nvidia' + name + '.cpp') for name in
         ('DeviceTransport', 'DeviceServices', 'DeviceCheck')],
         DEVICE / 'tests/check_device_transport_native.cpp',
@@ -150,8 +180,8 @@ def check(output: Path, assets: Path, *, upstream: Path | None = None,
          'production_checks': 21, 'unavailable_mapper_checks': 19,
          'lifecycle_cycles': 128, 'device_dma_verified': False,
          'hardware_interrupt_delivery': False, 'gpu_initialized': False},
-        host_control=host_control)
-    records['firmware_store'] = native_case(output, 'firmware-store', [
+        host_control=host_control))
+    progress.component('firmware_store', lambda: native_case(output, 'firmware-store', [
         GSP / 'src/S540NvidiaGspFirmware.cpp',
         ROOT / 'packages/nvidia-firmware-assets/src/S540NvidiaFirmwareAssets.cpp',
         ROOT / 'packages/nvidia-hardware-transport/firmware/S540NvidiaFirmware.cpp'],
@@ -162,17 +192,17 @@ def check(output: Path, assets: Path, *, upstream: Path | None = None,
          'firmware_loaded': False, 'gpu_initialized': False,
          'bridge_execution': 'not_tested'},
         arguments=[str(assets / 'gsp_tu10x.bin'), str(assets / 'ucodes_tu10x.bin')],
-        dead_strip=True, host_control=host_control)
-    records['platform_parsers'] = native_case(output, 'platform-parsers', [
+        dead_strip=True, host_control=host_control))
+    progress.component('platform_parsers', lambda: native_case(output, 'platform-parsers', [
         GSP / 'platform/S540NvidiaPlatformParsers.cpp',
         GSP / 'platform/S540NvidiaGspPlatform.cpp'],
         GSP / 'platform/tests/check_platform_native.cpp',
         {'component': 'nvidia-gsp-platform-parsers', 'checks': 50,
          'malformed_fixtures': 2048, 'hardware_queried': False},
-        host_control=host_control)
+        host_control=host_control))
     if upstream is None or namespace is None:
         raise ValueError('The exact upstream tree and generated namespace are required for timer ABI checks.')
-    records['gsp_timers'] = timer_case(output, upstream, namespace, host_control=host_control)
+    progress.component('gsp_timers', lambda: timer_case(output, upstream, namespace, host_control=host_control))
     inputs = [path for package in (SERVICES, DEVICE, GLOBAL, GSP)
               for path in package.rglob('*') if path.is_file()
               and '__pycache__' not in path.parts and path.suffix != '.pyc']
@@ -193,13 +223,21 @@ def check(output: Path, assets: Path, *, upstream: Path | None = None,
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output-dir', type=Path, required=True)
-    parser.add_argument('--assets-dir', type=Path, required=True)
+    parser.add_argument('--assets-dir', type=Path)
     parser.add_argument('--upstream', type=Path)
     parser.add_argument('--namespace', type=Path,
                         help='Generated full RM header for the explicit timer callback fixture.')
     parser.add_argument('--host-control', action='store_true',
                         help='Explicit Linux ELF controls; never authoritative Darwin execution.')
+    parser.add_argument('--services-preflight', action='store_true',
+                        help='Run the existing services CPU case before full RM compilation; no firmware or upstream tree needed.')
     args = parser.parse_args()
+    if args.services_preflight:
+        services_preflight(args.output_dir, host_control=args.host_control)
+        print('Darwin services CPU preflight passed; no kernel or GPU execution claimed.')
+        return 0
+    if args.assets_dir is None:
+        parser.error('--assets-dir is required unless --services-preflight is selected')
     check(args.output_dir, args.assets_dir.resolve(strict=True), upstream=args.upstream,
           namespace=args.namespace, host_control=args.host_control)
     print('Combined execution CPU-side native checks passed; no GPU execution claimed.')
