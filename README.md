@@ -47,7 +47,7 @@ Current status as of **October 15, 2026**. **Pending** means the feature has not
 | Touchpad and gestures | Working | ELAN0662 gestures confirmed in daily use; F6 toggle also works |
 | NVIDIA PCI attachment | Working diagnostic | Probe 0.1.0 attaches to `10DE:1F91`, verifies subsystem `17AA:3806`, reads fixed PCI configuration and assigned resource metadata; no GPU initialization or acceleration |
 | NVIDIA BAR0 identification | Working diagnostic | Probe 0.2.0 completed one read-only `NV_PMC_BOOT_0` read with the expected TU117 fields; no GPU initialization or acceleration |
-| NVIDIA HAL table match | Pending validation | Version 0.3.0 implements a guarded BOOT_42 cross-check and local pinned-table lookup; native build and laptop validation pending |
+| NVIDIA HAL table match | Pending validation | Version 0.3.0 implements a guarded BOOT_42 cross-check and local pinned-table lookup; native build passed; laptop validation pending |
 | Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; further icon-key investigation deferred |
 | USB-C video | Pending | No video test available; hardware video capability and routing remain unverified |
 | USB 2 device coverage / storage reliability | Pending | External USB 2 devices, measured throughput and sustained reliability |
@@ -70,7 +70,7 @@ Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including t
 
 ## Development priorities
 
-- Validate the [NVIDIA transport prototype](packages/nvidia-transport/README.md) 0.3.0 BOOT_42 cross-check and local HAL table matcher. Its implementation is present; native build and laptop validation are pending. The 0.2.0 BOOT_0 hardware milestone remains confirmed. HAL instantiation, resource-manager integration, DMA, firmware startup and acceleration remain unimplemented.
+- Validate the [NVIDIA transport prototype](packages/nvidia-transport/README.md) 0.3.0 BOOT_42 cross-check and local HAL table matcher. The native build passed; laptop validation is pending. The 0.2.0 BOOT_0 hardware milestone remains confirmed. HAL instantiation, resource-manager integration, DMA, firmware startup and acceleration remain unimplemented.
 - Complete storage reliability and remaining USB 2 device checks. Both USB-A connectors and USB-C in both orientations negotiate 5 Gb/s with the tested hardware. Audio peripherals, battery power and independent SSD boot work; measured battery runtime remains open.
 - Complete Intel stability and power-management coverage; sustained cooling and fan telemetry remain open. External-display work is paused.
 - Complete remaining device support and investigate connection performance from the recorded Internet baseline; wired/Bluetooth microphones, headphone switching and wireless reconnection work.
@@ -87,7 +87,7 @@ Download the [first EFI release, v0.1.0](https://github.com/MegaMind2566/Lenovo-
 
 Generated packages are available in **Artifacts** from successful [GitHub Actions runs](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions). Current companion packages are `S540-microfono-fix-v2`, `S540-volume-fine-v1` and `S540-brightness-keys-v2`. The [function-key guide](docs/guides/function-keys.md) records the complete keyboard mapping and remaining work.
 
-The **S540-nvidia-transport-v2** package is available from its [successful native Intel build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38664993966). Version 0.1.0 PCI attachment and version 0.2.0 single-read TU117 identification are confirmed on the laptop. Version 0.3.0 is implemented but its native build and laptop result remain pending. The [package guide](packages/nvidia-transport/README.md) records current scope and availability. Graphics acceleration remains unimplemented.
+The **S540-nvidia-transport-v3** package is available from its [successful native Intel build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38666863926). Version 0.1.0 PCI attachment and version 0.2.0 BOOT_0 identification remain confirmed on the laptop. Version 0.3.0 BOOT_42/local HAL table matching has passed the native build and awaits laptop validation. The [package guide](packages/nvidia-transport/README.md) records scope and deployment. Graphics acceleration remains unimplemented.
 
 **Code → Download ZIP downloads source code, without compiled payloads. It is not an installer.** Builders assemble the feature sources into distributable ZIPs with their own launchers and runtime layout.
 

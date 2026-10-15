@@ -17,7 +17,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 |---|---|
 | [Passive CPU sensors](../packages/cpu-sensors/README.md) | A continuous sensor reading with no CPU workload; complete temperature readings at idle and during desktop activity |
 | [CPU, temperature and power](../packages/cpu-thermal/README.md) | Grouped idle, short-load and recovery collector; sustained-cooling validation remains separate from the successful activity readings |
-| [NVIDIA PCI transport](../packages/nvidia-transport/README.md) | Confirmed 0.2.0 BOOT_0 hardware read; 0.3.0 BOOT_42/local HAL table-match implementation awaits native and laptop validation |
+| [NVIDIA PCI transport](../packages/nvidia-transport/README.md) | Confirmed 0.2.0 BOOT_0 hardware read; 0.3.0 BOOT_42/local HAL table-match implementation has passed the native build; laptop validation is pending |
 | [NVIDIA PCI inventory](../packages/nvidia-pci/README.md) | Native read-only inventory; active target PCI visibility is confirmed |
 | [Intel graphics](guides/intel-graphics.md) | Acceleration and stability checks |
 | [Boot and networking](guides/boot-network.md) | Backlight boot fix, HeliPort and Bluetooth |

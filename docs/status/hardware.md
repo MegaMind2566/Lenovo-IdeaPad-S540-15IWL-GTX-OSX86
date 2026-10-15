@@ -243,4 +243,4 @@ This confirms the one bounded identification-register read. It does not establis
 
 ## NVIDIA BOOT_42 and local HAL table matcher
 
-Version 0.3.0 BOOT_42 cross-check and local HAL table matching are implemented; native build and laptop results are pending. The format-3 path permits at most two total register loads, with BOOT_42 reached only after a successful BOOT_0 identification and repeated guards for each mapping/read. A table match does not establish HAL instantiation, resource-manager integration or GPU initialization. Private resource addresses and raw reports remain excluded.
+Version 0.3.0 BOOT_42 cross-check and local HAL table matching have passed the native build; the laptop result remains pending. The format-3 path permits at most two total register loads, with BOOT_42 reached only after a successful BOOT_0 identification and repeated guards for each mapping/read. A table match does not establish HAL instantiation, resource-manager integration or GPU initialization. Private resource addresses and raw reports remain excluded.

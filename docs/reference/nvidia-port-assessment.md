@@ -2,7 +2,7 @@
 
 Reviewed on October 15, 2026. Target: Lenovo IdeaPad S540-15IWL GTX, Intel macOS Tahoe, NVIDIA GTX 1650 Max-Q, PCI `10DE:1F91`.
 
-**Status:** PCI visibility, the 0.1.0 attachment/configuration/resource milestone and the [transport prototype](../../packages/nvidia-transport/README.md) 0.2.0 BOOT_0 identification are confirmed on the laptop. Version 0.3.0 BOOT_42 cross-check and local pinned HAL table matching are implemented, pending native build and laptop validation. HAL instantiation, resource-manager integration, GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
+**Status:** PCI visibility, the 0.1.0 attachment/configuration/resource milestone and the [transport prototype](../../packages/nvidia-transport/README.md) 0.2.0 BOOT_0 identification are confirmed on the laptop. Version 0.3.0 BOOT_42 cross-check and local pinned HAL table matching have passed the native build; laptop validation remains pending. HAL instantiation, resource-manager integration, GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
 
 ## Source baseline
 
@@ -100,7 +100,9 @@ The pinned NVIDIA resource manager's [`_halmgrIsChipSupported`](https://github.c
 
 Version 0.3.0 implements BOOT_0 followed by one guarded BOOT_42 read only after BOOT_0 identifies TU117, for at most two total register loads. Each mapping/read retains the identity, BAR0, memory-decode, D0 and provider-ownership guards. The format-3 snapshot records both outcomes and a local HAL table-match result, including NVIDIA source commit `1a82fbfda8f321b056eb3568850f9316c5e465c5`. Architecture `0x16`, implementation `0x07` and chip `0x167` must agree before the matcher selects TU117 variant index `41`; there are no scans, retries or writes.
 
-This is a local comparison against the pinned table. It does not instantiate a HAL object, integrate the resource manager or initialize the GPU. Native build and laptop validation are pending. The individual-load kernel-stall limitation remains; the confirmed 0.2.0 result does not validate BOOT_42 or the new matcher.
+This is a local comparison against the pinned table. It does not instantiate a HAL object, integrate the resource manager or initialize the GPU. The native build passed; laptop validation remains pending. The individual-load kernel-stall limitation remains; the confirmed 0.2.0 result does not validate BOOT_42 or the new matcher.
+
+The 0.3.0 [native Intel build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38666863926) passed at commit `dc21ecb52d0cde3b824d2ae692c0982d7e1cc972`, including compilation, signatures, policy/decoder checks and packaged reporter execution with the probe unloaded. Its ZIP SHA256 is `4b0c5c0634be2af65bcfd9fd01f91adb12fb7e6ef8d7fefd59027ccba51e6002`. CI did not load the kext or validate BOOT_42 on the laptop.
 
 ## Milestone status and remaining work
 
@@ -108,7 +110,7 @@ This is a local comparison against the pinned table. It does not instantiate a H
 |---|---|
 | Darwin PCI attachment | Confirmed laptop attachment, fixed configuration reads and assigned resource metadata; runtime stop/unload remains untested |
 | Single-read BAR0 identification | Confirmed on the laptop in 0.2.0: exactly one BOOT_0 read with expected TU117 fields; no broader hardware operation validated |
-| BOOT_42 and local HAL table match | Implemented in 0.3.0, format 3; native build and laptop validation pending. No HAL object or resource-manager integration |
+| BOOT_42 and local HAL table match | Implemented in 0.3.0, format 3; native build passed; laptop validation pending. No HAL object or resource-manager integration |
 | Further hardware transport | Separate reviewed work for DMA and interrupts, with bounded access and failure handling |
 | GPU and GSP startup | Matching, hashed firmware; observed initialization with timeouts and cleanup; no success inferred from PCI enumeration |
 | Minimal execution | One deterministic command with a checked result and recoverable failure path |
