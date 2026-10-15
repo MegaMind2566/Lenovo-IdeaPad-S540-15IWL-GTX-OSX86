@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the integrated NVIDIA caller/runtime and bounded TU117 probe package."""
+"""Build the integrated NVIDIA lifecycle and bounded TU117 probe package."""
 from __future__ import annotations
 
 import argparse
@@ -21,8 +21,9 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'packages/nvidia-transport'
 ADAPTER = ROOT / 'packages/nvidia-os-adapter'
 CALLERS = ROOT / 'packages/nvidia-caller-integration'
-PACKAGE = 'S540-nvidia-transport-v5'
-VERSION = '0.5.0'
+LIFECYCLE = ROOT / 'packages/nvidia-nvport-lifecycle'
+PACKAGE = 'S540-nvidia-transport-v6'
+VERSION = '0.6.0'
 SDK_COMMIT = '3f750085caa17ec3a7880f11c11bf4f48cd6a164'
 BUNDLE = 'S540NvidiaPCIProbe.kext'
 EXECUTABLE = 'S540NvidiaPCIProbe'
@@ -32,14 +33,33 @@ ADAPTER_CPP = ('S540NvidiaClock', 'S540NvidiaMemory', 'S540NvidiaRuntime')
 ADAPTER_C = ('nvport_time_uptime', 'nvport_memory_primitives')
 CALLER_CPP = ('S540NvidiaReserve', 'S540NvidiaMutex',
               'S540NvidiaCallerAssertions', 'S540NvidiaCallerRuntime')
-CALLER_C = ('nvport_allocator_callers', 'nvport_mutex_callers')
+# The v6 original owned-mutex extraction includes the five v5 operations.
+# Keep only the v5 untracked allocator object to avoid duplicate caller symbols.
+CALLER_C = ('nvport_allocator_callers',)
+LIFECYCLE_CPP = ('S540NvidiaSpinlock', 'S540NvidiaLifecycleRuntime',
+                 'S540NvidiaLifecycleDiagnostics')
+LIFECYCLE_C = ('nvport_memory_lifecycle', 'nvport_owned_sync')
 CALLER_SYMBOLS = (
     'os_alloc_mem', 'os_free_mem', 'os_alloc_mutex', 'os_free_mutex',
     'os_acquire_mutex', 'os_cond_acquire_mutex', 'os_release_mutex',
     '_portMemAllocPagedUntracked', '_portMemAllocNonPagedUntracked', '_portMemFreeUntracked',
     'portSyncMutexInitialize', 'portSyncMutexDestroy', 'portSyncMutexAcquire',
     'portSyncMutexAcquireConditional', 'portSyncMutexRelease', 's540NvidiaCallerAssertionFailed',
+    'os_alloc_spinlock', 'os_free_spinlock', 'os_acquire_spinlock', 'os_release_spinlock',
+    'portSyncSpinlockInitialize', 'portSyncSpinlockDestroy', 'portSyncSpinlockAcquire',
+    'portSyncSpinlockRelease', 'portSyncSpinlockCreate', 'portSyncMutexCreate',
+    's540NvportMemoryInitialize', 's540NvportMemoryIsInitialized', 's540NvportMemoryIsCold',
+    's540NvportMemoryAllocatorCount', 'portMemShutdown', 'portMemAllocPaged',
+    'portMemAllocNonPaged', 'portMemFree', 'portMemAllocatorCreatePaged',
+    'portMemAllocatorCreateNonPaged', 'portMemAllocatorRelease',
+    'portMemAllocatorGetGlobalNonPaged', 'portMemAllocatorGetGlobalPaged',
+    'portMemInitializeAllocatorTracking', '_portMemAllocatorAlloc', '_portMemAllocatorFree',
+    'portMemExTrackingGetActiveStats', 'portMemExTrackingGetTotalStats',
+    'portMemExTrackingGetPeakStats', 'portMemPrintTrackingInfo', 'portMemPrintAllTrackingInfo',
+    'portMemRegisterOomReportCb', 'portMemReportOom', 'portDbgPrintf',
+    's540NvportLifecycleContextAllowed',
 )
+CALLER_DATA_SYMBOLS = ('portSyncSpinlockSize', 'portSyncMutexSize')
 KPI_LIBRARIES = {
     'com.apple.kpi.iokit': '8.0.0', 'com.apple.kpi.libkern': '8.0.0',
     'com.apple.kpi.mach': '8.0.0', 'com.apple.iokit.IOPCIFamily': '2.9.0',
@@ -56,6 +76,9 @@ ADAPTER_IMPORTS = {
     '_IOSimpleLockAlloc', '_IOSimpleLockFree', '_IOSimpleLockLock', '_IOSimpleLockUnlock',
     '_ml_at_interrupt_context', '_ml_get_interrupts_enabled', '_ml_set_interrupts_enabled',
     '_assert_wait', '_thread_block', '_thread_wakeup_prim', '_panic',
+    # Real bounded formatted lifecycle diagnostics; pinned XNU IOKit.exports
+    # and Libkern.exports expose these through the existing KPI dependencies.
+    '_IOLog', '_vsnprintf',
 }
 
 
@@ -64,7 +87,7 @@ def digest(data: bytes) -> str:
 
 
 def run(*args: str) -> subprocess.CompletedProcess:
-    return subprocess.run(args, check=True, capture_output=True, text=True, timeout=90)
+    return subprocess.run(args, check=True, capture_output=True, text=True, timeout=180)
 
 
 def plain(path: Path) -> None:
@@ -88,44 +111,67 @@ def native_check(binary: Path) -> dict:
     if (result.get('status') != 'passed' or result.get('execution') != 'native-user-space'
             or result.get('gpu_access') is not False
             or result.get('kernel_runtime') != 'not_tested'
-            or not isinstance(result.get('checks'), int) or result['checks'] < 1):
+            or type(result.get('checks')) is not int or result['checks'] < 1):
         raise ValueError('Unexpected native check result: ' + binary.name)
     return result
 
 
+def adapter_sources() -> tuple[list[Path], list[Path]]:
+    """The reviewed production closure, reused by native lifecycle checks."""
+    cpp = [ADAPTER / 'src' / (stem + '.cpp') for stem in ADAPTER_CPP]
+    cpp += [CALLERS / 'src' / (stem + '.cpp') for stem in CALLER_CPP]
+    cpp += [LIFECYCLE / 'src' / (stem + '.cpp') for stem in LIFECYCLE_CPP]
+    c = [ADAPTER / 'upstream' / (stem + '.c') for stem in ADAPTER_C]
+    c += [CALLERS / 'upstream' / (stem + '.c') for stem in CALLER_C]
+    c += [LIFECYCLE / 'upstream' / (stem + '.c') for stem in LIFECYCLE_C]
+    return cpp, c
+
+
+def native_flags() -> list[str]:
+    return ['-arch', 'x86_64', '-mmacosx-version-min=15.0', '-O2',
+            '-Wall', '-Wextra', '-Werror', '-ffreestanding',
+            '-I', str(ADAPTER / 'upstream/include'),
+            '-I', str(ADAPTER / 'src'), '-I', str(CALLERS / 'src'),
+            '-I', str(LIFECYCLE / 'src'), '-I', str(LIFECYCLE / 'upstream')]
+
+
+def compile_native_harness(work: Path, label: str, harness: Path,
+                           sanitizer: list[str]) -> Path:
+    cpp_sources, c_sources = adapter_sources()
+    common = native_flags()
+    objects = []
+    for source in c_sources:
+        obj = work / (label + '-' + source.stem + '.o')
+        run('/usr/bin/xcrun', 'clang', *common, '-std=c11', *sanitizer,
+            '-c', str(source), '-o', str(obj))
+        objects.append(str(obj))
+    binary = work / ('check-' + label)
+    run('/usr/bin/xcrun', 'clang++', *common, '-std=c++17', *sanitizer, '-pthread',
+        str(harness), *(str(source) for source in cpp_sources), *objects,
+        '-o', str(binary))
+    return binary
+
+
 def check_integrated_runtime(work: Path) -> dict:
     """Run the exact bounded startup entry point used by the kernel probe."""
-    common = ['-arch', 'x86_64', '-mmacosx-version-min=15.0', '-O2',
-              '-Wall', '-Wextra', '-Werror', '-I', str(ADAPTER / 'upstream/include')]
-    cpp_sources = [ADAPTER / 'src' / (stem + '.cpp') for stem in ADAPTER_CPP]
-    cpp_sources += [CALLERS / 'src' / (stem + '.cpp') for stem in CALLER_CPP]
-    c_sources = [ADAPTER / 'upstream' / (stem + '.c') for stem in ADAPTER_C]
-    c_sources += [CALLERS / 'upstream' / (stem + '.c') for stem in CALLER_C]
     results = {}
     for name, sanitizer in (('integrated-runtime', []),
                             ('integrated-runtime-sanitized',
                              ['-fsanitize=address,undefined', '-fno-sanitize-recover=all',
                               '-fno-omit-frame-pointer'])):
-        objects = []
-        for source in c_sources:
-            obj = work / (name + '-' + source.stem + '.o')
-            run('/usr/bin/xcrun', 'clang', *common, '-std=c11', *sanitizer,
-                '-c', str(source), '-o', str(obj))
-            objects.append(str(obj))
-        binary = work / ('check-' + name)
-        run('/usr/bin/xcrun', 'clang++', *common, '-std=c++17', *sanitizer, '-pthread',
-            '-I', str(ADAPTER / 'src'), '-I', str(CALLERS / 'src'),
-            str(CALLERS / 'tests/check_caller_runtime_native.cpp'),
-            *(str(source) for source in cpp_sources), *objects, '-o', str(binary))
+        binary = compile_native_harness(
+            work, name, LIFECYCLE / 'tests/check_lifecycle_native.cpp', sanitizer)
         result = native_check(binary)
-        if (result.get('entrypoint') != 'S540NvidiaCallerRuntime::checkIntegrated'
+        if (result.get('format') != 1
+                or result.get('entrypoint') != 'S540NvidiaLifecycleRuntime::checkIntegrated'
                 or result.get('reserve_cold_after') is not True
-                or result.get('component') != 'nvport-caller-runtime'
-                or result.get('checks') != 35 or result.get('foundation_checks') != 23
+                or result.get('component') != 'nvport-lifecycle-runtime'
+                or result.get('foundation_checks') != 23
+                or result.get('caller_checks') != 35
                 or result.get('failures') != 0
                 or any(result.get(key) is not True for key in
-                       ('allocation_callers', 'mutex_callers', 'reserve', 'cleaned',
-                        'acquired', 'foundations_passed'))):
+                       ('lifecycle', 'tracked_allocation', 'owned_mutex', 'spinlocks',
+                        'cleanup', 'acquired', 'foundations_passed', 'callers_passed'))):
             raise ValueError('The native integration did not exercise and release probe startup.')
         results[name] = result
     return results
@@ -147,10 +193,7 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
     if archive.exists() or sidecar.exists():
         raise ValueError('The output already exists.')
     kernel_sources = [SOURCE / 'src/S540NvidiaPCIProbe.cpp', SOURCE / 'src/kmod_start.cpp']
-    adapter_cpp = [ADAPTER / 'src' / (stem + '.cpp') for stem in ADAPTER_CPP]
-    adapter_c = [ADAPTER / 'upstream' / (stem + '.c') for stem in ADAPTER_C]
-    adapter_cpp += [CALLERS / 'src' / (stem + '.cpp') for stem in CALLER_CPP]
-    adapter_c += [CALLERS / 'upstream' / (stem + '.c') for stem in CALLER_C]
+    adapter_cpp, adapter_c = adapter_sources()
     # Preserve the entire adapter source subtree, including NVIDIA and LLVM
     # notices, exact upstream inputs, adaptation records, and test sources.
     source_inputs = [*sorted((ADAPTER / 'src').rglob('*')),
@@ -158,10 +201,13 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                      *sorted((ADAPTER / 'tests').rglob('*')),
                      *sorted((SOURCE / 'src').rglob('*')),
                      *sorted(CALLERS.rglob('*')),
+                     *sorted(LIFECYCLE.rglob('*')),
                      ADAPTER / 'README.md',
                      ROOT / 'builders/build_nvidia_transport.py',
                      ROOT / 'builders/check_nvidia_foundations.py',
                      ROOT / 'builders/check_nvidia_callers.py',
+                     ROOT / 'builders/check_nvidia_lifecycle.py',
+                     ROOT / 'tests/test_nvidia_lifecycle_provenance.py',
                      ROOT / 'tests/test_nvidia_caller_provenance.py',
                      ROOT / 'tests/test_nvidia_transport_kernel.py',
                      *(ROOT / ('tests/test_nvidia_' + name + '_provenance.py')
@@ -211,15 +257,24 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
         if (caller_record.get('status') != 'passed'
                 or caller_record.get('github_sha') != commit):
             raise ValueError('The real NVIDIA caller checks do not match this source revision.')
+        lifecycle_output = work / 'lifecycle-checks'
+        lifecycle_checks = run(sys.executable, str(ROOT / 'builders/check_nvidia_lifecycle.py'),
+                               '--kernel-sdk', str(sdk), '--output-dir', str(lifecycle_output))
+        print(lifecycle_checks.stdout.strip())
+        lifecycle_record = json.loads((lifecycle_output / 'lifecycle-checks.json').read_text())
+        if (lifecycle_record.get('status') != 'passed'
+                or lifecycle_record.get('github_sha') != commit):
+            raise ValueError('The NVIDIA lifecycle checks do not match this source revision.')
         native_results = check_integrated_runtime(work)
         flags = ['-arch', 'x86_64', '-mmacosx-version-min=15.0', '-mkernel',
-                 '-fno-builtin', '-fno-common', '-fno-stack-protector',
+                 '-fno-builtin', '-ffreestanding', '-fno-common', '-fno-stack-protector',
                  '-fno-asynchronous-unwind-tables', '-fno-unwind-tables',
                  '-mno-red-zone', '-DKERNEL', '-D__KERNEL__', '-O2',
                  '-Wall', '-Wextra', '-Werror', '-Wno-deprecated-declarations',
                  '-nostdinc', '-isystem', str(sdk / 'Headers'),
                  '-I', str(SOURCE / 'src'), '-I', str(ADAPTER / 'src'),
-                 '-I', str(ADAPTER / 'upstream/include'), '-I', str(CALLERS / 'src')]
+                 '-I', str(ADAPTER / 'upstream/include'), '-I', str(CALLERS / 'src'),
+                 '-I', str(LIFECYCLE / 'src'), '-I', str(LIFECYCLE / 'upstream')]
         cpp_flags = ['-fapple-kext', '-fno-exceptions', '-fno-rtti',
                      '-fno-threadsafe-statics', '-nostdinc++', '-std=c++17']
         objects, adapter_objects = [], []
@@ -255,6 +310,9 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
         for symbol in CALLER_SYMBOLS:
             if not re.search(r'\bT _' + re.escape(symbol) + r'$', defined, re.M):
                 raise ValueError('An actual NVIDIA caller or OS hook is missing: ' + symbol)
+        for symbol in CALLER_DATA_SYMBOLS:
+            if not re.search(r'\b[SDsd] _' + re.escape(symbol) + r'$', defined, re.M):
+                raise ValueError('An original NVIDIA synchronization size is missing: ' + symbol)
         sections = run('/usr/bin/otool', '-l', str(linked_adapter)).stdout
         if '__mod_init_func' in sections or '__mod_term_func' in sections:
             raise ValueError('The integrated adapter gained static initialization.')
@@ -293,7 +351,7 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
         allowed_statuses = {'not_attached'}
         if allow_legacy_probe:
             allowed_statuses.add('outdated_probe')
-        if (live.get('format') != 5 or live.get('tool') != 'nvidia-transport'
+        if (live.get('format') != 6 or live.get('tool') != 'nvidia-transport'
                 or live.get('version') != VERSION or live.get('complete') is not True
                 or live.get('status') not in allowed_statuses):
             raise ValueError('The native reporter returned an unexpected report or loaded probe.')
@@ -317,6 +375,7 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
             'licenses/LLVM-LICENSE.txt': (ADAPTER / 'upstream/LLVM-LICENSE.txt').read_bytes(),
             'validation/foundation-checks.json': (foundation_output / 'foundation-checks.json').read_bytes(),
             'validation/caller-checks.json': (caller_output / 'caller-checks.json').read_bytes(),
+            'validation/lifecycle-checks.json': (lifecycle_output / 'lifecycle-checks.json').read_bytes(),
             'THIRD-PARTY-NOTICES.txt': (
                 'The unmodified kernel module runtime is from MacKernelSDK.\n'
                 'Portions Copyright (c) 2000, 2008-2012 Apple Inc. All rights reserved.\n'
@@ -324,13 +383,14 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                 'https://github.com/acidanthera/MacKernelSDK/tree/' + SDK_COMMIT + '/Library/kmod\n'
                 'The corresponding license is included in licenses/MacKernelSDK-APSL-2.0.txt.\n\n'
                 'NVIDIA CPU-side types, atomic headers and adapted NVPort memory, time,\n'
-                'allocator and mutex callers\n'
+                'tracked and untracked allocator, mutex and spinlock callers\n'
                 'are from NVIDIA/open-gpu-kernel-modules at commit\n'
                 '1a82fbfda8f321b056eb3568850f9316c5e465c5, under MIT. Their complete\n'
                 'copyright and license notices are retained in every applicable source file.\n'
                 'Corresponding source, original reference inputs, and precise adaptation\n'
                 'provenance are included under source/packages/nvidia-os-adapter/ and\n'
-                'source/packages/nvidia-caller-integration/.\n'
+                'source/packages/nvidia-caller-integration/ and\n'
+                'source/packages/nvidia-nvport-lifecycle/.\n'
                 'The pinned atomic header closure includes LLVM-derived declarations;\n'
                 'licenses/LLVM-LICENSE.txt supplies the accompanying license.\n'
                 'Project-authored adapters and probe source use the MIT license in LICENSE.\n').encode(),
@@ -367,22 +427,32 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                           'export_reference': 'config/Libkern.exports',
                           'implementation_reference': 'osfmk/x86_64/bzero.s',
                       }},
+                  'kernel_lifecycle_diagnostics': {
+                      'imports': ['_IOLog', '_vsnprintf'],
+                      'xnu_commit': 'f6217f891ac0bb64f3d375211650a4c1ff8ca1ea',
+                      'export_references': ['config/IOKit.exports', 'config/Libkern.exports'],
+                      'profile': 'bounded ordinary-thread formatting; startup cleanup remains silent',
+                      'buffer_bytes': 512,
+                  },
                   'kernel_adapter_resolved_caller_symbols': list(CALLER_SYMBOLS),
+                  'kernel_adapter_resolved_caller_data': list(CALLER_DATA_SYMBOLS),
                   'kernel_kpi_libraries': KPI_LIBRARIES,
                   'kernel_adapter_static_initializers': False,
                   'kernel_adapter_object_sha256': digest(linked_adapter.read_bytes()),
                   'package_file_sha256_excluding_BUILD': {name: digest(data) for name, data in payload.items()},
                   'validation': ['targeted native memory, timer and C/C++ atomic foundational checks',
-                                 'pinned provenance of eight original NVIDIA allocator/mutex callers',
+                                 'pinned provenance of original NVIDIA tracked/untracked allocation and owned synchronization callers',
                                  'native bounded reserve allocation, exhaustion, reuse and failure checks',
                                  'native original mutex caller contention and mandatory assertion checks',
+                                 'native lifecycle reserve exhaustion, allocation rollback and tracked concurrent use',
+                                 'native spinlock exclusion, simulated interrupt-state restoration and fatal misuse checks',
                                  'same bounded startup entry point as probe, with reserve lifecycle cleanup',
                                  'address and undefined-behavior sanitizers with fatal recovery policy',
                                  'native Intel kernel compile and link with adapter import allowlist',
                                  'thin x86_64 Mach-O and module entry metadata',
                                  'ad-hoc signature verification', 'native report decoder self-test',
                                  live_validation],
-                  'hardware_status': 'Version 0.4.0 TU117 identification and the 23-check CPU-only foundation self-check are confirmed on the laptop. Version 0.5.0 replaces the allocation/mutex backends and integrates eight original NVIDIA NVPort callers; execution of this new combined kernel startup is not established by this CI build. The full NVIDIA HAL and resource manager are not instantiated. GPU initialization, firmware, DMA and acceleration remain unimplemented.'}
+                  'hardware_status': 'Version 0.5.0 TU117 identification, the 23-check CPU-only foundation self-check and the 35-check original caller integration are confirmed on the laptop. Version 0.6.0 adds tracked allocations, owned object lifecycle and spinlocks; execution of this new combined kernel startup is not established by this CI build. The complete NvPort core, NVIDIA HAL and resource manager are not instantiated. GPU initialization, firmware, DMA and acceleration remain unimplemented.'}
         payload['BUILD.json'] = (json.dumps(record, indent=2, sort_keys=True) + '\n').encode()
         payload['SHA256SUMS'] = ''.join(digest(data) + '  ' + name + '\n' for name, data in sorted(payload.items())).encode('ascii')
         pending = work / archive.name

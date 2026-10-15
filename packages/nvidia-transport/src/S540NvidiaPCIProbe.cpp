@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 #include "S540NvidiaPCIProbe.hpp"
-#include "../../nvidia-caller-integration/src/S540NvidiaCallerRuntime.hpp"
+#include "../../nvidia-nvport-lifecycle/src/S540NvidiaLifecycleRuntime.hpp"
 
 #include <IOKit/IOMemoryDescriptor.h>
 #include <kern/task.h>
@@ -314,15 +314,15 @@ OSDictionary *copyHALSelection(const IdentificationOutcome &result) {
 
 OSDictionary *copySnapshot(IOPCIDevice *device,
                           const S540NvidiaPCIProbePolicy::Identity &identity) {
-    OSDictionary *snapshot = OSDictionary::withCapacity(18);
+    OSDictionary *snapshot = OSDictionary::withCapacity(19);
     if (!snapshot)
         return nullptr;
 
     // One additional fixed config read captures command/status without changing
     // memory decoding, I/O decoding, bus mastering, or any status bits.
     const uint32_t commandStatus = device->configRead32(0x04);
-    bool ok = setNumber(snapshot, "Format", 5, 32)
-        && setString(snapshot, "ProbeVersion", "0.5.0")
+    bool ok = setNumber(snapshot, "Format", 6, 32)
+        && setString(snapshot, "ProbeVersion", "0.6.0")
         && setString(snapshot, "Stage", "attached")
         && setString(snapshot, "AccessPolicy", "two-read-only-bar0-hal-identification")
         && setNumber(snapshot, "VendorID", identity.vendorDevice & 0xffffU, 16)
@@ -341,13 +341,13 @@ OSDictionary *copySnapshot(IOPCIDevice *device,
     // IOService::start is a sleepable thread context. The same finite combined
     // entry point runs in native CI. Its nonblocking singleton lease protects
     // the reserve lifecycle, and all resources are released before PCI reads.
-    const S540NvidiaCallerRuntime::IntegratedResult integrated =
-        S540NvidiaCallerRuntime::checkIntegrated();
+    const S540NvidiaLifecycleRuntime::IntegratedResult integrated =
+        S540NvidiaLifecycleRuntime::checkIntegrated();
     if (!integrated.acquired) {
         snapshot->release();
         return nullptr;
     }
-    const S540NvidiaRuntime::Result &foundations = integrated.foundations;
+    const S540NvidiaRuntime::Result &foundations = integrated.v5.foundations;
     ScopedRelease<OSDictionary> foundationSnapshot(OSDictionary::withCapacity(8));
     OSDictionary *foundation = foundationSnapshot.get();
     ok = foundation
@@ -360,7 +360,7 @@ OSDictionary *copySnapshot(IOPCIDevice *device,
         && foundation->setObject("Allocation", foundations.allocation ? kOSBooleanTrue : kOSBooleanFalse)
         && foundation->setObject("Mutex", foundations.mutex ? kOSBooleanTrue : kOSBooleanFalse)
         && snapshot->setObject("OSFoundations", foundation);
-    const S540NvidiaCallerRuntime::Result &callers = integrated.callers;
+    const S540NvidiaCallerRuntime::Result &callers = integrated.v5.callers;
     ScopedRelease<OSDictionary> callerSnapshot(OSDictionary::withCapacity(6));
     OSDictionary *caller = callerSnapshot.get();
     ok = ok && caller
@@ -371,6 +371,19 @@ OSDictionary *copySnapshot(IOPCIDevice *device,
         && caller->setObject("MutexCallers", callers.mutexCallers ? kOSBooleanTrue : kOSBooleanFalse)
         && caller->setObject("Reserve", callers.reserve ? kOSBooleanTrue : kOSBooleanFalse)
         && snapshot->setObject("CallerIntegration", caller);
+    const S540NvidiaLifecycleRuntime::Result &lifecycle = integrated.lifecycle;
+    ScopedRelease<OSDictionary> lifecycleSnapshot(OSDictionary::withCapacity(8));
+    OSDictionary *nvport = lifecycleSnapshot.get();
+    ok = ok && nvport
+        && setNumber(nvport, "Version", S540NvidiaLifecycleRuntime::kFormatVersion, 32)
+        && setString(nvport, "Status", lifecycle.passed() ? "passed" : "failed")
+        && setNumber(nvport, "Checks", lifecycle.checks, 32)
+        && nvport->setObject("Lifecycle", lifecycle.lifecycle ? kOSBooleanTrue : kOSBooleanFalse)
+        && nvport->setObject("TrackedAllocation", lifecycle.trackedAllocation ? kOSBooleanTrue : kOSBooleanFalse)
+        && nvport->setObject("OwnedMutex", lifecycle.ownedMutex ? kOSBooleanTrue : kOSBooleanFalse)
+        && nvport->setObject("Spinlocks", lifecycle.spinlocks ? kOSBooleanTrue : kOSBooleanFalse)
+        && nvport->setObject("Cleanup", lifecycle.cleanup ? kOSBooleanTrue : kOSBooleanFalse)
+        && snapshot->setObject("NvPortLifecycle", nvport);
     if (!ok) {
         snapshot->release();
         return nullptr;

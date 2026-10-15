@@ -23,4 +23,19 @@ NV_STATUS NV_API_CALL os_cond_acquire_mutex(void *);
 void NV_API_CALL os_release_mutex(void *);
 }
 
+namespace S540NvidiaMutex {
+// Component-owned OS backing objects, counted only after successful creation
+// and after complete quiescent destruction. This is not a lifetime lock.
+NvU32 liveObjects();
+}
+
+#if !defined(KERNEL)
+namespace S540NvidiaMutexNative {
+// Faults enter the real native allocation/unwind paths. They are excluded
+// from the kernel build and do not simulate kernel allocator behavior.
+enum class Failure : NvU32 { Storage = 1, Guard = 2, Condition = 3 };
+void failNextAllocation(Failure failure);
+}
+#endif
+
 #endif

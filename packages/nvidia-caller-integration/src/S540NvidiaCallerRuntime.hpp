@@ -42,6 +42,13 @@ struct IntegratedResult {
 // same new OS backends. Return only after quiescent reserve cleanup.
 IntegratedResult checkIntegrated();
 
+// An optional finite CPU-only continuation executes under the same exclusive
+// startup lease, after the v5 reserve lifecycle has returned cold. It must not
+// create workers, access hardware, reenter this API, or retain reserve objects.
+// It owns its result storage and must return the reserve cold on every path.
+using StartupContinuation = void (*)(void *context);
+IntegratedResult checkIntegrated(StartupContinuation continuation, void *context);
+
 } // namespace S540NvidiaCallerRuntime
 
 #endif

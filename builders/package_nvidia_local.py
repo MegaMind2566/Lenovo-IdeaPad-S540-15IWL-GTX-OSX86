@@ -10,11 +10,13 @@ import stat
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-NAME = 'S540-nvidia-build-local-v5'
+NAME = 'S540-nvidia-build-local-v6'
 SOURCE_FILES = [
     'builders/build_nvidia_transport.py',
     'builders/check_nvidia_foundations.py',
     'builders/check_nvidia_callers.py',
+    'builders/check_nvidia_lifecycle.py',
+    'tests/test_nvidia_lifecycle_provenance.py',
     'tests/test_nvidia_caller_provenance.py',
     'tests/test_nvidia_transport_kernel.py',
     'tests/test_nvidia_clock_provenance.py',
@@ -29,7 +31,7 @@ SOURCE_FILES = [
     'packages/nvidia-transport/README.md',
     'packages/nvidia-transport/LICENSE',
 ]
-for component in ('nvidia-os-adapter', 'nvidia-caller-integration'):
+for component in ('nvidia-os-adapter', 'nvidia-caller-integration', 'nvidia-nvport-lifecycle'):
     SOURCE_FILES.extend(path.relative_to(ROOT).as_posix()
                         for path in sorted((ROOT / 'packages' / component).rglob('*'))
                         if path.is_file() and '__pycache__' not in path.parts
@@ -55,7 +57,7 @@ def package(commit: str, destination: Path) -> Path:
         raise ValueError('The launcher source commit placeholder is not unique.')
     payload['BUILD-LOCAL.command'] = launcher.replace(token, commit).encode()
     payload['README.txt'] = (
-        'S540 NVIDIA 0.5.0 integrated NVPort caller local native build\n\n'
+        'S540 NVIDIA 0.6.0 integrated NVPort lifecycle local native build\n\n'
         'This archive contains source code, not a compiled kext.\n'
         'Intel macOS and Apple Command Line Tools are required.\n'
         'Extract the complete folder into Downloads, then run:\n\n'
@@ -66,10 +68,10 @@ def package(commit: str, destination: Path) -> Path:
         'policy tests, compiles and signs the native package, and runs its\n'
         'decoder self-tests. It never installs or loads the new kext, changes\n'
         'EFI, or requests an administrator password for the build.\n'
-        'An already-loaded probe older than 0.5.0 is allowed as outdated;\n'
-        'this does not claim that the new 0.5.0 probe has run.\n\n'
+        'An already-loaded probe older than 0.6.0 is allowed as outdated;\n'
+        'this does not claim that the new 0.6.0 probe has run.\n\n'
         'Outputs are kept in a private NVIDIA-BUILD folder on the Desktop.\n'
-        'On success, share output/S540-nvidia-transport-v5.zip for review.\n'
+        'On success, share output/S540-nvidia-transport-v6.zip for review.\n'
         'On failure, share build.log from that folder.\n\n'
         'Project source commit: ' + commit + '\n'
     ).encode()

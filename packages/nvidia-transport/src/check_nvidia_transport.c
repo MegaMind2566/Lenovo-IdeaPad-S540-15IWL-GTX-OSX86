@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TOOL_VERSION "0.5.0"
+#define TOOL_VERSION "0.6.0"
 #define PROBE_CLASS "S540NvidiaPCIProbe"
 #define SNAPSHOT_KEY "S540NvidiaPCIProbeSnapshot"
 #define ACCESS_POLICY "two-read-only-bar0-hal-identification"
@@ -68,6 +68,18 @@ struct caller_integration_result {
     int reserve;
 };
 
+struct nvport_lifecycle_result {
+    int valid;
+    uint32_t version;
+    uint32_t checks;
+    int passed;
+    int lifecycle;
+    int tracked_allocation;
+    int owned_mutex;
+    int spinlocks;
+    int cleanup;
+};
+
 static const char *const mmio_reasons[] = {
     "resource-metadata-unavailable", "bar0-descriptor-missing",
     "pci-identity-changed", "pci-config-unavailable",
@@ -101,6 +113,7 @@ struct snapshot {
     uint32_t total_read_count;
     struct os_foundations_result os_foundations;
     struct caller_integration_result caller_integration;
+    struct nvport_lifecycle_result nvport_lifecycle;
 };
 
 enum warning_code {
@@ -487,6 +500,46 @@ static int decode_caller_integration(CFTypeRef object,
     return 1;
 }
 
+/* Original NVPort lifecycle callers operate only on the CPU-side adapters.
+ * Presence, exact types, and agreement with Status are required independently. */
+static int decode_nvport_lifecycle(CFTypeRef object,
+                                    struct nvport_lifecycle_result *output)
+{
+    struct nvport_lifecycle_result candidate;
+    memset(&candidate, 0, sizeof(candidate));
+    if (object == NULL || CFGetTypeID(object) != CFDictionaryGetTypeID())
+        return 0;
+    CFDictionaryRef dictionary = (CFDictionaryRef)object;
+    uint64_t value = 0;
+    if (CFDictionaryGetCount(dictionary) != 8 ||
+        !dictionary_number(dictionary, CFSTR("Version"), 1, &value) || value != 1)
+        return 0;
+    candidate.version = (uint32_t)value;
+    if (!dictionary_number(dictionary, CFSTR("Checks"), UINT32_MAX, &value) || value == 0)
+        return 0;
+    candidate.checks = (uint32_t)value;
+#define READ_LIFECYCLE_COMPONENT(KEY, FIELD) do { \
+    CFTypeRef component = CFDictionaryGetValue(dictionary, CFSTR(KEY)); \
+    if (component == NULL || CFGetTypeID(component) != CFBooleanGetTypeID()) \
+        return 0; \
+    candidate.FIELD = CFBooleanGetValue((CFBooleanRef)component); \
+} while (0)
+    READ_LIFECYCLE_COMPONENT("Lifecycle", lifecycle);
+    READ_LIFECYCLE_COMPONENT("TrackedAllocation", tracked_allocation);
+    READ_LIFECYCLE_COMPONENT("OwnedMutex", owned_mutex);
+    READ_LIFECYCLE_COMPONENT("Spinlocks", spinlocks);
+    READ_LIFECYCLE_COMPONENT("Cleanup", cleanup);
+#undef READ_LIFECYCLE_COMPONENT
+    candidate.passed = candidate.lifecycle && candidate.tracked_allocation &&
+                       candidate.owned_mutex && candidate.spinlocks && candidate.cleanup;
+    if (!exact_string(CFDictionaryGetValue(dictionary, CFSTR("Status")),
+                       candidate.passed ? CFSTR("passed") : CFSTR("failed")))
+        return 0;
+    candidate.valid = 1;
+    *output = candidate;
+    return 1;
+}
+
 /* Legacy format is decoded only to identify an old loaded kext, never emitted. */
 static int decode_snapshot(CFTypeRef object, struct snapshot *output)
 {
@@ -496,14 +549,15 @@ static int decode_snapshot(CFTypeRef object, struct snapshot *output)
         return 0;
     CFDictionaryRef dictionary = (CFDictionaryRef)object;
     uint64_t value = 0;
-    if (!dictionary_number(dictionary, CFSTR("Format"), 5, &value) ||
-        (value != 1 && value != 2 && value != 3 && value != 4 && value != 5))
+    if (!dictionary_number(dictionary, CFSTR("Format"), 6, &value) ||
+        (value != 1 && value != 2 && value != 3 && value != 4 && value != 5 && value != 6))
         return 0;
     candidate.format = (uint32_t)value;
     int legacy = candidate.format == 1;
     int two_reads = candidate.format >= 3;
     int foundations_format = candidate.format >= 4;
-    int current = candidate.format == 5;
+    int callers_format = candidate.format >= 5;
+    int current = candidate.format == 6;
     if (!exact_string(CFDictionaryGetValue(dictionary, CFSTR("Stage")),
                        CFSTR("attached")) ||
         !exact_string(CFDictionaryGetValue(dictionary, CFSTR("AccessPolicy")),
@@ -513,7 +567,7 @@ static int decode_snapshot(CFTypeRef object, struct snapshot *output)
                          candidate.probe_version,
                          sizeof(candidate.probe_version)) ||
         strcmp(candidate.probe_version, legacy ? "0.1.0" : current ? TOOL_VERSION :
-            foundations_format ? "0.4.0" : two_reads ? "0.3.0" : "0.2.0") != 0)
+            callers_format ? "0.5.0" : foundations_format ? "0.4.0" : two_reads ? "0.3.0" : "0.2.0") != 0)
         return 0;
     if (!legacy && !decode_mmio(CFDictionaryGetValue(dictionary, CFSTR("MMIOResult")),
                                 &candidate.mmio))
@@ -529,12 +583,17 @@ static int decode_snapshot(CFTypeRef object, struct snapshot *output)
     CFTypeRef callers = CFDictionaryGetValue(dictionary, CFSTR("CallerIntegration"));
     if (foundations_format)
         (void)decode_os_foundations(foundations, &candidate.os_foundations);
-    if (current)
+    if (callers_format)
         (void)decode_caller_integration(callers, &candidate.caller_integration);
+    CFTypeRef lifecycle = CFDictionaryGetValue(dictionary, CFSTR("NvPortLifecycle"));
+    if (current)
+        (void)decode_nvport_lifecycle(lifecycle, &candidate.nvport_lifecycle);
     CFIndex expected_keys = legacy ? 13 : two_reads ? 16 : 14;
     if (foundations_format && foundations != NULL)
         ++expected_keys;
-    if (current && callers != NULL)
+    if (callers_format && callers != NULL)
+        ++expected_keys;
+    if (current && lifecycle != NULL)
         ++expected_keys;
     if (missing_bars_allowed)
         --expected_keys;
@@ -684,7 +743,7 @@ static void read_probe(io_registry_entry_t service, struct report *report)
         return;
     }
     report->attached = 1;
-    report->outdated = report->snapshot.format < 5;
+    report->outdated = report->snapshot.format < 6;
 }
 
 static void read_context(struct report *report)
@@ -845,6 +904,17 @@ static void write_snapshot(FILE *out, const struct snapshot *snapshot)
             callers->mutex_callers ? "true" : "false", callers->reserve ? "true" : "false");
     else
         fputs("null", out);
+    fputs(",\"nvport_lifecycle\":", out);
+    const struct nvport_lifecycle_result *lifecycle = &snapshot->nvport_lifecycle;
+    if (lifecycle->valid)
+        fprintf(out, "{\"version\":%" PRIu32 ",\"status\":\"%s\",\"checks\":%" PRIu32
+            ",\"lifecycle\":%s,\"tracked_allocation\":%s,\"owned_mutex\":%s,\"spinlocks\":%s,\"cleanup\":%s}",
+            lifecycle->version, lifecycle->passed ? "passed" : "failed", lifecycle->checks,
+            lifecycle->lifecycle ? "true" : "false", lifecycle->tracked_allocation ? "true" : "false",
+            lifecycle->owned_mutex ? "true" : "false", lifecycle->spinlocks ? "true" : "false",
+            lifecycle->cleanup ? "true" : "false");
+    else
+        fputs("null", out);
     fputc('}', out);
 }
 
@@ -864,6 +934,10 @@ static const char *report_status(const struct report *report)
         return "invalid_callers";
     if (!report->snapshot.caller_integration.passed)
         return "callers_failed";
+    if (!report->snapshot.nvport_lifecycle.valid)
+        return "invalid_lifecycle";
+    if (!report->snapshot.nvport_lifecycle.passed)
+        return "lifecycle_failed";
     if (report->snapshot.hal_matched)
         return "integrated_passed";
     return report->snapshot.mmio.status == MMIO_REFUSED ||
@@ -875,13 +949,14 @@ static int report_exit_code(const struct report *report)
     return report->complete && (!report->attached || report->outdated ||
         (report->snapshot.os_foundations.valid && report->snapshot.os_foundations.passed &&
          report->snapshot.caller_integration.valid && report->snapshot.caller_integration.passed &&
+         report->snapshot.nvport_lifecycle.valid && report->snapshot.nvport_lifecycle.passed &&
          report->snapshot.mmio.status != MMIO_FAILED &&
          report->snapshot.boot42.status != MMIO_FAILED)) ? 0 : 1;
 }
 
 static void write_report(FILE *out, const struct report *report)
 {
-    fprintf(out, "{\"format\":5,\"tool\":\"nvidia-transport\",\"version\":\"%s\","
+    fprintf(out, "{\"format\":6,\"tool\":\"nvidia-transport\",\"version\":\"%s\","
         "\"target\":{\"vendor_id\":\"0x10de\",\"device_id\":\"0x1f91\","
         "\"subsystem_vendor_id\":\"0x17aa\",\"subsystem_device_id\":\"0x3806\"},"
         "\"status\":\"%s\",\"complete\":%s,"
@@ -900,7 +975,7 @@ static void write_report(FILE *out, const struct report *report)
         fputs("null", out);
     }
     fputs(",\"reason\":", out);
-    fputs(report->outdated ? "\"The loaded probe is an older version. Replace the kext on the EFI used for this boot with version 0.5.0.\"" : "null", out);
+    fputs(report->outdated ? "\"The loaded probe is an older version. Replace the kext on the EFI used for this boot with version 0.6.0.\"" : "null", out);
     fputs(",\"warnings\":[", out);
     int emitted = 0;
     for (size_t index = 0; index < WARNING_COUNT; ++index) {
@@ -1043,6 +1118,25 @@ static CFMutableDictionaryRef fixture_caller_integration(void)
     return dictionary;
 }
 
+static CFMutableDictionaryRef fixture_nvport_lifecycle(void)
+{
+    CFMutableDictionaryRef dictionary = CFDictionaryCreateMutable(kCFAllocatorDefault,
+        0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    if (dictionary == NULL) {
+        fputs("Self-test allocation failed.\n", stderr);
+        exit(1);
+    }
+    fixture_number(dictionary, CFSTR("Version"), 1);
+    fixture_number(dictionary, CFSTR("Checks"), 5);
+    CFDictionarySetValue(dictionary, CFSTR("Status"), CFSTR("passed"));
+    CFDictionarySetValue(dictionary, CFSTR("Lifecycle"), kCFBooleanTrue);
+    CFDictionarySetValue(dictionary, CFSTR("TrackedAllocation"), kCFBooleanTrue);
+    CFDictionarySetValue(dictionary, CFSTR("OwnedMutex"), kCFBooleanTrue);
+    CFDictionarySetValue(dictionary, CFSTR("Spinlocks"), kCFBooleanTrue);
+    CFDictionarySetValue(dictionary, CFSTR("Cleanup"), kCFBooleanTrue);
+    return dictionary;
+}
+
 static CFMutableDictionaryRef valid_fixture(void)
 {
     CFMutableDictionaryRef dictionary = CFDictionaryCreateMutable(
@@ -1054,7 +1148,7 @@ static CFMutableDictionaryRef valid_fixture(void)
         fputs("Self-test allocation failed.\n", stderr);
         exit(1);
     }
-    fixture_number(dictionary, CFSTR("Format"), 5);
+    fixture_number(dictionary, CFSTR("Format"), 6);
     CFDictionarySetValue(dictionary, CFSTR("ProbeVersion"), CFSTR(TOOL_VERSION));
     CFDictionarySetValue(dictionary, CFSTR("Stage"), CFSTR("attached"));
     CFDictionarySetValue(dictionary, CFSTR("AccessPolicy"), CFSTR(ACCESS_POLICY));
@@ -1097,6 +1191,9 @@ static CFMutableDictionaryRef valid_fixture(void)
     CFMutableDictionaryRef callers = fixture_caller_integration();
     CFDictionarySetValue(dictionary, CFSTR("CallerIntegration"), callers);
     CFRelease(callers);
+    CFMutableDictionaryRef lifecycle = fixture_nvport_lifecycle();
+    CFDictionarySetValue(dictionary, CFSTR("NvPortLifecycle"), lifecycle);
+    CFRelease(lifecycle);
     return dictionary;
 }
 
@@ -1237,20 +1334,162 @@ static void test_caller_integration(unsigned int *count)
     char text[4096];
     size_t bytes = fread(text, 1, sizeof(text) - 1, serialized);
     text[bytes] = '\0';
-    require_test(!ferror(serialized) && strstr(text, "\"format\":5") != NULL &&
+    require_test(!ferror(serialized) && strstr(text, "\"format\":6") != NULL &&
         strstr(text, "\"caller_integration\":{\"version\":1,\"status\":\"passed\",\"checks\":3,"
             "\"allocation_callers\":true,\"mutex_callers\":true,\"reserve\":true}") != NULL &&
         strstr(text, "\"status\":\"integrated_passed\"") != NULL,
-        "serialized v5 report includes independent caller evidence", count);
+        "serialized v6 report includes independent caller evidence", count);
     fclose(serialized);
     CFRelease(fixture);
     CFRelease(callers);
+}
+
+static void test_nvport_lifecycle(unsigned int *count)
+{
+    struct nvport_lifecycle_result decoded;
+    memset(&decoded, 0, sizeof(decoded));
+    require_test(!decode_nvport_lifecycle(NULL, &decoded),
+        "missing NVPort lifecycle dictionary", count);
+    require_test(!decode_nvport_lifecycle(kCFBooleanTrue, &decoded),
+        "wrong NVPort lifecycle type", count);
+    CFMutableDictionaryRef lifecycle = fixture_nvport_lifecycle();
+    require_test(decode_nvport_lifecycle(lifecycle, &decoded) && decoded.valid &&
+        decoded.passed && decoded.version == 1 && decoded.checks == 5,
+        "valid NVPort lifecycle wire contract", count);
+    CFDictionarySetValue(lifecycle, CFSTR("Extra"), kCFBooleanTrue);
+    require_test(!decode_nvport_lifecycle(lifecycle, &decoded),
+        "extra NVPort lifecycle key", count);
+    CFDictionaryRemoveValue(lifecycle, CFSTR("Extra"));
+    const CFStringRef numeric_keys[] = {CFSTR("Version"), CFSTR("Checks")};
+    for (size_t index = 0; index < sizeof(numeric_keys) / sizeof(numeric_keys[0]); ++index) {
+        CFDictionaryRemoveValue(lifecycle, numeric_keys[index]);
+        require_test(!decode_nvport_lifecycle(lifecycle, &decoded),
+            "missing lifecycle numeric field", count);
+        CFDictionarySetValue(lifecycle, numeric_keys[index], kCFBooleanTrue);
+        require_test(!decode_nvport_lifecycle(lifecycle, &decoded),
+            "boolean lifecycle numeric field", count);
+        double fractional = 1.0;
+        CFNumberRef floating = CFNumberCreate(kCFAllocatorDefault,
+            kCFNumberDoubleType, &fractional);
+        require_test(floating != NULL, "floating lifecycle fixture allocation", count);
+        CFDictionarySetValue(lifecycle, numeric_keys[index], floating);
+        CFRelease(floating);
+        require_test(!decode_nvport_lifecycle(lifecycle, &decoded),
+            "floating lifecycle numeric field", count);
+        fixture_number(lifecycle, numeric_keys[index], index == 0 ? 1 : 5);
+    }
+    const int64_t bad_versions[] = {0, -1, 2, INT64_C(0x100000000)};
+    for (size_t index = 0; index < sizeof(bad_versions) / sizeof(bad_versions[0]); ++index) {
+        fixture_number(lifecycle, CFSTR("Version"), bad_versions[index]);
+        require_test(!decode_nvport_lifecycle(lifecycle, &decoded),
+            "unsupported NVPort lifecycle version", count);
+    }
+    fixture_number(lifecycle, CFSTR("Version"), 1);
+    const int64_t bad_checks[] = {0, -1, INT64_C(0x100000000)};
+    for (size_t index = 0; index < sizeof(bad_checks) / sizeof(bad_checks[0]); ++index) {
+        fixture_number(lifecycle, CFSTR("Checks"), bad_checks[index]);
+        require_test(!decode_nvport_lifecycle(lifecycle, &decoded),
+            "lifecycle check count range", count);
+    }
+    fixture_number(lifecycle, CFSTR("Checks"), UINT32_MAX);
+    require_test(decode_nvport_lifecycle(lifecycle, &decoded) &&
+        decoded.checks == UINT32_MAX, "maximum lifecycle check count", count);
+    fixture_number(lifecycle, CFSTR("Checks"), 5);
+    const CFStringRef component_keys[] = {
+        CFSTR("Lifecycle"), CFSTR("TrackedAllocation"), CFSTR("OwnedMutex"),
+        CFSTR("Spinlocks"), CFSTR("Cleanup")
+    };
+    for (size_t index = 0; index < sizeof(component_keys) / sizeof(component_keys[0]); ++index) {
+        CFDictionaryRemoveValue(lifecycle, component_keys[index]);
+        require_test(!decode_nvport_lifecycle(lifecycle, &decoded),
+            "missing lifecycle component", count);
+        fixture_number(lifecycle, component_keys[index], 1);
+        require_test(!decode_nvport_lifecycle(lifecycle, &decoded),
+            "lifecycle component requires CFBoolean", count);
+        CFDictionarySetValue(lifecycle, component_keys[index], kCFBooleanFalse);
+        require_test(!decode_nvport_lifecycle(lifecycle, &decoded),
+            "passed lifecycle status cannot hide a false component", count);
+        CFDictionarySetValue(lifecycle, CFSTR("Status"), CFSTR("failed"));
+        require_test(decode_nvport_lifecycle(lifecycle, &decoded) && decoded.valid &&
+            !decoded.passed, "lifecycle component failure is valid evidence", count);
+        CFDictionarySetValue(lifecycle, component_keys[index], kCFBooleanTrue);
+        require_test(!decode_nvport_lifecycle(lifecycle, &decoded),
+            "failed lifecycle status requires a false component", count);
+        CFDictionarySetValue(lifecycle, CFSTR("Status"), CFSTR("passed"));
+    }
+    CFDictionaryRemoveValue(lifecycle, CFSTR("Status"));
+    require_test(!decode_nvport_lifecycle(lifecycle, &decoded),
+        "missing lifecycle status", count);
+    CFDictionarySetValue(lifecycle, CFSTR("Status"), kCFBooleanTrue);
+    require_test(!decode_nvport_lifecycle(lifecycle, &decoded),
+        "wrong lifecycle status type", count);
+    CFDictionarySetValue(lifecycle, CFSTR("Status"), CFSTR("unknown"));
+    require_test(!decode_nvport_lifecycle(lifecycle, &decoded),
+        "unknown lifecycle status", count);
+    CFDictionarySetValue(lifecycle, CFSTR("Status"), CFSTR("passed"));
+
+    struct snapshot snapshot;
+    CFMutableDictionaryRef fixture = valid_fixture();
+    CFDictionaryRemoveValue(fixture, CFSTR("NvPortLifecycle"));
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.hal_matched &&
+        snapshot.os_foundations.passed && snapshot.caller_integration.passed &&
+        !snapshot.nvport_lifecycle.valid,
+        "missing lifecycle preserves independent v5 evidence", count);
+    struct report classified;
+    memset(&classified, 0, sizeof(classified));
+    classified.complete = 1;
+    classified.attached = 1;
+    classified.snapshot = snapshot;
+    require_test(strcmp(report_status(&classified), "invalid_lifecycle") == 0 &&
+        report_exit_code(&classified) != 0,
+        "v5 success alone cannot report v6 integrated success", count);
+    CFDictionarySetValue(fixture, CFSTR("NvPortLifecycle"), kCFBooleanTrue);
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.hal_matched &&
+        !snapshot.nvport_lifecycle.valid,
+        "invalid lifecycle preserves independent GPU evidence", count);
+    CFDictionarySetValue(fixture, CFSTR("NvPortLifecycle"), lifecycle);
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.nvport_lifecycle.passed,
+        "lifecycle evidence restored", count);
+    classified.snapshot = snapshot;
+    require_test(strcmp(report_status(&classified), "integrated_passed") == 0 &&
+        report_exit_code(&classified) == 0,
+        "three independent CPU blocks enable v6 integrated success", count);
+    CFDictionarySetValue(lifecycle, CFSTR("Cleanup"), kCFBooleanFalse);
+    CFDictionarySetValue(lifecycle, CFSTR("Status"), CFSTR("failed"));
+    require_test(decode_snapshot(fixture, &snapshot) && !snapshot.nvport_lifecycle.passed,
+        "cleanup failure remains explicit lifecycle evidence", count);
+    classified.snapshot = snapshot;
+    require_test(strcmp(report_status(&classified), "lifecycle_failed") == 0 &&
+        report_exit_code(&classified) != 0,
+        "cleanup failure rejects integrated success", count);
+    CFDictionarySetValue(lifecycle, CFSTR("Cleanup"), kCFBooleanTrue);
+    CFDictionarySetValue(lifecycle, CFSTR("Status"), CFSTR("passed"));
+    require_test(decode_snapshot(fixture, &snapshot), "lifecycle serialization fixture", count);
+    classified.snapshot = snapshot;
+    FILE *serialized = tmpfile();
+    require_test(serialized != NULL, "lifecycle serialization allocation", count);
+    write_report(serialized, &classified);
+    require_test(fflush(serialized) == 0 && fseek(serialized, 0, SEEK_SET) == 0,
+        "lifecycle serialization rewind", count);
+    char text[4096];
+    size_t bytes = fread(text, 1, sizeof(text) - 1, serialized);
+    text[bytes] = '\0';
+    require_test(!ferror(serialized) && strstr(text, "\"format\":6") != NULL &&
+        strstr(text, "\"nvport_lifecycle\":{\"version\":1,\"status\":\"passed\",\"checks\":5,"
+            "\"lifecycle\":true,\"tracked_allocation\":true,\"owned_mutex\":true,"
+            "\"spinlocks\":true,\"cleanup\":true}") != NULL &&
+        strstr(text, "\"status\":\"integrated_passed\"") != NULL,
+        "serialized v6 report includes independent lifecycle evidence", count);
+    fclose(serialized);
+    CFRelease(fixture);
+    CFRelease(lifecycle);
 }
 
 static int run_self_tests(void)
 {
     unsigned int count = 0;
     test_caller_integration(&count);
+    test_nvport_lifecycle(&count);
     struct snapshot snapshot;
     CFMutableDictionaryRef fixture = valid_fixture();
     require_test(decode_snapshot(fixture, &snapshot) &&
@@ -1265,9 +1504,9 @@ static int run_self_tests(void)
     CFDictionaryRemoveValue(fixture, CFSTR("Extra"));
     CFDictionaryRemoveValue(fixture, CFSTR("Format"));
     require_test(!decode_snapshot(fixture, &snapshot), "missing format", &count);
-    fixture_number(fixture, CFSTR("Format"), 6);
+    fixture_number(fixture, CFSTR("Format"), 7);
     require_test(!decode_snapshot(fixture, &snapshot), "unsupported format", &count);
-    fixture_number(fixture, CFSTR("Format"), 5);
+    fixture_number(fixture, CFSTR("Format"), 6);
     CFDictionarySetValue(fixture, CFSTR("VendorID"), kCFBooleanTrue);
     require_test(!decode_snapshot(fixture, &snapshot), "boolean numeric field", &count);
     fixture_number(fixture, CFSTR("VendorID"), -1);
@@ -1282,7 +1521,7 @@ static int run_self_tests(void)
     CFDictionarySetValue(fixture, CFSTR("Format"), floating);
     CFRelease(floating);
     require_test(!decode_snapshot(fixture, &snapshot), "floating numeric field", &count);
-    fixture_number(fixture, CFSTR("Format"), 5);
+    fixture_number(fixture, CFSTR("Format"), 6);
     fixture_number(fixture, CFSTR("SubsystemID"), 0x3807);
     require_test(!decode_snapshot(fixture, &snapshot), "wrong subsystem", &count);
     fixture_number(fixture, CFSTR("SubsystemID"), 0x3806);
@@ -1447,6 +1686,7 @@ static int run_self_tests(void)
     CFDictionaryRemoveValue(fixture, CFSTR("HALSelection"));
     CFDictionaryRemoveValue(fixture, CFSTR("OSFoundations"));
     CFDictionaryRemoveValue(fixture, CFSTR("CallerIntegration"));
+    CFDictionaryRemoveValue(fixture, CFSTR("NvPortLifecycle"));
     fixture_number(fixture, CFSTR("Format"), 1);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.1.0"));
     CFDictionarySetValue(fixture, CFSTR("AccessPolicy"), CFSTR(LEGACY_ACCESS_POLICY));
@@ -1461,6 +1701,7 @@ static int run_self_tests(void)
     CFDictionaryRemoveValue(fixture, CFSTR("HALSelection"));
     CFDictionaryRemoveValue(fixture, CFSTR("OSFoundations"));
     CFDictionaryRemoveValue(fixture, CFSTR("CallerIntegration"));
+    CFDictionaryRemoveValue(fixture, CFSTR("NvPortLifecycle"));
     fixture_number(fixture, CFSTR("Format"), 2);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.2.0"));
     CFDictionarySetValue(fixture, CFSTR("AccessPolicy"), CFSTR(LEGACY_MMIO_ACCESS_POLICY));
@@ -1473,6 +1714,7 @@ static int run_self_tests(void)
     fixture = valid_fixture();
     CFDictionaryRemoveValue(fixture, CFSTR("OSFoundations"));
     CFDictionaryRemoveValue(fixture, CFSTR("CallerIntegration"));
+    CFDictionaryRemoveValue(fixture, CFSTR("NvPortLifecycle"));
     fixture_number(fixture, CFSTR("Format"), 3);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.3.0"));
     require_test(decode_snapshot(fixture, &snapshot) && snapshot.format == 3 &&
@@ -1484,6 +1726,7 @@ static int run_self_tests(void)
 
     fixture = valid_fixture();
     CFDictionaryRemoveValue(fixture, CFSTR("CallerIntegration"));
+    CFDictionaryRemoveValue(fixture, CFSTR("NvPortLifecycle"));
     fixture_number(fixture, CFSTR("Format"), 4);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.4.0"));
     require_test(decode_snapshot(fixture, &snapshot) && snapshot.format == 4 &&
@@ -1492,6 +1735,18 @@ static int run_self_tests(void)
         "strict version 0.4.0 snapshot recognized without caller evidence", &count);
     CFDictionarySetValue(fixture, CFSTR("Extra"), CFSTR("not allowed"));
     require_test(!decode_snapshot(fixture, &snapshot), "version 0.4.0 extra rejected", &count);
+    CFRelease(fixture);
+
+    fixture = valid_fixture();
+    CFDictionaryRemoveValue(fixture, CFSTR("NvPortLifecycle"));
+    fixture_number(fixture, CFSTR("Format"), 5);
+    CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.5.0"));
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.format == 5 &&
+        snapshot.hal_matched && snapshot.os_foundations.passed &&
+        snapshot.caller_integration.passed && !snapshot.nvport_lifecycle.valid,
+        "strict version 0.5.0 snapshot recognized without lifecycle evidence", &count);
+    CFDictionarySetValue(fixture, CFSTR("Extra"), CFSTR("not allowed"));
+    require_test(!decode_snapshot(fixture, &snapshot), "version 0.5.0 extra rejected", &count);
     CFRelease(fixture);
 
     fixture = valid_fixture();
@@ -1623,6 +1878,8 @@ static int run_self_tests(void)
     classified.snapshot.os_foundations.passed = 1;
     classified.snapshot.caller_integration.valid = 1;
     classified.snapshot.caller_integration.passed = 1;
+    classified.snapshot.nvport_lifecycle.valid = 1;
+    classified.snapshot.nvport_lifecycle.passed = 1;
     classified.snapshot.mmio.status = MMIO_REFUSED;
     classified.snapshot.boot42.status = MMIO_NOT_ATTEMPTED;
     require_test(strcmp(report_status(&classified), "refused") == 0 &&
@@ -1674,7 +1931,7 @@ static int run_self_tests(void)
     size_t serialized_size = fread(serialized_report, 1, sizeof(serialized_report) - 1, serialized);
     serialized_report[serialized_size] = '\0';
     require_test(!ferror(serialized) && strstr(serialized_report, "\"probe\":null") != NULL &&
-        strstr(serialized_report, "version 0.5.0") != NULL &&
+        strstr(serialized_report, "version 0.6.0") != NULL &&
         strstr(serialized_report, "raw_value") == NULL,
         "legacy report emits fixed instruction without snapshot", &count);
     fclose(serialized);

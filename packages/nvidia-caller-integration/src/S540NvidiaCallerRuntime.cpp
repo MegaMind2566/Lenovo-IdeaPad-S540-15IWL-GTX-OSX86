@@ -222,6 +222,12 @@ S540NvidiaCallerRuntime::Result S540NvidiaCallerRuntime::run()
 
 S540NvidiaCallerRuntime::IntegratedResult S540NvidiaCallerRuntime::checkIntegrated()
 {
+    return checkIntegrated(nullptr, nullptr);
+}
+
+S540NvidiaCallerRuntime::IntegratedResult S540NvidiaCallerRuntime::checkIntegrated(
+    StartupContinuation continuation, void *context)
+{
     // Positive counts with failed components describe a refused precondition;
     // zero would be indistinguishable from absent or malformed evidence.
     IntegratedResult result = {{1, false, false, false, false, false},
@@ -247,6 +253,18 @@ S540NvidiaCallerRuntime::IntegratedResult S540NvidiaCallerRuntime::checkIntegrat
         if (!cleaned) {
             result.foundations.allocation = false;
             result.foundations.mutex = false;
+        }
+        if (cleaned && continuation != nullptr) {
+            continuation(context);
+            // A failed continuation must never make the earlier result claim
+            // complete resource cleanup. Do not reclaim objects of unknown
+            // ownership here; the continuation owns its own failure unwind.
+            if (S540NvidiaReserve::ready() ||
+                S540NvidiaReserve::liveSlots() != 0) {
+                result.foundations.allocation = false;
+                result.foundations.mutex = false;
+                result.callers.reserve = false;
+            }
         }
     }
 

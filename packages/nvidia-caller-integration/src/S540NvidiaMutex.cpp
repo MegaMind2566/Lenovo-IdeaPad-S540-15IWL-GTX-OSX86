@@ -17,6 +17,13 @@ static_assert(NVCPU_IS_X86_64 && sizeof(void *) == 8,
 
 namespace {
 
+alignas(4) NvU32 gLiveObjects;
+static_assert(__atomic_always_lock_free(sizeof(gLiveObjects), nullptr),
+              "Object accounting must not introduce a runtime lock.");
+#if !defined(KERNEL)
+alignas(4) NvU32 gNextNativeFailure;
+#endif
+
 bool ordinaryThreadContext() {
 #if defined(KERNEL)
     return !ml_at_interrupt_context() && ml_get_interrupts_enabled();
@@ -37,6 +44,17 @@ struct Mutex {
 
 } // namespace
 
+NvU32 S540NvidiaMutex::liveObjects() {
+    return __atomic_load_n(&gLiveObjects, __ATOMIC_RELAXED);
+}
+
+#if !defined(KERNEL)
+void S540NvidiaMutexNative::failNextAllocation(Failure failure) {
+    __atomic_store_n(&gNextNativeFailure, static_cast<NvU32>(failure),
+                     __ATOMIC_RELAXED);
+}
+#endif
+
 extern "C" NV_STATUS NV_API_CALL os_alloc_mutex(void **output) {
     if (output == nullptr)
         return NV_ERR_INVALID_ARGUMENT;
@@ -54,16 +72,22 @@ extern "C" NV_STATUS NV_API_CALL os_alloc_mutex(void **output) {
         return NV_ERR_NO_MEMORY;
     }
 #else
+    const auto failure = static_cast<S540NvidiaMutexNative::Failure>(
+        __atomic_exchange_n(&gNextNativeFailure, NvU32{0}, __ATOMIC_RELAXED));
+    if (failure == S540NvidiaMutexNative::Failure::Storage)
+        return NV_ERR_NO_MEMORY;
     auto *mutex = static_cast<Mutex *>(std::malloc(sizeof(Mutex)));
     if (mutex == nullptr)
         return NV_ERR_NO_MEMORY;
-    int result = pthread_mutex_init(&mutex->guard, nullptr);
+    int result = failure == S540NvidiaMutexNative::Failure::Guard
+        ? ENOMEM : pthread_mutex_init(&mutex->guard, nullptr);
     if (result != 0) {
         std::free(mutex);
         return result == ENOMEM || result == EAGAIN
             ? NV_ERR_NO_MEMORY : NV_ERR_OPERATING_SYSTEM;
     }
-    result = pthread_cond_init(&mutex->changed, nullptr);
+    result = failure == S540NvidiaMutexNative::Failure::Condition
+        ? ENOMEM : pthread_cond_init(&mutex->changed, nullptr);
     if (result != 0) {
         (void)pthread_mutex_destroy(&mutex->guard);
         std::free(mutex);
@@ -72,6 +96,7 @@ extern "C" NV_STATUS NV_API_CALL os_alloc_mutex(void **output) {
     }
 #endif
     mutex->available = true;
+    __atomic_fetch_add(&gLiveObjects, NvU32{1}, __ATOMIC_RELAXED);
     *output = mutex;
     return NV_OK;
 }
@@ -93,6 +118,7 @@ extern "C" void NV_API_CALL os_free_mutex(void *handle) {
         return;
     std::free(mutex);
 #endif
+    __atomic_fetch_sub(&gLiveObjects, NvU32{1}, __ATOMIC_RELAXED);
 }
 
 extern "C" NV_STATUS NV_API_CALL os_acquire_mutex(void *handle) {

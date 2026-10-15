@@ -1,4 +1,4 @@
-name: Build integrated NVIDIA caller prototype
+name: Build integrated NVIDIA lifecycle prototype
 
 on:
   push:
@@ -12,6 +12,8 @@ on:
       - 'builders/build_nvidia_transport.py'
       - 'builders/check_nvidia_foundations.py'
       - 'builders/check_nvidia_callers.py'
+      - 'builders/check_nvidia_lifecycle.py'
+      - 'packages/nvidia-nvport-lifecycle/**'
       - 'tests/test_nvidia_transport*'
       - 'tests/test_nvidia_*_provenance.py'
       - '.github/workflows/build-nvidia-transport.yml'
@@ -36,19 +38,19 @@ jobs:
           persist-credentials: false
       - name: Check PCI identity, BAR0 and power-state refusal policy
         run: python3 tests/test_nvidia_transport_kernel.py
-      - name: Check original NVIDIA callers, compile the kernel integration and verify the native package
+      - name: Check NVIDIA allocation, object lifecycle and synchronization; verify the integrated native package
         run: python3 builders/build_nvidia_transport.py --kernel-sdk build-src/MacKernelSDK --output-dir build/nvidia-transport
       - name: Run the packaged reporter without loading the kernel probe
         shell: bash
         run: |
           set -euo pipefail
-          /usr/bin/unzip -q build/nvidia-transport/S540-nvidia-transport-v5.zip -d "$RUNNER_TEMP/nvidia-transport-package"
-          /bin/bash "$RUNNER_TEMP/nvidia-transport-package/S540-nvidia-transport-v5/CHECK-TRANSPORT.command" --output-dir "$RUNNER_TEMP"
+          /usr/bin/unzip -q build/nvidia-transport/S540-nvidia-transport-v6.zip -d "$RUNNER_TEMP/nvidia-transport-package"
+          /bin/bash "$RUNNER_TEMP/nvidia-transport-package/S540-nvidia-transport-v6/CHECK-TRANSPORT.command" --output-dir "$RUNNER_TEMP"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: S540-nvidia-transport-v5
+          name: S540-nvidia-transport-v6
           path: |
-            build/nvidia-transport/S540-nvidia-transport-v5.zip
-            build/nvidia-transport/S540-nvidia-transport-v5.zip.sha256
+            build/nvidia-transport/S540-nvidia-transport-v6.zip
+            build/nvidia-transport/S540-nvidia-transport-v6.zip.sha256
           if-no-files-found: error
           retention-days: 30

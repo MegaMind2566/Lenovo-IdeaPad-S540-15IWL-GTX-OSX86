@@ -1,0 +1,746 @@
+{
+  "format": 1,
+  "repository": "NVIDIA/open-gpu-kernel-modules",
+  "release": "615.78.08",
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "upstream_files": [
+    {
+      "path": "../../nvidia-os-adapter/upstream/include/nvtypes.h",
+      "source_path": "src/common/sdk/nvidia/inc/nvtypes.h",
+      "git_blob_sha1": "cb6d906a34cf6ace3d852657cf8dde4a587d7721",
+      "sha256": "da23dbc28805c390d62338dba5603eb12b2e94c8aaf873c1c42c1a5f10f26b79",
+      "bytes": 30226,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "../../nvidia-os-adapter/upstream/include/cpuopsys.h",
+      "source_path": "src/common/sdk/nvidia/inc/cpuopsys.h",
+      "git_blob_sha1": "6467b396a696a47fa71d4ad41e32d27f344fcdce",
+      "sha256": "329ab764372bace3e1445315bb7a3766d4f60aacb8523ac3e3c760c79358f4fb",
+      "bytes": 11713,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "../../nvidia-os-adapter/upstream/include/nvstatus.h",
+      "source_path": "src/common/sdk/nvidia/inc/nvstatus.h",
+      "git_blob_sha1": "4f5284db2b1e6af1c2c0c85bc39dfc14daccc9fd",
+      "sha256": "e8267172a1f7a56420d612c6734b3554b9ff6a3d33fdda21b1371ff4ce4b8675",
+      "bytes": 4565,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "../../nvidia-os-adapter/upstream/include/nvstatuscodes.h",
+      "source_path": "src/common/sdk/nvidia/inc/nvstatuscodes.h",
+      "git_blob_sha1": "430eed77a03f2f15bf058d3c49931a9f89ace08e",
+      "sha256": "4a9a39b51862d21cfa446414135386616a4a4914dd34dc83f98099295fea7b56",
+      "bytes": 19637,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "../../nvidia-os-adapter/upstream/include/nv-kernel-interface-api.h",
+      "source_path": "kernel-open/common/inc/nv-kernel-interface-api.h",
+      "git_blob_sha1": "183f9b4312eb0913c0a0a97e4db1f62a50b442c5",
+      "sha256": "1cf34c1dcd1abf535fb27387145374972a43ec9cd6f6c9ef927777431bda3cc4",
+      "bytes": 1810,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "../../nvidia-os-adapter/upstream/reference/os-interface.h",
+      "source_path": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "git_blob_sha1": "03de89a28a2611bca2fb2a3d85c7f617a681a20a",
+      "sha256": "bd281e48ff06b481033fc2fb29a891710a2b4d66fb009cc2b752ab6e90f2113b",
+      "bytes": 17357,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "../../nvidia-os-adapter/upstream/reference/memory.h",
+      "source_path": "src/nvidia/inc/libraries/nvport/memory.h",
+      "git_blob_sha1": "595eafee880dccd54ca2f382fb77afc918793e1d",
+      "sha256": "a700efeb580141a76680fd2def6622759759232e6b0e9a6e5e6a0cb863b41d90",
+      "bytes": 38701,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "../../nvidia-os-adapter/upstream/reference/debug.h",
+      "source_path": "src/nvidia/inc/libraries/nvport/debug.h",
+      "git_blob_sha1": "c2929200e628022149e6c2fb1581469946ffe05a",
+      "sha256": "864a4080c67ab9037a300feb6d4a998a9e38df12db130acf5a292234351b2df5",
+      "bytes": 11601,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "../../nvidia-caller-integration/upstream/reference/memory_tracking.h",
+      "source_path": "src/nvidia/inc/libraries/nvport/inline/memory_tracking.h",
+      "git_blob_sha1": "37f11e95b6d6d4a02eefe1d66a0567a6baaed070",
+      "sha256": "9732d626c2387c84dc6832ae640a986baac40361e018881b577db646e9cbb2eb",
+      "bytes": 15291,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "../../nvidia-caller-integration/upstream/reference/sync_unix_kernel_os.c",
+      "source_path": "src/nvidia/src/libraries/nvport/sync/sync_unix_kernel_os.c",
+      "git_blob_sha1": "9a545779dda38f261977a0da6b130ab62cf67f41",
+      "sha256": "251ec5da384f6cddd51c3ebbef09fde118734687c83955c3a085652bcce53372",
+      "bytes": 6926,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "../../nvidia-caller-integration/upstream/reference/sync_unix_kernel_os_def.h",
+      "source_path": "src/nvidia/src/libraries/nvport/sync/inc/sync_unix_kernel_os_def.h",
+      "git_blob_sha1": "b12c4ad3506d39de835d3bce5e45bb8c8eeafe70",
+      "sha256": "889cc48b45b592bd8052add7b98a07b689ee508efaf32533cbfe780cf1505fba",
+      "bytes": 1739,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "../../nvidia-caller-integration/upstream/reference/sync.h",
+      "source_path": "src/nvidia/inc/libraries/nvport/sync.h",
+      "git_blob_sha1": "29e472dedf677501e11c22cb043431750c9f8f30",
+      "sha256": "e5fb2dba02d14f3e8a3ca73c56dcf9c5da3c8ca8815c2aee3118134d13801694",
+      "bytes": 28760,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "reference/memory_tracking.c",
+      "source_path": "src/nvidia/src/libraries/nvport/memory/memory_tracking.c",
+      "git_blob_sha1": "4a23295fee7afd5472587ac223ff3ee7e82cbd13",
+      "sha256": "c565c888ebc7b7a73474694097337a0ca5e8f692a94b7fb4974603bccf17b757",
+      "bytes": 66828,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "reference/sync_common.h",
+      "source_path": "src/nvidia/src/libraries/nvport/sync/sync_common.h",
+      "git_blob_sha1": "babb90f5acf3c47bcbd3d8be4c276ec7d1063c95",
+      "sha256": "145bd0d0297047cb34bdeeb55373cf0c4a10b284f8580d7bdc2d9c81bc15e680",
+      "bytes": 4221,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "reference/safe_generic.h",
+      "source_path": "src/nvidia/inc/libraries/nvport/inline/safe_generic.h",
+      "git_blob_sha1": "e701c2cecde7816760291c78b3fea5507acc82a5",
+      "sha256": "8e8ca640cade42f204d2afd699c3fe399d0fca82507e0c4adb869c768e51d85e",
+      "bytes": 12618,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "reference/safe.h",
+      "source_path": "src/nvidia/inc/libraries/nvport/safe.h",
+      "git_blob_sha1": "2847c71fffa39623abdd2748dadabb1f47deed45",
+      "sha256": "5c0ab8a43edd1eba3e7e7d7903bd8c17222320452608efce82e0f3ad00db4e67",
+      "bytes": 24385,
+      "modified": false,
+      "license": "MIT"
+    }
+  ],
+  "adapted_translation_units": [
+    {
+      "path": "nvport_memory_lifecycle.c",
+      "sha256": "a7aadf8bdb3d88f1fb0b37e6d1174437e1175b816f86e6589a96ffcbe7d588df",
+      "complete_upstream_translation_unit": false,
+      "functions": [
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "_portMemCounterInit",
+          "compiled_function": "_portMemCounterInit",
+          "source_lines": [
+            218,
+            225
+          ],
+          "source_body_sha256": "420afbb779b296a994c3b78725242291181176125e76965b111421e2468215ad",
+          "compiled_body_sha256": "420afbb779b296a994c3b78725242291181176125e76965b111421e2468215ad",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "_portMemCounterInc",
+          "compiled_function": "_portMemCounterInc",
+          "source_lines": [
+            226,
+            331
+          ],
+          "source_body_sha256": "d9bc4925deec1ddc1be95c91a996798e466d695b1e0c2df43feeb051ef22489d",
+          "compiled_body_sha256": "d9bc4925deec1ddc1be95c91a996798e466d695b1e0c2df43feeb051ef22489d",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "_portMemCounterDec",
+          "compiled_function": "_portMemCounterDec",
+          "source_lines": [
+            332,
+            345
+          ],
+          "source_body_sha256": "af98fb58dd7855d2789cccc7ebaca8f83eb682d74f16c5854edd9b4fff4bc4e8",
+          "compiled_body_sha256": "af98fb58dd7855d2789cccc7ebaca8f83eb682d74f16c5854edd9b4fff4bc4e8",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "_portMemGetTracking",
+          "compiled_function": "_portMemGetTracking",
+          "source_lines": [
+            824,
+            834
+          ],
+          "source_body_sha256": "7288dc8e0e8b36ece880466ddef8cab491a79987a60efc2f2cbc97ccda878a97",
+          "compiled_body_sha256": "7288dc8e0e8b36ece880466ddef8cab491a79987a60efc2f2cbc97ccda878a97",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "portMemInitialize",
+          "compiled_function": "s540NvportMemoryInitialize",
+          "source_lines": [
+            837,
+            894
+          ],
+          "source_body_sha256": "3891d2196ec1dd9531f050b3d398e8262f3395af7c1f2287873480f438662053",
+          "compiled_body_sha256": "da2a04dfcf2809a60a8353aa69d77ae86e90afe923b3e0906d16325c9362dd8e",
+          "changes": [
+            "renamed to s540NvportMemoryInitialize; return NV_STATUS",
+            "ordinary sleepable-thread context and init-count overflow guards",
+            "checked temporary untracked lock allocation and checked spin initialization before publishing initCount",
+            "temporary allocation freed on failed spin initialization; globals remain cold",
+            "published preinitialized bootstrap lock replaces unchecked PORT_MEM_LOCK_INIT",
+            "explicit NV_OK result for nested and successful first initialization"
+          ]
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "portMemShutdown",
+          "compiled_function": "portMemShutdown",
+          "source_lines": [
+            895,
+            925
+          ],
+          "source_body_sha256": "c54c4e9b413afb448755a213054829a729c7d9559221ad5c745ad62bf3fac501",
+          "compiled_body_sha256": "c54c4e9b413afb448755a213054829a729c7d9559221ad5c745ad62bf3fac501",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "portMemAllocPaged",
+          "compiled_function": "portMemAllocPaged",
+          "source_lines": [
+            927,
+            939
+          ],
+          "source_body_sha256": "f45c83e0154477e1bc3a28df48e572fc8a045c12716981bad73bad38a8d0961c",
+          "compiled_body_sha256": "f45c83e0154477e1bc3a28df48e572fc8a045c12716981bad73bad38a8d0961c",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "portMemAllocNonPaged",
+          "compiled_function": "portMemAllocNonPaged",
+          "source_lines": [
+            941,
+            953
+          ],
+          "source_body_sha256": "62fc7612aebccb26f33db680e8a35a5d5a9f18492702c621adb4845a1a5adec4",
+          "compiled_body_sha256": "62fc7612aebccb26f33db680e8a35a5d5a9f18492702c621adb4845a1a5adec4",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "portMemFree",
+          "compiled_function": "portMemFree",
+          "source_lines": [
+            955,
+            975
+          ],
+          "source_body_sha256": "6644ad8b061ba3d264970bc265f45c9fc2342a95b21026d50752176a5a1c9e84",
+          "compiled_body_sha256": "6644ad8b061ba3d264970bc265f45c9fc2342a95b21026d50752176a5a1c9e84",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "portMemAllocatorCreatePaged",
+          "compiled_function": "portMemAllocatorCreatePaged",
+          "source_lines": [
+            977,
+            998
+          ],
+          "source_body_sha256": "d3a325b2b4a796aac141f00ef29b52ac7ee9da6926f908f3a9c737daa37625a9",
+          "compiled_body_sha256": "d3a325b2b4a796aac141f00ef29b52ac7ee9da6926f908f3a9c737daa37625a9",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "portMemAllocatorCreateNonPaged",
+          "compiled_function": "portMemAllocatorCreateNonPaged",
+          "source_lines": [
+            1000,
+            1020
+          ],
+          "source_body_sha256": "156b43233df07959a86e670d3fcbaab6bff06e96a4fc04cf31e6681cf57e32d0",
+          "compiled_body_sha256": "156b43233df07959a86e670d3fcbaab6bff06e96a4fc04cf31e6681cf57e32d0",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "portMemAllocatorRelease",
+          "compiled_function": "portMemAllocatorRelease",
+          "source_lines": [
+            1048,
+            1064
+          ],
+          "source_body_sha256": "4ca07d9ee33ec968b74940ebb947be257a1bcba9bcf11f3d1704414052fd983f",
+          "compiled_body_sha256": "4ca07d9ee33ec968b74940ebb947be257a1bcba9bcf11f3d1704414052fd983f",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "portMemAllocatorGetGlobalNonPaged",
+          "compiled_function": "portMemAllocatorGetGlobalNonPaged",
+          "source_lines": [
+            1067,
+            1071
+          ],
+          "source_body_sha256": "3df8b7e8276941f10ab8ff2d3e0926d993676bf7be385e7d4a276b058c393995",
+          "compiled_body_sha256": "3df8b7e8276941f10ab8ff2d3e0926d993676bf7be385e7d4a276b058c393995",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "portMemAllocatorGetGlobalPaged",
+          "compiled_function": "portMemAllocatorGetGlobalPaged",
+          "source_lines": [
+            1072,
+            1076
+          ],
+          "source_body_sha256": "a26ad158d4369e1cb325aaec9396674ad251abf3c047e125c4a94a918b652d0b",
+          "compiled_body_sha256": "a26ad158d4369e1cb325aaec9396674ad251abf3c047e125c4a94a918b652d0b",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "portMemInitializeAllocatorTracking",
+          "compiled_function": "portMemInitializeAllocatorTracking",
+          "source_lines": [
+            1078,
+            1102
+          ],
+          "source_body_sha256": "788fc88aaac1c011a77b6a19a25ce3d402e490b6da1a687343cf21aa1fa1d1dc",
+          "compiled_body_sha256": "788fc88aaac1c011a77b6a19a25ce3d402e490b6da1a687343cf21aa1fa1d1dc",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "_portMemAllocatorAlloc",
+          "compiled_function": "_portMemAllocatorAlloc",
+          "source_lines": [
+            1192,
+            1265
+          ],
+          "source_body_sha256": "34d9dd9d93a3925ca30b3d0bc3b84e1b1650271c8856efe3e7cf72e4f7792f42",
+          "compiled_body_sha256": "34d9dd9d93a3925ca30b3d0bc3b84e1b1650271c8856efe3e7cf72e4f7792f42",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "_portMemAllocatorFree",
+          "compiled_function": "_portMemAllocatorFree",
+          "source_lines": [
+            1266,
+            1286
+          ],
+          "source_body_sha256": "1944797beb3844d305ad16a080042dcd8a50eb3e1048e4c3e1957cabc5d8016d",
+          "compiled_body_sha256": "1944797beb3844d305ad16a080042dcd8a50eb3e1048e4c3e1957cabc5d8016d",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "portMemPrintTrackingInfo",
+          "compiled_function": "portMemPrintTrackingInfo",
+          "source_lines": [
+            1288,
+            1458
+          ],
+          "source_body_sha256": "9d6943f7ba7c1562982a55d56714e9674f5f7f1a017e1b0948e99a6df067d94d",
+          "compiled_body_sha256": "9d6943f7ba7c1562982a55d56714e9674f5f7f1a017e1b0948e99a6df067d94d",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "portMemPrintAllTrackingInfo",
+          "compiled_function": "portMemPrintAllTrackingInfo",
+          "source_lines": [
+            1460,
+            1470
+          ],
+          "source_body_sha256": "56611a3ee059d4170f4517ecf2efce171f5a74edf534867861b0c75f2b5ff3f2",
+          "compiled_body_sha256": "56611a3ee059d4170f4517ecf2efce171f5a74edf534867861b0c75f2b5ff3f2",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "portMemRegisterOomReportCb",
+          "compiled_function": "portMemRegisterOomReportCb",
+          "source_lines": [
+            1472,
+            1476
+          ],
+          "source_body_sha256": "627cc2f1be7e44c8745c8c7a651963fe40886ce236a7c671d3d3c570996cba5c",
+          "compiled_body_sha256": "627cc2f1be7e44c8745c8c7a651963fe40886ce236a7c671d3d3c570996cba5c",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "portMemReportOom",
+          "compiled_function": "portMemReportOom",
+          "source_lines": [
+            1478,
+            1558
+          ],
+          "source_body_sha256": "c18a168ae9646a47749b8ca318ebdded72a641bd1006b4fcb50eae0e477b85c0",
+          "compiled_body_sha256": "c18a168ae9646a47749b8ca318ebdded72a641bd1006b4fcb50eae0e477b85c0",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "portMemExTrackingGetActiveStats",
+          "compiled_function": "portMemExTrackingGetActiveStats",
+          "source_lines": [
+            1561,
+            1578
+          ],
+          "source_body_sha256": "d7f517fcfd35bbc49a6f8df8a11b34f2e142e9133bfb7bb261d2f8f546c387ba",
+          "compiled_body_sha256": "d7f517fcfd35bbc49a6f8df8a11b34f2e142e9133bfb7bb261d2f8f546c387ba",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "portMemExTrackingGetTotalStats",
+          "compiled_function": "portMemExTrackingGetTotalStats",
+          "source_lines": [
+            1609,
+            1626
+          ],
+          "source_body_sha256": "ca9ec6ee7c48358b3c8c09a9a645c252a1f84f0632db2edadf6958ca442c8726",
+          "compiled_body_sha256": "ca9ec6ee7c48358b3c8c09a9a645c252a1f84f0632db2edadf6958ca442c8726",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "portMemExTrackingGetPeakStats",
+          "compiled_function": "portMemExTrackingGetPeakStats",
+          "source_lines": [
+            1657,
+            1674
+          ],
+          "source_body_sha256": "d7d2017e6a01c2029982e77c80bb2aa7d28a9e7bf4f1adb8f7b414d288b78d69",
+          "compiled_body_sha256": "d7d2017e6a01c2029982e77c80bb2aa7d28a9e7bf4f1adb8f7b414d288b78d69",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "_portMemTrackingRelease",
+          "compiled_function": "_portMemTrackingRelease",
+          "source_lines": [
+            1752,
+            1780
+          ],
+          "source_body_sha256": "f72f5218195a6425ee515c80794841fe5106d08fb9c5c113e1bcddd234420b8b",
+          "compiled_body_sha256": "f72f5218195a6425ee515c80794841fe5106d08fb9c5c113e1bcddd234420b8b",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "_portMemTrackAlloc",
+          "compiled_function": "_portMemTrackAlloc",
+          "source_lines": [
+            1782,
+            1823
+          ],
+          "source_body_sha256": "5d18d6292fe866514cca5507b9b2f216cb237cfa6657d39d086b6ffa57d9ea47",
+          "compiled_body_sha256": "5d18d6292fe866514cca5507b9b2f216cb237cfa6657d39d086b6ffa57d9ea47",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "_portMemTrackFree",
+          "compiled_function": "_portMemTrackFree",
+          "source_lines": [
+            1825,
+            1878
+          ],
+          "source_body_sha256": "30b23a85f52ca1f0a0c802e41e8cc668fbd6b01a54e4adfef2c002b416a4de68",
+          "compiled_body_sha256": "30b23a85f52ca1f0a0c802e41e8cc668fbd6b01a54e4adfef2c002b416a4de68",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "_portMemAllocatorAllocPagedWrapper",
+          "compiled_function": "_portMemAllocatorAllocPagedWrapper",
+          "source_lines": [
+            1881,
+            1890
+          ],
+          "source_body_sha256": "7a1acbdb91110b416ba876bda258f7d8a69b5377423757e847fe06d9eef594cf",
+          "compiled_body_sha256": "7a1acbdb91110b416ba876bda258f7d8a69b5377423757e847fe06d9eef594cf",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "_portMemAllocatorAllocNonPagedWrapper",
+          "compiled_function": "_portMemAllocatorAllocNonPagedWrapper",
+          "source_lines": [
+            1892,
+            1901
+          ],
+          "source_body_sha256": "96a0cca6cd42678c9d665eec8e2d84adbe487d6f736a5964c87a24751252d62d",
+          "compiled_body_sha256": "96a0cca6cd42678c9d665eec8e2d84adbe487d6f736a5964c87a24751252d62d",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "_portMemAllocatorFreeWrapper",
+          "compiled_function": "_portMemAllocatorFreeWrapper",
+          "source_lines": [
+            1903,
+            1912
+          ],
+          "source_body_sha256": "418761876441ab51272f8c2b04a7a001c63adc65acb6b3c475438a5e41599322",
+          "compiled_body_sha256": "418761876441ab51272f8c2b04a7a001c63adc65acb6b3c475438a5e41599322",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/memory_tracking.c",
+          "source_function": "_portMemAllocatorReleaseWrapper",
+          "compiled_function": "_portMemAllocatorReleaseWrapper",
+          "source_lines": [
+            1914,
+            1921
+          ],
+          "source_body_sha256": "59b57ce7fadf666b25e5013caf4e6ef693a4e4705a5ef12356ade2c8a4ed3053",
+          "compiled_body_sha256": "59b57ce7fadf666b25e5013caf4e6ef693a4e4705a5ef12356ade2c8a4ed3053",
+          "changes": []
+        }
+      ]
+    },
+    {
+      "path": "nvport_owned_sync.c",
+      "sha256": "40031410aec36a72a4e2db07adaa0772e1e7728f9f736a4143fb05036290cb82",
+      "complete_upstream_translation_unit": false,
+      "functions": [
+        {
+          "source_reference": "../../nvidia-caller-integration/upstream/reference/sync_unix_kernel_os.c",
+          "source_function": "portSyncSpinlockInitialize",
+          "compiled_function": "portSyncSpinlockInitialize",
+          "source_lines": [
+            45,
+            57
+          ],
+          "source_body_sha256": "a33b27af898f8c0f091defe7b1dbfd433a06de13a4a56c1812f1ae42bd3c3226",
+          "compiled_body_sha256": "a33b27af898f8c0f091defe7b1dbfd433a06de13a4a56c1812f1ae42bd3c3226",
+          "changes": []
+        },
+        {
+          "source_reference": "../../nvidia-caller-integration/upstream/reference/sync_unix_kernel_os.c",
+          "source_function": "portSyncSpinlockDestroy",
+          "compiled_function": "portSyncSpinlockDestroy",
+          "source_lines": [
+            59,
+            71
+          ],
+          "source_body_sha256": "829ebd85d6d30d0900bcd1158286aa3e7d5aca6dddd7761c4482d6cdaa380bba",
+          "compiled_body_sha256": "829ebd85d6d30d0900bcd1158286aa3e7d5aca6dddd7761c4482d6cdaa380bba",
+          "changes": []
+        },
+        {
+          "source_reference": "../../nvidia-caller-integration/upstream/reference/sync_unix_kernel_os.c",
+          "source_function": "portSyncSpinlockAcquire",
+          "compiled_function": "portSyncSpinlockAcquire",
+          "source_lines": [
+            73,
+            81
+          ],
+          "source_body_sha256": "99d4df765aa802fa50bf0b38c23afd3ce74c70f2f442af9f2ff4b842c9d8401e",
+          "compiled_body_sha256": "99d4df765aa802fa50bf0b38c23afd3ce74c70f2f442af9f2ff4b842c9d8401e",
+          "changes": []
+        },
+        {
+          "source_reference": "../../nvidia-caller-integration/upstream/reference/sync_unix_kernel_os.c",
+          "source_function": "portSyncSpinlockRelease",
+          "compiled_function": "portSyncSpinlockRelease",
+          "source_lines": [
+            83,
+            91
+          ],
+          "source_body_sha256": "4e5d824c9e36b6fe7ce1744a8ad5140e995daba201db6ac0aca61d741d70950f",
+          "compiled_body_sha256": "4e5d824c9e36b6fe7ce1744a8ad5140e995daba201db6ac0aca61d741d70950f",
+          "changes": []
+        },
+        {
+          "source_reference": "../../nvidia-caller-integration/upstream/reference/sync_unix_kernel_os.c",
+          "source_function": "portSyncMutexInitialize",
+          "compiled_function": "portSyncMutexInitialize",
+          "source_lines": [
+            95,
+            107
+          ],
+          "source_body_sha256": "50df5cbd41882a42e88018816f1ffb7ea62b4ed27c1c383a9868c04c72406210",
+          "compiled_body_sha256": "50df5cbd41882a42e88018816f1ffb7ea62b4ed27c1c383a9868c04c72406210",
+          "changes": []
+        },
+        {
+          "source_reference": "../../nvidia-caller-integration/upstream/reference/sync_unix_kernel_os.c",
+          "source_function": "portSyncMutexDestroy",
+          "compiled_function": "portSyncMutexDestroy",
+          "source_lines": [
+            109,
+            121
+          ],
+          "source_body_sha256": "522db1069f1c3146f319ab8386a4ef00fac253e8f0baf9ce5b7856f18965436b",
+          "compiled_body_sha256": "522db1069f1c3146f319ab8386a4ef00fac253e8f0baf9ce5b7856f18965436b",
+          "changes": []
+        },
+        {
+          "source_reference": "../../nvidia-caller-integration/upstream/reference/sync_unix_kernel_os.c",
+          "source_function": "portSyncMutexAcquire",
+          "compiled_function": "portSyncMutexAcquire",
+          "source_lines": [
+            123,
+            134
+          ],
+          "source_body_sha256": "3fd0b600af191e1f7ac0981bba18652436ba9762c144748ac6d905fd8f403483",
+          "compiled_body_sha256": "3fd0b600af191e1f7ac0981bba18652436ba9762c144748ac6d905fd8f403483",
+          "changes": []
+        },
+        {
+          "source_reference": "../../nvidia-caller-integration/upstream/reference/sync_unix_kernel_os.c",
+          "source_function": "portSyncMutexAcquireConditional",
+          "compiled_function": "portSyncMutexAcquireConditional",
+          "source_lines": [
+            136,
+            145
+          ],
+          "source_body_sha256": "eecb6bcd2d13af9e47af32934a3e8eeb082e33633ccfc52202487e818da9077e",
+          "compiled_body_sha256": "eecb6bcd2d13af9e47af32934a3e8eeb082e33633ccfc52202487e818da9077e",
+          "changes": []
+        },
+        {
+          "source_reference": "../../nvidia-caller-integration/upstream/reference/sync_unix_kernel_os.c",
+          "source_function": "portSyncMutexRelease",
+          "compiled_function": "portSyncMutexRelease",
+          "source_lines": [
+            147,
+            155
+          ],
+          "source_body_sha256": "7ae4c454103247066adf759eb56391fc6b59532768e6eb3d12d811d88681ffac",
+          "compiled_body_sha256": "7ae4c454103247066adf759eb56391fc6b59532768e6eb3d12d811d88681ffac",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/sync_common.h",
+          "source_function": "portSyncSpinlockCreate",
+          "compiled_function": "portSyncSpinlockCreate",
+          "source_lines": [
+            36,
+            55
+          ],
+          "source_body_sha256": "d9f36ccf658070513c26772d04a6adba5595e45e0c80a44f0227f93c16311498",
+          "compiled_body_sha256": "d9f36ccf658070513c26772d04a6adba5595e45e0c80a44f0227f93c16311498",
+          "changes": []
+        },
+        {
+          "source_reference": "reference/sync_common.h",
+          "source_function": "portSyncMutexCreate",
+          "compiled_function": "portSyncMutexCreate",
+          "source_lines": [
+            59,
+            78
+          ],
+          "source_body_sha256": "012781dd045186e0b206d2cd036bfe4d6dcddf59f1e451d7bb864da5db955f3d",
+          "compiled_body_sha256": "012781dd045186e0b206d2cd036bfe4d6dcddf59f1e451d7bb864da5db955f3d",
+          "changes": []
+        }
+      ]
+    }
+  ],
+  "interfaces": [
+    {
+      "path": "nvport_lifecycle.h",
+      "sha256": "dc819b9135ce87803a677c5ad76343cc58b641aad8febd85dd1146796985d933"
+    },
+    {
+      "path": "nvport_lifecycle_profile.h",
+      "sha256": "e55022f1e17e3695fe1de367d3dce7bf61038554b9044f745d6db9377fcd87e0"
+    },
+    {
+      "path": "nvport_safe_length.h",
+      "sha256": "6fdeb23235d676a6a36c070043f74463ee5aa4ddffb5e7c7ce9542cc51c63e9b"
+    }
+  ],
+  "atomic_closure": "../../nvidia-os-adapter/upstream/ATOMIC-PROVENANCE.json",
+  "profile": {
+    "assertions": "upstream release checked assertions; mandatory assertions fatal",
+    "counter": true,
+    "allocation_byte_size": false,
+    "fenceposts": false,
+    "allocation_list": false,
+    "caller_info": false,
+    "allocation_logging": false,
+    "GSP_process_limits": false,
+    "tracking_diagnostics": "upstream basic errors and real portDbgPrintf hook",
+    "length_add": "original unsigned macro expansion from safe_generic.h",
+    "thread_safety": "original counters atomic, allocator-list links protected by OS spinlock; lifecycle externally serialized"
+  },
+  "bootstrap_adaptation": {
+    "source": "portMemInitialize",
+    "compiled": "s540NvportMemoryInitialize",
+    "return": "NV_STATUS",
+    "failure_atomic": true,
+    "checked_before_publication": [
+      "ordinary sleepable-thread context",
+      "initCount overflow",
+      "untracked bootstrap object allocation",
+      "OS spinlock initialization"
+    ],
+    "failure_cleanup": "free temporary object and return actual error; no global publication",
+    "full_core_included": false
+  },
+  "link_contract": {
+    "retain": [
+      "../../nvidia-caller-integration/upstream/nvport_allocator_callers.c"
+    ],
+    "exclude": [
+      "../../nvidia-caller-integration/upstream/nvport_mutex_callers.c"
+    ],
+    "duplicate_os_symbols": false
+  },
+  "scope": {
+    "tracked_allocator": true,
+    "global_allocator": true,
+    "owned_mutex": true,
+    "owned_spinlock": true,
+    "full_nvport_core": false,
+    "existing_block_allocator": false,
+    "fencepost_validation": false,
+    "per_allocation_size_query": false,
+    "arbitrary_allocator_ownership_validation": false,
+    "interrupt_handlers": false,
+    "DMA": false,
+    "MMIO": false,
+    "resource_manager": false,
+    "GPU_initialization": false
+  }
+}

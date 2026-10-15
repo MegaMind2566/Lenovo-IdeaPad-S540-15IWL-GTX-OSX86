@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check the real NVIDIA allocator/mutex callers without changing the v4 probe."""
+"""Check the original NVIDIA allocator/mutex extraction separately from the integrated probe."""
 from __future__ import annotations
 
 import argparse
@@ -191,7 +191,7 @@ def check(sdk: Path, destination: Path) -> Path:
                       'native_backend': 'pthread functional semantics'},
             'kernel_runtime': 'not_tested', 'interrupt_runtime': 'not_tested',
             'gpu_operations': 'none', 'resource_manager_integration': False,
-            'transport_probe': 'not loaded by these caller-only checks; latest confirmed laptop version 0.4.0',
+            'transport_probe': 'not loaded by these caller-only checks; latest confirmed laptop version 0.5.0',
             'laptop_package': False,
             'source_sha256': {p.relative_to(ROOT).as_posix(): sha(p.read_bytes())
                               for p in sorted(source_paths) if p.is_file()
