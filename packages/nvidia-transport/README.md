@@ -58,6 +58,16 @@ Refusal is a complete diagnostic outcome. Failed reads and invalid reports retur
 
 The native Intel CI build compiles and links the kext, checks its Mach-O type and module metadata, verifies ad-hoc signatures, and runs decoder and policy tests. It does not load the experimental kext or validate the laptop's MMIO response.
 
+The current GitHub build is blocked by an account billing/spending-limit error before any job steps execute. Version 0.2.0 has therefore not passed native compilation yet. The local source bundle **S540-nvidia-build-local-v1.zip** provides an alternative on Intel macOS with Apple Command Line Tools. Extract it into Downloads and run:
+
+```bash
+bash "$HOME/Downloads/S540-nvidia-build-local-v1/BUILD-LOCAL.command"
+```
+
+If Command Line Tools are missing, run `xcode-select --install`, finish Apple's installation, and repeat the build command. The wrapper fetches the pinned public SDK Git revision and runs the same native compile, signature and decoder checks. It saves the resulting ZIP and log in a private **NVIDIA-BUILD…** folder on the Desktop. Share the ZIP for review before updating the test EFI, or share **build.log** if compilation fails. It does not install or load the new kext.
+
+Local builds use the explicit `--allow-legacy-probe` option so the already-loaded 0.1.0 probe can be recognized as outdated without failing the build. CI still requires no loaded probe. The build manifest records which live-report check completed; neither result means the new kext ran. The source bundle can be recreated with `builders/package_nvidia_local.py --source-commit FULL_SHA --output-dir OUTPUT` from that exact source checkout.
+
 The build pins [MacKernelSDK](https://github.com/acidanthera/MacKernelSDK/tree/3f750085caa17ec3a7880f11c11bf4f48cd6a164). Its unmodified module runtime includes Apple code under APSL 2.0; the archive includes the license and source location in **THIRD-PARTY-NOTICES.txt**. Project source is under the adjacent MIT license.
 
 Register semantics and decoding are based on NVIDIA's pinned [nv_ref.h](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/common/inc/swref/published/nv_ref.h) and [nv_arch.h](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/common/inc/swref/published/nv_arch.h). Apple API behavior was reviewed against [IOPCIFamily](https://github.com/apple-oss-distributions/IOPCIFamily/tree/4822b27a36e2de70e231ecf2bf3021384fab6ec2) and [XNU](https://github.com/apple-oss-distributions/xnu/tree/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea).

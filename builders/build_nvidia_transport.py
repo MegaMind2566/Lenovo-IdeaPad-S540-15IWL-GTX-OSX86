@@ -47,7 +47,7 @@ def macho(path: Path, expected_type: int) -> None:
         raise ValueError('The build must contain only x86_64.')
 
 
-def build(sdk: Path, output: Path) -> Path:
+def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
     if sys.platform != 'darwin' or platform.machine() != 'x86_64':
         raise ValueError('An Intel macOS build host is required.')
     commit = os.environ.get('GITHUB_SHA', '')
@@ -124,8 +124,17 @@ def build(sdk: Path, output: Path) -> Path:
         self_test = run(str(checker), '--self-test')
         print(self_test.stdout.strip())
         live = json.loads(run(str(checker)).stdout)
-        if live.get('format') != 2 or live.get('complete') is not True or live.get('status') != 'not_attached':
-            raise ValueError('The native runner must complete without a loaded probe.')
+        allowed_statuses = {'not_attached'}
+        if allow_legacy_probe:
+            allowed_statuses.add('outdated_probe')
+        if (live.get('format') != 2 or live.get('tool') != 'nvidia-transport'
+                or live.get('version') != VERSION or live.get('complete') is not True
+                or live.get('status') not in allowed_statuses):
+            raise ValueError('The native reporter returned an unexpected report or loaded probe.')
+        live_validation = ('native live enumeration without a loaded probe'
+                           if live['status'] == 'not_attached' else
+                           'native live recognition of the already-loaded version 0.1.0 probe; '
+                           'the new kernel probe was not loaded by this build')
         imports = run('/usr/bin/nm', '-u', str(checker)).stdout
         if any(name in imports for name in ('IOServiceOpen', 'IOConnectCall', 'IOConnectMapMemory', 'IORegistryEntrySetCFProperty', 'IORegistryEntrySetCFProperties')):
             raise ValueError('The reporter imports a hardware-client or write API.')
@@ -164,10 +173,11 @@ def build(sdk: Path, output: Path) -> Path:
                              'subsystem_vendor_id': '0x17aa', 'subsystem_device_id': '0x3806'},
                   'source_sha256': {item.relative_to(ROOT).as_posix(): digest(item.read_bytes())
                                     for item in required if item.is_relative_to(ROOT)},
+                  'native_report_status': live['status'],
                   'package_file_sha256_excluding_BUILD': {name: digest(data) for name, data in payload.items()},
                   'validation': ['native Intel kernel compile and link', 'thin x86_64 Mach-O and module entry metadata',
                                  'ad-hoc signature verification', 'native report decoder self-test',
-                                 'native live enumeration without a loaded probe'],
+                                 live_validation],
                   'hardware_status': 'Version 0.1.0 laptop PCI attachment confirmed. Version 0.2.0 single BAR0 identification read awaits laptop validation; GPU initialization remains unimplemented.'}
         payload['BUILD.json'] = (json.dumps(record, indent=2, sort_keys=True) + '\n').encode()
         payload['SHA256SUMS'] = ''.join(digest(data) + '  ' + name + '\n' for name, data in sorted(payload.items())).encode('ascii')
@@ -192,9 +202,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--kernel-sdk', type=Path, required=True)
     parser.add_argument('--output-dir', type=Path, required=True)
+    parser.add_argument('--allow-legacy-probe', action='store_true',
+                        help='Allow the already-loaded version 0.1.0 probe during a local build.')
     args = parser.parse_args()
     try:
-        archive = build(args.kernel_sdk, args.output_dir)
+        archive = build(args.kernel_sdk, args.output_dir,
+                        allow_legacy_probe=args.allow_legacy_probe)
         print('Verified NVIDIA single-read identification package: ' + str(archive))
         print('ZIP SHA256: ' + digest(archive.read_bytes()))
         return 0
