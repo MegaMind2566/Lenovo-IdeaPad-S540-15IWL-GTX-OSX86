@@ -60,6 +60,8 @@ The reporter requires no administrator password or developer tools. It does not 
 
 **BUILD.json** records the exact project commit, source/output hashes, native results, kernel imports and module version. The complete package checks thin x86_64 Mach-O output, matching kmod/Info versions, KPI dependencies, signatures, decoder fixtures and the packaged launcher.
 
+The exact 22-import adapter contract includes the compiler-emitted `__bzero` RAM helper (Mach-O `___bzero`). Its `com.apple.kpi.libkern` export and byte-zeroing implementation are verified against [pinned XNU](https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/x86_64/bzero.s). It adds no hardware access; the build records its provenance separately.
+
 Native tests exercise actual callers, reserve exhaustion/reuse/concurrent churn, mutex contention/publication, the mandatory failed-acquisition assertion and the same integrated startup sequence. AddressSanitizer and UndefinedBehaviorSanitizer instrument production sources with fatal diagnostics. CI compiles and links the kernel code but does not load it.
 
 The archive includes source, reference bytes, adaptation/provenance records, validation reports and NVIDIA/LLVM/MacKernelSDK licenses. NVIDIA is pinned to `1a82fbfda8f321b056eb3568850f9316c5e465c5`; MacKernelSDK to `3f750085caa17ec3a7880f11c11bf4f48cd6a164`. These build checks do not establish v5 laptop execution or graphics acceleration.

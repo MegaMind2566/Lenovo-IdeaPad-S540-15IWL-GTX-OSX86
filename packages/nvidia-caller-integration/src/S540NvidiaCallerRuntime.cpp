@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 #include "S540NvidiaCallerRuntime.hpp"
 #include "S540NvidiaReserve.hpp"
-#include "../../nvidia-os-adapter/src/S540NvidiaMemory.hpp"
 #include "../upstream/nvport_allocator_callers.h"
 #include "../upstream/nvport_mutex_callers.h"
 
@@ -38,11 +37,7 @@ bool ordinaryThreadContext()
 void allocationCallers(Result &result)
 {
     using namespace S540NvidiaReserve;
-    void *slots[kSlotCount];
-    // Route this larger stack initialization through the reviewed memory
-    // hook. An aggregate zero initializer can introduce an implicit bzero
-    // import in the Darwin kernel build despite -fno-builtin.
-    os_mem_set(slots, 0, static_cast<NvU32>(sizeof(slots)));
+    void *slots[kSlotCount] = {};
     bool full = true;
     bool uniqueAndAligned = true;
     bool contents = true;
@@ -96,7 +91,8 @@ void allocationCallers(Result &result)
               liveSlots() == kSlotCount);
         if (!refusedShutdown || !ready()) {
             // Do not read or free pointers after an unexpected destruction.
-            os_mem_set(slots, 0, static_cast<NvU32>(sizeof(slots)));
+            for (void *&slot : slots)
+                slot = nullptr;
             result.allocationCallers = false;
             return;
         }
@@ -134,8 +130,7 @@ void mutexCallers(Result &result)
     result.mutexCallers = true;
     check(result, result.mutexCallers,
           portSyncMutexInitialize(nullptr) == NV_ERR_INVALID_POINTER);
-    PORT_MUTEX mutex;
-    os_mem_set(&mutex, 0, static_cast<NvU32>(sizeof(mutex)));
+    PORT_MUTEX mutex{};
     const NV_STATUS initialized = portSyncMutexInitialize(&mutex);
     check(result, result.mutexCallers,
           initialized == NV_OK && mutex.mutex != nullptr);
@@ -180,8 +175,7 @@ void mutexCallers(Result &result)
 
 S540NvidiaCallerRuntime::Result S540NvidiaCallerRuntime::run()
 {
-    Result result;
-    os_mem_set(&result, 0, static_cast<NvU32>(sizeof(result)));
+    Result result{};
     result.reserve = true;
     check(result, result.reserve, ordinaryThreadContext());
     if (!result.reserve)
@@ -230,11 +224,8 @@ S540NvidiaCallerRuntime::IntegratedResult S540NvidiaCallerRuntime::checkIntegrat
 {
     // Positive counts with failed components describe a refused precondition;
     // zero would be indistinguishable from absent or malformed evidence.
-    IntegratedResult result;
-    os_mem_set(&result, 0, static_cast<NvU32>(sizeof(result)));
-    result.foundations.checks = 1;
-    result.callers.checks = 1;
-    result.callers.failures = 1;
+    IntegratedResult result = {{1, false, false, false, false, false},
+                               {1, 1, false, false, false}, false};
     NvU32 expected = 0;
     if (!__atomic_compare_exchange_n(&gStartupLease, &expected, NvU32{1}, false,
                                       __ATOMIC_ACQUIRE, __ATOMIC_RELAXED))

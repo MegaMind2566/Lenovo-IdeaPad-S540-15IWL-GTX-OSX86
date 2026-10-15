@@ -49,6 +49,9 @@ KPI_LIBRARIES = {
 ADAPTER_IMPORTS = {
     '_clock_get_uptime', '_absolutetime_to_nanoseconds', '_clock_timebase_info',
     '_memcpy', '_memset', '_memcmp',
+    # Compiler-emitted ordinary-RAM zeroing: pinned XNU Libkern.exports and
+    # osfmk/x86_64/bzero.s export and implement this alias of bzero.
+    '___bzero',
     '_IOMallocAligned', '_IOFreeAligned', '_IOMalloc', '_IOFree',
     '_IOSimpleLockAlloc', '_IOSimpleLockFree', '_IOSimpleLockLock', '_IOSimpleLockUnlock',
     '_ml_at_interrupt_context', '_ml_get_interrupts_enabled', '_ml_set_interrupts_enabled',
@@ -356,6 +359,14 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                   'native_report_status': live['status'],
                   'native_adapter_checks': native_results,
                   'kernel_adapter_imports': sorted(adapter_imports),
+                  'kernel_compiler_helpers': {
+                      '___bzero': {
+                          'purpose': 'compiler-emitted ordinary-RAM byte zeroing',
+                          'kpi': 'com.apple.kpi.libkern',
+                          'xnu_commit': 'f6217f891ac0bb64f3d375211650a4c1ff8ca1ea',
+                          'export_reference': 'config/Libkern.exports',
+                          'implementation_reference': 'osfmk/x86_64/bzero.s',
+                      }},
                   'kernel_adapter_resolved_caller_symbols': list(CALLER_SYMBOLS),
                   'kernel_kpi_libraries': KPI_LIBRARIES,
                   'kernel_adapter_static_initializers': False,
