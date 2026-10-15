@@ -10,7 +10,7 @@ Report received on 12 October 2026. Only data relevant to the project is include
 | CPU | Intel Core i7-8565U, Whiskey Lake-U, 4 cores / 8 threads | X86PlatformPlugin active; frequency/power response confirmed; idle temperatures 45–48 °C; activity session retains 57–82 °C with no missing readings and final 57 °C |
 | RAM | 12 GB DDR4-2400, 8 and 4 GB modules | Sufficient for the first test |
 | iGPU | Intel UHD 620, PCI 8086:3EA0 | IntelAccelerator detected and Metal 3 exposed; sustained load still to be tested |
-| dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91; subsystem 17AA:3806; revision A1 | Active IOPCIDevice confirmed with -wegnoegpu absent; initialization, acceleration and electrical power state remain unverified |
+| dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91; subsystem 17AA:3806; revision A1 | Kernel probe attachment, fixed PCI configuration reads and assigned resource metadata confirmed; GPU initialization, acceleration and electrical power state remain unverified |
 | Display | BOE NV156FHM-N61, 1920×1080 | Panel, brightness slider and direct F11/F12 working; boot blackout delay eliminated with -igfxblr |
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Problematic PM981a family; compatibility is not assumed |
 | Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | itlwm 2.3.0 loaded and HeliPort reported working; Ethernet presentation is expected with this driver; disconnection, reconnection and network switching confirmed; Internet baseline 15.751 Mb/s down / 63.036 Mb/s up with Low loaded responsiveness; cause unresolved |
@@ -210,4 +210,19 @@ The latest reports agree on the following normalized evidence:
 
 PCI visibility is therefore confirmed. The inventory reads published metadata; it does not open the device or verify PCI configuration-space access, MMIO, DMA, GSP, GPU execution, acceleration or electrical power state. It does not audit every current EFI setting or establish the physical routing of HDMI. Raw reports and private configurations remain outside the repository.
 
-The bounded IOKit attachment prototype is implemented, with a verified native Intel build and diagnostic package. It reads configuration-space identity and already-assigned resource descriptors. Laptop attachment remains unvalidated. NVIDIA electrical power-off and external-display work retain their deferred status.
+## NVIDIA PCI attachment: October 15, 2026
+
+The laptop report from `nvidia-transport` 0.1.0 returns `attached`, `complete=true`, `wegnoegpu_present=false` and no warnings. The active probe is `S540NvidiaPCIProbe`, with an `IOPCIDevice` provider whose identity is verified as `10DE:1F91`, subsystem `17AA:3806`, revision `A1`, display class `030000`. This confirms kernel attachment and the bounded fixed PCI configuration-read milestone.
+
+The snapshot retains these already-assigned resource descriptors:
+
+| BAR register | Descriptor length |
+|---|---|
+| `0x10` | 16 MiB |
+| `0x14` | 256 MiB |
+| `0x1C` | 32 MiB |
+| `0x24` | 128 bytes |
+
+The snapshot has no descriptor at `0x18` or `0x20`. Raw BAR type/width flags were not collected, so those gaps are not diagnosed as missing resources. Resource descriptors do not demonstrate MMIO access or usable VRAM capacity. The probe does not change PCI command bits, enable bus mastering or allocate DMA; observed command/status values are not evidence of changes made by the probe.
+
+GPU register reads, GSP initialization, command execution and acceleration have not been implemented. Stop/teardown is present in source, but runtime stop or unload has not been tested. The next step is a bounded read-only MMIO assessment before implementing any register access. NVIDIA electrical power-off and external-display work retain their deferred status. Raw reports, resource addresses and private EFI configuration stay outside the repository.

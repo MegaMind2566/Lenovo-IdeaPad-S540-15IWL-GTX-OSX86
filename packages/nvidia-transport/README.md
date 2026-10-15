@@ -1,8 +1,16 @@
 # NVIDIA PCI attachment prototype
 
-This is the first kernel attachment experiment for the S540 NVIDIA port. The laptop now publishes its GTX 1650 Max-Q (`10DE:1F91`, subsystem `17AA:3806`) in IOService with `-wegnoegpu` absent. This package checks the next boundary: an IOKit service attaching to that exact PCI device, reading fixed configuration registers and publishing the already-assigned BAR resource descriptors.
+This is the first kernel attachment experiment for the S540 NVIDIA port. The laptop now publishes its GTX 1650 Max-Q (`10DE:1F91`, subsystem `17AA:3806`) in IOService with `-wegnoegpu` absent. This package provides an IOKit service that attaches to that exact PCI device, reads fixed configuration registers and publishes the already-assigned BAR resource descriptors.
 
-**Status:** implementation available for an experimental boot; laptop attachment is not yet confirmed. This prototype provides no graphics acceleration, GPU command submission, display output or GSP initialization. It is independent of NVIDIA's Linux resource manager, which has not been integrated yet.
+**Status:** kernel attachment, fixed PCI configuration reads and assigned resource metadata are confirmed on the laptop. This prototype provides no graphics acceleration, GPU command submission, display output or GSP initialization. It is independent of NVIDIA's Linux resource manager, which has not been integrated yet.
+
+## Laptop result: October 15, 2026
+
+The report returns `attached`, `complete=true`, `wegnoegpu_present=false` and no warnings. The reporter verifies the actual `IOPCIDevice` provider as `10DE:1F91`, subsystem `17AA:3806`, revision `A1`, class `030000`. The kernel probe successfully attaches and reads its fixed PCI configuration snapshot.
+
+Already-assigned resource descriptors are reported at BAR registers `0x10` (16 MiB), `0x14` (256 MiB), `0x1C` (32 MiB) and `0x24` (128 bytes). These are resource metadata, not mapped register reads or usable VRAM measurements. No descriptor is retained for `0x18` or `0x20`; the snapshot lacks raw BAR type/width flags, so no missing-resource diagnosis follows from those gaps. Resource addresses and raw reports remain private.
+
+The probe does not write PCI configuration or enable bus mastering/DMA. Source stop/teardown removes the snapshot, but runtime stop or unload has not been tested. The next gate is a bounded read-only MMIO assessment: review a documented register, mapping bounds and read semantics before implementing register access. MMIO, DMA, GSP and acceleration remain unimplemented.
 
 ## Boot the experiment
 

@@ -165,7 +165,7 @@ def build(sdk: Path, output: Path) -> Path:
                   'validation': ['native Intel kernel compile and link', 'thin x86_64 Mach-O and module entry metadata',
                                  'ad-hoc signature verification', 'native report decoder self-test',
                                  'native live enumeration without a loaded probe'],
-                  'hardware_status': 'Laptop PCI visibility confirmed; probe attachment awaits the experimental boot.'}
+                  'hardware_status': 'Laptop PCI attachment and configuration/resource snapshot confirmed; MMIO and GPU initialization remain unverified.'}
         payload['BUILD.json'] = (json.dumps(record, indent=2, sort_keys=True) + '\n').encode()
         payload['SHA256SUMS'] = ''.join(digest(data) + '  ' + name + '\n' for name, data in sorted(payload.items())).encode('ascii')
         pending = work / archive.name

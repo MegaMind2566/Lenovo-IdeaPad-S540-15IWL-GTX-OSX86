@@ -2,7 +2,7 @@
 
 Reviewed on October 15, 2026. Target: Lenovo IdeaPad S540-15IWL GTX, Intel macOS Tahoe, NVIDIA GTX 1650 Max-Q, PCI `10DE:1F91`.
 
-**Status:** source assessment and PCI visibility are complete. The [native read-only PCI inventory](../../packages/nvidia-pci/README.md) now finds `10DE:1F91` as an active `IOPCIDevice`, with `-wegnoegpu` absent. The [bounded Darwin PCI attachment prototype](../../packages/nvidia-transport/README.md) is implemented; attachment on the laptop has not been validated. GPU initialization, execution and graphics acceleration remain unimplemented. Intel graphics remains the operating display configuration.
+**Status:** source assessment, PCI visibility and bounded kernel attachment are complete. The [Darwin PCI attachment prototype](../../packages/nvidia-transport/README.md) attaches to the laptop's verified `10DE:1F91` provider, reads fixed PCI configuration and publishes assigned resource descriptors. The next gate is a read-only MMIO assessment; MMIO access, GPU initialization, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
 
 ## Source baseline
 
@@ -63,18 +63,36 @@ This completes the PCI visibility milestone. It establishes published identity a
 
 ## Current implementation milestone: bounded PCI transport
 
-The prototype is limited to IOKit attachment to this exact PCI device, configuration-space identity reads, and inspection of already-assigned resource descriptors. It defines attachment, refusal and teardown behavior without PCI configuration writes, BAR reassignment, MMIO mapping or reads, DMA, interrupts, ACPI invocation or firmware loading. Its build and fixture results remain separate from a successful attachment on this laptop, which has not yet been observed. The kernel SDK is pinned to Acidanthera commit `3f750085caa17ec3a7880f11c11bf4f48cd6a164`.
+The prototype is limited to IOKit attachment to this exact PCI device, fixed configuration-space reads, and inspection of already-assigned resource descriptors. It defines attachment, refusal and teardown behavior without PCI configuration writes, BAR reassignment, MMIO mapping or reads, DMA, interrupts, ACPI invocation or firmware loading. Laptop attachment is now confirmed; the source teardown path has not been tested through runtime stop or unload. The kernel SDK is pinned to Acidanthera commit `3f750085caa17ec3a7880f11c11bf4f48cd6a164`.
 
 Resource inspection reads the provider's published `IODeviceMemory` array directly, with bounded type/tag checks. The convenience `getDeviceMemoryWithRegister` and `getDeviceMemoryWithIndex` calls are excluded: the inspected Apple implementation can call `setTunnelL1Enable`, which does not belong in this observational milestone.
 
-The [native Intel build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38660491862) at commit `d782b96f1d83a88ab4db84a1d38145fc9c7de260` passed kernel compilation/linkage, module metadata and signature checks, the production report decoder and the packaged launcher. CI deliberately did not load the kext. Its live `not_attached`, `complete=true` result covers an unloaded probe; laptop attachment is the next required result. The distributed ZIP SHA256 is `202e9cd550eb5cc8ba15088aff5a26ddcd96dda839f2750727350e0215a86f41`.
+The [native Intel build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38660491862) at commit `d782b96f1d83a88ab4db84a1d38145fc9c7de260` passed kernel compilation/linkage, module metadata and signature checks, the production report decoder and the packaged launcher. CI deliberately did not load the kext. Its live `not_attached`, `complete=true` result covers an unloaded probe and is separate from the subsequent successful laptop attachment. The distributed ZIP SHA256 is `202e9cd550eb5cc8ba15088aff5a26ddcd96dda839f2750727350e0215a86f41`.
 
-## Subsequent milestones
+### Confirmed laptop attachment
+
+The October 15 report from `nvidia-transport` 0.1.0 returns `attached`, `complete=true`, `wegnoegpu_present=false` and no warnings. It identifies the probe as `S540NvidiaPCIProbe` and independently verifies its actual `IOPCIDevice` provider: `10DE:1F91`, subsystem `17AA:3806`, revision `A1`, class `030000`. This establishes successful kernel attachment, fixed PCI configuration reads and already-assigned resource metadata.
+
+| BAR register | Assigned descriptor length |
+|---|---|
+| `0x10` | 16 MiB |
+| `0x14` | 256 MiB |
+| `0x1C` | 32 MiB |
+| `0x24` | 128 bytes |
+
+No descriptor is retained at `0x18` or `0x20`. Raw BAR type/width flags are absent from this snapshot, so the gaps are not diagnosed as missing resources. Descriptor lengths are not usable VRAM measurements or evidence of mapped register access. The probe did not change PCI command bits or enable bus mastering/DMA; observed configuration values must not be attributed to such changes. Raw reports, resource addresses and private configurations remain excluded from the repository.
+
+## Next gate: read-only MMIO assessment
+
+The gate under review is exactly one 32-bit read of [`NV_PMC_BOOT_0`](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/common/inc/swref/published/nv_ref.h#L102-L131), documented read-only at BAR0 offset zero; the candidate is a read-only uncached four-byte subset mapping, subject to VM page granularity. Implementation must first verify the exact provider identity, BAR0 memory type/alignment/length, already-enabled memory decoding and D0 established without power-management writes, or refuse; no MMIO implementation, register-read result, polling, timeout or GSP startup is claimed.
+
+## Milestone status and remaining work
 
 | Milestone | Required result |
 |---|---|
-| Darwin PCI attachment | Native build, exact-device attachment/teardown, bounded configuration reads and already-assigned resource descriptors; laptop result pending |
-| Further hardware transport | Separate reviewed work for MMIO, DMA and interrupts, with bounded access and failure handling |
+| Darwin PCI attachment | Confirmed laptop attachment, fixed configuration reads and assigned resource metadata; runtime stop/unload remains untested |
+| Read-only MMIO | Assessment first, then a separately reviewed bounded mapped-register read; not implemented |
+| Further hardware transport | Separate reviewed work for DMA and interrupts, with bounded access and failure handling |
 | GPU and GSP startup | Matching, hashed firmware; observed initialization with timeouts and cleanup; no success inferred from PCI enumeration |
 | Minimal execution | One deterministic command with a checked result and recoverable failure path |
 | Graphics userspace | An explicit kernel/application ABI and a selected rendering or compute target |

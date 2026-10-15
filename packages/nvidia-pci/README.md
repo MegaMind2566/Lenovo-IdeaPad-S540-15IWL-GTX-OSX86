@@ -31,7 +31,7 @@ The latest reports return `found`, `complete=true`, `service_visible=true`, `weg
 
 The earlier report returned `not_visible` with `-wegnoegpu` present. The automatic visibility helper stopped before making changes, and the argument was subsequently removed manually. The later inventory completes the PCI visibility milestone without establishing the full current EFI contents, electrical power state, configuration-space access, MMIO access or GPU initialization. Raw reports remain private.
 
-The next bounded prototype is being implemented for IOKit PCI attachment, configuration-space identity reads and already-assigned resource descriptors. It has not yet attached successfully on this laptop. MMIO, DMA, GSP and acceleration belong to later milestones.
+The separate [PCI attachment prototype](../nvidia-transport/README.md) has now returned `attached`, `complete=true` and no warnings on the laptop, with its actual provider identity verified. That subsequent result confirms fixed configuration-space reads and already-assigned resource descriptors. Read-only MMIO assessment is next; MMIO, DMA, GSP and acceleration remain unimplemented, and runtime stop/unload remains untested.
 
 ## Build and scope
 
