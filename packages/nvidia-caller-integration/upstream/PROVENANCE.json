@@ -1,0 +1,209 @@
+{
+  "format": 1,
+  "repository": "NVIDIA/open-gpu-kernel-modules",
+  "release": "615.78.08",
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "upstream_files": [
+    {
+      "path": "../../nvidia-os-adapter/upstream/include/nvtypes.h",
+      "source_path": "src/common/sdk/nvidia/inc/nvtypes.h",
+      "git_blob_sha1": "cb6d906a34cf6ace3d852657cf8dde4a587d7721",
+      "sha256": "da23dbc28805c390d62338dba5603eb12b2e94c8aaf873c1c42c1a5f10f26b79",
+      "bytes": 30226,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "../../nvidia-os-adapter/upstream/include/cpuopsys.h",
+      "source_path": "src/common/sdk/nvidia/inc/cpuopsys.h",
+      "git_blob_sha1": "6467b396a696a47fa71d4ad41e32d27f344fcdce",
+      "sha256": "329ab764372bace3e1445315bb7a3766d4f60aacb8523ac3e3c760c79358f4fb",
+      "bytes": 11713,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "../../nvidia-os-adapter/upstream/include/nvstatus.h",
+      "source_path": "src/common/sdk/nvidia/inc/nvstatus.h",
+      "git_blob_sha1": "4f5284db2b1e6af1c2c0c85bc39dfc14daccc9fd",
+      "sha256": "e8267172a1f7a56420d612c6734b3554b9ff6a3d33fdda21b1371ff4ce4b8675",
+      "bytes": 4565,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "../../nvidia-os-adapter/upstream/include/nvstatuscodes.h",
+      "source_path": "src/common/sdk/nvidia/inc/nvstatuscodes.h",
+      "git_blob_sha1": "430eed77a03f2f15bf058d3c49931a9f89ace08e",
+      "sha256": "4a9a39b51862d21cfa446414135386616a4a4914dd34dc83f98099295fea7b56",
+      "bytes": 19637,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "../../nvidia-os-adapter/upstream/include/nv-kernel-interface-api.h",
+      "source_path": "kernel-open/common/inc/nv-kernel-interface-api.h",
+      "git_blob_sha1": "183f9b4312eb0913c0a0a97e4db1f62a50b442c5",
+      "sha256": "1cf34c1dcd1abf535fb27387145374972a43ec9cd6f6c9ef927777431bda3cc4",
+      "bytes": 1810,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "../../nvidia-os-adapter/upstream/reference/os-interface.h",
+      "source_path": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "git_blob_sha1": "03de89a28a2611bca2fb2a3d85c7f617a681a20a",
+      "sha256": "bd281e48ff06b481033fc2fb29a891710a2b4d66fb009cc2b752ab6e90f2113b",
+      "bytes": 17357,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "../../nvidia-os-adapter/upstream/reference/memory_unix_kernel_os.c",
+      "source_path": "src/nvidia/src/libraries/nvport/memory/memory_unix_kernel_os.c",
+      "git_blob_sha1": "06e5504a6556d2107d41cf614063737a92ad57c0",
+      "sha256": "c32de8ee6199767bb8c99dc529eec1c9aa73c2e6366634639a803ab79962372c",
+      "bytes": 4659,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "../../nvidia-os-adapter/upstream/reference/memory.h",
+      "source_path": "src/nvidia/inc/libraries/nvport/memory.h",
+      "git_blob_sha1": "595eafee880dccd54ca2f382fb77afc918793e1d",
+      "sha256": "a700efeb580141a76680fd2def6622759759232e6b0e9a6e5e6a0cb863b41d90",
+      "bytes": 38701,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "../../nvidia-os-adapter/upstream/reference/debug.h",
+      "source_path": "src/nvidia/inc/libraries/nvport/debug.h",
+      "git_blob_sha1": "c2929200e628022149e6c2fb1581469946ffe05a",
+      "sha256": "864a4080c67ab9037a300feb6d4a998a9e38df12db130acf5a292234351b2df5",
+      "bytes": 11601,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "reference/memory_tracking.h",
+      "source_path": "src/nvidia/inc/libraries/nvport/inline/memory_tracking.h",
+      "git_blob_sha1": "37f11e95b6d6d4a02eefe1d66a0567a6baaed070",
+      "sha256": "9732d626c2387c84dc6832ae640a986baac40361e018881b577db646e9cbb2eb",
+      "bytes": 15291,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "reference/sync_unix_kernel_os.c",
+      "source_path": "src/nvidia/src/libraries/nvport/sync/sync_unix_kernel_os.c",
+      "git_blob_sha1": "9a545779dda38f261977a0da6b130ab62cf67f41",
+      "sha256": "251ec5da384f6cddd51c3ebbef09fde118734687c83955c3a085652bcce53372",
+      "bytes": 6926,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "reference/sync_unix_kernel_os_def.h",
+      "source_path": "src/nvidia/src/libraries/nvport/sync/inc/sync_unix_kernel_os_def.h",
+      "git_blob_sha1": "b12c4ad3506d39de835d3bce5e45bb8c8eeafe70",
+      "sha256": "889cc48b45b592bd8052add7b98a07b689ee508efaf32533cbfe780cf1505fba",
+      "bytes": 1739,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "reference/sync.h",
+      "source_path": "src/nvidia/inc/libraries/nvport/sync.h",
+      "git_blob_sha1": "29e472dedf677501e11c22cb043431750c9f8f30",
+      "sha256": "e5fb2dba02d14f3e8a3ca73c56dcf9c5da3c8ca8815c2aee3118134d13801694",
+      "bytes": 28760,
+      "modified": false,
+      "license": "MIT"
+    }
+  ],
+  "adapted_caller": {
+    "path": "nvport_allocator_callers.c",
+    "source_reference": "../../nvidia-os-adapter/upstream/reference/memory_unix_kernel_os.c",
+    "source_lines": [
+      43,
+      78
+    ],
+    "functions": [
+      "_portMemAllocPagedUntracked",
+      "_portMemAllocNonPagedUntracked",
+      "_portMemFreeUntracked"
+    ],
+    "changes": {},
+    "sha256": "e9ae56945711169d86e4c022d36af7df4a5615b3eb0a561b6df32c83b49aef4b",
+    "source_body_sha256": "3d21c4f43b60f81d2787cb5c694ff61dc0a62e429c1104526fa683f00dcfbd33",
+    "complete_upstream_translation_unit": false,
+    "assertion_profile": "upstream-release-only",
+    "checked_profile_supported": false
+  },
+  "interface": {
+    "path": "nvport_allocator_callers.h",
+    "declarations_reference": "../../nvidia-os-adapter/upstream/reference/os-interface.h",
+    "caller_declarations_reference": "reference/memory_tracking.h",
+    "hooks": [
+      "os_alloc_mem",
+      "os_free_mem"
+    ],
+    "length_abi": {
+      "NvLength_bits": 64,
+      "os_hook_length_bits": 64
+    },
+    "sha256": "417a060ca519c89c45c5b0013e3822481c4b04dd06c247548ac48d03e4cecd1c"
+  },
+  "scope": {
+    "allocation": "three untracked caller functions only",
+    "tracked_allocator": false,
+    "global_allocator": false,
+    "user_copy": false,
+    "mmio": false,
+    "dma": false,
+    "resource_manager": false,
+    "gpu_initialization": false,
+    "mutex": "five caller-owned mutex operations only",
+    "mutex_create": false,
+    "spinlock": false,
+    "semaphore": false,
+    "rwlock": false
+  },
+  "adapted_mutex_caller": {
+    "path": "nvport_mutex_callers.c",
+    "source_reference": "reference/sync_unix_kernel_os.c",
+    "source_lines": [
+      95,
+      158
+    ],
+    "functions": [
+      "portSyncMutexInitialize",
+      "portSyncMutexDestroy",
+      "portSyncMutexAcquire",
+      "portSyncMutexAcquireConditional",
+      "portSyncMutexRelease"
+    ],
+    "changes": {},
+    "sha256": "0c51555c3785287460216dfa0e9086ab8933a650c390f79742854cb8ff51f3d1",
+    "source_body_sha256": "c3663b3d2d0ac065b9178a7e8180726744a8146be70b0a2f3a69290372d9a7b8",
+    "complete_upstream_translation_unit": false,
+    "assertion_profile": "upstream-release-checked-assertions-with-fatal-mandatory-assertions",
+    "checked_profile_supported": false,
+    "tracked_allocator_free": "fatal unsupported contract"
+  },
+  "mutex_interface": {
+    "path": "nvport_mutex_callers.h",
+    "declarations_reference": "../../nvidia-os-adapter/upstream/reference/os-interface.h",
+    "caller_declarations_reference": "reference/sync.h",
+    "structure_reference": "reference/sync_unix_kernel_os_def.h",
+    "hooks": [
+      "os_alloc_mutex",
+      "os_free_mutex",
+      "os_acquire_mutex",
+      "os_cond_acquire_mutex",
+      "os_release_mutex"
+    ],
+    "sha256": "d2278cfe8fbfd9aeb8d500145cf73a2f4caef079bb2d051d61e7123ae778f363"
+  }
+}

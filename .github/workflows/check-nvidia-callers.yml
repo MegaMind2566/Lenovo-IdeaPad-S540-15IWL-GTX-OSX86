@@ -1,0 +1,43 @@
+name: Check NVIDIA NVPort caller integration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/nvidia-caller-integration/src/**'
+      - 'packages/nvidia-caller-integration/tests/**'
+      - 'packages/nvidia-caller-integration/upstream/**'
+      - 'packages/nvidia-os-adapter/upstream/include/**'
+      - 'packages/nvidia-os-adapter/upstream/reference/**'
+      - 'builders/check_nvidia_callers.py'
+      - 'tests/test_nvidia_caller_provenance.py'
+      - '.github/workflows/check-nvidia-callers.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  callers:
+    runs-on: macos-15-intel
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: acidanthera/MacKernelSDK
+          ref: 3f750085caa17ec3a7880f11c11bf4f48cd6a164
+          path: build-src/MacKernelSDK
+          persist-credentials: false
+      - name: Check original callers, bounded reserve, mutex semantics and kernel linkage
+        run: python3 builders/check_nvidia_callers.py --kernel-sdk build-src/MacKernelSDK --output-dir build/nvidia-callers
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: NVIDIA-caller-targeted-checks
+          path: |
+            build/nvidia-callers/caller-checks.json
+            build/nvidia-callers/caller-checks.json.sha256
+          if-no-files-found: error
+          retention-days: 30
