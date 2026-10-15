@@ -17,6 +17,13 @@ constexpr NvU32 kMaximumRomChunk = 64U * 1024U;
 bool decodeChassis(const void *table, NvU64 bytes, bool &notebook);
 bool decodeFadt(const void *table, NvU64 bytes, bool &lowPowerS0);
 bool romRequestValid(NvU32 offset, NvU32 bytes);
+struct ConsoleOwnership {
+    NvU32 frames, intelOwners, targetOwners, unknownOwners;
+    bool overflow;
+};
+void observeConsoleOwner(ConsoleOwnership &, bool ownerKnown, NvU32 vendor,
+                         NvU32 classCode, bool boundTarget);
+bool consoleExcludesTarget(const ConsoleOwnership &, bool complete);
 
 struct Evidence {
     NvU32 known;

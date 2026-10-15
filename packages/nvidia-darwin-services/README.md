@@ -65,8 +65,10 @@ cancellation. POSIX tests establish functional behavior, not Darwin interrupt or
 scheduler behavior. The kernel source is compiled separately against the pinned
 SDK and compared with an independent SDK import reference.
 
-The native suite currently performs 166 assertions, including 17 allocation
-failure paths. The production lifecycle contains 37 checks. Eight provenance
+The native suite currently performs 167 assertions, including 17 allocation
+failure paths and one isolated fatal contract-violation check. An unbound global
+queue has no measurable flush state: its scalar query raises the existing
+contract violation instead of returning a fabricated false result. The production lifecycle contains 37 checks. Eight provenance
 checks verify original ABI signatures, reference bytes and the source-backed
 CPU SPI. Native macOS execution is established by the macOS build workflow;
 local Linux validation alone does not establish that result.

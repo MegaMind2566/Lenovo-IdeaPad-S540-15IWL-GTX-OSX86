@@ -14,6 +14,7 @@ on:
       - 'builders/check_nvidia_global_crypto.py'
       - 'builders/check_nvidia_execution.py'
       - 'builders/nvidia_execution_commands.py'
+      - 'builders/nvidia_execution_closure.py'
       - 'builders/build_nvidia_execution.py'
       - '.github/workflows/check-nvidia-execution-development.yml'
   workflow_dispatch:
@@ -43,14 +44,18 @@ jobs:
           persist-credentials: false
       - name: Verify compiler diagnostics and native kernel link
         run: python3 packages/nvidia-global-rm/tests/test_compile_diagnostics.py
+      - name: Verify checked source isolation and complete execution closure controls
+        run: |
+          python3 packages/nvidia-global-rm/tests/test_checked_source.py
+          python3 packages/nvidia-global-rm/tests/test_execution_closure.py
       - name: Check native Darwin services before full RM compilation
         run: >-
           python3 builders/check_nvidia_execution.py --services-preflight
           --output-dir build/nvidia-execution/services-preflight
-      - name: Compile every original RM unit in its isolated Darwin namespace
+      - name: Compile the original baseline and checked RM source and header profiles
         run: >-
           python3 builders/compile_nvidia_global_rm.py
-          --upstream build-src/nvidia-upstream --generate-namespace
+          --upstream build-src/nvidia-upstream --generate-namespace --checked-cleanup-overlays
           --output-dir build/nvidia-execution/original-rm
       - name: Install the pinned bounded archive decoder in a private environment
         shell: bash
@@ -79,6 +84,7 @@ jobs:
           --kernel-sdk build-src/MacKernelSDK
           --assets-dir build/nvidia-execution/firmware
           --compiled-directory build/nvidia-execution/original-rm
+          --checked-cleanup-overlays
           --output-dir build/nvidia-execution/kernel-checks
       - name: Record the unresolved production milestone explicitly
         shell: bash
@@ -89,6 +95,11 @@ jobs:
           from pathlib import Path
           record = json.loads(Path('build/nvidia-execution/kernel-checks/execution-kernel-build.json').read_text())
           assert record['production_candidate_allowed'] is False
+          assert record['checked_cleanup_overlays'] is True
+          assert record['original_header_profile'] == 'checked-cleanup-development'
+          assert record['original_rm']['source_profile'] == 'checked-cleanup-development'
+          assert record['execution_closure']['link_control_status'] == 'passed'
+          assert record['execution_closure']['executable'] is False
           print('Development validation only: full adapter/GSP runtime closure remains unresolved.')
           print('No candidate ZIP, firmware upload, GPU initialization, or kernel runtime success is produced by this workflow.')
           PY
@@ -99,6 +110,10 @@ jobs:
           path: |
             build/nvidia-execution/original-rm/darwin-compile.json
             build/nvidia-execution/original-rm/dependency-controls.json
+            build/nvidia-execution/original-rm/checked-darwin-compile.json
+            build/nvidia-execution/original-rm/checked-source-manifest.json
+            build/nvidia-execution/original-rm/checked-namespaced/darwin-compile.json
+            build/nvidia-execution/original-rm/checked-namespaced/dependency-controls.json
             build/nvidia-execution/original-rm/original/darwin-compile.json
             build/nvidia-execution/original-rm/original/contract/SOURCE-CONTRACT.json
             build/nvidia-execution/original-rm/namespaced/darwin-compile.json

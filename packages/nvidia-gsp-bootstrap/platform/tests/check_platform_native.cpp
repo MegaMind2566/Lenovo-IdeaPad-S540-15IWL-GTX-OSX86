@@ -80,6 +80,39 @@ int main() {
     expect(!romRequestValid(kMaximumRomBytes - 1, 2));
     expect(!romRequestValid(~NvU32(0), ~NvU32(0)));
 
+    ConsoleOwnership console{};
+    expect(!consoleExcludesTarget(console, true));
+    observeConsoleOwner(console, true, 0x8086, 0x030000, false);
+    expect(consoleExcludesTarget(console, true));
+    expect(!consoleExcludesTarget(console, false));
+    auto uncertain = console;
+    observeConsoleOwner(uncertain, false, 0, 0, false);
+    expect(!consoleExcludesTarget(uncertain, true));
+    auto targetConsole = console;
+    observeConsoleOwner(targetConsole, true, 0x10de, 0x030000, true);
+    expect(!consoleExcludesTarget(targetConsole, true));
+    auto otherConsole = console;
+    observeConsoleOwner(otherConsole, true, 0x1002, 0x030000, false);
+    expect(consoleExcludesTarget(otherConsole, true));
+    auto wrongClass = console;
+    observeConsoleOwner(wrongClass, true, 0x8086, 0x060000, false);
+    expect(!consoleExcludesTarget(wrongClass, true));
+    ConsoleOwnership onlyOther{};
+    observeConsoleOwner(onlyOther, true, 0x1002, 0x030000, false);
+    expect(!consoleExcludesTarget(onlyOther, true));
+    ConsoleOwnership targetIntel{};
+    observeConsoleOwner(targetIntel, true, 0x8086, 0x030000, true);
+    expect(!consoleExcludesTarget(targetIntel, true));
+    auto overflowConsole = console;
+    overflowConsole.frames = ~NvU32(0);
+    observeConsoleOwner(overflowConsole, true, 0x8086, 0x030000, false);
+    expect(overflowConsole.overflow && !consoleExcludesTarget(overflowConsole, true));
+    auto inactiveEnumeration = console;
+    expect(!consoleExcludesTarget(inactiveEnumeration, false));
+    auto foreignNvidia = console;
+    observeConsoleOwner(foreignNvidia, true, 0x10de, 0x030000, false);
+    expect(consoleExcludesTarget(foreignNvidia, true));
+
     // Deterministic malformed-table exploration exercises bounded traversal
     // under the same address/undefined sanitizers as the production decoders.
     NvU32 random = 0x619a0421;

@@ -68,9 +68,9 @@ def services_case(output: Path, *, host_control: bool = False) -> dict:
     return native_case(output, 'darwin-services', [
         SERVICES / ('src/S540NvidiaDarwin' + name + '.cpp') for name in SERVICE_NAMES],
         SERVICES / 'tests/check_darwin_services_native.cpp',
-        {'component': 'nvidia-darwin-services', 'checks': 166,
+        {'component': 'nvidia-darwin-services', 'checks': 167,
          'production_checks': 37, 'mutex_updates': 12000,
-         'concurrent_work_items': 4000, 'fault_paths': 17, 'cleanup': True},
+         'concurrent_work_items': 4000, 'fault_paths': 18, 'cleanup': True},
         host_control=host_control)
 
 
@@ -90,9 +90,11 @@ def services_preflight(output: Path, *, host_control: bool = False) -> dict:
     return progress.record
 
 
-def timer_case(output: Path, upstream: Path, namespace: Path,
-               *, host_control: bool) -> dict:
-    """Only the RM callbacks/host allocator are fixtures; the timer is real code."""
+def original_header_case(output: Path, name: str, upstream: Path, namespace: Path,
+                         c_sources: list[Path], cpp_sources: list[Path], expected: dict,
+                         *, host_control: bool, dead_strip: bool = False,
+                         extra_c_flags: list[str] | None = None) -> dict:
+    """Compile actual original-header bridges with explicit userspace fixtures."""
     cc, cxx = crypto.compiler_pair(host_control)
     target = [] if host_control else ['-arch', 'x86_64', '-mmacosx-version-min=15.0']
     c_compiler = Path(cc[0]) if host_control else Path('/usr/bin/clang')
@@ -110,39 +112,63 @@ def timer_case(output: Path, upstream: Path, namespace: Path,
     for label, instrumentation in (('native', []), ('sanitized', [
             '-fsanitize=address,undefined,function', '-fno-sanitize-recover=all',
             '-fno-omit-frame-pointer'])):
-        work = output / ('gsp-timers-' + label)
+        work = output / (name + '-' + label)
         work.mkdir(parents=True, exist_ok=True)
         objects = []
-        for source in (GSP / 'timers/S540NvidiaGspTimersOriginal.c',
-                       GSP / 'timers/tests/check_gsp_timers_native.c'):
+        for source in c_sources:
             obj = work / (source.stem + '.o')
-            commands.run(*cc, *bridge, '-O1', '-g', *instrumentation,
+            commands.run(*cc, *bridge, '-O1', '-g', *(extra_c_flags or []),
+                          *(['-ffunction-sections', '-fdata-sections'] if dead_strip else []),
+                          *instrumentation,
                           '-c', str(source), '-o', str(obj),
                           diagnostic_log=work / (source.stem + '-compile.log'))
             crypto.verify_binary(obj, 1, host_control)
             objects.append(str(obj))
-        for name in SERVICE_NAMES:
-            source = SERVICES / ('src/S540NvidiaDarwin' + name + '.cpp')
+        for source in cpp_sources:
             obj = work / (source.stem + '.o')
-            commands.run(*cxx, *common, '-std=c++17', *instrumentation,
+            commands.run(*cxx, *common, '-std=c++17',
+                          *(['-ffunction-sections', '-fdata-sections'] if dead_strip else []),
+                          *instrumentation,
                           '-c', str(source), '-o', str(obj),
                           diagnostic_log=work / (source.stem + '-compile.log'))
             crypto.verify_binary(obj, 1, host_control)
             objects.append(str(obj))
         binary = work / 'check'
-        commands.run(*cxx, *common, *instrumentation, *objects, '-o', str(binary),
+        commands.run(*cxx, *common, *instrumentation, *objects,
+                     *(['-Wl,--gc-sections' if host_control else '-Wl,-dead_strip'] if dead_strip else []),
+                     '-o', str(binary),
                      diagnostic_log=work / 'link.log')
         crypto.verify_binary(binary, 2, host_control)
         record = json.loads(commands.run(str(binary), diagnostic_log=work / 'run.log').stdout)
-        expect(record, {'component': 'nvidia-gsp-timers', 'format': 1,
-                       'status': 'passed', 'checks': 34, 'failures': 0,
-                       'rc_callbacks': 1, 'nano_callbacks': 2, 'callback_fixture': True,
-                       'stack_abi_verified': True, 'quarantine_retention_verified': True,
-                       'cleanup': True, 'execution': 'native-user-space',
-                       'kernel_execution': 'not_tested', 'gpu_access': False},
-               'gsp-timers/' + label)
+        expect(record, {'format': 1, 'status': 'passed', 'failures': 0,
+                       'execution': 'native-user-space', 'kernel_execution': 'not_tested',
+                       'gpu_access': False, **expected}, name + '/' + label)
         results[label] = record
     return results
+
+
+def timer_case(output: Path, upstream: Path, namespace: Path, *, host_control: bool) -> dict:
+    return original_header_case(output, 'gsp-timers', upstream, namespace, [
+        GSP / 'timers/S540NvidiaGspTimersOriginal.c',
+        GSP / 'timers/tests/check_gsp_timers_native.c'], [
+        SERVICES / ('src/S540NvidiaDarwin' + name + '.cpp') for name in SERVICE_NAMES],
+        {'component': 'nvidia-gsp-timers', 'checks': 34,
+         'rc_callbacks': 1, 'nano_callbacks': 2, 'callback_fixture': True,
+         'stack_abi_verified': True, 'quarantine_retention_verified': True, 'cleanup': True},
+        host_control=host_control)
+
+
+def context_metadata_case(output: Path, upstream: Path, namespace: Path, *, host_control: bool) -> dict:
+    return original_header_case(output, 'gsp-context-metadata', upstream, namespace, [
+        GSP / 'src/S540NvidiaGspContext.c',
+        GSP / 'tests/check_context_metadata_native.c'], [
+        *(SERVICES / ('src/S540NvidiaDarwin' + name + '.cpp') for name in SERVICE_NAMES),
+        GLOBAL / 'src/S540NvidiaGlobalRmHost.cpp', GLOBAL / 'src/S540NvidiaGlobalRmFormat.cpp'],
+        {'component': 'nvidia-gsp-context-metadata', 'checks': 16, 'refusal_cases': 4,
+         'provider_facts_fixture': True, 'original_rm_executed': False,
+         'ownership_refusals_verified': True, 'cleanup': True},
+        host_control=host_control, dead_strip=True,
+        extra_c_flags=['-std=gnu11', '-Werror', '-Wno-unused-parameter'])
 
 
 @commands.logged(report='execution-checks.json')
@@ -197,12 +223,14 @@ def check(output: Path, assets: Path, *, upstream: Path | None = None,
         GSP / 'platform/S540NvidiaPlatformParsers.cpp',
         GSP / 'platform/S540NvidiaGspPlatform.cpp'],
         GSP / 'platform/tests/check_platform_native.cpp',
-        {'component': 'nvidia-gsp-platform-parsers', 'checks': 50,
+        {'component': 'nvidia-gsp-platform-parsers', 'checks': 62,
          'malformed_fixtures': 2048, 'hardware_queried': False},
         host_control=host_control))
     if upstream is None or namespace is None:
-        raise ValueError('The exact upstream tree and generated namespace are required for timer ABI checks.')
+        raise ValueError('The exact upstream tree and generated namespace are required for original-header ABI checks.')
     progress.component('gsp_timers', lambda: timer_case(output, upstream, namespace, host_control=host_control))
+    progress.component('gsp_context_metadata', lambda: context_metadata_case(
+        output, upstream, namespace, host_control=host_control))
     inputs = [path for package in (SERVICES, DEVICE, GLOBAL, GSP)
               for path in package.rglob('*') if path.is_file()
               and '__pycache__' not in path.parts and path.suffix != '.pyc']
@@ -226,7 +254,7 @@ def main() -> int:
     parser.add_argument('--assets-dir', type=Path)
     parser.add_argument('--upstream', type=Path)
     parser.add_argument('--namespace', type=Path,
-                        help='Generated full RM header for the explicit timer callback fixture.')
+                        help='Generated full RM header for explicit original-header CPU fixtures.')
     parser.add_argument('--host-control', action='store_true',
                         help='Explicit Linux ELF controls; never authoritative Darwin execution.')
     parser.add_argument('--services-preflight', action='store_true',

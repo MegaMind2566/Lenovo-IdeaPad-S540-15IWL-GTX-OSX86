@@ -140,7 +140,7 @@ extern "C" NV_STATUS NV_API_CALL s540Darwin_os_flush_work_queue(os_work_queue *a
 }
 extern "C" NvBool NV_API_CALL s540Darwin_os_is_queue_flush_ongoing(os_work_queue *argument) {
     auto *queue = resolve(argument);
-    if (queue == nullptr) return NV_FALSE;
+    if (queue == nullptr) violation("workqueue flush state requires a bound queue");
     const auto token = queue->guard.lock();
     const bool flushing = queue->unloadFlushes != 0;
     queue->guard.unlock(token);

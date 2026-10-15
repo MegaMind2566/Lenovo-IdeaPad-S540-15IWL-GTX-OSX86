@@ -1,0 +1,71 @@
+{
+  "format": 1,
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "scope": "Two additional original imports retained by the actual compiled coordinator roots. The selected 244-contract inventory remains unchanged.",
+  "source_sha256": {
+    "src/nvidia/arch/nvalloc/unix/include/nv.h": "02ce4b371e0a8dd26f62a320e88c8382dcf31a21b727503a66abcaea9eecf09b",
+    "src/nvidia/arch/nvalloc/unix/include/os-interface.h": "bd281e48ff06b481033fc2fb29a891710a2b4d66fb009cc2b752ab6e90f2113b",
+    "kernel-open/nvidia/os-interface.c": "0c8fe2749ec4ee12f1dbbd884cfbc8f1c8a7750903de7453b01c2f6b92e0f6d6"
+  },
+  "reference_copies": [
+    {
+      "path": "packages/nvidia-darwin-services/reference/os-interface.h",
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h"
+    },
+    {
+      "path": "packages/nvidia-darwin-services/reference/os-interface.c",
+      "source": "kernel-open/nvidia/os-interface.c"
+    }
+  ],
+  "contracts": [
+    {
+      "symbol": "nv_requires_dma_remap",
+      "namespace_symbol": "s540Global_nv_requires_dma_remap",
+      "kind": "FunctionDecl",
+      "type": "NvBool (nv_state_t *)",
+      "return_type": "NvBool",
+      "parameters": [{"name": "p0", "type": "nv_state_t *"}],
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "line": 1035,
+      "declaration": "NvBool NV_API_CALL nv_requires_dma_remap(nv_state_t *);",
+      "declaration_anchor": "NvBool     NV_API_CALL  nv_requires_dma_remap    (nv_state_t *);",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "implementation_status": "missing-operational-backend",
+      "implementation_requirement": "An actual bound-device DMA-remapping policy is required. No Boolean is inferred from absent or unresolved mapper metadata."
+    },
+    {
+      "symbol": "os_is_queue_flush_ongoing",
+      "namespace_symbol": "s540Global_os_is_queue_flush_ongoing",
+      "kind": "FunctionDecl",
+      "type": "NvBool (struct os_work_queue *)",
+      "return_type": "NvBool",
+      "parameters": [{"name": "p0", "type": "struct os_work_queue *"}],
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "line": 140,
+      "declaration": "NvBool NV_API_CALL os_is_queue_flush_ongoing(struct os_work_queue *);",
+      "declaration_anchor": "NvBool      NV_API_CALL  os_is_queue_flush_ongoing        (struct os_work_queue *);",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "implementation_status": "provided-guarded-queue-state",
+      "admission_requirement": "A real device context/global work queue must be bound before this callback is admitted. An unbound queue triggers the existing contract-violation path; it cannot produce a no-flush scalar result.",
+      "original_implementation": {
+        "source": "kernel-open/nvidia/os-interface.c",
+        "line": 1338,
+        "anchor": "NvBool NV_API_CALL os_is_queue_flush_ongoing(struct os_work_queue *queue)",
+        "state_anchor": "    return kthread->is_unload_flush_ongoing;"
+      },
+      "project_implementation": {
+        "bridge": "packages/nvidia-global-rm/src/S540NvidiaGlobalRmOs.c",
+        "bridge_anchor": "STATUS_BRIDGE(os_is_queue_flush_ongoing, NvBool, (struct os_work_queue *p), (p), CALL_WORK)",
+        "backend": "packages/nvidia-darwin-services/src/S540NvidiaDarwinWork.cpp",
+        "backend_anchors": [
+          "extern \"C\" NvBool NV_API_CALL s540Darwin_os_is_queue_flush_ongoing(os_work_queue *argument) {",
+          "    if (queue == nullptr) violation(\"workqueue flush state requires a bound queue\");",
+          "    const bool flushing = queue->unloadFlushes != 0;",
+          "    if (unload) ++queue->unloadFlushes;",
+          "    if (unload) --queue->unloadFlushes;"
+        ],
+        "semantics": "The namespaced original-ABI bridge delegates to the actual bound/global Darwin work queue and reads its guarded unload-flush counter."
+      }
+    }
+  ]
+}

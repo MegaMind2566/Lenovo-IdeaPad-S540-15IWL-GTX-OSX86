@@ -1,7 +1,9 @@
 {
   "format": 1,
   "implementation": "independent Darwin query and bounded parser adapter",
-  "hardware_actions": ["optional endpoint _ROM ACPI evaluation requested by original RM"],
+  "hardware_actions": [
+    "optional endpoint _ROM ACPI evaluation requested by original RM"
+  ],
   "public_output": "known bits, component presence, finite counters; no raw tables or resource addresses",
   "references": [
     {
@@ -42,10 +44,20 @@
       "anchor": "IOPCICopyACPIDevice: endpoint acpi-path property, fromPath and IOACPIPlatformDevice type check"
     },
     {
+      "repository": "apple-oss-distributions/IOGraphics",
+      "commit": "76285384ff0ce63965a21b8023bf6d7e447fcc19",
+      "path": "IOGraphicsFamily/IOFramebuffer.cpp",
+      "anchor": "IOFramebuffer::isConsoleDevice is a virtual query whose base implementation returns false; it does not establish global console uniqueness."
+    },
+    {
       "repository": "apple-oss-distributions/AppleSMBIOS",
       "commit": "9079d961c4dc99768745adc8208a24fda4678b4d",
       "path": "AppleSMBIOS.cpp",
-      "anchors": ["SMBIOS serializer property", "serializeSMBIOS", "SMBIOS-EPS publication"]
+      "anchors": [
+        "SMBIOS serializer property",
+        "serializeSMBIOS",
+        "SMBIOS-EPS publication"
+      ]
     },
     {
       "repository": "NVIDIA/open-gpu-kernel-modules",
@@ -69,6 +81,12 @@
     "missing_required_facts_refuse_startup": true,
     "rom_required_universally": false,
     "rom_window_bytes": 16777216,
-    "rom_request_maximum_bytes": 65536
+    "rom_request_maximum_bytes": 65536,
+    "console_enumeration_maximum_nodes": 4096,
+    "console_pci_ancestor_maximum_depth": 64,
+    "console_requires_positive_intel_owner": true,
+    "console_requires_bound_target_excluded": true,
+    "console_unknown_owner_or_incomplete_enumeration_refused": true,
+    "console_query_snapshot_not_power_ownership": true
   }
 }

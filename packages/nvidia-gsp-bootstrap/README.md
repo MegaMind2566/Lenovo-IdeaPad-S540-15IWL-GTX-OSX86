@@ -15,7 +15,7 @@ requirements, alongside compiled kernel stack policy and actual power ownership.
 | Component | Behavior |
 |---|---|
 | Firmware store | Verifies the actual approved firmware bytes, container and microcode directory; exposes bounded, generation-tagged leases to the exact original firmware ABI |
-| Original adapter context | Uses the pinned `nv_state_t`, independent aligned original RM stacks, real work queues, event locks and original adapter lifecycle calls |
+| Original adapter context | Uses the pinned `nv_state_t`, independent aligned original RM stacks, real work queues, event locks and original adapter lifecycle calls; binds exact screen and stream-ID metadata callbacks |
 | [Platform and ACPI](platform/README.md) | Collects explicit known platform facts, binds the published endpoint ACPI companion and implements bounded optional `_ROM` reads |
 | [Timers](timers/README.md) | Dispatches the original recovery and nano-timer callbacks through separately owned original stacks and synchronously drains them |
 | [GSP evidence](evidence/README.md) | Observes the original persistent success marker under original API and GPU locks, alongside complete adapter-state conditions |
@@ -86,6 +86,16 @@ corruption, owner/thread mismatches, unchanged outputs, lease exhaustion,
 stale handles and shutdown refusal. Fatal sanitizers are required. Typed C
 bridges are compiled against the pinned original headers for x86-64 Darwin;
 platform, timers and transport have separate CPU/resource tests.
+
+The context metadata harness exercises the exact original callback declarations
+with explicit provider facts. It uses the real tracked host allocator and Darwin
+service objects, verifies four refusal cases and complete normal cleanup, and
+traps any unexpected original RM callback. The screen callback returns the
+original non-console values only after a complete console-ownership query
+proves an Intel console and excludes the bound NVIDIA endpoint. The stream-ID
+callback copies the initialized original `nv_state_t` fields. Unknown owners or
+missing outputs preserve caller values and invalidate admission. This harness
+does not execute original adapter initialization or access the GPU.
 
 The complete original RM compiles in the local Darwin cross-target audit.
 That is compilation evidence, not execution in the Tahoe kernel. A private

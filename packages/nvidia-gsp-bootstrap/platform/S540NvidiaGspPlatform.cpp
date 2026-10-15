@@ -228,36 +228,39 @@ bool rootBridge(IOACPIPlatformDevice *device) {
     return found;
 }
 
-bool intelConsole() {
+bool targetConsoleExcluded(IOPCIDevice *target) {
     OSDictionary *match = IOService::serviceMatching("IOFramebuffer");
     OSIterator *iterator = match ? IOService::getMatchingServices(match) : nullptr;
     if (match) match->release();
     if (!iterator) return false;
-    bool found = false;
+    ConsoleOwnership ownership{};
+    bool complete = true;
     NvU32 count = 0;
     while (OSObject *object = iterator->getNextObject()) {
-        if (++count > kMaximumRegistryNodes) break;
+        if (++count > kMaximumRegistryNodes) { complete = false; break; }
         auto *framebuffer = OSDynamicCast(IOFramebuffer, object);
-        if (!framebuffer || framebuffer->isInactive() || !framebuffer->isConsoleDevice()) continue;
+        if (!framebuffer) { complete = false; continue; }
+        if (framebuffer->isInactive() || !framebuffer->isConsoleDevice()) continue;
+        bool ownerKnown = false, boundTarget = false;
+        NvU32 vendor = 0, classCode = 0;
         IORegistryEntry *entry = framebuffer;
         entry->retain();
         for (NvU32 depth = 0; entry && depth < 64; ++depth) {
             if (auto *pci = OSDynamicCast(IOPCIDevice, entry)) {
-                NvU32 vendor = 0, classCode = 0;
-                found = !pci->isInactive() && property32(pci, "vendor-id", vendor) &&
-                    property32(pci, "class-code", classCode) && vendor == 0x8086 &&
-                    (classCode & 0xff0000U) == 0x030000U;
+                ownerKnown = !pci->isInactive() && property32(pci, "vendor-id", vendor) &&
+                    property32(pci, "class-code", classCode);
+                boundTarget = pci == target;
                 break;
             }
             IORegistryEntry *parent = entry->copyParentEntry(gIOServicePlane);
             entry->release(); entry = parent;
         }
         if (entry) entry->release();
-        if (found) break;
+        observeConsoleOwner(ownership, ownerKnown, vendor, classCode, boundTarget);
     }
-    found = found && iterator->isValid();
+    complete = complete && iterator->isValid();
     iterator->release();
-    return found;
+    return consoleExcludesTarget(ownership, complete);
 }
 }
 
@@ -422,10 +425,15 @@ NV_STATUS S540NvidiaGspPlatform::Context::collectDeviceFacts(S540GspDeviceFacts 
     // verified x86 TU117 PCIe profile keeps that distinct NUMA feature NONE;
     // it does not describe or disable coherent CPU/PCIe host-memory DMA.
     facts.noCoherentGpuMemoryProfile = valid && facts.pciConfigurationRead && express && NVCPU_IS_X86_64;
-    facts.intelConsoleVerified = intelConsole();
+    // Exhaust every active console record before publishing either fact. A
+    // positive Intel record alone does not exclude a second NVIDIA console.
+    const bool consoleExcluded = targetConsoleExcluded(provider);
+    facts.intelConsoleVerified = consoleExcluded;
+    facts.nvidiaConsoleExcluded = consoleExcluded;
     *out = facts;
     return valid && facts.segmentKnown && facts.pciConfigurationRead && facts.barsVerified &&
-        facts.poweredD0 && facts.intelConsoleVerified && facts.noCoherentGpuMemoryProfile ? NV_OK : NV_ERR_NOT_READY;
+        facts.poweredD0 && facts.intelConsoleVerified && facts.nvidiaConsoleExcluded &&
+        facts.noCoherentGpuMemoryProfile ? NV_OK : NV_ERR_NOT_READY;
 }
 NV_STATUS S540NvidiaGspPlatform::Context::readRom(nv_state_t *state, const NvU32 *input, NvU32 *output) {
     if (!ordinary() || !impl_ || !state || !impl_->state || state != impl_->state || impl_->provider->isInactive())

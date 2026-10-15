@@ -19,8 +19,14 @@ struct S540GspContext {
     NvU64 ownerThread;
     void *allocationBase;
     NvBool globalQueueBound;
+    NvBool metadataBound;
+    NvBool intelConsoleVerified, nvidiaConsoleExcluded;
     S540GspContextSnapshot state;
 };
+// One S540 adapter belongs to the externally serialized operational session.
+// Keep this binding through original private-state destruction; every producer
+// must have quiesced before ContextDestroy releases it.
+static S540GspContext *metadataContext;
 static NvBool owner(S540GspContext *context)
 {
     NvU64 thread = 0;
@@ -56,7 +62,8 @@ NV_STATUS s540GspContextCreate(const S540GspDeviceFacts *facts, S540GspContext *
         facts->subsystemVendor != 0x17aa || facts->subsystemDevice != 0x3806 ||
         !facts->segmentKnown || !facts->pciConfigurationRead ||
         !facts->barsVerified || !facts->poweredD0 ||
-        !facts->intelConsoleVerified || !facts->noCoherentGpuMemoryProfile ||
+        !facts->intelConsoleVerified || !facts->nvidiaConsoleExcluded ||
+        !facts->noCoherentGpuMemoryProfile ||
         !s540Darwin_os_semaphore_may_sleep() ||
         s540Darwin_os_get_current_thread(&thread) != NV_OK || !thread || !cleanHost())
         return NV_ERR_NOT_SUPPORTED;
@@ -77,6 +84,8 @@ NV_STATUS s540GspContextCreate(const S540GspDeviceFacts *facts, S540GspContext *
     os_mem_set(context, 0, sizeof(*context));
     context->allocationBase = allocationBase;
     context->ownerThread = thread;
+    context->intelConsoleVerified = facts->intelConsoleVerified;
+    context->nvidiaConsoleExcluded = facts->nvidiaConsoleExcluded;
     context->state.created = NV_TRUE;
     for (i = 0; i != STACKS; ++i) {
         context->stacks[i].size = sizeof(context->stacks[i].stack);
@@ -123,6 +132,15 @@ NV_STATUS s540GspContextCreate(const S540GspDeviceFacts *facts, S540GspContext *
     status = s540DarwinBindGlobalWorkQueue(context->globalQueue);
     if (status != NV_OK) goto fail;
     context->globalQueueBound = NV_TRUE;
+    {
+        S540GspContext *expected = NULL;
+        if (!__atomic_compare_exchange_n(&metadataContext, &expected, context,
+                NV_FALSE, __ATOMIC_RELEASE, __ATOMIC_RELAXED)) {
+            status = NV_ERR_STATE_IN_USE;
+            goto fail;
+        }
+        context->metadataBound = NV_TRUE;
+    }
     *out = context;
     return NV_OK;
 fail:
@@ -217,6 +235,15 @@ NV_STATUS s540GspContextDestroy(S540GspContext *context, NvBool irqQuiescent,
         context->state.eventLocks = NV_FALSE;
     }
     if (!cleanHost()) { status = NV_ERR_INVALID_STATE; goto quarantine; }
+    if (context->metadataBound) {
+        S540GspContext *expected = context;
+        if (!__atomic_compare_exchange_n(&metadataContext, &expected, NULL,
+                NV_FALSE, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)) {
+            status = NV_ERR_INVALID_STATE;
+            goto quarantine;
+        }
+        context->metadataBound = NV_FALSE;
+    }
     if (context->deviceQueue) s540DarwinWorkQueueDestroy(context->deviceQueue);
     if (context->globalQueue) s540DarwinWorkQueueDestroy(context->globalQueue);
     if (context->isrGuard) s540Darwin_os_free_spinlock(context->isrGuard);
@@ -270,4 +297,45 @@ void s540GspContextUnlockedBottomHalf(S540GspContext *context)
 {
     rm_isr_bh_unlocked(&context->stacks[UNLOCKED_BH], &context->nv);
     __atomic_add_fetch(&context->state.unlockedBottomHalves, 1, __ATOMIC_RELAXED);
+}
+
+static S540GspContext *metadataOwner(nv_state_t *nv)
+{
+    S540GspContext *context = __atomic_load_n(&metadataContext, __ATOMIC_ACQUIRE);
+    return context && &context->nv == nv ? context : NULL;
+}
+
+void NV_API_CALL nv_get_screen_info(nv_state_t *nv, NvU64 *physical,
+    NvU32 *width, NvU32 *height, NvU32 *depth, NvU32 *pitch, NvU64 *bytes)
+{
+    S540GspContext *context = metadataOwner(nv);
+    s540GlobalRmRecordServiceName(__func__);
+    if (!context || !context->intelConsoleVerified || !context->nvidiaConsoleExcluded ||
+        !physical || !width || !height || !depth || !pitch || !bytes) {
+        // A void callback cannot report unsupported data through a status.
+        // Preserve outputs and invalidate admission instead of guessing facts.
+        s540GlobalRmRecordUnavailable(25);
+        return;
+    }
+    // The exhaustive provider query excluded this endpoint from every active
+    // console. These are the original Linux non-console output values, not
+    // fabricated framebuffer geometry or another GPU's framebuffer address.
+    *physical = 0;
+    *width = *height = *depth = *pitch = 0;
+    *bytes = 0;
+}
+
+void NV_API_CALL nv_get_disp_smmu_stream_ids(nv_state_t *nv,
+    NvU32 *iso, NvU32 *niso)
+{
+    S540GspContext *context = metadataOwner(nv);
+    s540GlobalRmRecordServiceName(__func__);
+    if (!context || !iso || !niso) {
+        s540GlobalRmRecordUnavailable(26);
+        return;
+    }
+    // Exact pinned nv.c contract: copy the initialized original state. No
+    // stream IDs or Tegra/SMMU presence are inferred from this PCIe endpoint.
+    *iso = context->nv.iommus.dispIsoStreamId;
+    *niso = context->nv.iommus.dispNisoStreamId;
 }

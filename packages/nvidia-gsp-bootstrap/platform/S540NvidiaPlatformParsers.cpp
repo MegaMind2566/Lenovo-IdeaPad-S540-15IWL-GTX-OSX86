@@ -58,3 +58,18 @@ bool S540NvidiaGspPlatform::romRequestValid(NvU32 offset, NvU32 bytes) {
     return bytes && bytes <= kMaximumRomChunk && offset < kMaximumRomBytes &&
            bytes <= kMaximumRomBytes - offset;
 }
+
+void S540NvidiaGspPlatform::observeConsoleOwner(ConsoleOwnership &state,
+    bool ownerKnown, NvU32 vendor, NvU32 classCode, bool boundTarget) {
+    if (state.frames == ~NvU32(0)) { state.overflow = true; return; }
+    ++state.frames;
+    if (!ownerKnown || (classCode & 0xff0000U) != 0x030000U) ++state.unknownOwners;
+    else if (boundTarget) ++state.targetOwners;
+    else if (vendor == 0x8086) ++state.intelOwners;
+}
+
+bool S540NvidiaGspPlatform::consoleExcludesTarget(const ConsoleOwnership &state,
+    bool complete) {
+    return complete && !state.overflow && state.frames != 0 &&
+        state.intelOwners != 0 && state.targetOwners == 0 && state.unknownOwners == 0;
+}

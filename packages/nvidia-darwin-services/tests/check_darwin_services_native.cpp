@@ -2,15 +2,33 @@
 #include "../src/S540NvidiaDarwinServices.h"
 #include <atomic>
 #include <chrono>
+#include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <thread>
 #include <vector>
+#include <sys/resource.h>
+#include <sys/wait.h>
+#include <unistd.h>
 namespace {
 unsigned checks;
 void require(bool value, const char *reason) {
     ++checks;
     if (!value) { std::fprintf(stderr, "Darwin services check failed: %s\n", reason); std::exit(1); }
+}
+bool unboundFlushStateRefuses() {
+    // Fork while the parent is cold, before any worker or timer exists.
+    const pid_t child = fork();
+    if (child < 0) return false;
+    if (!child) {
+        const rlimit noCore{0, 0};
+        if (setrlimit(RLIMIT_CORE, &noCore) != 0) _Exit(2);
+        (void)s540Darwin_os_is_queue_flush_ongoing(nullptr);
+        _Exit(3); // A fabricated false result must never satisfy this check.
+    }
+    int status = 0;
+    return waitpid(child, &status, 0) == child &&
+        WIFSIGNALED(status) && WTERMSIG(status) == SIGABRT;
 }
 bool waitUntil(std::atomic<unsigned> &value, unsigned expected) {
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(3);
@@ -77,6 +95,7 @@ void allocationFailures() {
 }
 int main() {
     require(s540DarwinLiveObjects() == 0, "initial state cold");
+    require(unboundFlushStateRefuses(), "unbound scalar flush-state query is a contract violation");
     const auto production = S540NvidiaDarwinServices::check();
     require(production.passed(), "real production service lifecycle");
     require(production.checks == 37, "production check count");
@@ -256,5 +275,5 @@ int main() {
     s540DarwinTimerDestroy(blockedTimer.timer);
     s540Darwin_os_free_semaphore(blockedTimer.gate);
     require(s540DarwinLiveObjects() == 0, "all storage and OS objects returned to baseline");
-    std::printf("{\"component\":\"nvidia-darwin-services\",\"format\":1,\"status\":\"passed\",\"checks\":%u,\"production_checks\":%u,\"failures\":0,\"mutex_updates\":12000,\"concurrent_work_items\":4000,\"fault_paths\":17,\"cleanup\":true,\"execution\":\"native-user-space\",\"kernel_execution\":\"not_tested\",\"gpu_access\":false}\n", checks, production.checks);
+    std::printf("{\"component\":\"nvidia-darwin-services\",\"format\":1,\"status\":\"passed\",\"checks\":%u,\"production_checks\":%u,\"failures\":0,\"mutex_updates\":12000,\"concurrent_work_items\":4000,\"fault_paths\":18,\"cleanup\":true,\"execution\":\"native-user-space\",\"kernel_execution\":\"not_tested\",\"gpu_access\":false}\n", checks, production.checks);
 }

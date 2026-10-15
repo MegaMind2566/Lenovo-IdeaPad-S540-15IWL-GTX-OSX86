@@ -19,6 +19,9 @@ typedef struct S540GspDeviceFacts {
     // Each bit is evidence collected from the actual retained provider.
     NvBool segmentKnown, pciConfigurationRead, barsVerified, poweredD0;
     NvBool intelConsoleVerified, noCoherentGpuMemoryProfile;
+    // Complete bounded console enumeration found positive Intel ownership,
+    // no bound-NVIDIA console and no unresolved console owner.
+    NvBool nvidiaConsoleExcluded;
 } S540GspDeviceFacts;
 typedef struct S540GspContextSnapshot {
     NvBool created, eventLocks, privateState, adapterAttempted;

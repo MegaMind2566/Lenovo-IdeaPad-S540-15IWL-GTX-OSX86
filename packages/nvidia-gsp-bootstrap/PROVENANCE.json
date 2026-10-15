@@ -230,6 +230,18 @@
           "lines": [
             1186
           ]
+        },
+        {
+          "text": "nv_get_screen_info",
+          "lines": [
+            1075
+          ]
+        },
+        {
+          "text": "nv_get_disp_smmu_stream_ids",
+          "lines": [
+            1110
+          ]
         }
       ]
     },
@@ -288,6 +300,18 @@
             2142,
             2250
           ]
+        },
+        {
+          "text": "nv_get_screen_info",
+          "lines": [
+            6484
+          ]
+        },
+        {
+          "text": "nv_get_disp_smmu_stream_ids",
+          "lines": [
+            3917
+          ]
         }
       ]
     },
@@ -340,5 +364,11 @@
         }
       ]
     }
-  ]
+  ],
+  "metadata_contracts": {
+    "nv_get_screen_info": "Exact bound nv_state_t plus complete Intel-console/NVIDIA-exclusion facts; original non-console outputs all zero; unknown owner or missing output preserves values and records unavailability.",
+    "nv_get_disp_smmu_stream_ids": "Exact bound nv_state_t; copy original initialized iommus.dispIsoStreamId and dispNisoStreamId fields; no inferred stream identifiers.",
+    "ownership": "Atomic publication after both real work queues bind; removal after queue drain and original private/event cleanup. Outer session owns callback quiescence.",
+    "native_context_test": "16 checks, 4 explicit refusal child fixtures; actual tracked allocator and Darwin services; original RM callbacks are aborting traps, not executed."
+  }
 }

@@ -16,6 +16,7 @@ import sys
 
 import compile_nvidia_global_rm as original
 import nvidia_execution_commands as commands
+import nvidia_execution_closure as closure
 import embed_nvidia_firmware as firmware
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -112,12 +113,14 @@ def audit_platform_imports(output: Path, kernel_flags: list[str], cpp_flags: lis
 @commands.logged(output_argument=1, report='execution-kernel-build.json')
 def kernel_objects(upstream: Path, output: Path, assets: Path,
                    kernel_flags: list[str], cpp_flags: list[str],
-                   *, compiled_directory: Path | None = None) -> KernelBuild:
+                   *, compiled_directory: Path | None = None,
+                   checked_cleanup_overlays: bool = False) -> KernelBuild:
     import build_nvidia_transport as transport
     output = output.absolute()
     output.mkdir(parents=True, exist_ok=True)
     partial = {'format': 1, 'status': 'running', 'phase': 'verify-original-compilation',
                'completed_project_sources': [], 'production_candidate_allowed': False,
+               'checked_cleanup_overlays': checked_cleanup_overlays,
                'global_rm_executed': False, 'adapter_initialized': False,
                'gsp_initialized': False, 'gpu_operations': False}
     report = output / 'execution-kernel-build.json'
@@ -131,7 +134,14 @@ def kernel_objects(upstream: Path, output: Path, assets: Path,
         raise ValueError('Full original RM bridge compilation requires an unchanged source checkout.')
     compilation_root = (compiled_directory.resolve(strict=True) if compiled_directory else
                         output / 'original-rm')
-    if compiled_directory:
+    checked_source = None
+    if checked_cleanup_overlays:
+        if not compiled_directory:
+            original.compile_with_namespace(upstream, compilation_root, Path('/usr/bin/clang'))
+            original.compile_checked_overlays(upstream, compilation_root, Path('/usr/bin/clang'))
+        compiled, checked_source, namespace, original_objects = original.load_checked_compilation(
+            upstream, compilation_root)
+    elif compiled_directory:
         compiled = json.loads((compilation_root / 'darwin-compile.json').read_text())
         if (compiled.get('status') != 'compiled' or compiled.get('native_apple_compiler') is not True
                 or compiled.get('cross_compile_probe') is not False
@@ -141,8 +151,9 @@ def kernel_objects(upstream: Path, output: Path, assets: Path,
             raise ValueError('Only this pinned native Apple compilation can be reused.')
     else:
         compiled = original.compile_with_namespace(upstream, compilation_root, Path('/usr/bin/clang'))
-    namespace = compilation_root / 'original/contract/S540GlobalRmNamespace.h'
-    original_objects = sorted((compilation_root / 'namespaced').glob('*.o'))
+    if not checked_cleanup_overlays:
+        namespace = compilation_root / 'original/contract/S540GlobalRmNamespace.h'
+        original_objects = sorted((compilation_root / 'namespaced').glob('*.o'))
     if len(original_objects) != 1100:
         raise ValueError('The actual full RM kernel closure lost an original translation unit.')
     actual_hashes = {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
@@ -155,8 +166,9 @@ def kernel_objects(upstream: Path, output: Path, assets: Path,
     cpp, c, plain_c = project_sources()
     partial.update(phase='compile-project-bridges', original_source_objects=len(original_objects))
     save_partial()
-    bridge = original.original_bridge_flags(upstream, compilation_root / 'namespaced',
-                                             Path('/usr/bin/clang'), namespace)
+    bridge = original.original_bridge_flags(
+        upstream, compilation_root / ('checked-namespaced' if checked_cleanup_overlays else 'namespaced'),
+        Path('/usr/bin/clang'), namespace, checked_source=checked_source)
     objects = list(original_objects)
     project_objects = []
     for source in [*cpp, *c, *plain_c]:
@@ -207,6 +219,10 @@ def kernel_objects(upstream: Path, output: Path, assets: Path,
     partial['phase'] = 'audit-platform-imports'
     save_partial()
     platform_import_audit = audit_platform_imports(output, kernel_flags, cpp_flags, linked, defined)
+    partial['phase'] = 'audit-actual-original-rm-closure'
+    save_partial()
+    execution_closure = closure.analyze_execution_closure(
+        linked, original_objects, compiled, output / 'original-rm-closure', upstream=upstream)
     record = {'format': 1, 'status': 'compiled', 'architecture': 'x86_64',
               'production_candidate_allowed': False,
               'milestone_status': 'development-source-only; adapter runtime closure unresolved',
@@ -217,6 +233,9 @@ def kernel_objects(upstream: Path, output: Path, assets: Path,
               'private_original_definitions': len(defined),
               'project_imports': sorted(transport.kernel_imports(linked)),
               'platform_import_audit': platform_import_audit,
+              'execution_closure': execution_closure,
+              'checked_cleanup_overlays': checked_cleanup_overlays,
+              'original_header_profile': 'checked-cleanup-development' if checked_source else 'unchanged-baseline',
               'global_rm_executed': False, 'adapter_initialized': False,
               'gsp_initialized': False, 'gpu_operations': False,
               'source_sha256': {path.relative_to(ROOT).as_posix():
@@ -236,6 +255,8 @@ def main() -> int:
     parser.add_argument('--assets-dir', type=Path, required=True)
     parser.add_argument('--output-dir', type=Path, required=True)
     parser.add_argument('--compiled-directory', type=Path)
+    parser.add_argument('--checked-cleanup-overlays', action='store_true',
+                        help='Use the verified composed cleanup sources and checked headers for all RM bridges.')
     args = parser.parse_args()
     if sys.platform != 'darwin' or platform.machine() != 'x86_64':
         raise ValueError('Authoritative kernel compilation requires Intel macOS.')
@@ -251,7 +272,8 @@ def main() -> int:
     cpp = ['-fapple-kext', '-fno-exceptions', '-fno-rtti', '-fno-threadsafe-statics',
            '-nostdinc++', '-std=c++17']
     kernel_objects(args.upstream, args.output_dir, args.assets_dir, flags, cpp,
-                   compiled_directory=args.compiled_directory)
+                   compiled_directory=args.compiled_directory,
+                   checked_cleanup_overlays=args.checked_cleanup_overlays)
     print('Development kernel objects compiled; no candidate ZIP or runtime milestone is produced.')
     return 0
 

@@ -87,20 +87,28 @@ and runtime contract. A 4 KiB limit on individual frames does not prove that
 the aggregate call chain fits a Darwin kernel stack. No kernel readiness is
 inferred from the development control.
 
-Native Intel macOS compilation passed for all 1,100 unchanged source units
-and their private-namespace rebuild. The dependency-control link then failed
-because its ordinary dynamic-bundle format required `libSystem.dylib`.
-The native control now selects `MH_KEXT_BUNDLE`, matching the original
-non-PIC kernel objects, and rejects dylib load commands. The explicitly PIC
-cross-probe keeps its separate dynamic-bundle format; its result cannot
-validate the native kernel link. Exact retained roots, undefined imports and
-dead stripping are inspected for both profiles. These diagnostic images are
-never loaded. Native Apple linking now passes with 204 global and 310 adapter
-imports, with no dylib dependencies. Firmware asset verification also passes.
-The complete development workflow is still blocked at native CPU-control
-compilation; those controls now run before full RM compilation and preserve
-command diagnostics. Source compilation does not validate the cleanup overlays
-or execute RM.
+The [native Intel macOS development workflow](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38811444683)
+passed from source `ee8893d0d951b51de20ce722015e8d6bb9e0ddfa`. It compiled all
+1,100 unchanged source units and their private-namespace rebuild, linked the
+selected global and adapter controls as `MH_KEXT_BUNDLE` without dylib
+dependencies, and passed 1,433 CPU/contract checks in each of the plain and
+fatal-sanitized variants. All 24 project bridge units compiled with the audited
+platform imports. Firmware files, licenses and embedded bytes were verified.
+These results do not execute the adapted full-RM lifecycle or the GPU.
+
+The next development profile explicitly applies all seven approved overlays in
+an isolated, hash-verified source tree. It preserves the unchanged baseline
+records and rebuilds every full-RM translation unit against the composed checked
+headers. Original-header macOS bridges use that same source tree and namespace;
+objects compiled against the old portable-memory declaration cannot be reused.
+This profile is development validation, with kernel entry and candidate
+packaging still disabled. Native results for this adapted profile are separate
+from the passing unchanged baseline above.
+
+The native dependency-control linker uses the kernel format required by the
+original non-PIC objects and rejects dynamic library load commands. The
+explicitly PIC cross-probe keeps its separate `MH_BUNDLE` diagnostic format;
+it cannot establish a native kernel link. All diagnostic images remain unloaded.
 
 ## External ABI boundary
 
@@ -109,8 +117,14 @@ external declarations retained by the selected startup/adapter/ISR root set.
 The separately reviewed [crypto boundary](../nvidia-global-rm-crypto/README.md)
 covers its 64 additional imports. Source inventories are not implementation or
 runtime evidence. The selected root controls are not the complete coordinator
-closure. Work-item, private-state, event-lock, fault, timer and evidence entry
-points must also be included and reviewed before runtime admission.
+closure. The additional compiled-bridge audit derives those work-item,
+private-state, event-lock, fault, timer and evidence roots from the actual
+macOS objects. Its [supplemental contracts](COORDINATOR-CONTRACTS.json) pin the
+two additional callback declarations without changing the selected 244-contract
+inventory. The queue-flush query has a real guarded backend; DMA-remap policy
+remains an explicit unresolved scalar service. The current compiled root set
+excludes the source-gated global lifecycle, which needs a separate admission
+review. Every report retains the kernel/GSP and candidate blocks.
 
 `generate_refusals.py` accepts an explicit set of implemented original symbol
 names. It can generate only typed `NV_ERR_NOT_SUPPORTED` and `NULL` failure
