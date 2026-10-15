@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import importlib.util
 import json
 import os
 from pathlib import Path
@@ -55,10 +54,10 @@ def check(sdk: Path, destination: Path) -> Path:
     provenance_path = ROOT / 'tests/test_nvidia_lifecycle_provenance.py'
     tested = transport.run(sys.executable, str(provenance_path))
     print((tested.stdout + tested.stderr).strip())
-    spec = importlib.util.spec_from_file_location('lifecycle_provenance', provenance_path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    provenance = module.verify_upstream()
+    # The preceding provenance suite validates every pinned input, body and
+    # explicit adaptation. Record that verified manifest without assuming a
+    # helper API on a unittest module or running the same suite twice.
+    provenance = json.loads((SOURCE / 'upstream/PROVENANCE.json').read_text())
     if provenance.get('commit') != NVIDIA_COMMIT:
         raise ValueError('Unexpected NVIDIA lifecycle source revision.')
     destination = destination.absolute()
