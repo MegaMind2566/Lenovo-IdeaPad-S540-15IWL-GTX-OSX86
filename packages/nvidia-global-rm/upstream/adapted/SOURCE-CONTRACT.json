@@ -1,0 +1,14 @@
+{
+  "alias_count": 17366,
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "defined_count": 16969,
+  "format": 1,
+  "generated_identification_units": 1,
+  "generation": "Compile all original C units, read every Mach-O global definition/reference, exclude compiler-only memory helpers, and emit private aliases.",
+  "namespace_sha256": "cb79f788baddb7f046e870b1e2e09bfde310b4b12417ec8c737fad1ef440f7a1",
+  "native_apple_compiler_validation": "pending",
+  "prefix": "s540Global_",
+  "profile": "NV_UNIX=1; actual Darwin/Apple compiler target; RS_STANDALONE=0",
+  "release": "615.78.08",
+  "source_units": 1099
+}
