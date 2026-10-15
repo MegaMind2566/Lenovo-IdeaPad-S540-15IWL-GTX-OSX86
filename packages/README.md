@@ -6,7 +6,7 @@ ZIP packages. Builders and regression checks are kept separately.
 
 | Package | Purpose | Guide |
 | --- | --- | --- |
-| [nvidia-transport](nvidia-transport) | Bounded IOKit PCI attachment prototype in development; laptop attachment remains unvalidated. No MMIO, DMA, firmware or acceleration. | [PCI transport](nvidia-transport/README.md) |
+| [nvidia-transport](nvidia-transport) | Native Intel build and diagnostic package verified; laptop PCI attachment remains unvalidated. No MMIO, DMA, firmware or acceleration. | [PCI transport](nvidia-transport/README.md) |
 | [nvidia-visibility](nvidia-visibility) | Superseded for the reached visibility milestone. V1 automatic locator stopped at `Mounted`; subsequent manual removal of the disable argument produced a visible PCI service. | [Retained visibility experiment](nvidia-visibility/README.md) |
 | [nvidia-pci](nvidia-pci) | Read published PCI metadata; laptop visibility is confirmed for the exact target. No hardware access or GPU initialization. | [NVIDIA PCI inventory](nvidia-pci/README.md) |
 | [ssd-boot](ssd-boot) | Automatic transfer helper on hold after a mounted-target guard stop. Manual transfer and independent Samsung boot are confirmed. | [Independent SSD boot](../docs/guides/ssd-boot.md) |

@@ -8,7 +8,7 @@ The [CPU and sensor reports](cpu-thermal.md) confirm frequency/power response an
 
 | Order | Work | Remaining scope |
 |---|---|---|
-| Now | NVIDIA PCI transport prototype | PCI visibility confirmed: active `10DE:1F91`, subsystem `17AA:3806`, revision `A1`, behind `RP05`; disable argument absent. Implement bounded IOKit attachment, configuration-space identity reads and already-assigned resource descriptors. Laptop attachment remains unvalidated; MMIO, DMA, GSP and acceleration remain later work. |
+| Now | NVIDIA PCI transport prototype | PCI visibility confirmed: active `10DE:1F91`, subsystem `17AA:3806`, revision `A1`, behind `RP05`; disable argument absent. Native build and diagnostic package verified. Validate laptop attachment, fixed configuration reads and assigned resource descriptors before MMIO, DMA, GSP or acceleration work. |
 | Remaining | Graphics, power and thermals | Sustained Intel graphics use and cooling, fan telemetry and measured battery runtime. Continuous temperature readings during desktop activity and basic battery power/discharge reporting are confirmed. NVIDIA electrical power-off is deferred until after the driver-port attempt. |
 | Complete / retained | Boot and EFI consolidation | Independent Samsung boot confirmed after manual EFI transfer. Keep the HDD as a recovery path and preserve the private working EFI. A later sanitized release remains separate from v0.1.0. |
 | 3 | Storage and USB reliability | USB-C at 5 Gb/s in both orientations and both tested USB-A connectors at 5 Gb/s are confirmed. File reads on both USB-A connectors are confirmed. External USB 2 devices, sustained SSD stability, shutdown and reboot remain separate checks. Move the system SSD cable only after shutdown. |
@@ -65,7 +65,7 @@ Fn+F1–F12 must remain ordinary application function keys. Remove or reassign o
 
 The [pinned source assessment](../reference/nvidia-port-assessment.md) is complete. It records release 615.78.08, the concrete Linux-to-Darwin boundaries and acceptance criteria. The [native PCI inventory](../../packages/nvidia-pci/README.md) now confirms an active `10DE:1F91` service, subsystem `17AA:3806`, revision `A1`, below `RP05`, with `-wegnoegpu` absent and no warnings. The earlier report found no target with the argument present. The automatic [visibility helper](../../packages/nvidia-visibility/README.md) stopped at its `Mounted` check before changes; the argument was subsequently removed manually. The latest reports establish visibility without auditing the full current EFI. The helper is superseded for this reached milestone.
 
-A bounded IOKit PCI transport prototype is being implemented. It will attach to the exact device, read configuration-space identity and inspect already-assigned resource descriptors. It has not yet attached on the laptop. No NVIDIA GPU initialization, MMIO access, DMA, firmware loading or acceleration has been validated. Intel display operation and the recovery EFI are retained.
+A bounded IOKit PCI attachment prototype and its diagnostic package have passed the native Intel build. It targets the exact device, reads configuration-space identity and inspects already-assigned resource descriptors. It has not yet attached on the laptop. No NVIDIA GPU initialization, MMIO access, DMA, firmware loading or acceleration has been validated. Intel display operation and the recovery EFI are retained.
 
 The GTX 1650, PCI `10DE:1F91`, is listed among the GPUs compatible with NVIDIA's open source kernel modules. The repository contains operating system independent parts and Linux-specific interfaces. The modules also require GSP firmware and userspace driver components of the same version.
 
@@ -74,7 +74,7 @@ Mesa/NVK provides an open Vulkan driver for NVIDIA, but its current implementati
 The proposed path is a technical assessment, not an already validated port:
 
 1. Source assessment complete: pinned Linux dependencies, firmware/userspace requirements and candidate reusable code are recorded in the assessment.
-2. PCI visibility complete. Implement bounded IOKit attachment, configuration-space identity reads and already-assigned resource descriptors; validate attachment on the laptop before expanding into MMIO, DMA or interrupts.
+2. PCI visibility complete; bounded attachment prototype built. Validate attachment, configuration-space identity reads and already-assigned resource descriptors on the laptop before expanding into MMIO, DMA or interrupts.
 3. Test GPU initialisation and execution of a minimal command, with observable results on the laptop.
 4. Assess the userspace component and the path towards Vulkan or other experimental functions.
 5. Address Metal integration, the macOS graphics system, power management and video outputs separately.

@@ -210,4 +210,4 @@ The latest reports agree on the following normalized evidence:
 
 PCI visibility is therefore confirmed. The inventory reads published metadata; it does not open the device or verify PCI configuration-space access, MMIO, DMA, GSP, GPU execution, acceleration or electrical power state. It does not audit every current EFI setting or establish the physical routing of HDMI. Raw reports and private configurations remain outside the repository.
 
-The next prototype is being implemented for bounded IOKit attachment, configuration-space identity reads and inspection of already-assigned resource descriptors. Laptop attachment remains unvalidated. NVIDIA electrical power-off and external-display work retain their deferred status.
+The bounded IOKit attachment prototype is implemented, with a verified native Intel build and diagnostic package. It reads configuration-space identity and already-assigned resource descriptors. Laptop attachment remains unvalidated. NVIDIA electrical power-off and external-display work retain their deferred status.

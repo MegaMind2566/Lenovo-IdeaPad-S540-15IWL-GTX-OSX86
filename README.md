@@ -68,7 +68,7 @@ Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including t
 
 ## Development priorities
 
-- Implement the bounded NVIDIA PCI transport prototype: IOKit attachment, configuration-space identity reads and already-assigned resource descriptors. PCI visibility is confirmed; laptop attachment, MMIO, DMA, firmware startup and acceleration are not.
+- Validate the [NVIDIA PCI attachment prototype](packages/nvidia-transport/README.md) on the laptop. Its native Intel build and diagnostic package are verified; laptop attachment, MMIO, DMA, firmware startup and acceleration remain unconfirmed.
 - Complete storage reliability and remaining USB 2 device checks. Both USB-A connectors and USB-C in both orientations negotiate 5 Gb/s with the tested hardware. Audio peripherals, battery power and independent SSD boot work; measured battery runtime remains open.
 - Complete Intel stability and power-management coverage; sustained cooling and fan telemetry remain open. External-display work is paused.
 - Complete remaining device support and investigate connection performance from the recorded Internet baseline; wired/Bluetooth microphones, headphone switching and wireless reconnection work.
@@ -84,6 +84,8 @@ The [documentation index](docs/README.md) links to setup, maintenance, and recov
 Download the [first EFI release, v0.1.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.1.0), with compatibility notes and setup instructions. Personalize its SMBIOS identity before use.
 
 Generated packages are available in **Artifacts** from successful [GitHub Actions runs](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions). Current companion packages are `S540-microfono-fix-v2`, `S540-volume-fine-v1` and `S540-brightness-keys-v2`. The [function-key guide](docs/guides/function-keys.md) records the complete keyboard mapping and remaining work.
+
+The experimental **S540-nvidia-transport-v1** package is available from its [successful native build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38660491862). It checks PCI attachment through a separate test EFI and provides no graphics acceleration.
 
 **Code → Download ZIP downloads source code, without compiled payloads. It is not an installer.** Builders assemble the feature sources into distributable ZIPs with their own launchers and runtime layout.
 

@@ -17,7 +17,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 |---|---|
 | [Passive CPU sensors](../packages/cpu-sensors/README.md) | A continuous sensor reading with no CPU workload; complete temperature readings at idle and during desktop activity |
 | [CPU, temperature and power](../packages/cpu-thermal/README.md) | Grouped idle, short-load and recovery collector; sustained-cooling validation remains separate from the successful activity readings |
-| [NVIDIA PCI transport](../packages/nvidia-transport/README.md) | Bounded attachment/configuration-read prototype in development; laptop attachment not yet validated |
+| [NVIDIA PCI transport](../packages/nvidia-transport/README.md) | Bounded attachment/configuration-read prototype with a verified native Intel build; laptop attachment not yet validated |
 | [NVIDIA PCI inventory](../packages/nvidia-pci/README.md) | Native read-only inventory; active target PCI visibility is confirmed |
 | [Intel graphics](guides/intel-graphics.md) | Acceleration and stability checks |
 | [Boot and networking](guides/boot-network.md) | Backlight boot fix, HeliPort and Bluetooth |

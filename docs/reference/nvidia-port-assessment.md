@@ -67,6 +67,8 @@ The prototype is limited to IOKit attachment to this exact PCI device, configura
 
 Resource inspection reads the provider's published `IODeviceMemory` array directly, with bounded type/tag checks. The convenience `getDeviceMemoryWithRegister` and `getDeviceMemoryWithIndex` calls are excluded: the inspected Apple implementation can call `setTunnelL1Enable`, which does not belong in this observational milestone.
 
+The [native Intel build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38660491862) at commit `d782b96f1d83a88ab4db84a1d38145fc9c7de260` passed kernel compilation/linkage, module metadata and signature checks, the production report decoder and the packaged launcher. CI deliberately did not load the kext. Its live `not_attached`, `complete=true` result covers an unloaded probe; laptop attachment is the next required result. The distributed ZIP SHA256 is `202e9cd550eb5cc8ba15088aff5a26ddcd96dda839f2750727350e0215a86f41`.
+
 ## Subsequent milestones
 
 | Milestone | Required result |
