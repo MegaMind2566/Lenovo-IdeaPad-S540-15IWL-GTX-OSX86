@@ -2,7 +2,7 @@
 
 This development component connects three original NVIDIA allocation callers and five original mutex callers to candidate Darwin backends. Function bodies come from NVIDIA release `615.78.08`, commit `1a82fbfda8f321b056eb3568850f9316c5e465c5`; includes and interface profiles are explicitly adapted. This is not the complete NVPort library or NVIDIA resource manager.
 
-[The earlier targeted Intel macOS CI passed](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38722294509), including original-caller execution, sanitizers, mandatory assertion failure and kernel compile/link/import checks. The component is now included in the [v0.5.0 transport candidate](../nvidia-transport/README.md), pending native CI verification and one combined laptop result. Version 0.4.0 remains the confirmed laptop checkpoint. Kernel and interrupt execution of the new backends remain untested.
+[The earlier targeted Intel macOS CI passed](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38722294509), including original-caller execution, sanitizers, mandatory assertion failure and kernel compile/link/import checks. The component is now included in the [v0.5.0 transport candidate](../nvidia-transport/README.md), whose exact build results accompany the package. One combined laptop result remains required. Version 0.4.0 remains the confirmed laptop checkpoint. Kernel and interrupt execution of the new backends remain untested.
 
 ## Allocation without sleeping
 

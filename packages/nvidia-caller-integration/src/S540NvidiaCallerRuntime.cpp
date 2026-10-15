@@ -96,8 +96,7 @@ void allocationCallers(Result &result)
               liveSlots() == kSlotCount);
         if (!refusedShutdown || !ready()) {
             // Do not read or free pointers after an unexpected destruction.
-            for (void *&slot : slots)
-                slot = nullptr;
+            os_mem_set(slots, 0, static_cast<NvU32>(sizeof(slots)));
             result.allocationCallers = false;
             return;
         }
@@ -135,7 +134,8 @@ void mutexCallers(Result &result)
     result.mutexCallers = true;
     check(result, result.mutexCallers,
           portSyncMutexInitialize(nullptr) == NV_ERR_INVALID_POINTER);
-    PORT_MUTEX mutex{};
+    PORT_MUTEX mutex;
+    os_mem_set(&mutex, 0, static_cast<NvU32>(sizeof(mutex)));
     const NV_STATUS initialized = portSyncMutexInitialize(&mutex);
     check(result, result.mutexCallers,
           initialized == NV_OK && mutex.mutex != nullptr);
@@ -180,7 +180,8 @@ void mutexCallers(Result &result)
 
 S540NvidiaCallerRuntime::Result S540NvidiaCallerRuntime::run()
 {
-    Result result{};
+    Result result;
+    os_mem_set(&result, 0, static_cast<NvU32>(sizeof(result)));
     result.reserve = true;
     check(result, result.reserve, ordinaryThreadContext());
     if (!result.reserve)
@@ -229,8 +230,11 @@ S540NvidiaCallerRuntime::IntegratedResult S540NvidiaCallerRuntime::checkIntegrat
 {
     // Positive counts with failed components describe a refused precondition;
     // zero would be indistinguishable from absent or malformed evidence.
-    IntegratedResult result = {{1, false, false, false, false, false},
-                               {1, 1, false, false, false}, false};
+    IntegratedResult result;
+    os_mem_set(&result, 0, static_cast<NvU32>(sizeof(result)));
+    result.foundations.checks = 1;
+    result.callers.checks = 1;
+    result.callers.failures = 1;
     NvU32 expected = 0;
     if (!__atomic_compare_exchange_n(&gStartupLease, &expected, NvU32{1}, false,
                                       __ATOMIC_ACQUIRE, __ATOMIC_RELAXED))

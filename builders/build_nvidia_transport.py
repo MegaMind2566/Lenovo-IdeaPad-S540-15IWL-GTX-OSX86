@@ -236,9 +236,18 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
         macho(linked_adapter, 1)
         adapter_imports = set(run('/usr/bin/nm', '-u', '-j', str(linked_adapter)).stdout.split())
         if adapter_imports != ADAPTER_IMPORTS:
+            unexpected = adapter_imports - ADAPTER_IMPORTS
+            import_origins = {}
+            # Diagnose only the rejected imports, without relaxing the exact
+            # combined import contract or adding work to successful builds.
+            for obj in adapter_objects:
+                imported = set(run('/usr/bin/nm', '-u', '-j', obj).stdout.split())
+                for symbol in sorted(unexpected & imported):
+                    import_origins.setdefault(symbol, []).append(Path(obj).name)
             raise ValueError('Integrated kernel imports differ: missing='
                              + str(sorted(ADAPTER_IMPORTS - adapter_imports))
-                             + ', unexpected=' + str(sorted(adapter_imports - ADAPTER_IMPORTS)))
+                             + ', unexpected=' + str(sorted(unexpected))
+                             + ', importing_objects=' + str(import_origins))
         defined = run('/usr/bin/nm', '-g', str(linked_adapter)).stdout
         for symbol in CALLER_SYMBOLS:
             if not re.search(r'\bT _' + re.escape(symbol) + r'$', defined, re.M):
