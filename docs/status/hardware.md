@@ -10,7 +10,7 @@ Report received on 12 October 2026. Only data relevant to the project is include
 | CPU | Intel Core i7-8565U, Whiskey Lake-U, 4 cores / 8 threads | X86PlatformPlugin active; frequency/power response confirmed; idle temperatures 45–48 °C; activity session retains 57–82 °C with no missing readings and final 57 °C |
 | RAM | 12 GB DDR4-2400, 8 and 4 GB modules | Sufficient for the first test |
 | iGPU | Intel UHD 620, PCI 8086:3EA0 | IntelAccelerator detected and Metal 3 exposed; sustained load still to be tested |
-| dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91; subsystem 17AA:3806; revision A1 | Kernel probe attachment, fixed PCI configuration reads and assigned resource metadata confirmed; GPU initialization, acceleration and electrical power state remain unverified |
+| dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91; subsystem 17AA:3806; revision A1 | Probe attachment, fixed PCI configuration/resource reads and one BAR0 TU117 identification read confirmed; GPU initialization, acceleration and electrical power management remain unverified |
 | Display | BOE NV156FHM-N61, 1920×1080 | Panel, brightness slider and direct F11/F12 working; boot blackout delay eliminated with -igfxblr |
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Problematic PM981a family; compatibility is not assumed |
 | Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | itlwm 2.3.0 loaded and HeliPort reported working; Ethernet presentation is expected with this driver; disconnection, reconnection and network switching confirmed; Internet baseline 15.751 Mb/s down / 63.036 Mb/s up with Low loaded responsiveness; cause unresolved |
@@ -225,4 +225,18 @@ The snapshot retains these already-assigned resource descriptors:
 
 The snapshot has no descriptor at `0x18` or `0x20`. Raw BAR type/width flags were not collected, so those gaps are not diagnosed as missing resources. Resource descriptors do not demonstrate MMIO access or usable VRAM capacity. The probe does not change PCI command bits, enable bus mastering or allocate DMA; observed command/status values are not evidence of changes made by the probe.
 
-The confirmed 0.1.0 result includes no GPU register read, GSP initialization, command execution or acceleration. Version 0.2.0 now implements one guarded 32-bit `NV_PMC_BOOT_0` read at BAR0 offset zero and a format-2 report; no laptop result has been received for that implementation. Its refusal path leaves prerequisites unchanged rather than enabling memory decode or changing power state. Runtime stop/unload remains untested. NVIDIA electrical power-off and external-display work retain their deferred status. Raw reports, resource addresses and private EFI configuration stay outside the repository.
+The confirmed 0.1.0 result includes no GPU register read, GSP initialization, command execution or acceleration. The subsequent 0.2.0 register-read result is recorded separately below. Runtime stop/unload remains untested. NVIDIA electrical power-off and external-display work retain their deferred status. Raw reports, resource addresses and private EFI configuration stay outside the repository.
+
+## NVIDIA single-read identification: October 15, 2026
+
+The format-2 laptop report from `nvidia-transport` 0.2.0 returns `identified`, `complete=true`, `wegnoegpu_present=false` and no warnings. The actual `IOPCIDevice` provider identity is verified as `10DE:1F91`, subsystem `17AA:3806`, revision `A1`, class `030000`.
+
+| Observation | Result |
+|---|---|
+| Register | `NV_PMC_BOOT_0`, BAR0 offset zero |
+| Access | Exactly one read, 32 bits |
+| Register value | `0x167000A1` |
+| Decoded architecture / implementation | `0x16` / `0x07`, TU117 |
+| Result reason | `tu117-identified` |
+
+This confirms the one bounded identification-register read. It does not establish general MMIO access, GPU initialization, usable VRAM, DMA, firmware operation, command execution or acceleration. Runtime stop/unload and power-management transitions remain untested. The next step is source assessment before selecting any expansion; no new register access is chosen from this result alone. Private resource addresses and raw reports remain excluded.

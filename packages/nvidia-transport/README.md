@@ -1,8 +1,14 @@
 # NVIDIA PCI and BAR0 identification prototype
 
-This experimental IOKit service targets the S540 GTX 1650 Max-Q (`10DE:1F91`, subsystem `17AA:3806`, revision `A1`). Version **0.1.0** successfully attached to its PCI provider and reported fixed configuration reads and assigned resource descriptors on the laptop. Version **0.2.0** adds one read-only `NV_PMC_BOOT_0` identification read and awaits laptop validation.
+This experimental IOKit service targets the S540 GTX 1650 Max-Q (`10DE:1F91`, subsystem `17AA:3806`, revision `A1`). Version **0.1.0** successfully attached to its PCI provider and reported fixed configuration reads and assigned resource descriptors on the laptop. Version **0.2.0** is also confirmed on the laptop: exactly one read-only `NV_PMC_BOOT_0` read returned the expected TU117 identification fields.
 
 The prototype does not initialize the GPU or provide acceleration, command submission, display output, DMA or GSP firmware support. NVIDIA's Linux resource manager has not been integrated.
+
+## Confirmed laptop result: October 15, 2026
+
+The format-2 report returns `identified`, `complete=true`, `wegnoegpu_present=false` and no warnings. The reporter verifies the actual PCI provider identity. The MMIO result records one 32-bit BAR0 identification read, register value `0x167000A1`, architecture `0x16`, implementation `0x07` and reason `tu117-identified`.
+
+This confirms the single identification-register read, without validating other registers, GPU initialization, usable VRAM, firmware operation or acceleration. Runtime stop/unload remains untested. The next boundary requires source assessment before expanding access; no additional register is selected from this result alone. Raw reports and private resource addresses remain excluded.
 
 ## Upgrade the existing experiment
 
@@ -19,7 +25,7 @@ Use the complete **S540-nvidia-transport-v2.zip**, extracted into Downloads. Kee
 
 5. Share **nvidia-transport.json** from the new **NVIDIA-TRANSPORT…** folder on the Desktop.
 
-This is the first hardware test of the MMIO read. A single MMIO load can hang or fault the kernel, and a software timeout cannot make that load recoverable. Use the separate test EFI and retain the unchanged Samsung boot path. If the experiment fails to boot, boot from Samsung and restore the previous kext on the test HDD. Do not attempt a live unload.
+The single-register read remains experimental. An MMIO load can hang or fault the kernel, and a software timeout cannot make that load recoverable. Use the separate test EFI and retain the unchanged Samsung boot path. If the experiment fails to boot, boot from Samsung and restore the previous kext on the test HDD. Do not attempt a live unload.
 
 No administrator command, system installation, SIP change, NVRAM reset or kernel collection rebuild is part of this procedure. The reporter requires no developer tools.
 
@@ -58,7 +64,7 @@ Refusal is a complete diagnostic outcome. Failed reads and invalid reports retur
 
 The native Intel CI build compiles and links the kext, checks its Mach-O type and module metadata, verifies ad-hoc signatures, and runs decoder and policy tests. It does not load the experimental kext or validate the laptop's MMIO response.
 
-Version 0.2.0 passed the [native Intel build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38664620193) at commit `a463601d5d876899bbd7b4ee17d5d81972f697b6`. Compilation, signatures, 116 native decoder checks, the host policy tests and packaged reporter execution passed. CI does not load the experimental kext; the laptop MMIO result remains pending.
+Version 0.2.0 passed the [native Intel build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38664993966), including compilation, signatures, policy/decoder checks and packaged reporter execution. CI does not load the experimental kext. The subsequent laptop report separately confirms the single BOOT_0 identification read described above.
 
 The optional local source bundle **S540-nvidia-build-local-v1.zip** provides an alternative on Intel macOS with Apple Command Line Tools. Extract it into Downloads and run:
 

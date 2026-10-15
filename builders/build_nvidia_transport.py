@@ -178,7 +178,7 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                   'validation': ['native Intel kernel compile and link', 'thin x86_64 Mach-O and module entry metadata',
                                  'ad-hoc signature verification', 'native report decoder self-test',
                                  live_validation],
-                  'hardware_status': 'Version 0.1.0 laptop PCI attachment confirmed. Version 0.2.0 single BAR0 identification read awaits laptop validation; GPU initialization remains unimplemented.'}
+                  'hardware_status': 'Laptop PCI attachment and version 0.2.0 single read-only BAR0 TU117 identification are confirmed. GPU initialization, firmware loading and acceleration remain unimplemented.'}
         payload['BUILD.json'] = (json.dumps(record, indent=2, sort_keys=True) + '\n').encode()
         payload['SHA256SUMS'] = ''.join(digest(data) + '  ' + name + '\n' for name, data in sorted(payload.items())).encode('ascii')
         pending = work / archive.name

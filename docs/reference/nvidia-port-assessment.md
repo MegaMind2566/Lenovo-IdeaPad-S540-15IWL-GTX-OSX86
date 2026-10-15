@@ -2,7 +2,7 @@
 
 Reviewed on October 15, 2026. Target: Lenovo IdeaPad S540-15IWL GTX, Intel macOS Tahoe, NVIDIA GTX 1650 Max-Q, PCI `10DE:1F91`.
 
-**Status:** source assessment, PCI visibility and the 0.1.0 kernel attachment/configuration/resource milestone are confirmed on the laptop. The [transport prototype](../../packages/nvidia-transport/README.md) 0.2.0 now implements one guarded read-only BAR0 identification read with a format-2 report; that hardware result remains pending. GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
+**Status:** PCI visibility, the 0.1.0 attachment/configuration/resource milestone and the [transport prototype](../../packages/nvidia-transport/README.md) 0.2.0 single-read TU117 identification are confirmed on the laptop. The next boundary requires source assessment before expanding hardware access. GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
 
 ## Source baseline
 
@@ -86,14 +86,26 @@ No descriptor is retained at `0x18` or `0x20`. Raw BAR type/width flags are abse
 
 Version 0.2.0 implements exactly one 32-bit read of [`NV_PMC_BOOT_0`](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/common/inc/swref/published/nv_ref.h#L102-L131), documented read-only at BAR0 offset zero. It requires the exact provider identity, matching BAR0 type/alignment/length, already-enabled memory decoding and D0 established through read-only PCI checks, or refuses without repairing configuration or power state. The read-only uncached mapping requests a four-byte subset; the VM mapping retains page granularity and is released after the single load.
 
-The format-2 report distinguishes identification, refusal and failed read/decode, while an old loaded 0.1.0 probe is reported as outdated rather than accepted as a new result. Laptop validation of 0.2.0 remains pending. There are no retries, polling, configuration or MMIO writes, DMA, interrupts, firmware loading or GSP initialization. A single MMIO load can still stall the kernel; this implementation provides no recoverable hardware timeout. Successful attachment or host-side checks do not establish a successful register read.
+The format-2 report distinguishes identification, refusal and failed read/decode, while an old loaded 0.1.0 probe is reported as outdated rather than accepted as a new result. There are no retries, polling, configuration or MMIO writes, DMA, interrupts, firmware loading or GSP initialization. A single MMIO load can still stall the kernel; this implementation provides no recoverable hardware timeout.
+
+The delivered 0.2.0 archive comes from the [successful native Intel build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38664993966) at commit `0352cacd844890b4e1a2a3179c1f50cd8ad35b8d`; its ZIP SHA256 is `3c4102039d41bf7a87fac3d42ebc8187dce895b83df3be5cfba6735cccc83f73`.
+
+### Confirmed single-read result: October 15, 2026
+
+The laptop report from 0.2.0 returns `identified`, `complete=true`, `wegnoegpu_present=false` and no warnings, with the actual PCI provider identity verified. Its MMIO result records `read_count=1`, BAR0 offset zero, width 32, register value `0x167000A1`, architecture `0x16`, implementation `0x07` and reason `tu117-identified`. This establishes exactly one completed read of the expected TU117 identification register. It does not validate other registers, usable VRAM, initialization, DMA, firmware startup, execution or graphics acceleration. Runtime stop/unload remains untested; raw reports and private resource addresses remain excluded.
+
+### Next boundary
+
+The pinned NVIDIA resource manager's [`_halmgrIsChipSupported`](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/src/kernel/core/hal_mgr.c#L125-L148) consumes `NV_PMC_BOOT_42` architecture and implementation fields for HAL matching. The [register definition](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/common/inc/swref/published/nv_ref.h#L150-L172) marks BAR0 offset `0xA00` as read-only. The [generated chip table](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/generated/g_chips2halspec_nvoc.c#L39-L43) maps architecture `0x16` and implementation `0x07` to the TU117 HAL variant.
+
+A single guarded BOOT_42 read and cross-check against BOOT_0 is therefore the next candidate to assess for the actual HAL-selection path. It is not implemented in 0.2.0. Any implementation must retain the existing identity, BAR0, memory-decode, D0 and provider-ownership guards, review the offset-specific mapping, reject unavailable or inconsistent identification, and avoid scans, retries or writes. The single-load kernel-stall limitation remains. No GPU initialization or firmware startup follows from these identification fields alone.
 
 ## Milestone status and remaining work
 
 | Milestone | Required result |
 |---|---|
 | Darwin PCI attachment | Confirmed laptop attachment, fixed configuration reads and assigned resource metadata; runtime stop/unload remains untested |
-| Single-read BAR0 identification | Implemented in 0.2.0, format 2; laptop result pending. The confirmed 0.1.0 attachment report is not register-read evidence |
+| Single-read BAR0 identification | Confirmed on the laptop in 0.2.0: exactly one BOOT_0 read with expected TU117 fields; no broader hardware operation validated |
 | Further hardware transport | Separate reviewed work for DMA and interrupts, with bounded access and failure handling |
 | GPU and GSP startup | Matching, hashed firmware; observed initialization with timeouts and cleanup; no success inferred from PCI enumeration |
 | Minimal execution | One deterministic command with a checked result and recoverable failure path |
