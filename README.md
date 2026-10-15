@@ -70,7 +70,7 @@ Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including t
 
 ## Development priorities
 
-- Continue the CPU-only [Darwin OS adapter](packages/nvidia-os-adapter/README.md) using GitHub checks. Its clock component passed kernel compile/link/import checks and native userspace validation. The confirmed v0.3.0 transport stays unchanged. Laptop tests will combine components into meaningful milestones. HAL instantiation, resource-manager integration, DMA, firmware startup and acceleration remain unimplemented.
+- Continue the CPU-only [Darwin OS adapter](packages/nvidia-os-adapter/README.md) in GitHub. Clock, ordinary-RAM and original NVIDIA atomic-header foundations passed combined kernel compile/link/import checks and native userspace validation. The confirmed v0.3.0 transport stays unchanged. Laptop tests will combine components into meaningful milestones; full validation follows the implementation stages. HAL instantiation, resource-manager integration, DMA, firmware startup and acceleration remain unimplemented.
 - Complete storage reliability and remaining USB 2 device checks. Both USB-A connectors and USB-C in both orientations negotiate 5 Gb/s with the tested hardware. Audio peripherals, battery power and independent SSD boot work; measured battery runtime remains open.
 - Complete Intel stability and power-management coverage; sustained cooling and fan telemetry remain open. External-display work is paused.
 - Complete remaining device support and investigate connection performance from the recorded Internet baseline; wired/Bluetooth microphones, headphone switching and wireless reconnection work.
@@ -81,7 +81,7 @@ See the [Roadmap](docs/status/roadmap.md) for the implementation plan.
 
 ## Documentation and downloads
 
-The CPU-only clock adapter passed [GitHub validation](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38694368596). It has no laptop installation package; kernel runtime remains unvalidated.
+The CPU-only OS adapter contains clock, ordinary-RAM and atomic foundations. [Combined GitHub validation passed](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38696607911), including kernel-object linking and native userspace execution. There is no laptop installation package, and kernel runtime remains unvalidated.
 
 The [documentation index](docs/README.md) links to setup, maintenance, and recovery procedures. Main guides: [Intel graphics](docs/guides/intel-graphics.md), [Tahoe audio](docs/guides/tahoe-audio.md), and [microphone correction](docs/guides/microphone-fix.md).
 

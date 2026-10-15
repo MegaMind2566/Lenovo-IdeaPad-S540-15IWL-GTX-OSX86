@@ -17,7 +17,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 |---|---|
 | [Passive CPU sensors](../packages/cpu-sensors/README.md) | A continuous sensor reading with no CPU workload; complete temperature readings at idle and during desktop activity |
 | [CPU, temperature and power](../packages/cpu-thermal/README.md) | Grouped idle, short-load and recovery collector; sustained-cooling validation remains separate from the successful activity readings |
-| [NVIDIA Darwin OS adapter](../packages/nvidia-os-adapter/README.md) | CPU-only clock compile/link/import and native userspace checks passed in GitHub; kernel runtime unvalidated, no laptop installation package |
+| [NVIDIA Darwin OS adapter](../packages/nvidia-os-adapter/README.md) | CPU-only clock, ordinary-RAM and atomic foundations; combined kernel compile/link/import and native userspace checks passed; no laptop installer or kernel runtime validation |
 | [NVIDIA PCI transport](../packages/nvidia-transport/README.md) | Confirmed 0.3.0 two-read identification and local TU117 HAL table match; no HAL object or initialized GPU |
 | [NVIDIA PCI inventory](../packages/nvidia-pci/README.md) | Native read-only inventory; active target PCI visibility is confirmed |
 | [Intel graphics](guides/intel-graphics.md) | Acceleration and stability checks |
@@ -34,7 +34,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 
 ## Reference
 
-- [NVIDIA port assessment](reference/nvidia-port-assessment.md): pinned source, confirmed two-read identification/local HAL table match and CPU-only clock validation scope.
+- [NVIDIA port assessment](reference/nvidia-port-assessment.md): pinned source, confirmed two-read identification/local HAL table match and CPU-only OS-adapter validation scope.
 - [ACPI analysis](reference/acpi-analysis.md), [ACPI patch review](reference/acpi-patch-review.md) and [initial EFI delivery review](reference/efi-review.md).
 - [External disk installation](reference/installation.md) and [initial EFI instructions](reference/first-boot.md), written before the working configuration.
 - [Repository layout](reference/repository-layout.md), including the distinction between source modules and generated ZIP packages.

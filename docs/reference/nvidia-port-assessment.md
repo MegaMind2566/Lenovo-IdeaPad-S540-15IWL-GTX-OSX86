@@ -2,7 +2,7 @@
 
 Reviewed on October 15, 2026. Target: Lenovo IdeaPad S540-15IWL GTX, Intel macOS Tahoe, NVIDIA GTX 1650 Max-Q, PCI `10DE:1F91`.
 
-**Status:** PCI visibility, 0.1.0 attachment/configuration/resource reads, 0.2.0 BOOT_0 identification and the [transport prototype](../../packages/nvidia-transport/README.md) 0.3.0 two-read/local HAL table match are confirmed on the laptop. The CPU-only Darwin clock adapter passed GitHub compile/link/import and native userspace checks; kernel runtime remains unvalidated. HAL instantiation, resource-manager integration, GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
+**Status:** PCI visibility, 0.1.0 attachment/configuration/resource reads, 0.2.0 BOOT_0 identification and the [transport prototype](../../packages/nvidia-transport/README.md) 0.3.0 two-read/local HAL table match are confirmed on the laptop. The CPU-only Darwin OS adapter passed combined kernel compile/link/import and native userspace checks for clocks, ordinary-RAM and atomic foundations; kernel runtime remains unvalidated. HAL instantiation, resource-manager integration, GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
 
 ## Source baseline
 
@@ -106,17 +106,21 @@ This confirms two read-only identification loads and a local table comparison. I
 
 The 0.3.0 [native Intel build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38666863926) passed at commit `dc21ecb52d0cde3b824d2ae692c0982d7e1cc972`, including compilation, signatures, policy/decoder checks and packaged reporter execution with the probe unloaded. Its ZIP SHA256 is `4b0c5c0634be2af65bcfd9fd01f91adb12fb7e6ef8d7fefd59027ccba51e6002`. CI did not load the kext or validate BOOT_42 on the laptop.
 
-## Darwin OS adapter: CPU-only clock component
+## Darwin OS adapter: CPU-only foundations
 
-The [OS-adapter component](../../packages/nvidia-os-adapter/README.md) is separate from the unchanged, confirmed v0.3.0 transport. It implements CPU-only monotonic-clock hooks for an adapted NVIDIA uptime caller. The full resource manager and HAL remain unintegrated; this component adds no GPU reads, writes or initialization.
+The [OS-adapter component](../../packages/nvidia-os-adapter/README.md) is separate from the unchanged, confirmed v0.3.0 transport. Its clock, ordinary-RAM and atomic boundaries are CPU-only. The full resource manager and HAL remain unintegrated; these components add no GPU access or initialization.
 
-The implemented clock hooks are `os_get_monotonic_time_ns`, `os_get_monotonic_time_ns_hr` and `os_get_monotonic_tick_resolution_ns`. NVIDIA's actual [nvport time caller](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/src/libraries/nvport/time/time_unix_kernel_os.c#L68-L80) consumes these hooks, and its [GPU timeout code](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/src/kernel/gpu/gpu_timeout.c#L282-L302) uses uptime and resolution to form deadlines. The pinned Darwin [clock header](https://github.com/acidanthera/MacKernelSDK/blob/3f750085caa17ec3a7880f11c11bf4f48cd6a164/Headers/kern/clock.h#L86-L115) provides `clock_get_uptime`, `absolutetime_to_nanoseconds` and `clock_timebase_info` for the kernel backend; the native userspace harness uses `mach_absolute_time` and its timebase.
+| Boundary | Implementation | Evidence |
+|---|---|---|
+| Monotonic clocks | Three exact OS hooks and four adapted upstream uptime callers; logical 1 ms ordinary-clock quantum and raw high-precision Darwin uptime | [Combined GitHub run passed](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38696607911): provenance, kernel compile/link/import audit and native userspace clock/memory integration |
+| Ordinary-RAM primitives | Exact copy/set/compare OS ABI; four adapted release-profile nvport callers preserve 64-bit lengths through bounded 32-bit hook calls | Native actual-caller/backend execution, AddressSanitizer/UndefinedBehaviorSanitizer execution and combined kernel-object checks passed |
+| Atomic headers | Unmodified NVIDIA header closure; actual Clang selection of C11 atomics in GNU C11 and Clang intrinsics in C++17 | Native C/C++ semantics, four-thread contention/publication and combined kernel-object checks passed; no atomic runtime helpers |
 
-The source adapts four contiguous upstream uptime functions with their signatures and bodies unchanged, while narrowing includes and build guards. Three NVIDIA ABI headers are retained unchanged with pinned provenance and MIT notices. This is an adapted excerpt, not the complete upstream time module. The ordinary clock is rounded down to a logical 1 ms quantum and reports `1,000,000` ns resolution; the high-precision hook returns raw Darwin uptime in nanoseconds. The quantum is a software policy, not measured hardware precision.
+The [source manifests](../../packages/nvidia-os-adapter/upstream/README.md) pin NVIDIA release `615.78.08` and distinguish unchanged headers from adapted time/memory excerpts. The memory excerpt is not the complete upstream module: allocation, user-copy, checked-build diagnostics and generic move helpers are excluded. Copy overlap remains undefined. The atomic header's LLVM license is retained alongside NVIDIA MIT notices.
 
-The [GitHub validation run](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38694368596) at commit `dc815ca51058fd44561853df380cff9b2d55ca66` passed provenance and clock-policy checks, compiled both kernel objects, produced a relocatable link with exactly three Apple clock imports, and ran the native userspace caller/harness. The validation report SHA256 is `63ee09d3ca168a370395a03ec1a575ee2cc960c3b105df7e289b8cd51e3bf159`.
+The [combined run](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38696607911) used commit `83d3ae7b2ce19215c73f8c89437257a3e7ac960c`; its verified report SHA256 is `55a669d3d0642bad93eb23fef511b447078a353e0f81e632cbd58acdd3b69fff`. Two relocatable kernel-object links each combine clock and memory with one atomic language consumer: GNU C11 or C++17. Exactly six imports remain: three Apple clock functions and `memcpy`, `memset`, `memcmp`; no atomic runtime helper is required. Native userspace harnesses exercise the real implementations. This establishes compile/link compatibility and tested userspace behavior, not kernel runtime, suspend behavior or GPU deadlines. The ordinary clock quantum is software policy, not measured hardware precision.
 
-These results establish compile/link compatibility and the tested userspace behavior, not kernel runtime, suspend behavior or GPU deadlines. No GPU operation occurred. This component has no laptop installation package. Future laptop tests will combine components into meaningful integration milestones. Software deadlines cannot make a stalled MMIO load recoverable.
+Large lengths are checked through chunk plans; no copy, fill or comparison over a buffer larger than 4 GiB is executed. There is no laptop installation package for these CPU-only substeps. Hardware tests will combine components into meaningful milestones; full validation follows the implementation stages. Software deadlines cannot make a stalled MMIO load recoverable.
 
 ## Milestone status and remaining work
 
@@ -125,7 +129,7 @@ These results establish compile/link compatibility and the tested userspace beha
 | Darwin PCI attachment | Confirmed laptop attachment, fixed configuration reads and assigned resource metadata; runtime stop/unload remains untested |
 | Single-read BAR0 identification | Confirmed on the laptop in 0.2.0: exactly one BOOT_0 read with expected TU117 fields; no broader hardware operation validated |
 | BOOT_42 and local HAL table match | Confirmed on the laptop in 0.3.0: two read-only identification loads and local TU117 variant-41 match. No HAL object or resource-manager integration |
-| CPU-only Darwin clock adapter | GitHub provenance, kernel compile/link/import and native userspace checks passed. No kernel runtime validation or resource-manager integration |
+| CPU-only Darwin OS foundations | Combined clock, ordinary-RAM and atomic GitHub kernel compile/link/import and native userspace checks passed. No kernel runtime validation or resource-manager integration |
 | Further hardware transport | Separate reviewed work for DMA and interrupts, with bounded access and failure handling |
 | GPU and GSP startup | Matching, hashed firmware; observed initialization with timeouts and cleanup; no success inferred from PCI enumeration |
 | Minimal execution | One deterministic command with a checked result and recoverable failure path |
