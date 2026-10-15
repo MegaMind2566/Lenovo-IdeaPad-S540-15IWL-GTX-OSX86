@@ -2,6 +2,26 @@
 
 Goal: make all components of the Lenovo IdeaPad S540-15IWL GTX usable on macOS Tahoe. Each component requires testing on the device. NVIDIA research remains open and is planned after stabilising Intel graphics.
 
+## Bundled NVIDIA development
+
+Version 0.6.0 is the confirmed kernel baseline. Its 130 checks are complete. Future development is grouped by an integrated runtime result, rather than one laptop checkpoint per primitive, wrapper, source extraction or version bump.
+
+The next bundle targets the CPU support runtime required by a selected original NVIDIA initialization path. It combines these work areas:
+
+| Work area | Included in the same development bundle |
+|---|---|
+| Actual dependency closure | Select the NVPort CPU-core startup profile and a real RM-library consumer; resolve their required source, headers, types and external symbols together, retaining source provenance and explicit adaptations |
+| Memory contracts | Check actual caller sizes, contexts and lifetime against the existing 4 MiB reserve and 128 KiB request limit; implement any required backend change before claiming compatibility |
+| Synchronization and initialization | Integrate the synchronization and module initialization required by that selected path, with explicit context and ownership contracts |
+| Failure handling and shutdown | Exercise failed initialization, reverse-order cleanup and repeated startup/shutdown in native CI; resources must return to their baseline |
+| Integrated delivery | Compile and link the production entry point, audit imports, execute fault/stress and sanitizer checks, and produce one package with a combined report and rollback instructions |
+
+These are implementation requirements, not completed features. The acceptance target is a real integrated CPU startup/cleanup path with a selected original library consumer, not a larger count of isolated wrapper checks. The pinned upstream `portInitialize()` publishes initialization state before module initialization and returns unconditional success; its selected integration therefore needs explicit failure propagation and rollback. Full NVPort or RM startup must not be claimed unless the actual selected upstream path and its dependencies execute successfully. Missing contracts cannot be replaced by successful no-op stubs.
+
+All independent implementation and validation stay in GitHub. Only a complete bundle that needs new kernel evidence becomes a laptop checkpoint: one package, one combined boot and one report. Existing v6 assertions may run automatically inside that report as regression coverage; no separate v6 rerun or per-component package is requested. A blocking kernel-only failure may require a focused follow-up, with the unresolved issue stated explicitly.
+
+The subsequent hardware bundle combines the required PCI, interrupt and DMA transport with matching firmware and RM/GSP startup only after their dependencies and failure paths are ready. It is not part of the confirmed CPU baseline. GPU initialization, minimal command execution and graphics integration remain later milestones. The present two-read identification policy remains the baseline until a reviewed hardware implementation explicitly replaces it.
+
 ## Work order and retained backlog
 
 The [CPU and sensor reports](cpu-thermal.md) confirm frequency/power response and complete temperature readings both at idle (45–48 °C) and during desktop activity (57–82 °C). The activity report retains a simultaneous maximum of 82 °C, estimated Intel package power 35.62 W and average system frequency 3.44 GHz, followed by a final 57 °C. Thermal pressure remains Nominal. Loaded SMC sensor drivers are 1.3.8. The earlier isolated load-temperature gap remains unexplained but did not recur in this continuous activity session; sustained cooling and fan RPM remain open, with no sensor patch inferred. Independent boot from the external 960 EVO is now confirmed after manual transfer of the private working EFI. The Samsung/RTL9210 connection reports 5 Gb/s in both USB-C connector orientations. Battery Power and discharge are reported after AC removal. Wired-headphone output, automatic return to speakers and wired-headset microphone input are confirmed. HDMI produces no image, and macOS enumerates only the internal panel. External-display work is paused by request. HDMI GPU routing remains unresolved, and USB-C video is not advertised in the exact GTX specification and cannot currently be tested. The subsequent two-port USB-A check reports the same Initio enclosure at 5 Gb/s on both tested connectors, while the Samsung remains enumerated at 5 Gb/s. File access was subsequently confirmed working on both USB-A connectors. External USB 2 device coverage, sustained storage reliability and measured battery runtime remain open. The remaining thermal and hardware items stay tracked below.

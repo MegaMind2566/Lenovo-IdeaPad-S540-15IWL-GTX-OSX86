@@ -73,6 +73,8 @@ Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including t
 
 ## Development priorities
 
+Development is grouped into complete integration milestones. The next bundle covers the selected NVIDIA CPU-runtime dependencies, allocation and synchronization contracts, startup, failure cleanup and one combined reporter. Component implementation, fault tests, stress checks and packaging run in GitHub before any laptop checkpoint. One package and one combined boot/report cover a completed bundle; individual wrappers and library additions do not trigger separate laptop tests. The confirmed v6 checks remain regression coverage within later packages, with no separate rerun. See the [bundled milestone scope](docs/status/roadmap.md#bundled-nvidia-development).
+
 - Continue NVIDIA OS-contract and resource-manager integration from the confirmed [v6 NVPort lifecycle block](packages/nvidia-nvport-lifecycle/README.md). All 130 combined startup checks passed in the Tahoe kernel, including resource cleanup, with no warnings. This checkpoint is complete; no repeat laptop test is required. Full resource-manager integration, DMA, firmware startup and acceleration remain unimplemented.
 - Complete storage reliability and remaining USB 2 device checks. Both USB-A connectors and USB-C in both orientations negotiate 5 Gb/s with the tested hardware. Audio peripherals, battery power and independent SSD boot work; measured battery runtime remains open.
 - Complete Intel stability and power-management coverage; sustained cooling and fan telemetry remain open. External-display work is paused.
