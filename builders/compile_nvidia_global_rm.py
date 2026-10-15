@@ -30,9 +30,30 @@ ADAPTER_ROOTS = (*GLOBAL_ROOTS, 'rm_init_adapter', 'rm_shutdown_adapter',
 
 
 def execute(args: list[str], *, cwd: Path | None = None,
-            timeout: int = 180) -> subprocess.CompletedProcess:
-    return subprocess.run(args, cwd=cwd, text=True, capture_output=True,
-                          check=True, timeout=timeout)
+            timeout: int = 180, diagnostic_log: Path | None = None) -> subprocess.CompletedProcess:
+    try:
+        result = subprocess.run(args, cwd=cwd, text=True, capture_output=True,
+                                timeout=timeout)
+    except subprocess.TimeoutExpired as error:
+        # TimeoutExpired may retain bytes even when text mode was requested.
+        def decoded(value: str | bytes | None) -> str:
+            return value.decode(errors='replace') if isinstance(value, bytes) else value or ''
+        result = subprocess.CompletedProcess(args, -1, decoded(error.stdout), decoded(error.stderr))
+        failure = 'Command timed out after ' + str(timeout) + ' seconds'
+    else:
+        failure = 'Command failed with exit status ' + str(result.returncode)
+    if diagnostic_log is not None:
+        diagnostic_log.write_text('stdout:\n' + result.stdout + '\nstderr:\n' + result.stderr)
+    if result.returncode:
+        # A link command contains 1,100 object paths. Preserve its diagnostics
+        # instead of replacing them with CalledProcessError's enormous argv.
+        detail = result.stderr.strip() or result.stdout.strip() or 'No diagnostic output was returned.'
+        if len(detail) > 8000:
+            detail = '[Earlier diagnostic output omitted.]\n' + detail[-8000:]
+        log = '\nFull diagnostics: ' + str(diagnostic_log) if diagnostic_log is not None else ''
+        raise RuntimeError(failure + ': ' + shlex.join(args[:2]) + ' (' + str(len(args)) +
+                           ' arguments)\n' + detail + log)
+    return result
 
 
 def original_commands(upstream: Path, output: Path, compiler: Path) -> list[list[str]]:
@@ -177,7 +198,8 @@ def compile_with_namespace(upstream: Path, output: Path, compiler: Path,
                          json.dumps(mismatches, sort_keys=True))
     header = output / 'original/contract/S540GlobalRmNamespace.h'
     record = compile_original(upstream, output / 'namespaced', compiler,
-                              cross_probe=cross_probe, namespace=header, linker=linker)
+                              cross_probe=cross_probe, namespace=header, linker=linker,
+                              summary_path=output / 'darwin-compile.json')
     record['source_namespace_verified'] = True
     record['source_namespace_contract'] = expected
     record['generated_namespace_header'] = 'original/contract/S540GlobalRmNamespace.h'
@@ -225,7 +247,8 @@ def link_dependency_controls(objects: list[Path], output: Path,
         args = [*linker, '-arch', 'x86_64', '-platform_version', 'macos', '15.0', '15.0',
                 '-bundle', '-undefined', 'dynamic_lookup', '-dead_strip', '-no_uuid']
         args += [value for root in roots for value in ('-exported_symbol', '_' + PREFIX + root)]
-        execute([*args, *(str(path) for path in objects), '-o', str(image)], timeout=300)
+        execute([*args, *(str(path) for path in objects), '-o', str(image)], timeout=300,
+                diagnostic_log=output / (name + '-dependency-control.log'))
         defined, external, sections = macho_symbols(image, expected_type=8)
         if defined != {PREFIX + root for root in roots}:
             raise ValueError('The dependency-control exports differ from the exact RM roots.')
@@ -238,7 +261,7 @@ def link_dependency_controls(objects: list[Path], output: Path,
 
 def compile_original(upstream: Path, output: Path, compiler: Path,
                      *, cross_probe: bool = False, namespace: Path | None = None,
-                     linker: Path | None = None) -> dict:
+                     linker: Path | None = None, summary_path: Path | None = None) -> dict:
     if not cross_probe and (sys.platform != 'darwin' or platform.machine() != 'x86_64'):
         raise ValueError('Authoritative original RM compilation requires Intel macOS.')
     upstream = upstream.resolve(strict=True)
@@ -301,10 +324,28 @@ def compile_original(upstream: Path, output: Path, compiler: Path,
                   hashlib.sha256((source_root / item['source']).read_bytes()).hexdigest()
                   for item in results},
               'warnings': [item for item in results if item['diagnostics']]}
-    if namespace is not None and (linker is not None or not cross_probe):
-        record['dependency_controls'] = link_dependency_controls(objects, output,
-            [str(linker)] if linker is not None else ['/usr/bin/xcrun', 'ld'])
-    (output / 'darwin-compile.json').write_text(json.dumps(record, indent=2, sort_keys=True) + '\n')
+    def save_record() -> None:
+        text = json.dumps(record, indent=2, sort_keys=True) + '\n'
+        (output / 'darwin-compile.json').write_text(text)
+        if summary_path is not None:
+            summary_path.write_text(text)
+
+    needs_link = namespace is not None and (linker is not None or not cross_probe)
+    record['dependency_controls_status'] = 'pending' if needs_link else 'not_requested'
+    # Successful compilation and namespace evidence must survive a later link
+    # failure. These records do not authorize reuse until the caller has also
+    # completed the source-namespace and dependency-control checks.
+    save_record()
+    if needs_link:
+        try:
+            record['dependency_controls'] = link_dependency_controls(objects, output,
+                [str(linker)] if linker is not None else ['/usr/bin/xcrun', 'ld'])
+        except (RuntimeError, ValueError, subprocess.TimeoutExpired):
+            record['dependency_controls_status'] = 'failed'
+            save_record()
+            raise
+        record['dependency_controls_status'] = 'passed'
+        save_record()
     return record
 
 

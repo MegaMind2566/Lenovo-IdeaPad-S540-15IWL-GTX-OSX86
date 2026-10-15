@@ -87,6 +87,13 @@ and runtime contract. A 4 KiB limit on individual frames does not prove that
 the aggregate call chain fits a Darwin kernel stack. No kernel readiness is
 inferred from the development control.
 
+The first native Intel macOS workflow compiled all 1,100 unchanged source
+units, repeated compilation with the verified private namespace, and reached
+the dependency-control link. That link failed; the original subprocess wrapper
+did not surface its diagnostic. This is native source-compilation evidence,
+not a passing workflow or validation of the cleanup overlays. No original RM
+entry point ran in that job.
+
 ## External ABI boundary
 
 [EXTERNAL-CONTRACTS.json](EXTERNAL-CONTRACTS.json) records 244 exact non-crypto
