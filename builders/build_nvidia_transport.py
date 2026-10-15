@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the bounded Intel NVIDIA HAL identification probe; never load or install it."""
+"""Build the integrated CPU-only NVIDIA OS-adapter and bounded TU117 probe."""
 from __future__ import annotations
 
 import argparse
@@ -19,11 +19,23 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'packages/nvidia-transport'
-PACKAGE = 'S540-nvidia-transport-v3'
-VERSION = '0.3.0'
+ADAPTER = ROOT / 'packages/nvidia-os-adapter'
+PACKAGE = 'S540-nvidia-transport-v4'
+VERSION = '0.4.0'
 SDK_COMMIT = '3f750085caa17ec3a7880f11c11bf4f48cd6a164'
 BUNDLE = 'S540NvidiaPCIProbe.kext'
 EXECUTABLE = 'S540NvidiaPCIProbe'
+ADAPTER_CPP = ('S540NvidiaClock', 'S540NvidiaMemory', 'S540NvidiaAllocator',
+               'S540NvidiaSync', 'S540NvidiaRuntime')
+ADAPTER_C = ('nvport_time_uptime', 'nvport_memory_primitives')
+# The combined adapter must leave only these ordinary Darwin CPU/RAM APIs
+# unresolved. Audit it before adding the existing IOKit PCI probe.
+ADAPTER_IMPORTS = {
+    '_clock_get_uptime', '_absolutetime_to_nanoseconds', '_clock_timebase_info',
+    '_memcpy', '_memset', '_memcmp', '_IOMalloc', '_IOFree',
+    '_IOLockAlloc', '_IOLockFree', '_IOLockLock', '_IOLockTryLock', '_IOLockUnlock',
+    '_ml_at_interrupt_context', '_ml_get_interrupts_enabled',
+}
 
 
 def digest(data: bytes) -> str:
@@ -47,6 +59,79 @@ def macho(path: Path, expected_type: int) -> None:
         raise ValueError('The build must contain only x86_64.')
 
 
+def native_check(binary: Path) -> dict:
+    macho(binary, 2)
+    run('/usr/bin/codesign', '--force', '--sign', '-', str(binary))
+    run('/usr/bin/codesign', '--verify', '--strict', str(binary))
+    result = json.loads(run(str(binary)).stdout)
+    if (result.get('status') != 'passed' or result.get('execution') != 'native-user-space'
+            or result.get('gpu_access') is not False
+            or result.get('kernel_runtime') != 'not_tested'
+            or not isinstance(result.get('checks'), int) or result['checks'] < 1):
+        raise ValueError('Unexpected native check result: ' + binary.name)
+    return result
+
+
+def check_new_adapters(work: Path) -> dict:
+    """Exercise actual allocator/lock backends before packaging the kernel build."""
+    common = ['-arch', 'x86_64', '-mmacosx-version-min=15.0', '-std=c++17',
+              '-O2', '-Wall', '-Wextra', '-Werror',
+              '-I', str(ADAPTER / 'upstream/include')]
+    tests = (
+        ('allocator', 'check_allocator_native.cpp', 'S540NvidiaAllocator.cpp', []),
+        ('allocator-failure-paths', 'check_allocator_native.cpp', 'S540NvidiaAllocator.cpp',
+         ['-DS540_NVIDIA_ALLOCATOR_TEST_BACKEND']),
+        ('allocator-sanitized', 'check_allocator_native.cpp', 'S540NvidiaAllocator.cpp',
+         ['-DS540_NVIDIA_ALLOCATOR_TEST_BACKEND', '-fsanitize=address,undefined',
+          '-fno-omit-frame-pointer']),
+        ('synchronization', 'check_sync_native.cpp', 'S540NvidiaSync.cpp', ['-pthread']),
+        ('synchronization-sanitized', 'check_sync_native.cpp', 'S540NvidiaSync.cpp',
+         ['-pthread', '-fsanitize=address,undefined', '-fno-omit-frame-pointer']),
+    )
+    results = {}
+    for name, harness, source, options in tests:
+        binary = work / ('check-' + name)
+        run('/usr/bin/xcrun', 'clang++', *common, *options,
+            str(ADAPTER / 'tests' / harness), str(ADAPTER / 'src' / source),
+            '-o', str(binary))
+        results[name] = native_check(binary)
+    # Run the same bounded self-check that the probe calls during IOKit start.
+    # This proves native integration; the on-laptop report separately proves
+    # whether its Darwin kernel backends have executed successfully.
+    harness = work / 'check-integrated-runtime.cpp'
+    harness.write_text('''#include "S540NvidiaRuntime.hpp"
+#include <cstdio>
+int main() {
+    const S540NvidiaRuntime::Result result = S540NvidiaRuntime::check();
+    if (!result.passed()) return 1;
+    std::printf("{\\"status\\":\\"passed\\",\\"checks\\":%u,"
+                "\\"execution\\":\\"native-user-space\\","
+                "\\"kernel_runtime\\":\\"not_tested\\",\\"gpu_access\\":false}\\n",
+                result.checks);
+    return 0;
+}
+''', encoding='utf-8')
+    for name, sanitizer in (('integrated-runtime', []),
+                            ('integrated-runtime-sanitized',
+                             ['-fsanitize=address,undefined', '-fno-omit-frame-pointer'])):
+        objects = []
+        for stem in ADAPTER_C:
+            obj = work / (name + '-' + stem + '.o')
+            run('/usr/bin/xcrun', 'clang', '-arch', 'x86_64',
+                '-mmacosx-version-min=15.0', '-std=c11', '-O2',
+                '-Wall', '-Wextra', '-Werror', *sanitizer,
+                '-I', str(ADAPTER / 'upstream/include'), '-c',
+                str(ADAPTER / 'upstream' / (stem + '.c')), '-o', str(obj))
+            objects.append(str(obj))
+        binary = work / ('check-' + name)
+        run('/usr/bin/xcrun', 'clang++', *common, *sanitizer, '-pthread',
+            '-I', str(ADAPTER / 'src'), str(harness),
+            *(str(ADAPTER / 'src' / (stem + '.cpp')) for stem in ADAPTER_CPP),
+            *objects, '-o', str(binary))
+        results[name] = native_check(binary)
+    return results
+
+
 def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
     if sys.platform != 'darwin' or platform.machine() != 'x86_64':
         raise ValueError('An Intel macOS build host is required.')
@@ -63,7 +148,25 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
     if archive.exists() or sidecar.exists():
         raise ValueError('The output already exists.')
     kernel_sources = [SOURCE / 'src/S540NvidiaPCIProbe.cpp', SOURCE / 'src/kmod_start.cpp']
-    required = [*kernel_sources, SOURCE / 'src/S540NvidiaPCIProbe.hpp',
+    adapter_cpp = [ADAPTER / 'src' / (stem + '.cpp') for stem in ADAPTER_CPP]
+    adapter_c = [ADAPTER / 'upstream' / (stem + '.c') for stem in ADAPTER_C]
+    # Preserve the entire adapter source subtree, including NVIDIA and LLVM
+    # notices, exact upstream inputs, adaptation records, and test sources.
+    source_inputs = [*sorted((ADAPTER / 'src').rglob('*')),
+                     *sorted((ADAPTER / 'upstream').rglob('*')),
+                     *sorted((ADAPTER / 'tests').rglob('*')),
+                     *sorted((SOURCE / 'src').rglob('*')),
+                     ADAPTER / 'README.md',
+                     ROOT / 'builders/build_nvidia_transport.py',
+                     ROOT / 'builders/check_nvidia_foundations.py',
+                     ROOT / 'tests/test_nvidia_transport_kernel.py',
+                     *(ROOT / ('tests/test_nvidia_' + name + '_provenance.py')
+                       for name in ('clock', 'memory', 'atomic')),
+                     SOURCE / 'Info.plist', SOURCE / 'CHECK-TRANSPORT.command',
+                     SOURCE / 'README.md', SOURCE / 'LICENSE']
+    source_inputs = [item for item in source_inputs if item.is_file()]
+    required = [*kernel_sources, *adapter_cpp, *adapter_c, *source_inputs,
+                SOURCE / 'src/S540NvidiaPCIProbe.hpp',
                 SOURCE / 'src/check_nvidia_transport.c', SOURCE / 'Info.plist',
                 SOURCE / 'CHECK-TRANSPORT.command', SOURCE / 'README.md',
                 SOURCE / 'LICENSE', sdk / 'LICENSE.txt', sdk / 'Library/x86_64/libkmod.a']
@@ -79,19 +182,44 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
         bundle = work / BUNDLE
         (bundle / 'Contents/MacOS').mkdir(parents=True)
         (bundle / 'Contents/Info.plist').write_bytes(plistlib.dumps(info, sort_keys=False))
+        foundation_output = work / 'foundation-checks'
+        foundations = run(sys.executable, str(ROOT / 'builders/check_nvidia_foundations.py'),
+                          '--kernel-sdk', str(sdk), '--output-dir', str(foundation_output))
+        print(foundations.stdout.strip())
+        foundation_record = json.loads((foundation_output / 'foundation-checks.json').read_text())
+        if foundation_record.get('status') != 'passed' or foundation_record.get('github_sha') != commit:
+            raise ValueError('The foundational native checks do not match this source revision.')
+        native_results = check_new_adapters(work)
         flags = ['-arch', 'x86_64', '-mmacosx-version-min=15.0', '-mkernel',
-                 '-fapple-kext', '-fno-exceptions', '-fno-rtti', '-fno-builtin',
-                 '-fno-common', '-fno-stack-protector', '-fno-threadsafe-statics',
+                 '-fno-builtin', '-fno-common', '-fno-stack-protector',
                  '-fno-asynchronous-unwind-tables', '-fno-unwind-tables',
                  '-mno-red-zone', '-DKERNEL', '-D__KERNEL__', '-O2',
                  '-Wall', '-Wextra', '-Werror', '-Wno-deprecated-declarations',
-                 '-std=c++17', '-nostdinc', '-nostdinc++',
-                 '-isystem', str(sdk / 'Headers'), '-I', str(SOURCE / 'src')]
-        objects = []
-        for source in kernel_sources:
+                 '-nostdinc', '-isystem', str(sdk / 'Headers'),
+                 '-I', str(SOURCE / 'src'), '-I', str(ADAPTER / 'src'),
+                 '-I', str(ADAPTER / 'upstream/include')]
+        cpp_flags = ['-fapple-kext', '-fno-exceptions', '-fno-rtti',
+                     '-fno-threadsafe-statics', '-nostdinc++', '-std=c++17']
+        objects, adapter_objects = [], []
+        for source in [*kernel_sources, *adapter_cpp, *adapter_c]:
             obj = work / (source.stem + '.o')
-            run('/usr/bin/xcrun', 'clang++', *flags, '-c', str(source), '-o', str(obj))
+            compiler = 'clang' if source.suffix == '.c' else 'clang++'
+            language_flags = ['-std=c11'] if source.suffix == '.c' else cpp_flags
+            run('/usr/bin/xcrun', compiler, *flags, *language_flags,
+                '-c', str(source), '-o', str(obj))
+            macho(obj, 1)
             objects.append(str(obj))
+            if source in adapter_cpp or source in adapter_c:
+                adapter_objects.append(str(obj))
+        linked_adapter = work / 'integrated-adapter.o'
+        run('/usr/bin/xcrun', 'ld', '-r', '-arch', 'x86_64', *adapter_objects,
+            '-o', str(linked_adapter))
+        macho(linked_adapter, 1)
+        adapter_imports = set(run('/usr/bin/nm', '-u', '-j', str(linked_adapter)).stdout.split())
+        unexpected_imports = adapter_imports - ADAPTER_IMPORTS
+        if unexpected_imports:
+            raise ValueError('Unexpected integrated kernel adapter imports: '
+                             + ', '.join(sorted(unexpected_imports)))
         binary = bundle / 'Contents/MacOS' / EXECUTABLE
         run('/usr/bin/xcrun', 'clang++', '-arch', 'x86_64',
             '-mmacosx-version-min=15.0', '-mkernel', '-nostdlib',
@@ -127,13 +255,13 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
         allowed_statuses = {'not_attached'}
         if allow_legacy_probe:
             allowed_statuses.add('outdated_probe')
-        if (live.get('format') != 3 or live.get('tool') != 'nvidia-transport'
+        if (live.get('format') != 4 or live.get('tool') != 'nvidia-transport'
                 or live.get('version') != VERSION or live.get('complete') is not True
                 or live.get('status') not in allowed_statuses):
             raise ValueError('The native reporter returned an unexpected report or loaded probe.')
         live_validation = ('native live enumeration without a loaded probe'
                            if live['status'] == 'not_attached' else
-                           'native live recognition of an already-loaded version 0.1.0 or 0.2.0 probe; '
+                           'native live recognition of an already-loaded earlier probe; '
                            'the new kernel probe was not loaded by this build')
         imports = run('/usr/bin/nm', '-u', str(checker)).stdout
         if any(name in imports for name in ('IOServiceOpen', 'IOConnectCall', 'IOConnectMapMemory', 'IORegistryEntrySetCFProperty', 'IORegistryEntrySetCFProperties')):
@@ -148,19 +276,32 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
             'README.md': (SOURCE / 'README.md').read_bytes(),
             'LICENSE': (SOURCE / 'LICENSE').read_bytes(),
             'licenses/MacKernelSDK-APSL-2.0.txt': (sdk / 'LICENSE.txt').read_bytes(),
+            'licenses/LLVM-LICENSE.txt': (ADAPTER / 'upstream/LLVM-LICENSE.txt').read_bytes(),
+            'validation/foundation-checks.json': (foundation_output / 'foundation-checks.json').read_bytes(),
             'THIRD-PARTY-NOTICES.txt': (
                 'The unmodified kernel module runtime is from MacKernelSDK.\n'
                 'Portions Copyright (c) 2000, 2008-2012 Apple Inc. All rights reserved.\n'
                 'Source code is available under the Apple Public Source License 2.0 at:\n'
                 'https://github.com/acidanthera/MacKernelSDK/tree/' + SDK_COMMIT + '/Library/kmod\n'
-                'The corresponding license is included in licenses/MacKernelSDK-APSL-2.0.txt.\n').encode(),
+                'The corresponding license is included in licenses/MacKernelSDK-APSL-2.0.txt.\n\n'
+                'NVIDIA CPU-side types, atomic headers and adapted nvport memory/time callers\n'
+                'are from NVIDIA/open-gpu-kernel-modules at commit\n'
+                '1a82fbfda8f321b056eb3568850f9316c5e465c5, under MIT. Their complete\n'
+                'copyright and license notices are retained in every applicable source file.\n'
+                'Corresponding source, original reference inputs, and precise adaptation\n'
+                'provenance are included under source/packages/nvidia-os-adapter/.\n'
+                'The pinned atomic header closure includes LLVM-derived declarations;\n'
+                'licenses/LLVM-LICENSE.txt supplies the accompanying license.\n'
+                'Project-authored adapters and probe source use the MIT license in LICENSE.\n').encode(),
             'Kernel-Add-entry.plist': plistlib.dumps({
                 'Arch': 'x86_64', 'BundlePath': BUNDLE,
-                'Comment': 'S540 NVIDIA PCI attachment experiment', 'Enabled': True,
+                'Comment': 'S540 NVIDIA integrated OS adapter and TU117 identification', 'Enabled': True,
                 'ExecutablePath': 'Contents/MacOS/' + EXECUTABLE,
                 'MaxKernel': '25.99.99', 'MinKernel': '25.0.0',
                 'PlistPath': 'Contents/Info.plist'}, sort_keys=False),
         }
+        for item in source_inputs:
+            payload['source/' + item.relative_to(ROOT).as_posix()] = item.read_bytes()
         for item in sorted(bundle.rglob('*')):
             if item.is_symlink():
                 raise ValueError('The signed bundle contains a symbolic link.')
@@ -174,11 +315,20 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                   'source_sha256': {item.relative_to(ROOT).as_posix(): digest(item.read_bytes())
                                     for item in required if item.is_relative_to(ROOT)},
                   'native_report_status': live['status'],
+                  'native_adapter_checks': native_results,
+                  'kernel_adapter_imports': sorted(adapter_imports),
+                  'kernel_adapter_object_sha256': digest(linked_adapter.read_bytes()),
                   'package_file_sha256_excluding_BUILD': {name: digest(data) for name, data in payload.items()},
-                  'validation': ['native Intel kernel compile and link', 'thin x86_64 Mach-O and module entry metadata',
+                  'validation': ['targeted native memory, timer and C/C++ atomic foundational checks',
+                                 'native allocator ABI, alignment, failure and exact-size free checks',
+                                 'native mutex contention and publication checks',
+                                 'native integrated runtime check with actual CPU-side callers',
+                                 'address and undefined-behavior sanitizers on new backends and integration',
+                                 'native Intel kernel compile and link with adapter import allowlist',
+                                 'thin x86_64 Mach-O and module entry metadata',
                                  'ad-hoc signature verification', 'native report decoder self-test',
                                  live_validation],
-                  'hardware_status': 'Laptop PCI attachment and version 0.3.0 two-register TU117 identification with a local pinned HAL-table match are confirmed. The NVIDIA HAL and resource manager are not instantiated; GPU initialization, firmware, DMA and acceleration remain unimplemented.'}
+                  'hardware_status': 'Version 0.3.0 two-register TU117 identification is confirmed on the laptop. Version 0.4.0 integrates a bounded CPU-only kernel runtime self-check, whose laptop execution is not established by this CI build. The NVIDIA HAL and resource manager are not instantiated; GPU initialization, firmware, DMA and acceleration remain unimplemented.'}
         payload['BUILD.json'] = (json.dumps(record, indent=2, sort_keys=True) + '\n').encode()
         payload['SHA256SUMS'] = ''.join(digest(data) + '  ' + name + '\n' for name, data in sorted(payload.items())).encode('ascii')
         pending = work / archive.name
@@ -203,12 +353,12 @@ def main() -> int:
     parser.add_argument('--kernel-sdk', type=Path, required=True)
     parser.add_argument('--output-dir', type=Path, required=True)
     parser.add_argument('--allow-legacy-probe', action='store_true',
-                        help='Allow an already-loaded version 0.1.0 or 0.2.0 probe during a local build.')
+                        help='Allow an already-loaded earlier probe during a local build.')
     args = parser.parse_args()
     try:
         archive = build(args.kernel_sdk, args.output_dir,
                         allow_legacy_probe=args.allow_legacy_probe)
-        print('Verified NVIDIA HAL identification package: ' + str(archive))
+        print('Verified integrated NVIDIA OS-adapter package: ' + str(archive))
         print('ZIP SHA256: ' + digest(archive.read_bytes()))
         return 0
     except (OSError, ValueError, subprocess.SubprocessError, zipfile.BadZipFile, plistlib.InvalidFileException) as error:

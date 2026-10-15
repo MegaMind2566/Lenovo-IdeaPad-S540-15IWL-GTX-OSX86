@@ -19,7 +19,7 @@ fi
 [ -d "$PACKAGE/source" ] && [ -f "$PACKAGE/SOURCE-SHA256SUMS" ] || stop 'The source bundle is incomplete.'
 (cd "$PACKAGE" && /usr/bin/shasum -a 256 -c SOURCE-SHA256SUMS) || stop 'A packaged source file differs from its checksum.'
 WORK=$(/usr/bin/mktemp -d "$HOME/Desktop/NVIDIA-BUILD.XXXXXX") || stop 'Cannot create a private build folder.'
-printf 'Building the NVIDIA identification prototype. No administrator password is required.\nBuild folder: %s\n' "$WORK"
+printf 'Building the integrated NVIDIA OS-adapter prototype. No administrator password is required.\nBuild folder: %s\n' "$WORK"
 
 build_package() {
     printf 'Fetching the pinned public MacKernelSDK source.\n'
@@ -36,7 +36,7 @@ build_package() {
 }
 
 if build_package 2>&1 | /usr/bin/tee "$WORK/build.log"; then
-    printf '\nBuild completed. Share this ZIP for review before changing the test EFI:\n%s/output/S540-nvidia-transport-v3.zip\n' "$WORK"
+    printf '\nBuild completed. Share this ZIP for review before changing the test EFI:\n%s/output/S540-nvidia-transport-v4.zip\n' "$WORK"
 else
     printf '\nBuild failed. Share this log:\n%s/build.log\n' "$WORK" >&2
     exit 1

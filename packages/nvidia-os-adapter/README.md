@@ -1,8 +1,8 @@
 # NVIDIA Darwin OS adapter
 
-CPU-only foundations for the S540 NVIDIA port: monotonic clocks, ordinary-RAM primitives and the original NVIDIA atomic headers. [Combined GitHub validation passed](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38696607911) for kernel-object compilation/linking, import auditing and native userspace execution. The confirmed v0.3.0 PCI identification probe is unchanged.
+CPU-only foundations for the S540 NVIDIA port: monotonic clocks, ordinary-RAM primitives and the original NVIDIA atomic headers. [Combined GitHub validation passed](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38696607911) for kernel-object compilation/linking, import auditing and native userspace execution. The confirmed v0.3.0 PCI identification is the hardware baseline for the integrated v0.4.0 milestone.
 
-There is no laptop installer or standalone kext package for these components. Build and CPU behavior checks run in GitHub Actions. Laptop tests will combine components into meaningful integration milestones; full validation follows the implementation stages.
+The integrated v0.4.0 transport package combines these components with ordinary-RAM allocation and thread mutexes in one startup check. Native execution and kernel compilation run in GitHub Actions before packaging. Kernel runtime remains unvalidated until a v4 laptop report is returned. Full validation follows the implementation stages.
 
 ## Source boundary
 
@@ -26,7 +26,7 @@ The quantum is software policy, not measured hardware or scheduler precision. Ti
 
 The [memory backend](src/S540NvidiaMemory.cpp) implements the exact `os_mem_copy`, `os_mem_set` and `os_mem_cmp` declarations using Darwin's `memcpy`, `memset` and `memcmp`. The hooks retain their 32-bit length ABI. Four [adapted nvport callers](upstream/nvport_memory_primitives.c)—`portMemCopy`, `portMemCopyAligned`, `portMemSet` and `portMemCmp`—use private bridges to preserve the 64-bit `NvLength` through bounded 32-bit chunks.
 
-The caller uses the upstream **release assertion profile only**. Checked-build diagnostics are not implemented. Copy buffers must not overlap, and every nonzero range must be valid ordinary CPU-accessible RAM. This component adds no allocator, user-copy, generic move, mapping, DMA or MMIO support.
+The caller uses the upstream **release assertion profile only**. Checked-build diagnostics are not implemented. Copy buffers must not overlap, and every nonzero range must be valid ordinary CPU-accessible RAM. These primitives add no user-copy, generic move, mapping, DMA or MMIO support. Ordinary host-RAM allocation is a separate component below.
 
 Targeted checks cover real small-buffer behavior and chunk planning at 32/64-bit edges. They do not execute copies, fills or comparisons over buffers larger than 4 GiB.
 
@@ -35,6 +35,16 @@ Targeted checks cover real small-buffer behavior and chunk planning at 32/64-bit
 [S540NvidiaAtomic.h](src/S540NvidiaAtomic.h) configures the unmodified nvport atomic-header closure for Intel x86_64 Clang. GNU C11 uses the original C11 implementation and pinned freestanding `stdatomic.h`; C++17 uses the original Clang intrinsics. Compiler selection is checked directly, rather than forcing one implementation for both languages.
 
 The consumers exercise the original CPU atomic operations and fences. This header integration adds no resource-manager objects, GPU synchronization or kernel runtime validation. NVIDIA MIT notices and the LLVM license for the bundled atomic header are retained.
+
+## Ordinary host-RAM allocation and thread mutexes
+
+The [allocator](src/S540NvidiaAllocator.cpp) preserves `os_alloc_mem(void **, NvU64)` and `os_free_mem(void *)`. It checks size overflow, clears failed outputs, rejects zero length, preserves 16-byte payload alignment and stores the exact original allocation and size for `IOFree`. Native tests execute production malloc/free and an injected backend for allocation failure, deliberately misaligned bases and exact-size release.
+
+Darwin `IOMalloc` can block. This is a limited thread-context OS hook, not a complete implementation of NvPort's non-sleeping allocator contract. Allocation/free require enabled interrupts and no spin lock held. Interrupt and disabled-interrupt callers are rejected; absence of a held spin lock remains a caller precondition. There is no physical-contiguity, user-memory, VRAM or DMA contract.
+
+The [mutex backend](src/S540NvidiaSync.cpp) preserves the five `os_*mutex` signatures using `IOLock` in the kernel and pthread mutexes natively. The contract is nonrecursive, same-owner release, unlocked/no-waiter destruction, sleepable thread context only. Busy conditional acquisition returns `NV_ERR_TIMEOUT_RETRY`. NVIDIA's Linux implementation uses semaphores; ownership handoff, interrupt/spin contexts, timed waits and complete RM caller compatibility are not implemented or claimed. Native checks cover conditional contention, publication and protected updates from four threads.
+
+The [integrated runtime check](src/S540NvidiaRuntime.cpp) executes the actual clock, adapted RAM callers, original C++ atomics, allocator and mutex backend once during probe startup. It uses small stack buffers and one 256-byte ordinary-RAM allocation; all allocated objects are released before publishing `OSFoundations`. Every component must pass before the reporter can return `integrated_passed` together with the existing two-register TU117 match. The kernel mutex check uses one thread; concurrency is tested only in native CI. This does not instantiate a HAL or resource manager.
 
 ## Validation boundary
 
@@ -49,3 +59,6 @@ No component accesses GPU registers, changes power, performs DMA or loads firmwa
 - [Pinned NVIDIA source](https://github.com/NVIDIA/open-gpu-kernel-modules/tree/1a82fbfda8f321b056eb3568850f9316c5e465c5), with local [provenance manifests](upstream/README.md).
 - [NVIDIA deadline consumer](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/src/kernel/gpu/gpu_timeout.c#L282-L302).
 - [Pinned Darwin clock declarations](https://github.com/acidanthera/MacKernelSDK/blob/3f750085caa17ec3a7880f11c11bf4f48cd6a164/Headers/kern/clock.h#L86-L115).
+
+
+- [Pinned NVIDIA allocation and mutex OS interface](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/kernel-open/nvidia/os-interface.c).

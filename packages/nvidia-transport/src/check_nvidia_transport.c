@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TOOL_VERSION "0.3.0"
+#define TOOL_VERSION "0.4.0"
 #define PROBE_CLASS "S540NvidiaPCIProbe"
 #define SNAPSHOT_KEY "S540NvidiaPCIProbeSnapshot"
 #define ACCESS_POLICY "two-read-only-bar0-hal-identification"
@@ -44,6 +44,18 @@ struct mmio_result {
     uint32_t architecture;
     uint32_t implementation;
     uint32_t chip_id;
+};
+
+struct os_foundations_result {
+    int valid;
+    uint32_t version;
+    uint32_t checks;
+    int passed;
+    int timer;
+    int memory;
+    int atomics;
+    int allocation;
+    int mutex;
 };
 
 static const char *const mmio_reasons[] = {
@@ -77,6 +89,7 @@ struct snapshot {
     struct mmio_result boot42;
     int hal_matched;
     uint32_t total_read_count;
+    struct os_foundations_result os_foundations;
 };
 
 enum warning_code {
@@ -384,6 +397,47 @@ static int decode_hal(CFTypeRef object, struct snapshot *snapshot)
     return 1;
 }
 
+/* The kernel runs these bounded RAM-only checks once, without GPU changes.
+ * A false component is a valid failure; malformed/missing evidence is invalid.
+ * The mutex check here is single-threaded. Native CI owns concurrency checks. */
+static int decode_os_foundations(CFTypeRef object,
+                                  struct os_foundations_result *output)
+{
+    struct os_foundations_result candidate;
+    memset(&candidate, 0, sizeof(candidate));
+    if (object == NULL || CFGetTypeID(object) != CFDictionaryGetTypeID())
+        return 0;
+    CFDictionaryRef dictionary = (CFDictionaryRef)object;
+    uint64_t value = 0;
+    if (CFDictionaryGetCount(dictionary) != 8 ||
+        !dictionary_number(dictionary, CFSTR("Version"), 1, &value) || value != 1)
+        return 0;
+    candidate.version = (uint32_t)value;
+    if (!dictionary_number(dictionary, CFSTR("Checks"), UINT32_MAX, &value) || value == 0)
+        return 0;
+    candidate.checks = (uint32_t)value;
+#define READ_COMPONENT(KEY, FIELD) do { \
+    CFTypeRef component = CFDictionaryGetValue(dictionary, CFSTR(KEY)); \
+    if (component == NULL || CFGetTypeID(component) != CFBooleanGetTypeID()) \
+        return 0; \
+    candidate.FIELD = CFBooleanGetValue((CFBooleanRef)component); \
+} while (0)
+    READ_COMPONENT("Timer", timer);
+    READ_COMPONENT("Memory", memory);
+    READ_COMPONENT("Atomics", atomics);
+    READ_COMPONENT("Allocation", allocation);
+    READ_COMPONENT("Mutex", mutex);
+#undef READ_COMPONENT
+    candidate.passed = candidate.timer && candidate.memory && candidate.atomics &&
+                       candidate.allocation && candidate.mutex;
+    if (!exact_string(CFDictionaryGetValue(dictionary, CFSTR("Status")),
+                       candidate.passed ? CFSTR("passed") : CFSTR("failed")))
+        return 0;
+    candidate.valid = 1;
+    *output = candidate;
+    return 1;
+}
+
 /* Legacy format is decoded only to identify an old loaded kext, never emitted. */
 static int decode_snapshot(CFTypeRef object, struct snapshot *output)
 {
@@ -393,33 +447,40 @@ static int decode_snapshot(CFTypeRef object, struct snapshot *output)
         return 0;
     CFDictionaryRef dictionary = (CFDictionaryRef)object;
     uint64_t value = 0;
-    if (!dictionary_number(dictionary, CFSTR("Format"), 3, &value) ||
-        (value != 1 && value != 2 && value != 3))
+    if (!dictionary_number(dictionary, CFSTR("Format"), 4, &value) ||
+        (value != 1 && value != 2 && value != 3 && value != 4))
         return 0;
     candidate.format = (uint32_t)value;
     int legacy = candidate.format == 1;
-    int current = candidate.format == 3;
+    int two_reads = candidate.format >= 3;
+    int current = candidate.format == 4;
     if (!exact_string(CFDictionaryGetValue(dictionary, CFSTR("Stage")),
                        CFSTR("attached")) ||
         !exact_string(CFDictionaryGetValue(dictionary, CFSTR("AccessPolicy")),
-                       legacy ? CFSTR(LEGACY_ACCESS_POLICY) : current ? CFSTR(ACCESS_POLICY) :
+                       legacy ? CFSTR(LEGACY_ACCESS_POLICY) : two_reads ? CFSTR(ACCESS_POLICY) :
                                 CFSTR(LEGACY_MMIO_ACCESS_POLICY)) ||
         !decode_version(CFDictionaryGetValue(dictionary, CFSTR("ProbeVersion")),
                          candidate.probe_version,
                          sizeof(candidate.probe_version)) ||
-        strcmp(candidate.probe_version, legacy ? "0.1.0" : current ? TOOL_VERSION : "0.2.0") != 0)
+        strcmp(candidate.probe_version, legacy ? "0.1.0" : current ? TOOL_VERSION :
+            two_reads ? "0.3.0" : "0.2.0") != 0)
         return 0;
     if (!legacy && !decode_mmio(CFDictionaryGetValue(dictionary, CFSTR("MMIOResult")),
                                 &candidate.mmio))
         return 0;
-    if (current &&
+    if (two_reads &&
         (!decode_boot42(CFDictionaryGetValue(dictionary, CFSTR("BOOT42Result")),
                           &candidate.mmio, &candidate.boot42) ||
          !decode_hal(CFDictionaryGetValue(dictionary, CFSTR("HALSelection")), &candidate)))
         return 0;
     int missing_bars_allowed = !legacy && candidate.mmio.status == MMIO_REFUSED &&
                               candidate.mmio.reason == 0;
-    CFIndex expected_keys = legacy ? 13 : current ? 16 : 14;
+    CFTypeRef foundations = CFDictionaryGetValue(dictionary, CFSTR("OSFoundations"));
+    if (current)
+        (void)decode_os_foundations(foundations, &candidate.os_foundations);
+    CFIndex expected_keys = legacy ? 13 : two_reads ? 16 : 14;
+    if (current && foundations != NULL)
+        ++expected_keys;
     if (missing_bars_allowed)
         --expected_keys;
     if (CFDictionaryGetCount(dictionary) != expected_keys)
@@ -568,7 +629,7 @@ static void read_probe(io_registry_entry_t service, struct report *report)
         return;
     }
     report->attached = 1;
-    report->outdated = report->snapshot.format < 3;
+    report->outdated = report->snapshot.format < 4;
 }
 
 static void read_context(struct report *report)
@@ -708,7 +769,18 @@ static void write_snapshot(FILE *out, const struct snapshot *snapshot)
         snapshot->total_read_count);
     if (snapshot->hal_matched)
         fputs(",\"chip\":\"TU117\",\"variant_index\":41", out);
-    fputs("}}", out);
+    fputs("},\"os_foundations\":", out);
+    const struct os_foundations_result *foundations = &snapshot->os_foundations;
+    if (foundations->valid)
+        fprintf(out, "{\"version\":%" PRIu32 ",\"status\":\"%s\",\"checks\":%" PRIu32
+            ",\"timer\":%s,\"memory\":%s,\"atomics\":%s,\"allocation\":%s,\"mutex\":%s}",
+            foundations->version, foundations->passed ? "passed" : "failed",
+            foundations->checks, foundations->timer ? "true" : "false",
+            foundations->memory ? "true" : "false", foundations->atomics ? "true" : "false",
+            foundations->allocation ? "true" : "false", foundations->mutex ? "true" : "false");
+    else
+        fputs("null", out);
+    fputc('}', out);
 }
 
 static const char *report_status(const struct report *report)
@@ -719,8 +791,12 @@ static const char *report_status(const struct report *report)
         return "outdated_probe";
     if (!report->attached)
         return "not_attached";
+    if (!report->snapshot.os_foundations.valid)
+        return "invalid_foundations";
+    if (!report->snapshot.os_foundations.passed)
+        return "foundations_failed";
     if (report->snapshot.hal_matched)
-        return "hal_matched";
+        return "integrated_passed";
     return report->snapshot.mmio.status == MMIO_REFUSED ||
            report->snapshot.boot42.status == MMIO_REFUSED ? "refused" : "failed";
 }
@@ -728,13 +804,14 @@ static const char *report_status(const struct report *report)
 static int report_exit_code(const struct report *report)
 {
     return report->complete && (!report->attached || report->outdated ||
-        (report->snapshot.mmio.status != MMIO_FAILED &&
+        (report->snapshot.os_foundations.valid && report->snapshot.os_foundations.passed &&
+         report->snapshot.mmio.status != MMIO_FAILED &&
          report->snapshot.boot42.status != MMIO_FAILED)) ? 0 : 1;
 }
 
 static void write_report(FILE *out, const struct report *report)
 {
-    fprintf(out, "{\"format\":3,\"tool\":\"nvidia-transport\",\"version\":\"%s\","
+    fprintf(out, "{\"format\":4,\"tool\":\"nvidia-transport\",\"version\":\"%s\","
         "\"target\":{\"vendor_id\":\"0x10de\",\"device_id\":\"0x1f91\","
         "\"subsystem_vendor_id\":\"0x17aa\",\"subsystem_device_id\":\"0x3806\"},"
         "\"status\":\"%s\",\"complete\":%s,"
@@ -753,7 +830,7 @@ static void write_report(FILE *out, const struct report *report)
         fputs("null", out);
     }
     fputs(",\"reason\":", out);
-    fputs(report->outdated ? "\"The loaded probe is an older version. Replace the kext on the EFI used for this boot with version 0.3.0.\"" : "null", out);
+    fputs(report->outdated ? "\"The loaded probe is an older version. Replace the kext on the EFI used for this boot with version 0.4.0.\"" : "null", out);
     fputs(",\"warnings\":[", out);
     int emitted = 0;
     for (size_t index = 0; index < WARNING_COUNT; ++index) {
@@ -860,6 +937,25 @@ static void fixture_set_phases(CFMutableDictionaryRef fixture,
         CFRelease(boot42);
 }
 
+static CFMutableDictionaryRef fixture_os_foundations(void)
+{
+    CFMutableDictionaryRef dictionary = CFDictionaryCreateMutable(kCFAllocatorDefault,
+        0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    if (dictionary == NULL) {
+        fputs("Self-test allocation failed.\n", stderr);
+        exit(1);
+    }
+    fixture_number(dictionary, CFSTR("Version"), 1);
+    fixture_number(dictionary, CFSTR("Checks"), 5);
+    CFDictionarySetValue(dictionary, CFSTR("Status"), CFSTR("passed"));
+    CFDictionarySetValue(dictionary, CFSTR("Timer"), kCFBooleanTrue);
+    CFDictionarySetValue(dictionary, CFSTR("Memory"), kCFBooleanTrue);
+    CFDictionarySetValue(dictionary, CFSTR("Atomics"), kCFBooleanTrue);
+    CFDictionarySetValue(dictionary, CFSTR("Allocation"), kCFBooleanTrue);
+    CFDictionarySetValue(dictionary, CFSTR("Mutex"), kCFBooleanTrue);
+    return dictionary;
+}
+
 static CFMutableDictionaryRef valid_fixture(void)
 {
     CFMutableDictionaryRef dictionary = CFDictionaryCreateMutable(
@@ -871,8 +967,8 @@ static CFMutableDictionaryRef valid_fixture(void)
         fputs("Self-test allocation failed.\n", stderr);
         exit(1);
     }
-    fixture_number(dictionary, CFSTR("Format"), 3);
-    CFDictionarySetValue(dictionary, CFSTR("ProbeVersion"), CFSTR("0.3.0"));
+    fixture_number(dictionary, CFSTR("Format"), 4);
+    CFDictionarySetValue(dictionary, CFSTR("ProbeVersion"), CFSTR(TOOL_VERSION));
     CFDictionarySetValue(dictionary, CFSTR("Stage"), CFSTR("attached"));
     CFDictionarySetValue(dictionary, CFSTR("AccessPolicy"), CFSTR(ACCESS_POLICY));
     fixture_number(dictionary, CFSTR("VendorID"), 0x10de);
@@ -908,6 +1004,9 @@ static CFMutableDictionaryRef valid_fixture(void)
     CFDictionarySetValue(dictionary, CFSTR("MMIOResult"), mmio);
     CFRelease(mmio);
     fixture_set_phases(dictionary, NULL);
+    CFMutableDictionaryRef foundations = fixture_os_foundations();
+    CFDictionarySetValue(dictionary, CFSTR("OSFoundations"), foundations);
+    CFRelease(foundations);
     return dictionary;
 }
 
@@ -937,9 +1036,9 @@ static int run_self_tests(void)
     CFDictionaryRemoveValue(fixture, CFSTR("Extra"));
     CFDictionaryRemoveValue(fixture, CFSTR("Format"));
     require_test(!decode_snapshot(fixture, &snapshot), "missing format", &count);
-    fixture_number(fixture, CFSTR("Format"), 4);
+    fixture_number(fixture, CFSTR("Format"), 5);
     require_test(!decode_snapshot(fixture, &snapshot), "unsupported format", &count);
-    fixture_number(fixture, CFSTR("Format"), 3);
+    fixture_number(fixture, CFSTR("Format"), 4);
     CFDictionarySetValue(fixture, CFSTR("VendorID"), kCFBooleanTrue);
     require_test(!decode_snapshot(fixture, &snapshot), "boolean numeric field", &count);
     fixture_number(fixture, CFSTR("VendorID"), -1);
@@ -954,7 +1053,7 @@ static int run_self_tests(void)
     CFDictionarySetValue(fixture, CFSTR("Format"), floating);
     CFRelease(floating);
     require_test(!decode_snapshot(fixture, &snapshot), "floating numeric field", &count);
-    fixture_number(fixture, CFSTR("Format"), 3);
+    fixture_number(fixture, CFSTR("Format"), 4);
     fixture_number(fixture, CFSTR("SubsystemID"), 0x3807);
     require_test(!decode_snapshot(fixture, &snapshot), "wrong subsystem", &count);
     fixture_number(fixture, CFSTR("SubsystemID"), 0x3806);
@@ -972,7 +1071,7 @@ static int run_self_tests(void)
     require_test(!decode_snapshot(fixture, &snapshot), "oversized version", &count);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.1.0\""));
     require_test(!decode_snapshot(fixture, &snapshot), "unsafe version character", &count);
-    CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.3.0"));
+    CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR(TOOL_VERSION));
     CFMutableArrayRef bars = (CFMutableArrayRef)CFDictionaryGetValue(
         fixture, CFSTR("BARDescriptors"));
     CFArrayAppendValue(bars, CFArrayGetValueAtIndex(bars, 0));
@@ -1117,6 +1216,7 @@ static int run_self_tests(void)
     CFDictionaryRemoveValue(fixture, CFSTR("MMIOResult"));
     CFDictionaryRemoveValue(fixture, CFSTR("BOOT42Result"));
     CFDictionaryRemoveValue(fixture, CFSTR("HALSelection"));
+    CFDictionaryRemoveValue(fixture, CFSTR("OSFoundations"));
     fixture_number(fixture, CFSTR("Format"), 1);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.1.0"));
     CFDictionarySetValue(fixture, CFSTR("AccessPolicy"), CFSTR(LEGACY_ACCESS_POLICY));
@@ -1129,6 +1229,7 @@ static int run_self_tests(void)
     fixture = valid_fixture();
     CFDictionaryRemoveValue(fixture, CFSTR("BOOT42Result"));
     CFDictionaryRemoveValue(fixture, CFSTR("HALSelection"));
+    CFDictionaryRemoveValue(fixture, CFSTR("OSFoundations"));
     fixture_number(fixture, CFSTR("Format"), 2);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.2.0"));
     CFDictionarySetValue(fixture, CFSTR("AccessPolicy"), CFSTR(LEGACY_MMIO_ACCESS_POLICY));
@@ -1136,6 +1237,17 @@ static int run_self_tests(void)
         "strict version 0.2.0 snapshot recognized", &count);
     CFDictionarySetValue(fixture, CFSTR("Extra"), CFSTR("not allowed"));
     require_test(!decode_snapshot(fixture, &snapshot), "version 0.2.0 extra rejected", &count);
+    CFRelease(fixture);
+
+    fixture = valid_fixture();
+    CFDictionaryRemoveValue(fixture, CFSTR("OSFoundations"));
+    fixture_number(fixture, CFSTR("Format"), 3);
+    CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.3.0"));
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.format == 3 &&
+        snapshot.hal_matched && !snapshot.os_foundations.valid,
+        "strict version 0.3.0 snapshot recognized", &count);
+    CFDictionarySetValue(fixture, CFSTR("Extra"), CFSTR("not allowed"));
+    require_test(!decode_snapshot(fixture, &snapshot), "version 0.3.0 extra rejected", &count);
     CFRelease(fixture);
 
     fixture = valid_fixture();
@@ -1263,6 +1375,8 @@ static int run_self_tests(void)
     require_test(strcmp(report_status(&classified), "not_attached") == 0 &&
         report_exit_code(&classified) == 0, "not attached result is complete", &count);
     classified.attached = 1;
+    classified.snapshot.os_foundations.valid = 1;
+    classified.snapshot.os_foundations.passed = 1;
     classified.snapshot.mmio.status = MMIO_REFUSED;
     classified.snapshot.boot42.status = MMIO_NOT_ATTEMPTED;
     require_test(strcmp(report_status(&classified), "refused") == 0 &&
@@ -1273,8 +1387,18 @@ static int run_self_tests(void)
     classified.snapshot.mmio.status = MMIO_IDENTIFIED;
     classified.snapshot.boot42.status = MMIO_IDENTIFIED;
     classified.snapshot.hal_matched = 1;
-    require_test(strcmp(report_status(&classified), "hal_matched") == 0 &&
+    require_test(strcmp(report_status(&classified), "integrated_passed") == 0 &&
         report_exit_code(&classified) == 0, "identified result", &count);
+    classified.snapshot.os_foundations.passed = 0;
+    require_test(strcmp(report_status(&classified), "foundations_failed") == 0 &&
+        report_exit_code(&classified) != 0,
+        "failed foundation cannot report integrated success", &count);
+    classified.snapshot.os_foundations.valid = 0;
+    require_test(strcmp(report_status(&classified), "invalid_foundations") == 0 &&
+        report_exit_code(&classified) != 0,
+        "invalid foundation cannot report integrated success", &count);
+    classified.snapshot.os_foundations.valid = 1;
+    classified.snapshot.os_foundations.passed = 1;
     classified.snapshot.hal_matched = 0;
     classified.snapshot.boot42.status = MMIO_REFUSED;
     require_test(strcmp(report_status(&classified), "refused") == 0 &&
@@ -1294,13 +1418,113 @@ static int run_self_tests(void)
     size_t serialized_size = fread(serialized_report, 1, sizeof(serialized_report) - 1, serialized);
     serialized_report[serialized_size] = '\0';
     require_test(!ferror(serialized) && strstr(serialized_report, "\"probe\":null") != NULL &&
-        strstr(serialized_report, "version 0.3.0") != NULL &&
+        strstr(serialized_report, "version 0.4.0") != NULL &&
         strstr(serialized_report, "raw_value") == NULL,
         "legacy report emits fixed instruction without snapshot", &count);
     fclose(serialized);
     classified.complete = 0;
     require_test(strcmp(report_status(&classified), "error") == 0 &&
         report_exit_code(&classified) != 0, "invalid snapshot has nonzero exit", &count);
+
+    struct os_foundations_result foundations_result;
+    memset(&foundations_result, 0, sizeof(foundations_result));
+    require_test(!decode_os_foundations(NULL, &foundations_result),
+        "missing OS foundation dictionary", &count);
+    require_test(!decode_os_foundations(kCFBooleanTrue, &foundations_result),
+        "wrong OS foundation type", &count);
+    CFMutableDictionaryRef foundations = fixture_os_foundations();
+    require_test(decode_os_foundations(foundations, &foundations_result) &&
+        foundations_result.valid && foundations_result.passed &&
+        foundations_result.version == 1 && foundations_result.checks == 5,
+        "valid OS foundation wire contract", &count);
+    CFDictionarySetValue(foundations, CFSTR("Extra"), kCFBooleanTrue);
+    require_test(!decode_os_foundations(foundations, &foundations_result),
+        "extra OS foundation key", &count);
+    CFDictionaryRemoveValue(foundations, CFSTR("Extra"));
+    CFDictionarySetValue(foundations, CFSTR("Version"), kCFBooleanTrue);
+    require_test(!decode_os_foundations(foundations, &foundations_result),
+        "boolean OS foundation version", &count);
+    fixture_number(foundations, CFSTR("Version"), 2);
+    require_test(!decode_os_foundations(foundations, &foundations_result),
+        "unsupported OS foundation version", &count);
+    fixture_number(foundations, CFSTR("Version"), 1);
+    const int64_t bad_checks[] = {0, -1, INT64_C(0x100000000)};
+    for (size_t index = 0; index < sizeof(bad_checks) / sizeof(bad_checks[0]); ++index) {
+        fixture_number(foundations, CFSTR("Checks"), bad_checks[index]);
+        require_test(!decode_os_foundations(foundations, &foundations_result),
+            "OS foundation check count range", &count);
+    }
+    CFDictionarySetValue(foundations, CFSTR("Checks"), kCFBooleanTrue);
+    require_test(!decode_os_foundations(foundations, &foundations_result),
+        "boolean OS foundation check count", &count);
+    floating = CFNumberCreate(kCFAllocatorDefault, kCFNumberDoubleType, &floating_value);
+    require_test(floating != NULL, "floating OS foundation fixture allocation", &count);
+    CFDictionarySetValue(foundations, CFSTR("Checks"), floating);
+    CFRelease(floating);
+    require_test(!decode_os_foundations(foundations, &foundations_result),
+        "floating OS foundation check count", &count);
+    fixture_number(foundations, CFSTR("Checks"), UINT32_MAX);
+    require_test(decode_os_foundations(foundations, &foundations_result) &&
+        foundations_result.checks == UINT32_MAX, "maximum OS foundation check count", &count);
+    fixture_number(foundations, CFSTR("Checks"), 5);
+    const CFStringRef component_keys[] = {
+        CFSTR("Timer"), CFSTR("Memory"), CFSTR("Atomics"), CFSTR("Allocation"), CFSTR("Mutex")
+    };
+    for (size_t index = 0; index < sizeof(component_keys) / sizeof(component_keys[0]); ++index) {
+        CFDictionaryRemoveValue(foundations, component_keys[index]);
+        require_test(!decode_os_foundations(foundations, &foundations_result),
+            "missing OS foundation component", &count);
+        fixture_number(foundations, component_keys[index], 1);
+        require_test(!decode_os_foundations(foundations, &foundations_result),
+            "OS foundation component requires CFBoolean", &count);
+        CFDictionarySetValue(foundations, component_keys[index], kCFBooleanFalse);
+        require_test(!decode_os_foundations(foundations, &foundations_result),
+            "passed OS foundation cannot hide a false component", &count);
+        CFDictionarySetValue(foundations, CFSTR("Status"), CFSTR("failed"));
+        require_test(decode_os_foundations(foundations, &foundations_result) &&
+            foundations_result.valid && !foundations_result.passed,
+            "OS foundation component failure is valid evidence", &count);
+        CFDictionarySetValue(foundations, component_keys[index], kCFBooleanTrue);
+        require_test(!decode_os_foundations(foundations, &foundations_result),
+            "failed OS foundation requires a false component", &count);
+        CFDictionarySetValue(foundations, CFSTR("Status"), CFSTR("passed"));
+    }
+    CFDictionarySetValue(foundations, CFSTR("Status"), CFSTR("unknown"));
+    require_test(!decode_os_foundations(foundations, &foundations_result),
+        "unknown OS foundation status", &count);
+    CFDictionarySetValue(foundations, CFSTR("Status"), kCFBooleanTrue);
+    require_test(!decode_os_foundations(foundations, &foundations_result),
+        "wrong OS foundation status type", &count);
+    CFDictionarySetValue(foundations, CFSTR("Status"), CFSTR("passed"));
+    fixture = valid_fixture();
+    CFDictionaryRemoveValue(fixture, CFSTR("OSFoundations"));
+    require_test(decode_snapshot(fixture, &snapshot) && !snapshot.os_foundations.valid,
+        "missing foundation preserves identified GPU without integrated success", &count);
+    CFDictionarySetValue(fixture, CFSTR("OSFoundations"), kCFBooleanTrue);
+    require_test(decode_snapshot(fixture, &snapshot) && !snapshot.os_foundations.valid,
+        "invalid foundation preserves identified GPU without integrated success", &count);
+    CFDictionarySetValue(fixture, CFSTR("OSFoundations"), foundations);
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.os_foundations.passed,
+        "restored integrated snapshot", &count);
+    memset(&classified, 0, sizeof(classified));
+    classified.complete = 1;
+    classified.attached = 1;
+    classified.snapshot = snapshot;
+    serialized = tmpfile();
+    require_test(serialized != NULL, "integrated serialization allocation", &count);
+    write_report(serialized, &classified);
+    require_test(fflush(serialized) == 0 && fseek(serialized, 0, SEEK_SET) == 0,
+        "integrated serialization rewind", &count);
+    serialized_size = fread(serialized_report, 1, sizeof(serialized_report) - 1, serialized);
+    serialized_report[serialized_size] = '\0';
+    require_test(!ferror(serialized) && strstr(serialized_report,
+        "\"os_foundations\":{\"version\":1,\"status\":\"passed\",\"checks\":5,"
+        "\"timer\":true,\"memory\":true,\"atomics\":true,\"allocation\":true,\"mutex\":true}") != NULL &&
+        strstr(serialized_report, "\"status\":\"integrated_passed\"") != NULL,
+        "serialized integrated report includes all foundation evidence", &count);
+    fclose(serialized);
+    CFRelease(foundations);
+    CFRelease(fixture);
 
     const UInt8 identity_bytes[] = {0xde, 0x10, 0, 0};
     uint16_t identity = 0;

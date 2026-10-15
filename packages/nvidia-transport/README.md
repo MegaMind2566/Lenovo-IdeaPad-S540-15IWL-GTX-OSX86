@@ -1,73 +1,53 @@
-# NVIDIA PCI and HAL identification prototype
+# NVIDIA integrated OS-adapter prototype
 
-This experimental IOKit service targets the S540 GTX 1650 Max-Q (`10DE:1F91`, subsystem `17AA:3806`, revision `A1`). Version **0.1.0** PCI attachment and version **0.2.0** single-read `NV_PMC_BOOT_0` identification are confirmed on the laptop. The v0.2 report returned `0x167000A1`, architecture `0x16`, implementation `0x07`, and no warnings.
+Version **0.4.0** combines the bounded TU117 identification probe with the Darwin clock, ordinary-RAM memory operations, NVIDIA atomics, host-RAM allocator and ordinary-thread mutex adapter. One startup self-check exercises those CPU components inside the kernel. The GPU identification remains the same two read-only register loads used by the confirmed v0.3.0 probe.
 
-Version **0.3.0** is also confirmed on the laptop: one BOOT_0 read followed by one conditional `NV_PMC_BOOT_42` read, with a local match against NVIDIA's pinned TU117 HAL-selection table. Built archives include native-check provenance in BUILD.json. This match does not instantiate NVIDIA's HAL or integrate the resource manager. GPU initialization, firmware, DMA, command submission, display output and acceleration remain unimplemented.
+**This is a development checkpoint. It does not initialize the GPU or provide graphics acceleration.** The NVIDIA HAL and resource manager are not instantiated. Firmware, DMA, command submission and display output remain unimplemented. Successful CI checks establish compilation and native user-space behavior; the laptop report establishes the kernel execution result separately.
 
-## Confirmed laptop result: October 15, 2026
+## One test on the laptop
 
-The format-3 report returns `hal_matched`, `complete=true`, `wegnoegpu_present=false` and no warnings, with the actual PCI provider identity verified. BOOT_0 returned `0x167000A1` and BOOT_42 returned `0x167A1000`, with one 32-bit read per phase and two total. Both decode to architecture `0x16` and implementation `0x07`; BOOT_42 chip `0x167` matches TU117 variant index `41` in the local pinned table. The selection records NVIDIA source commit `1a82fbfda8f321b056eb3568850f9316c5e465c5`.
+Extract **S540-nvidia-transport-v4.zip** into Downloads. Keep the working Samsung EFI available. Use only the separate EFI on the **240 GB test disk**.
 
-This establishes only those two read-only identification loads and local table matching. No HAL object is instantiated, no resource manager is integrated, and the GPU remains uninitialized. Firmware, DMA and acceleration remain unimplemented. Runtime stop/unload remains untested. The next stage is Darwin OS-adapter boundary assessment; no additional register is selected by this result. Raw reports and private resource addresses remain excluded.
-
-## Upgrade the existing experiment
-
-Extract the complete **S540-nvidia-transport-v3.zip** into Downloads. Keep the working Samsung EFI available. Apply the upgrade only to the separate EFI on the **240 GB test boot HDD**.
-
-1. Save the existing `EFI/OC/Kexts/S540NvidiaPCIProbe.kext` outside the EFI directory as a private backup of the working v0.2.0 probe.
-2. Replace that one kext with **S540NvidiaPCIProbe.kext** from this package. The existing `Kernel → Add` entry remains valid; **no config edit is required**.
-3. Boot the HDD from the firmware's one-time boot menu, then select the existing Tahoe installation.
-4. Run:
+1. Save the existing `EFI/OC/Kexts/S540NvidiaPCIProbe.kext` outside the EFI directory.
+2. Replace that kext with the one in this package. **Keep the existing config: no edit is required.**
+3. Boot from the 240 GB disk, then select Tahoe.
+4. Run this one command:
 
    ```bash
-   bash "$HOME/Downloads/S540-nvidia-transport-v3/CHECK-TRANSPORT.command"
+   bash "$HOME/Downloads/S540-nvidia-transport-v4/CHECK-TRANSPORT.command"
    ```
 
 5. Share **nvidia-transport.json** from the new **NVIDIA-TRANSPORT…** folder on the Desktop.
 
-This extends the experimental hardware read to a second documented register. An MMIO load can hang or fault the kernel; software cannot provide a recoverable timeout for that load. Use the separate test EFI. If boot fails, boot from Samsung and restore the previous kext on the HDD. Runtime unload is untested; use a reboot for rollback.
+The expected result is **`integrated_passed`**: all five CPU-component checks passed in the kernel, and both identification registers still select TU117 variant 41. This result does not establish GPU initialization or acceleration. If boot fails, boot from Samsung and restore the previous kext on the test disk. Runtime unload remains untested; rollback uses a reboot.
 
-The package requires no administrator command, system installation, SIP change, NVRAM reset or kernel collection rebuild. The reporter requires no developer tools.
+The reporter needs no administrator password or developer tools. It does not install a kext or change EFI, SIP, NVRAM or kernel collections.
 
-## New experimental EFI installations
+## Boundaries and report results
 
-If no previous probe was added, copy the kext into `EFI/OC/Kexts/` and add the dictionary from **Kernel-Add-entry.plist** under `Kernel → Add`. This fragment is not a replacement config. It uses `Arch=x86_64`, `Enabled=true`, `MinKernel=25.0.0`, `MaxKernel=25.99.99`, `BundlePath=S540NvidiaPCIProbe.kext`, `ExecutablePath=Contents/MacOS/S540NvidiaPCIProbe` and `PlistPath=Contents/Info.plist`.
+The PCI gate remains `10DE:1F91`, subsystem `17AA:3806`, revision `A1`. The probe requires an already-enabled memory decoder, D0 and a matching 16 MiB BAR0 descriptor. It opens no GPU user client and performs no power transitions, GPU writes, firmware operations, interrupt setup or DMA allocation.
 
-Keep `-wegnoegpu` absent and `SSDT-DGPU-OFF.aml` disabled. Preserve `-igfxblr` and the working Intel settings. Validate the configuration with the matching OpenCore validator before booting the separate test EFI.
+The probe performs at most one aligned 32-bit BOOT_0 load and one conditional BOOT_42 load. Both must identify TU117. Each uses a unique read-only, cache-inhibited mapping released after the load; prerequisites are checked again before each mapping and load. An MMIO load can fault or hang the kernel; software cannot provide a recoverable timeout for that load.
 
-## Read and selection policy
+The new self-check uses ordinary CPU RAM. The allocator uses `IOMalloc`/`IOFree`; the mutex uses `IOLock` in a sleepable thread context. Allocation and lock resources created by the check are released before the report is published. No worker threads or GPU operations are added.
 
-The private service category and exact PCI configuration identity gate attachment. The probe retains the already-published `IODeviceMemory` resources directly, without opening the provider or calling resource convenience getters that can change link or resource state.
-
-The prerequisites require an unambiguous matching BAR0 descriptor, the expected 16 MiB aperture, matching address/tag, a non-prefetchable 32-bit memory BAR, memory decoding already enabled and PCI D0. A bounded conventional capability walk establishes D0 without a power transition. Provider arbitration serializes compliant ownership and termination; an already-open provider causes refusal. The arbitration lock can block and does not freeze power management.
-
-The prototype first requests a unique read-only, cache-inhibited four-byte mapping at BAR0 offset zero and reads BOOT_0 once. Only if BOOT_0 identifies the exact TU117 target does it request a separate four-byte mapping at offset `0xA00` and read BOOT_42 once. The mapping's returned virtual address already includes the requested offset. Each mapping is released immediately after its load. Identity, BAR0, memory decoding and D0 are rechecked before each mapping and immediately before each load. Actual VM mappings retain page granularity.
-
-BOOT_0 uses its architecture extension bit and implementation field. BOOT_42 uses architecture bits `29:24`, implementation bits `23:20` and chip ID bits `29:20`. Both must agree on architecture `0x16` and implementation `0x07`; BOOT_42 chip ID must be `0x167`. The local selector then reports **TU117, variant index 41**, tied to NVIDIA source commit `1a82fbfda8f321b056eb3568850f9316c5e465c5`.
-
-There are at most two aligned 32-bit volatile loads per startup. The prototype performs no scans, retries, polling, writes, BAR sizing, ACPI calls, resets, power transitions, firmware operations, interrupt setup or DMA allocation. The table result is identification metadata; no NVIDIA HAL object is constructed or executed.
-
-## Report outcomes
-
-The native reporter validates the actual PCI parent and a strict Format 3 snapshot, including phase order, read counts, decoded identities and pinned table provenance. It opens no hardware user client and writes no registry properties.
-
-| Status | Meaning |
+| Format-4 status | Meaning |
 | --- | --- |
-| `hal_matched` | Both identification reads agree and the local pinned table selects TU117 variant 41. |
-| `refused` | A prerequisite failed before a load in the relevant phase. Earlier completed reads remain explicitly counted. |
-| `failed` | An identification read completed but returned zero, all-ones or unexpected fields. |
-| `outdated_probe` | A valid 0.1.0 or 0.2.0 probe is loaded; replace the kext on the EFI actually used to boot and reboot. |
-| `not_attached` | The service was not found; the report does not establish why loading or matching failed. |
-| `error` | Snapshot, provider or report validation failed. |
+| `integrated_passed` | CPU-component self-checks passed in the kernel and both GPU IDs select TU117 variant 41. |
+| `refused` | A hardware prerequisite failed before the corresponding load. |
+| `foundations_failed` | At least one CPU-component check failed. |
+| `invalid_foundations` | The CPU-component result is absent or invalid. |
+| `failed` | An identification read failed. |
+| `outdated_probe` | An earlier probe is loaded. Replace the kext on the EFI actually used to boot, then reboot. |
+| `not_attached` | The service was not found; the report does not establish the cause. |
+| `error` | Snapshot, actual PCI provider or report validation failed. |
 
-BOOT_42 is marked `not_attempted` when BOOT_0 is not identified. A HAL match requires exactly two completed reads. Refusal is a complete diagnostic outcome. Failed reads and invalid reports return a nonzero exit status. Raw reports and resource addresses remain private. Runtime stop/unload remains untested.
+The format-4 report records component checks separately from GPU identification. Older snapshots remain recognizable as outdated. Raw reports and resource addresses remain private.
 
-## Build and source references
+## Build and provenance
 
-The native Intel CI build compiles and links the kext, checks Mach-O types and module metadata, verifies ad-hoc signatures, and runs policy and native decoder tests. Version 0.3.0 passed its [native build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38666863926), which executed the packaged reporter without loading the experimental kext. Each archive's BUILD.json records its completed native checks. The subsequent laptop report independently confirms the two identification reads and local table match described above.
+The native Intel CI build runs the existing timer, memory and C/C++ atomic checks; allocator alignment, allocation failure and exact-size free checks; mutex contention and publication checks; and the same integrated CPU self-check used by the kernel probe. Address and undefined-behavior sanitizers instrument the new backends and integration. The build also compiles and links the real kernel sources, audits adapter imports, checks Intel Mach-O metadata, verifies ad-hoc signatures, and runs the report decoder. CI does not load the experimental kext.
 
-An optional source bundle can be generated from an exact checkout with `builders/package_nvidia_local.py --source-commit FULL_SHA --output-dir OUTPUT`. The generated **S540-nvidia-build-local-v2.zip** supports Intel macOS with Apple Command Line Tools. Its wrapper fetches the pinned public SDK Git revision and performs native compile, signature and decoder checks. It does not install or load the probe. The explicit `--allow-legacy-probe` build option accepts an already-loaded 0.1.0 or 0.2.0 probe as outdated; CI remains strict about having no loaded probe.
+**BUILD.json** records the exact project commit, source and output hashes, native results and kernel import audit. The archive includes the corresponding adapter/probe source, NVIDIA reference inputs and provenance records under **source/**. NVIDIA source is pinned to commit `1a82fbfda8f321b056eb3568850f9316c5e465c5`. MIT notices remain in the original and adapted files. LLVM and MacKernelSDK license texts and source references are included in **licenses/** and **THIRD-PARTY-NOTICES.txt**.
 
-The SDK is pinned to [MacKernelSDK commit 3f75008](https://github.com/acidanthera/MacKernelSDK/tree/3f750085caa17ec3a7880f11c11bf4f48cd6a164). Its unmodified module runtime includes Apple code under APSL 2.0. The built archive includes that license and its source location in **THIRD-PARTY-NOTICES.txt**; project source uses the adjacent MIT license.
-
-The identification registers are documented in pinned NVIDIA [nv_ref.h](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/common/inc/swref/published/nv_ref.h). The real resource manager consumes BOOT_42 in [`_halmgrIsChipSupported`](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/src/kernel/core/hal_mgr.c#L125-L148); the local match follows its fields and the pinned [TU117 table entry](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/generated/g_chips2halspec_nvoc.c#L39-L43). Apple API behavior was reviewed against [IOPCIFamily](https://github.com/apple-oss-distributions/IOPCIFamily/tree/4822b27a36e2de70e231ecf2bf3021384fab6ec2) and [XNU](https://github.com/apple-oss-distributions/xnu/tree/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea).
+MacKernelSDK is pinned to commit `3f750085caa17ec3a7880f11c11bf4f48cd6a164`. An optional source-only local-build bundle can be generated with `builders/package_nvidia_local.py`; the ready-built CI package is intended for the laptop test above.

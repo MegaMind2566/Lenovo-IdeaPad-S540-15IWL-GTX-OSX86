@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 #include "S540NvidiaPCIProbe.hpp"
+#include "../../nvidia-os-adapter/src/S540NvidiaRuntime.hpp"
 
 #include <IOKit/IOMemoryDescriptor.h>
 #include <kern/task.h>
@@ -320,8 +321,8 @@ OSDictionary *copySnapshot(IOPCIDevice *device,
     // One additional fixed config read captures command/status without changing
     // memory decoding, I/O decoding, bus mastering, or any status bits.
     const uint32_t commandStatus = device->configRead32(0x04);
-    bool ok = setNumber(snapshot, "Format", 3, 32)
-        && setString(snapshot, "ProbeVersion", "0.3.0")
+    bool ok = setNumber(snapshot, "Format", 4, 32)
+        && setString(snapshot, "ProbeVersion", "0.4.0")
         && setString(snapshot, "Stage", "attached")
         && setString(snapshot, "AccessPolicy", "two-read-only-bar0-hal-identification")
         && setNumber(snapshot, "VendorID", identity.vendorDevice & 0xffffU, 16)
@@ -332,6 +333,27 @@ OSDictionary *copySnapshot(IOPCIDevice *device,
         && setNumber(snapshot, "ClassCode", identity.revisionClass >> 8, 32)
         && setNumber(snapshot, "Command", commandStatus & 0xffffU, 16)
         && setNumber(snapshot, "Status", commandStatus >> 16, 16);
+    if (!ok) {
+        snapshot->release();
+        return nullptr;
+    }
+
+    // IOService::start is a sleepable thread context. Finish the CPU-only
+    // check before taking the PCI provider arbitration used for identification.
+    // Each object is freed before publishing the immutable result dictionary.
+    const S540NvidiaRuntime::Result foundations = S540NvidiaRuntime::check();
+    ScopedRelease<OSDictionary> foundationSnapshot(OSDictionary::withCapacity(8));
+    OSDictionary *foundation = foundationSnapshot.get();
+    ok = foundation
+        && setNumber(foundation, "Version", 1, 32)
+        && setString(foundation, "Status", foundations.passed() ? "passed" : "failed")
+        && setNumber(foundation, "Checks", foundations.checks, 32)
+        && foundation->setObject("Timer", foundations.timer ? kOSBooleanTrue : kOSBooleanFalse)
+        && foundation->setObject("Memory", foundations.memory ? kOSBooleanTrue : kOSBooleanFalse)
+        && foundation->setObject("Atomics", foundations.atomics ? kOSBooleanTrue : kOSBooleanFalse)
+        && foundation->setObject("Allocation", foundations.allocation ? kOSBooleanTrue : kOSBooleanFalse)
+        && foundation->setObject("Mutex", foundations.mutex ? kOSBooleanTrue : kOSBooleanFalse)
+        && snapshot->setObject("OSFoundations", foundation);
     if (!ok) {
         snapshot->release();
         return nullptr;
