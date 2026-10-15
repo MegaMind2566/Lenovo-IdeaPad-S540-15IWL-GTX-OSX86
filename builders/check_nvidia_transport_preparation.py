@@ -56,21 +56,22 @@ def verify_result(result: dict, stem: str, component: str) -> None:
                     'lifecycle_checks': 72, 'support_checks': 128}
         if any(result.get(key) != value for key, value in expected.items()):
             raise ValueError('The bundled startup no longer preserves all 258 v7 checks.')
-        if (result.get('entrypoint') != 'S540NvidiaHardwareRuntime::checkIntegrated'
-                or result.get('dma_mode') != 'provider_mapped'
-                or result.get('dma_reason') != 'none'
-                or result.get('dma_bytes') != 65536
-                or result.get('dma_segments') != 16
-                or result.get('pci_reason') != 'complete'
-                or type(result.get('pci_capabilities')) is not int
-                or result['pci_capabilities'] != 2
-                or type(result.get('msi_vectors')) is not int
-                or result['msi_vectors'] != 1
-                or type(result.get('msix_vectors')) is not int
-                or result['msix_vectors'] != 0
-                or result.get('msi_observed_enabled') is not False
-                or result.get('msix_observed_enabled') is not False):
-            raise ValueError('The exact aggregate entry or native DMA geometry changed.')
+        expected_preparation = {
+            'entrypoint': 'S540NvidiaHardwareRuntime::checkIntegrated',
+            'dma_mode': 'provider_mapped', 'dma_reason': 'none',
+            'dma_bytes': 65536, 'dma_segments': 16,
+            'pci_reason': 'pci-read-only-inventory-complete',
+            'pci_capabilities': 2, 'msi_vectors': 1, 'msix_vectors': 0,
+            'msi_observed_enabled': False, 'msix_observed_enabled': False,
+        }
+        mismatches = {
+            key: {'expected': value, 'observed': result.get(key)}
+            for key, value in expected_preparation.items()
+            if type(result.get(key)) is not type(value) or result[key] != value
+        }
+        if mismatches:
+            raise ValueError('The exact aggregate entry or native preparation evidence changed: '
+                             + json.dumps(mismatches, sort_keys=True)[:2000])
         require_true(result, ('previous_blocks_passed', 'host_dma', 'pci_read_adapter',
                               'interrupt_inventory', 'firmware_parser', 'firmware_rpc',
                               'cleanup', 'acquired', 'reserve_cold_after',
