@@ -49,6 +49,7 @@ Current status as of **October 15, 2026**. **Pending** means the feature has not
 | NVIDIA BAR0 identification | Working diagnostic | Probe 0.2.0 completed one read-only `NV_PMC_BOOT_0` read with the expected TU117 fields; no GPU initialization or acceleration |
 | NVIDIA HAL table match | Working diagnostic | Version 0.3.0 completed two read-only identification loads and a pinned local TU117 variant-41 table match; no HAL object or GPU initialization |
 | NVIDIA OS-adapter startup | Working diagnostic | Version 0.4.0 passed the integrated kernel startup check for clocks, ordinary RAM, atomics, allocation and thread mutexes; no GPU initialization |
+| NVIDIA original-caller startup | Pending | Version 0.5.0 compiled package and native checks passed; the combined laptop result remains pending |
 | Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; further icon-key investigation deferred |
 | USB-C video | Pending | No video test available; hardware video capability and routing remain unverified |
 | USB 2 device coverage / storage reliability | Pending | External USB 2 devices, measured throughput and sustained reliability |
@@ -71,7 +72,7 @@ Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including t
 
 ## Development priorities
 
-- Extend the [NVPort caller integration](packages/nvidia-caller-integration/README.md) beyond the confirmed v0.4.0 kernel checkpoint. Targeted GitHub checks passed for the original allocation/mutex callers and candidate backends. The new backends still require a combined kernel milestone; full resource-manager integration, DMA, firmware startup and acceleration remain unimplemented.
+- Collect one combined laptop result for the [verified v0.5.0 NVPort package](packages/nvidia-transport/README.md). It connects eight original allocation/mutex callers to a bounded reserve and a new mutex backend. Version 0.4.0 remains the confirmed kernel checkpoint; full resource-manager integration, DMA, firmware startup and acceleration remain unimplemented.
 - Complete storage reliability and remaining USB 2 device checks. Both USB-A connectors and USB-C in both orientations negotiate 5 Gb/s with the tested hardware. Audio peripherals, battery power and independent SSD boot work; measured battery runtime remains open.
 - Complete Intel stability and power-management coverage; sustained cooling and fan telemetry remain open. External-display work is paused.
 - Complete remaining device support and investigate connection performance from the recorded Internet baseline; wired/Bluetooth microphones, headphone switching and wireless reconnection work.
@@ -90,7 +91,7 @@ Download the [first EFI release, v0.1.0](https://github.com/MegaMind2566/Lenovo-
 
 Generated packages are available in **Artifacts** from successful [GitHub Actions runs](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions). Current companion packages are `S540-microfono-fix-v2`, `S540-volume-fine-v1` and `S540-brightness-keys-v2`. The [function-key guide](docs/guides/function-keys.md) records the complete keyboard mapping and remaining work.
 
-The **S540-nvidia-transport-v4** package is available from its [successful native Intel build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38717866330). It combines the confirmed two-read TU117 identification with one bounded kernel startup check of clocks, ordinary RAM, original atomics, allocation and thread mutexes. The laptop report returned `integrated_passed`, with all five CPU components passing the kernel startup check. The [package guide](packages/nvidia-transport/README.md) records the result and deployment procedure. No HAL object, resource manager, initialized GPU or acceleration is provided.
+The **S540-nvidia-transport-v5** compiled package passed its [native Intel build and checks](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38726407067) from source `81c1529a31fcc1b61fa3a466442e73fef0fc3aa9`. Its shared startup sequence passed 23 foundation checks and 35 original-caller/reserve checks, both plain and with sanitizers. The archive and every contained file checksum were verified. Version 0.4.0 remains the confirmed laptop checkpoint; v5 kernel execution is pending. The [package guide](packages/nvidia-transport/README.md) describes the single combined test. No HAL object, resource manager, initialized GPU or acceleration is provided.
 
 **Code → Download ZIP downloads source code, without compiled payloads. It is not an installer.** Builders assemble the feature sources into distributable ZIPs with their own launchers and runtime layout.
 

@@ -1,15 +1,15 @@
 # Packages and development components
 
 Sources are grouped by feature. Installable packages retain their launchers and
-runtime helpers together. The CPU-only OS adapter is a development component
-whose checks belong in GitHub; it has no laptop installation package. Builders and
-regression checks are kept separately.
+runtime helpers together. CPU-only NVIDIA components are combined in the
+experimental transport package for targeted laptop milestones; their other
+checks run in GitHub. Builders and regression checks are kept separately.
 
 | Package | Purpose | Guide |
 | --- | --- | --- |
-| [nvidia-caller-integration](nvidia-caller-integration) | Three original allocation callers and five mutex callers with bounded reserve and candidate no-sleep paths. [Targeted CI passed](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38722294509); no kernel runtime validation or laptop package. | [NVPort callers](nvidia-caller-integration/README.md) |
+| [nvidia-caller-integration](nvidia-caller-integration) | Three original allocation callers and five mutex callers with bounded reserve and mutex backends. The v5 transport package passed native CI and kernel compilation; its combined laptop result remains pending. | [NVPort callers](nvidia-caller-integration/README.md) |
 | [nvidia-os-adapter](nvidia-os-adapter) | CPU-only clock, RAM, atomics, allocation and thread-mutex foundations. Integrated v4 kernel startup check confirmed on the laptop; native/sanitizer checks and kernel packaging passed. Concurrent kernel execution and full NVIDIA caller compatibility remain separate. | [OS adapter](nvidia-os-adapter/README.md) |
-| [nvidia-transport](nvidia-transport) | Version 0.4.0 returned `integrated_passed` on the laptop: bounded kernel foundations check and two-read TU117 identification confirmed. No HAL/RM, firmware or acceleration. | [PCI transport](nvidia-transport/README.md) |
+| [nvidia-transport](nvidia-transport) | Version 0.4.0 remains the confirmed laptop checkpoint. The compiled v5 package and its native checks are verified; one combined laptop result is pending. The same two-read TU117 identification is retained. No HAL/RM, firmware or acceleration. | [PCI transport](nvidia-transport/README.md) |
 | [nvidia-visibility](nvidia-visibility) | Superseded for the reached visibility milestone. V1 automatic locator stopped at `Mounted`; subsequent manual removal of the disable argument produced a visible PCI service. | [Retained visibility experiment](nvidia-visibility/README.md) |
 | [nvidia-pci](nvidia-pci) | Read published PCI metadata; laptop visibility is confirmed for the exact target. No hardware access or GPU initialization. | [NVIDIA PCI inventory](nvidia-pci/README.md) |
 | [ssd-boot](ssd-boot) | Automatic transfer helper on hold after a mounted-target guard stop. Manual transfer and independent Samsung boot are confirmed. | [Independent SSD boot](../docs/guides/ssd-boot.md) |
