@@ -4,7 +4,15 @@ on:
   push:
     branches: [main]
     paths:
-      - 'packages/nvidia-os-adapter/**'
+      - 'packages/nvidia-os-adapter/src/S540NvidiaClock*'
+      - 'packages/nvidia-os-adapter/tests/check_clock_native.cpp'
+      - 'packages/nvidia-os-adapter/upstream/nvport_time_uptime.*'
+      - 'packages/nvidia-os-adapter/upstream/PROVENANCE.json'
+      - 'packages/nvidia-os-adapter/upstream/include/cpuopsys.h'
+      - 'packages/nvidia-os-adapter/upstream/include/nvtypes.h'
+      - 'packages/nvidia-os-adapter/upstream/include/nv-kernel-interface-api.h'
+      - 'packages/nvidia-os-adapter/upstream/reference/time_unix_kernel_os.c'
+      - 'packages/nvidia-os-adapter/upstream/reference/os-interface.h'
       - 'builders/check_nvidia_clock.py'
       - 'tests/test_nvidia_clock*'
       - '.github/workflows/check-nvidia-clock.yml'

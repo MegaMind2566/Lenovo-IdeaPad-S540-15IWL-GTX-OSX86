@@ -1,0 +1,71 @@
+{
+  "format": 1,
+  "repository": "NVIDIA/open-gpu-kernel-modules",
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "component": "nvport-atomic",
+  "adapted_upstream_code": false,
+  "source_files": [
+    {
+      "path": "include/nvport/nvport.h",
+      "upstream_path": "src/nvidia/inc/libraries/nvport/nvport.h",
+      "git_blob_sha1": "f9cd603d3a920534a1c4ddec10b8ebb4ad7e526b"
+    },
+    {
+      "path": "include/nvport/atomic.h",
+      "upstream_path": "src/nvidia/inc/libraries/nvport/atomic.h",
+      "git_blob_sha1": "2ad6f6a7e353f174f16ffbfb80b9ee8f9fb269ac"
+    },
+    {
+      "path": "include/nvport/inline/atomic_c11.h",
+      "upstream_path": "src/nvidia/inc/libraries/nvport/inline/atomic_c11.h",
+      "git_blob_sha1": "a1dffba035f155a42db28d1ae6dc3ecd93bf5cef"
+    },
+    {
+      "path": "include/nvport/inline/atomic_clang.h",
+      "upstream_path": "src/nvidia/inc/libraries/nvport/inline/atomic_clang.h",
+      "git_blob_sha1": "57e5dd67a4aa5941e1361681b57f9ad06751bfd0"
+    },
+    {
+      "path": "include/nvport/clang/stdatomic.h",
+      "upstream_path": "src/nvidia/inc/libraries/nvport/clang/stdatomic.h",
+      "git_blob_sha1": "e796a36c02a751780724696a28220195e451378c"
+    },
+    {
+      "path": "include/nvstatus.h",
+      "upstream_path": "src/common/sdk/nvidia/inc/nvstatus.h",
+      "git_blob_sha1": "4f5284db2b1e6af1c2c0c85bc39dfc14daccc9fd"
+    },
+    {
+      "path": "include/nvstatuscodes.h",
+      "upstream_path": "src/common/sdk/nvidia/inc/nvstatuscodes.h",
+      "git_blob_sha1": "430eed77a03f2f15bf058d3c49931a9f89ace08e"
+    },
+    {
+      "path": "include/nv_stddef.h",
+      "upstream_path": "src/common/sdk/nvidia/inc/nv_stddef.h",
+      "git_blob_sha1": "a69b28c023b06cd98f49dccfadf1097f762a83ab"
+    },
+    {
+      "path": "include/nvtypes.h",
+      "upstream_path": "src/common/sdk/nvidia/inc/nvtypes.h",
+      "git_blob_sha1": "cb6d906a34cf6ace3d852657cf8dde4a587d7721"
+    },
+    {
+      "path": "include/cpuopsys.h",
+      "upstream_path": "src/common/sdk/nvidia/inc/cpuopsys.h",
+      "git_blob_sha1": "6467b396a696a47fa71d4ad41e32d27f344fcdce"
+    }
+  ],
+  "llvm_license": {
+    "path": "LLVM-LICENSE.txt",
+    "repository": "llvm/llvm-project",
+    "upstream_path": "llvm/LICENSE.TXT",
+    "ref": "llvmorg-18.1.8",
+    "git_blob_sha1": "fa6ac540007032cbd0ec772a1c72e6cb5527a4fe"
+  },
+  "selection": {
+    "c": "GNU C11, PORT_IS_KERNEL_BUILD=1, freestanding; NVPORT_HAS_C11_ATOMICS=1",
+    "cpp": "C++17, PORT_IS_KERNEL_BUILD=1; NVPORT_HAS_C11_ATOMICS=0, Clang intrinsics"
+  },
+  "scope": "CPU-only original atomic header integration. No allocator, RM, GPU initialization, MMIO or kernel runtime validation."
+}

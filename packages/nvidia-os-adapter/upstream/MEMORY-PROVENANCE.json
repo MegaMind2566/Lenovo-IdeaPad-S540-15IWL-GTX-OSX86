@@ -1,0 +1,119 @@
+{
+  "format": 1,
+  "repository": "NVIDIA/open-gpu-kernel-modules",
+  "release": "615.78.08",
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "upstream_files": [
+    {
+      "path": "include/nvtypes.h",
+      "source_path": "src/common/sdk/nvidia/inc/nvtypes.h",
+      "git_blob_sha1": "cb6d906a34cf6ace3d852657cf8dde4a587d7721",
+      "sha256": "da23dbc28805c390d62338dba5603eb12b2e94c8aaf873c1c42c1a5f10f26b79",
+      "bytes": 30226,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "include/cpuopsys.h",
+      "source_path": "src/common/sdk/nvidia/inc/cpuopsys.h",
+      "git_blob_sha1": "6467b396a696a47fa71d4ad41e32d27f344fcdce",
+      "sha256": "329ab764372bace3e1445315bb7a3766d4f60aacb8523ac3e3c760c79358f4fb",
+      "bytes": 11713,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "include/nv-kernel-interface-api.h",
+      "source_path": "kernel-open/common/inc/nv-kernel-interface-api.h",
+      "git_blob_sha1": "183f9b4312eb0913c0a0a97e4db1f62a50b442c5",
+      "sha256": "1cf34c1dcd1abf535fb27387145374972a43ec9cd6f6c9ef927777431bda3cc4",
+      "bytes": 1810,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "reference/os-interface.h",
+      "source_path": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "git_blob_sha1": "03de89a28a2611bca2fb2a3d85c7f617a681a20a",
+      "sha256": "bd281e48ff06b481033fc2fb29a891710a2b4d66fb009cc2b752ab6e90f2113b",
+      "bytes": 17357,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "reference/memory_unix_kernel_os.c",
+      "source_path": "src/nvidia/src/libraries/nvport/memory/memory_unix_kernel_os.c",
+      "git_blob_sha1": "06e5504a6556d2107d41cf614063737a92ad57c0",
+      "sha256": "c32de8ee6199767bb8c99dc529eec1c9aa73c2e6366634639a803ab79962372c",
+      "bytes": 4659,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "reference/memory.h",
+      "source_path": "src/nvidia/inc/libraries/nvport/memory.h",
+      "git_blob_sha1": "595eafee880dccd54ca2f382fb77afc918793e1d",
+      "sha256": "a700efeb580141a76680fd2def6622759759232e6b0e9a6e5e6a0cb863b41d90",
+      "bytes": 38701,
+      "modified": false,
+      "license": "MIT"
+    },
+    {
+      "path": "reference/debug.h",
+      "source_path": "src/nvidia/inc/libraries/nvport/debug.h",
+      "git_blob_sha1": "c2929200e628022149e6c2fb1581469946ffe05a",
+      "sha256": "864a4080c67ab9037a300feb6d4a998a9e38df12db130acf5a292234351b2df5",
+      "bytes": 11601,
+      "modified": false,
+      "license": "MIT"
+    }
+  ],
+  "adapted_caller": {
+    "path": "nvport_memory_primitives.c",
+    "source_reference": "reference/memory_unix_kernel_os.c",
+    "source_lines": [
+      79,
+      156
+    ],
+    "functions": [
+      "portMemCopy",
+      "portMemCopyAligned",
+      "portMemSet",
+      "portMemCmp"
+    ],
+    "changes": {
+      "os_mem_copy": "s540NvidiaMemoryCopy",
+      "os_mem_set": "s540NvidiaMemorySet",
+      "os_mem_cmp": "s540NvidiaMemoryCompare"
+    },
+    "sha256": "54dc0495690b71a89b85ca4e7ab86fcf7ca40448f8b95d0ac10adb7a354d915b",
+    "source_body_sha256": "db378e97e3c6c90c2d7fdef978a7af52e9d9a34da3d3778e89d60d26409accec",
+    "complete_upstream_translation_unit": false,
+    "assertion_profile": "upstream-release-only",
+    "checked_profile_supported": false,
+    "wide_length_policy": "Preserve 64-bit NvLength by issuing bounded NvU32 chunks to the unchanged OS-hook ABI."
+  },
+  "interface": {
+    "path": "nvport_memory_primitives.h",
+    "declarations_reference": "reference/os-interface.h",
+    "sha256": "cb144237601ed9062624e73b548b87b271849c5626c26c79a565147439cfd9da",
+    "hooks": [
+      "os_mem_copy",
+      "os_mem_set",
+      "os_mem_cmp"
+    ],
+    "caller_declarations_reference": "reference/memory.h",
+    "length_abi": {
+      "NvLength_bits": 64,
+      "os_hook_length_bits": 32
+    }
+  },
+  "scope": {
+    "memory": "ordinary RAM only",
+    "allocation": false,
+    "user_copy": false,
+    "mmio": false,
+    "dma": false,
+    "generic_move_pattern": false
+  }
+}

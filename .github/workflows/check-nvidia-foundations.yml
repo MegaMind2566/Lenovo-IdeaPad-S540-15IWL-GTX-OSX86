@@ -1,0 +1,48 @@
+name: Check NVIDIA Darwin OS foundations
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/nvidia-os-adapter/src/**'
+      - 'packages/nvidia-os-adapter/tests/check_atomic_*'
+      - 'packages/nvidia-os-adapter/tests/check_memory_native.cpp'
+      - 'packages/nvidia-os-adapter/upstream/include/**'
+      - 'packages/nvidia-os-adapter/upstream/reference/**'
+      - 'packages/nvidia-os-adapter/upstream/nvport_*.c'
+      - 'packages/nvidia-os-adapter/upstream/nvport_*.h'
+      - 'packages/nvidia-os-adapter/upstream/*PROVENANCE.json'
+      - 'packages/nvidia-os-adapter/upstream/LLVM-LICENSE.txt'
+      - 'builders/check_nvidia_foundations.py'
+      - 'tests/test_nvidia_memory_provenance.py'
+      - 'tests/test_nvidia_atomic_provenance.py'
+      - '.github/workflows/check-nvidia-foundations.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  foundations:
+    runs-on: macos-15-intel
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: acidanthera/MacKernelSDK
+          ref: 3f750085caa17ec3a7880f11c11bf4f48cd6a164
+          path: build-src/MacKernelSDK
+          persist-credentials: false
+      - name: Check memory, atomics, native integration and kernel compilation
+        run: python3 builders/check_nvidia_foundations.py --kernel-sdk build-src/MacKernelSDK --output-dir build/nvidia-foundations
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: NVIDIA-foundation-targeted-checks
+          path: |
+            build/nvidia-foundations/foundation-checks.json
+            build/nvidia-foundations/foundation-checks.json.sha256
+          if-no-files-found: error
+          retention-days: 30
