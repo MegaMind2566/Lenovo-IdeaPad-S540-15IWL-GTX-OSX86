@@ -56,6 +56,10 @@ Native userspace execution passed for the actual clock and memory callers and bo
 
 No component accesses GPU registers, changes power, performs DMA or loads firmware. NVIDIA HAL instantiation, resource-manager integration and GPU initialization remain unimplemented. Software deadlines cannot make a stalled MMIO load recoverable.
 
+## Next caller boundary
+
+The separate [NVPort caller component](../nvidia-caller-integration/README.md) connects original NVIDIA allocation and mutex bodies to candidate backends with stronger no-sleep contracts. Its bounded reserve and spin-guarded mutex do not replace the confirmed v4 code. [Targeted GitHub checks passed](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38722294509); a later combined milestone is required for kernel deployment. This remains separate from GPU initialization and full resource-manager integration.
+
 ## Primary references
 
 - [Pinned NVIDIA source](https://github.com/NVIDIA/open-gpu-kernel-modules/tree/1a82fbfda8f321b056eb3568850f9316c5e465c5), with local [provenance manifests](upstream/README.md).

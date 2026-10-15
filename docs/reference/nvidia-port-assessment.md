@@ -128,6 +128,16 @@ The October 15, 2026 laptop report returns `integrated_passed`, `complete=true`,
 
 The check runs once on a sleepable thread. It uses small buffers, a single 256-byte ordinary-RAM allocation with 16-byte alignment, and a mutex created, conditionally acquired, released and reacquired on that same thread. Resources are released before the snapshot is published. This establishes the bounded startup result in the real Tahoe kernel. It does not validate kernel contention/publication, the C11 atomic branch at kernel runtime, interrupt-safe allocation, suspend behavior, usable VRAM, HAL/RM instantiation or GPU initialization. The allocator and mutex retain their limited contracts; full NVIDIA caller compatibility must be reviewed before wider runtime binding. Raw reports and resource addresses remain private. No repeated laptop test is needed for this checkpoint.
 
+## Next caller integration: bounded allocation and mutex contracts
+
+The [candidate caller component](../../packages/nvidia-caller-integration/README.md) retains three allocation and five mutex function bodies from the pinned NVIDIA source. It is a narrow, explicitly adapted extraction, not complete NVPort or RM integration. The confirmed v4 probe is unchanged.
+
+NVIDIA's nonpaged allocation/free contract excludes sleeping. Candidate hooks therefore use a 32-slot, 4 MiB preallocated reserve with a 128 KiB request ceiling and bounded lock-free bitmap operations. Initialization/shutdown require ordinary thread context and external quiescence. Requests may fail for size, exhaustion or contention. Larger RM allocations require a later design; this is not a general RM heap.
+
+The NVPort mutex caller profile requires ordinary threads, same-owner release and no recursion. Candidate kernel acquisition registers `assert_wait(THREAD_UNINT)` under a simple-lock state guard, drops the guard before `thread_block`, and rechecks the token after waking. Conditional acquisition/release use the spin guard and wake primitive. Native pthread execution tests semantics, not kernel non-sleeping or interrupt behavior. The original mandatory acquisition assertion reaches a real fatal backend; failed acquisition cannot return unlocked. Caller-owned mutex initialization/lifetime is supported, while tracked allocator creation and other synchronization modules are excluded explicitly.
+
+[Targeted GitHub validation passed](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38722294509) from source `df3738eb8a3ab08f3f0668735a42def18c821cd3`: exact caller provenance, native reserve/caller/mutex execution, fatal sanitizer diagnostics, the original failed-acquisition assertion, and kernel compile/link/import validation. All 16 expected hook/caller/assertion symbols resolved with exactly 15 platform imports and no static initializers. The verified report SHA256 is `1e04b6838516375d7513dec6bbc4e2c67ce850f6a88c4bd8302af8c46efeb424`. These backends are not deployed on the laptop. No GPU operation, HAL/RM object or laptop installation package is added.
+
 ## Milestone status and remaining work
 
 | Milestone | Required result |

@@ -2,7 +2,7 @@
 
 This development component connects three original NVIDIA allocation callers and five original mutex callers to candidate Darwin backends. Function bodies come from NVIDIA release `615.78.08`, commit `1a82fbfda8f321b056eb3568850f9316c5e465c5`; includes and interface profiles are explicitly adapted. This is not the complete NVPort library or NVIDIA resource manager.
 
-Targeted Intel macOS CI is pending. The confirmed v0.4.0 laptop probe and its sources are unchanged. This component has no kext or laptop installation package. Kernel and interrupt execution of these candidate backends remain untested.
+[Targeted Intel macOS CI passed](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38722294509), including original-caller execution, sanitizers, mandatory assertion failure and kernel compile/link/import checks. The confirmed v0.4.0 laptop probe and its sources are unchanged. This component has no kext or laptop installation package. Kernel and interrupt execution of these candidate backends remain untested.
 
 ## Allocation without sleeping
 
@@ -29,7 +29,7 @@ The original mandatory acquisition assertion stays active. A failed OS acquisiti
 
 ## Evidence and deployment boundary
 
-The [provenance records](upstream/README.md) verify exact upstream bytes, function bodies, ABI widths and mutex layout. CI compiles and relocatably links the candidate kernel backends with the actual C callers, audits the remaining imports and static initializers, and executes native reserve/caller/mutex harnesses. AddressSanitizer and UndefinedBehaviorSanitizer instrument the actual sources with fatal diagnostics. A separate subprocess must abort through the original failed-acquisition assertion.
+The [successful CI run](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38722294509) used source `df3738eb8a3ab08f3f0668735a42def18c821cd3`. The [provenance records](upstream/README.md) verified exact upstream bytes, function bodies, ABI widths and mutex layout. All 16 hook/caller/assertion symbols resolved in the relocatable kernel object, with exactly 15 platform imports and no static initializers. Native reserve/caller/mutex harnesses passed both plain and under AddressSanitizer/UndefinedBehaviorSanitizer with fatal diagnostics. The failed original acquisition assertion terminated its separate subprocess with SIGABRT. The downloaded report and all 40 source checksums were verified.
 
 No PCI or MMIO access, firmware, DMA, GPU commands, HAL objects or RM objects are added. The v4 laptop result remains the confirmed hardware checkpoint. A later combined kernel milestone is required before using these candidate backends on the laptop.
 
