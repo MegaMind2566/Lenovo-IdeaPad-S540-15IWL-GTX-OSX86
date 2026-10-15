@@ -86,6 +86,22 @@ class Provenance(unittest.TestCase):
     def test_exact_derived_server(self):
         self.assertEqual(derive_server(), (UPSTREAM / 'adapted/rs_server.c').read_text())
 
+    def test_exact_typed_iterator_overlay(self):
+        original = (TREE / 'src/nvidia/inc/libraries/containers/type_safety.h').read_text()
+        a = original.index('//\n// The dummy contId prevents compilers')
+        b = original.index('\n#else\n', a)
+        replacement = (UPSTREAM / 'adapted/iterator_macros.h.inc').read_text()
+        derived = original[:a] + replacement + original[b:]
+        self.assertEqual(derived,
+            (UPSTREAM / 'adapted/include/containers/type_safety.h').read_text())
+        self.assertEqual(self.build['adapter_include_dirs'], ['upstream/adapted/include'])
+        self.assertEqual(self.build['header_overrides'], {
+            'containers/type_safety.h': 'upstream/adapted/include/containers/type_safety.h'})
+        self.assertNotIn('contId(pFunc)', replacement)
+        self.assertIn('s540_typed_iterator.iter = (pFunc)', replacement)
+        self.assertEqual(self.manifest['adaptations'][2]['macros'],
+                         ['CONT_ITER_RANGE', 'CONT_ITER_RANGE_INDEX'])
+
     def test_exact_policy_extraction(self):
         original = (TREE / 'src/nvidia/src/kernel/rmapi/sharing.c').read_text()
         a = original.index('NV_STATUS\nserverInitGlobalSharePolicies\n')

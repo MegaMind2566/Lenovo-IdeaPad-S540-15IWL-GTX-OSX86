@@ -477,6 +477,17 @@
       "function": "serverInitGlobalSharePolicies",
       "reason": "Verbatim complete function and license extracted to avoid unrelated GPU RM closure.",
       "compiled": false
+    },
+    {
+      "output": "upstream/adapted/include/containers/type_safety.h",
+      "reference": "src/nvidia/inc/libraries/containers/type_safety.h",
+      "replacement": "upstream/adapted/iterator_macros.h.inc",
+      "macros": [
+        "CONT_ITER_RANGE",
+        "CONT_ITER_RANGE_INDEX"
+      ],
+      "reason": "Call list/map/multimap/index iterator implementations through their original C signatures, then assign the returned base iterator into the typed union; remove undefined incompatible function-pointer calls without suppressing function sanitization.",
+      "scope": "Only ResourceServer C translation units receive this include overlay; generic list structures and implementation remain unchanged."
     }
   ],
   "profile": {

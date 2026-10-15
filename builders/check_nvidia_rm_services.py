@@ -188,7 +188,9 @@ def check(sdk: Path, output: Path) -> Path:
         work = Path(temporary)
         for instrumented in (False, True):
             label = 'sanitized' if instrumented else 'native'
-            flags = ['-fsanitize=address,undefined', '-fno-sanitize-recover=all',
+            # Require the indirect-call type check explicitly: Clang distributions
+            # differ in whether their undefined group includes function.
+            flags = ['-fsanitize=address,undefined,function', '-fno-sanitize-recover=all',
                      '-fno-omit-frame-pointer'] if instrumented else []
             for stem, component, harness, closure in cases:
                 binary = transport.compile_native_harness(work, label + '-' + stem,

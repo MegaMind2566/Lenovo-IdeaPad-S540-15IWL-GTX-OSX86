@@ -20,7 +20,7 @@ The original references remain unchanged. The compiled server copy has three doc
 - Replace the empty standalone global-policy hook with the complete unchanged `serverInitGlobalSharePolicies` implementation from upstream RM sharing code.
 - Track the actual top-lock mode in `serverFreeResourceTree`, including a missing-handle compatibility path that originally acquired a read lock and released it as a write lock.
 
-A provenance test derives the exact compiled copy from the original references and these changes.
+A ResourceServer-only header overlay also replaces the two typed iterator macros. Each macro calls the generic list/map/multimap implementation through its original C signature, then assigns its returned base iterator into the typed union. This removes incompatible function-pointer calls while preserving all function-sanitizer checks. Container structures and the shared list implementation remain unchanged. Provenance tests derive both the exact compiled server and header overlay from the original references.
 
 ## Darwin services and limits
 
@@ -30,6 +30,6 @@ All entry points require the shared outer startup lease and initially cold servi
 
 ## Verification
 
-The native production entry completes **45 checks**. The backend suite completes **134 checks**, including thirty-two concurrent TLS threads and 4,800 contended lock updates. The allocation-pressure suite completes **598 checks** across thirty-one constructor and thirty-one full-graph pressure cases, verifies twenty-nine real failure cases, and then recovers through the complete production entry. All suites require complete cleanup. The provenance suite contains nine checks of source hashes, derivation, ABI sharing and compile profile.
+The native production entry completes **45 checks**. The backend suite completes **134 checks**, including thirty-two concurrent TLS threads and 4,800 contended lock updates. The allocation-pressure suite completes **598 checks** across thirty-one constructor and thirty-one full-graph pressure cases, verifies twenty-nine real failure cases, and then recovers through the complete production entry. All suites require complete cleanup. The provenance suite contains ten checks of source hashes, derivation, ABI sharing and compile profile.
 
 Local Clang native runs and fatal AddressSanitizer/UndefinedBehaviorSanitizer runs passed using the actual production backend. Linux execution uses a scratch-only monotonic-clock compatibility include for the existing Darwin clock adapter; it is not included in the package. Intel macOS CI and the combined laptop checkpoint are recorded by the parent transport package.

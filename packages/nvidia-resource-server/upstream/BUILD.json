@@ -102,5 +102,11 @@
     "tests/check_resource_server_native.cpp",
     "tests/check_resource_backend_native.cpp",
     "tests/check_resource_faults_native.cpp"
-  ]
+  ],
+  "adapter_include_dirs": [
+    "upstream/adapted/include"
+  ],
+  "header_overrides": {
+    "containers/type_safety.h": "upstream/adapted/include/containers/type_safety.h"
+  }
 }

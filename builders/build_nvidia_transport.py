@@ -429,7 +429,10 @@ def source_flags(source: Path) -> list[str]:
     if source.suffix == '.c' and RESOURCE_SERVER in source.parents:
         build = json.loads((RESOURCE_SERVER / 'upstream/BUILD.json').read_text())
         tree = RESOURCE_SERVER / 'upstream/tree'
-        return [flag for path in build['include_dirs'] for flag in ('-I', str(tree / path))] + [
+        overlay = [flag for path in build.get('adapter_include_dirs', [])
+                   for flag in ('-I', str(RESOURCE_SERVER / path))]
+        return overlay + [flag for path in build['include_dirs']
+                          for flag in ('-I', str(tree / path))] + [
             '-D' + define for define in build['defines']] + [
             '-include', str(tree / build['force_include'])]
     # These unchanged container translation units use the narrow consumer

@@ -1,0 +1,24 @@
+//
+// Scoped Darwin C ABI adaptation: invoke the generic implementation through
+// its original function type, then assign its returned base iterator into the
+// typed union. Layout-compatible union return types are not compatible C
+// function types. Keep function sanitization enabled; do not cast callbacks.
+// GNU statement expressions preserve the existing expression-valued API.
+//
+#define CONT_ITER_RANGE(pCont, pFunc, pFirst, pLast, validfunc)              \
+    __extension__ ({                                                       \
+        __typeof__(pCont) s540_iterator_container = (pCont);                 \
+        __typeof__(*(s540_iterator_container)->iter) s540_typed_iterator;    \
+        s540_typed_iterator.iter = (pFunc)(                                \
+            &(s540_iterator_container)->real.base, (pFirst), (pLast));      \
+        s540_typed_iterator;                                               \
+    })
+
+#define CONT_ITER_RANGE_INDEX(pCont, pFunc, first, last, validfunc)          \
+    __extension__ ({                                                       \
+        __typeof__(pCont) s540_iterator_container = (pCont);                 \
+        __typeof__(*(s540_iterator_container)->iter) s540_typed_iterator;    \
+        s540_typed_iterator.iter = (pFunc)(                                \
+            &(s540_iterator_container)->real.base, (first), (last));        \
+        s540_typed_iterator;                                               \
+    })
