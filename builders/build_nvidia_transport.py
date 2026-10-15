@@ -142,7 +142,7 @@ def compile_native_harness(work: Path, label: str, harness: Path,
     objects = []
     for source in c_sources:
         obj = work / (label + '-' + source.stem + '.o')
-        run('/usr/bin/xcrun', 'clang', *common, '-std=c11', *sanitizer,
+        run('/usr/bin/xcrun', 'clang', *common, '-std=gnu11', *sanitizer,
             '-c', str(source), '-o', str(obj))
         objects.append(str(obj))
     binary = work / ('check-' + label)
@@ -281,7 +281,7 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
         for source in [*kernel_sources, *adapter_cpp, *adapter_c]:
             obj = work / (source.stem + '.o')
             compiler = 'clang' if source.suffix == '.c' else 'clang++'
-            language_flags = ['-std=c11'] if source.suffix == '.c' else cpp_flags
+            language_flags = ['-std=gnu11'] if source.suffix == '.c' else cpp_flags
             run('/usr/bin/xcrun', compiler, *flags, *language_flags,
                 '-c', str(source), '-o', str(obj))
             macho(obj, 1)
@@ -338,7 +338,7 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
         run('/usr/bin/codesign', '--force', '--sign', '-', str(bundle))
         run('/usr/bin/codesign', '--verify', '--strict', str(bundle))
         checker = work / 'check-nvidia-transport'
-        run('/usr/bin/xcrun', 'clang', '-std=c11', '-Wall', '-Wextra', '-Werror',
+        run('/usr/bin/xcrun', 'clang', '-std=gnu11', '-Wall', '-Wextra', '-Werror',
             '-O2', '-fstack-protector-strong', '-arch', 'x86_64',
             '-mmacosx-version-min=15.0', '-framework', 'IOKit', '-framework', 'CoreFoundation',
             str(SOURCE / 'src/check_nvidia_transport.c'), '-o', str(checker))
