@@ -70,7 +70,9 @@ def build(sdk: Path, output: Path) -> Path:
     for item in required:
         plain(item)
     info = plistlib.loads((SOURCE / 'Info.plist').read_bytes())
-    if info.get('CFBundleExecutable') != EXECUTABLE or info.get('CFBundleVersion') != VERSION:
+    if (info.get('CFBundleExecutable') != EXECUTABLE
+            or any(info.get(key) != VERSION for key in
+                   ('CFBundleVersion', 'CFBundleShortVersionString', 'OSBundleCompatibleVersion'))):
         raise ValueError('The kernel bundle version or executable is inconsistent.')
     with tempfile.TemporaryDirectory(prefix='s540-nvidia-transport-', dir=output) as temporary:
         work = Path(temporary)
@@ -119,7 +121,8 @@ def build(sdk: Path, output: Path) -> Path:
         macho(checker, 2)
         run('/usr/bin/codesign', '--force', '--sign', '-', str(checker))
         run('/usr/bin/codesign', '--verify', '--strict', str(checker))
-        run(str(checker), '--self-test')
+        self_test = run(str(checker), '--self-test')
+        print(self_test.stdout.strip())
         live = json.loads(run(str(checker)).stdout)
         if live.get('format') != 2 or live.get('complete') is not True or live.get('status') != 'not_attached':
             raise ValueError('The native runner must complete without a loaded probe.')

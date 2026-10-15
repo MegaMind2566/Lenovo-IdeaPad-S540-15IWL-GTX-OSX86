@@ -45,7 +45,8 @@ Current status as of **October 15, 2026**. **Pending** means the feature has not
 | F6 touchpad toggle | Working | Direct key enables and disables the touchpad |
 | Fn function row | Configured | Ordinary F1–F12 events recorded; four conflicting macOS shortcuts disabled, session refresh confirmation pending |
 | Touchpad and gestures | Working | ELAN0662 gestures confirmed in daily use; F6 toggle also works |
-| NVIDIA PCI attachment | Working diagnostic | Kernel probe attaches to `10DE:1F91`, verifies subsystem `17AA:3806`, reads fixed PCI configuration and assigned resource metadata; no GPU initialization or acceleration |
+| NVIDIA PCI attachment | Working diagnostic | Probe 0.1.0 attaches to `10DE:1F91`, verifies subsystem `17AA:3806`, reads fixed PCI configuration and assigned resource metadata; no GPU initialization or acceleration |
+| NVIDIA BAR0 identification | Pending | Probe 0.2.0 implements one guarded read-only identification-register read; laptop result pending |
 | Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; further icon-key investigation deferred |
 | USB-C video | Pending | No video test available; hardware video capability and routing remain unverified |
 | USB 2 device coverage / storage reliability | Pending | External USB 2 devices, measured throughput and sustained reliability |
@@ -62,13 +63,13 @@ Detailed hardware information is in [Hardware](docs/status/hardware.md).
 
 macOS and OpenCore use the external Samsung 960 EVO. Independent boot is confirmed after manually copying the current private EFI from the 240 GB HDD. The HDD remains available as a recovery route; Windows remains on the internal PM981a.
 
-The experimental NVIDIA probe now attaches to the GTX 1650 Max-Q and reads its fixed PCI configuration and assigned resource descriptors. This diagnostic milestone does not initialize the GPU or provide graphics acceleration. Intel remains the operating display GPU; the reports do not audit the full current EFI.
+NVIDIA probe 0.1.0 is confirmed to attach to the GTX 1650 Max-Q and read its fixed PCI configuration and assigned resource descriptors. Version 0.2.0 implements a single guarded read of its BAR0 identification register; that new hardware result remains pending. Neither milestone provides GPU initialization or graphics acceleration. Intel remains the operating display GPU; the reports do not audit the full current EFI.
 
 Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including the S540 microphone correction. The EFI alone does not install this extension. The audio guides document the existing installation and upgrade procedures; those helpers require their original rollback state.
 
 ## Development priorities
 
-- Assess the next bounded read-only MMIO step for the [NVIDIA transport prototype](packages/nvidia-transport/README.md). Kernel attachment, fixed PCI configuration reads and assigned resource metadata are confirmed on the laptop. MMIO access, DMA, firmware startup and acceleration remain unimplemented.
+- Validate the [NVIDIA transport prototype](packages/nvidia-transport/README.md) 0.2.0 single read-only BAR0 identification step on the laptop. Version 0.1.0 attachment and configuration/resource reads are confirmed. The new register-read implementation has no laptop result yet; DMA, firmware startup and acceleration remain unimplemented.
 - Complete storage reliability and remaining USB 2 device checks. Both USB-A connectors and USB-C in both orientations negotiate 5 Gb/s with the tested hardware. Audio peripherals, battery power and independent SSD boot work; measured battery runtime remains open.
 - Complete Intel stability and power-management coverage; sustained cooling and fan telemetry remain open. External-display work is paused.
 - Complete remaining device support and investigate connection performance from the recorded Internet baseline; wired/Bluetooth microphones, headphone switching and wireless reconnection work.
@@ -85,7 +86,7 @@ Download the [first EFI release, v0.1.0](https://github.com/MegaMind2566/Lenovo-
 
 Generated packages are available in **Artifacts** from successful [GitHub Actions runs](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions). Current companion packages are `S540-microfono-fix-v2`, `S540-volume-fine-v1` and `S540-brightness-keys-v2`. The [function-key guide](docs/guides/function-keys.md) records the complete keyboard mapping and remaining work.
 
-The experimental **S540-nvidia-transport-v1** package is available from its [successful native build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38660491862). Its PCI attachment diagnostic now succeeds on the laptop through a separate test EFI; it provides no graphics acceleration.
+The earlier **S540-nvidia-transport-v1** package is available from its [successful native build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38660491862). Its 0.1.0 PCI attachment diagnostic succeeds on the laptop through a separate test EFI. The 0.2.0 single-read implementation is the next experimental milestone; follow the [package guide](packages/nvidia-transport/README.md) for its build and deployment status. Neither version provides graphics acceleration.
 
 **Code → Download ZIP downloads source code, without compiled payloads. It is not an installer.** Builders assemble the feature sources into distributable ZIPs with their own launchers and runtime layout.
 

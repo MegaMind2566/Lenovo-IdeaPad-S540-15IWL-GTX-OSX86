@@ -2,7 +2,7 @@
 
 Reviewed on October 15, 2026. Target: Lenovo IdeaPad S540-15IWL GTX, Intel macOS Tahoe, NVIDIA GTX 1650 Max-Q, PCI `10DE:1F91`.
 
-**Status:** source assessment, PCI visibility and bounded kernel attachment are complete. The [Darwin PCI attachment prototype](../../packages/nvidia-transport/README.md) attaches to the laptop's verified `10DE:1F91` provider, reads fixed PCI configuration and publishes assigned resource descriptors. The next gate is a read-only MMIO assessment; MMIO access, GPU initialization, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
+**Status:** source assessment, PCI visibility and the 0.1.0 kernel attachment/configuration/resource milestone are confirmed on the laptop. The [transport prototype](../../packages/nvidia-transport/README.md) 0.2.0 now implements one guarded read-only BAR0 identification read with a format-2 report; that hardware result remains pending. GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
 
 ## Source baseline
 
@@ -63,7 +63,7 @@ This completes the PCI visibility milestone. It establishes published identity a
 
 ## Current implementation milestone: bounded PCI transport
 
-The prototype is limited to IOKit attachment to this exact PCI device, fixed configuration-space reads, and inspection of already-assigned resource descriptors. It defines attachment, refusal and teardown behavior without PCI configuration writes, BAR reassignment, MMIO mapping or reads, DMA, interrupts, ACPI invocation or firmware loading. Laptop attachment is now confirmed; the source teardown path has not been tested through runtime stop or unload. The kernel SDK is pinned to Acidanthera commit `3f750085caa17ec3a7880f11c11bf4f48cd6a164`.
+Version 0.1.0 is limited to IOKit attachment to this exact PCI device, fixed configuration-space reads, and inspection of already-assigned resource descriptors. It defines attachment, refusal and teardown behavior without PCI configuration writes, BAR reassignment, MMIO mapping or reads, DMA, interrupts, ACPI invocation or firmware loading. That laptop attachment is confirmed; the source teardown path has not been tested through runtime stop or unload. The kernel SDK is pinned to Acidanthera commit `3f750085caa17ec3a7880f11c11bf4f48cd6a164`.
 
 Resource inspection reads the provider's published `IODeviceMemory` array directly, with bounded type/tag checks. The convenience `getDeviceMemoryWithRegister` and `getDeviceMemoryWithIndex` calls are excluded: the inspected Apple implementation can call `setTunnelL1Enable`, which does not belong in this observational milestone.
 
@@ -82,16 +82,18 @@ The October 15 report from `nvidia-transport` 0.1.0 returns `attached`, `complet
 
 No descriptor is retained at `0x18` or `0x20`. Raw BAR type/width flags are absent from this snapshot, so the gaps are not diagnosed as missing resources. Descriptor lengths are not usable VRAM measurements or evidence of mapped register access. The probe did not change PCI command bits or enable bus mastering/DMA; observed configuration values must not be attributed to such changes. Raw reports, resource addresses and private configurations remain excluded from the repository.
 
-## Next gate: read-only MMIO assessment
+## Current implementation: single-read identification, 0.2.0
 
-The gate under review is exactly one 32-bit read of [`NV_PMC_BOOT_0`](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/common/inc/swref/published/nv_ref.h#L102-L131), documented read-only at BAR0 offset zero; the candidate is a read-only uncached four-byte subset mapping, subject to VM page granularity. Implementation must first verify the exact provider identity, BAR0 memory type/alignment/length, already-enabled memory decoding and D0 established without power-management writes, or refuse; no MMIO implementation, register-read result, polling, timeout or GSP startup is claimed.
+Version 0.2.0 implements exactly one 32-bit read of [`NV_PMC_BOOT_0`](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/common/inc/swref/published/nv_ref.h#L102-L131), documented read-only at BAR0 offset zero. It requires the exact provider identity, matching BAR0 type/alignment/length, already-enabled memory decoding and D0 established through read-only PCI checks, or refuses without repairing configuration or power state. The read-only uncached mapping requests a four-byte subset; the VM mapping retains page granularity and is released after the single load.
+
+The format-2 report distinguishes identification, refusal and failed read/decode, while an old loaded 0.1.0 probe is reported as outdated rather than accepted as a new result. Laptop validation of 0.2.0 remains pending. There are no retries, polling, configuration or MMIO writes, DMA, interrupts, firmware loading or GSP initialization. A single MMIO load can still stall the kernel; this implementation provides no recoverable hardware timeout. Successful attachment or host-side checks do not establish a successful register read.
 
 ## Milestone status and remaining work
 
 | Milestone | Required result |
 |---|---|
 | Darwin PCI attachment | Confirmed laptop attachment, fixed configuration reads and assigned resource metadata; runtime stop/unload remains untested |
-| Read-only MMIO | Assessment first, then a separately reviewed bounded mapped-register read; not implemented |
+| Single-read BAR0 identification | Implemented in 0.2.0, format 2; laptop result pending. The confirmed 0.1.0 attachment report is not register-read evidence |
 | Further hardware transport | Separate reviewed work for DMA and interrupts, with bounded access and failure handling |
 | GPU and GSP startup | Matching, hashed firmware; observed initialization with timeouts and cleanup; no success inferred from PCI enumeration |
 | Minimal execution | One deterministic command with a checked result and recoverable failure path |
