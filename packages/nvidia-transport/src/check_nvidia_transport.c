@@ -16,10 +16,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TOOL_VERSION "0.2.0"
+#define TOOL_VERSION "0.3.0"
 #define PROBE_CLASS "S540NvidiaPCIProbe"
 #define SNAPSHOT_KEY "S540NvidiaPCIProbeSnapshot"
-#define ACCESS_POLICY "single-read-only-bar0-identification"
+#define ACCESS_POLICY "two-read-only-bar0-hal-identification"
+#define LEGACY_MMIO_ACCESS_POLICY "single-read-only-bar0-identification"
+#define NVIDIA_SOURCE_COMMIT "1a82fbfda8f321b056eb3568850f9316c5e465c5"
 #define LEGACY_ACCESS_POLICY "config-read-and-resource-metadata-only"
 #define BAR_COUNT 6
 #define MAX_SERVICES 8
@@ -32,7 +34,7 @@ struct bar_descriptor {
     uint64_t length;
 };
 
-enum mmio_status { MMIO_REFUSED, MMIO_FAILED, MMIO_IDENTIFIED };
+enum mmio_status { MMIO_REFUSED, MMIO_FAILED, MMIO_IDENTIFIED, MMIO_NOT_ATTEMPTED };
 
 struct mmio_result {
     enum mmio_status status;
@@ -41,6 +43,7 @@ struct mmio_result {
     uint32_t raw_value;
     uint32_t architecture;
     uint32_t implementation;
+    uint32_t chip_id;
 };
 
 static const char *const mmio_reasons[] = {
@@ -71,6 +74,9 @@ struct snapshot {
     struct bar_descriptor bars[BAR_COUNT];
     int bars_available;
     struct mmio_result mmio;
+    struct mmio_result boot42;
+    int hal_matched;
+    uint32_t total_read_count;
 };
 
 enum warning_code {
@@ -253,6 +259,131 @@ static int decode_mmio(CFTypeRef object, struct mmio_result *output)
     return 1;
 }
 
+/* BOOT42 has its own architecture encoding and must not reuse BOOT0 masks. */
+static int decode_boot42(CFTypeRef object, const struct mmio_result *boot0,
+                         struct mmio_result *output)
+{
+    struct mmio_result candidate;
+    memset(&candidate, 0, sizeof(candidate));
+    if (object == NULL || CFGetTypeID(object) != CFDictionaryGetTypeID())
+        return 0;
+    CFDictionaryRef dictionary = (CFDictionaryRef)object;
+    uint64_t value = 0;
+    if (!dictionary_number(dictionary, CFSTR("ReadCount"), 1, &value))
+        return 0;
+    candidate.read_count = (uint32_t)value;
+    if (CFDictionaryGetCount(dictionary) != (candidate.read_count ? 10 : 6) ||
+        !dictionary_number(dictionary, CFSTR("BarIndex"), 0, &value) ||
+        !dictionary_number(dictionary, CFSTR("Offset"), 0xa00, &value) || value != 0xa00 ||
+        !dictionary_number(dictionary, CFSTR("Width"), 32, &value) || value != 32)
+        return 0;
+    CFTypeRef reason_object = CFDictionaryGetValue(dictionary, CFSTR("Reason"));
+    CFTypeRef status_object = CFDictionaryGetValue(dictionary, CFSTR("Status"));
+    if (boot0->status != MMIO_IDENTIFIED) {
+        if (candidate.read_count != 0 ||
+            !exact_string(status_object, CFSTR("not_attempted")) ||
+            !exact_string(reason_object, CFSTR("boot0-not-identified")))
+            return 0;
+        candidate.status = MMIO_NOT_ATTEMPTED;
+        candidate.reason = MMIO_REASON_COUNT;
+        *output = candidate;
+        return 1;
+    }
+    char reason[64];
+    if (reason_object == NULL || CFGetTypeID(reason_object) != CFStringGetTypeID() ||
+        !CFStringGetCString((CFStringRef)reason_object, reason, sizeof(reason),
+                            kCFStringEncodingASCII) ||
+        strlen(reason) != (size_t)CFStringGetLength((CFStringRef)reason_object))
+        return 0;
+    int found = 0;
+    for (size_t index = 0; index < MMIO_REASON_COUNT; ++index) {
+        if (strcmp(reason, mmio_reasons[index]) == 0) {
+            candidate.reason = index;
+            found = 1;
+            break;
+        }
+    }
+    if (!found)
+        return 0;
+    if (candidate.reason < MMIO_REFUSAL_COUNT) {
+        if (candidate.reason == 0 || candidate.reason == 1 ||
+            candidate.reason == 13 || candidate.reason == 14 ||
+            candidate.read_count != 0 || !exact_string(status_object, CFSTR("refused")))
+            return 0;
+        candidate.status = MMIO_REFUSED;
+    } else {
+        if (candidate.read_count != 1 ||
+            !dictionary_number(dictionary, CFSTR("RawValue"), UINT32_MAX, &value))
+            return 0;
+        candidate.raw_value = (uint32_t)value;
+        if (!dictionary_number(dictionary, CFSTR("Architecture"), 0x3f, &value))
+            return 0;
+        candidate.architecture = (uint32_t)value;
+        if (!dictionary_number(dictionary, CFSTR("Implementation"), 0xf, &value))
+            return 0;
+        candidate.implementation = (uint32_t)value;
+        if (!dictionary_number(dictionary, CFSTR("ChipID"), 0x3ff, &value))
+            return 0;
+        candidate.chip_id = (uint32_t)value;
+        uint32_t raw = candidate.raw_value;
+        if (candidate.architecture != ((raw >> 24) & 0x3fU) ||
+            candidate.implementation != ((raw >> 20) & 0xfU) ||
+            candidate.chip_id != ((raw >> 20) & 0x3ffU))
+            return 0;
+        size_t expected_reason;
+        if (raw == 0)
+            expected_reason = MMIO_REFUSAL_COUNT;
+        else if (raw == UINT32_MAX)
+            expected_reason = MMIO_REFUSAL_COUNT + 1;
+        else if (candidate.architecture != 0x16)
+            expected_reason = MMIO_REFUSAL_COUNT + 2;
+        else if (candidate.implementation != 7)
+            expected_reason = MMIO_REFUSAL_COUNT + 3;
+        else
+            expected_reason = MMIO_REFUSAL_COUNT + 4;
+        if (candidate.reason != expected_reason)
+            return 0;
+        int identified = expected_reason == MMIO_REFUSAL_COUNT + 4;
+        if (!exact_string(status_object, identified ? CFSTR("identified") : CFSTR("failed")))
+            return 0;
+        candidate.status = identified ? MMIO_IDENTIFIED : MMIO_FAILED;
+    }
+    *output = candidate;
+    return 1;
+}
+
+/* Selection is a local identity table match, not a running NVIDIA HAL. */
+static int decode_hal(CFTypeRef object, struct snapshot *snapshot)
+{
+    if (object == NULL || CFGetTypeID(object) != CFDictionaryGetTypeID())
+        return 0;
+    CFDictionaryRef dictionary = (CFDictionaryRef)object;
+    uint64_t count = 0;
+    if (!dictionary_number(dictionary, CFSTR("TotalReadCount"), 2, &count) ||
+        count != snapshot->mmio.read_count + snapshot->boot42.read_count ||
+        !exact_string(CFDictionaryGetValue(dictionary, CFSTR("SourceCommit")),
+                       CFSTR(NVIDIA_SOURCE_COMMIT)))
+        return 0;
+    int matched = snapshot->mmio.status == MMIO_IDENTIFIED &&
+                  snapshot->boot42.status == MMIO_IDENTIFIED &&
+                  snapshot->mmio.architecture == snapshot->boot42.architecture &&
+                  snapshot->mmio.implementation == snapshot->boot42.implementation &&
+                  snapshot->boot42.chip_id == 0x167;
+    if (CFDictionaryGetCount(dictionary) != (matched ? 5 : 3) ||
+        !exact_string(CFDictionaryGetValue(dictionary, CFSTR("Status")),
+                       matched ? CFSTR("matched") : CFSTR("not_selected")))
+        return 0;
+    if (matched) {
+        uint64_t variant = 0;
+        if (!exact_string(CFDictionaryGetValue(dictionary, CFSTR("Chip")), CFSTR("TU117")) ||
+            !dictionary_number(dictionary, CFSTR("VariantIndex"), 41, &variant) || variant != 41)
+            return 0;
+    }
+    snapshot->hal_matched = matched;
+    snapshot->total_read_count = (uint32_t)count;
+    return 1;
+}
+
 /* Legacy format is decoded only to identify an old loaded kext, never emitted. */
 static int decode_snapshot(CFTypeRef object, struct snapshot *output)
 {
@@ -262,26 +393,36 @@ static int decode_snapshot(CFTypeRef object, struct snapshot *output)
         return 0;
     CFDictionaryRef dictionary = (CFDictionaryRef)object;
     uint64_t value = 0;
-    if (!dictionary_number(dictionary, CFSTR("Format"), 2, &value) ||
-        (value != 1 && value != 2))
+    if (!dictionary_number(dictionary, CFSTR("Format"), 3, &value) ||
+        (value != 1 && value != 2 && value != 3))
         return 0;
     candidate.format = (uint32_t)value;
     int legacy = candidate.format == 1;
+    int current = candidate.format == 3;
     if (!exact_string(CFDictionaryGetValue(dictionary, CFSTR("Stage")),
                        CFSTR("attached")) ||
         !exact_string(CFDictionaryGetValue(dictionary, CFSTR("AccessPolicy")),
-                       legacy ? CFSTR(LEGACY_ACCESS_POLICY) : CFSTR(ACCESS_POLICY)) ||
+                       legacy ? CFSTR(LEGACY_ACCESS_POLICY) : current ? CFSTR(ACCESS_POLICY) :
+                                CFSTR(LEGACY_MMIO_ACCESS_POLICY)) ||
         !decode_version(CFDictionaryGetValue(dictionary, CFSTR("ProbeVersion")),
                          candidate.probe_version,
                          sizeof(candidate.probe_version)) ||
-        strcmp(candidate.probe_version, legacy ? "0.1.0" : TOOL_VERSION) != 0)
+        strcmp(candidate.probe_version, legacy ? "0.1.0" : current ? TOOL_VERSION : "0.2.0") != 0)
         return 0;
     if (!legacy && !decode_mmio(CFDictionaryGetValue(dictionary, CFSTR("MMIOResult")),
                                 &candidate.mmio))
         return 0;
+    if (current &&
+        (!decode_boot42(CFDictionaryGetValue(dictionary, CFSTR("BOOT42Result")),
+                          &candidate.mmio, &candidate.boot42) ||
+         !decode_hal(CFDictionaryGetValue(dictionary, CFSTR("HALSelection")), &candidate)))
+        return 0;
     int missing_bars_allowed = !legacy && candidate.mmio.status == MMIO_REFUSED &&
                               candidate.mmio.reason == 0;
-    if (CFDictionaryGetCount(dictionary) != (legacy ? 13 : missing_bars_allowed ? 13 : 14))
+    CFIndex expected_keys = legacy ? 13 : current ? 16 : 14;
+    if (missing_bars_allowed)
+        --expected_keys;
+    if (CFDictionaryGetCount(dictionary) != expected_keys)
         return 0;
 #define READ_FIELD(KEY, MAXIMUM, FIELD) do { \
     if (!dictionary_number(dictionary, CFSTR(KEY), (MAXIMUM), &value)) \
@@ -427,7 +568,7 @@ static void read_probe(io_registry_entry_t service, struct report *report)
         return;
     }
     report->attached = 1;
-    report->outdated = report->snapshot.format == 1;
+    report->outdated = report->snapshot.format < 3;
 }
 
 static void read_context(struct report *report)
@@ -507,6 +648,22 @@ static void collect_report(struct report *report)
     }
 }
 
+static void write_boot42(FILE *out, const struct mmio_result *result)
+{
+    const char *status = result->status == MMIO_IDENTIFIED ? "identified" :
+                         result->status == MMIO_FAILED ? "failed" :
+                         result->status == MMIO_REFUSED ? "refused" : "not_attempted";
+    const char *reason = result->status == MMIO_NOT_ATTEMPTED ? "boot0-not-identified" :
+                         mmio_reasons[result->reason];
+    fprintf(out, "{\"status\":\"%s\",\"reason\":\"%s\",\"read_count\":%" PRIu32
+        ",\"bar_index\":0,\"offset\":2560,\"width_bits\":32", status, reason, result->read_count);
+    if (result->read_count)
+        fprintf(out, ",\"raw_value\":\"0x%08" PRIx32 "\",\"architecture\":\"0x%02" PRIx32
+            "\",\"implementation\":\"0x%02" PRIx32 "\",\"chip_id\":\"0x%03" PRIx32 "\"",
+            result->raw_value, result->architecture, result->implementation, result->chip_id);
+    fputc('}', out);
+}
+
 static void write_snapshot(FILE *out, const struct snapshot *snapshot)
 {
     /* All strings here are constants or the ASCII digits/dots version. */
@@ -544,6 +701,13 @@ static void write_snapshot(FILE *out, const struct snapshot *snapshot)
         fprintf(out, ",\"raw_value\":\"0x%08" PRIx32 "\",\"architecture\":\"0x%02" PRIx32
             "\",\"implementation\":\"0x%02" PRIx32 "\"", mmio->raw_value,
             mmio->architecture, mmio->implementation);
+    fputs("},\"boot42\":", out);
+    write_boot42(out, &snapshot->boot42);
+    fprintf(out, ",\"hal_selection\":{\"status\":\"%s\",\"total_read_count\":%" PRIu32
+        ",\"source_commit\":\"" NVIDIA_SOURCE_COMMIT "\"", snapshot->hal_matched ? "matched" : "not_selected",
+        snapshot->total_read_count);
+    if (snapshot->hal_matched)
+        fputs(",\"chip\":\"TU117\",\"variant_index\":41", out);
     fputs("}}", out);
 }
 
@@ -555,19 +719,22 @@ static const char *report_status(const struct report *report)
         return "outdated_probe";
     if (!report->attached)
         return "not_attached";
-    return report->snapshot.mmio.status == MMIO_IDENTIFIED ? "identified" :
-           report->snapshot.mmio.status == MMIO_REFUSED ? "refused" : "failed";
+    if (report->snapshot.hal_matched)
+        return "hal_matched";
+    return report->snapshot.mmio.status == MMIO_REFUSED ||
+           report->snapshot.boot42.status == MMIO_REFUSED ? "refused" : "failed";
 }
 
 static int report_exit_code(const struct report *report)
 {
     return report->complete && (!report->attached || report->outdated ||
-        report->snapshot.mmio.status != MMIO_FAILED) ? 0 : 1;
+        (report->snapshot.mmio.status != MMIO_FAILED &&
+         report->snapshot.boot42.status != MMIO_FAILED)) ? 0 : 1;
 }
 
 static void write_report(FILE *out, const struct report *report)
 {
-    fprintf(out, "{\"format\":2,\"tool\":\"nvidia-transport\",\"version\":\"%s\","
+    fprintf(out, "{\"format\":3,\"tool\":\"nvidia-transport\",\"version\":\"%s\","
         "\"target\":{\"vendor_id\":\"0x10de\",\"device_id\":\"0x1f91\","
         "\"subsystem_vendor_id\":\"0x17aa\",\"subsystem_device_id\":\"0x3806\"},"
         "\"status\":\"%s\",\"complete\":%s,"
@@ -586,7 +753,7 @@ static void write_report(FILE *out, const struct report *report)
         fputs("null", out);
     }
     fputs(",\"reason\":", out);
-    fputs(report->outdated ? "\"The loaded probe is version 0.1.0. Replace the kext on the EFI used for this boot with version 0.2.0.\"" : "null", out);
+    fputs(report->outdated ? "\"The loaded probe is an older version. Replace the kext on the EFI used for this boot with version 0.3.0.\"" : "null", out);
     fputs(",\"warnings\":[", out);
     int emitted = 0;
     for (size_t index = 0; index < WARNING_COUNT; ++index) {
@@ -643,6 +810,56 @@ static CFMutableDictionaryRef fixture_mmio(const char *status, const char *reaso
     return mmio;
 }
 
+static CFMutableDictionaryRef fixture_boot42(const char *status, const char *reason,
+                                             int read_count, uint32_t raw)
+{
+    CFMutableDictionaryRef result = fixture_mmio(status, reason, read_count, raw);
+    fixture_number(result, CFSTR("Offset"), 0xa00);
+    if (read_count) {
+        fixture_number(result, CFSTR("Architecture"), (raw >> 24) & 0x3fU);
+        fixture_number(result, CFSTR("ChipID"), (raw >> 20) & 0x3ffU);
+    }
+    return result;
+}
+
+static void fixture_set_phases(CFMutableDictionaryRef fixture,
+                                CFMutableDictionaryRef supplied_boot42)
+{
+    CFDictionaryRef boot0 = (CFDictionaryRef)CFDictionaryGetValue(fixture, CFSTR("MMIOResult"));
+    int boot0_identified = exact_string(CFDictionaryGetValue(boot0, CFSTR("Status")), CFSTR("identified"));
+    CFMutableDictionaryRef boot42 = supplied_boot42;
+    if (boot42 == NULL)
+        boot42 = fixture_boot42(boot0_identified ? "identified" : "not_attempted",
+            boot0_identified ? "tu117-identified" : "boot0-not-identified",
+            boot0_identified ? 1 : 0, 0x167000a1);
+    CFDictionarySetValue(fixture, CFSTR("BOOT42Result"), boot42);
+    int matched = boot0_identified && exact_string(CFDictionaryGetValue(boot42,
+        CFSTR("Status")), CFSTR("identified"));
+    uint64_t boot0_count = 0, boot42_count = 0;
+    if (!dictionary_number(boot0, CFSTR("ReadCount"), 1, &boot0_count) ||
+        !dictionary_number(boot42, CFSTR("ReadCount"), 1, &boot42_count)) {
+        fputs("Self-test phase fixture invalid.\n", stderr);
+        exit(1);
+    }
+    CFMutableDictionaryRef hal = CFDictionaryCreateMutable(kCFAllocatorDefault,
+        0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    if (hal == NULL) {
+        fputs("Self-test allocation failed.\n", stderr);
+        exit(1);
+    }
+    CFDictionarySetValue(hal, CFSTR("Status"), matched ? CFSTR("matched") : CFSTR("not_selected"));
+    CFDictionarySetValue(hal, CFSTR("SourceCommit"), CFSTR(NVIDIA_SOURCE_COMMIT));
+    fixture_number(hal, CFSTR("TotalReadCount"), (int64_t)(boot0_count + boot42_count));
+    if (matched) {
+        CFDictionarySetValue(hal, CFSTR("Chip"), CFSTR("TU117"));
+        fixture_number(hal, CFSTR("VariantIndex"), 41);
+    }
+    CFDictionarySetValue(fixture, CFSTR("HALSelection"), hal);
+    CFRelease(hal);
+    if (supplied_boot42 == NULL)
+        CFRelease(boot42);
+}
+
 static CFMutableDictionaryRef valid_fixture(void)
 {
     CFMutableDictionaryRef dictionary = CFDictionaryCreateMutable(
@@ -654,8 +871,8 @@ static CFMutableDictionaryRef valid_fixture(void)
         fputs("Self-test allocation failed.\n", stderr);
         exit(1);
     }
-    fixture_number(dictionary, CFSTR("Format"), 2);
-    CFDictionarySetValue(dictionary, CFSTR("ProbeVersion"), CFSTR("0.2.0"));
+    fixture_number(dictionary, CFSTR("Format"), 3);
+    CFDictionarySetValue(dictionary, CFSTR("ProbeVersion"), CFSTR("0.3.0"));
     CFDictionarySetValue(dictionary, CFSTR("Stage"), CFSTR("attached"));
     CFDictionarySetValue(dictionary, CFSTR("AccessPolicy"), CFSTR(ACCESS_POLICY));
     fixture_number(dictionary, CFSTR("VendorID"), 0x10de);
@@ -690,6 +907,7 @@ static CFMutableDictionaryRef valid_fixture(void)
                                               1, 0x167000a1);
     CFDictionarySetValue(dictionary, CFSTR("MMIOResult"), mmio);
     CFRelease(mmio);
+    fixture_set_phases(dictionary, NULL);
     return dictionary;
 }
 
@@ -719,9 +937,9 @@ static int run_self_tests(void)
     CFDictionaryRemoveValue(fixture, CFSTR("Extra"));
     CFDictionaryRemoveValue(fixture, CFSTR("Format"));
     require_test(!decode_snapshot(fixture, &snapshot), "missing format", &count);
-    fixture_number(fixture, CFSTR("Format"), 3);
+    fixture_number(fixture, CFSTR("Format"), 4);
     require_test(!decode_snapshot(fixture, &snapshot), "unsupported format", &count);
-    fixture_number(fixture, CFSTR("Format"), 2);
+    fixture_number(fixture, CFSTR("Format"), 3);
     CFDictionarySetValue(fixture, CFSTR("VendorID"), kCFBooleanTrue);
     require_test(!decode_snapshot(fixture, &snapshot), "boolean numeric field", &count);
     fixture_number(fixture, CFSTR("VendorID"), -1);
@@ -736,7 +954,7 @@ static int run_self_tests(void)
     CFDictionarySetValue(fixture, CFSTR("Format"), floating);
     CFRelease(floating);
     require_test(!decode_snapshot(fixture, &snapshot), "floating numeric field", &count);
-    fixture_number(fixture, CFSTR("Format"), 2);
+    fixture_number(fixture, CFSTR("Format"), 3);
     fixture_number(fixture, CFSTR("SubsystemID"), 0x3807);
     require_test(!decode_snapshot(fixture, &snapshot), "wrong subsystem", &count);
     fixture_number(fixture, CFSTR("SubsystemID"), 0x3806);
@@ -754,7 +972,7 @@ static int run_self_tests(void)
     require_test(!decode_snapshot(fixture, &snapshot), "oversized version", &count);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.1.0\""));
     require_test(!decode_snapshot(fixture, &snapshot), "unsafe version character", &count);
-    CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.2.0"));
+    CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.3.0"));
     CFMutableArrayRef bars = (CFMutableArrayRef)CFDictionaryGetValue(
         fixture, CFSTR("BARDescriptors"));
     CFArrayAppendValue(bars, CFArrayGetValueAtIndex(bars, 0));
@@ -849,6 +1067,7 @@ static int run_self_tests(void)
     for (size_t index = 0; index < sizeof(failures) / sizeof(failures[0]); ++index) {
         mmio = fixture_mmio("failed", failures[index].reason, 1, failures[index].raw);
         CFDictionarySetValue(fixture, CFSTR("MMIOResult"), mmio);
+        fixture_set_phases(fixture, NULL);
         require_test(decode_snapshot(fixture, &snapshot) &&
             snapshot.mmio.status == MMIO_FAILED && snapshot.mmio.read_count == 1,
             "failed read classified without claiming identification", &count);
@@ -860,6 +1079,7 @@ static int run_self_tests(void)
     /* Extended architecture bit is part of the decoded architecture. */
     mmio = fixture_mmio("failed", "architecture-mismatch", 1, 0x167001a1);
     CFDictionarySetValue(fixture, CFSTR("MMIOResult"), mmio);
+    fixture_set_phases(fixture, NULL);
     require_test(decode_snapshot(fixture, &snapshot) && snapshot.mmio.architecture == 0x36,
         "extended architecture bit decoded", &count);
     CFRelease(mmio);
@@ -878,6 +1098,7 @@ static int run_self_tests(void)
             CFDictionaryRemoveValue(bar, CFSTR("Address"));
             CFDictionaryRemoveValue(bar, CFSTR("Length"));
         }
+        fixture_set_phases(fixture, NULL);
         require_test(decode_snapshot(fixture, &snapshot) &&
             snapshot.mmio.status == MMIO_REFUSED && snapshot.mmio.read_count == 0,
             "known refusal performs no read", &count);
@@ -894,6 +1115,8 @@ static int run_self_tests(void)
 
     fixture = valid_fixture();
     CFDictionaryRemoveValue(fixture, CFSTR("MMIOResult"));
+    CFDictionaryRemoveValue(fixture, CFSTR("BOOT42Result"));
+    CFDictionaryRemoveValue(fixture, CFSTR("HALSelection"));
     fixture_number(fixture, CFSTR("Format"), 1);
     CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.1.0"));
     CFDictionarySetValue(fixture, CFSTR("AccessPolicy"), CFSTR(LEGACY_ACCESS_POLICY));
@@ -903,6 +1126,137 @@ static int run_self_tests(void)
     require_test(!decode_snapshot(fixture, &snapshot), "legacy extra rejected", &count);
     CFRelease(fixture);
 
+    fixture = valid_fixture();
+    CFDictionaryRemoveValue(fixture, CFSTR("BOOT42Result"));
+    CFDictionaryRemoveValue(fixture, CFSTR("HALSelection"));
+    fixture_number(fixture, CFSTR("Format"), 2);
+    CFDictionarySetValue(fixture, CFSTR("ProbeVersion"), CFSTR("0.2.0"));
+    CFDictionarySetValue(fixture, CFSTR("AccessPolicy"), CFSTR(LEGACY_MMIO_ACCESS_POLICY));
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.format == 2,
+        "strict version 0.2.0 snapshot recognized", &count);
+    CFDictionarySetValue(fixture, CFSTR("Extra"), CFSTR("not allowed"));
+    require_test(!decode_snapshot(fixture, &snapshot), "version 0.2.0 extra rejected", &count);
+    CFRelease(fixture);
+
+    fixture = valid_fixture();
+    CFMutableDictionaryRef boot42 = (CFMutableDictionaryRef)CFDictionaryGetValue(
+        fixture, CFSTR("BOOT42Result"));
+    CFMutableDictionaryRef hal = (CFMutableDictionaryRef)CFDictionaryGetValue(
+        fixture, CFSTR("HALSelection"));
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.hal_matched &&
+        snapshot.total_read_count == 2 && snapshot.boot42.chip_id == 0x167,
+        "two coherent identities select pinned TU117 table entry", &count);
+    require_test(!decode_boot42(NULL, &snapshot.mmio, &snapshot.boot42),
+        "missing BOOT42 result", &count);
+    require_test(!decode_boot42(kCFBooleanTrue, &snapshot.mmio, &snapshot.boot42),
+        "wrong BOOT42 type", &count);
+    CFDictionarySetValue(boot42, CFSTR("Extra"), CFSTR("private"));
+    require_test(!decode_snapshot(fixture, &snapshot), "extra BOOT42 key", &count);
+    CFDictionaryRemoveValue(boot42, CFSTR("Extra"));
+    fixture_number(boot42, CFSTR("Offset"), 0);
+    require_test(!decode_snapshot(fixture, &snapshot), "BOOT42 cannot use BOOT0 offset", &count);
+    fixture_number(boot42, CFSTR("Offset"), 0xa00);
+    fixture_number(boot42, CFSTR("BarIndex"), 1);
+    require_test(!decode_snapshot(fixture, &snapshot), "BOOT42 cannot use other BAR", &count);
+    fixture_number(boot42, CFSTR("BarIndex"), 0);
+    fixture_number(boot42, CFSTR("Width"), 64);
+    require_test(!decode_snapshot(fixture, &snapshot), "BOOT42 cannot use other width", &count);
+    fixture_number(boot42, CFSTR("Width"), 32);
+    fixture_number(boot42, CFSTR("ReadCount"), 2);
+    require_test(!decode_snapshot(fixture, &snapshot), "BOOT42 cannot retry", &count);
+    fixture_number(boot42, CFSTR("ReadCount"), 1);
+    CFDictionarySetValue(boot42, CFSTR("RawValue"), kCFBooleanTrue);
+    require_test(!decode_snapshot(fixture, &snapshot), "BOOT42 boolean raw value", &count);
+    fixture_number(boot42, CFSTR("RawValue"), INT64_C(0x100000000));
+    require_test(!decode_snapshot(fixture, &snapshot), "BOOT42 oversized raw value", &count);
+    fixture_number(boot42, CFSTR("RawValue"), 0x167001a1);
+    fixture_number(boot42, CFSTR("Architecture"), 0x36);
+    require_test(!decode_snapshot(fixture, &snapshot), "BOOT42 rejects BOOT0 architecture mask", &count);
+    fixture_number(boot42, CFSTR("Architecture"), 0x16);
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.hal_matched,
+        "BOOT42 bit 8 is not the BOOT0 architecture extension", &count);
+    fixture_number(boot42, CFSTR("RawValue"), 0x167000a1);
+    fixture_number(boot42, CFSTR("ChipID"), 0x166);
+    require_test(!decode_snapshot(fixture, &snapshot), "incoherent BOOT42 chip ID", &count);
+    fixture_number(boot42, CFSTR("ChipID"), 0x167);
+    fixture_number(boot42, CFSTR("Implementation"), 6);
+    require_test(!decode_snapshot(fixture, &snapshot), "incoherent BOOT42 implementation", &count);
+    fixture_number(boot42, CFSTR("Implementation"), 7);
+    CFDictionarySetValue(boot42, CFSTR("Status"), CFSTR("not_attempted"));
+    require_test(!decode_snapshot(fixture, &snapshot), "BOOT42 must run after identified BOOT0", &count);
+    CFDictionarySetValue(boot42, CFSTR("Status"), CFSTR("identified"));
+    fixture_number(hal, CFSTR("TotalReadCount"), 1);
+    require_test(!decode_snapshot(fixture, &snapshot), "HAL count must equal phase sum", &count);
+    fixture_number(hal, CFSTR("TotalReadCount"), 3);
+    require_test(!decode_snapshot(fixture, &snapshot), "HAL count cannot exceed two", &count);
+    fixture_number(hal, CFSTR("TotalReadCount"), 2);
+    CFDictionarySetValue(hal, CFSTR("SourceCommit"), CFSTR("0000000000000000000000000000000000000000"));
+    require_test(!decode_snapshot(fixture, &snapshot), "HAL source pin mismatch", &count);
+    CFDictionarySetValue(hal, CFSTR("SourceCommit"), CFSTR(NVIDIA_SOURCE_COMMIT));
+    fixture_number(hal, CFSTR("VariantIndex"), 40);
+    require_test(!decode_snapshot(fixture, &snapshot), "HAL variant index mismatch", &count);
+    fixture_number(hal, CFSTR("VariantIndex"), 41);
+    CFDictionarySetValue(hal, CFSTR("Chip"), CFSTR("TU116"));
+    require_test(!decode_snapshot(fixture, &snapshot), "HAL chip mismatch", &count);
+    CFDictionarySetValue(hal, CFSTR("Chip"), CFSTR("TU117"));
+    CFDictionarySetValue(hal, CFSTR("Status"), CFSTR("not_selected"));
+    require_test(!decode_snapshot(fixture, &snapshot), "coherent identities must select table entry", &count);
+    CFDictionarySetValue(hal, CFSTR("Status"), CFSTR("matched"));
+    CFDictionarySetValue(hal, CFSTR("Extra"), CFSTR("private"));
+    require_test(!decode_snapshot(fixture, &snapshot), "extra HAL key", &count);
+    CFDictionaryRemoveValue(hal, CFSTR("Extra"));
+    require_test(decode_snapshot(fixture, &snapshot), "restored HAL fixture", &count);
+    CFRelease(fixture);
+
+    for (size_t index = 0; index < sizeof(failures) / sizeof(failures[0]); ++index) {
+        fixture = valid_fixture();
+        boot42 = fixture_boot42("failed", failures[index].reason, 1, failures[index].raw);
+        fixture_set_phases(fixture, boot42);
+        require_test(decode_snapshot(fixture, &snapshot) && !snapshot.hal_matched &&
+            snapshot.total_read_count == 2 && snapshot.boot42.status == MMIO_FAILED,
+            "BOOT42 failed read prevents HAL selection", &count);
+        hal = (CFMutableDictionaryRef)CFDictionaryGetValue(fixture, CFSTR("HALSelection"));
+        CFDictionarySetValue(hal, CFSTR("Status"), CFSTR("matched"));
+        CFDictionarySetValue(hal, CFSTR("Chip"), CFSTR("TU117"));
+        fixture_number(hal, CFSTR("VariantIndex"), 41);
+        require_test(!decode_snapshot(fixture, &snapshot), "failed BOOT42 cannot select HAL", &count);
+        CFRelease(boot42);
+        CFRelease(fixture);
+    }
+    fixture = valid_fixture();
+    boot42 = fixture_boot42("failed", "architecture-mismatch", 1, 0x367000a1);
+    fixture_set_phases(fixture, boot42);
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.boot42.architecture == 0x36 &&
+        !snapshot.hal_matched, "BOOT42 architecture includes bit 29", &count);
+    CFRelease(boot42);
+    CFRelease(fixture);
+
+    for (size_t index = 0; index < MMIO_REFUSAL_COUNT; ++index) {
+        fixture = valid_fixture();
+        boot42 = fixture_boot42("refused", mmio_reasons[index], 0, 0);
+        fixture_set_phases(fixture, boot42);
+        int outer_guard = index == 0 || index == 1 || index == 13 || index == 14;
+        int decoded = decode_snapshot(fixture, &snapshot);
+        require_test(outer_guard ? !decoded : decoded && !snapshot.hal_matched &&
+            snapshot.total_read_count == 1 && snapshot.boot42.status == MMIO_REFUSED,
+            "phase-two refusal respects retained outer guards", &count);
+        CFRelease(boot42);
+        CFRelease(fixture);
+    }
+    fixture = valid_fixture();
+    mmio = fixture_mmio("failed", "zero-value", 1, 0);
+    CFDictionarySetValue(fixture, CFSTR("MMIOResult"), mmio);
+    fixture_set_phases(fixture, NULL);
+    require_test(decode_snapshot(fixture, &snapshot) && snapshot.total_read_count == 1 &&
+        snapshot.boot42.status == MMIO_NOT_ATTEMPTED && !snapshot.hal_matched,
+        "BOOT0 failure stops before BOOT42", &count);
+    boot42 = fixture_boot42("identified", "tu117-identified", 1, 0x167000a1);
+    fixture_set_phases(fixture, boot42);
+    require_test(!decode_snapshot(fixture, &snapshot), "BOOT42 forbidden after failed BOOT0", &count);
+    CFRelease(boot42);
+    CFRelease(mmio);
+    CFRelease(fixture);
+
     struct report classified;
     memset(&classified, 0, sizeof(classified));
     classified.complete = 1;
@@ -910,14 +1264,24 @@ static int run_self_tests(void)
         report_exit_code(&classified) == 0, "not attached result is complete", &count);
     classified.attached = 1;
     classified.snapshot.mmio.status = MMIO_REFUSED;
+    classified.snapshot.boot42.status = MMIO_NOT_ATTEMPTED;
     require_test(strcmp(report_status(&classified), "refused") == 0 &&
         report_exit_code(&classified) == 0, "safe refusal is complete", &count);
     classified.snapshot.mmio.status = MMIO_FAILED;
     require_test(strcmp(report_status(&classified), "failed") == 0 &&
         report_exit_code(&classified) != 0, "failed read has nonzero exit", &count);
     classified.snapshot.mmio.status = MMIO_IDENTIFIED;
-    require_test(strcmp(report_status(&classified), "identified") == 0 &&
+    classified.snapshot.boot42.status = MMIO_IDENTIFIED;
+    classified.snapshot.hal_matched = 1;
+    require_test(strcmp(report_status(&classified), "hal_matched") == 0 &&
         report_exit_code(&classified) == 0, "identified result", &count);
+    classified.snapshot.hal_matched = 0;
+    classified.snapshot.boot42.status = MMIO_REFUSED;
+    require_test(strcmp(report_status(&classified), "refused") == 0 &&
+        report_exit_code(&classified) == 0, "phase-two refusal is complete", &count);
+    classified.snapshot.boot42.status = MMIO_FAILED;
+    require_test(strcmp(report_status(&classified), "failed") == 0 &&
+        report_exit_code(&classified) != 0, "phase-two failure has nonzero exit", &count);
     classified.outdated = 1;
     require_test(strcmp(report_status(&classified), "outdated_probe") == 0 &&
         report_exit_code(&classified) == 0, "outdated probe recognized", &count);
@@ -930,7 +1294,7 @@ static int run_self_tests(void)
     size_t serialized_size = fread(serialized_report, 1, sizeof(serialized_report) - 1, serialized);
     serialized_report[serialized_size] = '\0';
     require_test(!ferror(serialized) && strstr(serialized_report, "\"probe\":null") != NULL &&
-        strstr(serialized_report, "version 0.1.0") != NULL &&
+        strstr(serialized_report, "version 0.3.0") != NULL &&
         strstr(serialized_report, "raw_value") == NULL,
         "legacy report emits fixed instruction without snapshot", &count);
     fclose(serialized);

@@ -2,7 +2,7 @@
 
 Reviewed on October 15, 2026. Target: Lenovo IdeaPad S540-15IWL GTX, Intel macOS Tahoe, NVIDIA GTX 1650 Max-Q, PCI `10DE:1F91`.
 
-**Status:** PCI visibility, the 0.1.0 attachment/configuration/resource milestone and the [transport prototype](../../packages/nvidia-transport/README.md) 0.2.0 single-read TU117 identification are confirmed on the laptop. The next boundary requires source assessment before expanding hardware access. GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
+**Status:** PCI visibility, the 0.1.0 attachment/configuration/resource milestone and the [transport prototype](../../packages/nvidia-transport/README.md) 0.2.0 BOOT_0 identification are confirmed on the laptop. Version 0.3.0 BOOT_42 cross-check and local pinned HAL table matching are implemented, pending native build and laptop validation. HAL instantiation, resource-manager integration, GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
 
 ## Source baseline
 
@@ -94,11 +94,13 @@ The delivered 0.2.0 archive comes from the [successful native Intel build](https
 
 The laptop report from 0.2.0 returns `identified`, `complete=true`, `wegnoegpu_present=false` and no warnings, with the actual PCI provider identity verified. Its MMIO result records `read_count=1`, BAR0 offset zero, width 32, register value `0x167000A1`, architecture `0x16`, implementation `0x07` and reason `tu117-identified`. This establishes exactly one completed read of the expected TU117 identification register. It does not validate other registers, usable VRAM, initialization, DMA, firmware startup, execution or graphics acceleration. Runtime stop/unload remains untested; raw reports and private resource addresses remain excluded.
 
-### Next boundary
+### Next implementation: BOOT_42 and local HAL table match, 0.3.0
 
 The pinned NVIDIA resource manager's [`_halmgrIsChipSupported`](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/src/kernel/core/hal_mgr.c#L125-L148) consumes `NV_PMC_BOOT_42` architecture and implementation fields for HAL matching. The [register definition](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/common/inc/swref/published/nv_ref.h#L150-L172) marks BAR0 offset `0xA00` as read-only. The [generated chip table](https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/generated/g_chips2halspec_nvoc.c#L39-L43) maps architecture `0x16` and implementation `0x07` to the TU117 HAL variant.
 
-A single guarded BOOT_42 read and cross-check against BOOT_0 is therefore the next candidate to assess for the actual HAL-selection path. It is not implemented in 0.2.0. Any implementation must retain the existing identity, BAR0, memory-decode, D0 and provider-ownership guards, review the offset-specific mapping, reject unavailable or inconsistent identification, and avoid scans, retries or writes. The single-load kernel-stall limitation remains. No GPU initialization or firmware startup follows from these identification fields alone.
+Version 0.3.0 implements BOOT_0 followed by one guarded BOOT_42 read only after BOOT_0 identifies TU117, for at most two total register loads. Each mapping/read retains the identity, BAR0, memory-decode, D0 and provider-ownership guards. The format-3 snapshot records both outcomes and a local HAL table-match result, including NVIDIA source commit `1a82fbfda8f321b056eb3568850f9316c5e465c5`. Architecture `0x16`, implementation `0x07` and chip `0x167` must agree before the matcher selects TU117 variant index `41`; there are no scans, retries or writes.
+
+This is a local comparison against the pinned table. It does not instantiate a HAL object, integrate the resource manager or initialize the GPU. Native build and laptop validation are pending. The individual-load kernel-stall limitation remains; the confirmed 0.2.0 result does not validate BOOT_42 or the new matcher.
 
 ## Milestone status and remaining work
 
@@ -106,6 +108,7 @@ A single guarded BOOT_42 read and cross-check against BOOT_0 is therefore the ne
 |---|---|
 | Darwin PCI attachment | Confirmed laptop attachment, fixed configuration reads and assigned resource metadata; runtime stop/unload remains untested |
 | Single-read BAR0 identification | Confirmed on the laptop in 0.2.0: exactly one BOOT_0 read with expected TU117 fields; no broader hardware operation validated |
+| BOOT_42 and local HAL table match | Implemented in 0.3.0, format 3; native build and laptop validation pending. No HAL object or resource-manager integration |
 | Further hardware transport | Separate reviewed work for DMA and interrupts, with bounded access and failure handling |
 | GPU and GSP startup | Matching, hashed firmware; observed initialization with timeouts and cleanup; no success inferred from PCI enumeration |
 | Minimal execution | One deterministic command with a checked result and recoverable failure path |

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check the exact-device gate and the single-read MMIO hardware boundary.
+"""Check the exact-device gate and the two-register MMIO hardware boundary.
 
 These tests do not load a kext. Native SDK compilation and linkage are separate
 CI checks; a passing host policy test is not evidence of hardware attachment.
@@ -176,12 +176,67 @@ int main() {
                            check=True, timeout=30, capture_output=True, text=True)
             subprocess.run([str(binary)], check=True, timeout=10)
 
-    def test_hardware_boundary_has_one_fixed_read_and_no_write_or_power_helpers(self):
+    def test_boot42_decode_and_hal_selection_reject_other_chip_variants(self):
+        compiler = os.environ.get("CXX") or shutil.which("clang++") or shutil.which("c++")
+        self.assertTrue(compiler, "A host C++ compiler is required.")
+        program = r'''
+#include "S540NvidiaPCIProbe.hpp"
+#include <cstring>
+using namespace S540NvidiaPCIProbePolicy;
+int main() {
+    const uint32_t boot0 = 0x167000a1;
+    // BOOT42 bit 8 belongs to lower register data, not architecture extension.
+    const uint32_t boot42 = 0x167005a1;
+    if (!boot42IsTU117(boot42) || boot42Architecture(boot42) != 0x16
+        || boot42Implementation(boot42) != 7 || boot42ChipID(boot42) != 0x167
+        || std::strcmp(identifyBoot42(boot42), "tu117-identified")
+        || selectHALVariant(boot0, boot42) != 41) return 1;
+    // Every other architecture/implementation combination must remain unselected.
+    for (uint32_t architecture = 0; architecture < 64; ++architecture) {
+        for (uint32_t implementation = 0; implementation < 16; ++implementation) {
+            const uint32_t word = (architecture << 24) | (implementation << 20) | 0x5a1;
+            const bool expected = architecture == 0x16 && implementation == 7;
+            if (boot42Architecture(word) != architecture
+                || boot42Implementation(word) != implementation
+                || boot42ChipID(word) != (architecture << 4 | implementation)
+                || boot42IsTU117(word) != expected
+                || (selectHALVariant(boot0, word) == 41) != expected) return 2;
+        }
+    }
+    const uint32_t invalidBoot0[] = {0, UINT32_MAX, 0x167001a1, 0x157000a1, 0x166000a1};
+    for (unsigned int i = 0; i < 5; ++i)
+        if (selectHALVariant(invalidBoot0[i], boot42) != -1) return 3;
+    if (selectHALVariant(boot0, 0) != -1 || selectHALVariant(boot0, UINT32_MAX) != -1)
+        return 4;
+    if (std::strcmp(identifyBoot42(0), "zero-value")
+        || std::strcmp(identifyBoot42(UINT32_MAX), "all-ones-value")
+        || std::strcmp(identifyBoot42(0x367000a1), "architecture-mismatch")
+        || std::strcmp(identifyBoot42(0x166000a1), "implementation-mismatch")) return 5;
+    return 0;
+}
+'''
+        with tempfile.TemporaryDirectory(prefix="nvidia-hal-policy-") as directory:
+            source = Path(directory) / "policy.cpp"
+            binary = Path(directory) / "policy"
+            source.write_text(program, encoding="utf-8")
+            subprocess.run([compiler, "-std=c++11", "-Wall", "-Wextra", "-Werror",
+                            "-I", str(HEADER.parent), str(source), "-o", str(binary)],
+                           check=True, timeout=30, capture_output=True, text=True)
+            subprocess.run([str(binary)], check=True, timeout=10)
+
+    def test_hardware_boundary_has_two_fixed_reads_and_no_write_or_power_helpers(self):
         code = without_comments(SOURCE.read_text(encoding="utf-8"))
-        self.assertEqual(code.count("result.rawValue = *boot0;"), 1)
+        self.assertEqual(code.count("result.rawValue = *registerWord;"), 1)
         self.assertEqual(code.count("->createMappingInTask("), 1)
-        self.assertIn("kIOMapAnywhere | kIOMapReadOnly | kIOMapInhibitCache | kIOMapUnique, 0, 4", code)
-        self.assertIn("const volatile uint32_t *boot0", code)
+        self.assertIn("kIOMapAnywhere | kIOMapReadOnly | kIOMapInhibitCache | kIOMapUnique, Offset, 4", code)
+        self.assertIn("const volatile uint32_t *registerWord", code)
+        self.assertIn("static_assert(Offset == 0 || Offset == 0xa00,", code)
+        self.assertEqual(re.findall(r"attemptRegisterRead<([^>]+)>\(device, bar0\)", code),
+                         ["0", "0xa00"])
+        self.assertRegex(code, r"result\.boot0\.readCount == 1\s*&& "
+                         r"S540NvidiaPCIProbePolicy::boot0IsTU117\(result\.boot0\.rawValue\)\)\s*"
+                         r"result\.boot42 = attemptRegisterRead<0xa00>")
+        self.assertEqual(code.count("ScopedArbitration arbitration(device);"), 1)
         self.assertIn("mapping.reset();", code)
         self.assertIn('device->copyProperty("IODeviceMemory")', code)
         self.assertIn("value->lockForArbitration(false)", code)
@@ -197,13 +252,13 @@ int main() {
                             r"IOWorkLoop|evaluateObject|newUserClient|registerPowerDriver|PMinit|"
                             r"joinPMtree|setPowerState)\b")
         self.assertNotRegex(code, r"->(?:map|readBytes|writeBytes|read|write|open)\s*\(")
-        self.assertNotRegex(code, r"(?m)^\s*\*boot0\s*=")
+        self.assertNotRegex(code, r"(?m)^\s*\*registerWord\s*=")
 
     def test_personality_requires_exact_device_and_observational_category(self):
         with (PACKAGE / "Info.plist").open("rb") as stream:
             info = plistlib.load(stream)
         self.assertEqual(info["CFBundleIdentifier"], "org.osx86.S540NvidiaPCIProbe")
-        self.assertEqual(info["CFBundleVersion"], "0.2.0")
+        self.assertEqual(info["CFBundleVersion"], "0.3.0")
         self.assertEqual(set(info["IOKitPersonalities"]), {"S540NvidiaPCIProbe"})
         personality = info["IOKitPersonalities"]["S540NvidiaPCIProbe"]
         self.assertEqual(personality, {

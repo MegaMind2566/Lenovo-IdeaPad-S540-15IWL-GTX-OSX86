@@ -8,7 +8,7 @@ The [CPU and sensor reports](cpu-thermal.md) confirm frequency/power response an
 
 | Order | Work | Remaining scope |
 |---|---|---|
-| Now | NVIDIA next-boundary assessment | Probe 0.1.0 attachment/configuration/resource reads and 0.2.0 single-read TU117 identification confirmed. Review the next bounded step before expanding hardware access. DMA, GSP and acceleration remain later work. |
+| Now | NVIDIA BOOT_42 and HAL table match | Version 0.2.0 BOOT_0 hardware read confirmed. Version 0.3.0 guarded BOOT_42/local pinned-table match implemented; native build and laptop validation pending. No HAL instantiation or resource-manager integration. |
 | Remaining | Graphics, power and thermals | Sustained Intel graphics use and cooling, fan telemetry and measured battery runtime. Continuous temperature readings during desktop activity and basic battery power/discharge reporting are confirmed. NVIDIA electrical power-off is deferred until after the driver-port attempt. |
 | Complete / retained | Boot and EFI consolidation | Independent Samsung boot confirmed after manual EFI transfer. Keep the HDD as a recovery path and preserve the private working EFI. A later sanitized release remains separate from v0.1.0. |
 | 3 | Storage and USB reliability | USB-C at 5 Gb/s in both orientations and both tested USB-A connectors at 5 Gb/s are confirmed. File reads on both USB-A connectors are confirmed. External USB 2 devices, sustained SSD stability, shutdown and reboot remain separate checks. Move the system SSD cable only after shutdown. |
@@ -47,7 +47,7 @@ Priorities updated on 13 October 2026: the panel being off during boot is **reso
 | Fingerprint reader | Internal USB port mapped; support to be assessed | Assess drivers and macOS integration |
 | HDMI | No image; macOS display report lists only the internal panel | Identify the connected external display's owning GPU in Windows before selecting a fix |
 | USB-C video | No video test available; video capability and routing not verified; USB data works | Check hardware capability from documentation; keep separate from the observed HDMI failure |
-| NVIDIA GTX 1650 Max-Q | Probe 0.1.0 attachment/configuration/resource reads and 0.2.0 single-read TU117 identification confirmed; no initialized GPU | Assess the next boundary before expanding access; runtime stop/unload remains untested. DMA, startup, execution and graphics integration remain separate |
+| NVIDIA GTX 1650 Max-Q | Probe 0.1.0 attachment/configuration/resource reads and 0.2.0 BOOT_0 identification confirmed; no initialized GPU | Version 0.3.0 BOOT_42/local HAL table match implemented, pending native and laptop validation. Runtime stop/unload, DMA, startup, execution and graphics integration remain separate |
 
 Recovery test results are not automatically extended to the installed system. Incomplete items remain open until a documented result is available.
 
@@ -67,7 +67,9 @@ The [pinned source assessment](../reference/nvidia-port-assessment.md) is comple
 
 The bounded IOKit PCI attachment prototype 0.1.0 returns `attached`, `complete=true` and no warnings on the laptop. Its reporter verifies the actual `IOPCIDevice` provider: `10DE:1F91`, subsystem `17AA:3806`, revision `A1`, display class `030000`, with `-wegnoegpu` absent. Fixed configuration reads and assigned resource descriptors are confirmed. The descriptors report 16 MiB, 256 MiB, 32 MiB and 128 bytes; they do not establish usable VRAM or MMIO access.
 
-On October 15, version 0.2.0 returned `identified`, `complete=true` and no warnings on the laptop. The format-2 snapshot records exactly one 32-bit read of the documented read-only `NV_PMC_BOOT_0` register at BAR0 offset zero, with architecture `0x16`, implementation `0x07` and reason `tu117-identified`. This confirms that single identification read, not GPU initialization or general register access. The next boundary requires source assessment before any expansion; no additional register or hardware operation is selected here. DMA, firmware loading and acceleration remain later work. Runtime stop/unload remains untested. Intel display operation and the recovery EFI are retained.
+On October 15, version 0.2.0 returned `identified`, `complete=true` and no warnings on the laptop. The format-2 snapshot records exactly one 32-bit read of the documented read-only `NV_PMC_BOOT_0` register at BAR0 offset zero, with architecture `0x16`, implementation `0x07` and reason `tu117-identified`. This confirms that single identification read, not GPU initialization or general register access.
+
+The next scoped step is the implemented 0.3.0 prototype: read BOOT_0, then perform one guarded BOOT_42 read only if BOOT_0 identifies TU117, for at most two total register loads. It reapplies the existing identity, BAR0, memory-decode, D0 and ownership checks for each mapping/read. The format-3 report cross-checks architecture `0x16`, implementation `0x07` and chip `0x167` against a local table pinned to NVIDIA source, selecting TU117 variant `41` only for a coherent match. This is a table lookup, not HAL instantiation or resource-manager integration. Native build and laptop validation remain pending. DMA, firmware loading and acceleration remain later work. Runtime stop/unload remains untested. Intel display operation and the recovery EFI are retained.
 
 The GTX 1650, PCI `10DE:1F91`, is listed among the GPUs compatible with NVIDIA's open source kernel modules. The repository contains operating system independent parts and Linux-specific interfaces. The modules also require GSP firmware and userspace driver components of the same version.
 
@@ -76,7 +78,7 @@ Mesa/NVK provides an open Vulkan driver for NVIDIA, but its current implementati
 The proposed path is a technical assessment, not an already validated port:
 
 1. Source assessment complete: pinned Linux dependencies, firmware/userspace requirements and candidate reusable code are recorded in the assessment.
-2. PCI visibility, probe 0.1.0 attachment/configuration/resource reads and 0.2.0 single-read TU117 identification complete on the laptop. Assess the next bounded step before expanding scope. Stop/unload remains untested; DMA and interrupts require separate work.
+2. PCI visibility, probe 0.1.0 attachment/configuration/resource reads and 0.2.0 BOOT_0 identification complete on the laptop. Validate the implemented 0.3.0 BOOT_42 cross-check/local HAL table matching before widening scope. Stop/unload remains untested; DMA and interrupts require separate work.
 3. Test GPU initialisation and execution of a minimal command, with observable results on the laptop.
 4. Assess the userspace component and the path towards Vulkan or other experimental functions.
 5. Address Metal integration, the macOS graphics system, power management and video outputs separately.

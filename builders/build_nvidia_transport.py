@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the single-read Intel NVIDIA identification probe; never load or install it."""
+"""Build the bounded Intel NVIDIA HAL identification probe; never load or install it."""
 from __future__ import annotations
 
 import argparse
@@ -19,8 +19,8 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'packages/nvidia-transport'
-PACKAGE = 'S540-nvidia-transport-v2'
-VERSION = '0.2.0'
+PACKAGE = 'S540-nvidia-transport-v3'
+VERSION = '0.3.0'
 SDK_COMMIT = '3f750085caa17ec3a7880f11c11bf4f48cd6a164'
 BUNDLE = 'S540NvidiaPCIProbe.kext'
 EXECUTABLE = 'S540NvidiaPCIProbe'
@@ -127,13 +127,13 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
         allowed_statuses = {'not_attached'}
         if allow_legacy_probe:
             allowed_statuses.add('outdated_probe')
-        if (live.get('format') != 2 or live.get('tool') != 'nvidia-transport'
+        if (live.get('format') != 3 or live.get('tool') != 'nvidia-transport'
                 or live.get('version') != VERSION or live.get('complete') is not True
                 or live.get('status') not in allowed_statuses):
             raise ValueError('The native reporter returned an unexpected report or loaded probe.')
         live_validation = ('native live enumeration without a loaded probe'
                            if live['status'] == 'not_attached' else
-                           'native live recognition of the already-loaded version 0.1.0 probe; '
+                           'native live recognition of an already-loaded version 0.1.0 or 0.2.0 probe; '
                            'the new kernel probe was not loaded by this build')
         imports = run('/usr/bin/nm', '-u', str(checker)).stdout
         if any(name in imports for name in ('IOServiceOpen', 'IOConnectCall', 'IOConnectMapMemory', 'IORegistryEntrySetCFProperty', 'IORegistryEntrySetCFProperties')):
@@ -178,7 +178,7 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
                   'validation': ['native Intel kernel compile and link', 'thin x86_64 Mach-O and module entry metadata',
                                  'ad-hoc signature verification', 'native report decoder self-test',
                                  live_validation],
-                  'hardware_status': 'Laptop PCI attachment and version 0.2.0 single read-only BAR0 TU117 identification are confirmed. GPU initialization, firmware loading and acceleration remain unimplemented.'}
+                  'hardware_status': 'Laptop PCI attachment and version 0.2.0 BOOT0 identification are confirmed. Version 0.3.0 BOOT42 cross-check and local TU117 HAL-table match await laptop validation. The NVIDIA HAL is not instantiated; GPU initialization, firmware and acceleration remain unimplemented.'}
         payload['BUILD.json'] = (json.dumps(record, indent=2, sort_keys=True) + '\n').encode()
         payload['SHA256SUMS'] = ''.join(digest(data) + '  ' + name + '\n' for name, data in sorted(payload.items())).encode('ascii')
         pending = work / archive.name
@@ -203,12 +203,12 @@ def main() -> int:
     parser.add_argument('--kernel-sdk', type=Path, required=True)
     parser.add_argument('--output-dir', type=Path, required=True)
     parser.add_argument('--allow-legacy-probe', action='store_true',
-                        help='Allow the already-loaded version 0.1.0 probe during a local build.')
+                        help='Allow an already-loaded version 0.1.0 or 0.2.0 probe during a local build.')
     args = parser.parse_args()
     try:
         archive = build(args.kernel_sdk, args.output_dir,
                         allow_legacy_probe=args.allow_legacy_probe)
-        print('Verified NVIDIA single-read identification package: ' + str(archive))
+        print('Verified NVIDIA HAL identification package: ' + str(archive))
         print('ZIP SHA256: ' + digest(archive.read_bytes()))
         return 0
     except (OSError, ValueError, subprocess.SubprocessError, zipfile.BadZipFile, plistlib.InvalidFileException) as error:

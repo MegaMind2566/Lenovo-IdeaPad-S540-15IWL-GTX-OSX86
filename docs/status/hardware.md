@@ -239,4 +239,8 @@ The format-2 laptop report from `nvidia-transport` 0.2.0 returns `identified`, `
 | Decoded architecture / implementation | `0x16` / `0x07`, TU117 |
 | Result reason | `tu117-identified` |
 
-This confirms the one bounded identification-register read. It does not establish general MMIO access, GPU initialization, usable VRAM, DMA, firmware operation, command execution or acceleration. Runtime stop/unload and power-management transitions remain untested. The next step is source assessment before selecting any expansion; no new register access is chosen from this result alone. Private resource addresses and raw reports remain excluded.
+This confirms the one bounded identification-register read. It does not establish general MMIO access, GPU initialization, usable VRAM, DMA, firmware operation, command execution or acceleration. Runtime stop/unload and power-management transitions remain untested. This confirmed 0.2.0 result remains the hardware baseline.
+
+## NVIDIA BOOT_42 and local HAL table matcher
+
+Version 0.3.0 BOOT_42 cross-check and local HAL table matching are implemented; native build and laptop results are pending. The format-3 path permits at most two total register loads, with BOOT_42 reached only after a successful BOOT_0 identification and repeated guards for each mapping/read. A table match does not establish HAL instantiation, resource-manager integration or GPU initialization. Private resource addresses and raw reports remain excluded.

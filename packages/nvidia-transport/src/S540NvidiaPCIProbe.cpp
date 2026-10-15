@@ -177,44 +177,30 @@ const char *checkReadPrerequisites(IOPCIDevice *device,
     return S540NvidiaPCIProbePolicy::requireD0(read);
 }
 
-MMIOOutcome attemptIdentificationRead(IOPCIDevice *device,
-                                      IOMemoryDescriptor *bar0,
-                                      bool metadataAvailable) {
-    MMIOOutcome result = {"refused", "resource-metadata-unavailable", 0, 0};
-    if (!metadataAvailable)
-        return result;
-    if (!bar0) {
-        result.reason = "bar0-descriptor-missing";
-        return result;
-    }
+struct IdentificationOutcome {
+    MMIOOutcome boot0;
+    MMIOOutcome boot42;
+};
 
-    // Arbitration serializes compliant open/close/termination, without opening
-    // the PCI provider (whose open path may change hardware resource state).
-    // It does not freeze platform power management. D0 is rechecked below.
-    ScopedArbitration arbitration(device);
-    if (!arbitration.acquired()) {
-        result.reason = "provider-arbitration-unavailable";
-        return result;
-    }
-    if (device->isOpen()) {
-        result.reason = "provider-already-open";
-        return result;
-    }
+template <uint32_t Offset>
+MMIOOutcome attemptRegisterRead(IOPCIDevice *device,
+                               IOMemoryDescriptor *bar0) {
+    // A compile-time whitelist, not an arbitrary-offset runtime interface.
+    static_assert(Offset == 0 || Offset == 0xa00, "Only BOOT0 and BOOT42 are allowed.");
+    MMIOOutcome result = {"refused", "mapping-unavailable", 0, 0};
     const char *reason = checkReadPrerequisites(device, bar0);
     if (reason) {
         result.reason = reason;
         return result;
     }
 
-    // Request only BOOT0. The VM mapping itself has page granularity; this
-    // request does not make a four-byte physical aperture or a recoverable
-    // hardware timeout. A single stalled MMIO load can still stall the kernel.
+    // Each request covers one register. Physical VM mappings still have page
+    // granularity. No timeout makes a stalled hardware load recoverable.
     ScopedRelease<IOMemoryMap> mapping(bar0->createMappingInTask(kernel_task, 0,
-        kIOMapAnywhere | kIOMapReadOnly | kIOMapInhibitCache | kIOMapUnique, 0, 4));
-    if (!mapping.get()) {
-        result.reason = "mapping-unavailable";
+        kIOMapAnywhere | kIOMapReadOnly | kIOMapInhibitCache | kIOMapUnique, Offset, 4));
+    if (!mapping.get())
         return result;
-    }
+    // The returned address already includes Offset; do not add it again.
     const mach_vm_address_t address = mapping.get()->getVirtualAddress();
     if (address == 0 || (address & 3U) != 0 || mapping.get()->getLength() != 4) {
         result.reason = "mapping-invalid";
@@ -226,37 +212,98 @@ MMIOOutcome attemptIdentificationRead(IOPCIDevice *device,
         return result;
     }
 
-    // Intel x86_64, exactly one aligned 32-bit volatile load. No retries,
-    // registers beyond NV_PMC_BOOT_0, writes, polling, or arbitrary offsets.
-    const volatile uint32_t *boot0 = reinterpret_cast<const volatile uint32_t *>(address);
-    result.rawValue = *boot0;
+    // Intel x86_64: one aligned 32-bit volatile load per fixed instantiation.
+    // No writes, retries, polling, or access beyond the two allowed registers.
+    const volatile uint32_t *registerWord = reinterpret_cast<const volatile uint32_t *>(address);
+    result.rawValue = *registerWord;
     result.readCount = 1;
     mapping.reset();
-    result.reason = S540NvidiaPCIProbePolicy::identifyBoot0(result.rawValue);
-    result.status = S540NvidiaPCIProbePolicy::architecture(result.rawValue) == 0x16U
-        && S540NvidiaPCIProbePolicy::implementation(result.rawValue) == 7U
-        && result.rawValue != 0 && result.rawValue != UINT32_MAX
-        ? "identified" : "failed";
+    const bool identified = Offset == 0
+        ? S540NvidiaPCIProbePolicy::boot0IsTU117(result.rawValue)
+        : S540NvidiaPCIProbePolicy::boot42IsTU117(result.rawValue);
+    result.reason = Offset == 0
+        ? S540NvidiaPCIProbePolicy::identifyBoot0(result.rawValue)
+        : S540NvidiaPCIProbePolicy::identifyBoot42(result.rawValue);
+    result.status = identified ? "identified" : "failed";
     return result;
 }
 
-OSDictionary *copyMMIOResult(const MMIOOutcome &result) {
-    OSDictionary *dictionary = OSDictionary::withCapacity(9);
+IdentificationOutcome attemptIdentificationReads(IOPCIDevice *device,
+                                                 IOMemoryDescriptor *bar0,
+                                                 bool metadataAvailable) {
+    IdentificationOutcome result = {
+        {"refused", "resource-metadata-unavailable", 0, 0},
+        {"not_attempted", "boot0-not-identified", 0, 0}
+    };
+    if (!metadataAvailable)
+        return result;
+    if (!bar0) {
+        result.boot0.reason = "bar0-descriptor-missing";
+        return result;
+    }
+
+    // One arbitration scope covers both reads and both mapping lifetimes.
+    // It serializes compliant open/close/termination without opening the PCI
+    // provider. It does not freeze platform PM or guarantee bounded latency.
+    ScopedArbitration arbitration(device);
+    if (!arbitration.acquired()) {
+        result.boot0.reason = "provider-arbitration-unavailable";
+        return result;
+    }
+    if (device->isOpen()) {
+        result.boot0.reason = "provider-already-open";
+        return result;
+    }
+    result.boot0 = attemptRegisterRead<0>(device, bar0);
+    if (result.boot0.readCount == 1
+        && S540NvidiaPCIProbePolicy::boot0IsTU117(result.boot0.rawValue))
+        result.boot42 = attemptRegisterRead<0xa00>(device, bar0);
+    return result;
+}
+
+OSDictionary *copyMMIOResult(const MMIOOutcome &result, bool boot42) {
+    OSDictionary *dictionary = OSDictionary::withCapacity(10);
     if (!dictionary)
         return nullptr;
     bool ok = setString(dictionary, "Status", result.status)
         && setString(dictionary, "Reason", result.reason)
         && setNumber(dictionary, "ReadCount", result.readCount, 32)
         && setNumber(dictionary, "BarIndex", 0, 32)
-        && setNumber(dictionary, "Offset", 0, 32)
+        && setNumber(dictionary, "Offset", boot42 ? 0xa00 : 0, 32)
         && setNumber(dictionary, "Width", 32, 32);
     if (ok && result.readCount == 1) {
         ok = setNumber(dictionary, "RawValue", result.rawValue, 32)
-            && setNumber(dictionary, "Architecture",
-                         S540NvidiaPCIProbePolicy::architecture(result.rawValue), 32)
-            && setNumber(dictionary, "Implementation",
-                         S540NvidiaPCIProbePolicy::implementation(result.rawValue), 32);
+            && setNumber(dictionary, "Architecture", boot42
+                         ? S540NvidiaPCIProbePolicy::boot42Architecture(result.rawValue)
+                         : S540NvidiaPCIProbePolicy::architecture(result.rawValue), 32)
+            && setNumber(dictionary, "Implementation", boot42
+                         ? S540NvidiaPCIProbePolicy::boot42Implementation(result.rawValue)
+                         : S540NvidiaPCIProbePolicy::implementation(result.rawValue), 32);
+        if (ok && boot42)
+            ok = setNumber(dictionary, "ChipID",
+                           S540NvidiaPCIProbePolicy::boot42ChipID(result.rawValue), 32);
     }
+    if (!ok) {
+        dictionary->release();
+        return nullptr;
+    }
+    return dictionary;
+}
+
+OSDictionary *copyHALSelection(const IdentificationOutcome &result) {
+    OSDictionary *dictionary = OSDictionary::withCapacity(5);
+    if (!dictionary)
+        return nullptr;
+    const bool matched = result.boot0.readCount == 1 && result.boot42.readCount == 1
+        && S540NvidiaPCIProbePolicy::selectHALVariant(result.boot0.rawValue,
+                                                     result.boot42.rawValue) == 41;
+    bool ok = setString(dictionary, "Status", matched ? "matched" : "not_selected")
+        && setNumber(dictionary, "TotalReadCount",
+                     result.boot0.readCount + result.boot42.readCount, 32)
+        && setString(dictionary, "SourceCommit", "1a82fbfda8f321b056eb3568850f9316c5e465c5");
+    if (ok && matched)
+        ok = setString(dictionary, "Chip", "TU117")
+            && setNumber(dictionary, "VariantIndex", 41, 32);
     if (!ok) {
         dictionary->release();
         return nullptr;
@@ -266,17 +313,17 @@ OSDictionary *copyMMIOResult(const MMIOOutcome &result) {
 
 OSDictionary *copySnapshot(IOPCIDevice *device,
                           const S540NvidiaPCIProbePolicy::Identity &identity) {
-    OSDictionary *snapshot = OSDictionary::withCapacity(15);
+    OSDictionary *snapshot = OSDictionary::withCapacity(16);
     if (!snapshot)
         return nullptr;
 
     // One additional fixed config read captures command/status without changing
     // memory decoding, I/O decoding, bus mastering, or any status bits.
     const uint32_t commandStatus = device->configRead32(0x04);
-    bool ok = setNumber(snapshot, "Format", 2, 32)
-        && setString(snapshot, "ProbeVersion", "0.2.0")
+    bool ok = setNumber(snapshot, "Format", 3, 32)
+        && setString(snapshot, "ProbeVersion", "0.3.0")
         && setString(snapshot, "Stage", "attached")
-        && setString(snapshot, "AccessPolicy", "single-read-only-bar0-identification")
+        && setString(snapshot, "AccessPolicy", "two-read-only-bar0-hal-identification")
         && setNumber(snapshot, "VendorID", identity.vendorDevice & 0xffffU, 16)
         && setNumber(snapshot, "DeviceID", identity.vendorDevice >> 16, 16)
         && setNumber(snapshot, "SubsystemVendorID", identity.subsystem & 0xffffU, 16)
@@ -303,14 +350,18 @@ OSDictionary *copySnapshot(IOPCIDevice *device,
     }
     // The service remains attached on MMIO refusal. Missing resource metadata
     // is explicit and is not fabricated as a list of absent BARs.
-    const MMIOOutcome outcome = attemptIdentificationRead(device, bar0, resources != nullptr);
-    OSDictionary *mmio = copyMMIOResult(outcome);
-    if (mmio) {
-        ok = ok && snapshot->setObject("MMIOResult", mmio);
-        mmio->release();
-    } else {
-        ok = false;
-    }
+    const IdentificationOutcome outcome = attemptIdentificationReads(device, bar0, resources != nullptr);
+    OSDictionary *mmio = copyMMIOResult(outcome.boot0, false);
+    OSDictionary *boot42 = copyMMIOResult(outcome.boot42, true);
+    OSDictionary *selection = copyHALSelection(outcome);
+    ok = mmio && boot42 && selection;
+    if (ok)
+        ok = snapshot->setObject("MMIOResult", mmio)
+            && snapshot->setObject("BOOT42Result", boot42)
+            && snapshot->setObject("HALSelection", selection);
+    if (mmio) mmio->release();
+    if (boot42) boot42->release();
+    if (selection) selection->release();
     if (!ok) {
         snapshot->release();
         return nullptr;

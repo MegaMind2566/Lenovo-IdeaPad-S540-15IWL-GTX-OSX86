@@ -101,11 +101,55 @@ inline const char *identifyBoot0(uint32_t boot0) {
         return "implementation-mismatch";
     return "tu117-identified";
 }
+
+// BOOT42 has a contiguous six-bit architecture field. BOOT0's extension bit
+// layout must not be reused for this second register.
+inline uint32_t boot42Architecture(uint32_t boot42) {
+    return (boot42 >> 24) & 0x3fU;
+}
+
+inline uint32_t boot42Implementation(uint32_t boot42) {
+    return (boot42 >> 20) & 0xfU;
+}
+
+inline uint32_t boot42ChipID(uint32_t boot42) {
+    return (boot42 >> 20) & 0x3ffU;
+}
+
+inline const char *identifyBoot42(uint32_t boot42) {
+    if (boot42 == 0)
+        return "zero-value";
+    if (boot42 == UINT32_MAX)
+        return "all-ones-value";
+    if (boot42Architecture(boot42) != 0x16U)
+        return "architecture-mismatch";
+    if (boot42Implementation(boot42) != 7U)
+        return "implementation-mismatch";
+    return "tu117-identified";
+}
+
+inline bool boot0IsTU117(uint32_t boot0) {
+    return boot0 != 0 && boot0 != UINT32_MAX
+        && architecture(boot0) == 0x16U && implementation(boot0) == 7U;
+}
+
+inline bool boot42IsTU117(uint32_t boot42) {
+    return boot42 != 0 && boot42 != UINT32_MAX
+        && boot42Architecture(boot42) == 0x16U
+        && boot42Implementation(boot42) == 7U
+        && boot42ChipID(boot42) == 0x167U;
+}
+
+// This reproduces only the pinned TU117 table predicate. It does not create
+// an NVIDIA RM object or HAL instance, nor initialize any hardware.
+inline int selectHALVariant(uint32_t boot0, uint32_t boot42) {
+    return boot0IsTU117(boot0) && boot42IsTU117(boot42) ? 41 : -1;
+}
 }
 
 #if defined(KERNEL)
 #if !defined(__x86_64__)
-#error "The single-read PCI prototype supports Intel x86_64 only."
+#error "The read-only PCI prototype supports Intel x86_64 only."
 #endif
 #include <IOKit/IOService.h>
 #include <IOKit/pci/IOPCIDevice.h>

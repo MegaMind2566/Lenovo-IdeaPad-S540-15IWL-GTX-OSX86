@@ -1,4 +1,4 @@
-name: Build bounded NVIDIA BAR0 identification prototype
+name: Build bounded NVIDIA HAL identification prototype
 
 on:
   push:
@@ -35,13 +35,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          /usr/bin/unzip -q build/nvidia-transport/S540-nvidia-transport-v2.zip -d "$RUNNER_TEMP/nvidia-transport-package"
-          /bin/bash "$RUNNER_TEMP/nvidia-transport-package/S540-nvidia-transport-v2/CHECK-TRANSPORT.command" --output-dir "$RUNNER_TEMP"
+          /usr/bin/unzip -q build/nvidia-transport/S540-nvidia-transport-v3.zip -d "$RUNNER_TEMP/nvidia-transport-package"
+          /bin/bash "$RUNNER_TEMP/nvidia-transport-package/S540-nvidia-transport-v3/CHECK-TRANSPORT.command" --output-dir "$RUNNER_TEMP"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: S540-nvidia-transport-v2
+          name: S540-nvidia-transport-v3
           path: |
-            build/nvidia-transport/S540-nvidia-transport-v2.zip
-            build/nvidia-transport/S540-nvidia-transport-v2.zip.sha256
+            build/nvidia-transport/S540-nvidia-transport-v3.zip
+            build/nvidia-transport/S540-nvidia-transport-v3.zip.sha256
           if-no-files-found: error
           retention-days: 30
