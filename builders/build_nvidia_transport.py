@@ -196,12 +196,18 @@ def source_flags(source: Path) -> list[str]:
             RUNTIME / 'upstream/consumer/list.c',
             RUNTIME / 'src/S540NvidiaRmConsumer.cpp',
             RUNTIME / 'tests/check_rm_consumer_native.cpp'}:
-        flags = ['-I', str(RUNTIME / 'upstream/consumer/include')]
-        if source.suffix == '.c':
-            # The unchanged release-profile iterator-validity functions accept
-            # but do not use their container parameter under GNU typeof.
-            flags.append('-Wno-unused-parameter')
-        return flags
+        return ['-I', str(RUNTIME / 'upstream/consumer/include')]
+    return []
+
+
+def source_warning_flags(source: Path) -> list[str]:
+    # Apply the narrow exception after -Wextra/-Werror. Clang otherwise
+    # re-enables the warning through the later umbrella warning option.
+    # The original release-profile validity functions accept an unused
+    # container parameter under GNU typeof; their bodies remain unchanged.
+    if source in {RUNTIME / 'upstream/consumer/vector.c',
+                  RUNTIME / 'upstream/consumer/list.c'}:
+        return ['-Wno-unused-parameter']
     return []
 
 
@@ -213,6 +219,7 @@ def compile_native_harness(work: Path, label: str, harness: Path,
     for source in c_sources:
         obj = work / (label + '-' + source.stem + '.o')
         run('/usr/bin/xcrun', 'clang', *source_flags(source), *common,
+            *source_warning_flags(source),
             '-std=gnu11', '-ffreestanding', *sanitizer,
             '-c', str(source), '-o', str(obj))
         objects.append(str(obj))
@@ -373,7 +380,8 @@ def build(sdk: Path, output: Path, *, allow_legacy_probe: bool = False) -> Path:
             obj = work / (source.stem + '.o')
             compiler = 'clang' if source.suffix == '.c' else 'clang++'
             language_flags = ['-std=gnu11'] if source.suffix == '.c' else cpp_flags
-            run('/usr/bin/xcrun', compiler, *source_flags(source), *flags, *language_flags,
+            run('/usr/bin/xcrun', compiler, *source_flags(source), *flags,
+                *source_warning_flags(source), *language_flags,
                 '-c', str(source), '-o', str(obj))
             macho(obj, 1)
             objects.append(str(obj))
