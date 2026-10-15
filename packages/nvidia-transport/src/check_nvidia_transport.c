@@ -352,6 +352,10 @@ static void collect_report(struct report *report)
         warn_report(report, WARN_ENUMERATION_FAILED, 1);
         return;
     }
+    /* XNU can return success with no iterator when no service class matches.
+       A null handle is an empty result, not an invalidated live iterator. */
+    if (iterator == IO_OBJECT_NULL)
+        return;
     io_registry_entry_t service;
     while ((service = IOIteratorNext(iterator)) != IO_OBJECT_NULL) {
         ++report->services;

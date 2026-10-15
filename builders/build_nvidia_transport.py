@@ -199,6 +199,8 @@ def main() -> int:
         print('NVIDIA transport package not created: ' + str(error), file=sys.stderr)
         if isinstance(error, subprocess.CalledProcessError) and error.stderr:
             print(error.stderr[-6000:], file=sys.stderr)
+        if isinstance(error, subprocess.CalledProcessError) and error.stdout:
+            print(error.stdout[-6000:], file=sys.stderr)
         return 1
 
 
