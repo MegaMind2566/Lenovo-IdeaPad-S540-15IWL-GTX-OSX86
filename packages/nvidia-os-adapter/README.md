@@ -2,7 +2,7 @@
 
 CPU-only foundations for the S540 NVIDIA port: monotonic clocks, ordinary-RAM primitives and the original NVIDIA atomic headers. [Combined GitHub validation passed](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38696607911) for kernel-object compilation/linking, import auditing and native userspace execution. The confirmed v0.3.0 PCI identification is the hardware baseline for the integrated v0.4.0 milestone.
 
-The integrated v0.4.0 transport package combines these components with ordinary-RAM allocation and thread mutexes in one startup check. Native execution and kernel compilation run in GitHub Actions before packaging. Kernel runtime remains unvalidated until a v4 laptop report is returned. Full validation follows the implementation stages.
+The integrated v0.4.0 transport package combines these components with ordinary-RAM allocation and thread mutexes in one startup check. Native execution and kernel compilation run in GitHub Actions before packaging. The returned v4 laptop report confirms the bounded startup check in the real Tahoe kernel: `integrated_passed`, 23 assertions passed, all five component results true, and no warnings. This is a single-thread startup result; concurrent kernel execution, suspend behavior and full NVIDIA caller compatibility remain separate. Full validation follows the implementation stages.
 
 ## Source boundary
 
@@ -34,7 +34,7 @@ Targeted checks cover real small-buffer behavior and chunk planning at 32/64-bit
 
 [S540NvidiaAtomic.h](src/S540NvidiaAtomic.h) configures the unmodified nvport atomic-header closure for Intel x86_64 Clang. GNU C11 uses the original C11 implementation and pinned freestanding `stdatomic.h`; C++17 uses the original Clang intrinsics. Compiler selection is checked directly, rather than forcing one implementation for both languages.
 
-The consumers exercise the original CPU atomic operations and fences. This header integration adds no resource-manager objects, GPU synchronization or kernel runtime validation. NVIDIA MIT notices and the LLVM license for the bundled atomic header are retained.
+The consumers exercise the original CPU atomic operations and fences. This header integration adds no resource-manager objects or GPU synchronization. The v4 startup check separately confirms execution of selected original C++ atomic operations in the kernel; it does not exercise the C11 branch or concurrent kernel operations. NVIDIA MIT notices and the LLVM license for the bundled atomic header are retained.
 
 ## Ordinary host-RAM allocation and thread mutexes
 
@@ -48,11 +48,11 @@ The [integrated runtime check](src/S540NvidiaRuntime.cpp) executes the actual cl
 
 ## Validation boundary
 
-[The v0.4.0 integrated build passed](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38717866330) from source `4f3ccfa8970c9fd6ae5d00197753883dcba484aa`. Kernel compilation/linking and the adapter import audit passed, with both thread-context guard functions resolved through the existing Libkern KPI dependency. The actual integrated runtime passed 23 native checks, both plain and under AddressSanitizer/UndefinedBehaviorSanitizer. Allocator checks passed with the production backend (487) and deterministic failure/alignment backend (1,292); mutex checks passed with four threads and 24,000 protected increments. The reporter passed 219 decoder checks, and the packaged launcher executed successfully without a loaded probe. The downloaded archive and every file checksum were verified. These are CI results, not a v4 laptop result; kernel runtime and GPU operation remain unvalidated.
+[The v0.4.0 integrated build passed](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38717866330) from source `4f3ccfa8970c9fd6ae5d00197753883dcba484aa`. Kernel compilation/linking and the adapter import audit passed, with both thread-context guard functions resolved through the existing Libkern KPI dependency. The actual integrated runtime passed 23 native checks, both plain and under AddressSanitizer/UndefinedBehaviorSanitizer. Allocator checks passed with the production backend (487) and deterministic failure/alignment backend (1,292); mutex checks passed with four threads and 24,000 protected increments. The reporter passed 219 decoder checks, and the packaged launcher executed successfully without a loaded probe. The downloaded archive and every file checksum were verified. Those CI results are separate from the subsequent v4 laptop report. The report returned `integrated_passed` and confirms all 23 bounded startup assertions in the Tahoe kernel while retaining the two-read TU117 identification. GPU operation remains unimplemented.
 
 The [successful combined run](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38696607911) used source commit `83d3ae7b2ce19215c73f8c89437257a3e7ac960c`. It passed provenance and targeted policy checks, compiled clock and memory backends with the adapted callers and produced two relocatable kernel-object links, one for each atomic language consumer. The import audit found exactly the three Apple clock functions plus `memcpy`, `memset` and `memcmp`, with no atomic runtime helpers.
 
-Native userspace execution passed for the actual clock and memory callers and both original atomic implementations. Atomic checks cover semantics, four-thread contention and publication. The real memory backend also passed AddressSanitizer and UndefinedBehaviorSanitizer execution. Kernel runtime, suspend behavior, buffers larger than 4 GiB and GPU deadlines remain unvalidated.
+Native userspace execution passed for the actual clock and memory callers and both original atomic implementations. Atomic checks cover semantics, four-thread contention and publication. The real memory backend also passed AddressSanitizer and UndefinedBehaviorSanitizer execution. Concurrent kernel execution, suspend behavior, buffers larger than 4 GiB and GPU deadlines remain unvalidated. The laptop result covers only the bounded v4 startup check.
 
 No component accesses GPU registers, changes power, performs DMA or loads firmware. NVIDIA HAL instantiation, resource-manager integration and GPU initialization remain unimplemented. Software deadlines cannot make a stalled MMIO load recoverable.
 

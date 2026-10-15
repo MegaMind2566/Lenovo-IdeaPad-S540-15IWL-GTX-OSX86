@@ -2,7 +2,7 @@
 
 Reviewed on October 15, 2026. Target: Lenovo IdeaPad S540-15IWL GTX, Intel macOS Tahoe, NVIDIA GTX 1650 Max-Q, PCI `10DE:1F91`.
 
-**Status:** PCI visibility, 0.1.0 attachment/configuration/resource reads, 0.2.0 BOOT_0 identification and the [transport prototype](../../packages/nvidia-transport/README.md) 0.3.0 two-read/local HAL table match are confirmed on the laptop. The CPU-only Darwin OS adapter passed combined kernel compile/link/import and native userspace checks for clocks, ordinary-RAM and atomic foundations; kernel runtime remains unvalidated. HAL instantiation, resource-manager integration, GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
+**Status:** PCI visibility, 0.1.0 attachment/configuration/resource reads, 0.2.0 BOOT_0 identification and the [transport prototype](../../packages/nvidia-transport/README.md) 0.3.0 two-read/local HAL table match are confirmed on the laptop. The integrated v0.4.0 laptop report confirms the bounded CPU-component startup check in the Tahoe kernel for clocks, ordinary RAM, original C++ atomics, ordinary host-RAM allocation and thread mutexes. Concurrent kernel execution and full NVIDIA caller compatibility remain unvalidated. HAL instantiation, resource-manager integration, GPU initialization, DMA, firmware loading, execution and graphics acceleration remain unimplemented. Runtime stop/unload is untested. Intel graphics remains the operating display configuration.
 
 ## Source baseline
 
@@ -122,6 +122,12 @@ The [combined run](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX
 
 Large lengths are checked through chunk plans; no copy, fill or comparison over a buffer larger than 4 GiB is executed. There is no laptop installation package for these CPU-only substeps. Hardware tests will combine components into meaningful milestones; full validation follows the implementation stages. Software deadlines cannot make a stalled MMIO load recoverable.
 
+## Confirmed integrated kernel startup, v0.4.0
+
+The October 15, 2026 laptop report returns `integrated_passed`, `complete=true`, no warnings, and a verified PCI provider identity. All 23 startup assertions passed: timer (6), ordinary-RAM primitives (4), original C++ atomics (5), ordinary host-RAM allocation (4), and thread mutexes (4). The existing identification still completed exactly one BOOT_0 and one BOOT_42 read, selecting TU117 variant `41`.
+
+The check runs once on a sleepable thread. It uses small buffers, a single 256-byte ordinary-RAM allocation with 16-byte alignment, and a mutex created, conditionally acquired, released and reacquired on that same thread. Resources are released before the snapshot is published. This establishes the bounded startup result in the real Tahoe kernel. It does not validate kernel contention/publication, the C11 atomic branch at kernel runtime, interrupt-safe allocation, suspend behavior, usable VRAM, HAL/RM instantiation or GPU initialization. The allocator and mutex retain their limited contracts; full NVIDIA caller compatibility must be reviewed before wider runtime binding. Raw reports and resource addresses remain private. No repeated laptop test is needed for this checkpoint.
+
 ## Milestone status and remaining work
 
 | Milestone | Required result |
@@ -129,7 +135,7 @@ Large lengths are checked through chunk plans; no copy, fill or comparison over 
 | Darwin PCI attachment | Confirmed laptop attachment, fixed configuration reads and assigned resource metadata; runtime stop/unload remains untested |
 | Single-read BAR0 identification | Confirmed on the laptop in 0.2.0: exactly one BOOT_0 read with expected TU117 fields; no broader hardware operation validated |
 | BOOT_42 and local HAL table match | Confirmed on the laptop in 0.3.0: two read-only identification loads and local TU117 variant-41 match. No HAL object or resource-manager integration |
-| CPU-only Darwin OS foundations | Combined clock, ordinary-RAM and atomic GitHub kernel compile/link/import and native userspace checks passed. No kernel runtime validation or resource-manager integration |
+| CPU-only Darwin OS foundations | Integrated v0.4.0 kernel startup check confirmed: 23 assertions across clocks, ordinary RAM, original C++ atomics, allocation and thread mutexes. No concurrent kernel or resource-manager validation |
 | Further hardware transport | Separate reviewed work for DMA and interrupts, with bounded access and failure handling |
 | GPU and GSP startup | Matching, hashed firmware; observed initialization with timeouts and cleanup; no success inferred from PCI enumeration |
 | Minimal execution | One deterministic command with a checked result and recoverable failure path |

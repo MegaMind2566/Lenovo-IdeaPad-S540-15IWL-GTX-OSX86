@@ -4,7 +4,13 @@ Version **0.4.0** combines the bounded TU117 identification probe with the Darwi
 
 **This is a development checkpoint. It does not initialize the GPU or provide graphics acceleration.** The NVIDIA HAL and resource manager are not instantiated. Firmware, DMA, command submission and display output remain unimplemented. Successful CI checks establish compilation and native user-space behavior; the laptop report establishes the kernel execution result separately.
 
-## One test on the laptop
+## Confirmed laptop result
+
+The October 15, 2026 format-4 laptop report returns `integrated_passed`, `complete=true`, and no warnings. The actual PCI provider identity is verified. All 23 startup assertions passed across the five CPU components: timer, ordinary-RAM operations, original C++ atomics, ordinary host-RAM allocation and thread mutexes. BOOT_0 and BOOT_42 each completed one read and retained the TU117 variant-41 match.
+
+This confirms the bounded startup check in the real Tahoe kernel. It runs on one thread, uses small RAM buffers and one 256-byte allocation, and releases its allocations and mutex before publishing the snapshot. It does not validate kernel contention, interrupt-context allocation, suspend behavior, full NVIDIA caller compatibility or GPU initialization. Raw reports and resource addresses remain private. No repeated laptop test is needed for this checkpoint.
+
+## Deployment and reporter
 
 Extract **S540-nvidia-transport-v4.zip** into Downloads. Keep the working Samsung EFI available. Use only the separate EFI on the **240 GB test disk**.
 
