@@ -2,7 +2,7 @@
 
 This component groups the next CPU-side porting work into one production startup path. It connects NVIDIA string and pseudorandom utilities, checked module initialization, and the original vector/list libraries used by the resource manager to the existing Darwin memory and synchronization backends.
 
-It is included in **S540-nvidia-transport-v7**, version **0.7.0**. The confirmed laptop baseline remains v0.6.0 until a format-7 hardware report is recorded. Native CI does not load the kernel extension.
+It is included in **S540-nvidia-transport-v7**, version **0.7.0**. The format-7 laptop report confirms this version: `integrated_passed`, all 258 combined kernel startup checks passed (128 support, 72 lifecycle, 35 caller/reserve and 23 foundations), every component true including cleanup, verified PCI provider, the same two-read TU117 variant-41 match and no warnings. This bounded sequential startup checkpoint is complete; no repeat laptop test is required. Native CI evidence remains separate from the hardware result.
 
 ## Combined implementation
 

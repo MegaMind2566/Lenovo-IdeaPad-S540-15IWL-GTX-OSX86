@@ -4,7 +4,9 @@ Version **0.7.0** combines the existing foundation/caller/object-lifecycle block
 
 **This is an experimental CPU-side integration milestone.** NVIDIA HAL/RM construction, GPU initialization, firmware, DMA, GPU commands and graphics/Metal acceleration remain unimplemented.
 
-## One combined laptop test
+The format-7 laptop report confirms all 258 combined startup checks in the Tahoe kernel: 128 support, 72 lifecycle, 35 caller/reserve and 23 foundations. Every CPU block passed, including cleanup, with verified provider identity, the same two-read TU117 variant-41 match and no warnings. The bounded sequential startup checkpoint is complete; no repeat laptop test is required.
+
+## Installation and combined checkpoint
 
 Use the EFI on the **240 GB test disk** and retain the working Samsung EFI as the fallback.
 
