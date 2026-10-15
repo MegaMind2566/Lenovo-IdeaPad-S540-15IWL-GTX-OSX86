@@ -15,7 +15,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 
 | Guide | Purpose |
 |---|---|
-| [NVIDIA Resource Server and host services](../packages/nvidia-rm-services/README.md) | V9 candidate: original standalone Resource Server, cached host allocation/mapping, retained read-only PCI and separately verified official firmware; native CI/package verification passed, one combined laptop checkpoint pending |
+| [NVIDIA Resource Server and host services](../packages/nvidia-rm-services/README.md) | V9 confirmed: all 486 kernel startup checks, cleanup and 15 separate userspace firmware checks passed, with no warnings; completed checkpoint, no repeat requested |
 | [Original NVIDIA Resource Server](../packages/nvidia-resource-server/README.md) | Selected NVOC/library subsystem, real client/resource/access/sharing paths and explicit adaptations; not full global RM startup |
 | [Matching NVIDIA firmware assets](../packages/nvidia-firmware-assets/README.md) | Official release 615.78.08 GSP/UCODES byte hashes, parsing, provenance and full license; no device upload or execution |
 | [NVIDIA hardware-transport preparation](../packages/nvidia-hardware-transport/README.md) | V8 confirmed in the Tahoe kernel: all 390 combined startup checks passed, cleanup complete and no warnings; untranslated host preparation is not device DMA verification |
@@ -25,7 +25,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 | [NVIDIA NVPort lifecycle](../packages/nvidia-nvport-lifecycle/README.md) | V6 tracked memory, spinlocks and allocator-owned mutex lifecycle confirmed in the Tahoe kernel: 72 lifecycle checks passed, including cleanup, with no warnings |
 | [NVIDIA NVPort callers](../packages/nvidia-caller-integration/README.md) | Original allocation/mutex caller integration with bounded reserve and mutex backend; v5 kernel startup confirmed with 35 caller/reserve checks and 23 foundation checks |
 | [NVIDIA Darwin OS adapter](../packages/nvidia-os-adapter/README.md) | CPU-only clock, RAM, atomics, allocation and thread mutexes; integrated v4 kernel startup check confirmed on the laptop; native/sanitizer checks and kernel packaging passed |
-| [NVIDIA PCI transport](../packages/nvidia-transport/README.md) | Combined package delivery/reporting: v9 candidate, with v8 retained as the confirmed 390-check kernel baseline |
+| [NVIDIA PCI transport](../packages/nvidia-transport/README.md) | Combined package delivery/reporting: v9 confirmed at 486 kernel startup checks; 485 native checks remain separate build evidence |
 | [NVIDIA PCI inventory](../packages/nvidia-pci/README.md) | Native read-only inventory; active target PCI visibility is confirmed |
 | [Intel graphics](guides/intel-graphics.md) | Acceleration and stability checks |
 | [Boot and networking](guides/boot-network.md) | Backlight boot fix, HeliPort and Bluetooth |
@@ -35,13 +35,13 @@ Start with the [project README](../README.md) for the current state and scope. D
 | [USB mapping](guides/usb-mapping.md) | Mapped ports and outstanding tests |
 | [Independent SSD boot](guides/ssd-boot.md) | Confirmed manual EFI transfer and Samsung boot; automatic helper on hold |
 | [Boot disk maintenance](guides/boot-maintenance.md) | Separate maintenance procedure for the physical boot disk |
-| [Function keys](guides/function-keys.md) | Keyboard icon actions, ordinary Fn function keys, event diagnosis and brightness rollback |
+| [Function keys](guides/function-keys.md) | Keyboard icon actions, ordinary Fn function keys and brightness rollback; the brightness-adjustment regression in the NVIDIA-test EFI is deferred; the non-NVIDIA EFI works normally |
 | [Bluetooth](guides/bluetooth.md) | The targeted patcher exclusion and its rollback |
 | [Previous microphone diagnostics](guides/microphone-diagnostics.md) | Collector for VoodooHDA 3.6.8 before the microphone fix; it rejects the 3.6.9 variant |
 
 ## Reference
 
-- [NVIDIA port assessment](reference/nvidia-port-assessment.md): pinned source, confirmed v8 baseline, v9 selected Resource Server scope, full-RM closure diagnostics and remaining GPU/GSP boundaries.
+- [NVIDIA port assessment](reference/nvidia-port-assessment.md): pinned source, confirmed v9 Resource Server checkpoint, full-RM closure diagnostics and remaining GPU/GSP boundaries.
 - [ACPI analysis](reference/acpi-analysis.md), [ACPI patch review](reference/acpi-patch-review.md) and [initial EFI delivery review](reference/efi-review.md).
 - [External disk installation](reference/installation.md) and [initial EFI instructions](reference/first-boot.md), written before the working configuration.
 - [Repository layout](reference/repository-layout.md), including the distinction between source modules and generated ZIP packages.
