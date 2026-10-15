@@ -7,8 +7,8 @@ regression checks are kept separately.
 
 | Package | Purpose | Guide |
 | --- | --- | --- |
-| [nvidia-os-adapter](nvidia-os-adapter) | CPU-only clock, ordinary-RAM and atomic foundations. Combined kernel compile/link/import and native userspace checks passed. No kernel runtime validation or laptop installer; future hardware tests combine components. | [OS adapter](nvidia-os-adapter/README.md) |
-| [nvidia-transport](nvidia-transport) | Version 0.3.0 two-read identification and pinned local TU117 variant-41 table match confirmed on the laptop. No HAL instantiation, resource-manager integration, firmware or acceleration. | [PCI transport](nvidia-transport/README.md) |
+| [nvidia-os-adapter](nvidia-os-adapter) | CPU-only clock, RAM, atomics, allocation and thread-mutex foundations. Integrated v4 native/sanitizer checks and kernel packaging passed; one laptop startup test is ready. Kernel runtime awaits its report. | [OS adapter](nvidia-os-adapter/README.md) |
+| [nvidia-transport](nvidia-transport) | Version 0.4.0 combines a bounded kernel foundations check with the two-read TU117 identification confirmed on v3. One kext replacement and one reporter command; kernel runtime pending. No HAL/RM, firmware or acceleration. | [PCI transport](nvidia-transport/README.md) |
 | [nvidia-visibility](nvidia-visibility) | Superseded for the reached visibility milestone. V1 automatic locator stopped at `Mounted`; subsequent manual removal of the disable argument produced a visible PCI service. | [Retained visibility experiment](nvidia-visibility/README.md) |
 | [nvidia-pci](nvidia-pci) | Read published PCI metadata; laptop visibility is confirmed for the exact target. No hardware access or GPU initialization. | [NVIDIA PCI inventory](nvidia-pci/README.md) |
 | [ssd-boot](ssd-boot) | Automatic transfer helper on hold after a mounted-target guard stop. Manual transfer and independent Samsung boot are confirmed. | [Independent SSD boot](../docs/guides/ssd-boot.md) |
@@ -46,4 +46,3 @@ Available keyboard companions (remaining icon-key investigation is deferred):
 - [Function-key events](function-key-events/README.md): passive direct/Fn session-event observation.
 - [Fn shortcut setup](function-keys-setup/README.md): reversible removal of four conflicting macOS function-key shortcuts.
 - [Driver scan-code collection](function-key-scancodes/README.md): bounded runtime logging for the verified VoodooPS2Keyboard RELEASE binary, with automatic restoration.
-
