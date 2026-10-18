@@ -13,6 +13,10 @@ not a new implementation of Intel's radio stack. Basic laptop operation is
 
 ## Confirmed laptop checkpoint
 
+Boot scope: the successful native Wi-Fi tests used the EFI on the external
+**240 GB test disk**. They do not separately validate the Samsung 960 EVO boot
+EFI with this change. Hardware-label refinements will also target the test EFI.
+
 The native macOS menu and settings show the Wi-Fi switch, available networks and
 an active wireless connection. The user confirmed joining a network and Internet
 browsing, then reported reboot reconnection and Wi-Fi recovery after sleep working.

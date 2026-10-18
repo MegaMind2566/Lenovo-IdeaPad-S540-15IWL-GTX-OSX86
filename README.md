@@ -61,7 +61,7 @@ Current status as of **October 19, 2026**. **Pending** means the feature has not
 | Battery runtime / sleep and wake | Pending | Measured runtime and device recovery; basic battery power is confirmed |
 | NVIDIA electrical power-off | Pending | Deferred until after the driver-port attempt; PCI visibility does not establish electrical power state |
 | NVIDIA acceleration | Not working | GTX 1650 Max-Q has no supported driver in this configuration |
-| Native macOS Wi-Fi interface | Working basic functions | [AC9560 Tahoe integration](packages/wifi-native/README.md): native menu/settings, network visibility, connection and browsing confirmed by the user; reboot reconnection and Wi-Fi recovery after sleep also reported working. Service renamed from Ethernet to Wi-Fi |
+| Native macOS Wi-Fi interface | Working basic functions | [AC9560 Tahoe integration](packages/wifi-native/README.md): test EFI on the external 240 GB disk: native menu/settings, network visibility, connection and browsing confirmed by the user; reboot reconnection and Wi-Fi recovery after sleep also reported working. Service renamed from Ethernet to Wi-Fi |
 | HDMI output | Not working | No image or external display in the macOS report; physical GPU routing under investigation |
 
 Detailed hardware information is in [Hardware](docs/status/hardware.md).
