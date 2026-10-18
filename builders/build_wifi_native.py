@@ -165,6 +165,11 @@ def build(output: Path, audit_only: bool) -> None:
     shutil.copytree(kext, package / "payload/AirportItlwm.kext")
     shutil.copytree(SOURCE / "tools", package / "tools", ignore=shutil.ignore_patterns("__pycache__"))
     shutil.copy2(SOURCE / "README.md", package / "README.md")
+    for launcher in SOURCE.glob("*.command"):
+        shutil.copy2(launcher, package / launcher.name)
+        (package / launcher.name).chmod(0o755)
+    for instructions in SOURCE.glob("*.txt"):
+        shutil.copy2(instructions, package / instructions.name)
     shutil.copy2(LOCK, package / "sources.lock.json")
     licenses = package / "licenses"
     licenses.mkdir()

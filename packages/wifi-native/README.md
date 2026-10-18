@@ -56,6 +56,11 @@ These commands refer to the **built, extracted package**, not the source folder.
 Python 3 is required on the laptop. Keep the current working boot route available.
 From the extracted `S540-wifi-native-v1` directory:
 
+The delivery includes `LEGGIMI-PRIMA.txt` in Italian and two double-click launchers.
+`PREPARA-WIFI-NATIVO.command` asks for the current EFI folder and creates a new
+Desktop trial copy. `RACCOGLI-WIFI-NATIVO.command` saves one new filtered report
+on the Desktop. The equivalent terminal commands are below.
+
 ```sh
 python3 tools/stage_wifi_native.py \
   --efi /path/to/current-private/EFI \
