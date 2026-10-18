@@ -16,6 +16,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 | Guide | Purpose |
 |---|---|
 | [NVIDIA Resource Server and host services](../packages/nvidia-rm-services/README.md) | V9 confirmed: all 486 kernel startup checks, cleanup and 15 separate userspace firmware checks passed, with no warnings; completed checkpoint, no repeat requested |
+| [Native NVIDIA integration validation](../packages/nvidia-global-rm/NATIVE-INTEGRATION-VALIDATION.json) | Current Intel macOS compiler and CPU evidence, including original global lifecycle/fault controls; kernel and GPU execution remain unconfirmed |
 | [Original NVIDIA GSP integration](../packages/nvidia-gsp-bootstrap/README.md) | Development owner, transport and firmware preparation; original runtime remains gated, including cancellation and teardown within the macOS power deadline; no new laptop package |
 | [Original NVIDIA Resource Server](../packages/nvidia-resource-server/README.md) | Selected NVOC/library subsystem, real client/resource/access/sharing paths and explicit adaptations; not full global RM startup |
 | [Matching NVIDIA firmware assets](../packages/nvidia-firmware-assets/README.md) | Official release 615.78.08 GSP/UCODES byte hashes, parsing, provenance and full license; no device upload or execution |

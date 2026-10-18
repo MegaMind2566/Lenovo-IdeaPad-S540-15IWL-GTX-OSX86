@@ -151,5 +151,25 @@
     "native_kernel_execution": false,
     "native_gpu_access": false,
     "leak_sanitizer": "unavailable-local-container"
+  },
+  "native_apple_validation": {
+    "status": "passed",
+    "source_commit": "76e0f43c6c1eaf5f259acbe73846e89ecd9be1a7",
+    "workflow_run": 39175620059,
+    "workflow_url": "https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39175620059",
+    "artifact": {
+      "id": 12155380339,
+      "sha256": "ced11cb63a67e4930cf637f3e8b5baadcf993b4079b758b1d8e04f91bf0ec122"
+    },
+    "plain_and_fatal_sanitizers": true,
+    "kernel_execution": "not_tested",
+    "gpu_access": false,
+    "record": "../nvidia-global-rm/NATIVE-INTEGRATION-VALIDATION.json",
+    "transport_checks_per_variant": 421,
+    "production_translation_units": 4,
+    "complete_integration_project_kernel_bridges": 34,
+    "complete_integration_platform_imports": 392,
+    "reviewed_sdk_import_audit": "matched",
+    "actual_kernel_or_device_execution": false
   }
 }

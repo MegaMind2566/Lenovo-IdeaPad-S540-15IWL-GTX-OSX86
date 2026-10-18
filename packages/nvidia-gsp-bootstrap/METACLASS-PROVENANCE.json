@@ -1,7 +1,7 @@
 {
   "format": 1,
   "component": "one reviewed IOKit power-service metaclass lifetime",
-  "status": "exact SDK compiler-reference verification required; kernel execution untested",
+  "status": "native metaclass and platform-import development validation passed; target kernel execution untested",
   "target_kernel_admission_audit": "KXLD-ADMISSION-AUDIT.md",
   "class": "S540GspPowerKernel::S540NvidiaGspPowerService",
   "implementation": {
@@ -266,7 +266,7 @@
     "loader_graph_result": "Production Power and reference matched with exactly one initializer, one finalizer, two reachable loader functions and the three reviewed imports.",
     "negative_control": "Objects built with only -fno-use-cxa-atexit retained two initializer entries, no finalizer and cxa/DSO imports; the tightened verifier rejects them.",
     "regression_cases": 28,
-    "native_apple_compiler_execution": "CI run 39173389514 compiled 34 project units and matched the individual Power object to its SDK metaclass reference; the subsequent combined relocatable-link graph comparison failed.",
+    "native_apple_compiler_execution": "Complete native development validation passes in run 39175620059/source 76e0f43c6c1eaf5f259acbe73846e89ecd9be1a7: individual Power, whole project bridge, SDK import audit and original-global userspace controls. Target kernel/KXLD resolution and original RM/GSP kernel execution remain untested.",
     "output_identity": "Each build report records the actual/reference object hashes, independent source hash, shared class declaration hash and canonical reachable-loader-graph hash. These are regenerated after any class layout or compiler change.",
     "final_local_cross_probe": {
       "class_declaration_sha256": "57e12e03561fa290d80f0b92aff541dc70f2e3a073390a808d315baeb97b952a",
@@ -297,7 +297,7 @@
       ],
       "interpretation": "285 inherited/other SDK-reference dependencies and five actual private definitions are evidence of this local object pair, not a fixed approval list or native linked success."
     },
-    "native_relocatable_link_after_cstring_normalization": "not_yet_verified; a native CI result is still required",
+    "native_relocatable_link_after_cstring_normalization": "passed for both the early native linker preflight and the complete project bridge; final native SDK import audit also matches in run 39175620059",
     "native_link_preflight": {
       "builder_mode": "build_nvidia_execution.py --metaclass-preflight",
       "objects": [
@@ -307,7 +307,181 @@
       ],
       "operation": "Compile with the actual Apple kernel flags, require empty loader tables on both unrelated companions, use real xcrun ld -r with one companion before Power and one after, then require the exact independently compiled reference graph on the linked object before full original RM compilation.",
       "diagnostics": "A failed comparison includes both actual and reference canonical graphs. The workflow preserves the actual Power, linked object and reference object for diagnosis.",
-      "success_claim": "No native linked success is claimed until this preflight and the full combined project link both pass."
+      "success_claim": "Native early preflight, complete 34-unit bridge and exact platform-import audit all pass in final run 39175620059. Historical run 39174416237 remains recorded separately as a metaclass success followed by the then-unresolved snprintf mismatch."
+    },
+    "native_metaclass_evidence": {
+      "source_commit": "737f559e24c0f2adda6c974a298e1f426fc44143",
+      "workflow_run_id": 39174416237,
+      "workflow_run_url": "https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39174416237",
+      "workflow_attempt": 1,
+      "workflow_conclusion": "failure",
+      "artifact": {
+        "id": 12154456177,
+        "name": "NVIDIA-execution-development-validation",
+        "size_bytes": 3159747,
+        "sha256": "a7cff1ad7482ddd5b531cb8e528c059984d979ab9cd0e64fd10604e8b3c3d5a1",
+        "identity_check": "Downloaded ZIP SHA-256 matches the GitHub artifact digest."
+      },
+      "native_scope": "Actual Intel macOS Apple-compiler objects and real Apple ld -r output. Both the individual production Power object and the complete 34-unit project bridge match the independent SDK metaclass reference.",
+      "original_source_objects_in_build": 1100,
+      "completed_project_source_units": 34,
+      "initializer_entries": 1,
+      "finalizer_entries": 1,
+      "reachable_loader_functions": 2,
+      "loader_external_symbols": [
+        "__ZN11OSMetaClassC2EPKcPKS_j",
+        "__ZN11OSMetaClassD2Ev",
+        "__ZN9IOService10gMetaClassE"
+      ],
+      "loader_graph_sha256": "06f302a7c41747d838bc0633631ee087f5e19954cbd6e037fb7c4a402799ae75",
+      "object_sha256": {
+        "S540NvidiaGspPower.o": "8b7dfe0d93344d5e45449f3859a84a3c0751657a2a094b970fdbc9db7f7fa376",
+        "execution-bridge.o": "31bee153d372d106c7c5352ea5d8a52da203ca03edf33faea36482badf0877a5",
+        "sdk-power-metaclass-reference.o": "2dd8bc1fdb7a94e437498c2c059d86f1f442ea5aeb2b9b3ab8693f3d91df7d78",
+        "execution-kernel-build.json": "8e045f6349938fcaa8c8f6e5e1f8ea818755eb5d7dbc25cb5327cfc372dbfdbc"
+      },
+      "framework_reference_import_evidence": {
+        "sdk_import_count": 285,
+        "defined_private_dependency_count": 5,
+        "interpretation": "Separate from the three exact loader imports; derived from this independent SDK reference, not an observed project allowlist."
+      },
+      "next_phase_failure": {
+        "phase": "audit-platform-imports",
+        "status": "failed",
+        "unreviewed_platform_imports": [
+          "_snprintf"
+        ],
+        "missing_expected_imports": [],
+        "scope": "The later platform-import audit failed. The metaclass proof does not make this workflow successful."
+      },
+      "corrective_follow_up": {
+        "source_commit": "76e0f43c6c1eaf5f259acbe73846e89ecd9be1a7",
+        "operation": "Add an independent pinned-SDK bounded snprintf operation matching the actual diagnostic-prefix formatter. Its existing cross object imports exactly _snprintf; the complete native follow-up workflow result is not asserted here."
+      },
+      "kernel_execution": "not_tested",
+      "global_rm_kernel_entry": false,
+      "adapter_initialized": false,
+      "gsp_initialized": false,
+      "production_candidate_allowed": false
+    },
+    "causal_historical_parser_replay": {
+      "historical_source_commit": "ef3201f550694b77388275f4951843a7f860b7a0",
+      "historical_module_path": "builders/nvidia_metaclass_initializers.py",
+      "historical_module_git_blob": "b6d757a64ace9683ef9bcc25f4f5a0b4f9ccafcc",
+      "identity_check": "The exact module blob fetched from historical remote ef320 matches the local historical module used for this in-memory replay.",
+      "replayed_artifact": "The actual individual Power, complete linked bridge and independent SDK reference objects from native run 39174416237 identified above.",
+      "individual_object_graph_matches": true,
+      "linked_object_graph_matches_with_historical_parser": false,
+      "linked_object_graph_matches_with_cstring_normalization": true,
+      "all_loader_entries_function_names_and_instruction_bytes_match": true,
+      "all_other_relocations_match": true,
+      "sole_historical_graph_delta": {
+        "function": "<translation-unit-initializer>",
+        "relocation_index": 1,
+        "actual": {
+          "offset": 14,
+          "kind": 1,
+          "pc_relative": true,
+          "width": 4,
+          "target": {
+            "data": "LC69",
+            "addend": 0
+          }
+        },
+        "reference": {
+          "offset": 14,
+          "kind": 1,
+          "pc_relative": true,
+          "width": 4,
+          "target": {
+            "cstring": "S540NvidiaGspPowerService"
+          }
+        }
+      },
+      "conclusion": "Apple ld -r expresses the same class string via the defined __cstring symbol LC69. The previous parser classified that target as arbitrary data instead of resolving its actual bytes. Bounded defined-string canonicalization explains precisely this native-link comparison failure; no GOT or code-operation normalization is needed."
+    },
+    "latest_native_metaclass_evidence": {
+      "source_commit": "76e0f43c6c1eaf5f259acbe73846e89ecd9be1a7",
+      "workflow_run_id": 39175620059,
+      "workflow_run_url": "https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39175620059",
+      "workflow_conclusion": "success",
+      "status": "passed-development-validation",
+      "artifact": {
+        "id": 12155380339,
+        "name": "NVIDIA-execution-development-validation",
+        "sha256": "ced11cb63a67e4930cf637f3e8b5baadcf993b4079b758b1d8e04f91bf0ec122",
+        "size_bytes": 4957359,
+        "identity_check": "Downloaded ZIP SHA-256 matches the final central validation record."
+      },
+      "central_validation_record": {
+        "path": "../nvidia-global-rm/NATIVE-INTEGRATION-VALIDATION.json",
+        "sha256": "f8abb9f754b9187043c14fabd226d4b8100613c727da66d24d1aa577ce049c7b",
+        "scope": "The central strict record verifies the actual inputs of all 34 project units and the component, kernel and original-global reports."
+      },
+      "kernel_build_report": {
+        "artifact_path": "kernel-checks/execution-kernel-build.json",
+        "sha256": "d3a110d0359c13b96b80392aee4c3395fa936d622d1338505b4c279c1dda169f",
+        "status": "compiled",
+        "original_source_objects": 1100,
+        "project_source_objects": 34
+      },
+      "native_metaclass_proof": {
+        "scope": "The real Apple-compiled production Power object and real Apple ld -r complete 34-unit project bridge both match the independent SDK reference exactly. The early native linker preflight also passed.",
+        "individual_object_status": "matched-exact-metaclass-codegen",
+        "whole_bridge_status": "matched-exact-metaclass-codegen",
+        "initializer_entries": 1,
+        "finalizer_entries": 1,
+        "reachable_loader_functions": 2,
+        "loader_graph_sha256": "06f302a7c41747d838bc0633631ee087f5e19954cbd6e037fb7c4a402799ae75",
+        "loader_external_symbols": [
+          "__ZN11OSMetaClassC2EPKcPKS_j",
+          "__ZN11OSMetaClassD2Ev",
+          "__ZN9IOService10gMetaClassE"
+        ],
+        "object_sha256": {
+          "S540NvidiaGspPower.o": "8b7dfe0d93344d5e45449f3859a84a3c0751657a2a094b970fdbc9db7f7fa376",
+          "execution-bridge.o": "31bee153d372d106c7c5352ea5d8a52da203ca03edf33faea36482badf0877a5",
+          "sdk-power-metaclass-reference.o": "2dd8bc1fdb7a94e437498c2c059d86f1f442ea5aeb2b9b3ab8693f3d91df7d78"
+        },
+        "reference_source_sha256": "3b7af79be023757e25d23510c7883243b93f8def8563d71d429a84ed61981d0a",
+        "class_declaration_sha256": "57e12e03561fa290d80f0b92aff541dc70f2e3a073390a808d315baeb97b952a"
+      },
+      "platform_import_proof": {
+        "status": "matched",
+        "platform_import_count": 392,
+        "additional_sdk_import_count": 355,
+        "sdk_metaclass_reference_import_count": 285,
+        "defined_private_metaclass_dependency_count": 5,
+        "defined_private_metaclass_dependencies": [
+          "__ZN18S540GspPowerKernel25S540NvidiaGspPowerService13setPowerStateEmP9IOService",
+          "__ZN18S540GspPowerKernel25S540NvidiaGspPowerService15powerChangeDoneEm",
+          "__ZN18S540GspPowerKernel25S540NvidiaGspPowerService4freeEv",
+          "__ZN18S540GspPowerKernel25S540NvidiaGspPowerService4initEP12OSDictionary",
+          "__ZN18S540NvidiaGspPower6Detail8ProtocolC1Ev"
+        ],
+        "unreviewed_imports": [],
+        "missing_expected_imports": [],
+        "diagnostic_prefix_reference": {
+          "source": "../nvidia-global-rm/tests/sdk_import_reference.cpp",
+          "sha256": "90d6471a46b8972e6daf6e189918d8136d0cf87221492ff8a9ba634d44cc1fb1",
+          "operation": "Actual bounded snprintf call through the pinned SDK declaration; its sole import _snprintf closes the earlier platform-import mismatch."
+        },
+        "scope": "The three loader imports remain distinct from 285 SDK-reference class/vtable dependencies and five private dependencies supplied by the project. No actual project import is used to generate an observed allowlist."
+      },
+      "development_validation": {
+        "component_checks_per_variant": 2008,
+        "original_global_userspace_checks_per_variant": 134,
+        "allocation_fault_cases_per_variant": 156,
+        "scope": "Both ordinary and fatal-sanitizer variants pass. Original-global execution is a private userspace validation control, not execution in the target kernel."
+      },
+      "kernel_runtime": "not_tested",
+      "original_rm_kernel_entry": false,
+      "adapter_initialized": false,
+      "gsp_initialized": false,
+      "gpu_access": false,
+      "target_kernel_resolution": "not_tested; separate KXLD admission evidence required",
+      "prospective_original_execution_closure": "blocked",
+      "production_candidate_allowed": false
     }
   },
   "limitations": [

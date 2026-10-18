@@ -10,11 +10,38 @@
     "compiler": "Clang18 Linux ELF control",
     "concurrent_sync_calls": 400,
     "explicit_macho_cross_probe": "passed; not Apple compiler execution",
-    "native_apple_execution": "pending",
+    "native_apple_execution": "pending at the time of this local probe; subsequent evidence is recorded separately below",
     "variants": [
       "ordinary",
       "fatal-address-undefined-function-sanitizers"
     ]
+  },
+  "native_apple_validation": {
+    "status": "passed-native-user-space",
+    "source_commit": "76e0f43c6c1eaf5f259acbe73846e89ecd9be1a7",
+    "workflow_run": "https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39175620059",
+    "workflow_conclusion": "success",
+    "artifact_id": 12155380339,
+    "artifact_zip_sha256": "ced11cb63a67e4930cf637f3e8b5baadcf993b4079b758b1d8e04f91bf0ec122",
+    "report": "native-checks/execution-checks.json",
+    "report_sha256": "fe1b2b10831f947f69baeaaf031775ed24bd31ff661d4f2eb43d36e32dcb2b57",
+    "report_component": "gsp_dispatcher",
+    "integration_record": "../nvidia-global-rm/NATIVE-INTEGRATION-VALIDATION.json",
+    "host": "Intel macOS",
+    "assertions_per_variant": 53,
+    "variants": [
+      "ordinary",
+      "fatal-address-undefined-function-sanitizers"
+    ],
+    "stable_owner_thread": true,
+    "concurrent_sync_calls": 400,
+    "queue_capacity": 16,
+    "shutdown_drain_verified": true,
+    "kernel_compilation": "passed with independently matched SDK imports",
+    "kernel_runtime": "not_tested",
+    "kernel_stack_enlarged": false,
+    "gpu_access": false,
+    "production_candidate_allowed": false
   },
   "production_candidate_allowed": false,
   "purpose": "Persistent ordinary owner thread for RM lifecycle and asynchronous PM revocation requests.",

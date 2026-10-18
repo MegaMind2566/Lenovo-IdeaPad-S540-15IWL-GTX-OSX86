@@ -112,8 +112,8 @@
       "platform_facts_fixture": true
     },
     "local_clang_18": "All three controls passed ordinary and fatal address,undefined,function sanitizers.",
-    "full_original_global_lifecycle_and_allocation_faults": "Separate combined checked-original-source control required; not replaced by targeted fixtures.",
-    "native_apple_result": "pending combined workflow",
+    "full_original_global_lifecycle_and_allocation_faults": "Passed separately: 134 controls and all 156 observed allocation-failure positions per variant; explicit platform/privileged-CPU fixtures.",
+    "native_apple_result": "passed; see NATIVE-INTEGRATION-VALIDATION.json",
     "kernel_execution": "not_tested",
     "gpu_access": false,
     "real_registry_epoch": {
@@ -121,22 +121,44 @@
       "checks": 23,
       "real_original_registry": true,
       "scope": "Actual original nvport/registry seed, global-entry cold refusal, preserved entry/portable epoch and explicit owner cleanup.",
-      "result": "pending complete checked-original corpus execution"
+      "result": "passed complete checked-original corpus on native Intel macOS, plain and fatal address,undefined,function sanitizers"
     },
     "host_domains": {
       "harness": "tests/check_host_domains_native.cpp",
       "checks": 29,
       "wrong_domain_frees_retained": 2,
       "concurrent_mixed_allocations": 768,
-      "result": "passed ordinary and fatal address,undefined,function sanitizers locally"
+      "result": "passed ordinary and fatal address,undefined,function sanitizers locally",
+      "native_apple_result": "passed both variants"
     },
     "real_global_domains": {
       "harness": "tests/check_global_domains_native.cpp",
       "checks": 23,
       "real_original_global_lifecycle": true,
       "external_allocations": 2,
-      "result": "pending complete checked-original corpus execution"
-    }
+      "result": "passed complete checked-original corpus on native Intel macOS, plain and fatal address,undefined,function sanitizers"
+    },
+    "native_apple_validation": {
+      "status": "passed",
+      "source_commit": "76e0f43c6c1eaf5f259acbe73846e89ecd9be1a7",
+      "workflow_run": 39175620059,
+      "workflow_url": "https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39175620059",
+      "artifact": {
+        "id": 12155380339,
+        "sha256": "ced11cb63a67e4930cf637f3e8b5baadcf993b4079b758b1d8e04f91bf0ec122"
+      },
+      "plain_and_fatal_sanitizers": true,
+      "kernel_execution": "not_tested",
+      "gpu_access": false,
+      "record": "NATIVE-INTEGRATION-VALIDATION.json",
+      "profile_checks_per_variant": 62,
+      "overlay_stage_checks_per_variant": 13,
+      "acpi_checks_per_variant": 21,
+      "host_domain_checks_per_variant": 29,
+      "real_registry_epoch_checks_per_variant": 23,
+      "real_global_domain_checks_per_variant": 23
+    },
+    "historical_registry_audit": "upstream/adapted/REGISTRY-PROFILE-AUDIT.json remains the unchanged source-review snapshot; current execution results are recorded separately here and in NATIVE-INTEGRATION-VALIDATION.json."
   },
   "integration_blockers": [
     "Owner.initialize remains refused before original RM; original ABI/stack/device execution gates are not closed."

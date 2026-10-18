@@ -53,6 +53,22 @@
     "fatal_subprocesses": 2,
     "kernel_execution": "not_tested",
     "gpu_access": false,
-    "native_apple_result": "requires combined workflow"
+    "native_apple_result": "passed combined workflow, both variants",
+    "native_apple_validation": {
+      "status": "passed",
+      "source_commit": "76e0f43c6c1eaf5f259acbe73846e89ecd9be1a7",
+      "workflow_run": 39175620059,
+      "workflow_url": "https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39175620059",
+      "artifact": {
+        "id": 12155380339,
+        "sha256": "ced11cb63a67e4930cf637f3e8b5baadcf993b4079b758b1d8e04f91bf0ec122"
+      },
+      "plain_and_fatal_sanitizers": true,
+      "kernel_execution": "not_tested",
+      "gpu_access": false,
+      "record": "NATIVE-INTEGRATION-VALIDATION.json",
+      "checks_per_variant": 37,
+      "independent_kernel_sdk_imports": "matched"
+    }
   }
 }

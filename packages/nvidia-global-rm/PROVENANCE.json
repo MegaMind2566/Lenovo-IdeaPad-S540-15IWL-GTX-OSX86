@@ -33,6 +33,30 @@
     "result": "passed",
     "tests": 5
   },
+  "current_native_integration": {
+    "allocation_faults_per_variant": 156,
+    "artifact": {
+      "id": 12155380339,
+      "sha256": "ced11cb63a67e4930cf637f3e8b5baadcf993b4079b758b1d8e04f91bf0ec122"
+    },
+    "compiled_retained_project_definitions": 130,
+    "component_checks_per_variant": 2008,
+    "gpu_access": false,
+    "kernel_execution": "not_tested",
+    "original_global_checks_per_variant": 134,
+    "original_kernel_translation_units": 1100,
+    "plain_and_fatal_sanitizers": true,
+    "project_kernel_bridge_units": 34,
+    "prospective_closure_executable": false,
+    "record": "NATIVE-INTEGRATION-VALIDATION.json",
+    "retained_unavailable_acpi_methods": 6,
+    "retained_unavailable_crypto_definitions": 64,
+    "retained_unmet_reviewed_callbacks": 110,
+    "source_commit": "76e0f43c6c1eaf5f259acbe73846e89ecd9be1a7",
+    "status": "passed",
+    "workflow_run": 39175620059,
+    "workflow_url": "https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39175620059"
+  },
   "dependency_control_profiles": {
     "actual_root_exports": "required_exactly",
     "added_root": "rm_isr_bh_unlocked",
@@ -72,6 +96,7 @@
     "crypto_calls": 0,
     "gpu_operations": false,
     "gsp_initialized": false,
+    "historical_profile": "seven cleanup overlays; 148-allocation snapshot, superseded for current validation by NATIVE-INTEGRATION-VALIDATION.json",
     "host_allocations": 148,
     "host_frees": 148,
     "kernel_executed": false,
@@ -182,6 +207,7 @@
     "out_string"
   ],
   "format": 1,
+  "historical_inventory_scope": "facade_implemented_* and remaining_before_other_component_integration retain the earlier standalone-facade inventory; current combined retained-callback counts are in NATIVE-INTEGRATION-VALIDATION.json.",
   "host_facade_validation": {
     "assertions": 24,
     "concurrent_allocations_and_frees": 2048,
@@ -212,19 +238,22 @@
   },
   "production_entry": "hard-refused-in-KERNEL-builds",
   "production_gates": [
-    "Integrate the seven explicit source overlays and checked memory header in the production source-substitution build; validate their lifecycle on the authoritative Darwin toolchain.",
-    "Derive and review the final original root closure from every production bridge, including work-item, private-state, event-lock, fault, timer and evidence entry points; selected diagnostic roots alone do not admit runtime.",
-    "Resolve or preflight-block every actual retained external ABI dependency; no scalar/void success placeholders.",
-    "Verify the compiled runtime stack policy and aggregate kernel stack budget; the pinned profile leaves __use_altstack__ undefined and the original wrapper does not switch stacks by itself.",
-    "Complete authoritative Apple compiler/native lifecycle checks before considering one hardware checkpoint."
+    "Implement or independently prove non-reachability of all 110 retained unmet reviewed callbacks for the complete supported lifecycle; no scalar/void success placeholders.",
+    "Prove zero use of the 64 unavailable crypto definitions and six unavailable ACPI methods throughout the actual supported lifecycle, or implement their real contracts.",
+    "Complete original-operation cancellation and all shutdown/drain work within the actual PM revocation deadline.",
+    "Prove the aggregate original thread and IRQ stack budget and executable-code lifetime; a per-function 4096-byte bound does not prove a 16-KiB chain.",
+    "Prove the bounded device allocation/retirement pool covers the complete original adapter lifecycle.",
+    "Validate actual target-kernel dependency and superclass-vtable resolution, then the original kernel global/adapter/GSP lifecycle and physical DMA/IRQ/GPU response."
   ],
   "profile": "NV_UNIX=1; RS_STANDALONE=0; private s540Global_ namespace",
   "release": "615.78.08",
   "remaining_before_other_component_integration": {
     "data_entry_blockers": 0,
+    "historical_inventory": true,
     "noncrypto_contracts": 162,
     "note": "Counts apply to this facade alone; other component implementations must be measured at the selected final link.",
     "scalar_or_void_entry_blockers": 77,
+    "superseded_by": "NATIVE-INTEGRATION-VALIDATION.json",
     "typed_failure_bindings_possible": 85
   },
   "repository": "NVIDIA/open-gpu-kernel-modules",

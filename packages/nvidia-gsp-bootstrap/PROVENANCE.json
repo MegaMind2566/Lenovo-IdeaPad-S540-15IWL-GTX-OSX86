@@ -377,20 +377,83 @@
     "initialization": "refused-before-original-global-and-adapter-code",
     "unresolved_gates": [
       "complete-original-callback-closure",
-      "platform-power-lifetime",
+      "original-entry-power-revocation-deadline-and-cooperative-cancellation",
       "aggregate-original-stack-policy",
-      "allocation-retirement-under-active-irqs"
+      "complete-adapter-allocation-capacity-and-retirement-drain-lifecycle"
     ],
-    "local_native_checks": 43,
+    "local_native_checks": 83,
     "original_entry_tripwires": true,
     "firmware_bytes": "approved-pair; owned immutable copies",
+    "bounded_irq_retirement": "implemented; retains device mappings and host backing until successful interrupt quiescence and real backend drain; full-adapter capacity and lifecycle remain unproved",
+    "power_admission": "completed real PM child permits preparation but does not clear PowerLifetime; original wait/unwind and shutdown must fit the revocation deadline",
+    "power_deadline_audit": "platform/POWER-DEADLINE-AUDIT.md",
     "hardware_execution": false
   },
   "context_lifecycle": {
-    "local_native_checks": 24,
+    "local_native_checks": 26,
     "real_timer_service": true,
     "original_callbacks": "explicit typed fixtures",
     "failed_detach": "retained-and-retryable",
-    "timer_bound_positive_detach": "refused-before-free"
+    "timer_bound_positive_detach": "refused-before-free",
+    "crypto_lifetime_refusal_cases": 2
+  },
+  "current_native_component_validation": {
+    "source_commit": "76e0f43c6c1eaf5f259acbe73846e89ecd9be1a7",
+    "workflow_run": "https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39175620059",
+    "artifact_id": 12155380339,
+    "artifact_zip_sha256": "ced11cb63a67e4930cf637f3e8b5baadcf993b4079b758b1d8e04f91bf0ec122",
+    "report": "native-checks/execution-checks.json",
+    "report_sha256": "fe1b2b10831f947f69baeaaf031775ed24bd31ff661d4f2eb43d36e32dcb2b57",
+    "integration_record": "../nvidia-global-rm/NATIVE-INTEGRATION-VALIDATION.json",
+    "component_status": "passed",
+    "authoritative_darwin_execution": true,
+    "checks_per_plain_and_fatal_sanitized_variant": 2008,
+    "bootstrap_owner_checks_per_variant": 83,
+    "context_lifecycle_checks_per_variant": 26,
+    "dispatcher_checks_per_variant": 53,
+    "power_protocol_checks_per_variant": 15,
+    "workflow_status": "success",
+    "kernel_bridge_compilation": {
+      "project_units": 34,
+      "sdk_import_audit": "matched",
+      "linked_metaclass_audit": "matched-exact-metaclass-codegen",
+      "target_kernel_resolution": "not_tested"
+    },
+    "original_global_user_space": {
+      "checks_per_variant": 134,
+      "allocation_faults_per_variant": 156,
+      "privileged_cpu_and_platform_facts_fixtures": true,
+      "full_original_units_instrumented_in_sanitized_variant": true
+    },
+    "bootstrap_original_entry_gate_mask": 15,
+    "kernel_execution": "not_tested",
+    "gpu_access": false,
+    "production_candidate_allowed": false
+  },
+  "prior_native_component_validation": {
+    "source_commit": "737f559e24c0f2adda6c974a298e1f426fc44143",
+    "workflow_run": "https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39174416237",
+    "artifact_id": 12154456177,
+    "artifact_zip_sha256": "a7cff1ad7482ddd5b531cb8e528c059984d979ab9cd0e64fd10604e8b3c3d5a1",
+    "report": "native-checks/execution-checks.json",
+    "report_sha256": "a37a8f68980bfc7b7bca531e1f49a2515fb40548c5b17e71a6bc5a380a745977",
+    "component_status": "passed",
+    "authoritative_darwin_execution": true,
+    "checks_per_plain_and_fatal_sanitized_variant": 2008,
+    "bootstrap_owner_checks_per_variant": 83,
+    "context_lifecycle_checks_per_variant": 26,
+    "workflow_status": "failed",
+    "workflow_failure": "kernel platform-import audit: _snprintf missing from the independent SDK reference",
+    "full_original_global_stage": "skipped",
+    "kernel_execution": "not_tested",
+    "gpu_access": false,
+    "production_candidate_allowed": false
+  },
+  "historical_native_validation": {
+    "source_commit": "d81b19845bf31bca61464e198bdc883790af05bc",
+    "workflow_run": "https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39169319480",
+    "bootstrap_owner_checks_per_variant": 43,
+    "context_lifecycle_checks_per_variant": 24,
+    "scope": "historical seven-overlay snapshot; predates the current PM lease, dispatcher and expanded source profile"
   }
 }

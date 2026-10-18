@@ -190,5 +190,10 @@ x86_64 Darwin Mach-O with the pinned kernel SDK, warnings as errors and the
 33-operation independent SDK reference. Direct adds `IOService::getPlatform`;
 the four production units together have 34 platform imports, including the
 already reviewed `panic` outside that reference.
-An authoritative native Apple rebuild and physical adapter execution remain
-separate requirements.
+The [current native Intel macOS run](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39175620059) passed the
+421 transport checks in both plain and fatal address/undefined/function-sanitized
+variants and compiled this transport within all 34 production bridges. The
+[validation record](../nvidia-global-rm/NATIVE-INTEGRATION-VALIDATION.json) records
+the reviewed import comparison separately from actual target-kernel resolution.
+Physical DMA, interrupt delivery, full-adapter capacity and kernel execution
+remain unproved.

@@ -28,9 +28,10 @@ Foreign and duplicate frees are rejected and counted.
 
 The [bootstrap owner](../nvidia-gsp-bootstrap/README.md) retains its context,
 firmware and PM/worker objects across a future global lifecycle. Separate
-original-RM and bootstrap allocation domains are being integrated and validated
-so original shutdown can prove its own domain empty without freeing retained
-bootstrap identities. Equal live-allocation counts are insufficient ownership
+original-RM and bootstrap domains tag every allocation identity and reject
+wrong-domain frees. Native controls verify original shutdown empties its domain
+while retaining bootstrap identities; outer host shutdown requires both domains
+to be empty. Equal live-allocation counts are insufficient ownership
 evidence. This work does not enable global entry.
 
 The original source namespace is generated during the build. The small pinned
@@ -52,8 +53,9 @@ adapter initialization, GSP initialization or GPU operation.
 The current [adaptation manifest](upstream/ADAPTATIONS.json) records **ten
 approved patches**, composed into **twelve source/header files** by the
 [checked integration audit](upstream/adapted/CHECKED-INTEGRATION-AUDIT.json).
-The seven cleanup families below retain their historical fault evidence; the
-complete expanded profile requires its own validation.
+The seven cleanup families below retain their historical fault evidence. The
+[current native validation](NATIVE-INTEGRATION-VALIDATION.json) separately covers
+the complete expanded profile.
 
 | Path | Adaptation | Development result |
 | --- | --- | --- |
@@ -64,9 +66,9 @@ complete expanded profile requires its own validation.
 | Resource Server construction | Check acquisitions, publish construction last and release only acquired resources | Faults 124 and 128 release all allocations |
 | System construction failure | Retain system, children and TLS until real Resource Server cleanup completes | Faults 144–146 release all allocations |
 | RMAPI lock/TLS acquisition | Release the acquired RW lock after TLS refusal; never free a client through an unowned lock | Faults 147–148 complete genuine shutdown cleanup |
-| Original registry/profile initialization | Propagate registry failure, verify policy writes/readback and preserve a preexisting unowned registry | Expanded original lifecycle/fault validation in progress |
-| NVOC inherited-pointer casts | Evaluate the source once while retaining the original null guard and conversion | Expanded original plain/fatal-sanitized validation in progress |
-| Typed iterator dispatch | Call the declared C iterator ABI, then assign the returned base iterator into the typed union | Expanded original plain/fatal function-sanitizer validation in progress |
+| Original registry/profile initialization | Propagate registry failure, verify policy writes/readback and preserve a preexisting unowned registry | Native profile/registry controls and complete original fault sweep passed |
+| NVOC inherited-pointer casts | Evaluate the source once while retaining the original null guard and conversion | Native C/C++ controls and complete original fatal-sanitized lifecycle passed |
+| Typed iterator dispatch | Call the declared C iterator ABI, then assign the returned base iterator into the typed union | Native exact-ABI controls and complete original function-sanitizer lifecycle passed |
 
 The historical [combined allocation audit](upstream/adapted/COMBINED-ALLOCATION-AUDIT.json) records
 the seven cleanup overlays in one original-RM development image. All **148 allocation
@@ -75,10 +77,14 @@ unavailable service calls after cleanup. The normal 22-check lifecycle and the
 29-check memory failure/retry control also pass. Original failure diagnostics
 remain visible. These are user-space controls with explicit platform/CPU
 fixtures; they do not validate the current ten-patch composition or establish
-safe execution in a Darwin kernel. The complete expanded lifecycle, memory
-retry and allocation-failure sweep are under plain and fatal address,
-undefined-behavior and function-type sanitizer validation. A new native Intel
-macOS CI run is pending; no current aggregate pass count is claimed.
+safe execution in a Darwin kernel. The complete ten-patch profile now passes separately on native Intel macOS: 134
+checks across the original global lifecycle, memory retry, registry, allocation-domain
+and ABI controls, plus all 156 allocation-failure positions in each plain/fatal address,
+undefined-behavior and function-type sanitizer variant. Each variant rebuilt
+the 1,100-unit RM profile: 1,098 original units, one generated identification
+unit and one explicit privileged-CPU replacement, with platform fixtures. See the
+[validation record](NATIVE-INTEGRATION-VALIDATION.json); this does not execute
+original RM in the kernel.
 
 The portable-memory overlay changes an
 internal declaration from `void` to `NV_STATUS`: all affected callers must be
@@ -114,7 +120,7 @@ fatal-sanitized variants. All 24 project bridge units compiled with the audited
 platform imports. Firmware files, licenses and embedded bytes were verified.
 These results do not execute the adapted full-RM lifecycle or the GPU.
 
-The subsequent [checked native build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38816440893) from `5413897` also passed its seven-overlay profile: all 1,100 units and their namespace rebuilt against the composed headers, original-header bridges used the same checked ABI, and the compiled-bridge dependency control passed. The later [native validation](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39169319480) from `d81b198` compiled 25 project units and passed 1,594 CPU/contract checks per plain and fatal-sanitized variant. Both are historical snapshots, preceding the current ten-patch composition and PM/worker integration. Neither executed original RM in the kernel. Current native Intel macOS CI, kernel entry and candidate packaging remain pending or disabled.
+The subsequent [checked native build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38816440893) from `5413897` also passed its seven-overlay profile: all 1,100 units and their namespace rebuilt against the composed headers, original-header bridges used the same checked ABI, and the compiled-bridge dependency control passed. The later [native validation](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39169319480) from `d81b198` compiled 25 project units and passed 1,594 CPU/contract checks per plain and fatal-sanitized variant. Both are historical snapshots, preceding the current ten-patch composition and PM/worker integration. Neither executed original RM in the kernel. The [current native run](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39175620059) from `76e0f43c6c1eaf5f259acbe73846e89ecd9be1a7` passed 2,008 component checks per plain/fatal-sanitized variant and compiled all 34 production bridges with the reviewed import/metaclass comparisons. Its [separate original-global results](NATIVE-INTEGRATION-VALIDATION.json) cover the ten-patch profile. Kernel entry and candidate packaging remain disabled; target-kernel resolution, physical execution and the other runtime gates remain unproved.
 
 The native dependency-control linker uses the kernel format required by the
 original non-PIC objects and rejects dynamic library load commands. The
@@ -145,10 +151,11 @@ including [diagnostic](DIAGNOSTICS-CONTRACTS.json) and
 [profile](PROFILE-CONTRACTS.json) manifests. Unsupported RM ACPI method calls
 remain unavailable operations and invalidate admission if reached.
 
-Approximately 110 callbacks still lacked implementations in the latest review;
-the count is provisional until a fresh prospective global/coordinator closure
-includes the currently source-gated global roots. A successful link of a smaller
-control is not closure of that enlarged runtime. Every report retains the
+The current native audit includes the source-gated global roots in the
+prospective global/coordinator closure. Its unresolved and defined-unavailable
+contracts remain runtime blockers; see the exact categories in the
+[validation record](NATIVE-INTEGRATION-VALIDATION.json). A successful
+dynamic-lookup control link does not close that runtime. Every report retains the
 kernel/GSP and candidate blocks.
 
 `generate_refusals.py` accepts an explicit set of implemented original symbol

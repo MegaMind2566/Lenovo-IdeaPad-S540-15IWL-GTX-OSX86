@@ -7,9 +7,10 @@ followed by controlled shutdown. The first GPU command is a later milestone.
 
 **This component is not enabled in the distributed EFI or v9 extension. No
 v10 installation package is available from this development work.** Native
-macOS validation and the complete operational OS callback profile remain
-requirements, alongside a usable original kernel stack boundary and sufficient
-allocation capacity for the complete adapter lifecycle.
+macOS CPU/compilation validation has passed. Complete operational callback
+coverage, target-kernel resolution, a usable original kernel stack boundary,
+sufficient full-adapter allocation capacity and the original-entry PM deadline
+remain requirements.
 
 ## Implemented components
 
@@ -150,13 +151,14 @@ callback copies the initialized original `nv_state_t` fields. Unknown owners or
 missing outputs preserve caller values and invalidate admission. This harness
 does not execute original adapter initialization or access the GPU.
 
-The complete original RM compiles in the local Darwin cross-target audit.
-That is compilation evidence, not execution in the Tahoe kernel. A private
-native development control constructs and destroys the real global RM with
-explicit platform and privileged-CPU fixtures. Seven explicit cleanup overlays
-now pass all 148 allocation-failure positions, normal startup and same-process
-memory-failure recovery in that control. The adapted source/header profile compiled in authoritative Intel macOS CI;
-its production integration and original lifecycle execution remain required.
+The complete ten-patch original profile passes native Intel macOS development
+controls: 134 checks across the real original global lifecycle, memory retry,
+registry, allocation domains and ABI controls, plus all 156 allocation-failure positions in
+each plain/fatal-sanitized variant. Each variant rebuilt the 1,100-unit RM profile: 1,098 original units,
+one generated identification unit and one explicit privileged-CPU replacement,
+with platform fixtures. The historical seven-overlay
+148-position evidence remains separate. See the [validation record](../nvidia-global-rm/NATIVE-INTEGRATION-VALIDATION.json);
+original kernel/GSP execution and operational runtime integration remain unproved.
 Scalar or void OS callbacks cannot be filled with fabricated successful
 defaults to make the adapter link.
 
@@ -170,20 +172,24 @@ host counters remain clean. Both crypto masks, the lifetime call count and
 overflow must stay zero; a zero delta is insufficient. The bootstrap-owner harness uses those real components, the Session and
 Store, actual approved firmware bytes and explicit platform observations.
 
-| Current local control | Checks | Evidence |
+| Current native CPU control | Checks | Evidence |
 |---|---:|---|
 | Bootstrap owner | 83 | Stable worker ownership, initialization refusal, copied firmware and OS-text lifetime, retained cleanup owners, PM revocation, in-flight hook retention, failed acknowledgement and retry |
 | Power callback protocol | 15 | Request versus completed transition, monotonic revocation, failed post and separate acknowledgement; explicit native PM events |
 | Persistent dispatcher | 53 | Stable thread identity, synchronous commands, accepted asynchronous work, bounded queue, startup failure and drained shutdown |
 
-These current controls pass plain and fatal address, undefined-behavior and
-function-type sanitizers. Native Apple power-domain execution is not tested.
+These controls passed plain and fatal address, undefined-behavior and
+function-type sanitizers in the [current native Intel macOS run](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39175620059),
+as part of 2,008 component checks per variant. All 34 production bridges and the
+complete linked metaclass reference comparison passed. Native PM event fixtures
+do not test Apple power-domain execution on the laptop.
 The older 43-check bootstrap version and the 24-check context lifecycle passed
 the [native Intel macOS build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39169319480)
 from `d81b198`. That historical snapshot also compiled 25 production units with
 matched SDK imports and passed 1,594 combined CPU/contract checks per variant;
-it predates the current dispatcher and PM lease. Current native Intel macOS CI
-is still required. Original kernel/GSP execution remains unconfirmed.
+it predates the current dispatcher and PM lease. Current native development
+results are recorded separately in the [validation record](../nvidia-global-rm/NATIVE-INTEGRATION-VALIDATION.json).
+Original kernel/GSP execution remains unconfirmed.
 
 The development workflow emits validation records only. It cannot create an
 installable candidate or change the working EFI. Actual GSP execution,
