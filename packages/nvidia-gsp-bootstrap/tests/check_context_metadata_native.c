@@ -37,6 +37,13 @@ void NV_API_CALL rm_free_private_state(nvidia_stack_t *stack, nv_state_t *nv) {
 void NV_API_CALL rm_destroy_event_locks(nvidia_stack_t *stack, nv_state_t *nv) {
     (void)stack; (void)nv; abort();
 }
+NV_STATUS NV_API_CALL rm_run_rc_callback(nvidia_stack_t *stack, nv_state_t *nv) {
+    (void)stack; (void)nv; abort();
+}
+NV_STATUS NV_API_CALL rm_run_nano_timer_callback(nvidia_stack_t *stack,
+                                               nv_state_t *nv, void *event) {
+    (void)stack; (void)nv; (void)event; abort();
+}
 static S540NvidiaGlobalRmPlatformFacts host_facts(void) {
     S540NvidiaGlobalRmPlatformFacts f = {0};
     f.format = 1; f.known = S540_GLOBAL_FACT_ALL;

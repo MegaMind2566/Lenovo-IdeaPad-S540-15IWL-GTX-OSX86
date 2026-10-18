@@ -5,7 +5,14 @@
 #include <cstdlib>
 #include <cstring>
 #include <initializer_list>
+#include <type_traits>
+#include <csignal>
+#include <sys/resource.h>
+#include <sys/wait.h>
+#include <unistd.h>
 using namespace S540NvidiaDeviceTransport;
+static_assert(std::is_same<decltype(&s540Global_nv_requires_dma_remap),
+    NvBool (NV_API_CALL *)(nv_state_t *)>::value, "Original NVIDIA DMA-remap ABI");
 namespace {
 NvU32 assertions = 0;
 void expect(bool condition, const char *message) {
@@ -20,6 +27,9 @@ struct Fake {
     bool failUnmap = false;
     bool badSnapshot = false;
     Mapper mapper = Mapper::Device;
+    DmaRemapPolicy remapPolicy = DmaRemapPolicy::MapPhysicalPagesWithoutBounce;
+    NV_STATUS remapStatus = NV_OK;
+    NvU32 policyQueries = 0;
     NvU32 resources = 0;
     NvU32 registerReads = 0;
     bool active = false;
@@ -27,6 +37,10 @@ struct Fake {
     bool readyForInterrupt = true;
     bool irq = false;
     bool armed = false;
+    bool enableAttempted = false;
+    bool failMask = false;
+    bool failStopAfterMask = false;
+    bool hardwareMaskRequired = false;
     NvU32 maskCalls = 0;
     NvU32 topCalls = 0;
     NvU32 lockedCalls = 0;
@@ -101,14 +115,22 @@ NV_STATUS install(void *opaque, const InterruptContract &contract) {
 }
 NV_STATUS arm(void *opaque) {
     auto &f = *static_cast<Fake *>(opaque);
-    if (f.fault == Fault::Arm) return NV_ERR_OPERATING_SYSTEM;
+    f.enableAttempted = f.hardwareMaskRequired = true;
+    // Model an OS controller that changes state and subsequently reports a
+    // failure. The Session must retain memory even though irqArmed is false.
     f.armed = true;
+    if (f.fault == Fault::Arm) return NV_ERR_OPERATING_SYSTEM;
     return NV_OK;
 }
 NV_STATUS stopIrq(void *opaque) {
     auto &f = *static_cast<Fake *>(opaque);
     if (f.fault == Fault::StopIrq) return NV_ERR_BUSY_RETRY;
-    if (f.contract.maskHardware(f.contract.context) != NV_OK) return NV_ERR_OPERATING_SYSTEM;
+    if (f.hardwareMaskRequired) {
+        if (f.contract.maskHardware(f.contract.context) != NV_OK) return NV_ERR_OPERATING_SYSTEM;
+        f.hardwareMaskRequired = false;
+    }
+    if (f.failStopAfterMask) return NV_ERR_BUSY_RETRY;
+    f.enableAttempted = false;
     f.irq = f.armed = false;
     return NV_OK;
 }
@@ -133,19 +155,108 @@ NV_STATUS configWrite(void *opaque, NvU32 offset, NvU32 width, NvU32 value) {
     f.command = static_cast<NvU16>(value);
     return NV_OK;
 }
+NV_STATUS dmaRemapPolicy(void *opaque, DmaRemapPolicy &policy) {
+    auto &f = *static_cast<Fake *>(opaque);
+    ++f.policyQueries;
+    if (f.remapStatus != NV_OK) return f.remapStatus;
+    policy = f.remapPolicy;
+    return NV_OK;
+}
 Detail::Backend backend(Fake &f) {
     return Detail::Backend{&f, ordinary, start, stop, live, readIdentification,
         allocate, pageAddress, mapDma, unmapDma, release, install, arm, stopIrq,
-        nullptr, nullptr, nullptr, configRead, configWrite, nullptr};
+        nullptr, nullptr, nullptr, configRead, configWrite, nullptr, dmaRemapPolicy};
 }
 bool top(void *opaque, bool &locked, bool &unlocked) {
     ++static_cast<Fake *>(opaque)->topCalls; locked = unlocked = true; return true;
 }
 void locked(void *opaque) { ++static_cast<Fake *>(opaque)->lockedCalls; }
 void unlocked(void *opaque) { ++static_cast<Fake *>(opaque)->unlockedCalls; }
-NV_STATUS mask(void *opaque) { ++static_cast<Fake *>(opaque)->maskCalls; return NV_OK; }
+NV_STATUS mask(void *opaque) {
+    auto &f = *static_cast<Fake *>(opaque);
+    ++f.maskCalls;
+    return f.failMask ? NV_STATUS(NV_ERR_NOT_READY) : NV_STATUS(NV_OK);
+}
 bool ready(void *opaque) { return static_cast<Fake *>(opaque)->active && static_cast<Fake *>(opaque)->readyForInterrupt; }
 InterruptContract contract(Fake &f) { return InterruptContract{&f, top, locked, unlocked, mask, ready}; }
+void expectDmaPolicyFatal(nv_state_t *state, const char *message) {
+    const pid_t child = fork();
+    expect(child >= 0, "DMA policy refusal subprocess");
+    if (!child) {
+        const rlimit noCore{0, 0};
+        (void)setrlimit(RLIMIT_CORE, &noCore);
+        if (!std::freopen("/dev/null", "w", stderr)) _exit(13);
+        const NvBool scalar = s540Global_nv_requires_dma_remap(state);
+        _exit(scalar ? 11 : 12);
+    }
+    int status = 0;
+    expect(waitpid(child, &status, 0) == child, "DMA policy refusal subprocess reaped");
+    expect(WIFSIGNALED(status) && WTERMSIG(status) == SIGABRT, message);
+}
+void dmaRemapTests() {
+    auto *state = reinterpret_cast<nv_state_t *>(NvUPtr(0x300));
+    auto *foreign = reinterpret_cast<nv_state_t *>(NvUPtr(0x301));
+    auto *dma = reinterpret_cast<nv_dma_device_t *>(NvUPtr(0x400));
+    NvBool required = NV_FALSE;
+    expect(queryRmDmaRemap(state, required) == NV_ERR_INVALID_STATE && required == NV_FALSE,
+           "unbound scalar admission refuses without publishing a Boolean");
+    expectDmaPolicyFatal(state, "unbound scalar callback cannot fabricate false");
+    {
+        Fake f; Session session;
+        Detail::Backend withoutPolicy = backend(f); withoutPolicy.dmaRemapPolicy = nullptr;
+        expect(session.start(withoutPolicy) == NV_OK, "mapper metadata without policy start");
+        required = NV_TRUE;
+        expect(session.requiresDmaRemap(required) == NV_ERR_NOT_SUPPORTED && required == NV_TRUE &&
+               !f.policyQueries, "published mapper alone never supplies RM policy");
+        expect(session.stop() == NV_OK, "missing policy owner cleanup");
+    }
+    for (Mapper mapper : {Mapper::Unavailable, Mapper::Direct, Mapper::System}) {
+        Fake f; f.mapper = mapper; f.remapPolicy = DmaRemapPolicy::Unavailable;
+        Session session;
+        expect(session.start(backend(f)) == NV_OK && bindRmDevice(&session, state, dma) == NV_OK,
+               "unattested policy fixture binding");
+        required = NV_TRUE;
+        expect(queryRmDmaRemap(state, required) == NV_ERR_NOT_SUPPORTED && required == NV_TRUE,
+               "unavailable/direct/system mapper cannot infer bypass or mapping policy");
+        expectDmaPolicyFatal(state, "unknown bound scalar policy terminates without a result");
+        expect(unbindRmDevice(&session) == NV_OK && session.stop() == NV_OK,
+               "unattested policy fixture cleanup");
+    }
+    Fake f; Session session;
+    expect(session.start(backend(f)) == NV_OK && bindRmDevice(&session, state, dma) == NV_OK,
+           "attested policy exact device binding");
+    required = NV_FALSE;
+    expect(queryRmDmaRemap(foreign, required) == NV_ERR_INVALID_STATE && required == NV_FALSE &&
+           !f.policyQueries, "foreign nv_state cannot query another provider's policy");
+    expectDmaPolicyFatal(foreign, "foreign scalar callback cannot fabricate a policy");
+    expect(queryRmDmaRemap(state, required) == NV_OK && required == NV_TRUE && f.policyQueries == 1,
+           "positive provider contract requires explicit mapping of physical PTEs");
+    expect(s540Global_nv_requires_dma_remap(state) == NV_TRUE && f.policyQueries == 2,
+           "original scalar ABI delegates to the bound provider each time");
+    f.remapStatus = NV_ERR_BUSY_RETRY; required = NV_FALSE;
+    expect(queryRmDmaRemap(state, required) == NV_ERR_BUSY_RETRY && required == NV_FALSE,
+           "temporarily indeterminate policy preserves caller output");
+    expectDmaPolicyFatal(state, "indeterminate scalar cannot return a default Boolean");
+    f.remapStatus = NV_OK; f.remapPolicy = static_cast<DmaRemapPolicy>(42);
+    expect(queryRmDmaRemap(state, required) == NV_ERR_NOT_SUPPORTED && required == NV_FALSE,
+           "invalid provider policy cannot publish a Boolean");
+    f.remapPolicy = DmaRemapPolicy::Unavailable;
+    expect(queryRmDmaRemap(state, required) == NV_ERR_NOT_SUPPORTED && required == NV_FALSE,
+           "provider policy revocation is rechecked after admission");
+    f.remapPolicy = DmaRemapPolicy::MapPhysicalPagesWithoutBounce;
+    f.ordinary = false;
+    expect(queryRmDmaRemap(state, required) == NV_ERR_INVALID_STATE && required == NV_FALSE,
+           "wrong execution context refuses before scalar policy query");
+    f.ordinary = true; f.active = false;
+    expect(queryRmDmaRemap(state, required) == NV_ERR_INVALID_STATE && required == NV_FALSE,
+           "provider departure revokes policy admission");
+    expectDmaPolicyFatal(state, "departed provider scalar callback cannot reuse cached policy");
+    f.active = true;
+    expect(unbindRmDevice(&session) == NV_OK && session.stop() == NV_OK,
+           "attested policy binding cleanup");
+    expect(queryRmDmaRemap(state, required) == NV_ERR_INVALID_STATE && required == NV_FALSE,
+           "stale nv_state cannot retain DMA policy");
+}
 void stateTests() {
     Fake f;
     Session session;
@@ -281,6 +392,62 @@ void quarantineTests() {
     }
 }
 
+void irqLifecycleTests() {
+    {
+        Fake f; Session session;
+        NvU64 pages[2]{}; void *allocation = nullptr;
+        expect(session.start(backend(f)) == NV_OK, "disabled-controller unwind owner");
+        expect(session.allocate(2,pages,&allocation) == NV_OK &&
+               session.mapDma(allocation,pages) == NV_OK, "disabled-controller unwind allocation");
+        f.failMask = true; // Original adapter state does not exist yet.
+        expect(session.installInterrupt(contract(f)) == NV_OK && !session.interruptArmed(),
+               "controller registration has no enable side effects");
+        f.readyForInterrupt = false;
+        expect(session.armInterrupt() == NV_ERR_INVALID_STATE,
+               "rejected dispatch prerequisite never attempts enable");
+        expect(session.unmapDma(allocation,pages) == NV_OK && pages[0] == 0x10000000,
+               "original-init unwind can unmap with a never-enabled controller");
+        expect(session.release(allocation) == NV_OK && !f.resources,
+               "original-init unwind can free before controller deregistration");
+        expect(session.stopInterrupt() == NV_OK && !f.maskCalls && !f.irq,
+               "never-enabled controller teardown does not call original hardware mask");
+        expect(session.stop() == NV_OK, "disabled-controller owner cleanup");
+    }
+    {
+        Fake f; Session session;
+        NvU64 pages[2]{}; void *allocation = nullptr;
+        expect(session.start(backend(f)) == NV_OK &&
+               session.allocate(2,pages,&allocation) == NV_OK &&
+               session.mapDma(allocation,pages) == NV_OK, "partial-enable owner and allocation");
+        expect(session.installInterrupt(contract(f)) == NV_OK, "partial-enable registration");
+        f.fault = Fault::Arm;
+        expect(session.armInterrupt() == NV_ERR_OPERATING_SYSTEM && f.armed &&
+               !session.interruptArmed(), "controller enable may take effect before reporting failure");
+        expect(session.armInterrupt() == NV_ERR_STATE_IN_USE,
+               "uncertain enable cannot be retried before a drain");
+        expect(session.unmapDma(allocation,pages) == NV_ERR_IN_USE && pages[0] == 0x20000000 &&
+               session.release(allocation) == NV_ERR_IN_USE && f.resources == 1,
+               "failed enable retains DMA addresses and backing");
+        f.fault = Fault::None; f.failMask = true;
+        expect(session.stopInterrupt() == NV_ERR_OPERATING_SYSTEM && session.interruptInstalled(),
+               "failed original mask retains the registered controller");
+        expect(session.release(allocation) == NV_ERR_IN_USE,
+               "mask refusal retains addressable memory");
+        f.failMask = false; f.failStopAfterMask = true;
+        expect(session.stopInterrupt() == NV_ERR_BUSY_RETRY && f.maskCalls == 2,
+               "controller drain failure follows successful original masking");
+        expect(session.release(allocation) == NV_ERR_IN_USE,
+               "incomplete controller drain retains addressable memory");
+        f.failStopAfterMask = false;
+        expect(session.stopInterrupt() == NV_OK && f.maskCalls == 2 && !f.armed,
+               "drain retry does not disable original adapter twice");
+        expect(session.unmapDma(allocation,pages) == NV_OK &&
+               session.release(allocation) == NV_OK && !f.resources,
+               "only complete drain permits DMA reclamation");
+        expect(session.stop() == NV_OK, "partial-enable owner cleanup");
+    }
+}
+
 }
 int main() {
     expect(selectMapperPolicy(false,false,true) == Mapper::Direct, "settled direct admission");
@@ -305,7 +472,7 @@ int main() {
     expect(pciWriteKind(0xc,4,0,0xf900) == PciWriteKind::Refused, "unreviewed legacy command refused");
     expect(pciWriteKind(0x10,4,0,0) == PciWriteKind::Refused, "BAR mutation refused");
     expect(pciWriteKind(0x80,4,0,0) == PciWriteKind::Refused, "capability mutation lacks reviewed TU117 caller");
-    stateTests(); abiTests(); failures(); quarantineTests();
+    dmaRemapTests(); stateTests(); abiTests(); failures(); quarantineTests(); irqLifecycleTests();
     for (NvU32 i = 0; i < 128; ++i) {
         Fake f;
         Result result = check(backend(f));

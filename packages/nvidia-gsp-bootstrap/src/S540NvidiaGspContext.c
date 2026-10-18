@@ -5,6 +5,7 @@
 #include "S540NvidiaGspContext.h"
 #include "../../nvidia-global-rm/src/S540NvidiaGlobalRm.h"
 #include "../../nvidia-darwin-services/src/S540NvidiaDarwinServices.h"
+#include "../timers/S540NvidiaGspTimers.h"
 
 // The original OS layer owns this opaque type. The Darwin implementation uses
 // its address only as a bound identity; no Linux dma_device layout is imported.
@@ -21,6 +22,7 @@ struct S540GspContext {
     NvBool globalQueueBound;
     NvBool metadataBound;
     NvBool intelConsoleVerified, nvidiaConsoleExcluded;
+    S540GspContextDetacher detacher;
     S540GspContextSnapshot state;
 };
 // One S540 adapter belongs to the externally serialized operational session.
@@ -156,15 +158,27 @@ void *s540GspContextMainStack(S540GspContext *context) { return context ? &conte
 NV_STATUS s540GspContextSetPciHandle(S540GspContext *context, void *handle)
 {
     if (!owner(context) || !handle || context->nv.handle ||
-        context->state.eventLocks || context->state.privateState)
+        context->state.originalReleased || context->state.eventLocks || context->state.privateState)
         return NV_ERR_INVALID_STATE;
     context->nv.handle = handle;
+    return NV_OK;
+}
+NV_STATUS s540GspContextSetDetacher(S540GspContext *context,
+                                   const S540GspContextDetacher *detacher)
+{
+    if (!owner(context) || !detacher || !detacher->owner || !detacher->detach ||
+        context->detacher.detach || context->state.originalReleased ||
+        context->state.eventLocks || context->state.privateState ||
+        context->state.adapterAttempted)
+        return NV_ERR_INVALID_STATE;
+    context->detacher = *detacher;
     return NV_OK;
 }
 NV_STATUS s540GspContextPrepare(S540GspContext *context)
 {
     NV_STATUS status;
     if (!owner(context) || !context->nv.handle || !s540GlobalRmIsInitialized() || !cleanHost() ||
+        !context->detacher.detach || context->state.originalReleased ||
         context->state.eventLocks || context->state.privateState) return NV_ERR_INVALID_STATE;
     if (!rm_init_event_locks(&context->stacks[MAIN], &context->nv)) return NV_ERR_NO_MEMORY;
     context->state.eventLocks = NV_TRUE;
@@ -203,22 +217,26 @@ NV_STATUS s540GspContextShutdownAdapter(S540GspContext *context, NvBool irqQuies
     context->state.adapterShutdown = NV_TRUE;
     return NV_OK;
 }
-NV_STATUS s540GspContextDestroy(S540GspContext *context, NvBool irqQuiescent,
-                               S540GspContextSnapshot *finalSnapshot)
+NV_STATUS s540GspContextReleaseOriginalState(S540GspContext *context, NvBool irqQuiescent)
 {
     NV_STATUS status;
+    S540GspTimersSnapshot timers;
     if (!owner(context) || !irqQuiescent || context->state.quarantined ||
         (context->state.adapterInitialized && !context->state.adapterShutdown)) return NV_ERR_INVALID_STATE;
+    if (context->state.originalReleased) return NV_OK;
+    // This operation drains actual timer workers before original state is
+    // released. A failed drain leaves both the original state and its owner
+    // intact; no snapshot flag is accepted as a substitute for the operation.
+    s540GspTimersGetSnapshot(&timers);
+    if (timers.bound) {
+        status = s540GspTimersStop(&context->nv);
+        if (status != NV_OK) return status;
+    }
     // A failed original init performs its internal GPU unwind. No Linux
     // initialized-device teardown is fabricated for a never initialized GPU.
     if (context->deviceQueue) {
         status = s540DarwinWorkQueueStop(context->deviceQueue);
         if (status != NV_OK) goto quarantine;
-    }
-    if (context->globalQueueBound) {
-        status = s540DarwinUnbindGlobalWorkQueue(context->globalQueue);
-        if (status != NV_OK) goto quarantine;
-        context->globalQueueBound = NV_FALSE;
     }
     if (context->globalQueue) {
         status = s540DarwinWorkQueueStop(context->globalQueue);
@@ -235,12 +253,48 @@ NV_STATUS s540GspContextDestroy(S540GspContext *context, NvBool irqQuiescent,
         context->state.eventLocks = NV_FALSE;
     }
     if (!cleanHost()) { status = NV_ERR_INVALID_STATE; goto quarantine; }
+    context->state.originalReleased = NV_TRUE;
+    return NV_OK;
+quarantine:
+    context->state.quarantined = NV_TRUE;
+    return status;
+}
+NV_STATUS s540GspContextDestroy(S540GspContext *context, NvBool irqQuiescent,
+                               S540GspContextSnapshot *finalSnapshot)
+{
+    NV_STATUS status;
+    S540GspTimersSnapshot timers;
+    if (!owner(context) || context->state.quarantined) return NV_ERR_INVALID_STATE;
+    // Legacy destruction is reserved for allocation/validation failures before
+    // an operational owner can attach external users or enter original RM.
+    if (!context->detacher.detach && (context->state.eventLocks ||
+        context->state.privateState || context->state.adapterAttempted))
+        return NV_ERR_INVALID_STATE;
+    status = s540GspContextReleaseOriginalState(context, irqQuiescent);
+    if (status != NV_OK) goto retained;
+    if (context->detacher.detach && !context->state.finalDetach) {
+        status = context->detacher.detach(context->detacher.owner,
+                                          &context->nv, &context->dma);
+        if (status != NV_OK) goto retained;
+    }
+    // A callback reporting success cannot release a context still owned by
+    // the actual timer service. In particular, TimersUnbind calls TimersStop
+    // and writes nv->rc_timer_enabled, so it must happen before this free.
+    s540GspTimersGetSnapshot(&timers);
+    if (timers.bound) { status = NV_ERR_IN_USE; goto retained; }
+    if (!cleanHost()) { status = NV_ERR_INVALID_STATE; goto retained; }
+    context->state.finalDetach = NV_TRUE;
+    if (context->globalQueueBound) {
+        status = s540DarwinUnbindGlobalWorkQueue(context->globalQueue);
+        if (status != NV_OK) goto retained;
+        context->globalQueueBound = NV_FALSE;
+    }
     if (context->metadataBound) {
         S540GspContext *expected = context;
         if (!__atomic_compare_exchange_n(&metadataContext, &expected, NULL,
                 NV_FALSE, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)) {
             status = NV_ERR_INVALID_STATE;
-            goto quarantine;
+            goto retained;
         }
         context->metadataBound = NV_FALSE;
     }
@@ -251,8 +305,7 @@ NV_STATUS s540GspContextDestroy(S540GspContext *context, NvBool irqQuiescent,
     if (finalSnapshot) s540GspContextSnapshot(context, finalSnapshot);
     s540GlobalRmHostFree(context->allocationBase);
     return NV_OK;
-quarantine:
-    context->state.quarantined = NV_TRUE;
+retained:
     if (finalSnapshot) s540GspContextSnapshot(context, finalSnapshot);
     return status;
 }
@@ -269,6 +322,8 @@ void s540GspContextSnapshot(S540GspContext *context, S540GspContextSnapshot *out
     out->workStopped = context->state.workStopped;
     out->quiescent = context->state.quiescent;
     out->quarantined = context->state.quarantined;
+    out->originalReleased = context->state.originalReleased;
+    out->finalDetach = context->state.finalDetach;
     out->interruptsHandled = __atomic_load_n(&context->state.interruptsHandled, __ATOMIC_RELAXED);
     out->lockedBottomHalves = __atomic_load_n(&context->state.lockedBottomHalves, __ATOMIC_RELAXED);
     out->unlockedBottomHalves = __atomic_load_n(&context->state.unlockedBottomHalves, __ATOMIC_RELAXED);

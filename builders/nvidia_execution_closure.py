@@ -163,8 +163,27 @@ def review_coordinator_contracts(upstream: Path | None) -> tuple[dict[str, dict]
         if (ROOT / reference['path']).read_bytes() != source_bytes[reference['source']]:
             raise ValueError('A retained supplemental coordinator source copy changed: ' + reference['path'])
     remap = reviewed[original.PREFIX + 'nv_requires_dma_remap']
-    if remap.get('implementation_status') != 'missing-operational-backend':
-        raise ValueError('The missing DMA-remapping scalar backend must remain explicitly blocked.')
+    if remap.get('implementation_status') != 'provided-guarded-device-remap':
+        raise ValueError('The DMA-remapping ABI must retain its reviewed bound-device implementation.')
+    if not remap.get('admission_requirement'):
+        raise ValueError('The DMA-remapping scalar requires its checked bound-device admission policy.')
+    remap_original = remap['original_implementation']
+    remap_original_text = source_bytes[remap_original['source']].decode()
+    if (remap_original_text.splitlines()[remap_original['line'] - 1] != remap_original['anchor'] or
+            remap_original['state_anchor'] not in remap_original_text or
+            remap_original['policy_anchor'] not in source_bytes[remap_original['policy_source']].decode()):
+        raise ValueError('The original DMA-remapping/bounce-buffer policy anchor changed.')
+    remap_project = remap['project_implementation']
+    remap_bridge = (ROOT / remap_project['bridge']).read_text()
+    if (remap_project['bridge_anchor'] not in remap_bridge or
+            any(anchor not in remap_bridge for anchor in remap_project['bridge_anchors'])):
+        raise ValueError('The reviewed original-ABI DMA-remapping bridge changed.')
+    for implementation_file, anchors in (
+            (remap_project['backend'], remap_project['backend_anchors']),
+            (remap_project['session'], remap_project['session_anchors'])):
+        implementation_text = (ROOT / implementation_file).read_text()
+        if any(anchor not in implementation_text for anchor in anchors):
+            raise ValueError('The reviewed bound-device DMA-remapping policy changed: ' + implementation_file)
     queue = reviewed[original.PREFIX + 'os_is_queue_flush_ongoing']
     if queue.get('implementation_status') != 'provided-guarded-queue-state':
         raise ValueError('The queue-state ABI must retain its reviewed operational implementation.')
@@ -190,8 +209,12 @@ def review_coordinator_contracts(upstream: Path | None) -> tuple[dict[str, dict]
         'manifest_sha256': hashlib.sha256(COORDINATOR_CONTRACTS.read_bytes()).hexdigest(),
         'source_sha256': verified_sources,
         'project_implementation_sha256': {path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
-                                          for path in (project['bridge'], project['backend'])},
-        'nv_requires_dma_remap_backend': 'missing; no inferred Boolean',
+                                          for path in (project['bridge'], project['backend'],
+                                              remap_project['bridge'], remap_project['backend'], remap_project['session'])},
+        'nv_requires_dma_remap_backend': 'provided; positively attested bound-device no-bounce mapping',
+        'nv_requires_dma_remap_admission_requirement': remap['admission_requirement'],
+        'dma_remap_unknown_policy': 'entry blocked; scalar contract violation without Boolean fallback',
+        'dma_remap_runtime_admission_verified': False,
         'os_is_queue_flush_ongoing_backend': 'provided; actual guarded queue unload-flush state',
         'os_is_queue_flush_ongoing_admission_requirement': queue['admission_requirement'],
         'queue_unbound_context_policy': 'contract-violation; no scalar fallback',
@@ -315,6 +338,14 @@ def analyze_execution_closure(linked_project: Path, original_objects: list[Path]
             record['runtime_blockers'].append(
                 'Queue-state scalar requires an actual bound context/global work queue; '
                 'an unbound queue triggers a contract violation instead of a scalar fallback.')
+        if original.PREFIX + 'nv_requires_dma_remap' in retained:
+            record['runtime_blockers'].append(
+                'DMA-remapping scalar requires a checked policy from the exact bound device before entry; '
+                'unresolved or revoked mapper metadata cannot select a Boolean bypass.')
+        record['runtime_blockers'].append(
+            'Original GSP init/disable frees temporary allocations with active interrupts. '
+            'The operational allocation-retirement contract remains unimplemented; '
+            'a never-armed controller unwind is separate evidence.')
         save()
         if classified['unreviewed_retained_imports']:
             raise ValueError('The retained original imports escape the verified full compilation inventory: ' +

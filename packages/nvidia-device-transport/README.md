@@ -38,6 +38,21 @@ not an initialized GPU driver or a replacement for the released v9 package.
   Successful DMA mapping publishes a separate opaque mapping token; successful
   unmapping restores the original allocation token. Raw Linux private layouts
   are never fabricated.
+- `nv_requires_dma_remap(nv_state_t *)` has the exact original scalar ABI.
+  In NVIDIA `nv.c:5412`, its result is the inverse of the device's SWIOTLB
+  bounce policy, not an IOMMU-presence test. `NV_TRUE` selects physical PTEs
+  followed by explicit DMA mapping. This package implements that route and
+  rejects mappings which do not resolve to the original physical backing.
+  `Session::requiresDmaRemap(NvBool &)` is the status-bearing admission query
+  before RM state exists. `queryRmDmaRemap(nv_state_t *, NvBool &)` additionally
+  requires the exact active RM binding. Both preserve output on failure.
+  Darwin attests the supported policy only for this opened provider's retained,
+  published device mapper, revalidated under provider arbitration on each query.
+  The older `Direct` DMA exercise is insufficient for this admission: the
+  transport has no NVIDIA bypass-PTE implementation and no attested direct
+  provider policy. Direct, unknown, unresolved and revoked states therefore
+  return a status failure, never an inferred Boolean. The original scalar
+  callback terminates on a missed gate; it cannot return a fallback `NV_FALSE`.
 - Interrupt installation requires actual RM top-half/fault, locked and unlocked
   bottom-half, hardware-mask and dispatch-readiness callbacks. Public IOKit
   controller registration initially leaves the vector disabled. Controller
@@ -72,6 +87,13 @@ owner and must not be used for a failed operational adapter session.
 
 ## Explicit remaining limits
 
+- Original GSP initialization and adapter disable release temporary allocations
+  while interrupts remain active. Per-allocation retirement for that path is
+  still unresolved; the session does not admit those frees by removing its
+  addressable-memory guard. A registered controller that has never attempted
+  enable permits original allocation unwind. Failed/partial enable retains DMA
+  storage until masking, controller disable and callback drain all succeed.
+
 - Complete global RM and real `rm_init_adapter` integration must pass before
   any package is offered for a GPU boot attempt. Native models and Mach-O
   compilation are not kernel execution or device-transfer evidence.
@@ -91,7 +113,7 @@ owner and must not be used for a failed operational adapter session.
 
 ## Validation
 
-The shared state-machine/ABI native harness currently passes 242 assertions and
+The shared state-machine/ABI native harness currently passes 307 assertions and
 128 complete allocation/map/unmap/cleanup cycles. It includes ownership refusal,
 constructor and completion quarantine, mapper admission, bounce/address-mask
 policy, CPU-map deferred free, contiguous output width, scoped PCI access and
@@ -99,6 +121,11 @@ interrupt prerequisites. Its mapped exercise has 21 checks; the explicit
 unavailable-mapper refusal exercise has 19 checks. All native reports label GPU
 access, kernel execution, physical interrupt delivery and GPU initialization as
 unverified or false.
+
+DMA-remap admission additionally checks the exact ABI type, real callback
+delegation, missing/unknown/invalid policy, provider revocation, foreign and
+stale state, context failure and output preservation. Seven subprocess checks
+confirm that scalar callback violations terminate without a fabricated result.
 
 Local Linux execution passed plain and fatal AddressSanitizer/UndefinedBehaviorSanitizer
 runs. LeakSanitizer could not run in the local container because process/task

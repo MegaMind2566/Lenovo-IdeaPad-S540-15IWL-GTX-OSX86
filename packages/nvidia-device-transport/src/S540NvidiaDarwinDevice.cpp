@@ -34,6 +34,8 @@ struct Platform {
     bool irqRegistered;
     bool controllerAttached;
     bool irqEnabled;
+    bool controllerEnableAttempted;
+    bool hardwareMaskRequired;
     bool accepting;
     NvU32 callbacks;
     NvU32 pending;
@@ -323,6 +325,20 @@ bool mapperStillValid(Platform *p) {
     if (property) property->release();
     return valid;
 }
+NV_STATUS dmaRemapPolicy(void *opaque, DmaRemapPolicy &policy) {
+    auto *p = static_cast<Platform *>(opaque);
+    if (!ordinary(p) || !live(p)) return NV_ERR_INVALID_STATE;
+    if (!p->provider->lockForArbitration(false)) return NV_ERR_BUSY_RETRY;
+    // Positive attestation comes from this opened provider's published mapper
+    // and the exact mapping path below, which rejects every bounce alias.
+    // A missing mapper/gSystem value never establishes the scalar RM policy.
+    const bool usable = live(p) && p->mapperMode == Mapper::Device && p->mapper &&
+                        mapperStillValid(p);
+    p->provider->unlockForArbitration();
+    if (!usable) return NV_ERR_NOT_SUPPORTED;
+    policy = DmaRemapPolicy::MapPhysicalPagesWithoutBounce;
+    return NV_OK;
+}
 NV_STATUS mapDma(void *opaque, void *allocation, NvU32 addressBits) {
     auto *p = static_cast<Platform *>(opaque);
     auto *a = static_cast<Allocation *>(allocation);
@@ -462,6 +478,11 @@ NV_STATUS armInterrupt(void *opaque) {
     auto *p = static_cast<Platform *>(opaque);
     if (!live(p) || !p->irqRegistered || !p->interrupt.readyToArm ||
         !p->interrupt.readyToArm(p->interrupt.context)) return NV_ERR_INVALID_STATE;
+    // Failure from enableInterrupt does not prove that the controller remained
+    // disabled. Both the original hardware source and controller must be
+    // quiesced before storage can be returned, even on that failure path.
+    p->controllerEnableAttempted = true;
+    p->hardwareMaskRequired = true;
     __atomic_store_n(&p->accepting, true, __ATOMIC_RELEASE);
     if (p->provider->enableInterrupt(0) != kIOReturnSuccess) {
         __atomic_store_n(&p->accepting, false, __ATOMIC_RELEASE);
@@ -473,10 +494,19 @@ NV_STATUS armInterrupt(void *opaque) {
 NV_STATUS stopInterrupt(void *opaque) {
     auto *p = static_cast<Platform *>(opaque);
     if (!p->irqRegistered) return NV_OK;
-    NV_STATUS status = p->interrupt.maskHardware(p->interrupt.context);
-    if (status != NV_OK) return status;
-    if (p->irqEnabled && p->provider->disableInterrupt(0) != kIOReturnSuccess)
-        return NV_ERR_OPERATING_SYSTEM;
+    // registerInterrupt starts disabled. Before any enable attempt there is no
+    // original GPU state to mask; invoking its callback here would fabricate an
+    // adapter-disable operation for a device that was never initialized.
+    if (p->hardwareMaskRequired) {
+        NV_STATUS status = p->interrupt.maskHardware(p->interrupt.context);
+        if (status != NV_OK) return status;
+        p->hardwareMaskRequired = false;
+    }
+    if (p->controllerEnableAttempted) {
+        if (p->provider->disableInterrupt(0) != kIOReturnSuccess)
+            return NV_ERR_OPERATING_SYSTEM;
+        p->controllerEnableAttempted = false;
+    }
     p->irqEnabled = false;
     __atomic_store_n(&p->accepting, false, __ATOMIC_RELEASE);
     if (p->controllerAttached) {
@@ -514,7 +544,8 @@ NV_STATUS S540NvidiaDeviceTransport::Session::start(IOPCIDevice *provider, IOSer
     Detail::Backend backend{platform, ::ordinary, ::start, ::stop, ::live,
         ::readIdentification, ::allocate, pageAddress, ::mapDma, ::unmapDma,
         releaseAllocation, ::installInterrupt, ::armInterrupt, ::stopInterrupt,
-        ::registerGeometry, ::mapRegisters, ::unmapRegisters, ::configRead, ::configWrite, ::interruptStatistics};
+        ::registerGeometry, ::mapRegisters, ::unmapRegisters, ::configRead, ::configWrite, ::interruptStatistics,
+        ::dmaRemapPolicy};
     NV_STATUS status = start(backend);
     if (status == NV_OK) platformOwned_ = true;
     else if (!active()) IOFree(platform, sizeof(*platform));

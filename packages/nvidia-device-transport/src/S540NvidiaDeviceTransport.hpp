@@ -10,6 +10,10 @@ constexpr NvU32 kPageBytes = 4096;
 constexpr NvU32 kMaximumPages = 8192;
 constexpr NvU32 kMaximumAllocations = 32;
 enum class Mapper : NvU32 { Unavailable, Device, System, Direct };
+// NVIDIA's query chooses whether CPU physical PTEs must pass through the DMA
+// mapping callbacks. It is not an IOMMU-presence query. This transport supports
+// the explicit, no-bounce mapping path; it does not implement bypass PTEs.
+enum class DmaRemapPolicy : NvU32 { Unavailable, MapPhysicalPagesWithoutBounce };
 struct Snapshot {
     bool identity;
     bool providerOwned;
@@ -40,6 +44,9 @@ struct InterruptContract {
     bool (*top)(void *context, bool &lockedBottomHalf, bool &unlockedBottomHalf);
     void (*lockedBottomHalf)(void *context);
     void (*unlockedBottomHalf)(void *context);
+    // A successful mask is persistent: subsequent original ISR/bottom-half
+    // completion cannot re-enable the hardware source. stop retries may reuse
+    // that success instead of calling a non-idempotent adapter disable again.
     NV_STATUS (*maskHardware)(void *context);
     bool (*readyToArm)(void *context);
 };
@@ -73,6 +80,7 @@ struct Backend {
     NV_STATUS (*configRead)(void *, NvU32, NvU32, NvU32 &);
     NV_STATUS (*configWrite)(void *, NvU32, NvU32, NvU32);
     InterruptStatistics (*interruptStatistics)(void *);
+    NV_STATUS (*dmaRemapPolicy)(void *, DmaRemapPolicy &);
 };
 }
 // Ordinary-thread, externally serialized owner. No GPU command is submitted.
@@ -106,6 +114,9 @@ public:
     // Refusal/failure preserves all caller outputs and input ownership.
     NV_STATUS allocate(NvU32 pages, NvU64 *physicalPages, void **token, bool contiguous = false, NvU32 cache = 0);
     NV_STATUS setDmaAddressSize(NvU32 bits);
+    // Checked admission for the scalar NVIDIA ABI. Failure preserves output;
+    // callers must pass this gate before an RM entry can reach that callback.
+    NV_STATUS requiresDmaRemap(NvBool &required);
     NV_STATUS mapDma(void *token, NvU64 *devicePages);
     NV_STATUS unmapDma(void *token, NvU64 *physicalPages);
     NV_STATUS address(void *token, NvU32 page, NvU64 &deviceAddress);
@@ -139,6 +150,9 @@ private:
     bool active_;
     bool irqInstalled_;
     bool irqArmed_;
+    // An unsuccessful controller-enable call may have had partial effects.
+    // Keep all addressable storage until stopInterrupt has drained that attempt.
+    bool irqArmAttempted_;
     bool platformOwned_;
     bool rmBound_;
     Allocation *find(void *token);

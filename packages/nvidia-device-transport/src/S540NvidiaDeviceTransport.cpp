@@ -23,7 +23,7 @@ namespace S540NvidiaDeviceTransport {
 void destroyDarwinBackend(void *);
 #endif
 Session::Session() : allocations_{}, backend_{}, snapshot_{}, interruptContract_{}, pciHandle_(nullptr), active_(false),
-    irqInstalled_(false), irqArmed_(false), platformOwned_(false), rmBound_(false) {}
+    irqInstalled_(false), irqArmed_(false), irqArmAttempted_(false), platformOwned_(false), rmBound_(false) {}
 // Ordinary use always closes successfully. Failed quiescence deliberately
 // preserves kernel resources, rather than returning DMA storage to the VM.
 Session::~Session() { (void)stop(); }
@@ -189,6 +189,20 @@ NV_STATUS Session::setDmaAddressSize(NvU32 bits) {
     snapshot_.dmaAddressBits = bits;
     return NV_OK;
 }
+NV_STATUS Session::requiresDmaRemap(NvBool &required) {
+    if (!ordinary() || !live()) return NV_ERR_INVALID_STATE;
+    if (!backend_.dmaRemapPolicy) return NV_ERR_NOT_SUPPORTED;
+    DmaRemapPolicy captured = DmaRemapPolicy::Unavailable;
+    const NV_STATUS status = backend_.dmaRemapPolicy(backend_.context, captured);
+    if (status != NV_OK) return status;
+    if (captured != DmaRemapPolicy::MapPhysicalPagesWithoutBounce)
+        return NV_ERR_NOT_SUPPORTED;
+    // nv_alloc_pages publishes CPU physical PTEs; nv_dma_map_alloc is required
+    // even if an eventual validated device address happens to be identical.
+    // No result is inferred from Snapshot::mapper or a null mapper pointer.
+    required = NV_TRUE;
+    return NV_OK;
+}
 NV_STATUS Session::mapDma(void *token, NvU64 *devicePages) {
     if (!ordinary() || !live()) return NV_ERR_INVALID_STATE;
     if (!devicePages) return NV_ERR_INVALID_ARGUMENT;
@@ -225,7 +239,7 @@ NV_STATUS Session::mapDma(void *token, NvU64 *devicePages) {
 NV_STATUS Session::unmapDma(void *token, NvU64 *physicalPages) {
     if (!ordinary() || !active_) return NV_ERR_INVALID_STATE;
     if (!physicalPages) return NV_ERR_INVALID_ARGUMENT;
-    if (irqInstalled_) return NV_ERR_IN_USE;
+    if (irqArmAttempted_) return NV_ERR_IN_USE;
     Allocation *entry = find(token);
     if (!entry) return NV_ERR_OBJECT_NOT_FOUND;
     if (!entry->mapped) return NV_ERR_INVALID_STATE;
@@ -290,8 +304,10 @@ NV_STATUS Session::releaseEntry(Allocation &entry) {
 }
 NV_STATUS Session::release(void *token) {
     if (!ordinary() || !active_) return NV_ERR_INVALID_STATE;
-    // Never free addressable host pages while an adapter IRQ can run.
-    if (irqInstalled_) return NV_ERR_IN_USE;
+    // A newly registered controller is disabled. Original initialization can
+    // unwind host allocations before the first enable attempt. Once enable has
+    // been attempted, including a failed partial enable, require a full drain.
+    if (irqArmAttempted_) return NV_ERR_IN_USE;
     Allocation *entry = find(token);
     return entry ? releaseEntry(*entry) : NV_STATUS(NV_ERR_OBJECT_NOT_FOUND);
 }
@@ -307,9 +323,10 @@ NV_STATUS Session::installInterrupt(const InterruptContract &contract) {
 }
 NV_STATUS Session::armInterrupt() {
     if (!ordinary() || !live() || !irqInstalled_) return NV_ERR_INVALID_STATE;
-    if (irqArmed_) return NV_ERR_STATE_IN_USE;
+    if (irqArmAttempted_) return NV_ERR_STATE_IN_USE;
     if (!interruptContract_.readyToArm || !interruptContract_.readyToArm(interruptContract_.context))
         return NV_ERR_INVALID_STATE;
+    irqArmAttempted_ = true;
     NV_STATUS status = backend_.armInterrupt(backend_.context);
     if (status == NV_OK) irqArmed_ = true;
     return status;
@@ -319,7 +336,8 @@ NV_STATUS Session::stopInterrupt() {
     if (!irqInstalled_) return NV_OK;
     NV_STATUS status = backend_.stopInterrupt(backend_.context);
     if (status == NV_OK) {
-        irqArmed_ = false; irqInstalled_ = false; interruptContract_ = InterruptContract{};
+        irqArmed_ = false; irqArmAttempted_ = false; irqInstalled_ = false;
+        interruptContract_ = InterruptContract{};
     }
     return status;
 }

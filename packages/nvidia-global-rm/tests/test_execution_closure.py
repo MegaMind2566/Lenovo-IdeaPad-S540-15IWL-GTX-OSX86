@@ -113,7 +113,7 @@ class CoordinatorClosureTests(unittest.TestCase):
         remap = next(row for row in result['unmet_reviewed_callbacks'] if row['symbol'] == self.remap_missing)
         self.assertEqual(remap['type'], 'NvBool (nv_state_t *)')
         self.assertEqual(remap['unavailable_policy'], 'entry-must-be-blocked-before-call')
-        self.assertEqual(remap['implementation_status'], 'missing-operational-backend')
+        self.assertEqual(remap['implementation_status'], 'provided-guarded-device-remap')
         self.assertEqual([row['symbol'] for row in result['unmet_abi_review']], [self.abi_missing])
         self.assertFalse(result['unmet_abi_review'][0]['default_value_inferred'])
         self.assertEqual(result['status'], 'blocked')
@@ -167,14 +167,16 @@ class CoordinatorClosureTests(unittest.TestCase):
             actual = hashlib.sha256((ROOT / reference['path']).read_bytes()).hexdigest()
             self.assertEqual(actual, supplemental['source_sha256'][reference['source']])
 
-    def test_supplemental_prototypes_and_queue_implementation_match_pinned_upstream(self):
+    def test_supplemental_prototypes_and_operational_implementations_match_pinned_upstream(self):
         if not UPSTREAM.exists():
             self.skipTest('Pass --upstream or provide build-src/nvidia-upstream to verify pinned source bytes.')
         rows, evidence = self.review_coordinator_contracts(UPSTREAM)
         self.assertEqual(set(rows), {self.remap_missing, self.queue_provided})
         self.assertEqual(evidence['status'], 'verified-exact-prototypes-and-source')
         self.assertEqual(evidence['contract_count'], 2)
-        self.assertIn('missing; no inferred Boolean', evidence['nv_requires_dma_remap_backend'])
+        self.assertIn('positively attested bound-device', evidence['nv_requires_dma_remap_backend'])
+        self.assertIn('before an original RM entry', evidence['nv_requires_dma_remap_admission_requirement'])
+        self.assertFalse(evidence['dma_remap_runtime_admission_verified'])
         self.assertIn('must be bound', evidence['os_is_queue_flush_ongoing_admission_requirement'])
         self.assertFalse(evidence['queue_runtime_admission_verified'])
 

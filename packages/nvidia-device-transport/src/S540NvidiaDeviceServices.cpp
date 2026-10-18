@@ -2,6 +2,10 @@
 #include "nv_device_services.h"
 #if defined(KERNEL)
 #include <machine/machine_routines.h>
+#include <libkern/libkern.h>
+#else
+#include <cstdio>
+#include <cstdlib>
 #endif
 namespace {
 using namespace S540NvidiaDeviceTransport;
@@ -45,6 +49,15 @@ void *token(bool mapping) {
 bool stateValid(nv_state_t *state) {
     return ordinary() && binding.session && binding.session->active() && state == binding.state;
 }
+[[noreturn]] void dmaPolicyViolation() {
+    // Returning NV_FALSE here would silently select NVIDIA's bypass path.
+#if defined(KERNEL)
+    panic("NVIDIA device DMA-remap callback requires an admitted bound policy");
+#else
+    std::fputs("NVIDIA device DMA-remap callback requires an admitted bound policy\n", stderr);
+    std::abort();
+#endif
+}
 Allocation *find(void *value) {
     if (!value) return nullptr;
     for (auto &entry : binding.allocations) if (entry.token == value) return &entry;
@@ -77,6 +90,15 @@ NV_STATUS S540NvidiaDeviceTransport::unbindRmDevice(Session *session) {
     if (status != NV_OK) return status;
     binding = Binding{};
     return NV_OK;
+}
+NV_STATUS S540NvidiaDeviceTransport::queryRmDmaRemap(nv_state_t *state, NvBool &required) {
+    if (!stateValid(state)) return NV_ERR_INVALID_STATE;
+    return binding.session->requiresDmaRemap(required);
+}
+extern "C" NvBool NV_API_CALL s540Global_nv_requires_dma_remap(nv_state_t *state) {
+    NvBool required;
+    if (queryRmDmaRemap(state, required) != NV_OK) dmaPolicyViolation();
+    return required;
 }
 S540NvidiaDeviceTransport::AbiStatistics S540NvidiaDeviceTransport::abiStatistics() {
     AbiStatistics out{}; out.bound = binding.session != nullptr;

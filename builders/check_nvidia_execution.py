@@ -93,7 +93,9 @@ def services_preflight(output: Path, *, host_control: bool = False) -> dict:
 def original_header_case(output: Path, name: str, upstream: Path, namespace: Path,
                          c_sources: list[Path], cpp_sources: list[Path], expected: dict,
                          *, host_control: bool, dead_strip: bool = False,
-                         extra_c_flags: list[str] | None = None) -> dict:
+                         extra_c_flags: list[str] | None = None,
+                         extra_cpp_flags: list[str] | None = None,
+                         arguments: list[str] | None = None) -> dict:
     """Compile actual original-header bridges with explicit userspace fixtures."""
     cc, cxx = crypto.compiler_pair(host_control)
     target = [] if host_control else ['-arch', 'x86_64', '-mmacosx-version-min=15.0']
@@ -126,7 +128,7 @@ def original_header_case(output: Path, name: str, upstream: Path, namespace: Pat
             objects.append(str(obj))
         for source in cpp_sources:
             obj = work / (source.stem + '.o')
-            commands.run(*cxx, *common, '-std=c++17',
+            commands.run(*cxx, *common, '-std=c++17', *(extra_cpp_flags or []),
                           *(['-ffunction-sections', '-fdata-sections'] if dead_strip else []),
                           *instrumentation,
                           '-c', str(source), '-o', str(obj),
@@ -139,7 +141,8 @@ def original_header_case(output: Path, name: str, upstream: Path, namespace: Pat
                      '-o', str(binary),
                      diagnostic_log=work / 'link.log')
         crypto.verify_binary(binary, 2, host_control)
-        record = json.loads(commands.run(str(binary), diagnostic_log=work / 'run.log').stdout)
+        record = json.loads(commands.run(str(binary), *(arguments or []),
+                                        diagnostic_log=work / 'run.log').stdout)
         expect(record, {'format': 1, 'status': 'passed', 'failures': 0,
                        'execution': 'native-user-space', 'kernel_execution': 'not_tested',
                        'gpu_access': False, **expected}, name + '/' + label)
@@ -161,6 +164,7 @@ def timer_case(output: Path, upstream: Path, namespace: Path, *, host_control: b
 def context_metadata_case(output: Path, upstream: Path, namespace: Path, *, host_control: bool) -> dict:
     return original_header_case(output, 'gsp-context-metadata', upstream, namespace, [
         GSP / 'src/S540NvidiaGspContext.c',
+        GSP / 'timers/S540NvidiaGspTimersOriginal.c',
         GSP / 'tests/check_context_metadata_native.c'], [
         *(SERVICES / ('src/S540NvidiaDarwin' + name + '.cpp') for name in SERVICE_NAMES),
         GLOBAL / 'src/S540NvidiaGlobalRmHost.cpp', GLOBAL / 'src/S540NvidiaGlobalRmFormat.cpp'],
@@ -169,6 +173,45 @@ def context_metadata_case(output: Path, upstream: Path, namespace: Path, *, host
          'ownership_refusals_verified': True, 'cleanup': True},
         host_control=host_control, dead_strip=True,
         extra_c_flags=['-std=gnu11', '-Werror', '-Wno-unused-parameter'])
+
+
+def context_lifecycle_case(output: Path, upstream: Path, namespace: Path, *, host_control: bool) -> dict:
+    return original_header_case(output, 'gsp-context-lifecycle', upstream, namespace, [
+        GSP / 'src/S540NvidiaGspContext.c',
+        GSP / 'timers/S540NvidiaGspTimersOriginal.c',
+        GSP / 'tests/check_context_lifecycle_native.c'], [
+        *(SERVICES / ('src/S540NvidiaDarwin' + name + '.cpp') for name in SERVICE_NAMES),
+        GLOBAL / 'src/S540NvidiaGlobalRmHost.cpp', GLOBAL / 'src/S540NvidiaGlobalRmFormat.cpp'],
+        {'component': 'nvidia-gsp-context-lifecycle', 'checks': 24,
+         'real_timer_binding': True, 'recoverable_detach_refusals': 2,
+         'original_rm_executed': False, 'callback_fixture': True, 'cleanup': True},
+        host_control=host_control, dead_strip=True,
+        extra_c_flags=['-std=gnu11', '-Werror', '-Wno-unused-parameter'])
+
+
+def bootstrap_case(output: Path, upstream: Path, namespace: Path, assets: Path, *, host_control: bool) -> dict:
+    return original_header_case(output, 'gsp-bootstrap-owner', upstream, namespace, [
+        DEVICE / 'tests/check_transport_policy_abi.c',
+        GSP / 'src/S540NvidiaGspContext.c',
+        GSP / 'timers/S540NvidiaGspTimersOriginal.c',
+        GSP / 'tests/check_bootstrap_boundary_native.c'], [
+        GSP / 'src/S540NvidiaGspBootstrap.cpp',
+        GSP / 'tests/check_bootstrap_native.cpp',
+        GSP / 'src/S540NvidiaGspFirmware.cpp',
+        ROOT / 'packages/nvidia-firmware-assets/src/S540NvidiaFirmwareAssets.cpp',
+        ROOT / 'packages/nvidia-hardware-transport/firmware/S540NvidiaFirmware.cpp',
+        DEVICE / 'src/S540NvidiaDeviceTransport.cpp', DEVICE / 'src/S540NvidiaDeviceServices.cpp',
+        *(SERVICES / ('src/S540NvidiaDarwin' + name + '.cpp') for name in SERVICE_NAMES),
+        GLOBAL / 'src/S540NvidiaGlobalRmHost.cpp', GLOBAL / 'src/S540NvidiaGlobalRmFormat.cpp'],
+        {'component': 'nvidia-gsp-bootstrap-owner', 'checks': 43,
+         'preparation_verified': True, 'cleanup_retry_verified': True,
+         'platform_fixture': True, 'original_entry_tripwires': True,
+         'real_context_store_transport_timers': True, 'original_rm_executed': False,
+         'firmware_loaded': False, 'gpu_initialized': False},
+        host_control=host_control, dead_strip=True,
+        extra_c_flags=['-std=gnu11', '-Werror', '-Wno-unused-parameter'],
+        extra_cpp_flags=['-DS540_GSP_BOOTSTRAP_NATIVE_TEST'],
+        arguments=[str(assets / 'gsp_tu10x.bin'), str(assets / 'ucodes_tu10x.bin')])
 
 
 @commands.logged(report='execution-checks.json')
@@ -202,7 +245,7 @@ def check(output: Path, assets: Path, *, upstream: Path | None = None,
         DEVICE / ('src/S540Nvidia' + name + '.cpp') for name in
         ('DeviceTransport', 'DeviceServices', 'DeviceCheck')],
         DEVICE / 'tests/check_device_transport_native.cpp',
-        {'component': 'nvidia-device-transport', 'checks': 242,
+        {'component': 'nvidia-device-transport', 'checks': 307,
          'production_checks': 21, 'unavailable_mapper_checks': 19,
          'lifecycle_cycles': 128, 'device_dma_verified': False,
          'hardware_interrupt_delivery': False, 'gpu_initialized': False},
@@ -231,6 +274,10 @@ def check(output: Path, assets: Path, *, upstream: Path | None = None,
     progress.component('gsp_timers', lambda: timer_case(output, upstream, namespace, host_control=host_control))
     progress.component('gsp_context_metadata', lambda: context_metadata_case(
         output, upstream, namespace, host_control=host_control))
+    progress.component('gsp_context_lifecycle', lambda: context_lifecycle_case(
+        output, upstream, namespace, host_control=host_control))
+    progress.component('gsp_bootstrap_owner', lambda: bootstrap_case(
+        output, upstream, namespace, assets, host_control=host_control))
     inputs = [path for package in (SERVICES, DEVICE, GLOBAL, GSP)
               for path in package.rglob('*') if path.is_file()
               and '__pycache__' not in path.parts and path.suffix != '.pyc']

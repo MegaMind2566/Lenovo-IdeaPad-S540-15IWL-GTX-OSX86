@@ -51,7 +51,10 @@ def project_sources() -> tuple[list[Path], list[Path], list[Path]]:
                 GLOBAL / 'src/S540NvidiaGlobalRmLifecycle.c',
                 DEVICE / 'src/S540NvidiaDarwinDevice.cpp',
                 GSP / 'src/S540NvidiaGspFirmwareOriginal.c',
-                GSP / 'src/S540NvidiaGspFirmware.cpp'}
+                GSP / 'src/S540NvidiaGspFirmware.cpp',
+                GSP / 'src/S540NvidiaGspBootstrap.cpp',
+                GSP / 'src/S540NvidiaGspContext.c',
+                GSP / 'timers/S540NvidiaGspTimersOriginal.c'}
     selected = set(cpp + original_c + plain_c)
     if not required <= selected or len(selected) != len(cpp + original_c + plain_c):
         raise ValueError('The full RM execution source profile is incomplete or duplicated.')

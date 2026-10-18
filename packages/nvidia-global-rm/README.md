@@ -96,14 +96,7 @@ fatal-sanitized variants. All 24 project bridge units compiled with the audited
 platform imports. Firmware files, licenses and embedded bytes were verified.
 These results do not execute the adapted full-RM lifecycle or the GPU.
 
-The next development profile explicitly applies all seven approved overlays in
-an isolated, hash-verified source tree. It preserves the unchanged baseline
-records and rebuilds every full-RM translation unit against the composed checked
-headers. Original-header macOS bridges use that same source tree and namespace;
-objects compiled against the old portable-memory declaration cannot be reused.
-This profile is development validation, with kernel entry and candidate
-packaging still disabled. Native results for this adapted profile are separate
-from the passing unchanged baseline above.
+The subsequent [checked native build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/38816440893) from `5413897` also passed. It applied all seven approved overlays in an isolated, hash-verified source tree, preserved the unchanged records and rebuilt all 1,100 translation units and their namespaced profile against the composed headers. Original-header bridges used the same checked ABI, and the actual compiled-bridge dependency control passed. This closes checked-profile compilation; it does not execute the adapted global lifecycle in the kernel. Current ownership/DMA integration changes require another native validation. Kernel entry and candidate packaging remain disabled.
 
 The native dependency-control linker uses the kernel format required by the
 original non-PIC objects and rejects dynamic library load commands. The
@@ -121,8 +114,11 @@ closure. The additional compiled-bridge audit derives those work-item,
 private-state, event-lock, fault, timer and evidence roots from the actual
 macOS objects. Its [supplemental contracts](COORDINATOR-CONTRACTS.json) pin the
 two additional callback declarations without changing the selected 244-contract
-inventory. The queue-flush query has a real guarded backend; DMA-remap policy
-remains an explicit unresolved scalar service. The current compiled root set
+inventory. The queue-flush query has a real guarded backend. DMA-remap policy now has
+a checked exact-device query and original scalar bridge: only a positively
+attested no-bounce mapping route is admitted. Unknown, revoked or unsupported
+routes block entry rather than selecting a Boolean bypass. Hardware admission
+for that policy remains unverified. The current compiled root set
 excludes the source-gated global lifecycle, which needs a separate admission
 review. Every report retains the kernel/GSP and candidate blocks.
 

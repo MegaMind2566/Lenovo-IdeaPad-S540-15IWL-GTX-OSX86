@@ -22,6 +22,7 @@ NV_STATUS NV_API_CALL s540Global_nv_dma_map_alloc(nv_dma_device_t *, NvU64,
 NV_STATUS NV_API_CALL s540Global_nv_dma_unmap_alloc(nv_dma_device_t *, NvU64,
     NvU64 *, void **);
 void NV_API_CALL s540Global_nv_set_dma_address_size(nv_state_t *, NvU32);
+NvBool NV_API_CALL s540Global_nv_requires_dma_remap(nv_state_t *);
 NvU64 NV_API_CALL s540Global_nv_get_kern_phys_address(NvU64);
 void *NV_API_CALL s540Global_os_pci_init_handle(NvU32, NvU8, NvU8, NvU8, NvU16 *, NvU16 *);
 NV_STATUS NV_API_CALL s540Global_os_pci_read_byte(void *, NvU32, NvU8 *);
@@ -44,6 +45,9 @@ namespace S540NvidiaDeviceTransport {
 // the complete RM device owner. Opaque identities are compared, not dereferenced.
 NV_STATUS bindRmDevice(Session *session, nv_state_t *state, nv_dma_device_t *dma);
 NV_STATUS unbindRmDevice(Session *session);
+// Unlike the original scalar ABI, the admission query can report unknown
+// policy. A coordinator must check it before allowing an RM entry to execute.
+NV_STATUS queryRmDmaRemap(nv_state_t *state, NvBool &required);
 struct AbiStatistics { NvU32 allocations; NvU32 mappings; NvU32 dmaMappings; bool bound; };
 AbiStatistics abiStatistics();
 Session *boundRmSession();

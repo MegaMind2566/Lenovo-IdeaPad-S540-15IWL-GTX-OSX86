@@ -14,6 +14,7 @@ requirements, alongside compiled kernel stack policy and actual power ownership.
 
 | Component | Behavior |
 |---|---|
+| [Bootstrap owner](src/S540NvidiaGspBootstrap.hpp) | Prepares and owns the real context, transport, copied firmware and timer bindings; cleanup failure preserves the heap owner for retry; initialization remains explicitly gated |
 | Firmware store | Verifies the actual approved firmware bytes, container and microcode directory; exposes bounded, generation-tagged leases to the exact original firmware ABI |
 | Original adapter context | Uses the pinned `nv_state_t`, independent aligned original RM stacks, real work queues, event locks and original adapter lifecycle calls; binds exact screen and stream-ID metadata callbacks |
 | [Platform and ACPI](platform/README.md) | Collects explicit known platform facts, binds the published endpoint ACPI companion and implements bounded optional `_ROM` reads |
@@ -68,9 +69,14 @@ mean only that original RM received bytes. They never mean the GPU booted.
    remain available. Stop timer producers and drain interrupt callbacks before
    original adapter shutdown. Release original users before unbinding their
    firmware, DMA, ACPI and timer resources.
-7. Stop work queues, release private/event state, shut down global RM and
-   verify every ownership registry. A failed drain retains the context and its
-   resources; it does not free potentially addressable storage.
+7. Stop work queues and release original private/event state through
+   `s540GspContextReleaseOriginalState`, retaining the original `nv_state`,
+   metadata and global-queue binding. The registered operational detacher then
+   unbinds timers, firmware, device transport and platform state. Final destroy
+   verifies that the actual timer service is detached before freeing storage.
+   Shut down global RM and verify every ownership registry. A failed drain or
+   detach retains the context and resources; retry never frees addressable
+   storage or invokes an original destructor twice.
 
 `S540NvidiaGspContext` is a typed integration component, not an independently
 complete driver entry point. Its caller must enforce these prerequisites,
@@ -80,6 +86,16 @@ initialization failure uses the original initialization unwind; it does not
 pretend that a never-initialized device completed normal shutdown.
 
 ## Validation and remaining gates
+
+
+The preparation owner copies bounded OS fact strings and both approved firmware
+images into its own lifetime before publishing them to borrowers. A successful
+`prepare()` means resources/bindings are prepared, never an initialized GPU.
+`initialize()` has no caller-supplied readiness Boolean and refuses before
+original RM while complete ABI closure, real power lifetime, original aggregate
+stack policy and allocation retirement during active IRQs remain unresolved.
+The current release guard cannot handle original GSP's temporary buffer frees
+with IRQs active; this is an operational blocker, not a successful test result.
 
 The firmware-store native harness uses the actual approved pair and covers
 corruption, owner/thread mismatches, unchanged outputs, lease exhaustion,
@@ -106,6 +122,18 @@ memory-failure recovery in that control. The adapted source/header profile
 still requires production integration and authoritative Darwin validation.
 Scalar or void OS callbacks cannot be filled with fabricated successful
 defaults to make the adapter link.
+
+The new lifecycle harness uses real context, allocator, work queues and timers,
+with typed original callback fixtures. Its 24 checks include successful timer
+execution, private-state cleanup with metadata still available, detach refusal,
+retry and rejection of a detacher that reports success while timers remain
+bound. The bootstrap-owner harness uses those real components, the Session and
+Store, actual approved firmware bytes and explicit platform observations. Its
+43 checks include initialization refusal, capacity admission, OS-string lifetime,
+wrong-thread rejection and retained owners after firmware/platform/transport
+cleanup failures. Both harnesses pass local plain and fatal ASan/UBSan controls;
+Darwin, namespace and function-type sanitizer validation belong to native CI.
+The existing metadata harness retains its 16 checks.
 
 The development workflow emits validation records only. It cannot create an
 installable candidate or change the working EFI. Actual GSP execution,

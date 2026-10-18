@@ -5,7 +5,9 @@
   "source_sha256": {
     "src/nvidia/arch/nvalloc/unix/include/nv.h": "02ce4b371e0a8dd26f62a320e88c8382dcf31a21b727503a66abcaea9eecf09b",
     "src/nvidia/arch/nvalloc/unix/include/os-interface.h": "bd281e48ff06b481033fc2fb29a891710a2b4d66fb009cc2b752ab6e90f2113b",
-    "kernel-open/nvidia/os-interface.c": "0c8fe2749ec4ee12f1dbbd884cfbc8f1c8a7750903de7453b01c2f6b92e0f6d6"
+    "kernel-open/nvidia/os-interface.c": "0c8fe2749ec4ee12f1dbbd884cfbc8f1c8a7750903de7453b01c2f6b92e0f6d6",
+    "kernel-open/nvidia/nv.c": "ce04946d288cf0251668a2d847acceb2a39af9dac2f13bb005f53759c774dbf7",
+    "kernel-open/common/inc/nv-linux.h": "b652154742225a92a808797b75e595ee5707cf6a9e8c2f0987ca78616f22a5b5"
   },
   "reference_copies": [
     {
@@ -24,14 +26,53 @@
       "kind": "FunctionDecl",
       "type": "NvBool (nv_state_t *)",
       "return_type": "NvBool",
-      "parameters": [{"name": "p0", "type": "nv_state_t *"}],
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "nv_state_t *"
+        }
+      ],
       "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
       "line": 1035,
       "declaration": "NvBool NV_API_CALL nv_requires_dma_remap(nv_state_t *);",
       "declaration_anchor": "NvBool     NV_API_CALL  nv_requires_dma_remap    (nv_state_t *);",
       "unavailable_policy": "entry-must-be-blocked-before-call",
-      "implementation_status": "missing-operational-backend",
-      "implementation_requirement": "An actual bound-device DMA-remapping policy is required. No Boolean is inferred from absent or unresolved mapper metadata."
+      "implementation_status": "provided-guarded-device-remap",
+      "implementation_requirement": "An actual bound-device DMA-remapping policy is required. No Boolean is inferred from absent or unresolved mapper metadata.",
+      "admission_requirement": "The exact bound nv_state must pass queryRmDmaRemap immediately before an original RM entry. An unknown, revoked or unsupported device route blocks entry; the scalar callback terminates on contract violation without publishing a fallback Boolean.",
+      "original_implementation": {
+        "source": "kernel-open/nvidia/nv.c",
+        "line": 5412,
+        "anchor": "NvBool NV_API_CALL nv_requires_dma_remap(",
+        "state_anchor": "    dma_remap = !nv_dma_maps_swiotlb(nvl->dev);",
+        "policy_source": "kernel-open/common/inc/nv-linux.h",
+        "policy_anchor": " * nv_dma_maps_swiotlb - return NV_TRUE if swiotlb is enabled"
+      },
+      "project_implementation": {
+        "bridge": "packages/nvidia-device-transport/src/S540NvidiaDeviceServices.cpp",
+        "bridge_anchor": "extern \"C\" NvBool NV_API_CALL s540Global_nv_requires_dma_remap(nv_state_t *state) {",
+        "bridge_anchors": [
+          "    if (queryRmDmaRemap(state, required) != NV_OK) dmaPolicyViolation();",
+          "    if (!stateValid(state)) return NV_ERR_INVALID_STATE;",
+          "    return binding.session->requiresDmaRemap(required);"
+        ],
+        "backend": "packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp",
+        "backend_anchors": [
+          "NV_STATUS dmaRemapPolicy(void *opaque, DmaRemapPolicy &policy) {",
+          "    const bool usable = live(p) && p->mapperMode == Mapper::Device && p->mapper &&",
+          "                        mapperStillValid(p);",
+          "    if (!usable) return NV_ERR_NOT_SUPPORTED;",
+          "    policy = DmaRemapPolicy::MapPhysicalPagesWithoutBounce;"
+        ],
+        "session": "packages/nvidia-device-transport/src/S540NvidiaDeviceTransport.cpp",
+        "session_anchors": [
+          "NV_STATUS Session::requiresDmaRemap(NvBool &required) {",
+          "    if (!backend_.dmaRemapPolicy) return NV_ERR_NOT_SUPPORTED;",
+          "    if (captured != DmaRemapPolicy::MapPhysicalPagesWithoutBounce)",
+          "    required = NV_TRUE;"
+        ],
+        "semantics": "NV_TRUE selects explicit no-bounce mapping of CPU physical PTEs, not IOMMU presence. The currently opened device must positively retain its published mapper; unsupported direct or unresolved routes cannot select a Boolean bypass."
+      }
     },
     {
       "symbol": "os_is_queue_flush_ongoing",
@@ -39,7 +80,12 @@
       "kind": "FunctionDecl",
       "type": "NvBool (struct os_work_queue *)",
       "return_type": "NvBool",
-      "parameters": [{"name": "p0", "type": "struct os_work_queue *"}],
+      "parameters": [
+        {
+          "name": "p0",
+          "type": "struct os_work_queue *"
+        }
+      ],
       "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
       "line": 140,
       "declaration": "NvBool NV_API_CALL os_is_queue_flush_ongoing(struct os_work_queue *);",

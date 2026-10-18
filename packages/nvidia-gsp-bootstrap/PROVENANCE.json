@@ -370,5 +370,27 @@
     "nv_get_disp_smmu_stream_ids": "Exact bound nv_state_t; copy original initialized iommus.dispIsoStreamId and dispNisoStreamId fields; no inferred stream identifiers.",
     "ownership": "Atomic publication after both real work queues bind; removal after queue drain and original private/event cleanup. Outer session owns callback quiescence.",
     "native_context_test": "16 checks, 4 explicit refusal child fixtures; actual tracked allocator and Darwin services; original RM callbacks are aborting traps, not executed."
+  },
+  "preparation_owner": {
+    "source": "src/S540NvidiaGspBootstrap.cpp",
+    "context_release": "two-phase; actual detacher before nv_state free",
+    "initialization": "refused-before-original-global-and-adapter-code",
+    "unresolved_gates": [
+      "complete-original-callback-closure",
+      "platform-power-lifetime",
+      "aggregate-original-stack-policy",
+      "allocation-retirement-under-active-irqs"
+    ],
+    "local_native_checks": 43,
+    "original_entry_tripwires": true,
+    "firmware_bytes": "approved-pair; owned immutable copies",
+    "hardware_execution": false
+  },
+  "context_lifecycle": {
+    "local_native_checks": 24,
+    "real_timer_service": true,
+    "original_callbacks": "explicit typed fixtures",
+    "failed_detach": "retained-and-retryable",
+    "timer_bound_positive_detach": "refused-before-free"
   }
 }

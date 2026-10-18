@@ -12,6 +12,14 @@
         "sha256": "ae47af242f37db76255094628d79c31ac0a63906452a71a4df6390f76f7585d2"
       },
       {
+        "path": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "sha256": "02ce4b371e0a8dd26f62a320e88c8382dcf31a21b727503a66abcaea9eecf09b"
+      },
+      {
+        "path": "kernel-open/common/inc/nv-linux.h",
+        "sha256": "b652154742225a92a808797b75e595ee5707cf6a9e8c2f0987ca78616f22a5b5"
+      },
+      {
         "path": "kernel-open/nvidia/nv.c",
         "sha256": "ce04946d288cf0251668a2d847acceb2a39af9dac2f13bb005f53759c774dbf7"
       },
@@ -68,7 +76,25 @@
     "private_linux_layouts_redefined": false,
     "failure_preserves_inout_ownership": true,
     "successful_dma_mapping_has_distinct_token": true,
-    "quarantine_on_failed_completion": true
+    "quarantine_on_failed_completion": true,
+    "never_armed_original_unwind": true,
+    "partial_controller_enable_retains_dma": true,
+    "active_irq_rm_retirement_complete": false
+  },
+  "dma_remap_policy": {
+    "abi": "NvBool NV_API_CALL nv_requires_dma_remap(nv_state_t *);",
+    "namespace_symbol": "s540Global_nv_requires_dma_remap",
+    "original_semantics": "Inverse of nv_dma_maps_swiotlb for the bound device; selects explicit DMA mapping of CPU physical PTEs, not IOMMU presence.",
+    "supported_policy": "MapPhysicalPagesWithoutBounce",
+    "supported_scalar": "NV_TRUE",
+    "bypass_pte_path": "not_implemented",
+    "provider_attestation": "Retained published device IOMapper for the opened PCI provider, still identical under provider arbitration at each query.",
+    "unattested_direct_mapper": "refused_without_boolean",
+    "pre_entry_session_gate": "NV_STATUS Session::requiresDmaRemap(NvBool &)",
+    "bound_state_gate": "NV_STATUS queryRmDmaRemap(nv_state_t *, NvBool &)",
+    "query_failure_preserves_output": true,
+    "scalar_unavailable_policy": "entry-must-be-blocked-before-call; non-returning contract violation if called without an attested bound policy",
+    "kernel_policy_execution": "not_tested"
   },
   "source_anchors": {
     "dma_ownership": "kernel-open/nvidia/nv-dma.c:480-741",
@@ -77,10 +103,14 @@
     "device_dma_width": "kernel-open/nvidia/nv-pci.c:2313 and src/nvidia/arch/nvalloc/unix/src/osinit.c:1612",
     "initial_configuration_writes": "src/nvidia/arch/nvalloc/unix/src/osinit.c:osInitMapping",
     "mapper_state": "xnu/iokit/Kernel/IOMapper.cpp and IOPlatformExpert.cpp",
+    "dma_remap_declaration": "src/nvidia/arch/nvalloc/unix/include/nv.h:1035",
+    "dma_remap_scalar": "kernel-open/nvidia/nv.c:5412-5419",
+    "dma_remap_bounce_semantics": "kernel-open/common/inc/nv-linux.h:968-978",
+    "dma_remap_pte_semantics": "kernel-open/nvidia/nv.c:4112-4127",
     "initial_interrupt_mask": "xnu/iokit/Kernel/IOInterruptController.cpp and IOPCIFamily/IOPCIMessagedInterruptController.cpp"
   },
   "local_evidence": {
-    "native_assertions": 242,
+    "native_assertions": 307,
     "lifecycle_cycles": 128,
     "mapped_exercise_checks": 21,
     "unavailable_mapper_exercise_checks": 19,
