@@ -118,8 +118,8 @@ That is compilation evidence, not execution in the Tahoe kernel. A private
 native development control constructs and destroys the real global RM with
 explicit platform and privileged-CPU fixtures. Seven explicit cleanup overlays
 now pass all 148 allocation-failure positions, normal startup and same-process
-memory-failure recovery in that control. The adapted source/header profile
-still requires production integration and authoritative Darwin validation.
+memory-failure recovery in that control. The adapted source/header profile compiled in authoritative Intel macOS CI;
+its production integration and original lifecycle execution remain required.
 Scalar or void OS callbacks cannot be filled with fabricated successful
 defaults to make the adapter link.
 
@@ -131,9 +131,7 @@ bound. The bootstrap-owner harness uses those real components, the Session and
 Store, actual approved firmware bytes and explicit platform observations. Its
 43 checks include initialization refusal, capacity admission, OS-string lifetime,
 wrong-thread rejection and retained owners after firmware/platform/transport
-cleanup failures. Both harnesses pass local plain and fatal ASan/UBSan controls;
-Darwin, namespace and function-type sanitizer validation belong to native CI.
-The existing metadata harness retains its 16 checks.
+cleanup failures. Both harnesses passed local controls and the [native Intel macOS build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39169319480) from `d81b198`, with the original namespace and fatal address, undefined-behavior and function-type sanitizers. The existing metadata harness retained its 16 checks. All 25 production units compiled with matched SDK imports; the combined CPU/contract suite passed 1,594 checks per variant. Original kernel/GSP execution remains unconfirmed.
 
 The development workflow emits validation records only. It cannot create an
 installable candidate or change the working EFI. Actual GSP execution,

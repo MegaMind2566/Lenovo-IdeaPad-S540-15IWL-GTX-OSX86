@@ -129,7 +129,10 @@ confirm that scalar callback violations terminate without a fabricated result.
 
 Local Linux execution passed plain and fatal AddressSanitizer/UndefinedBehaviorSanitizer
 runs. LeakSanitizer could not run in the local container because process/task
-inspection was unavailable. The four production C++ files and independent SDK
-reference cross-compile to x86_64 Mach-O with the 4 KiB kernel frame bound and
-warnings treated as errors. Their 32 SDK imports match exactly. Native Apple
-compiler/linker validation and physical adapter execution remain separate gates.
+inspection was unavailable. The earlier isolated component cross-probe matched its 32-operation SDK
+reference. The current [native Apple build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39169319480) from `d81b198` compiled the actual transport inside all 25 execution
+units and matched the complete reviewed platform-import set; the DMA-policy
+violation path reuses the already reviewed panic import. All 307 transport
+checks passed plain and with fatal address, undefined-behavior and function-type
+sanitizers. The exact policy ABI compiled against the original NVIDIA header.
+Physical adapter execution remains unverified.
