@@ -113,7 +113,7 @@ Priorities updated on 13 October 2026: the panel being off during boot is **reso
 | CPU, battery and fans | X86PlatformPlugin active; idle temperatures 45–48 °C and median estimated Intel package power 1.05 W. Activity session: 15/15 valid temperatures, 57–82 °C; simultaneous recorded maximum 82 °C, 35.62 W and 3.44 GHz; final 57 °C. Nominal pressure throughout. SMC drivers 1.3.8 loaded. Battery Power at 100%, discharging after AC removal | Fan telemetry, sustained cooling, dGPU status and measured battery runtime; the earlier isolated missing load sample remains unexplained |
 | Sleep | pmset records Sleep Count 1, User Wake Count 1 and Dark Wake Count 0; [data retained](battery-sleep.md) | Tests deferred: peripheral recovery, lid behaviour and extended sleep still to be verified |
 | Webcam | Working; image capture confirmed alongside the internal microphone | Retain the current configuration; recovery after sleep remains part of the deferred wake checks |
-| O2Micro SD reader | PCI 1217:8621 present; native AppleSDXC 3.5.4 loaded but not attached | [Native matching trial](../../packages/sd-native/README.md) prepared for the 240 GB test EFI; attachment, card mounting/reading and reinsertion pending |
+| O2Micro SD reader | User reports reader visible in System Information after the native matching trial, but SD card unreadable | New SPX with card inserted to distinguish driver attachment, card media and volume mounting; native SD support remains unconfirmed |
 | Fingerprint reader | Goodix 27C6:55B4 on internal HS02; only generic USB services in the October 19 IORegistry | Assess driver and biometric integration; enumeration is not Touch ID support |
 | HDMI | No image; macOS display report lists only the internal panel | Identify the connected external display's owning GPU in Windows before selecting a fix |
 | USB-C video | No video test available; video capability and routing not verified; USB data works | Check hardware capability from documentation; keep separate from the observed HDMI failure |
@@ -192,3 +192,9 @@ loaded native AppleSDXC driver. Only its compatible property changes; no older
 driver is distributed. Matching and card operation are unverified. The internal
 SSD remains readable and is no longer an immediate fix priority. USB/BT/battery
 settings are retained; no blanket sleep or EC/fan patch follows from the SPX.
+
+The first native SD trial is not a successful reading result: the user sees the
+reader in System Information but the card is unreadable. A new SPX with the card
+inserted is the next evidence step. The next delivered package must also remove
+the internal SSD kernel block, as explicitly requested; no immediate separate
+config mutation is authorized by that timing instruction.

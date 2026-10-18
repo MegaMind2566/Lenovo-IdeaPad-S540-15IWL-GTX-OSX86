@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "prepared-unverified",
+  "status": "reader-enumerated-card-unreadable-user-report",
   "target": "Lenovo IdeaPad S540-15IWL GTX 81SW",
   "boot_scope": "external 240 GB test EFI",
   "kernel": "Darwin 25 / x86_64",
@@ -18,7 +18,8 @@
     "version": "3.5.4",
     "architecture": "x86_64",
     "loaded": true,
-    "attached_to_reader": false
+    "attached_to_reader": false,
+    "snapshot_phase": "before-native-matching-trial"
   },
   "trial": {
     "property": "compatible",
@@ -44,5 +45,18 @@
     "a test SD card creates a block-storage media object and mounts",
     "a file can be read without errors",
     "card eject and reinsertion work"
-  ]
+  ],
+  "laptop_result": {
+    "date": "2026-10-19",
+    "source": "user report after the native matching trial",
+    "reader_visible_in_system_information": true,
+    "card_reading_confirmed": false,
+    "driver_attachment_verified_after_trial": false,
+    "media_enumeration_verified_after_trial": false,
+    "next_evidence": "new System Information export with the SD card inserted"
+  },
+  "next_package": {
+    "remove_internal_nvme_kernel_block": true,
+    "authorization": "user requested removal in the next package only; current delivery unchanged"
+  }
 }

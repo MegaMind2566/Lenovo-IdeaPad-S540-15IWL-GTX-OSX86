@@ -1,6 +1,7 @@
 # O2Micro SD reader: native-driver trial
 
-Prepared, **not laptop-confirmed**, for the S540-15IWL GTX 81SW and its external
+Trial result: **reader visible, card unreadable**, as reported by the user on
+October 19. Target: S540-15IWL GTX 81SW and its external
 240 GB test EFI. The operating system remains on the separate USB Samsung SSD.
 
 The October 19 System Information/IORegistry export identifies the O2Micro
@@ -53,3 +54,22 @@ justifying USB, Bluetooth or battery changes. The lid device is attached; the
 clamshell policy needs further analysis before a sleep patch. Fan telemetry
 requires verified EC addresses/scaling. Goodix enumeration does not supply native
 Touch ID support. These areas are not silently modified by the SD trial.
+
+
+## Reported trial result: October 19
+
+The user reports that the reader appears in System Information but does not read
+the SD card. This is not a successful card-access checkpoint. Without a new
+IORegistry snapshot, neither driver attachment after this trial nor publication
+of a card media object is established. A filesystem/mounting problem cannot yet
+be distinguished from card initialization or driver-matching failure.
+
+The minimum next evidence is a new System Information export with the SD card
+inserted. Its IORegistry, Card Reader and storage sections can show the chain
+from PCI reader to driver, media/BSD disk and volume. The earlier export predates
+this trial and cannot prove the updated state. Read back the installed AppleSDXC
+personality if matching remains unresolved; no next driver patch is selected yet.
+
+The user also requested removal of the internal-NVMe kernel block **in the next
+package**, not as an immediate separate change. That removal is queued. Existing
+private deliveries are not silently changed while diagnosing this result.
