@@ -356,3 +356,14 @@ patch. MacBookPro16,2 and all other platform identifiers are preserved. Both
 baseline and trial pass OpenCore 1.0.8 ocvalidate, and reversing the explicit edits
 reproduces the baseline. Displayed names remain **pending a laptop reboot**;
 no NVIDIA acceleration or new peripheral support is added by these labels.
+
+
+### Next hardware trial
+
+The user considers the internal SSD operational; the export confirms volume
+readability and free-space reporting. It is removed from immediate fix priorities.
+The [SD native matching trial](../../packages/sd-native/README.md) now targets
+the exact O2Micro 1217:8621 path through its compatible property, while retaining
+real IDs and original compatibility entries. Native AppleSDXC 3.5.4 is loaded,
+but its matching personality and actual card operation remain unverified. No
+USB, Bluetooth, battery or sleep-policy setting is changed by this trial.

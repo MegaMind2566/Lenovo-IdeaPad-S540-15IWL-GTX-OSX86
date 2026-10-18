@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "status": "prepared-unverified",
+  "target": "Lenovo IdeaPad S540-15IWL GTX 81SW",
+  "boot_scope": "external 240 GB test EFI",
+  "kernel": "Darwin 25 / x86_64",
+  "reader": {
+    "vendor_id": "1217",
+    "device_id": "8621",
+    "subsystem_vendor_id": "17AA",
+    "subsystem_id": "3803",
+    "class_code": "080501",
+    "acpi_path": "\\_SB.PCI0.RP04.PXSX",
+    "pci_path": "PciRoot(0x0)/Pci(0x1C,0x0)/Pci(0x0,0x0)"
+  },
+  "driver_observed": {
+    "bundle_id": "com.apple.driver.AppleSDXC",
+    "version": "3.5.4",
+    "architecture": "x86_64",
+    "loaded": true,
+    "attached_to_reader": false
+  },
+  "trial": {
+    "property": "compatible",
+    "type": "Data",
+    "prepend_nul_terminated_ascii": "pci14e4,16bc",
+    "preserve_existing_compatible_entries": true,
+    "preserve_hardware_vendor_and_device_ids": true,
+    "additional_kexts": [],
+    "property_match_verified_for_installed_driver": false
+  },
+  "evidence": [
+    {
+      "source": "private System Information export with IORegistry, October 19 2026",
+      "scope": "exact reader path, IDs, original compatible list, loaded AppleSDXC 3.5.4; no SD driver attached"
+    },
+    {
+      "source": "https://github.com/KrzysiuWojcik/Fujitsu-Lifebook-U749-Hackintosh/blob/main/README.md",
+      "scope": "same 1217:8621 reported working on Monterey/Ventura via 14e4:16bc plus CtlnaSDXC; Tahoe explicitly untested, not evidence of this native trial working"
+    }
+  ],
+  "acceptance": [
+    "AppleSDXC service attaches under the physical 1217:8621 reader",
+    "a test SD card creates a block-storage media object and mounts",
+    "a file can be read without errors",
+    "card eject and reinsertion work"
+  ]
+}

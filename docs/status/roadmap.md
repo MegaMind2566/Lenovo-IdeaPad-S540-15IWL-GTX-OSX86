@@ -108,12 +108,12 @@ Priorities updated on 13 October 2026: the panel being off during boot is **reso
 | ALC257 audio | Speaker/headphone output, automatic switching, wired-headset input and F1–F3 confirmed; internal microphone fix v2 retained; quiet-volume correction confirmed during YouTube playback | Retain the full DAC-range correction; equalisation and resume checks deferred |
 | USB-A and USB-C | 9-port map verified; Samsung/RTL9210 at 5 Gb/s in both USB-C orientations; Initio enclosure at 5 Gb/s on both tested USB-A connectors | External USB 2 devices and sustained storage use; SuperSpeed links and file reads are confirmed for both USB-A connectors |
 | External Samsung 960 EVO | Independent boot confirmed; current enclosure link 5 Gb/s | Sustained storage use without disconnections and measured throughput; resume remains part of deferred wake checks |
-| Internal PM981a NVMe | October 19 IORegistry shows IONVMeController attached and Windows volumes readable, despite the configured driver block | Verify the intended exclusion and macOS reliability; SMART/TRIM do not establish compatibility |
+| Internal PM981a NVMe | Detected and readable, including Windows volume capacity/free space | Removed from immediate fix priorities by the user; retain Windows and current access. The configured block is ineffective but is not itself a disk fault |
 | Display and brightness | Intel Metal 3 and internal 1920×1080 main panel remain active; brightness works with the non-NVIDIA EFI but is unavailable with a disabled slider in the NVIDIA-test EFI | Cause not isolated; brightness work deferred by request, with no new tests or patches |
 | CPU, battery and fans | X86PlatformPlugin active; idle temperatures 45–48 °C and median estimated Intel package power 1.05 W. Activity session: 15/15 valid temperatures, 57–82 °C; simultaneous recorded maximum 82 °C, 35.62 W and 3.44 GHz; final 57 °C. Nominal pressure throughout. SMC drivers 1.3.8 loaded. Battery Power at 100%, discharging after AC removal | Fan telemetry, sustained cooling, dGPU status and measured battery runtime; the earlier isolated missing load sample remains unexplained |
 | Sleep | pmset records Sleep Count 1, User Wake Count 1 and Dark Wake Count 0; [data retained](battery-sleep.md) | Tests deferred: peripheral recovery, lid behaviour and extended sleep still to be verified |
 | Webcam | Working; image capture confirmed alongside the internal microphone | Retain the current configuration; recovery after sleep remains part of the deferred wake checks |
-| O2Micro SD reader | PCI 1217:8621 present; no specific child driver in the October 19 IORegistry | Applicable driver and reading a card |
+| O2Micro SD reader | PCI 1217:8621 present; native AppleSDXC 3.5.4 loaded but not attached | [Native matching trial](../../packages/sd-native/README.md) prepared for the 240 GB test EFI; attachment, card mounting/reading and reinsertion pending |
 | Fingerprint reader | Goodix 27C6:55B4 on internal HS02; only generic USB services in the October 19 IORegistry | Assess driver and biometric integration; enumeration is not Touch ID support |
 | HDMI | No image; macOS display report lists only the internal panel | Identify the connected external display's owning GPU in Windows before selecting a fix |
 | USB-C video | No video test available; video capability and routing not verified; USB data works | Check hardware capability from documentation; keep separate from the observed HDMI failure |
@@ -183,3 +183,12 @@ The BrightnessKeys companion fix provides the retained non-NVIDIA EFI baseline. 
 All twelve Fn key identities are recorded. The [Fn shortcut setup](../../packages/function-keys-setup/README.md) has disabled the four existing plain F9–F12 macOS bindings; application behavior is pending the laptop's normal session refresh. Observer 1.1.1 completed seven targeted windows without interruption: direct and Fn F5 have identical complete session events, direct F9 sends Command-L, direct F10 sends Command-P, and direct F4/F7/F8 have no retained event.
 
 The bounded driver collector stopped after three empty F4/F5/Fn+F5 windows because its F5 positive controls did not verify log visibility. Logging restoration is confirmed. This result does not identify any missing hardware event or justify a key mapping. Additional keyboard diagnostics are deferred. Only a demonstrated input distinction can justify a global remap. Browser-specific F5 Reload is also possible without changing its ordinary function-key identity; no browser override has been applied. Missing PS/2 observations would lead to a separate guarded VPC investigation, not a guessed ACPI patch.
+
+
+## Hardware follow-up: 19 October 2026
+
+The next isolated hardware trial targets the O2Micro SD reader with the already
+loaded native AppleSDXC driver. Only its compatible property changes; no older
+driver is distributed. Matching and card operation are unverified. The internal
+SSD remains readable and is no longer an immediate fix priority. USB/BT/battery
+settings are retained; no blanket sleep or EC/fan patch follows from the SPX.
