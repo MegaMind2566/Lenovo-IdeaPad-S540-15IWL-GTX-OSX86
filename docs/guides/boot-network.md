@@ -1,6 +1,6 @@
 # Panel off at startup, Bluetooth, and Wi-Fi
 
-The panel delay was resolved in the result reported on October 13, 2026: the black-screen wait fell **from about two minutes to zero** after the `-igfxblr`-only trial. Keep this configuration. Working Bluetooth headphones and HeliPort were reported on October 14, 2026. Keep the current Intel firmware, BlueToolFixup, and itlwm. Battery information and counters are preserved in [Battery and sleep](../status/battery-sleep.md). Further sleep checks, function keys, and equalization are deferred.
+The panel delay was resolved in the result reported on October 13, 2026: the black-screen wait fell **from about two minutes to zero** after the `-igfxblr`-only trial. Keep this configuration. Working Bluetooth headphones and HeliPort were reported on October 14, 2026. Intel firmware and BlueToolFixup are retained; itlwm is now the historical fallback to the native Wi-Fi checkpoint below. Battery information and counters are preserved in [Battery and sleep](../status/battery-sleep.md). Further sleep checks, function keys, and equalization are deferred.
 
 ## Distinguish system startup from panel power-on
 
@@ -54,15 +54,23 @@ The report shows Bluetooth State On, FirmwareLoaded=Yes, a connected transport, 
 
 ## Wi-Fi listed as Ethernet
 
+The first two paragraphs below describe the historical itlwm/HeliPort fallback.
+The current native AirportItlwm checkpoint follows them.
+
 This is the expected behavior of itlwm 2.3.0: it uses IOEthernetController. Renaming the service does not turn it into an IO80211 device. Networks can be managed through HeliPort or driver profiles; the project states that this representation does not reduce performance.
 
-The desktop report confirms itlwm 2.3.0 and the Ethernet service on en0. To select networks from the menu bar, use [official HeliPort 1.5.0](https://github.com/OpenIntelWireless/HeliPort/releases/tag/v1.5.0), with the [release DMG](https://github.com/OpenIntelWireless/HeliPort/releases/download/v1.5.0/HeliPort.dmg). The app is the itlwm client: it does not change the classification in the macOS network settings. HeliPort was reported as working on October 14, 2026. This result is not a speed measurement or a Continuity feature check.
+The desktop report confirms itlwm 2.3.0 and the Ethernet service on en0. The former setup selected networks from the menu bar with [official HeliPort 1.5.0](https://github.com/OpenIntelWireless/HeliPort/releases/tag/v1.5.0), with the [release DMG](https://github.com/OpenIntelWireless/HeliPort/releases/download/v1.5.0/HeliPort.dmg). The app is the itlwm client: it does not change the classification in the macOS network settings. HeliPort was reported as working on October 14, 2026. This result is not a speed measurement or a Continuity feature check.
 
-The official stable AirportItlwm 2.3.0 release has packages up to Sonoma, without a Tahoe asset. On October 19, 2026, the requested [native AC9560 Tahoe integration](../../packages/wifi-native/README.md) started using laobamac's native Tahoe fork at `738d4c6`. Its pinned source contains the exact `8086:9DF0` match and `iwm-9000-46` firmware path. The new builder targets Tahoe's WCL / IO80211 / Skywalk stack; it does not restore older Apple frameworks or apply root patches. The staging helper prepares a separate EFI copy and disables itlwm only in that copy. Native laptop operation remains unconfirmed; the working connection still uses HeliPort. AWDL/AirDrop is unsupported in the selected fork.
+The official stable AirportItlwm 2.3.0 release has packages up to Sonoma, without a Tahoe asset. On October 19, 2026, the requested [native AC9560 Tahoe integration](../../packages/wifi-native/README.md) used laobamac's native Tahoe fork at `738d4c6`. Its pinned source contains the exact `8086:9DF0` match and `iwm-9000-46` firmware path. The builder targets Tahoe's WCL / IO80211 / Skywalk stack without restoring older Apple frameworks or applying root patches. Native menu/settings, network visibility, connection and browsing are user-confirmed. Reboot reconnection and Wi-Fi recovery after sleep were also reported working. No new kernel report was analyzed, and these observations do not validate other devices after sleep. AWDL/AirDrop remains unsupported in the selected fork.
+
+The confirmed delivery used a prepared private config and the compiled kext copied manually into the current EFI. The optional automatic stager stopped at its payload-manifest check before copying. The existing network service initially retained the name `Ethernet`, but already displayed the Wi-Fi icon and wireless settings. Renaming that service to `Wi-Fi` corrected the label. The Wi-Fi sidebar and Network service are two settings paths to the same connection.
 
 ## Connection performance baseline
 
-Wireless disconnection/reconnection and network switching are already confirmed. The next performance observation uses the working itlwm/HeliPort connection without changing the driver or its Ethernet presentation. Close the laptop's downloads and streams, keep HeliPort connected to the usual network, and run Apple's built-in command:
+The following observations used the former itlwm/HeliPort connection. They predate
+the native AirportItlwm migration and do not measure the current native driver.
+
+Wireless disconnection/reconnection and network switching are already confirmed. The first performance observation used the working itlwm/HeliPort connection without changing the driver or its Ethernet presentation. Its procedure was to close downloads and streams, keep HeliPort connected to the usual network, and run Apple's built-in command:
 
 ```sh
 networkQuality
@@ -81,7 +89,7 @@ No additional collector, archive, reboot or EFI change is required. Exclude netw
 | Responsiveness under load | Low: 1.023 seconds / 58 RPM |
 | Idle latency | 41.376 ms / 1450 RPM |
 
-The delay is elevated during the concurrent test, but no subscribed-line baseline or comparison client result is available. The measurement does not locate the bottleneck or establish an itlwm defect. Keep the current driver.
+The delay is elevated during the concurrent test, but no subscribed-line baseline or comparison client result is available. The measurement does not locate the bottleneck or establish an itlwm defect. That result did not justify changing the then-current itlwm driver.
 
 For one controlled diagnostic comparison, retain the same network and laptop position, stop the laptop's other transfers, and measure the directions sequentially:
 
@@ -101,7 +109,7 @@ Sequential mode separates upload and download responsiveness. A better result wo
 | Downlink responsiveness | Medium: 144.830 ms / 414 RPM |
 | Idle latency | 33.658 ms / 1782 RPM |
 
-The sequential trial reports higher capacity than the concurrent baseline, and the larger loaded delay is in the uplink. The difference shows sensitivity to test conditions in these observations; it does not isolate radio, driver, router, ISP or endpoint. No line-rate or independent-client reference is available. Keep itlwm/HeliPort unchanged. Further network investigation is deferred while the reported quiet-volume issue is addressed.
+The sequential trial reports higher capacity than the concurrent baseline, and the larger loaded delay is in the uplink. The difference shows sensitivity to test conditions in these observations; it does not isolate radio, driver, router, ISP or endpoint. No line-rate or independent-client reference is available. At that checkpoint, itlwm/HeliPort was retained and further network investigation was deferred while the reported quiet-volume issue was addressed.
 
 ## Checks and limitations
 

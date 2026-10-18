@@ -3,12 +3,34 @@
 Development trial for **Lenovo IdeaPad S540-15IWL GTX 81SW**, Intel Wireless-AC
 9560 **8086:9DF0**, macOS Tahoe 26 / Darwin 25, x86_64, OpenCore 1.0.8.
 
-The existing itlwm 2.3.0 / HeliPort connection is confirmed working. This component
-starts the requested migration to the native macOS Wi-Fi interface. It uses
+The former itlwm 2.3.0 / HeliPort connection is retained as a working fallback.
+This component provides the now user-confirmed native macOS Wi-Fi interface. It uses
 [laobamac's AirportItlwm Tahoe source](https://github.com/laobamac/itlwm), derived
 from OpenIntelWireless and OpenBSD, at commit
 `738d4c61b5a64433b27c1ab09dba94916ab77d8d`. It is an integration of that driver,
-not a new implementation of Intel's radio stack. Laptop operation is **pending**.
+not a new implementation of Intel's radio stack. Basic laptop operation is
+**confirmed by the user on October 19, 2026**.
+
+## Confirmed laptop checkpoint
+
+The native macOS menu and settings show the Wi-Fi switch, available networks and
+an active wireless connection. The user confirmed joining a network and Internet
+browsing, then reported reboot reconnection and Wi-Fi recovery after sleep working.
+These are user observations and supplied settings screenshots; no new kernel or
+collector report was analyzed. Wi-Fi recovery does not establish complete laptop
+suspend/wake behavior for other devices.
+
+The existing service retained the name `Ethernet`, while already showing a Wi-Fi
+icon and the native wireless settings. Renaming that service to `Wi-Fi` corrected
+the label; it was the same active connection shown through two settings paths.
+
+The successful route used the compiled and signed driver from native Intel macOS
+CI run [39171971175](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39171971175),
+plus a prepared private copy of the user's current config. Only the existing
+itlwm entry was disabled and the Tahoe-only AirportItlwm entry added. Both the
+original and updated configurations passed OpenCore 1.0.8 `ocvalidate`. The two
+items were copied manually into the current EFI. Native network switching,
+measured performance and long-term reliability remain unverified.
 
 ## First milestone
 
@@ -25,9 +47,9 @@ change SIP, AMFI, SecureBootModel, IOMapper settings, Bluetooth or NVIDIA.
 
 The selected fork describes scanning, joining, switching and private addresses.
 It supports WPA2-Personal and WPA2/WPA3 transition networks with optional PMF.
-WPA3-only, mandatory PMF, AWDL/AirDrop and MLO are unsupported. All adapter-specific
-behavior still needs verification on this AC9560. No speed or Continuity result
-is claimed. Wi-Fi 6 settings are not relevant to this 802.11ac adapter.
+WPA3-only, mandatory PMF, AWDL/AirDrop and MLO are unsupported. The confirmed basic
+AC9560 behavior is described above; no speed or Continuity result is claimed.
+Wi-Fi 6 settings are not relevant to this 802.11ac adapter.
 
 ## Build
 
@@ -50,7 +72,13 @@ On other hosts, source inspection is available with `--audit-only`; it neither
 compiles a driver nor establishes laptop operation. A successful macOS build also
 does not prove kernel loadability or radio operation on Tahoe.
 
-## Prepare one offline EFI trial
+## Optional offline EFI staging
+
+The automatic preparation attempt stopped at its manifest payload-coverage check,
+before copying the EFI. Extra Finder metadata such as `.DS_Store` reproduces the
+same refusal; the extra paths in the user's attempt were not collected. Automatic
+staging on the laptop remains unconfirmed. The successful checkpoint used the
+prepared private config and compiled kext copied manually, as described above.
 
 These commands refer to the **built, extracted package**, not the source folder.
 Python 3 is required on the laptop. Keep the current working boot route available.

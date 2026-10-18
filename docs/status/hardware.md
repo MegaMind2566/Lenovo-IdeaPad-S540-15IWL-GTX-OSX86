@@ -13,7 +13,7 @@ Report received on 12 October 2026. Only data relevant to the project is include
 | dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91; subsystem 17AA:3806; revision A1 | Probe attachment, fixed PCI configuration/resource reads, two identification reads and local TU117 variant-41 table match confirmed; no HAL instance, initialized GPU or acceleration |
 | Display | BOE NV156FHM-N61, 1920×1080 | Internal panel and Intel Metal remain active. Brightness works with the non-NVIDIA EFI; adjustment is unavailable with a disabled slider in the NVIDIA-test EFI. Cause not isolated; work deferred |
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Problematic PM981a family; compatibility is not assumed |
-| Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | itlwm 2.3.0 loaded and HeliPort reported working; Ethernet presentation is expected with this driver; disconnection, reconnection and network switching confirmed; Internet baseline 15.751 Mb/s down / 63.036 Mb/s up with Low loaded responsiveness; cause unresolved |
+| Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | Native AirportItlwm basic operation user-confirmed on October 19: menu/settings, network visibility, joining and browsing, reboot reconnection and Wi-Fi recovery after sleep. Previous itlwm/HeliPort measurements remain historical; native performance is unmeasured |
 | Bluetooth | Intel, USB 8087:0AAA | Headphone playback, microphone, disconnection and reconnection confirmed; firmware loaded, correct NVRAM and IntelBTPatcher excluded |
 | Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Speaker/headphone output, automatic switching, wired-headset input and F1–F3 confirmed; S540 microphone fix v2 retained; quiet-volume correction confirmed during YouTube playback; equalisation and resume checks deferred |
 | Keyboard | PS/2 | VoodooPS2; direct F1–F3 and F6 working. Brightness works with the non-NVIDIA EFI; the NVIDIA-test EFI adjustment regression and remaining icon work are deferred |
@@ -107,6 +107,9 @@ The test using only `-igfxblr` eliminated the boot blackout in the reported resu
 Bluetooth status is On, FirmwareLoaded is Yes and the transport is connected; BlueToolFixup 2.7.2 and IntelBluetoothFirmware 2.4 are loaded, while IntelBTPatcher is absent. The two required NVRAM variables are present with the correct values: one zero byte and fourteen zero bytes. The stack starts scanning and receives BLE devices. On 14 October 2026, operation with Bluetooth headphones was reported, together with HeliPort operation for Wi-Fi network management. The current drivers and NVRAM are retained. The Bluetooth headset microphone was subsequently confirmed working on 14 October 2026. Playback and headset voice capture are therefore established as working. Disconnection and reconnection of both Wi-Fi and Bluetooth, together with Wi-Fi network switching, were also confirmed. Wired headphone output, automatic speaker switching and wired-headset microphone input were subsequently confirmed. Sleep recovery belongs to the deferred wake checks.
 
 ## Internet connection baseline: October 14, 2026
+
+These measurements used the former itlwm/HeliPort connection. They do not measure
+the native AirportItlwm driver subsequently confirmed on October 19.
 
 The built-in `networkQuality` summary reports **15.751 Mb/s downlink**, **63.036 Mb/s uplink**, **Low responsiveness at 1.023 seconds / 58 RPM**, and **idle latency 41.376 ms / 1450 RPM**. This is the default concurrent upload/download test on the current connection. The connection remains functional; the observed low loaded responsiveness does not by itself identify a Wi-Fi driver fault.
 

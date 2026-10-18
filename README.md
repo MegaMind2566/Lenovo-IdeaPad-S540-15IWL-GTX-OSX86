@@ -20,7 +20,7 @@ Tahoe boots directly from the external Samsung 960 EVO, with Intel graphics acce
 
 ## Compatibility
 
-Current status as of **October 15, 2026**. **Pending** means the feature has not yet been established as working or not working.
+Current status as of **October 19, 2026**. **Pending** means the feature has not yet been established as working or not working.
 
 | Feature | Status | Details |
 |---|---|---|
@@ -32,7 +32,7 @@ Current status as of **October 15, 2026**. **Pending** means the feature has not
 | Wired headphone output and switching | Working | Jack output works; speakers mute on connection and resume after unplugging |
 | Wired headset microphone | Working | Microphone input through the 3.5 mm combo jack |
 | Internal microphone | Working | S540 microphone correction v2 |
-| Wi-Fi through HeliPort | Working | Intel AC9560 with itlwm; disconnection, reconnection and network switching confirmed |
+| Wi-Fi through HeliPort | Retained fallback | Previous itlwm configuration worked, including reconnection and network switching; the current connection uses native AirportItlwm |
 | Bluetooth headphone audio and microphone | Working | Playback, headset voice capture, disconnection and reconnection confirmed |
 | Webcam | Working | Image capture confirmed alongside the internal microphone |
 | CPU power management | Working | X86PlatformPlugin active; frequency and estimated package power respond to activity |
@@ -61,7 +61,7 @@ Current status as of **October 15, 2026**. **Pending** means the feature has not
 | Battery runtime / sleep and wake | Pending | Measured runtime and device recovery; basic battery power is confirmed |
 | NVIDIA electrical power-off | Pending | Deferred until after the driver-port attempt; PCI visibility does not establish electrical power state |
 | NVIDIA acceleration | Not working | GTX 1650 Max-Q has no supported driver in this configuration |
-| Native macOS Wi-Fi interface | Development started | [AC9560 Tahoe integration](packages/wifi-native/README.md) uses a pinned native AirportItlwm fork; laptop validation pending. The operating EFI still uses HeliPort |
+| Native macOS Wi-Fi interface | Working basic functions | [AC9560 Tahoe integration](packages/wifi-native/README.md): native menu/settings, network visibility, connection and browsing confirmed by the user; reboot reconnection and Wi-Fi recovery after sleep also reported working. Service renamed from Ethernet to Wi-Fi |
 | HDMI output | Not working | No image or external display in the macOS report; physical GPU routing under investigation |
 
 Detailed hardware information is in [Hardware](docs/status/hardware.md).
@@ -87,7 +87,7 @@ Development is grouped into complete integration milestones. The completed v7 bu
 - Complete Intel stability and power-management coverage; sustained cooling and fan telemetry remain open. External-display work is paused.
 - Complete remaining device support and investigate connection performance from the recorded Internet baseline; wired/Bluetooth microphones, headphone switching and wireless reconnection work.
 - Retain the working keyboard controls; remaining icon actions, equalization and sleep refinements are deferred.
-- Start the requested [native AC9560 Wi-Fi integration](packages/wifi-native/README.md) with the pinned AirportItlwm Tahoe target, an offline EFI staging tool and one combined reporter. The current HeliPort EFI remains the working route until the laptop checkpoint. NVIDIA electrical power-off remains deferred until after the driver-port attempt.
+- Retain the working [native AC9560 Wi-Fi integration](packages/wifi-native/README.md). Basic native operation, reboot reconnection and Wi-Fi recovery after sleep are user-confirmed; measured performance and long-term reliability remain separate. NVIDIA electrical power-off remains deferred until after the driver-port attempt.
 
 See the [Roadmap](docs/status/roadmap.md) for the implementation plan.
 
