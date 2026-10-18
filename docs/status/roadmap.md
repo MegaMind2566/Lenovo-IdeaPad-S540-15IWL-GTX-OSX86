@@ -78,6 +78,7 @@ The [CPU and sensor reports](cpu-thermal.md) confirm frequency/power response an
 | Order | Work | Remaining scope |
 |---|---|---|
 | Now | NVIDIA global RM and device/GPU integration | [V9](../../packages/nvidia-rm-services/README.md) is complete: all 486 kernel checks, cleanup and 15 separate userspace firmware checks passed, with no warnings. Continue full global RM and device transport/GPU startup as grouped work; no repeat v9 test is requested. |
+| Started | Native AC9560 Wi-Fi | Requested October 19: [pinned AirportItlwm Tahoe source and build](../../packages/wifi-native/README.md), exact `8086:9DF0` / `iwm-9000-46` audit, offline private-EFI staging and one combined runtime report. Native laptop operation is pending; keep the operating itlwm/HeliPort route until the checkpoint. |
 | Remaining | Graphics, power and thermals | Sustained Intel graphics use and cooling, fan telemetry and measured battery runtime. Continuous temperature readings during desktop activity and basic battery power/discharge reporting are confirmed. NVIDIA electrical power-off is deferred until after the driver-port attempt. |
 | Complete / retained | Boot and EFI consolidation | Independent Samsung boot confirmed after manual EFI transfer. Keep the HDD as a recovery path and preserve the private working EFI. A later sanitized release remains separate from v0.1.0. |
 | 3 | Storage and USB reliability | USB-C at 5 Gb/s in both orientations and both tested USB-A connectors at 5 Gb/s are confirmed. File reads on both USB-A connectors are confirmed. External USB 2 devices, sustained SSD stability, shutdown and reboot remain separate checks. Move the system SSD cable only after shutdown. |
@@ -86,7 +87,7 @@ The [CPU and sensor reports](cpu-thermal.md) confirm frequency/power response an
 | Paused | External displays | HDMI produces no image and macOS lists only the internal panel. A Windows GPU-routing check is retained for when this work resumes. USB-C video cannot currently be tested; hardware capability remains unverified. |
 | 6 | Other peripherals | O2Micro SD reader and fingerprint-reader support. |
 | Later | Deferred refinements | Remaining F4/F5/F7/F8/F9/F10 icon actions, Fn behavior after session refresh, audio equalization, lid/sleep/wake and peripheral recovery. NVIDIA electrical power-off follows the driver-port attempt. |
-| Research | Open compatibility work | Native macOS Wi-Fi integration and the NVIDIA Linux-driver port. Neither is treated as completed or discarded. |
+| Development | Open compatibility work | Native macOS Wi-Fi integration and the NVIDIA Linux-driver port are active development tasks. Neither is treated as completed. |
 
 The October 14 disk listing shows the source HDD as a 240.1 GB external GUID disk with one Microsoft Basic Data partition. The Samsung is a separate 250.1 GB external GUID disk with an existing 209.7 MB EFI system partition and APFS. The current private EFI was copied manually, and independent Samsung boot is confirmed following the HDD-disconnected procedure. The [transfer helper](../guides/ssd-boot.md) stopped at its initial mounted-target guard before backup or copy; that helper is on hold pending identification of the failed condition.
 

@@ -58,7 +58,7 @@ This is the expected behavior of itlwm 2.3.0: it uses IOEthernetController. Rena
 
 The desktop report confirms itlwm 2.3.0 and the Ethernet service on en0. To select networks from the menu bar, use [official HeliPort 1.5.0](https://github.com/OpenIntelWireless/HeliPort/releases/tag/v1.5.0), with the [release DMG](https://github.com/OpenIntelWireless/HeliPort/releases/download/v1.5.0/HeliPort.dmg). The app is the itlwm client: it does not change the classification in the macOS network settings. HeliPort was reported as working on October 14, 2026. This result is not a speed measurement or a Continuity feature check.
 
-The official stable AirportItlwm 2.3.0 release has packages up to Sonoma, without a Tahoe asset. Approaches using older Airport drivers and restored Wi-Fi frameworks require broader system and SIP changes. Native Tahoe integration remains a separate task; the working driver is not replaced now solely to change the Ethernet label, and AirDrop is not promised.
+The official stable AirportItlwm 2.3.0 release has packages up to Sonoma, without a Tahoe asset. On October 19, 2026, the requested [native AC9560 Tahoe integration](../../packages/wifi-native/README.md) started using laobamac's native Tahoe fork at `738d4c6`. Its pinned source contains the exact `8086:9DF0` match and `iwm-9000-46` firmware path. The new builder targets Tahoe's WCL / IO80211 / Skywalk stack; it does not restore older Apple frameworks or apply root patches. The staging helper prepares a separate EFI copy and disables itlwm only in that copy. Native laptop operation remains unconfirmed; the working connection still uses HeliPort. AWDL/AirDrop is unsupported in the selected fork.
 
 ## Connection performance baseline
 

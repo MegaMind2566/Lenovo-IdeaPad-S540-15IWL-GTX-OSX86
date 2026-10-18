@@ -29,6 +29,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 | [NVIDIA PCI inventory](../packages/nvidia-pci/README.md) | Native read-only inventory; active target PCI visibility is confirmed |
 | [Intel graphics](guides/intel-graphics.md) | Acceleration and stability checks |
 | [Boot and networking](guides/boot-network.md) | Backlight boot fix, HeliPort and Bluetooth |
+| [Native AC9560 Wi-Fi](../packages/wifi-native/README.md) | Pinned AirportItlwm Tahoe integration, offline EFI preparation and one filtered report; native laptop validation pending |
 | [Tahoe audio](guides/tahoe-audio.md) | Initial audio setup, volume fix and recovery |
 | [Microphone v2](guides/microphone-fix.md) | S540 driver variant, verification and rollback |
 | [Fine output volume](guides/volume-control.md) | Full analog DAC range with the working microphone correction retained |

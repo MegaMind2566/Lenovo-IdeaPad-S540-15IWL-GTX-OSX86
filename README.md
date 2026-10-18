@@ -61,7 +61,7 @@ Current status as of **October 15, 2026**. **Pending** means the feature has not
 | Battery runtime / sleep and wake | Pending | Measured runtime and device recovery; basic battery power is confirmed |
 | NVIDIA electrical power-off | Pending | Deferred until after the driver-port attempt; PCI visibility does not establish electrical power state |
 | NVIDIA acceleration | Not working | GTX 1650 Max-Q has no supported driver in this configuration |
-| Native macOS Wi-Fi interface | Not working | Network management uses HeliPort |
+| Native macOS Wi-Fi interface | Development started | [AC9560 Tahoe integration](packages/wifi-native/README.md) uses a pinned native AirportItlwm fork; laptop validation pending. The operating EFI still uses HeliPort |
 | HDMI output | Not working | No image or external display in the macOS report; physical GPU routing under investigation |
 
 Detailed hardware information is in [Hardware](docs/status/hardware.md).
@@ -87,7 +87,7 @@ Development is grouped into complete integration milestones. The completed v7 bu
 - Complete Intel stability and power-management coverage; sustained cooling and fan telemetry remain open. External-display work is paused.
 - Complete remaining device support and investigate connection performance from the recorded Internet baseline; wired/Bluetooth microphones, headphone switching and wireless reconnection work.
 - Retain the working keyboard controls; remaining icon actions, equalization and sleep refinements are deferred.
-- Keep native macOS Wi-Fi integration open; NVIDIA electrical power-off remains deferred until after the driver-port attempt.
+- Start the requested [native AC9560 Wi-Fi integration](packages/wifi-native/README.md) with the pinned AirportItlwm Tahoe target, an offline EFI staging tool and one combined reporter. The current HeliPort EFI remains the working route until the laptop checkpoint. NVIDIA electrical power-off remains deferred until after the driver-port attempt.
 
 See the [Roadmap](docs/status/roadmap.md) for the implementation plan.
 
