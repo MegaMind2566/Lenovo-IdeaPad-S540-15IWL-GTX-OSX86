@@ -17,7 +17,7 @@ namespace {
 constexpr NvU32 kCapacity = 8192;
 constexpr NvU64 kSingleLimit = 256ULL * 1024 * 1024;
 constexpr NvU64 kTotalLimit = 512ULL * 1024 * 1024;
-struct Allocation { void *pointer; NvU64 bytes; };
+struct Allocation { void *pointer; NvU64 bytes; bool original; };
 Allocation records[kCapacity] = {};
 S540NvidiaGlobalRmPlatformFacts platformFacts = {};
 S540NvidiaGlobalRmHostSnapshot counters = {};
@@ -94,7 +94,7 @@ extern "C" NvBool s540GlobalRmHostShutdown(void)
     return NV_TRUE;
 }
 
-extern "C" void *s540GlobalRmHostAllocate(NvU64 bytes)
+static void *allocateTracked(NvU64 bytes, bool original)
 {
     if (!s540Darwin_os_semaphore_may_sleep()) {
         s540GlobalRmRecordUnavailable(0);
@@ -120,9 +120,13 @@ extern "C" void *s540GlobalRmHostAllocate(NvU64 bytes)
     }
     // Reserve ownership before sleeping in IOMalloc. Other callers cannot use
     // this slot and the total byte ceiling includes in-progress allocations.
-    records[slot] = {reinterpret_cast<void *>(static_cast<NvUPtr>(1)), bytes};
+    records[slot] = {reinterpret_cast<void *>(static_cast<NvUPtr>(1)), bytes, original};
     counters.liveBytes += bytes;
     ++counters.liveAllocations;
+    if (original) {
+        counters.originalLiveBytes += bytes;
+        ++counters.originalLiveAllocations;
+    }
     unlock();
     void *pointer = allocate(bytes);
     lock();
@@ -130,6 +134,10 @@ extern "C" void *s540GlobalRmHostAllocate(NvU64 bytes)
         records[slot] = {};
         counters.liveBytes -= bytes;
         --counters.liveAllocations;
+        if (original) {
+            counters.originalLiveBytes -= bytes;
+            --counters.originalLiveAllocations;
+        }
         ++counters.allocationFailures;
     } else {
         records[slot].pointer = pointer;
@@ -142,7 +150,7 @@ extern "C" void *s540GlobalRmHostAllocate(NvU64 bytes)
     return pointer;
 }
 
-extern "C" void s540GlobalRmHostFree(void *pointer)
+static void freeTracked(void *pointer, bool original)
 {
     if (!pointer) return;
     if (!s540Darwin_os_semaphore_may_sleep()) {
@@ -154,7 +162,8 @@ extern "C" void s540GlobalRmHostFree(void *pointer)
     lock();
     NvU32 slot = 0;
     while (slot != kCapacity && records[slot].pointer != pointer) ++slot;
-    if (slot == kCapacity || pointer == reinterpret_cast<void *>(static_cast<NvUPtr>(1))) {
+    if (slot == kCapacity || pointer == reinterpret_cast<void *>(static_cast<NvUPtr>(1)) ||
+        records[slot].original != original) {
         ++counters.invalidFrees;
         unlock();
         return;
@@ -169,9 +178,18 @@ extern "C" void s540GlobalRmHostFree(void *pointer)
     records[slot] = {};
     counters.liveBytes -= bytes;
     --counters.liveAllocations;
+    if (original) {
+        counters.originalLiveBytes -= bytes;
+        --counters.originalLiveAllocations;
+    }
     ++counters.frees;
     unlock();
 }
+
+extern "C" void *s540GlobalRmHostAllocate(NvU64 bytes) { return allocateTracked(bytes, false); }
+extern "C" void s540GlobalRmHostFree(void *pointer) { freeTracked(pointer, false); }
+extern "C" void *s540GlobalRmHostAllocateOriginal(NvU64 bytes) { return allocateTracked(bytes, true); }
+extern "C" void s540GlobalRmHostFreeOriginal(void *pointer) { freeTracked(pointer, true); }
 
 extern "C" void s540GlobalRmHostSnapshot(S540NvidiaGlobalRmHostSnapshot *out)
 {
@@ -194,6 +212,10 @@ extern "C" void s540GlobalRmHostSnapshot(S540NvidiaGlobalRmHostSnapshot *out)
     out->invalidFrees = counters.invalidFrees;
     out->unavailableCalls = __atomic_load_n(&counters.unavailableCalls, __ATOMIC_ACQUIRE);
     out->initialized = counters.initialized;
+    out->originalLiveBytes = counters.originalLiveBytes;
+    out->originalLiveAllocations = counters.originalLiveAllocations;
+    out->externalLiveBytes = counters.liveBytes - counters.originalLiveBytes;
+    out->externalLiveAllocations = counters.liveAllocations - counters.originalLiveAllocations;
     if (guard) unlock();
 }
 

@@ -56,6 +56,11 @@ struct InterruptStatistics {
     NvU64 lockedBottomHalves;
     NvU64 unlockedBottomHalves;
 };
+struct RetirementStatistics {
+    NvU32 allocations;
+    NvU32 dmaMappings;
+    NvU32 pages;
+};
 namespace Detail {
 // Shared state-machine boundary. Native tests replace only these OS/resource
 // operations; the kernel path supplies real IOPCIDevice/IODMACommand ownership.
@@ -81,6 +86,7 @@ struct Backend {
     NV_STATUS (*configWrite)(void *, NvU32, NvU32, NvU32);
     InterruptStatistics (*interruptStatistics)(void *);
     NV_STATUS (*dmaRemapPolicy)(void *, DmaRemapPolicy &);
+    NV_STATUS (*validateRetainedDma)(void *, void *, NvU32);
 };
 }
 // Ordinary-thread, externally serialized owner. No GPU command is submitted.
@@ -119,6 +125,16 @@ public:
     NV_STATUS requiresDmaRemap(NvBool &required);
     NV_STATUS mapDma(void *token, NvU64 *devicePages);
     NV_STATUS unmapDma(void *token, NvU64 *physicalPages);
+    // Exact bound-RM ownership transfers. While an IRQ enable attempt remains
+    // undrained, acknowledge logical retirement but retain the same non-reusable
+    // backing and IOVA. Generic release/unmap keep their stronger IRQ guard.
+    NV_STATUS releaseRmAllocation(void *token, bool &deferred);
+    // Preserve a logically freed allocation after a void CPU-unmap callback
+    // cannot report a backend completion error to the original owner.
+    NV_STATUS retainRmAllocation(void *token);
+    NV_STATUS unmapRmDma(void *token, NvU64 *physicalPages, bool &deferred);
+    NV_STATUS reclaimRmRetirement(void *token);
+    RetirementStatistics retirementStatistics() const;
     NV_STATUS address(void *token, NvU32 page, NvU64 &deviceAddress);
     NV_STATUS borrowHost(void *token, NvU64 offset, NvU64 length, void **address);
     NV_STATUS hostWrite(void *token, NvU64 offset, const void *bytes, NvU64 length);
@@ -142,6 +158,8 @@ private:
         NvU32 pages;
         bool contiguous;
         bool mapped;
+        bool dmaRetired;
+        bool retired;
     } allocations_[kMaximumAllocations];
     Detail::Backend backend_;
     Snapshot snapshot_;
@@ -156,6 +174,7 @@ private:
     bool platformOwned_;
     bool rmBound_;
     Allocation *find(void *token);
+    Allocation *findOwned(void *token);
     bool ordinary() const;
     bool live() const;
     NV_STATUS releaseEntry(Allocation &entry);

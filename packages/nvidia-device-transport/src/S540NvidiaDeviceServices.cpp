@@ -19,6 +19,8 @@ struct Allocation {
     bool contiguous;
     bool mapped;
     bool freePending;
+    bool retired;
+    bool dmaRetirement;
 };
 struct Mapping {
     void *token;
@@ -49,23 +51,29 @@ void *token(bool mapping) {
 bool stateValid(nv_state_t *state) {
     return ordinary() && binding.session && binding.session->active() && state == binding.state;
 }
-[[noreturn]] void dmaPolicyViolation() {
-    // Returning NV_FALSE here would silently select NVIDIA's bypass path.
+[[noreturn]] void deviceContractViolation(const char *message) {
+    // Scalar/void callbacks cannot encode a failed ownership contract as an
+    // ordinary default result. Their status-bearing gates must run first.
 #if defined(KERNEL)
-    panic("NVIDIA device DMA-remap callback requires an admitted bound policy");
+    panic("NVIDIA device services contract violation: %s", message);
 #else
-    std::fputs("NVIDIA device DMA-remap callback requires an admitted bound policy\n", stderr);
+    std::fprintf(stderr, "NVIDIA device services contract violation: %s\n", message);
     std::abort();
 #endif
 }
 Allocation *find(void *value) {
     if (!value) return nullptr;
-    for (auto &entry : binding.allocations) if (entry.token == value) return &entry;
+    for (auto &entry : binding.allocations)
+        if (entry.token == value && !entry.retired) return &entry;
     return nullptr;
 }
 NV_STATUS release(Allocation &entry) {
-    NV_STATUS status = binding.session->release(entry.sessionToken);
-    if (status == NV_OK) entry = Allocation{};
+    bool deferred = false;
+    NV_STATUS status = binding.session->releaseRmAllocation(entry.sessionToken, deferred);
+    if (status == NV_OK) {
+        if (deferred) entry.retired = true;
+        else entry = Allocation{};
+    }
     return status;
 }
 }
@@ -91,19 +99,41 @@ NV_STATUS S540NvidiaDeviceTransport::unbindRmDevice(Session *session) {
     binding = Binding{};
     return NV_OK;
 }
+NV_STATUS S540NvidiaDeviceTransport::drainRmRetirements(Session *session) {
+    if (!ordinary() || !session || binding.session != session || !session->active())
+        return NV_ERR_INVALID_STATE;
+    for (auto &entry : binding.allocations) if (entry.token && (entry.retired || entry.dmaRetirement)) {
+        const NV_STATUS status = session->reclaimRmRetirement(entry.sessionToken);
+        if (status != NV_OK) return status;
+        if (entry.retired) entry = Allocation{};
+        else entry.dmaRetirement = false;
+    }
+    return NV_OK;
+}
 NV_STATUS S540NvidiaDeviceTransport::queryRmDmaRemap(nv_state_t *state, NvBool &required) {
     if (!stateValid(state)) return NV_ERR_INVALID_STATE;
     return binding.session->requiresDmaRemap(required);
 }
 extern "C" NvBool NV_API_CALL s540Global_nv_requires_dma_remap(nv_state_t *state) {
     NvBool required;
-    if (queryRmDmaRemap(state, required) != NV_OK) dmaPolicyViolation();
+    if (queryRmDmaRemap(state, required) != NV_OK)
+        deviceContractViolation("DMA-remap callback requires an admitted bound policy");
     return required;
+}
+extern "C" NV_STATUS NV_API_CALL s540Global_nv_get_num_phys_pages(void *allocation, NvU32 *pages) {
+    if (!pages) return NV_ERR_INVALID_ARGUMENT;
+    if (!ordinary() || !binding.session || !binding.session->active()) return NV_ERR_INVALID_STATE;
+    Allocation *entry = find(allocation);
+    if (!entry || entry->freePending) return NV_ERR_OBJECT_NOT_FOUND;
+    *pages = entry->pages;
+    return NV_OK;
 }
 S540NvidiaDeviceTransport::AbiStatistics S540NvidiaDeviceTransport::abiStatistics() {
     AbiStatistics out{}; out.bound = binding.session != nullptr;
     for (const auto &entry : binding.allocations) if (entry.token) {
         ++out.allocations; if (entry.mapped) ++out.dmaMappings;
+        if (entry.retired) ++out.retiredAllocations;
+        if (entry.dmaRetirement) ++out.retiredDmaMappings;
     }
     for (const auto &entry : binding.mappings) if (entry.token) ++out.mappings;
     return out;
@@ -172,7 +202,14 @@ extern "C" void NV_API_CALL s540Global_nv_free_kernel_mapping(nv_state_t *state,
         if (mapping.token == mappingPrivate && mapping.allocation == entry && mapping.address == address) {
             mapping = Mapping{};
             if (entry->cpuMappings) --entry->cpuMappings;
-            if (!entry->cpuMappings && entry->freePending) (void)release(*entry);
+            if (!entry->cpuMappings && entry->freePending && release(*entry) != NV_OK) {
+                // nv_free_pages already transferred the caller's ownership.
+                // This void callback cannot return a failed completion. Keep
+                // the tracked backing for an explicit, status-bearing drain.
+                if (binding.session->retainRmAllocation(entry->sessionToken) != NV_OK)
+                    deviceContractViolation("void CPU-map release lost its retained allocation owner");
+                entry->retired = true;
+            }
             return;
         }
     }
@@ -193,6 +230,7 @@ extern "C" NV_STATUS NV_API_CALL s540Global_nv_dma_map_alloc(nv_dma_device_t *dm
     NV_STATUS status = binding.session->mapDma(entry->sessionToken, ptes);
     if (status == NV_OK) {
         entry->mapped = true;
+        entry->dmaRetirement = false;
         entry->dmaToken = mappingToken;
         *privateData = mappingToken;
     }
@@ -209,9 +247,11 @@ extern "C" NV_STATUS NV_API_CALL s540Global_nv_dma_unmap_alloc(nv_dma_device_t *
     if (!entry) return NV_ERR_OBJECT_NOT_FOUND;
     if (pages != entry->pages) return NV_ERR_INVALID_ARGUMENT;
     if (!entry->mapped) return NV_ERR_INVALID_STATE;
-    NV_STATUS status = binding.session->unmapDma(entry->sessionToken, ptes);
+    bool deferred = false;
+    NV_STATUS status = binding.session->unmapRmDma(entry->sessionToken, ptes, deferred);
     if (status == NV_OK) {
         entry->mapped = false; entry->dmaToken = nullptr;
+        entry->dmaRetirement = deferred;
         *privateData = entry->token;
     }
     return status;

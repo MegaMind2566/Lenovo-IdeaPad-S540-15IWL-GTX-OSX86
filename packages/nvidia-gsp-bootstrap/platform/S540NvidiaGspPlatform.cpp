@@ -297,6 +297,12 @@ NV_STATUS S540NvidiaGspPlatform::Context::bindState(nv_state_t *state) {
     impl_->state = state;
     return NV_OK;
 }
+NV_STATUS S540NvidiaGspPlatform::Context::unbindState(nv_state_t *state) {
+    if (!ordinary() || !impl_ || !state || impl_->state != state || impl_->romInFlight)
+        return NV_ERR_INVALID_STATE;
+    impl_->state = nullptr;
+    return NV_OK;
+}
 NV_STATUS S540NvidiaGspPlatform::Context::collect(S540NvidiaGlobalRmPlatformFacts *out) {
     if (!ordinary() || !impl_ || !out || impl_->provider->isInactive()) return NV_ERR_INVALID_STATE;
     auto &f = impl_->facts;
@@ -484,6 +490,7 @@ S540NvidiaGspPlatform::Context::~Context() = default;
 bool S540NvidiaGspPlatform::Context::active() const { return false; }
 NV_STATUS S540NvidiaGspPlatform::Context::initialize(IOPCIDevice *, nv_state_t *) { return NV_ERR_NOT_SUPPORTED; }
 NV_STATUS S540NvidiaGspPlatform::Context::bindState(nv_state_t *) { return NV_ERR_NOT_SUPPORTED; }
+NV_STATUS S540NvidiaGspPlatform::Context::unbindState(nv_state_t *) { return NV_ERR_NOT_SUPPORTED; }
 NV_STATUS S540NvidiaGspPlatform::Context::shutdown() { return NV_OK; }
 NV_STATUS S540NvidiaGspPlatform::Context::collect(S540NvidiaGlobalRmPlatformFacts *) { return NV_ERR_NOT_SUPPORTED; }
 NV_STATUS S540NvidiaGspPlatform::Context::collectSegment(NvU32 &) { return NV_ERR_NOT_SUPPORTED; }

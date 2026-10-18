@@ -339,6 +339,22 @@ NV_STATUS dmaRemapPolicy(void *opaque, DmaRemapPolicy &policy) {
     policy = DmaRemapPolicy::MapPhysicalPagesWithoutBounce;
     return NV_OK;
 }
+NV_STATUS validateRetainedDma(void *opaque, void *allocation, NvU32 addressBits) {
+    auto *p = static_cast<Platform *>(opaque);
+    auto *a = static_cast<Allocation *>(allocation);
+    if (!ordinary(p) || !live(p) || !a || a->quarantined || !a->bufferPrepared ||
+        !a->command || !a->commandPrepared || !a->attached ||
+        addressBits < 32 || addressBits > 64) return NV_ERR_INVALID_STATE;
+    if (!p->provider->lockForArbitration(false)) return NV_ERR_BUSY_RETRY;
+    bool valid = live(p) && mapperStillValid(p);
+    for (NvU32 i = 0; valid && i < a->pages; ++i) {
+        const NvU64 physical = p->mapperMode == Mapper::Direct ? a->device[i] :
+                               p->mapper->mapToPhysicalAddress(a->device[i]);
+        valid = dmaPageMatches(a->physical[i], a->device[i], physical, addressBits);
+    }
+    p->provider->unlockForArbitration();
+    return valid ? NV_STATUS(NV_OK) : NV_STATUS(NV_ERR_INVALID_ADDRESS);
+}
 NV_STATUS mapDma(void *opaque, void *allocation, NvU32 addressBits) {
     auto *p = static_cast<Platform *>(opaque);
     auto *a = static_cast<Allocation *>(allocation);
@@ -545,7 +561,7 @@ NV_STATUS S540NvidiaDeviceTransport::Session::start(IOPCIDevice *provider, IOSer
         ::readIdentification, ::allocate, pageAddress, ::mapDma, ::unmapDma,
         releaseAllocation, ::installInterrupt, ::armInterrupt, ::stopInterrupt,
         ::registerGeometry, ::mapRegisters, ::unmapRegisters, ::configRead, ::configWrite, ::interruptStatistics,
-        ::dmaRemapPolicy};
+        ::dmaRemapPolicy, ::validateRetainedDma};
     NV_STATUS status = start(backend);
     if (status == NV_OK) platformOwned_ = true;
     else if (!active()) IOFree(platform, sizeof(*platform));

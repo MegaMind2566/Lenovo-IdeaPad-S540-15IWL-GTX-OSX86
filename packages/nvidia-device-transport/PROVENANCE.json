@@ -79,7 +79,22 @@
     "quarantine_on_failed_completion": true,
     "never_armed_original_unwind": true,
     "partial_controller_enable_retains_dma": true,
+    "bounded_active_irq_retirement": true,
     "active_irq_rm_retirement_complete": false
+  },
+  "retirement": {
+    "scope": "Exact bound-RM allocation records only; generic Session release/unmap retain their IRQ guards.",
+    "logical_unmap": "Revoke caller DMA token while retaining its exact backend map, IOVA and physical backing until actual interrupt drain.",
+    "logical_free": "Revoke new CPU/DMA access; preserve existing CPU aliases until last close; keep backend ownership in a non-reusable retirement record.",
+    "remap": "Same physical backing and retained IOVA only, after current provider/mapper/no-bounce revalidation.",
+    "drain": "NV_STATUS drainRmRetirements(Session *); requires successful actual IRQ drain and records backend completion progress per allocation.",
+    "unbind_with_pending_retirement": "refused",
+    "void_cpu_unmap_completion_failure": "preserves a tracked retirement owner",
+    "maximum_active_plus_retired_allocations": 32,
+    "full_rm_capacity_sufficiency": "not_established; firmware/log/GPU configuration and boot retry affect peak ownership",
+    "native_ownership_model": "verified",
+    "original_active_irq_execution": "not_tested",
+    "kernel_execution": "not_tested"
   },
   "dma_remap_policy": {
     "abi": "NvBool NV_API_CALL nv_requires_dma_remap(nv_state_t *);",
@@ -98,6 +113,12 @@
   },
   "source_anchors": {
     "dma_ownership": "kernel-open/nvidia/nv-dma.c:480-741",
+    "deferred_free_original": "kernel-open/nvidia/nv.c:4145-4193; usage_count permits successful logical free before final release",
+    "logical_dma_unmap_caller": "src/nvidia/arch/nvalloc/unix/src/os.c:4099-4146; caller clears pOsData after successful callback",
+    "init_temporary_retirement": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c:5351-5355; INIT_DONE releases external bindata",
+    "disable_internal_retirement": "src/nvidia/arch/nvalloc/unix/src/osinit.c:2580-2630; gpuStateUnload releases RM-internal resources before IRQ teardown",
+    "physical_page_count": "kernel-open/nvidia/nv.c:3875-3889",
+    "linux_page_object_output_unavailable": "kernel-open/nvidia/nv.c:3891-3914; struct page * output cannot be replaced with physical integers",
     "cache_policy": "kernel-open/nvidia/nv-dma.c:898-928 and kernel-open/nvidia/nv.c:6346",
     "file_authorization": "kernel-open/nvidia/nv.c:6058-6094",
     "device_dma_width": "kernel-open/nvidia/nv-pci.c:2313 and src/nvidia/arch/nvalloc/unix/src/osinit.c:1612",
@@ -110,12 +131,17 @@
     "initial_interrupt_mask": "xnu/iokit/Kernel/IOInterruptController.cpp and IOPCIFamily/IOPCIMessagedInterruptController.cpp"
   },
   "local_evidence": {
-    "native_assertions": 307,
+    "native_assertions": 396,
+    "retirement_darwin_macho_crossprobe": "four production translation units passed with pinned SDK, Werror and 4096-byte frame bound; not native Apple execution",
+    "retirement_backend_platform_imports": 31,
+    "retirement_backend_imports_outside_sdk_reference": 0,
     "lifecycle_cycles": 128,
     "mapped_exercise_checks": 21,
     "unavailable_mapper_exercise_checks": 19,
     "sdk_imports": 32,
-    "sdk_reference_exact_match": true,
+    "production_platform_imports": 33,
+    "sdk_reference_exact_match": false,
+    "reviewed_production_import_outside_sdk_reference": "panic; already used by the baseline scalar-policy contract-violation path",
     "native_kernel_execution": false,
     "native_gpu_access": false,
     "leak_sanitizer": "unavailable-local-container"

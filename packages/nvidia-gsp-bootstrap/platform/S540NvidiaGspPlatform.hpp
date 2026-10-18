@@ -48,6 +48,9 @@ public:
     ~Context();
     NV_STATUS initialize(IOPCIDevice *provider, nv_state_t *state = nullptr);
     NV_STATUS bindState(nv_state_t *state);
+    // Detach the ROM callback's exact state identity while keeping provider
+    // facts alive through transport/DMA cleanup and power-domain release.
+    NV_STATUS unbindState(nv_state_t *state);
     NV_STATUS shutdown();
     NV_STATUS collect(S540NvidiaGlobalRmPlatformFacts *out);
     NV_STATUS collectSegment(NvU32 &segment);

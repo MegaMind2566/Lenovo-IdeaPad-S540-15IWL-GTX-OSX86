@@ -29,6 +29,8 @@ extern "C" void s540DarwinServicesSdkReference(void) {
     REF(clock_get_calendar_microtime);
     REF(clock_get_uptime);
     REF(clock_timebase_info);
+    REF(copyin);
+    REF(copyout);
     REF(cpu_number);
     REF(current_task);
     REF(current_thread);

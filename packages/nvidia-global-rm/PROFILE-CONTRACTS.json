@@ -1,0 +1,160 @@
+{
+  "format": 1,
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "profile_version": 2,
+  "scope": "Explicit ordinary physical TU117 bootstrap backend policy. No production entry, kernel execution, physical ACPI absence or power ownership is established.",
+  "source_sha256": {
+    "kernel-open/nvidia/nv-acpi.c": "39ea93250c6daec9fac485ddf2e277ff4b75184e3f057fa41c6524ee00d31beb",
+    "src/nvidia/arch/nvalloc/unix/src/osinit.c": "dda3b014833c2e94680e5adea152011ffce72c8067782aceeecaefc28b7394d3",
+    "src/nvidia/arch/nvalloc/unix/src/registry.c": "aaf57cff951cf235a9a1a0a62592a00f1b8f08157a74b4f1b738d8180c908485",
+    "src/nvidia/src/kernel/core/system.c": "bea78ffe5afd71df78bac6dc98c2c6077feea725d18df13680d258e7bf17f5c6",
+    "src/nvidia/arch/nvalloc/unix/include/nv-reg.h": "a8bff18c6dbeb7f19f5a5e5bbdd9a211329c7a989bb058ee1573395ffe36264f",
+    "src/nvidia/interface/nvrm_registry.h": "8de487f1f624a628d2c5efffc9d25de2669ac5764f7420cd09da6c53aab1556f",
+    "src/nvidia/generated/g_os_nvoc.h": "3444dbac90e159e4a0bb1434738e595bc6fa5b77ecf5b55544de6a6eb96fc107",
+    "src/nvidia/arch/nvalloc/unix/include/nv.h": "02ce4b371e0a8dd26f62a320e88c8382dcf31a21b727503a66abcaea9eecf09b"
+  },
+  "config": {
+    "source": "src/S540NvidiaGlobalRmProfile.h",
+    "version_macro": "S540_GLOBAL_RM_PROFILE_VERSION",
+    "version": 2,
+    "rm_acpi_events_macro": "S540_GLOBAL_RM_ACPI_EVENTS_ENABLED",
+    "rm_acpi_events_enabled": false,
+    "hardware_acpi_presence_inferred": false,
+    "hardware_battery_facts_overridden": false,
+    "power_reference_inferred": false
+  },
+  "registry": {
+    "implementation": "src/S540NvidiaGlobalRmRegistry.c",
+    "entry_bridge": "src/S540NvidiaGlobalRmOs.c",
+    "keys": [
+      {
+        "name": "DynamicPowerManagement",
+        "value": 0,
+        "original_macro": "NV_REG_DYNAMIC_POWER_MANAGEMENT",
+        "meaning": "Never allow RM runtime power down; independent Darwin power ownership still required."
+      },
+      {
+        "name": "EnableS0ixPowerManagement",
+        "value": 0,
+        "original_macro": "NV_REG_ENABLE_S0IX_POWER_MANAGEMENT",
+        "meaning": "Disable RM S0ix power management; platform S0ix facts remain independent."
+      },
+      {
+        "name": "NvLinkDisable",
+        "value": 1,
+        "original_macro": "NV_REG_NVLINK_DISABLE",
+        "meaning": "Disable original NVLink initialization/training. Does not prove common library host primitives unreachable."
+      },
+      {
+        "name": "S540DarwinGlobalRmProfile",
+        "value": 2,
+        "meaning": "Profile version marker, written/read back last; not runtime admission."
+      }
+    ],
+    "derived_original_key": {
+      "name": "RMNvLinkControl",
+      "value": 1,
+      "meaning": "Original FORCE_DISABLE bit; original osRmInitRm conversion now checks write status and actual readback."
+    },
+    "readback_every_key": true,
+    "cold_only_preflight": "Actual RmPackageRegistry empty original table header size. Existing entries cause STATE_IN_USE before any write/destruction.",
+    "initial_failure_rollback": "RmDestroyRegistry(NULL) only after empty global registry ownership was established; verify actual package size is empty afterward.",
+    "rollback_failure": "NV_ERR_INVALID_STATE plus actual host unavailable observer; no clean rollback claimed.",
+    "lifecycle_entry_cold_preflight": "s540GlobalRmInitialize calls the actual s540GlobalRmCheckRegistryCold before coreInitializeRm. A populated epoch is refused without entering the constructor or its global shutdown failure path."
+  },
+  "acpi": {
+    "implementation": "src/S540NvidiaGlobalRmAcpi.c",
+    "original_disabled_branch": "kernel-open/nvidia/nv-acpi.c:#else // NV_LINUX_ACPI_EVENTS_SUPPORTED",
+    "capability_callbacks": [
+      {
+        "symbol": "nv_acpi_methods_init",
+        "meaning": "Publish zero registered handles for selected disabled RM backend; null output records unavailable."
+      },
+      {
+        "symbol": "nv_acpi_methods_uninit",
+        "meaning": "Selected disabled backend registered no handles/notifiers and owns none to unregister."
+      }
+    ],
+    "provided_unavailable_callbacks": [
+      "nv_acpi_d3cold_dsm_for_upstream_port",
+      "nv_acpi_ddc_method",
+      "nv_acpi_dod_method",
+      "nv_acpi_dsm_method",
+      "nv_acpi_get_powersource",
+      "nv_acpi_mux_method"
+    ],
+    "unavailable_implementation": "Each exact ABI endpoint preserves all input/output storage, records the actual static service name and increments s540GlobalRmRecordUnavailable, then returns NV_ERR_NOT_SUPPORTED.",
+    "runtime_admission": "Any reached unavailable method invalidates aggregate no-unavailable-call admission. No method is counted as operational AML evaluation.",
+    "linux_trace_or_notifier_emulated": false
+  },
+  "validation": {
+    "registry_profile": {
+      "harness": "tests/check_registry_profile_native.c",
+      "checks": 62,
+      "failure_stages": 8,
+      "rollback_refusals": 3,
+      "registry_abi_fixture": true
+    },
+    "registry_original_stage_overlay": {
+      "harness": "tests/check_registry_overlay_native.c",
+      "generator": "tests/registry_overlay_source.py",
+      "checks": 13,
+      "source_extracted_original_stages": true,
+      "scope": "Only exact initial registry status and derived NVLink stage statements, not the full osRmInitRm body.",
+      "registry_abi_fixture": true
+    },
+    "acpi_profile": {
+      "harness": "tests/check_acpi_profile_native.c",
+      "checks": 21,
+      "real_host_observer": true,
+      "unsupported_method_calls": 6,
+      "invalid_init_output": 1,
+      "platform_facts_fixture": true
+    },
+    "local_clang_18": "All three controls passed ordinary and fatal address,undefined,function sanitizers.",
+    "full_original_global_lifecycle_and_allocation_faults": "Separate combined checked-original-source control required; not replaced by targeted fixtures.",
+    "native_apple_result": "pending combined workflow",
+    "kernel_execution": "not_tested",
+    "gpu_access": false,
+    "real_registry_epoch": {
+      "harness": "tests/check_registry_epoch_native.c",
+      "checks": 23,
+      "real_original_registry": true,
+      "scope": "Actual original nvport/registry seed, global-entry cold refusal, preserved entry/portable epoch and explicit owner cleanup.",
+      "result": "pending complete checked-original corpus execution"
+    },
+    "host_domains": {
+      "harness": "tests/check_host_domains_native.cpp",
+      "checks": 29,
+      "wrong_domain_frees_retained": 2,
+      "concurrent_mixed_allocations": 768,
+      "result": "passed ordinary and fatal address,undefined,function sanitizers locally"
+    },
+    "real_global_domains": {
+      "harness": "tests/check_global_domains_native.cpp",
+      "checks": 23,
+      "real_original_global_lifecycle": true,
+      "external_allocations": 2,
+      "result": "pending complete checked-original corpus execution"
+    }
+  },
+  "integration_blockers": [
+    "Owner.initialize remains refused before original RM; original ABI/stack/device execution gates are not closed."
+  ],
+  "allocation_domains": {
+    "implementation": "src/S540NvidiaGlobalRmHost.cpp",
+    "original_boundaries": [
+      "src/S540NvidiaGlobalRmOs.c:os_alloc_mem/os_free_mem",
+      "src/S540NvidiaGlobalRmNvlink.c:nvlink_malloc/nvlink_free"
+    ],
+    "external_boundaries": [
+      "../nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c:context allocation",
+      "../nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp:firmware copies",
+      "../nvidia-gsp-bootstrap/timers/S540NvidiaGspTimersOriginal.c:project timer owners and original-stack storage"
+    ],
+    "ownership": "Every reserved/live allocation records original versus external domain under the existing host guard. Frees must match the exact recorded pointer and domain; mismatches retain ownership and increment invalidFrees.",
+    "global_cleanup": "Zero originalLiveAllocations/originalLiveBytes, original system/portable state stopped, no invalid frees/unavailable/crypto refusals. External-domain allocations remain independently owned.",
+    "outer_host_shutdown": "Both domains must be empty; total live allocation reservation prevents racing OS allocation/free.",
+    "raw_baseline_count_equality_used": false
+  }
+}

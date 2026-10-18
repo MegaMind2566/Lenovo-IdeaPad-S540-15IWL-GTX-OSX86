@@ -6,14 +6,17 @@
 #include "../src/S540NvidiaGspContext.h"
 #include "../timers/S540NvidiaGspTimers.h"
 #include "../../nvidia-global-rm/src/S540NvidiaGlobalRm.h"
+#include "../../nvidia-global-rm-crypto/src/S540NvidiaGlobalCrypto.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 static NvU32 checks, privateReleases, eventReleases, detachCalls, nanoCalls;
 static NvU32 detachMode, metadataReleases, stackFailures;
 static nv_state_t *expectedState;
 static nv_nano_timer_t *originalTimer;
+static NvBool cryptoRefusalOnInit;
 
 static void require(NvBool condition, const char *reason)
 {
@@ -53,6 +56,14 @@ NvBool NV_API_CALL rm_init_private_state(nvidia_stack_t *stack, nv_state_t *stat
     if (!validStack(stack, state)) return NV_FALSE;
     state->priv = s540GlobalRmHostAllocate(128);
     return state->priv != NULL;
+}
+NvBool NV_API_CALL rm_init_adapter(nvidia_stack_t *stack, nv_state_t *state)
+{
+    if (!cryptoRefusalOnInit || !validStack(stack, state)) abort();
+    // Explicit apparent-success fixture. The genuine unsupported crypto
+    // boundary must invalidate admission even though this body returns true.
+    if (s540Global_libspdm_x509_verify_cert_chain(NULL, 0, NULL, 0)) abort();
+    return NV_TRUE;
 }
 void NV_API_CALL rm_execute_work_item(nvidia_stack_t *stack, void *item)
 {
@@ -132,6 +143,44 @@ static S540GspDeviceFacts deviceFacts(void)
     }
     return facts;
 }
+static NvBool cryptoRefusedCase(NvU32 mode)
+{
+    pid_t child = fork();
+    int result = 0;
+    if (child < 0) return NV_FALSE;
+    if (!child) {
+        S540NvidiaGlobalRmPlatformFacts host = hostFacts();
+        S540GspDeviceFacts facts = deviceFacts();
+        S540GspContext *context = NULL;
+        S540GspContextSnapshot contextState;
+        S540NvidiaGlobalRmHostSnapshot hostState;
+        S540NvidiaGlobalCryptoSnapshot crypto;
+        S540GspContextDetacher detacher = { &detachMode, detach };
+        if (s540GlobalRmHostInitialize(&host) != NV_OK) _Exit(2);
+        if (mode == 0) {
+            (void)s540Global_libspdm_x509_verify_cert_chain(NULL, 0, NULL, 0);
+            if (s540GspContextCreate(&facts, &context) != NV_ERR_NOT_SUPPORTED || context) _Exit(3);
+        } else {
+            if (s540GspContextCreate(&facts, &context) != NV_OK) _Exit(4);
+            expectedState = s540GspContextState(context);
+            if (s540GspContextSetDetacher(context, &detacher) != NV_OK ||
+                s540GspContextPrepare(context) != NV_OK) _Exit(5);
+            cryptoRefusalOnInit = NV_TRUE;
+            if (s540GspContextInitializeAdapter(context) != NV_ERR_INVALID_STATE) _Exit(6);
+            s540GspContextSnapshot(context, &contextState);
+            if (!contextState.adapterAttempted || !contextState.adapterInitialized ||
+                s540GspContextDestroy(context, NV_TRUE, NULL) != NV_ERR_INVALID_STATE) _Exit(7);
+        }
+        s540GlobalRmHostSnapshot(&hostState);
+        s540Global_crypto_snapshot(&crypto);
+        // The host itself stayed clean; a genuine high-mask crypto refusal is
+        // the sole reason the apparent original success cannot be admitted.
+        _Exit(!hostState.unavailableCalls && !hostState.invalidFrees &&
+              crypto.unavailable_calls == 1 && crypto.unavailable_symbol_mask_high &&
+              !crypto.counter_overflow ? 0 : 8);
+    }
+    return waitpid(child, &result, 0) == child && WIFEXITED(result) && WEXITSTATUS(result) == 0;
+}
 int main(void)
 {
     S540NvidiaGlobalRmPlatformFacts host = hostFacts();
@@ -142,6 +191,8 @@ int main(void)
     S540NvidiaGlobalRmHostSnapshot allocation;
     S540GspContextDetacher detacher = { &detachMode, detach };
     unsigned i;
+    require(cryptoRefusedCase(0), "earlier lifetime crypto refusal blocks a later context despite a clean host");
+    require(cryptoRefusedCase(1), "crypto refusal during apparent adapter success invalidates admission and retains owner");
     require(s540GlobalRmHostInitialize(&host) == NV_OK, "tracked host starts");
     require(s540GspContextCreate(&facts, &context) == NV_OK, "real context starts");
     expectedState = s540GspContextState(context);
@@ -196,6 +247,6 @@ int main(void)
             allocation.allocations == allocation.frees && !s540DarwinLiveObjects(),
             "all retries and successful teardown release real resources exactly once");
     require(s540GlobalRmHostShutdown(), "tracked host shuts down cleanly");
-    printf("{\"format\":1,\"component\":\"nvidia-gsp-context-lifecycle\",\"status\":\"passed\",\"checks\":%u,\"failures\":0,\"real_timer_binding\":true,\"recoverable_detach_refusals\":2,\"original_rm_executed\":false,\"callback_fixture\":true,\"cleanup\":true,\"execution\":\"native-user-space\",\"kernel_execution\":\"not_tested\",\"gpu_access\":false}\n", checks);
+    printf("{\"format\":1,\"component\":\"nvidia-gsp-context-lifecycle\",\"status\":\"passed\",\"checks\":%u,\"failures\":0,\"real_timer_binding\":true,\"recoverable_detach_refusals\":2,\"crypto_lifetime_refusals\":2,\"original_rm_executed\":false,\"callback_fixture\":true,\"cleanup\":true,\"execution\":\"native-user-space\",\"kernel_execution\":\"not_tested\",\"gpu_access\":false}\n", checks);
     return 0;
 }

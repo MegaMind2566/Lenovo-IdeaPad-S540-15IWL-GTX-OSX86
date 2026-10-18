@@ -5,6 +5,7 @@
 #include "S540NvidiaGspContext.h"
 #include "../../nvidia-global-rm/src/S540NvidiaGlobalRm.h"
 #include "../../nvidia-darwin-services/src/S540NvidiaDarwinServices.h"
+#include "../../nvidia-global-rm-crypto/src/S540NvidiaGlobalCrypto.h"
 #include "../timers/S540NvidiaGspTimers.h"
 
 // The original OS layer owns this opaque type. The Darwin implementation uses
@@ -49,8 +50,14 @@ static void globalWork(void *opaque, void *item)
 static NvBool cleanHost(void)
 {
     S540NvidiaGlobalRmHostSnapshot host;
+    S540NvidiaGlobalCryptoSnapshot crypto;
     s540GlobalRmHostSnapshot(&host);
-    return host.initialized && !host.unavailableCalls && !host.invalidFrees;
+    s540Global_crypto_snapshot(&crypto);
+    // Crypto refusals are lifetime-monotonic. Neither a clean host snapshot
+    // nor a zero delta since this adapter trial can erase an earlier refusal.
+    return host.initialized && !host.unavailableCalls && !host.invalidFrees &&
+        !crypto.unavailable_calls && !crypto.unavailable_symbol_mask &&
+        !crypto.unavailable_symbol_mask_high && !crypto.counter_overflow;
 }
 NV_STATUS s540GspContextCreate(const S540GspDeviceFacts *facts, S540GspContext **out)
 {

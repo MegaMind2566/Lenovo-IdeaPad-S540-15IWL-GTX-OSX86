@@ -13,8 +13,10 @@ on:
       - 'builders/embed_nvidia_firmware.py'
       - 'builders/check_nvidia_global_crypto.py'
       - 'builders/check_nvidia_execution.py'
+      - 'builders/check_nvidia_global_lifecycle.py'
       - 'builders/nvidia_execution_commands.py'
       - 'builders/nvidia_execution_closure.py'
+      - 'builders/nvidia_metaclass_initializers.py'
       - 'builders/build_nvidia_execution.py'
       - '.github/workflows/check-nvidia-execution-development.yml'
   workflow_dispatch:
@@ -25,7 +27,7 @@ permissions:
 jobs:
   native-development:
     runs-on: macos-15-intel
-    timeout-minutes: 40
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -52,6 +54,11 @@ jobs:
         run: >-
           python3 builders/check_nvidia_execution.py --services-preflight
           --output-dir build/nvidia-execution/services-preflight
+      - name: Verify the actual kernel power-service metaclass before full RM compilation
+        run: >-
+          python3 builders/build_nvidia_execution.py --metaclass-preflight
+          --kernel-sdk build-src/MacKernelSDK
+          --output-dir build/nvidia-execution/metaclass-preflight
       - name: Compile the original baseline and checked RM source and header profiles
         run: >-
           python3 builders/compile_nvidia_global_rm.py
@@ -86,6 +93,12 @@ jobs:
           --compiled-directory build/nvidia-execution/original-rm
           --checked-cleanup-overlays
           --output-dir build/nvidia-execution/kernel-checks
+      - name: Execute the checked original global lifecycle and every allocation failure in user space
+        run: >-
+          python3 builders/check_nvidia_global_lifecycle.py
+          --upstream build-src/nvidia-upstream
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --output-dir build/nvidia-execution/original-global-lifecycle
       - name: Record the unresolved production milestone explicitly
         shell: bash
         run: |
@@ -121,6 +134,8 @@ jobs:
             build/nvidia-execution/original-rm/**/*dependency-control.log
             build/nvidia-execution/services-preflight/**/*.json
             build/nvidia-execution/services-preflight/**/*.log
+            build/nvidia-execution/metaclass-preflight/**/*.json
+            build/nvidia-execution/metaclass-preflight/**/*.log
             build/nvidia-execution/firmware-checks/firmware-assets-checks.json
             build/nvidia-execution/native-checks/execution-checks.json
             build/nvidia-execution/native-checks/**/*.json
@@ -128,5 +143,7 @@ jobs:
             build/nvidia-execution/kernel-checks/execution-kernel-build.json
             build/nvidia-execution/kernel-checks/**/*.json
             build/nvidia-execution/kernel-checks/**/*.log
+            build/nvidia-execution/original-global-lifecycle/**/*.json
+            build/nvidia-execution/original-global-lifecycle/**/*.log
           if-no-files-found: warn
           retention-days: 30

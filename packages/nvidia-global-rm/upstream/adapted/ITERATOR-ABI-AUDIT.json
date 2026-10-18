@@ -1,0 +1,59 @@
+{
+  "adaptation": "Invoke each implementation directly through its declared function type with the real base-container pointer, then assign the returned base iterator into the typed iterator union .iter. Capture source container once. C++ template branch and iterator representations remain unchanged.",
+  "adapted_sha256": "a3078bf758824cfd5f44735f9873d9509f831947b3d5b8346ef4a4b8bc372c04",
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "controls": {
+    "actual_container_headers": true,
+    "cases": [
+      "pointer-range exact signature",
+      "index-range exact signature",
+      "typed union return contents",
+      "actual base pointer",
+      "64-bit index preservation",
+      "one source-container expression evaluation"
+    ],
+    "checks_per_variant": 13,
+    "compiler": "Clang18.1.3 x86_64 ELF host controls; native Apple pending",
+    "sha256": "6e08a4f7e5425ad2c5d83da69d93e1a88a9c63e26fae29f7209ba6582e9f52a6",
+    "source": "tests/check_iterator_dispatch_native.c",
+    "typed_callback_fixture": true,
+    "variants": [
+      "plain",
+      "fatal address,undefined,function"
+    ]
+  },
+  "format": 1,
+  "full_original_corpus_rebuild_required": true,
+  "full_original_host_validation": {
+    "allocation_failure_cases_per_variant": 156,
+    "external_allocation_domain_checks": 23,
+    "gpu_access": false,
+    "kernel_executed": false,
+    "leak_sanitizer": "Disabled only in explicit Linux local run because container process-inspection support is unavailable; host/service accounting verified zero. Native Apple builder retains default sanitizer configuration.",
+    "lifecycle_checks": 22,
+    "memory_retry_checks": 29,
+    "original_translation_units_per_variant": 1100,
+    "passed_allocation_cases_per_variant": 156,
+    "registry_epoch_checks": 23,
+    "source_profile": "10 reviewed overlays,12 changed source/header files",
+    "tracked_original_allocations_at_shutdown": 0,
+    "unavailable_calls": 0,
+    "variants": [
+      "plain",
+      "fatal address,undefined,function"
+    ]
+  },
+  "gpu_access": false,
+  "kernel_execution": "not_tested",
+  "original_diagnosis": "Fatal function sanitizer in actual original rs_client.c1527 indexRefIterAll calls multimapItemIterRange_IMPL through RsIndexIter(void*,void*,void*) despite its actual MultimapIterBase(MultimapBase*,void*,void*) declaration. Distinct union return/pointer types are incompatible C function types even when layouts match.",
+  "patch": "upstream/adapted/iterator-dispatch-typed-abi.patch",
+  "patch_sha256": "42d05eff5d60da7a5db3d8d0b456ad09378434ad47f18570b9ef0e5b2c49d1e6",
+  "precedent": {
+    "reuse": "Exact retained reviewed standalone macro block, now explicit full-RM overlay.",
+    "sha256": "910ea5500b3dc4f6abc485abb2fa097ae3a23363218b5626e5c3672224013139",
+    "source": "packages/nvidia-resource-server/upstream/adapted/iterator_macros.h.inc"
+  },
+  "production_entry": "remains_disabled",
+  "source": "src/nvidia/inc/libraries/containers/type_safety.h",
+  "status": "passed-full-original-host-controls; native-Apple-execution-pending"
+}

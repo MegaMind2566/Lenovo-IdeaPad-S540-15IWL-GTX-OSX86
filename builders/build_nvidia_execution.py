@@ -18,6 +18,7 @@ import compile_nvidia_global_rm as original
 import nvidia_execution_commands as commands
 import nvidia_execution_closure as closure
 import embed_nvidia_firmware as firmware
+import nvidia_metaclass_initializers as metaclass
 
 ROOT = Path(__file__).resolve().parents[1]
 GLOBAL = ROOT / 'packages/nvidia-global-rm'
@@ -53,6 +54,7 @@ def project_sources() -> tuple[list[Path], list[Path], list[Path]]:
                 GSP / 'src/S540NvidiaGspFirmwareOriginal.c',
                 GSP / 'src/S540NvidiaGspFirmware.cpp',
                 GSP / 'src/S540NvidiaGspBootstrap.cpp',
+                GSP / 'src/S540NvidiaGspDispatcher.cpp',
                 GSP / 'src/S540NvidiaGspContext.c',
                 GSP / 'timers/S540NvidiaGspTimersOriginal.c'}
     selected = set(cpp + original_c + plain_c)
@@ -72,7 +74,9 @@ def audit_platform_imports(output: Path, kernel_flags: list[str], cpp_flags: lis
     baseline.update(services)
     references = [SERVICES / 'tests/sdk_import_reference.cpp',
                   DEVICE / 'tests/sdk_import_reference.cpp',
-                  GSP / 'platform/tests/sdk_import_reference.cpp']
+                  GSP / 'platform/tests/sdk_import_reference.cpp',
+                  GSP / 'platform/tests/sdk_power_reference.cpp',
+                  GSP / 'tests/sdk_dispatcher_reference.cpp']
     approved, component_imports = set(), {}
     for index, source in enumerate(references):
         obj = output / ('execution-sdk-reference-' + str(index) + '.o')
@@ -83,6 +87,11 @@ def audit_platform_imports(output: Path, kernel_flags: list[str], cpp_flags: lis
         imports = transport.kernel_imports(obj)
         approved.update(imports)
         component_imports[source.relative_to(ROOT).as_posix()] = sorted(imports)
+    # The separately byte/relocation-verified loader graph admits only the
+    # kernel OSMetaClass lifetime operations, not its reference vtable's
+    # unresolved project virtual methods or arbitrary C++ runtime imports.
+    approved.update(metaclass.EXTERNALS)
+    component_imports['verified-power-metaclass-loader'] = sorted(metaclass.EXTERNALS)
     previous_exports = set()
     dependencies = [ROOT / 'packages/nvidia-hardware-transport/src/S540NvidiaPci.cpp',
                     ROOT / 'packages/nvidia-hardware-transport/firmware/S540NvidiaFirmware.cpp']
@@ -119,6 +128,7 @@ def kernel_objects(upstream: Path, output: Path, assets: Path,
                    *, compiled_directory: Path | None = None,
                    checked_cleanup_overlays: bool = False) -> KernelBuild:
     import build_nvidia_transport as transport
+    cpp_flags = kernel_cpp_flags(cpp_flags)
     output = output.absolute()
     output.mkdir(parents=True, exist_ok=True)
     partial = {'format': 1, 'status': 'running', 'phase': 'verify-original-compilation',
@@ -167,6 +177,8 @@ def kernel_objects(upstream: Path, output: Path, assets: Path,
     if actual_namespace != compiled['namespace_contract']:
         raise ValueError('The reused original RM private namespace changed.')
     cpp, c, plain_c = project_sources()
+    metaclass_reference = metaclass.compile_reference(output, kernel_flags, cpp_flags)
+    metaclass_object_review = None
     partial.update(phase='compile-project-bridges', original_source_objects=len(original_objects))
     save_partial()
     bridge = original.original_bridge_flags(
@@ -193,7 +205,10 @@ def kernel_objects(upstream: Path, output: Path, assets: Path,
                       '-c', str(source), '-o', str(obj),
                       diagnostic_log=output / (source.stem + '-compile.log'))
         transport.macho(obj, 1)
-        transport.verify_no_static_initializers(obj, 'The actual Darwin execution bridge')
+        if source == GSP / 'platform/S540NvidiaGspPower.cpp':
+            metaclass_object_review = metaclass.verify_metaclass_initializers(obj, metaclass_reference)
+        else:
+            metaclass.verify_no_initializers(obj)
         objects.append(obj)
         project_objects.append(obj)
         partial['completed_project_sources'].append(source.relative_to(ROOT).as_posix())
@@ -218,14 +233,17 @@ def kernel_objects(upstream: Path, output: Path, assets: Path,
                   *(str(path) for path in project_objects), '-o', str(linked),
                   diagnostic_log=output / 'execution-bridge-link.log')
     transport.macho(linked, 1)
-    transport.verify_no_static_initializers(linked, 'The complete actual Darwin execution bridge')
+    if metaclass_object_review is None:
+        raise ValueError('The execution bridge lost the reviewed power metaclass.')
+    linked_metaclass_review = metaclass.verify_metaclass_initializers(linked, metaclass_reference)
     partial['phase'] = 'audit-platform-imports'
     save_partial()
     platform_import_audit = audit_platform_imports(output, kernel_flags, cpp_flags, linked, defined)
     partial['phase'] = 'audit-actual-original-rm-closure'
     save_partial()
     execution_closure = closure.analyze_execution_closure(
-        linked, original_objects, compiled, output / 'original-rm-closure', upstream=upstream)
+        linked, original_objects, compiled, output / 'original-rm-closure', upstream=upstream,
+        metaclass_reference=metaclass_reference)
     record = {'format': 1, 'status': 'compiled', 'architecture': 'x86_64',
               'production_candidate_allowed': False,
               'milestone_status': 'development-source-only; adapter runtime closure unresolved',
@@ -236,6 +254,8 @@ def kernel_objects(upstream: Path, output: Path, assets: Path,
               'private_original_definitions': len(defined),
               'project_imports': sorted(transport.kernel_imports(linked)),
               'platform_import_audit': platform_import_audit,
+              'power_metaclass_object_audit': metaclass_object_review,
+              'linked_power_metaclass_audit': linked_metaclass_review,
               'execution_closure': execution_closure,
               'checked_cleanup_overlays': checked_cleanup_overlays,
               'original_header_profile': 'checked-cleanup-development' if checked_source else 'unchanged-baseline',
@@ -250,17 +270,32 @@ def kernel_objects(upstream: Path, output: Path, assets: Path,
                        validation=record)
 
 
+def kernel_cpp_flags(flags: list[str]) -> list[str]:
+    result = list(flags)
+    if '-fno-use-cxa-atexit' not in result:
+        result.append('-fno-use-cxa-atexit')
+    # LLVM's Mach-O destructor lowering otherwise synthesizes __cxa_atexit
+    # even with the frontend flag. Kext unload uses the explicit term table.
+    if '-disable-atexit-based-global-dtor-lowering' not in result:
+        result += ['-mllvm', '-disable-atexit-based-global-dtor-lowering']
+    return result
+
+
 def main() -> int:
     import build_nvidia_transport as transport
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--upstream', type=Path, required=True)
+    parser.add_argument('--upstream', type=Path)
     parser.add_argument('--kernel-sdk', type=Path, required=True)
-    parser.add_argument('--assets-dir', type=Path, required=True)
+    parser.add_argument('--assets-dir', type=Path)
+    parser.add_argument('--metaclass-preflight', action='store_true',
+                        help='Verify actual kernel power-service loader code before compiling full RM.')
     parser.add_argument('--output-dir', type=Path, required=True)
     parser.add_argument('--compiled-directory', type=Path)
     parser.add_argument('--checked-cleanup-overlays', action='store_true',
                         help='Use the verified composed cleanup sources and checked headers for all RM bridges.')
     args = parser.parse_args()
+    if not args.metaclass_preflight and (args.upstream is None or args.assets_dir is None):
+        parser.error('--upstream and --assets-dir are required for the full execution build')
     if sys.platform != 'darwin' or platform.machine() != 'x86_64':
         raise ValueError('Authoritative kernel compilation requires Intel macOS.')
     sdk = args.kernel_sdk.resolve(strict=True)
@@ -272,8 +307,20 @@ def main() -> int:
              '-DKERNEL', '-D__KERNEL__', '-O2', '-Wall', '-Wextra', '-Werror',
              '-Wno-deprecated-declarations', '-nostdinc', '-isystem', str(sdk / 'Headers'),
              '-I', str(ROOT / 'packages/nvidia-os-adapter/upstream/include')]
-    cpp = ['-fapple-kext', '-fno-exceptions', '-fno-rtti', '-fno-threadsafe-statics',
-           '-nostdinc++', '-std=c++17']
+    cpp = kernel_cpp_flags(['-fapple-kext', '-fno-exceptions', '-fno-rtti',
+                           '-fno-threadsafe-statics', '-nostdinc++', '-std=c++17'])
+    if args.metaclass_preflight:
+        args.output_dir.mkdir(parents=True, exist_ok=True)
+        reference = metaclass.compile_reference(args.output_dir, flags, cpp)
+        actual = args.output_dir / 'power-service.o'
+        commands.run('/usr/bin/xcrun', 'clang++', *flags, *cpp, '-Wframe-larger-than=4096',
+                     '-c', str(GSP / 'platform/S540NvidiaGspPower.cpp'), '-o', str(actual),
+                     diagnostic_log=args.output_dir / 'power-service-compile.log')
+        record = metaclass.verify_metaclass_initializers(actual, reference)
+        record['kernel_cpp_flags'] = cpp
+        (args.output_dir / 'metaclass-preflight.json').write_text(json.dumps(record, indent=2) + '\n')
+        print('Power-service kernel loader preflight passed; no kernel code was executed.')
+        return 0
     kernel_objects(args.upstream, args.output_dir, args.assets_dir, flags, cpp,
                    compiled_directory=args.compiled_directory,
                    checked_cleanup_overlays=args.checked_cleanup_overlays)

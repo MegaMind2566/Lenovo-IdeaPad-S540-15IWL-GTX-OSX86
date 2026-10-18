@@ -52,7 +52,11 @@
         "bridge": "packages/nvidia-device-transport/src/S540NvidiaDeviceServices.cpp",
         "bridge_anchor": "extern \"C\" NvBool NV_API_CALL s540Global_nv_requires_dma_remap(nv_state_t *state) {",
         "bridge_anchors": [
-          "    if (queryRmDmaRemap(state, required) != NV_OK) dmaPolicyViolation();",
+          "    if (queryRmDmaRemap(state, required) != NV_OK)",
+          "        deviceContractViolation(\"DMA-remap callback requires an admitted bound policy\");",
+          "[[noreturn]] void deviceContractViolation(const char *message) {",
+          "    panic(\"NVIDIA device services contract violation: %s\", message);",
+          "    std::abort();",
           "    if (!stateValid(state)) return NV_ERR_INVALID_STATE;",
           "    return binding.session->requiresDmaRemap(required);"
         ],

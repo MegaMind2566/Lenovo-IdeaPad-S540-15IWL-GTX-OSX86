@@ -12,7 +12,7 @@ class Provenance(unittest.TestCase):
     def test_pinned_references(self):
         record = json.loads((ROOT / 'PROVENANCE.json').read_text())
         self.assertEqual(record['nvidia_commit'], '1a82fbfda8f321b056eb3568850f9316c5e465c5')
-        self.assertEqual(len(record['reference_files']), 7)
+        self.assertEqual(len(record['reference_files']), 12)
         for item in record['reference_files']:
             data = (ROOT / item['local']).read_bytes()
             self.assertEqual(hashlib.sha256(data).hexdigest(), item['sha256'])
@@ -43,6 +43,26 @@ class Provenance(unittest.TestCase):
         self.assertIn('extern "C" int cpu_number(void);', source)
         self.assertIn('const int number = cpu_number();', source)
         self.assertNotIn('rdtscp', source.lower())
+
+    def test_usercopy_uses_public_fault_recoverable_exports(self):
+        header = (ROOT / 'reference/apple-copyio.h').read_text()
+        exports = (ROOT / 'reference/apple-libkern.exports').read_text().splitlines()
+        self.assertIn('int     copyin(const user_addr_t uaddr,', header)
+        self.assertIn('int     copyout(const void *', header)
+        self.assertIn('_copyin', exports)
+        self.assertIn('_copyout', exports)
+        original = (ROOT / 'reference/os-interface.c').read_text()
+        self.assertIn('copy_from_user(to, from, n) ? NV_ERR_INVALID_ADDRESS : NV_OK', original)
+        self.assertIn('copy_to_user(to, from, n) ? NV_ERR_INVALID_ADDRESS : NV_OK', original)
+        xnu = (ROOT / 'reference/apple-copyio.c').read_text()
+        self.assertIn('const int copysize_limit_panic = (64 * MB);', xnu)
+        source = (ROOT / 'src/S540NvidiaDarwinUserCopy.cpp').read_text()
+        self.assertIn('current_task() == kernel_task', source)
+        self.assertIn('copyin(', source)
+        self.assertIn('copyout(', source)
+        self.assertNotIn('std::memcpy', source)
+        record = json.loads((ROOT / 'PROVENANCE.json').read_text())
+        self.assertLess(record['user_copy']['kernel_chunk_bytes'], 64 * 1024 * 1024)
 
     def test_no_v9_symbol_override(self):
         for source in (ROOT / 'src').glob('*.cpp'):

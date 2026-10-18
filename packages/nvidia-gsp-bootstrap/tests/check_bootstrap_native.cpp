@@ -3,15 +3,19 @@
 // provider/platform observations are explicit CPU fixtures. Original RM entry
 // bodies are typed abort tripwires in check_bootstrap_boundary_native.c.
 #include "../src/S540NvidiaGspBootstrap.hpp"
+#include "../src/S540NvidiaGspDispatcher.hpp"
 #include "../src/S540NvidiaGspFirmwareBridge.h"
 #include "../platform/S540NvidiaGspPlatform.hpp"
+#include "../platform/S540NvidiaGspPower.hpp"
 #include "../timers/S540NvidiaGspTimers.h"
 #include "../../nvidia-device-transport/src/nv_device_services.h"
 #include "../../nvidia-darwin-services/src/S540NvidiaDarwinServices.h"
 #include <cstdio>
+#include <condition_variable>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
+#include <mutex>
 #include <thread>
 #include <vector>
 
@@ -21,6 +25,7 @@ using namespace S540NvidiaDeviceTransport;
 unsigned checks;
 nv_state_t *fixtureState;
 bool fixturePlatformStopFailure;
+bool fixturePlatformUnbindFailure;
 void expect(bool value, const char *reason) {
     ++checks;
     if (!value) { std::fprintf(stderr, "Bootstrap check failed: %s\n", reason); std::exit(1); }
@@ -66,7 +71,7 @@ NV_STATUS policy(void *opaque, DmaRemapPolicy &out) {
 Detail::Backend backend(ResourceFixture &fixture) {
     return Detail::Backend{&fixture, ordinary, start, stop, live, identification,
         allocate, page, map, allocationOperation, allocationOperation, install,
-        irq, irq, nullptr, nullptr, nullptr, configRead, configWrite, nullptr, policy};
+        irq, irq, nullptr, nullptr, nullptr, configRead, configWrite, nullptr, policy, nullptr};
 }
 S540GspDeviceFacts deviceFacts() {
     S540GspDeviceFacts f{};
@@ -89,6 +94,54 @@ void expectCold() {
     expect(!timers.bound && !s540DarwinLiveObjects() &&
         !abiStatistics().bound && !fixtureState, "all callback owners detached");
 }
+struct FirmwareLeaseFixture { const void *handle = nullptr, *bytes = nullptr; NvU32 length = 0; };
+NV_STATUS acquireFirmware(void *opaque, void *state) {
+    auto &lease = *static_cast<FirmwareLeaseFixture *>(opaque);
+    lease.handle = s540GspFirmwareAcquire(state, 0, 2, &lease.bytes, &lease.length);
+    return lease.handle ? NV_STATUS(NV_OK) : NV_STATUS(NV_ERR_NOT_READY);
+}
+NV_STATUS releaseFirmware(void *opaque, void *) {
+    s540GspFirmwareRelease(static_cast<FirmwareLeaseFixture *>(opaque)->handle);
+    return NV_OK;
+}
+NV_STATUS inspect(void *, void *) { return NV_OK; }
+NV_STATUS allocateHostBorrower(void *opaque, void *) {
+    *static_cast<void **>(opaque) = s540GlobalRmHostAllocate(64);
+    return *static_cast<void **>(opaque) ? NV_STATUS(NV_OK) : NV_STATUS(NV_ERR_NO_MEMORY);
+}
+NV_STATUS releaseHostBorrower(void *opaque, void *) {
+    s540GlobalRmHostFree(*static_cast<void **>(opaque)); return NV_OK;
+}
+// Exercise the actual lease/worker lifetime, rather than a simulated PMstop
+// barrier: an external hook remains inside its owner after enqueuing shutdown.
+// Even after the worker acknowledges, it must retain that owner until return.
+struct PowerHookFixture {
+    S540NvidiaGspBootstrap::Dispatcher dispatcher;
+    S540NvidiaGspPower::Lease lease;
+    std::mutex guard;
+    std::condition_variable changed;
+    bool entered = false, stopAttempted = false, release = false;
+    NV_STATUS postStatus = NV_ERR_NOT_READY, ackStatus = NV_ERR_NOT_READY;
+    NV_STATUS stopStatus = NV_ERR_NOT_READY;
+    static NV_STATUS request(void *opaque) {
+        auto &self = *static_cast<PowerHookFixture *>(opaque);
+        const NV_STATUS status = self.dispatcher.post(2);
+        std::unique_lock<std::mutex> lock(self.guard);
+        self.postStatus = status; self.entered = true; self.changed.notify_all();
+        self.changed.wait(lock, [&] { return self.release; });
+        return status;
+    }
+    static NV_STATUS action(void *opaque, NvU32 command) {
+        auto &self = *static_cast<PowerHookFixture *>(opaque);
+        if (command == 1) return self.lease.startNativeForTest({&self, request});
+        const NV_STATUS ack = self.lease.acknowledgeRevocation();
+        const NV_STATUS stop = self.lease.stop();
+        std::lock_guard<std::mutex> lock(self.guard);
+        self.ackStatus = ack; self.stopStatus = stop;
+        self.stopAttempted = true; self.changed.notify_all();
+        return stop;
+    }
+};
 }
 
 // Explicit native platform fixture. This is not linked with the real Darwin
@@ -122,6 +175,11 @@ NV_STATUS S540NvidiaGspPlatform::Context::bindState(nv_state_t *state) {
     if (!impl_ || !state || fixtureState) return NV_ERR_INVALID_STATE;
     fixtureState = state; return NV_OK;
 }
+NV_STATUS S540NvidiaGspPlatform::Context::unbindState(nv_state_t *state) {
+    if (fixturePlatformUnbindFailure) return NV_ERR_BUSY_RETRY;
+    if (!impl_ || !state || fixtureState != state) return NV_ERR_INVALID_STATE;
+    fixtureState = nullptr; return NV_OK;
+}
 NV_STATUS S540NvidiaGspPlatform::Context::shutdown() {
     if (fixturePlatformStopFailure) return NV_ERR_BUSY_RETRY;
     delete impl_; impl_ = nullptr; fixtureState = nullptr; return NV_OK;
@@ -133,6 +191,41 @@ int main(int argc, char **argv) {
     if (!readImage(argv[1], gsp) || !readImage(argv[2], ucodes)) return 2;
     const S540NvidiaGspBootstrap::Images images{gsp.data(), gsp.size(), ucodes.data(), ucodes.size()};
     IOPCIDevice provider;
+    {
+        PowerHookFixture fixture;
+        expect(!s540DarwinLiveObjects(), "PM hook race starts without service owners");
+        expect(fixture.dispatcher.start(PowerHookFixture::action, &fixture) == NV_OK,
+            "PM hook race uses a real persistent owner worker");
+        expect(fixture.dispatcher.invoke(1) == NV_OK, "PM fixture lease starts on owner thread");
+        NV_STATUS revokeStatus = NV_ERR_NOT_READY;
+        std::thread callback([&] { revokeStatus = fixture.lease.revokeNativeForTest(); });
+        {
+            std::unique_lock<std::mutex> lock(fixture.guard);
+            fixture.changed.wait(lock, [&] { return fixture.entered && fixture.stopAttempted; });
+        }
+        expect(fixture.postStatus == NV_OK, "external hook enqueues real shutdown before blocking");
+        expect(fixture.ackStatus == NV_OK, "worker can acknowledge while PM hook is in flight");
+        expect(fixture.stopStatus == NV_ERR_IN_USE, "in-flight external hook pins lease after acknowledgement");
+        const auto pinned = fixture.lease.snapshot();
+        expect(pinned.retained && pinned.acknowledgementSent && !pinned.acknowledgementPending &&
+            !pinned.stopped && pinned.revocationHooksInFlight == 1,
+            "independent hook count retains owner without relying on Apple's bounded PM wait");
+        {
+            std::lock_guard<std::mutex> lock(fixture.guard);
+            fixture.release = true; fixture.changed.notify_all();
+        }
+        callback.join();
+        expect(revokeStatus == NV_OK, "external hook returns after explicit release");
+        const auto returned = fixture.lease.snapshot();
+        expect(returned.retained && returned.revocationHooksInFlight == 0 && returned.revocationPosts == 1,
+            "hook completion closes only its own lifetime reference");
+        expect(fixture.dispatcher.invoke(2) == NV_OK, "owner retries lease stop after actual callback return");
+        const auto stopped = fixture.lease.snapshot();
+        expect(!stopped.retained && stopped.stopped && stopped.revocationHooksInFlight == 0,
+            "successful retry releases lease storage only after external hook exit");
+        expect(fixture.dispatcher.stop() == NV_OK, "PM hook race joins persistent worker");
+    }
+    expectCold();
     {
         S540NvidiaGspBootstrap::Owner owner;
         expect(owner.initialize() == NV_ERR_INVALID_STATE && owner.stop() == NV_OK,
@@ -150,12 +243,14 @@ int main(int argc, char **argv) {
             "no original entry or IRQ activation during preparation");
         expect(owner.initialize() == NV_ERR_NOT_SUPPORTED, "unresolved gates refuse before original entry");
         state = owner.snapshot();
-        expect(state.initializationRefused && state.prepared && state.blockedGates == 15,
+        expect(state.initializationRefused && state.prepared && state.blockedGates == 13 &&
+            state.workerActive && state.workerThread && state.powerDomainJoined && state.powerOnCompleted,
             "refusal retains reviewable prepared resources and all unresolved gates");
         NV_STATUS foreign = NV_OK;
-        std::thread wrong([&] { foreign = owner.stop(); }); wrong.join();
-        expect(foreign == NV_ERR_INVALID_STATE && owner.snapshot().ownsResources,
-            "wrong-thread stop preserves every owner");
+        const NvU64 worker = state.workerThread;
+        std::thread caller([&] { foreign = owner.initialize(); }); caller.join();
+        expect(foreign == NV_ERR_NOT_SUPPORTED && owner.snapshot().workerThread == worker,
+            "different caller still dispatches on the exact persistent RM owner thread");
         expect(owner.stop() == NV_OK && !fixture.active && owner.snapshot().cleanupComplete,
             "normal ordered cleanup");
         expectCold();
@@ -163,27 +258,72 @@ int main(int argc, char **argv) {
     {
         S540NvidiaGspBootstrap::Owner owner; ResourceFixture fixture;
         expect(owner.prepareNativeForTest(&provider, backend(fixture), images) == NV_OK, "lease case prepared");
-        const void *bytes = nullptr; NvU32 length = 0;
-        const void *lease = s540GspFirmwareAcquire(fixtureState, 0, 2, &bytes, &length);
-        expect(lease && bytes && bytes != gsp.data() && length == gsp.size() &&
-            static_cast<const NvU8 *>(bytes)[0] == gsp[0], "Store delivers an owned immutable copy");
+        FirmwareLeaseFixture lease;
+        expect(owner.runNativeForTest(acquireFirmware, &lease) == NV_OK &&
+            lease.handle && lease.bytes && lease.bytes != gsp.data() && lease.length == gsp.size() &&
+            static_cast<const NvU8 *>(lease.bytes)[0] == gsp[0], "Store delivers an owned immutable copy on its owner worker");
         expect(owner.stop() == NV_ERR_IN_USE, "live firmware lease blocks destruction");
         auto state = owner.snapshot();
         expect(state.ownsResources && state.quarantined && fixture.active &&
             state.firmwareBound && state.transportBound && state.platformBound &&
             !state.timersBound && fixtureState, "partial detach retains original state and all implicated owners");
-        s540GspFirmwareRelease(lease);
+        expect(owner.runNativeForTest(releaseFirmware, &lease) == NV_OK, "firmware release returns to same owner worker");
         expect(owner.stop() == NV_OK && !fixture.active, "lease release permits idempotent cleanup retry");
         expectCold();
     }
     {
         S540NvidiaGspBootstrap::Owner owner; ResourceFixture fixture;
         expect(owner.prepareNativeForTest(&provider, backend(fixture), images) == NV_OK, "platform refusal case prepared");
-        fixturePlatformStopFailure = true;
+        fixturePlatformUnbindFailure = true;
         expect(owner.stop() == NV_ERR_BUSY_RETRY && owner.snapshot().ownsResources && fixtureState,
             "platform unbind refusal pins context until successful retry");
-        fixturePlatformStopFailure = false;
+        fixturePlatformUnbindFailure = false;
         expect(owner.stop() == NV_OK, "platform detach retry releases retained context");
+        expectCold();
+    }
+    {
+        S540NvidiaGspBootstrap::Owner owner; ResourceFixture fixture;
+        expect(owner.prepareNativeForTest(&provider, backend(fixture), images) == NV_OK, "PM revocation case prepared");
+        expect(owner.failPowerAcknowledgementNativeForTest(true) == NV_OK, "inject actual acknowledgement refusal boundary");
+        expect(owner.revokePowerNativeForTest() == NV_OK, "PM down posts to persistent worker");
+        expect(owner.runNativeForTest(inspect, nullptr) == NV_OK, "barrier waits for posted PM shutdown action");
+        const auto state = owner.snapshot();
+        expect(state.powerRevoked && !state.powerAcknowledged && state.quarantined &&
+            state.ownsResources && state.workerActive && !fixture.active && !fixtureState,
+            "failed ack retains PM owner and worker after real RM resources drain");
+        expect(owner.failPowerAcknowledgementNativeForTest(false) == NV_OK && owner.stop() == NV_OK,
+            "retry acknowledges only after cleanup and joins persistent worker");
+        expect(owner.snapshot().powerAcknowledged && !owner.snapshot().workerActive,
+            "completed PM acknowledgement reported separately from enqueue acceptance");
+        expectCold();
+    }
+    {
+        S540NvidiaGspBootstrap::Owner owner; ResourceFixture fixture;
+        expect(owner.prepareNativeForTest(&provider, backend(fixture), images) == NV_OK, "PM transport failure case prepared");
+        fixture.failStop = true;
+        expect(owner.revokePowerNativeForTest() == NV_OK && owner.runNativeForTest(inspect, nullptr) == NV_OK,
+            "revocation worker reaches actual transport stop refusal");
+        const auto state = owner.snapshot();
+        expect(state.powerRevoked && !state.powerAcknowledged && state.ownsResources && fixture.active,
+            "hardware-owner cleanup failure never acknowledges the PM drop");
+        fixture.failStop = false;
+        expect(owner.stop() == NV_OK && owner.snapshot().powerAcknowledged,
+            "retained transport cleanup retry precedes real acknowledgement");
+        expectCold();
+    }
+    {
+        S540NvidiaGspBootstrap::Owner owner; ResourceFixture fixture;
+        expect(owner.prepareNativeForTest(&provider, backend(fixture), images) == NV_OK, "host borrower refusal case prepared");
+        void *borrower = nullptr;
+        expect(owner.runNativeForTest(allocateHostBorrower, &borrower) == NV_OK,
+            "actual tracked borrower keeps host alive");
+        expect(owner.stop() == NV_ERR_IN_USE && !fixtureState && owner.snapshot().hostInitialized,
+            "host teardown refusal preserves OS fact storage after actual platform destruction");
+        const auto *facts = s540GlobalRmPlatformFacts();
+        expect(facts && !std::strcmp(facts->osDate, "native-bootstrap-platform-fixture"),
+            "host text is independent of freed Platform storage");
+        expect(owner.runNativeForTest(releaseHostBorrower, &borrower) == NV_OK && owner.stop() == NV_OK,
+            "borrower release permits ordered host and power cleanup retry");
         expectCold();
     }
     {
@@ -224,6 +364,8 @@ int main(int argc, char **argv) {
     std::printf("{\"format\":1,\"component\":\"nvidia-gsp-bootstrap-owner\",\"status\":\"passed\","
         "\"checks\":%u,\"failures\":0,\"preparation_verified\":true,\"cleanup_retry_verified\":true,"
         "\"platform_fixture\":true,\"original_entry_tripwires\":true,\"real_context_store_transport_timers\":true,"
+        "\"persistent_worker_verified\":true,\"pm_revocation_fixture\":true,\"ack_after_cleanup_verified\":true,"
+        "\"pm_hook_lifetime_verified\":true,"
         "\"original_rm_executed\":false,\"firmware_loaded\":false,\"gpu_initialized\":false,"
         "\"execution\":\"native-user-space\",\"kernel_execution\":\"not_tested\",\"gpu_access\":false}\n", checks);
     return 0;

@@ -4,6 +4,7 @@
 #include "nv.h"
 #include "os-interface.h"
 #include "S540NvidiaGlobalRm.h"
+#include "S540NvidiaGlobalRmProfile.h"
 #include "../../nvidia-darwin-services/src/S540NvidiaDarwinServices.h"
 
 extern NV_STATUS RmWriteRegistryDword(nv_state_t *, const char *, NvU32);
@@ -33,12 +34,12 @@ NV_STATUS os_alloc_mem(void **out, NvU64 bytes)
         s540GlobalRmRecordUnavailable(CALL_ALLOC);
         return NV_ERR_INVALID_STATE;
     }
-    allocation = s540GlobalRmHostAllocate(bytes);
+    allocation = s540GlobalRmHostAllocateOriginal(bytes);
     if (!allocation) return NV_ERR_NO_MEMORY;
     *out = allocation;
     return NV_OK;
 }
-void os_free_mem(void *pointer) { MARK(CALL_FREE); s540GlobalRmHostFree(pointer); }
+void os_free_mem(void *pointer) { MARK(CALL_FREE); s540GlobalRmHostFreeOriginal(pointer); }
 
 STATUS_BRIDGE(os_alloc_mutex, NV_STATUS, (void **p), (p), CALL_MUTEX)
 VOID_BRIDGE(os_free_mutex, (void *p), (p), CALL_MUTEX)
@@ -121,17 +122,12 @@ NV_STATUS os_get_version_info(os_version_info *out)
 }
 
 // Original Linux builds seed their RM registry from Linux module parameters.
-// Darwin has no such parameter table. This explicit profile writes a real RM
-// registry entry and verifies it through the original registry implementation.
+// Darwin has no such parameter table. Publish and verify the selected original
+// power/NVLink policy transaction; never continue after a partial profile.
 NV_STATUS os_registry_init(void)
 {
-    NvU32 actual = 0;
-    NV_STATUS status;
     MARK(CALL_REGISTRY);
-    status = RmWriteRegistryDword(NULL, "S540DarwinGlobalRmProfile", 1);
-    if (status != NV_OK) return status;
-    status = RmReadRegistryDword(NULL, "S540DarwinGlobalRmProfile", &actual);
-    return status == NV_OK && actual == 1 ? NV_OK : NV_ERR_INVALID_STATE;
+    return s540GlobalRmInitializeRegistryProfile();
 }
 
 static NvU32 debugLevel = ~0U;

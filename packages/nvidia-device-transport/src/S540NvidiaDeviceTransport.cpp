@@ -113,7 +113,7 @@ NV_STATUS Session::unmapRegisters(void *address, NvU64 bytes) {
 }
 NV_STATUS Session::physicalAddressForHost(NvU64 host, NvU64 &physical) {
     if (!ordinary() || !live()) return NV_ERR_INVALID_STATE;
-    for (const auto &entry : allocations_) if (entry.resource) {
+    for (const auto &entry : allocations_) if (entry.resource && !entry.retired) {
         const NvU64 start = static_cast<NvU64>(reinterpret_cast<NvUPtr>(entry.host));
         const NvU64 bytes = NvU64(entry.pages) * kPageBytes;
         if (host >= start && host - start < bytes) {
@@ -128,6 +128,10 @@ NV_STATUS Session::physicalAddressForHost(NvU64 host, NvU64 &physical) {
     return NV_ERR_INVALID_ADDRESS;
 }
 Session::Allocation *Session::find(void *token) {
+    Allocation *entry = findOwned(token);
+    return entry && !entry->retired ? entry : nullptr;
+}
+Session::Allocation *Session::findOwned(void *token) {
     const NvU64 requested = static_cast<NvU64>(reinterpret_cast<NvUPtr>(token));
     if (!requested) return nullptr;
     for (auto &entry : allocations_)
@@ -208,11 +212,15 @@ NV_STATUS Session::mapDma(void *token, NvU64 *devicePages) {
     if (!devicePages) return NV_ERR_INVALID_ARGUMENT;
     Allocation *entry = find(token);
     if (!entry) return NV_ERR_OBJECT_NOT_FOUND;
-    if (entry->mapped) return NV_ERR_STATE_IN_USE;
+    if (entry->mapped && !entry->dmaRetired) return NV_ERR_STATE_IN_USE;
     if (!snapshot_.dmaPolicySettled || snapshot_.mapper == Mapper::Unavailable ||
         snapshot_.dmaAddressBits == 0)
         return NV_ERR_NOT_SUPPORTED;
-    NV_STATUS status = backend_.mapDma(backend_.context, entry->resource, snapshot_.dmaAddressBits);
+    const bool retained = entry->mapped;
+    if (retained && !backend_.validateRetainedDma) return NV_ERR_NOT_SUPPORTED;
+    NV_STATUS status = retained ?
+        backend_.validateRetainedDma(backend_.context, entry->resource, snapshot_.dmaAddressBits) :
+        backend_.mapDma(backend_.context, entry->resource, snapshot_.dmaAddressBits);
     if (status != NV_OK) return status;
     bool valid = true;
     NvU64 previous = 0;
@@ -227,11 +235,14 @@ NV_STATUS Session::mapDma(void *token, NvU64 *devicePages) {
         previous = address;
     }
     if (!valid) {
-        if (backend_.unmapDma(backend_.context, entry->resource) != NV_OK)
+        // A retained mapping can still be addressable by an undrained IRQ.
+        // Failed revalidation must never tear down that old ownership.
+        if (!retained && backend_.unmapDma(backend_.context, entry->resource) != NV_OK)
             entry->mapped = true;
         return NV_ERR_INVALID_ADDRESS;
     }
     entry->mapped = true;
+    entry->dmaRetired = false;
     for (NvU32 i = 0; i < (entry->contiguous ? 1U : entry->pages); ++i)
         (void)backend_.pageAddress(backend_.context, entry->resource, i, true, devicePages[i]);
     return NV_OK;
@@ -242,7 +253,7 @@ NV_STATUS Session::unmapDma(void *token, NvU64 *physicalPages) {
     if (irqArmAttempted_) return NV_ERR_IN_USE;
     Allocation *entry = find(token);
     if (!entry) return NV_ERR_OBJECT_NOT_FOUND;
-    if (!entry->mapped) return NV_ERR_INVALID_STATE;
+    if (!entry->mapped || entry->dmaRetired) return NV_ERR_INVALID_STATE;
     NV_STATUS status = backend_.unmapDma(backend_.context, entry->resource);
     if (status != NV_OK) return status;
     entry->mapped = false;
@@ -250,12 +261,84 @@ NV_STATUS Session::unmapDma(void *token, NvU64 *physicalPages) {
         (void)backend_.pageAddress(backend_.context, entry->resource, i, false, physicalPages[i]);
     return NV_OK;
 }
+NV_STATUS Session::unmapRmDma(void *token, NvU64 *physicalPages, bool &deferred) {
+    if (!ordinary() || !active_ || !rmBound_) return NV_ERR_INVALID_STATE;
+    if (!physicalPages) return NV_ERR_INVALID_ARGUMENT;
+    Allocation *entry = find(token);
+    if (!entry) return NV_ERR_OBJECT_NOT_FOUND;
+    if (!entry->mapped || entry->dmaRetired) return NV_ERR_INVALID_STATE;
+    if (!irqArmAttempted_) {
+        const NV_STATUS status = unmapDma(token, physicalPages);
+        if (status == NV_OK) deferred = false;
+        return status;
+    }
+    // The immutable physical table was published at allocation. Validate it
+    // before acknowledging retirement; no completion or page reuse occurs.
+    for (NvU32 i = 0; i < entry->pages; ++i) {
+        NvU64 physical = 0;
+        const NV_STATUS status = backend_.pageAddress(backend_.context, entry->resource, i, false, physical);
+        if (status != NV_OK) return status;
+        if (!physical || (physical & (kPageBytes - 1)) ||
+            physical > ~NvU64(0) - (kPageBytes - 1)) return NV_ERR_INVALID_ADDRESS;
+    }
+    entry->dmaRetired = true;
+    for (NvU32 i = 0; i < (entry->contiguous ? 1U : entry->pages); ++i)
+        (void)backend_.pageAddress(backend_.context, entry->resource, i, false, physicalPages[i]);
+    deferred = true;
+    return NV_OK;
+}
+NV_STATUS Session::releaseRmAllocation(void *token, bool &deferred) {
+    if (!ordinary() || !active_ || !rmBound_) return NV_ERR_INVALID_STATE;
+    Allocation *entry = find(token);
+    if (!entry) return NV_ERR_OBJECT_NOT_FOUND;
+    if (entry->mapped && !entry->dmaRetired) return NV_ERR_IN_USE;
+    if (!irqArmAttempted_) {
+        const NV_STATUS status = releaseEntry(*entry);
+        if (status == NV_OK) deferred = false;
+        return status;
+    }
+    const NV_STATUS retained = retainRmAllocation(token);
+    if (retained != NV_OK) return retained;
+    deferred = true;
+    return NV_OK;
+}
+NV_STATUS Session::retainRmAllocation(void *token) {
+    if (!ordinary() || !active_ || !rmBound_) return NV_ERR_INVALID_STATE;
+    Allocation *entry = find(token);
+    if (!entry) return NV_ERR_OBJECT_NOT_FOUND;
+    if (entry->mapped && !entry->dmaRetired) return NV_ERR_IN_USE;
+    entry->retired = true;
+    return NV_OK;
+}
+NV_STATUS Session::reclaimRmRetirement(void *token) {
+    if (!ordinary() || !active_ || !rmBound_) return NV_ERR_INVALID_STATE;
+    if (irqArmAttempted_) return NV_ERR_IN_USE;
+    Allocation *entry = findOwned(token);
+    if (!entry) return NV_ERR_OBJECT_NOT_FOUND;
+    if (entry->retired) return releaseEntry(*entry);
+    if (entry->dmaRetired) {
+        const NV_STATUS status = backend_.unmapDma(backend_.context, entry->resource);
+        if (status != NV_OK) return status;
+        entry->mapped = entry->dmaRetired = false;
+    }
+    return NV_OK;
+}
+RetirementStatistics Session::retirementStatistics() const {
+    RetirementStatistics out{};
+    for (const auto &entry : allocations_) if (entry.resource) {
+        if (entry.retired) ++out.allocations;
+        if (entry.dmaRetired) ++out.dmaMappings;
+        if (entry.retired || entry.dmaRetired) out.pages += entry.pages;
+    }
+    return out;
+}
 NV_STATUS Session::address(void *token, NvU32 page, NvU64 &deviceAddress) {
     if (!ordinary() || !live()) return NV_ERR_INVALID_STATE;
     Allocation *entry = find(token);
     if (!entry) return NV_ERR_OBJECT_NOT_FOUND;
     if (page >= entry->pages) return NV_ERR_INVALID_ARGUMENT;
-    return backend_.pageAddress(backend_.context, entry->resource, page, entry->mapped, deviceAddress);
+    return backend_.pageAddress(backend_.context, entry->resource, page,
+                               entry->mapped && !entry->dmaRetired, deviceAddress);
 }
 NV_STATUS Session::borrowHost(void *token, NvU64 offset, NvU64 length, void **address) {
     if (!ordinary() || !live()) return NV_ERR_INVALID_STATE;
@@ -293,6 +376,7 @@ NV_STATUS Session::releaseEntry(Allocation &entry) {
         status = backend_.unmapDma(backend_.context, entry.resource);
         if (status != NV_OK) return status;
         entry.mapped = false;
+        entry.dmaRetired = false;
     }
     NV_STATUS released = backend_.releaseAllocation(backend_.context, entry.resource);
     if (status == NV_OK) status = released;
@@ -352,6 +436,10 @@ NV_STATUS Session::transitionPower(NvU32) { return NV_ERR_NOT_SUPPORTED; }
 NV_STATUS Session::setRmBinding(bool bound) {
     if (!ordinary() || !active_) return NV_ERR_INVALID_STATE;
     if (bound == rmBound_) return NV_ERR_INVALID_STATE;
+    if (!bound) {
+        const RetirementStatistics pending = retirementStatistics();
+        if (pending.allocations || pending.dmaMappings) return NV_ERR_IN_USE;
+    }
     rmBound_ = bound;
     return NV_OK;
 }

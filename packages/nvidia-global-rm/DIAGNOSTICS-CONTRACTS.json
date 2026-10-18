@@ -1,0 +1,51 @@
+{
+  "format": 1,
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "scope": "Original-ABI Darwin diagnostic implementation, not a hardware runtime or GPU error recovery implementation.",
+  "source_sha256": {
+    "kernel-open/nvidia/nv.c": "ce04946d288cf0251668a2d847acceb2a39af9dac2f13bb005f53759c774dbf7",
+    "kernel-open/nvidia/os-interface.c": "0c8fe2749ec4ee12f1dbbd884cfbc8f1c8a7750903de7453b01c2f6b92e0f6d6",
+    "kernel-open/nvidia/nv-report-err.c": "71f96ef5be72fd4b43df33b3b8e812d2f0050fd9577a2f7ca17a808d44fd527a",
+    "src/nvidia/arch/nvalloc/unix/include/nv.h": "02ce4b371e0a8dd26f62a320e88c8382dcf31a21b727503a66abcaea9eecf09b",
+    "src/nvidia/arch/nvalloc/unix/include/nv-dev-printf.h": "0585b5d49b1bcaa6ec1fe07511c337cfa77ddf45b4aa9076ca5a02a516b1ec5d",
+    "src/nvidia/arch/nvalloc/unix/include/os-interface.h": "bd281e48ff06b481033fc2fb29a891710a2b4d66fb009cc2b752ab6e90f2113b"
+  },
+  "implementation": {
+    "facade": "src/S540NvidiaGlobalRmDiagnostics.c",
+    "platform": "src/S540NvidiaGlobalRmFormat.cpp",
+    "boundary": "src/S540NvidiaGlobalRmDiagnostics.h"
+  },
+  "contracts": [
+    {
+      "symbol": "nv_dev_vprintf",
+      "original": "kernel-open/nvidia/os-interface.c",
+      "anchor": "int NV_API_CALL nv_dev_vprintf(struct nv_state_t *nv, NV_LOG_LEVEL level, const char *printf_format, va_list arglist)",
+      "behavior": "Actual device-scoped system log, original-state PCI identity and mapped severity; absent nv_state emits nothing as in original; invalid format rejected; returns actual bounded bytes supplied to log.",
+      "limits": "1024-byte stack message including terminating NUL; truncation count is actual emitted bytes; no dynamic allocation. Kernel stack execution remains gated."
+    },
+    {
+      "symbol": "nv_log_error",
+      "original": "kernel-open/nvidia/nv.c",
+      "anchor": "NV_STATUS NV_API_CALL nv_log_error(",
+      "behavior": "Actual device-scoped Xid report to Darwin system log; validates state and format; success means log submission, not recovery or GPU health.",
+      "port_policy": "Darwin system log replaces original Linux tracepoint delivery. Linux vendor error-subscriber registration and CONFIG_CRAY_XT forwarding are not exposed by this port."
+    },
+    {
+      "symbol": "os_bug_check",
+      "original": "kernel-open/nvidia/os-interface.c",
+      "anchor": "void NV_API_CALL os_bug_check(NvU32 bugCode, const char *bugCodeStr)",
+      "behavior": "Fatal kernel panic, never a successful return; bug text always a string argument rather than format. Native control uses actual abort."
+    }
+  ],
+  "validation": {
+    "exact_abi": "C facade includes pinned original declarations before definitions; compile-time __builtin_types_compatible_p checks all three exact function-pointer types.",
+    "harness": "tests/check_diagnostics_native.c",
+    "checks_per_variant": 37,
+    "local_clang_18": "passed ordinary and fatal address,undefined,function sanitizers",
+    "actual_log_bytes_observed": true,
+    "fatal_subprocesses": 2,
+    "kernel_execution": "not_tested",
+    "gpu_access": false,
+    "native_apple_result": "requires combined workflow"
+  }
+}

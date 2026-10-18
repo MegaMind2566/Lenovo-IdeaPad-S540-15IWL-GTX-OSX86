@@ -8,13 +8,16 @@ followed by controlled shutdown. The first GPU command is a later milestone.
 **This component is not enabled in the distributed EFI or v9 extension. No
 v10 installation package is available from this development work.** Native
 macOS validation and the complete operational OS callback profile remain
-requirements, alongside compiled kernel stack policy and actual power ownership.
+requirements, alongside a usable original kernel stack boundary and sufficient
+allocation capacity for the complete adapter lifecycle.
 
 ## Implemented components
 
 | Component | Behavior |
 |---|---|
 | [Bootstrap owner](src/S540NvidiaGspBootstrap.hpp) | Prepares and owns the real context, transport, copied firmware and timer bindings; cleanup failure preserves the heap owner for retry; initialization remains explicitly gated |
+| [Persistent dispatcher](src/S540NvidiaGspDispatcher.hpp) | Creates a stable kernel thread, serializes every RM operation and accepts preallocated asynchronous power-revocation work; successful stop drains accepted commands and joins owner storage |
+| [Power-domain lease](platform/S540NvidiaGspPower.hpp) | Registers a private real PM child below the exact endpoint, waits for its completed on transition and acknowledges revocation only after the owner has actually drained resources |
 | Firmware store | Verifies the actual approved firmware bytes, container and microcode directory; exposes bounded, generation-tagged leases to the exact original firmware ABI |
 | Original adapter context | Uses the pinned `nv_state_t`, independent aligned original RM stacks, real work queues, event locks and original adapter lifecycle calls; binds exact screen and stream-ID metadata callbacks |
 | [Platform and ACPI](platform/README.md) | Collects explicit known platform facts, binds the published endpoint ACPI companion and implements bounded optional `_ROM` reads |
@@ -54,7 +57,8 @@ mean only that original RM received bytes. They never mean the GPU booted.
 ## Runtime ordering required before enabling a candidate
 
 1. Finish the older standalone checks and acquire the single outer startup
-   lease. Retain the actual PCI provider, power reference and device session.
+   lease. Start the persistent owner thread, establish the exact power-child
+   connection and wait for its on completion. Retain the PCI/device owners.
 2. Collect platform and device facts, initialize tracked host allocation,
    construct the exact original context and bind its transport identities.
 3. Initialize and validate the actual global RM, then original per-device
@@ -66,17 +70,25 @@ mean only that original RM received bytes. They never mean the GPU booted.
    `gspRmInitialized` and the completed original adapter state. A firmware
    request, submitted bootstrap or expired timeout cannot satisfy this step.
 6. Disable the original adapter while interrupts, queues, MMIO, DMA and power
-   remain available. Stop timer producers and drain interrupt callbacks before
+   remain available. Drain interrupt callbacks and retired temporary allocations before
    original adapter shutdown. Release original users before unbinding their
    firmware, DMA, ACPI and timer resources.
 7. Stop work queues and release original private/event state through
    `s540GspContextReleaseOriginalState`, retaining the original `nv_state`,
    metadata and global-queue binding. The registered operational detacher then
-   unbinds timers, firmware, device transport and platform state. Final destroy
+   unbinds timers, firmware, device transport and platform state. Retired
+   allocations must also finish their real backend unmap/release before device
+   unbinding. Final destroy
    verifies that the actual timer service is detached before freeing storage.
    Shut down global RM and verify every ownership registry. A failed drain or
    detach retains the context and resources; retry never frees addressable
    storage or invokes an original destructor twice.
+8. Stop the transport, release copied host owners and close the host context.
+   Only after these operations succeed may a pending PM down request be
+   acknowledged. Require every external revocation hook to return before
+   closing the PM service, then close the persistent worker. Failed cleanup
+   retains the power lease and worker for retry and submits no false power
+   acknowledgement.
 
 `S540NvidiaGspContext` is a typed integration component, not an independently
 complete driver entry point. Its caller must enforce these prerequisites,
@@ -89,13 +101,30 @@ pretend that a never-initialized device completed normal shutdown.
 
 
 The preparation owner copies bounded OS fact strings and both approved firmware
-images into its own lifetime before publishing them to borrowers. A successful
+images into its own lifetime before publishing them to borrowers. Every RM,
+transport, firmware and timer operation runs on the same persistent worker,
+including shutdown requested by the separate PM callback thread. Snapshots are
+published under a guard. A successful
 `prepare()` means resources/bindings are prepared, never an initialized GPU.
 `initialize()` has no caller-supplied readiness Boolean and refuses before
-original RM while complete ABI closure, real power lifetime, original aggregate
-stack policy and allocation retirement during active IRQs remain unresolved.
-The current release guard cannot handle original GSP's temporary buffer frees
-with IRQs active; this is an operational blocker, not a successful test result.
+original RM while complete ABI closure, original aggregate stack policy and
+full-adapter allocation capacity remain unresolved. The power gate uses the
+actual completed PM-child transition and monotonic revocation state.
+
+The original GSP paths can unmap/free temporary buffers while interrupts are
+active. The transport now removes their caller visibility while retaining their
+device mappings and host backing until successful interrupt quiescence and real
+retirement drain. Callback tests cover partial enable, original-order disable,
+backend failure and retry. The bounded allocation registry has not yet been
+shown sufficient for the complete original adapter; successful fixture
+retirement is not evidence of that capacity.
+
+The power lease does not substitute a D0 sample for a lifetime request. It uses
+Apple's PM child protocol, completed transition, delayed acknowledgement and
+an independent external-hook lifetime count. Apple's bounded `PMstop` wait is
+not proof that the revocation owner can be freed. Emergency sleep and PM timeout escalation can
+still force a transition. Native PM events verify the owner/acknowledgement
+ordering; they do not establish an acquired power domain on the Lenovo.
 
 The firmware-store native harness uses the actual approved pair and covers
 corruption, owner/thread mismatches, unchanged outputs, lease exhaustion,
@@ -123,15 +152,30 @@ its production integration and original lifecycle execution remain required.
 Scalar or void OS callbacks cannot be filled with fabricated successful
 defaults to make the adapter link.
 
-The new lifecycle harness uses real context, allocator, work queues and timers,
-with typed original callback fixtures. Its 24 checks include successful timer
+The lifecycle harness uses real context, allocator, work queues and timers,
+with typed original callback fixtures. Its 26 checks include successful timer
 execution, private-state cleanup with metadata still available, detach refusal,
 retry and rejection of a detacher that reports success while timers remain
-bound. The bootstrap-owner harness uses those real components, the Session and
-Store, actual approved firmware bytes and explicit platform observations. Its
-43 checks include initialization refusal, capacity admission, OS-string lifetime,
-wrong-thread rejection and retained owners after firmware/platform/transport
-cleanup failures. Both harnesses passed local controls and the [native Intel macOS build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39169319480) from `d81b198`, with the original namespace and fatal address, undefined-behavior and function-type sanitizers. The existing metadata harness retained its 16 checks. All 25 production units compiled with matched SDK imports; the combined CPU/contract suite passed 1,594 checks per variant. Original kernel/GSP execution remains unconfirmed.
+bound. Two subprocesses also prove that genuine lifetime crypto refusals block
+a later context and invalidate an apparent original adapter success even when
+host counters remain clean. Both crypto masks, the lifetime call count and
+overflow must stay zero; a zero delta is insufficient. The bootstrap-owner harness uses those real components, the Session and
+Store, actual approved firmware bytes and explicit platform observations.
+
+| Current local control | Checks | Evidence |
+|---|---:|---|
+| Bootstrap owner | 83 | Stable worker ownership, initialization refusal, copied firmware and OS-text lifetime, retained cleanup owners, PM revocation, in-flight hook retention, failed acknowledgement and retry |
+| Power callback protocol | 15 | Request versus completed transition, monotonic revocation, failed post and separate acknowledgement; explicit native PM events |
+| Persistent dispatcher | 53 | Stable thread identity, synchronous commands, accepted asynchronous work, bounded queue, startup failure and drained shutdown |
+
+These current controls pass plain and fatal address, undefined-behavior and
+function-type sanitizers. Native Apple power-domain execution is not tested.
+The older 43-check bootstrap version and the 24-check context lifecycle passed
+the [native Intel macOS build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39169319480)
+from `d81b198`. That historical snapshot also compiled 25 production units with
+matched SDK imports and passed 1,594 combined CPU/contract checks per variant;
+it predates the current dispatcher and PM lease. Current native Intel macOS CI
+is still required. Original kernel/GSP execution remains unconfirmed.
 
 The development workflow emits validation records only. It cannot create an
 installable candidate or change the working EFI. Actual GSP execution,

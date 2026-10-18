@@ -1,0 +1,18 @@
+--- a/src/nvidia/inc/libraries/nvoc/prelude.h
++++ b/src/nvidia/inc/libraries/nvoc/prelude.h
+@@ -75,7 +75,14 @@
+  *
+  * This is similar to C++'s static_cast<TYPE>(pObj).
+  */
+-#define staticCast(pObj, TYPE) ((pObj)? __staticCast_##TYPE((pObj)) : NULL)
++/* Evaluate the source pointer once before testing and casting it.  Besides
++ * preserving side effects, this keeps the anonymous-union member expression
++ * behind an actual local-pointer guard in Clang's undefined-behavior checking.
++ * GNU statement expressions/typeof are part of this isolated Clang profile.
++ */
++#define staticCast(pObj, TYPE)                                              \
++    ({ __typeof__(pObj) __nvoc_cast_source = (pObj);                         \
++       __nvoc_cast_source ? __staticCast_##TYPE(__nvoc_cast_source) : NULL; })
+ 
+ /*!
+  * @brief Statically casts pObj to a TYPE*.  Fails to compile if the cast is invalid.

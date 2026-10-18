@@ -61,6 +61,12 @@ NV_STATUS NV_API_CALL s540Darwin_os_delay_us(NvU32);
 NV_STATUS NV_API_CALL s540Darwin_os_get_random_bytes(NvU8 *, NvU16);
 NV_STATUS NV_API_CALL s540Darwin_os_schedule(void);
 void NV_API_CALL s540Darwin_os_flush_cpu_write_combine_buffer(void);
+// Fault-recoverable copies for the invoking user task, in ordinary thread
+// context. Kernel buffers remain trusted original-caller storage. Invalid
+// context/ranges perform no copy; an OS fault may have copied a prefix before
+// returning INVALID_ADDRESS, as permitted by the original status-only ABI.
+NV_STATUS NV_API_CALL s540Darwin_os_memcpy_from_user(void *, const void *, NvU32);
+NV_STATUS NV_API_CALL s540Darwin_os_memcpy_to_user(void *, const void *, NvU32);
 NV_STATUS NV_API_CALL s540Darwin_os_queue_work_item(struct os_work_queue *, void *);
 NV_STATUS NV_API_CALL s540Darwin_os_flush_work_queue(struct os_work_queue *, NvBool);
 NvBool NV_API_CALL s540Darwin_os_is_queue_flush_ongoing(struct os_work_queue *);

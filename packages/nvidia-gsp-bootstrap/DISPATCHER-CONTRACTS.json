@@ -1,0 +1,36 @@
+{
+  "alternate_stack_switch": false,
+  "component": "nvidia-gsp-dispatcher",
+  "format": 1,
+  "gpu_access": false,
+  "kernel_execution": "not_tested",
+  "kernel_stack_enlarged": false,
+  "local_validation": {
+    "assertions_per_variant": 53,
+    "compiler": "Clang18 Linux ELF control",
+    "concurrent_sync_calls": 400,
+    "explicit_macho_cross_probe": "passed; not Apple compiler execution",
+    "native_apple_execution": "pending",
+    "variants": [
+      "ordinary",
+      "fatal-address-undefined-function-sanitizers"
+    ]
+  },
+  "production_candidate_allowed": false,
+  "purpose": "Persistent ordinary owner thread for RM lifecycle and asynchronous PM revocation requests.",
+  "queue_capacity": 16,
+  "sdk_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+  "source_contracts": {
+    "kernel_thread_start": "SDK kern/thread.h returns an explicit thread reference that caller must deallocate. XNU thread.c creates a normal kernel-task thread with its managed kernel stack.",
+    "ownership": "start/stop/destruction externally serialized; invoke/post concurrent after completed start. Stop closes admission, completes all accepted stack-backed sync requests, drains callback access. Caller must exclude new entries before destruction.",
+    "pm": "post acceptance is not power acknowledgement. A PM completion must be sent by the actual action only after successful device shutdown.",
+    "queue_lifetime": "A lock-protected finish event establishes that the worker will make no further callback or owner-data accesses. Native uses pthread_join; kernel drops the explicit thread reference after that finish event. Caller must retain executable code through the termination handoff; this is not a kext-unload proof.",
+    "thread_termination": "XNU thread_act.c thread_terminate rejects terminating another kernel thread; cooperative self-termination runs thread_apc_ast and never returns."
+  },
+  "upstream_reference_sha256": {
+    "Mach.exports": "92b30f7401e38074688978a74f00f6299aa53a3f517ffb0d0572408f16b642da",
+    "kern_thread.sdk.h": "2f5f2144fdbd21899b315a865c9b6fa32d6ca4ee94ddfc137a8a3070c2e5b725",
+    "thread.c": "c78d6ec0336c7fc9a7349a3cc58e35813259be8dcd5293929e9d91a1f97712eb"
+  },
+  "xnu_commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea"
+}

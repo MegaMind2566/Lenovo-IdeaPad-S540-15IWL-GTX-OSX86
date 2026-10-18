@@ -1,0 +1,67 @@
+{
+  "format": 1,
+  "implementation": "independent IOService power-child lease and monotonic revocation protocol",
+  "native_evidence": "explicit PM events fixture; never proof of an acquired Apple power domain",
+  "references": [
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "paths": {
+        "iokit/IOKit/IOService.h": "5ea49a619669100324f9410e5349758c6178d8ae",
+        "iokit/Kernel/IOServicePM.cpp": "3e912d1057f24518eb11ce636258efef00d3336f",
+        "iokit/IOKit/pwr_mgt/IOPM.h": "a13d0bf6ac88d7fba899de82d9ca1a0b225933e2",
+        "iokit/Kernel/IOPMrootDomain.cpp": "d0f78f6fb3de4c70063796eb7844a39ca3593058",
+        "config/IOKit.exports": "03822d86c54a5affe32259444d53a4e68d8f044f",
+        "config/Mach.exports": "af102a0a37c5f3ed11e908f17e58b7c72272171d"
+      },
+      "anchors": [
+        "registerPowerDriver copies the supplied state table before submitting its PM request",
+        "addPowerChild establishes a real IOPowerConnection and asynchronously completes three dependent requests",
+        "changePowerStateToPriv requests this private child's desire without overwriting the IOPCIDevice nub's request",
+        "powerChangeDone is called after a completed transition; setPowerState entry alone is not completion",
+        "handleAcknowledgeSetPowerState accepts an acknowledgement while setPowerState is still in flight",
+        "PMstop sets PMStop and waits for prior PM driver callouts through waitForPMDriverCall, whose 15-second timeout is not an unconditional lifetime barrier",
+        "An independent guarded count retains the external revocation owner until every requestStop hook returns; finish refuses before closing when that count is nonzero",
+        "PMstop submits asynchronous tree detach through an IOPMRequest that retains its target IOService",
+        "requestPowerDomainState is an internal PM-workloop operation and returns success without acting when called outside that thread",
+        "IOPMPreventSystemSleep is a private undefined flag for third-party drivers; it is not used here",
+        "checkSystemSleepAllowed permits low-battery or thermal emergency sleep before evaluating ordinary sleep-prevention clamps"
+      ]
+    },
+    {
+      "repository": "apple-oss-distributions/IOPCIFamily",
+      "commit": "4822b27a36e2de70e231ecf2bf3021384fab6ec2",
+      "path": "IOPCIDevice.cpp",
+      "blob": "193edcb11ec75fe0f56b42447da9eb657ad2041f",
+      "anchor": "IOPCIDevice is itself power managed; a retained nub or a sampled PMCSR D0 bit is not a child's lifetime request"
+    },
+    {
+      "repository": "acidanthera/MacKernelSDK",
+      "commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+      "paths": [
+        "Headers/IOKit/IOService.h",
+        "Headers/IOKit/pwr_mgt/IOPM.h",
+        "Headers/IOKit/pwr_mgt/IOPowerConnection.h",
+        "Headers/IOKit/IOLocks.h",
+        "Headers/kern/clock.h"
+      ],
+      "independent_import_reference": "tests/sdk_power_reference.cpp"
+    }
+  ],
+  "policy": {
+    "on_wait_milliseconds": 5000,
+    "power_down_ack_deadline_microseconds": 30000000,
+    "exact_endpoint_power_connection_required": true,
+    "completed_on_callback_required": true,
+    "revocation_monotonic": true,
+    "post_acceptance_is_not_acknowledgement": true,
+    "ack_only_after_original_irq_dma_mmio_cleanup": true,
+    "cleanup_refusal_retains_owner_and_pending_ack": true,
+    "external_revocation_hooks_must_return_before_owner_release": true,
+    "pmstop_timeout_is_not_owner_lifetime_proof": true,
+    "emergency_sleep_or_timeout_cannot_be_prevented": true,
+    "no_direct_requestPowerDomainState_call": true,
+    "no_nub_policy_override": true,
+    "no_private_prevent_system_sleep_flag": true
+  }
+}

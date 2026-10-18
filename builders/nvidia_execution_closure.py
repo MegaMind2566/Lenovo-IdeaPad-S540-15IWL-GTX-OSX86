@@ -16,6 +16,7 @@ import sys
 
 import compile_nvidia_global_rm as original
 import nvidia_execution_commands as commands
+import nvidia_metaclass_initializers as metaclass
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_CONTRACT = ROOT / 'packages/nvidia-global-rm/upstream/adapted/SOURCE-CONTRACT.json'
@@ -24,6 +25,14 @@ CRYPTO_CONTRACTS = ROOT / 'packages/nvidia-global-rm-crypto/upstream/PROVENANCE.
 COORDINATOR_CONTRACTS = ROOT / 'packages/nvidia-global-rm/COORDINATOR-CONTRACTS.json'
 LIFECYCLE_SOURCE = ROOT / 'packages/nvidia-global-rm/src/S540NvidiaGlobalRmLifecycle.c'
 EXPECTED_ORIGINAL_OBJECTS = 1100
+GATED_LIFECYCLE_ROOTS = ('coreInitializeRm', 'RmShutdownRm')
+# The selected no-RM-ACPI-events backend supplies exact typed refusals for
+# method execution. These are present linker definitions, never working ACPI
+# methods. Each invocation invalidates the full-RM host's clean admission.
+UNAVAILABLE_ACPI = {original.PREFIX + name for name in (
+    'nv_acpi_d3cold_dsm_for_upstream_port', 'nv_acpi_ddc_method',
+    'nv_acpi_dod_method', 'nv_acpi_dsm_method', 'nv_acpi_get_powersource',
+    'nv_acpi_mux_method')}
 IDENTIFIER = re.compile(r'[A-Za-z_][A-Za-z0-9_]*')
 
 
@@ -230,8 +239,9 @@ def _classify(retained: set[str], project_defined: set[str], original_external: 
     reviewed_missing = missing & reviewed.keys()
     abi_review = missing - reviewed.keys() - crypto
     return {
-        'provided_project_callbacks': sorted(provided - crypto - compiler),
+        'provided_project_callbacks': sorted(provided - crypto - compiler - UNAVAILABLE_ACPI),
         'provided_unavailable_crypto': sorted(provided & crypto),
+        'provided_unavailable_acpi_methods': sorted(provided & UNAVAILABLE_ACPI),
         'compiler_memory_helpers': sorted(compiler),
         'unmet_reviewed_callbacks': [
             {'symbol': name, **{key: reviewed[name][key] for key in
@@ -253,7 +263,8 @@ def analyze_execution_closure(linked_project: Path, original_objects: list[Path]
                               compiled: dict, output: Path, *,
                               linker: list[str] | None = None,
                               cross_probe: bool = False,
-                              upstream: Path | None = None) -> dict:
+                              upstream: Path | None = None,
+                              metaclass_reference: Path | None = None) -> dict:
     """Write execution-closure.json, returning blocked link evidence or raising.
 
     The caller verifies its checked-source manifest and current bridge bytes.
@@ -267,7 +278,7 @@ def analyze_execution_closure(linked_project: Path, original_objects: list[Path]
     record = {'format': 1, 'component': 'nvidia-execution-closure', 'status': 'running',
               'phase': 'validate-inputs', 'source_commit': original.COMMIT,
               'source_profile': compiled.get('source_profile', 'original-unmodified'),
-              'closure_scope': 'current-compiled-bridges; excludes-source-gated-lifecycle',
+              'closure_scope': 'current-compiled-bridges-and-source-gated-global-lifecycle',
               'production_candidate_allowed': False, 'executable': False,
               'kernel_execution': 'not_tested', 'global_rm_executed': False,
               'adapter_initialized': False, 'firmware_loaded': False, 'gpu_access': False,
@@ -287,21 +298,34 @@ def analyze_execution_closure(linked_project: Path, original_objects: list[Path]
         reviewed.update(supplemental)
         record['coordinator_contract_review'] = supplemental_review
         provenance['packages/nvidia-global-rm/COORDINATOR-CONTRACTS.json'] = supplemental_review['manifest_sha256']
-        project_defined, project_undefined, _ = original.macho_symbols(linked_project)
+        if metaclass_reference is not None:
+            record['project_metaclass_audit'] = metaclass.verify_metaclass_initializers(
+                linked_project, metaclass_reference)
+        project_defined, project_undefined, _ = original.macho_symbols(
+            linked_project, reviewed_project_initializers=metaclass_reference is not None)
         overlap = project_defined & original_defined
         record['project_original_definition_overlap'] = sorted(overlap)
         if overlap:
             raise ValueError('Project sources redefine original RM definitions: ' + str(sorted(overlap)))
-        roots = derive_roots(project_defined, project_undefined, original_defined)
-        if not roots:
+        compiled_roots = derive_roots(project_defined, project_undefined, original_defined)
+        if not compiled_roots:
             raise ValueError('The actual compiled bridge references no original RM definition.')
-        # This checks the documented current source gate, not a guessed future
-        # call graph. Future lifecycle roots require a separate reviewed control.
+        # The source-gated wrapper has no original imports in its current
+        # kernel object. Audit those exact prospective entries as well: a
+        # successful current-bridge link must not conceal their dependencies.
+        # This link-only control does not authorize removing the source gate.
         lifecycle = LIFECYCLE_SOURCE.read_text()
         gate = lifecycle.split('#if defined(KERNEL)', 1)
         if (len(gate) != 2 or 'return out->startupStatus = NV_ERR_NOT_READY;' not in
                 gate[1].split('#endif', 1)[0]):
             raise ValueError('The documented kernel global-lifecycle refusal needs a new source review.')
+        if ('status = coreInitializeRm();' not in lifecycle or
+                'RmShutdownRm();' not in lifecycle):
+            raise ValueError('The gated global lifecycle entries need a new source review.')
+        gated_roots = {original.PREFIX + name for name in GATED_LIFECYCLE_ROOTS}
+        if not gated_roots <= original_defined:
+            raise ValueError('The original compilation lacks the gated global lifecycle entries.')
+        roots = compiled_roots | gated_roots
         filetype = original.MH_BUNDLE if cross_probe else original.MH_KEXT_BUNDLE
         image = output / 'coordinator-original-dependency-control.bundle'
         record.update(
@@ -310,6 +334,8 @@ def analyze_execution_closure(linked_project: Path, original_objects: list[Path]
             linked_project_sha256=hashlib.sha256(linked_project.read_bytes()).hexdigest(),
             contract_sha256=provenance, original_object_count=len(original_objects),
             original_root_count=len(roots), original_roots=sorted(roots),
+            compiled_bridge_original_roots=sorted(compiled_roots),
+            source_gated_global_lifecycle_roots=sorted(gated_roots),
             project_original_definition_overlap=sorted(project_defined & original_defined),
             project_unresolved_non_original=sorted(project_undefined - project_defined - original_defined),
             mach_o_filetype=filetype,
@@ -344,8 +370,8 @@ def analyze_execution_closure(linked_project: Path, original_objects: list[Path]
                 'unresolved or revoked mapper metadata cannot select a Boolean bypass.')
         record['runtime_blockers'].append(
             'Original GSP init/disable frees temporary allocations with active interrupts. '
-            'The operational allocation-retirement contract remains unimplemented; '
-            'a never-armed controller unwind is separate evidence.')
+            'Bounded per-allocation retirement now retains pages and IOVA through the actual IRQ drain. '
+            'Its 32-slot/128-MiB capacity and the complete original device lifecycle are not yet validated.')
         save()
         if classified['unreviewed_retained_imports']:
             raise ValueError('The retained original imports escape the verified full compilation inventory: ' +
@@ -355,10 +381,22 @@ def analyze_execution_closure(linked_project: Path, original_objects: list[Path]
         for key in blocker_categories:
             if classified[key]:
                 record['runtime_blockers'].append(key + ': ' + str(len(classified[key])))
+        if classified['provided_unavailable_acpi_methods']:
+            record['runtime_blockers'].append(
+                'The selected RM ACPI-events backend has no method execution. Its six typed '
+                'refusal definitions are not operational methods; any call records unavailability '
+                'and prevents a successful runtime trial.')
+        if classified['provided_unavailable_crypto']:
+            record['runtime_blockers'].append(
+                'The typed crypto boundaries implement no cryptographic operations. A complete '
+                'supported profile must independently prove zero requests throughout its actual lifecycle.')
         record.update(status='blocked', phase='complete', link_control_status='passed',
                       abi_inventory_status='blocked' if (classified['unmet_abi_review'] or
                           classified['provided_without_selected_abi_contract']) else 'reviewed',
-                      closure_implementation_complete=not any(classified[key] for key in blocker_categories))
+                      closure_implementation_complete=not (
+                          any(classified[key] for key in blocker_categories) or
+                          classified['provided_unavailable_acpi_methods'] or
+                          classified['provided_unavailable_crypto']))
         save()
         return record
     except Exception as error:

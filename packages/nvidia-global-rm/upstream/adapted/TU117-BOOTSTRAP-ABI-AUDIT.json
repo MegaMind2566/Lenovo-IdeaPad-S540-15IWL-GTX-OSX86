@@ -1,0 +1,3363 @@
+{
+  "format": 1,
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "scope": "Historical 132-callback native bridge closure baseline and conservative TU117 bootstrap route audit; not a final production closure or whole-program call-graph proof.",
+  "baseline": {
+    "project_commit": "d81b19845bf31bca61464e198bdc883790af05bc",
+    "workflow_run": 39169319480,
+    "artifact": "NVIDIA-execution-development-validation",
+    "kernel_summary_sha256": "7d098ce6710138d43193e909dfbd4fbf1659a09a45555deeb67c3648c141bc40",
+    "missing_reviewed_callback_count": 132,
+    "closure_scope": "current-compiled-bridges; excludes-source-gated-lifecycle",
+    "excluded_source_gated_global_lifecycle": true,
+    "new_full_global_roots_require_fresh_link": true
+  },
+  "target": {
+    "vendor": "10de",
+    "device": "1f91",
+    "subsystem_vendor": "17aa",
+    "subsystem_device": "3806",
+    "architecture": "TU117",
+    "first_hardware_checkpoint": "one combined package after integration; no implied admission"
+  },
+  "evidence_policy": {
+    "lexical_c_reference_scan_is_call_graph": false,
+    "comment_references_removed": true,
+    "headers_and_macros_not_enumerated": true,
+    "absence_of_c_reference_is_unreachability_proof": false,
+    "reviewed_production_profile_exclusions": [],
+    "generated_failure_bindings_count_as_implementation": false,
+    "native_cpu_tests_prove_gpu_execution": false
+  },
+  "source_sha256": {
+    "kernel-open/nvidia/nv-acpi.c": "39ea93250c6daec9fac485ddf2e277ff4b75184e3f057fa41c6524ee00d31beb",
+    "kernel-open/nvidia/os-interface.c": "0c8fe2749ec4ee12f1dbbd884cfbc8f1c8a7750903de7453b01c2f6b92e0f6d6",
+    "src/common/nvlink/kernel/nvlink/core/nvlink_conn_mgmt.c": "ed522b4025e527eff63c79134fdce906a4da1ddffb79b9f87b762646ffa2c212",
+    "src/common/nvlink/kernel/nvlink/core/nvlink_discovery.c": "9fc9f7d6246e005c49ab643cdbb0501b0aff2e31153e19c2425dc0ede1d1d28a",
+    "src/common/nvlink/kernel/nvlink/core/nvlink_initialize.c": "4a4247b9fe5808118a092e9384629e354fb6e8857926a7da70d199631d33bd70",
+    "src/common/nvlink/kernel/nvlink/core/nvlink_ioctl.c": "ed0dfbf7f9018f75bab12734cfb75e94e384cef7310a1f216591347906ca16c8",
+    "src/common/nvlink/kernel/nvlink/core/nvlink_link_mgmt.c": "bb88447c2ef23a022ee8b8526754675074cd36b8c68eb12cc2a4152e30d568c5",
+    "src/common/nvlink/kernel/nvlink/core/nvlink_shutdown.c": "896d8d0a0c09a2bf3a484850fd92477bf2f02fc0efbc2e0c5f708aea826f8bfc",
+    "src/common/nvlink/kernel/nvlink/core/nvlink_training.c": "5ad1e94e2568027e923d166b12511464b6463959412a6efd8bf2f8cbf6b44318",
+    "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c": "43d08ed3084dbe4b562785dc75b64dcf6020ad8d05dd62e97c9dcde502b5136a",
+    "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_discovery_entry.c": "fdf2e35904260cfac8202b13dde52f8c8d5b81775d87e3f1de4387015ff64efc",
+    "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c": "42836ddd1c5dcfc7b54a6ae3a75df5ccd126ac256ab4eaa9f5a0df2fd9ef279a",
+    "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_training_entry.c": "3da558a6eb1ddee307888e80b7c0d1879964d297624faa8fed2386ceaf3b8e48",
+    "src/nvidia/arch/nvalloc/unix/include/nv-reg.h": "a8bff18c6dbeb7f19f5a5e5bbdd9a211329c7a989bb058ee1573395ffe36264f",
+    "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c": "a0b6639b517612e3e0c5b4c76abf317378bf0a91409ca27e5bb172e3395053fa",
+    "src/nvidia/arch/nvalloc/unix/src/escape.c": "43bf7520b5d161b8f6de82404d209fca34c2779bd290d6db748fc3a353c3c1ed",
+    "src/nvidia/arch/nvalloc/unix/src/os-hypervisor.c": "f81270cb29c0cdb1cb1bf9e2cfc62a8c5ad0f215de95a55c06ca8991238e77cb",
+    "src/nvidia/arch/nvalloc/unix/src/os.c": "057b50fcb738be90a073b60f63e70559706864ddcec3bf703282563173e3dce4",
+    "src/nvidia/arch/nvalloc/unix/src/osapi.c": "e4336f0e3bb55122680e0d344f970c123664122c2415134b7a6b517c98fcbe75",
+    "src/nvidia/arch/nvalloc/unix/src/osinit.c": "dda3b014833c2e94680e5adea152011ffce72c8067782aceeecaefc28b7394d3",
+    "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c": "c1cbd0b0bb814d5ca1d0a022d59a4b91ae90ca2663ee5d48621f7527d85cd897",
+    "src/nvidia/arch/nvalloc/unix/src/unix_intr.c": "952e1ccb8b3214c83cfb54748324131900eaff68986169ad7e794be29ef86819",
+    "src/nvidia/arch/nvalloc/unix/src/vbioscall.c": "39b4f21425e02e51df9f4e33e225108fe4abb29e9663190649e456737d31d835",
+    "src/nvidia/src/kernel/gpu/bus/kern_bus_vbar2.c": "f12df5758c2fa13043606b50e0b1442592cfd74bd5caffd64ab2bd61c059d26b",
+    "src/nvidia/src/kernel/gpu/device_ctrl.c": "f2eb076a74322f96029230b9aca48885d1206717a577df419e360f4c95454c1d",
+    "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c": "ed6d7020a8a1772bc44608178aa13a77a72b8bf0eabe3293c12bc9d2b122c6c9",
+    "src/nvidia/src/kernel/gpu/mem_mgr/vaspace_api.c": "3e0d6b4525a18a5afeef79d955fd2e6581ea9cc0d7dca447fb9b9cd281c72cee",
+    "src/nvidia/src/kernel/gpu/nvlink/kernel_nvlinkcorelibtrain.c": "a0d16d2b37e19ff8c430e13043c446cccde030bb66d9eb894b04c4e3eceee84a",
+    "src/nvidia/src/libraries/nvport/memory/memory_unix_kernel_os.c": "c32de8ee6199767bb8c99dc529eec1c9aa73c2e6366634639a803ab79962372c"
+  },
+  "groups": [
+    {
+      "id": "diagnostics",
+      "baseline_missing_count": 6,
+      "review": "Diagnostics may be entered on ordinary success messages and every error/unwind path. Never omit them on the assumption that initialization succeeds. The local development change implements actual nv_dev_vprintf/nv_log_error output and fatal os_bug_check; this baseline does not claim the other three implementations.",
+      "symbols": [
+        "nv_dev_vprintf",
+        "nv_log_error",
+        "os_add_record_for_crashLog",
+        "os_bug_check",
+        "os_delete_record_for_crashLog",
+        "os_dump_stack"
+      ]
+    },
+    {
+      "id": "rm_acpi_services",
+      "baseline_missing_count": 9,
+      "review": "RmInitAdapter calls RmInitAcpiMethods before GSP boot. The methods initializer/uninitializer is not excluded by a non-console GPU. An explicit no-RM-ACPI-events profile can follow the original nv-acpi.c disabled branch; that is a selected unavailable feature, not evidence that the laptop has no ACPI, and not a PM reference.",
+      "symbols": [
+        "nv_acpi_d3cold_dsm_for_upstream_port",
+        "nv_acpi_ddc_method",
+        "nv_acpi_dod_method",
+        "nv_acpi_dsm_method",
+        "nv_acpi_get_powersource",
+        "nv_acpi_methods_init",
+        "nv_acpi_methods_uninit",
+        "nv_acpi_mux_method",
+        "os_get_acpi_rsdp_from_uefi"
+      ]
+    },
+    {
+      "id": "power_and_console",
+      "baseline_missing_count": 11,
+      "review": "The device owner must hold real platform power independently of RM dynamic-PM policy. Console guards are based on rm_get_uefi_console_status computed by original RM, not merely a zero-initialized client_managed_console field. Disabling runtime D3 requires real RM registry state/readback and complete entry-route audit.",
+      "symbols": [
+        "nv_acquire_mmap_lock",
+        "nv_audio_dynamic_power",
+        "nv_get_all_mappings_revoked_locked",
+        "nv_indicate_idle",
+        "nv_indicate_not_idle",
+        "nv_release_mmap_lock",
+        "nv_revoke_gpu_mappings",
+        "nv_set_safe_to_mmap_locked",
+        "os_disable_console_access",
+        "os_enable_console_access",
+        "os_supports_kernel_suspend_notifiers"
+      ]
+    },
+    {
+      "id": "tegra_soc",
+      "baseline_missing_count": 15,
+      "review": "TU117 PCI identity is not a Tegra SoC display device. Concrete guards are present in unix_intr.c and osinit.c; final admission must also verify original nv_state facts and resulting GPU properties. Hardware identity alone does not erase retained linker imports or all generic OS wrappers.",
+      "symbols": [
+        "nv_control_soc_irqs",
+        "nv_disable_clk",
+        "nv_enable_clk",
+        "nv_get_current_irq_type",
+        "nv_get_max_freq",
+        "nv_get_syncpoint_aperture",
+        "nv_imp_get_import_data",
+        "nv_imp_get_uefi_data",
+        "nv_imp_icc_set_bw",
+        "nv_set_freq",
+        "nv_tegra_dce_client_ipc_send_recv",
+        "nv_tegra_dce_register_ipc_client",
+        "nv_tegra_dce_unregister_ipc_client",
+        "nv_tegra_get_rm_interface_type",
+        "os_tegra_igpu_perf_boost"
+      ]
+    },
+    {
+      "id": "user_mapping_process_and_events",
+      "baseline_missing_count": 20,
+      "review": "A first GSP bootstrap may expose no user clients, mappings or event recipients. That is an interface policy requiring sealed entry routes and RM kernel-client call-graph review. nv_get_ctl_state appears in multiple kernel entry wrappers; generic user-path labels alone are insufficient to exclude it.",
+      "symbols": [
+        "nv_alias_pages",
+        "nv_alloc_user_mapping",
+        "nv_free_user_mapping",
+        "nv_get_ctl_state",
+        "nv_get_dev_minor",
+        "nv_get_file_private",
+        "nv_get_num_phys_pages",
+        "nv_get_phys_pages",
+        "nv_post_event",
+        "nv_put_file_private",
+        "nv_register_phys_pages",
+        "nv_register_user_pages",
+        "nv_unregister_phys_pages",
+        "nv_unregister_user_pages",
+        "os_cgroup_for_pid",
+        "os_flush_user_cache",
+        "os_get_max_user_va",
+        "os_memcpy_from_user",
+        "os_memcpy_to_user",
+        "os_unlock_user_pages"
+      ]
+    },
+    {
+      "id": "dma_import_peer_uvm_fabric",
+      "baseline_missing_count": 23,
+      "review": "Only project-owned system-memory DMA is currently implemented. Imported pages, Linux dma_buf/SGT, peer windows, UVM scheduling and fabric capabilities require real ownership or a proved unreachable feature path. Refusing one allocation request must preserve all outputs and unwind correctly; that does not implement mapping.",
+      "symbols": [
+        "nv_acquire_fabric_mgmt_cap",
+        "nv_dma_destroy_sysmem_window_for_fabric_access",
+        "nv_dma_import_dma_buf",
+        "nv_dma_import_from_fd",
+        "nv_dma_import_sgt",
+        "nv_dma_init_sysmem_window_for_fabric_access",
+        "nv_dma_map_mmio",
+        "nv_dma_map_peer",
+        "nv_dma_release_dma_buf",
+        "nv_dma_release_sgt",
+        "nv_dma_unmap_mmio",
+        "nv_dma_unmap_peer",
+        "nv_register_peer_io_mem",
+        "nv_register_sgt",
+        "nv_schedule_uvm_drain_p2p",
+        "nv_schedule_uvm_isr",
+        "nv_schedule_uvm_resume_p2p",
+        "nv_unregister_peer_io_mem",
+        "nv_unregister_sgt",
+        "os_imex_channel_count",
+        "os_imex_channel_get",
+        "os_iommu_sva_bind",
+        "os_iommu_sva_unbind"
+      ]
+    },
+    {
+      "id": "nvlink_host_primitives",
+      "baseline_missing_count": 6,
+      "review": "These are host primitives used by the original NVLink library. A no-NVLink hardware profile may skip training, but original global initialization may still construct common library state. NvLinkDisable registry policy is not a proof that all six host callbacks are unreachable.",
+      "symbols": [
+        "nvlink_assert",
+        "nvlink_free",
+        "nvlink_malloc",
+        "nvlink_memcpy",
+        "nvlink_memset",
+        "nvlink_sleep"
+      ]
+    },
+    {
+      "id": "numa_page_and_system_memory",
+      "baseline_missing_count": 13,
+      "review": "Do not publish invented NUMA, page-reference, physical-memory or EGM data. Generic os.c retained wrappers do not establish actual runtime calls. Each needed route requires real Darwin VM/device facts or an audited unsupported subsystem.",
+      "symbols": [
+        "nv_get_device_memory_config",
+        "nv_get_egm_info",
+        "os_alloc_pages_node",
+        "os_count_tail_pages",
+        "os_get_numa_node_memory_usage",
+        "os_get_page",
+        "os_get_page_refcount",
+        "os_get_reclaimable_memory_usage",
+        "os_numa_add_gpu_memory",
+        "os_numa_memblock_size",
+        "os_numa_remove_gpu_memory",
+        "os_offline_page_at_address",
+        "os_put_page"
+      ]
+    },
+    {
+      "id": "host_files_and_capabilities",
+      "baseline_missing_count": 9,
+      "review": "Linux procfs capability directories/fds and temporary-file interfaces have no automatic Darwin equivalent. RM global construction/teardown must be reviewed separately from userspace request entry. A non-console policy does not exclude them.",
+      "symbols": [
+        "os_allocate_temporary_file",
+        "os_close_file",
+        "os_nv_cap_close_fd",
+        "os_nv_cap_create_dir_entry",
+        "os_nv_cap_create_file_entry",
+        "os_nv_cap_destroy_entry",
+        "os_nv_cap_validate_and_dup_fd",
+        "os_read_file",
+        "os_write_file"
+      ]
+    },
+    {
+      "id": "virtualization_and_build_feature_facts",
+      "baseline_missing_count": 5,
+      "review": "Runtime guest/VFIO operations and compile-time GRID-build facts are different contracts. os_is_grid_supported is used directly when preparing GSP bootstrap flags, even on a physical GPU; the correct value must come from the actual selected build configuration.",
+      "symbols": [
+        "os_call_vgpu_vfio",
+        "os_device_vm_present",
+        "os_get_grid_csp_support",
+        "os_inject_vgx_msi",
+        "os_is_grid_supported"
+      ]
+    },
+    {
+      "id": "pci_low_level_and_vbios",
+      "baseline_missing_count": 15,
+      "review": "PCI BIF reset, hot removal, cache maintenance, CXL and legacy port I/O are distinct policies. TU117 PCI identity does not imply firmware/VBIOS paths are unreachable. Legacy console VBIOS calls must be excluded through actual initialization path evidence before leaving void/scalar callbacks absent.",
+      "symbols": [
+        "nv_get_updated_emu_seg",
+        "nv_i2c_add_adapter",
+        "nv_pci_cxl_set_caching",
+        "nv_pci_read_gpu_pdi_from_dvsec",
+        "os_enable_pci_req_atomics",
+        "os_flush_cpu_cache_all",
+        "os_io_read_byte",
+        "os_io_read_dword",
+        "os_io_read_word",
+        "os_io_write_byte",
+        "os_io_write_dword",
+        "os_io_write_word",
+        "os_is_bif_reset_supported",
+        "os_pci_remove",
+        "os_pci_remove_supported"
+      ]
+    }
+  ],
+  "callbacks": [
+    {
+      "symbol": "nv_acpi_d3cold_dsm_for_upstream_port",
+      "namespace_symbol": "s540Global_nv_acpi_d3cold_dsm_for_upstream_port",
+      "group": "rm_acpi_services",
+      "original_type": "NV_STATUS (nv_state_t *, NvU8 *, NvU32, NvU32, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 3108
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_acpi_ddc_method",
+      "namespace_symbol": "s540Global_nv_acpi_ddc_method",
+      "group": "rm_acpi_services",
+      "original_type": "NV_STATUS (nv_state_t *, void *, NvU32 *, NvBool)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 3276
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_acpi_dod_method",
+      "namespace_symbol": "s540Global_nv_acpi_dod_method",
+      "group": "rm_acpi_services",
+      "original_type": "NV_STATUS (nv_state_t *, NvU32 *, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 3246
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_acpi_dsm_method",
+      "namespace_symbol": "s540Global_nv_acpi_dsm_method",
+      "group": "rm_acpi_services",
+      "original_type": "NV_STATUS (nv_state_t *, NvU8 *, NvU32, NvBool, NvU32, void *, NvU16, NvU32 *, void *, NvU16 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 3202
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_acpi_get_powersource",
+      "namespace_symbol": "s540Global_nv_acpi_get_powersource",
+      "group": "rm_acpi_services",
+      "original_type": "NV_STATUS (NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 2375
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+          "line": 2346
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_acpi_methods_init",
+      "namespace_symbol": "s540Global_nv_acpi_methods_init",
+      "group": "rm_acpi_services",
+      "original_type": "void (NvU32 *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+          "line": 5311
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_acpi_methods_uninit",
+      "namespace_symbol": "s540Global_nv_acpi_methods_uninit",
+      "group": "rm_acpi_services",
+      "original_type": "void (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+          "line": 5323
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_acpi_mux_method",
+      "namespace_symbol": "s540Global_nv_acpi_mux_method",
+      "group": "rm_acpi_services",
+      "original_type": "NV_STATUS (nv_state_t *, NvU32 *, NvU32, const char *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 3369
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 3395
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_acquire_fabric_mgmt_cap",
+      "namespace_symbol": "s540Global_nv_acquire_fabric_mgmt_cap",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "NV_STATUS (int, int *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5484
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_acquire_mmap_lock",
+      "namespace_symbol": "s540Global_nv_acquire_mmap_lock",
+      "group": "power_and_console",
+      "original_type": "void (nv_state_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 405
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 431
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 1505
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_alias_pages",
+      "namespace_symbol": "s540Global_nv_alias_pages",
+      "group": "user_mapping_process_and_events",
+      "original_type": "NV_STATUS (nv_state_t *, NvU32, NvU64, NvU32, NvU32, NvU64, NvU64 *, NvBool, void **)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 1012
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_alloc_user_mapping",
+      "namespace_symbol": "s540Global_nv_alloc_user_mapping",
+      "group": "user_mapping_process_and_events",
+      "original_type": "NV_STATUS (nv_state_t *, void *, NvU64, NvU32, NvU64, NvU32, NvU64 *, void **)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 564
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_audio_dynamic_power",
+      "namespace_symbol": "s540Global_nv_audio_dynamic_power",
+      "group": "power_and_console",
+      "original_type": "void (nv_state_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 613
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_control_soc_irqs",
+      "namespace_symbol": "s540Global_nv_control_soc_irqs",
+      "group": "tegra_soc",
+      "original_type": "void (nv_state_t *, NvBool)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/unix_intr.c",
+          "line": 623
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/unix_intr.c",
+          "line": 650
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_dev_vprintf",
+      "namespace_symbol": "s540Global_nv_dev_vprintf",
+      "group": "diagnostics",
+      "original_type": "int (struct nv_state_t *, NV_LOG_LEVEL, const char *, struct __va_list_tag *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_disable_clk",
+      "namespace_symbol": "s540Global_nv_disable_clk",
+      "group": "tegra_soc",
+      "original_type": "void (nv_state_t *, TEGRASOC_WHICH_CLK)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+          "line": 1257
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_dma_destroy_sysmem_window_for_fabric_access",
+      "namespace_symbol": "s540Global_nv_dma_destroy_sysmem_window_for_fabric_access",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "void (nv_state_t *, NvU64, NvU64)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 6505
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_dma_import_dma_buf",
+      "namespace_symbol": "s540Global_nv_dma_import_dma_buf",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "NV_STATUS (nv_dma_device_t *, struct dma_buf *, NvBool, NvU32 *, struct sg_table **, nv_dma_buf_t **)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 1135
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_dma_import_from_fd",
+      "namespace_symbol": "s540Global_nv_dma_import_from_fd",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "NV_STATUS (nv_dma_device_t *, NvS32, NvBool, NvU32 *, struct sg_table **, nv_dma_buf_t **)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 1056
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_dma_import_sgt",
+      "namespace_symbol": "s540Global_nv_dma_import_sgt",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "NV_STATUS (nv_dma_device_t *, struct sg_table *, struct drm_gem_object *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 1091
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_dma_init_sysmem_window_for_fabric_access",
+      "namespace_symbol": "s540Global_nv_dma_init_sysmem_window_for_fabric_access",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "NV_STATUS (nv_state_t *, NvU64, NvU64 *, NvU64 *, NvBool *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 6494
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_dma_map_mmio",
+      "namespace_symbol": "s540Global_nv_dma_map_mmio",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "NV_STATUS (nv_dma_device_t *, NvU64, NvU64 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 3896
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_dma_map_peer",
+      "namespace_symbol": "s540Global_nv_dma_map_peer",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "NV_STATUS (nv_dma_device_t *, nv_dma_device_t *, NvU8, NvU64, NvU64 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 3989
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+          "line": 4756
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_dma_release_dma_buf",
+      "namespace_symbol": "s540Global_nv_dma_release_dma_buf",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "void (nv_dma_buf_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 968
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 1286
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_dma_release_sgt",
+      "namespace_symbol": "s540Global_nv_dma_release_sgt",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "void (struct sg_table *, struct drm_gem_object *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 993
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 1324
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_dma_unmap_mmio",
+      "namespace_symbol": "s540Global_nv_dma_unmap_mmio",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "void (nv_dma_device_t *, NvU64, NvU64)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 4088
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_dma_unmap_peer",
+      "namespace_symbol": "s540Global_nv_dma_unmap_peer",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "void (nv_dma_device_t *, NvU64, NvU64)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 4126
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+          "line": 4763
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_enable_clk",
+      "namespace_symbol": "s540Global_nv_enable_clk",
+      "group": "tegra_soc",
+      "original_type": "NV_STATUS (nv_state_t *, TEGRASOC_WHICH_CLK)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+          "line": 1231
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_free_user_mapping",
+      "namespace_symbol": "s540Global_nv_free_user_mapping",
+      "group": "user_mapping_process_and_events",
+      "original_type": "void (nv_state_t *, void *, NvU64, void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 604
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_get_all_mappings_revoked_locked",
+      "namespace_symbol": "s540Global_nv_get_all_mappings_revoked_locked",
+      "group": "power_and_console",
+      "original_type": "NvBool (nv_state_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 433
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 1507
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_get_ctl_state",
+      "namespace_symbol": "s540Global_nv_get_ctl_state",
+      "group": "user_mapping_process_and_events",
+      "original_type": "nv_state_t *(void)",
+      "unavailable_policy": "output-preserving-NULL",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 1461
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 1491
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 1761
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 1778
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 1795
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+          "line": 517
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+          "line": 642
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+          "line": 698
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+          "line": 2540
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_get_current_irq_type",
+      "namespace_symbol": "s540Global_nv_get_current_irq_type",
+      "group": "tegra_soc",
+      "original_type": "nv_soc_irq_type_t (nv_state_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/unix_intr.c",
+          "line": 361
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/unix_intr.c",
+          "line": 706
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_get_dev_minor",
+      "namespace_symbol": "s540Global_nv_get_dev_minor",
+      "group": "user_mapping_process_and_events",
+      "original_type": "NvU32 (nv_state_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5088
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_get_device_memory_config",
+      "namespace_symbol": "s540Global_nv_get_device_memory_config",
+      "group": "numa_page_and_system_memory",
+      "original_type": "NV_STATUS (nv_state_t *, NvU64 *, NvU64 *, NvU64 *, NvU64 *, NvU32 *, NvS32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 4456
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 4511
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 4787
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_get_egm_info",
+      "namespace_symbol": "s540Global_nv_get_egm_info",
+      "group": "numa_page_and_system_memory",
+      "original_type": "NV_STATUS (nv_state_t *, NvU64 *, NvU64 *, NvS32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 6482
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_get_file_private",
+      "namespace_symbol": "s540Global_nv_get_file_private",
+      "group": "user_mapping_process_and_events",
+      "original_type": "nv_file_private_t *(NvS32, NvBool, void **)",
+      "unavailable_policy": "output-preserving-NULL",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/escape.c",
+          "line": 820
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/escape.c",
+          "line": 956
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 2565
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 2618
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 2656
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 2801
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 2846
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 2934
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_get_max_freq",
+      "namespace_symbol": "s540Global_nv_get_max_freq",
+      "group": "tegra_soc",
+      "original_type": "NV_STATUS (nv_state_t *, TEGRASOC_WHICH_CLK, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+          "line": 1224
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_get_num_phys_pages",
+      "namespace_symbol": "s540Global_nv_get_num_phys_pages",
+      "group": "user_mapping_process_and_events",
+      "original_type": "NV_STATUS (void *, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 468
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_get_phys_pages",
+      "namespace_symbol": "s540Global_nv_get_phys_pages",
+      "group": "user_mapping_process_and_events",
+      "original_type": "NV_STATUS (void *, void *, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 487
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_get_syncpoint_aperture",
+      "namespace_symbol": "s540Global_nv_get_syncpoint_aperture",
+      "group": "tegra_soc",
+      "original_type": "NV_STATUS (NvU32, NvU64 *, NvU64 *, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 6280
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_get_updated_emu_seg",
+      "namespace_symbol": "s540Global_nv_get_updated_emu_seg",
+      "group": "pci_low_level_and_vbios",
+      "original_type": "void (NvU32 *, NvU32 *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/vbioscall.c",
+          "line": 313
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_i2c_add_adapter",
+      "namespace_symbol": "s540Global_nv_i2c_add_adapter",
+      "group": "pci_low_level_and_vbios",
+      "original_type": "void *(nv_state_t *, NvU32)",
+      "unavailable_policy": "output-preserving-NULL",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+          "line": 4328
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_imp_get_import_data",
+      "namespace_symbol": "s540Global_nv_imp_get_import_data",
+      "group": "tegra_soc",
+      "original_type": "NV_STATUS (TEGRA_IMP_IMPORT_DATA *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5913
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_imp_get_uefi_data",
+      "namespace_symbol": "s540Global_nv_imp_get_uefi_data",
+      "group": "tegra_soc",
+      "original_type": "NV_STATUS (nv_state_t *, NvU32 *, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5942
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_imp_icc_set_bw",
+      "namespace_symbol": "s540Global_nv_imp_icc_set_bw",
+      "group": "tegra_soc",
+      "original_type": "NV_STATUS (nv_state_t *, NvU32, NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 6050
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_indicate_idle",
+      "namespace_symbol": "s540Global_nv_indicate_idle",
+      "group": "power_and_console",
+      "original_type": "NV_STATUS (nv_state_t *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 440
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 1339
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 1455
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 1790
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 2694
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_indicate_not_idle",
+      "namespace_symbol": "s540Global_nv_indicate_not_idle",
+      "group": "power_and_console",
+      "original_type": "NV_STATUS (nv_state_t *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 385
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 1034
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 1163
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_log_error",
+      "namespace_symbol": "s540Global_nv_log_error",
+      "group": "diagnostics",
+      "original_type": "NV_STATUS (nv_state_t *, NvU32, const char *, struct __va_list_tag *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 1872
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_pci_cxl_set_caching",
+      "namespace_symbol": "s540Global_nv_pci_cxl_set_caching",
+      "group": "pci_low_level_and_vbios",
+      "original_type": "void (nv_state_t *, NvBool)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 6582
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_pci_read_gpu_pdi_from_dvsec",
+      "namespace_symbol": "s540Global_nv_pci_read_gpu_pdi_from_dvsec",
+      "group": "pci_low_level_and_vbios",
+      "original_type": "NV_STATUS (nv_state_t *, NvU64 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+          "line": 287
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_post_event",
+      "namespace_symbol": "s540Global_nv_post_event",
+      "group": "user_mapping_process_and_events",
+      "original_type": "void (nv_event_t *, NvHandle, NvU32, NvU32, NvU16, NvBool)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 1525
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_put_file_private",
+      "namespace_symbol": "s540Global_nv_put_file_private",
+      "group": "user_mapping_process_and_events",
+      "original_type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/escape.c",
+          "line": 835
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/escape.c",
+          "line": 852
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/escape.c",
+          "line": 971
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/escape.c",
+          "line": 983
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 2592
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 2632
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 2777
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 2824
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 2912
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 2957
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 6388
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+          "line": 3177
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_register_peer_io_mem",
+      "namespace_symbol": "s540Global_nv_register_peer_io_mem",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "NV_STATUS (nv_state_t *, NvU64 *, NvU64, void **)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 586
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_register_phys_pages",
+      "namespace_symbol": "s540Global_nv_register_phys_pages",
+      "group": "user_mapping_process_and_events",
+      "original_type": "NV_STATUS (nv_state_t *, NvU64 *, NvU64, NvU32, void **)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 439
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 710
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_register_sgt",
+      "namespace_symbol": "s540Global_nv_register_sgt",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "NV_STATUS (nv_state_t *, NvU64 *, NvU64, NvU32, void **, struct sg_table *, void *, NvBool)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 866
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_register_user_pages",
+      "namespace_symbol": "s540Global_nv_register_user_pages",
+      "group": "user_mapping_process_and_events",
+      "original_type": "NV_STATUS (nv_state_t *, NvU64, NvU64 *, void *, void **, NvBool)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 240
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_release_mmap_lock",
+      "namespace_symbol": "s540Global_nv_release_mmap_lock",
+      "group": "power_and_console",
+      "original_type": "void (nv_state_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 407
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 447
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 1531
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_revoke_gpu_mappings",
+      "namespace_symbol": "s540Global_nv_revoke_gpu_mappings",
+      "group": "power_and_console",
+      "original_type": "NV_STATUS (nv_state_t *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 2993
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_schedule_uvm_drain_p2p",
+      "namespace_symbol": "s540Global_nv_schedule_uvm_drain_p2p",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "NV_STATUS (NvU8 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 895
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_schedule_uvm_isr",
+      "namespace_symbol": "s540Global_nv_schedule_uvm_isr",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "void (nv_state_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 881
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_schedule_uvm_resume_p2p",
+      "namespace_symbol": "s540Global_nv_schedule_uvm_resume_p2p",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "void (NvU8 *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 900
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_set_freq",
+      "namespace_symbol": "s540Global_nv_set_freq",
+      "group": "tegra_soc",
+      "original_type": "NV_STATUS (nv_state_t *, TEGRASOC_WHICH_CLK, NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+          "line": 1238
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_set_safe_to_mmap_locked",
+      "namespace_symbol": "s540Global_nv_set_safe_to_mmap_locked",
+      "group": "power_and_console",
+      "original_type": "void (nv_state_t *, NvBool)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 406
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 437
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_tegra_dce_client_ipc_send_recv",
+      "namespace_symbol": "s540Global_nv_tegra_dce_client_ipc_send_recv",
+      "group": "tegra_soc",
+      "original_type": "NV_STATUS (NvU32, void *, NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5830
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_tegra_dce_register_ipc_client",
+      "namespace_symbol": "s540Global_nv_tegra_dce_register_ipc_client",
+      "group": "tegra_soc",
+      "original_type": "NV_STATUS (NvU32, void *, nvTegraDceClientIpcCallback, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5782
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5784
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_tegra_dce_unregister_ipc_client",
+      "namespace_symbol": "s540Global_nv_tegra_dce_unregister_ipc_client",
+      "group": "tegra_soc",
+      "original_type": "NV_STATUS (NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5806
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_tegra_get_rm_interface_type",
+      "namespace_symbol": "s540Global_nv_tegra_get_rm_interface_type",
+      "group": "tegra_soc",
+      "original_type": "NvU32 (NvU32)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5746
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_unregister_peer_io_mem",
+      "namespace_symbol": "s540Global_nv_unregister_peer_io_mem",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "void (nv_state_t *, void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 612
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 1181
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_unregister_phys_pages",
+      "namespace_symbol": "s540Global_nv_unregister_phys_pages",
+      "group": "user_mapping_process_and_events",
+      "original_type": "void (nv_state_t *, void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 613
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 754
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 1164
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_unregister_sgt",
+      "namespace_symbol": "s540Global_nv_unregister_sgt",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "void (nv_state_t *, struct sg_table **, void **, void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 937
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 1277
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 1321
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nv_unregister_user_pages",
+      "namespace_symbol": "s540Global_nv_unregister_user_pages",
+      "group": "user_mapping_process_and_events",
+      "original_type": "void (nv_state_t *, NvU64, void **, void **)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 312
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 1225
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nvlink_assert",
+      "namespace_symbol": "s540Global_nvlink_assert",
+      "group": "nvlink_host_primitives",
+      "original_type": "void (int)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_conn_mgmt.c",
+          "line": 119
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_conn_mgmt.c",
+          "line": 120
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_discovery.c",
+          "line": 87
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_initialize.c",
+          "line": 52
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_initialize.c",
+          "line": 306
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_initialize.c",
+          "line": 526
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_initialize.c",
+          "line": 622
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_initialize.c",
+          "line": 757
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_initialize.c",
+          "line": 871
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_initialize.c",
+          "line": 1014
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_initialize.c",
+          "line": 1136
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_initialize.c",
+          "line": 1252
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_initialize.c",
+          "line": 1362
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_initialize.c",
+          "line": 1477
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_initialize.c",
+          "line": 1589
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_initialize.c",
+          "line": 1732
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_ioctl.c",
+          "line": 316
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_ioctl.c",
+          "line": 332
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_ioctl.c",
+          "line": 339
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_ioctl.c",
+          "line": 516
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 660
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 692
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1058
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1099
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1209
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1263
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1367
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1422
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1574
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1695
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1862
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3044
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3199
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3504
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3617
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3751
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3782
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3788
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_discovery_entry.c",
+          "line": 101
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_discovery_entry.c",
+          "line": 230
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 140
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_training_entry.c",
+          "line": 93
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nvlink_free",
+      "namespace_symbol": "s540Global_nvlink_free",
+      "group": "nvlink_host_primitives",
+      "original_type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_conn_mgmt.c",
+          "line": 256
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_conn_mgmt.c",
+          "line": 280
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_discovery.c",
+          "line": 88
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_discovery.c",
+          "line": 123
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_shutdown.c",
+          "line": 1075
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_shutdown.c",
+          "line": 1164
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_shutdown.c",
+          "line": 1165
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 641
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 664
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 682
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 987
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1027
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1046
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1061
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1079
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1102
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1126
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1169
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1188
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1213
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1232
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1266
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1284
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1327
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1346
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1371
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1390
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1425
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1443
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1534
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1553
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1578
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1597
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1617
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1638
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1676
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1699
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1719
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1761
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1792
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 2665
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 2670
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 2675
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3000
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3012
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3035
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3048
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3067
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3123
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3155
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3167
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3190
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3203
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3222
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3264
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3449
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3453
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3573
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3585
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3608
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3621
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3640
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3681
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3721
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3735
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3755
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3772
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3806
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_discovery_entry.c",
+          "line": 75
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_discovery_entry.c",
+          "line": 105
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_discovery_entry.c",
+          "line": 139
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_discovery_entry.c",
+          "line": 164
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_discovery_entry.c",
+          "line": 211
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_discovery_entry.c",
+          "line": 234
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_discovery_entry.c",
+          "line": 254
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_discovery_entry.c",
+          "line": 280
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 88
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 274
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 279
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 321
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 338
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 359
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 405
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 463
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 510
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 513
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 642
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 647
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 708
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 812
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 817
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 878
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 955
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 960
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 1065
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_training_entry.c",
+          "line": 142
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_training_entry.c",
+          "line": 351
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_training_entry.c",
+          "line": 356
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_training_entry.c",
+          "line": 600
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_training_entry.c",
+          "line": 605
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nvlink_malloc",
+      "namespace_symbol": "s540Global_nvlink_malloc",
+      "group": "nvlink_host_primitives",
+      "original_type": "void *(NvLength)",
+      "unavailable_policy": "output-preserving-NULL",
+      "c_references": [
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_conn_mgmt.c",
+          "line": 130
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_conn_mgmt.c",
+          "line": 195
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_discovery.c",
+          "line": 65
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_shutdown.c",
+          "line": 1062
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_shutdown.c",
+          "line": 1070
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 626
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1012
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1151
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1309
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1516
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 1661
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 2375
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 2388
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 2400
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 2991
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3146
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3289
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3297
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3564
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3700
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_discovery_entry.c",
+          "line": 57
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_discovery_entry.c",
+          "line": 196
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 71
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 79
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 306
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 447
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 454
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 692
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 699
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 862
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 869
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 987
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_training_entry.c",
+          "line": 60
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_training_entry.c",
+          "line": 185
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_training_entry.c",
+          "line": 192
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_training_entry.c",
+          "line": 401
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_training_entry.c",
+          "line": 409
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nvlink_memcpy",
+      "namespace_symbol": "s540Global_nvlink_memcpy",
+      "group": "nvlink_host_primitives",
+      "original_type": "void *(void *, const void *, NvLength)",
+      "unavailable_policy": "output-preserving-NULL",
+      "c_references": [
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_conn_mgmt.c",
+          "line": 211
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_conn_mgmt.c",
+          "line": 546
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_conn_mgmt.c",
+          "line": 583
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_ioctl.c",
+          "line": 483
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_ioctl.c",
+          "line": 492
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_training_entry.c",
+          "line": 807
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_training_entry.c",
+          "line": 863
+        },
+        {
+          "source": "src/nvidia/src/kernel/gpu/nvlink/kernel_nvlinkcorelibtrain.c",
+          "line": 244
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nvlink_memset",
+      "namespace_symbol": "s540Global_nvlink_memset",
+      "group": "nvlink_host_primitives",
+      "original_type": "void *(void *, int, NvLength)",
+      "unavailable_policy": "output-preserving-NULL",
+      "c_references": [
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_conn_mgmt.c",
+          "line": 139
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_conn_mgmt.c",
+          "line": 204
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 520
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 2411
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 2412
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 2413
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 3711
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 93
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 467
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 712
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_shutdown_entry.c",
+          "line": 882
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_training_entry.c",
+          "line": 205
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_kern_training_entry.c",
+          "line": 423
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "nvlink_sleep",
+      "namespace_symbol": "s540Global_nvlink_sleep",
+      "group": "nvlink_host_primitives",
+      "original_type": "void (unsigned int)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_initialize.c",
+          "line": 1657
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_link_mgmt.c",
+          "line": 348
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_link_mgmt.c",
+          "line": 478
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_link_mgmt.c",
+          "line": 544
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/core/nvlink_training.c",
+          "line": 724
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 2269
+        },
+        {
+          "source": "src/common/nvlink/kernel/nvlink/interface/nvlink_ioctl_entry.c",
+          "line": 2616
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_add_record_for_crashLog",
+      "namespace_symbol": "s540Global_os_add_record_for_crashLog",
+      "group": "diagnostics",
+      "original_type": "void (void *, NvU32)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 4745
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_alloc_pages_node",
+      "namespace_symbol": "s540Global_os_alloc_pages_node",
+      "group": "numa_page_and_system_memory",
+      "original_type": "NV_STATUS (NvS32, NvU32, NvU32, NvU64 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 4833
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_allocate_temporary_file",
+      "namespace_symbol": "s540Global_os_allocate_temporary_file",
+      "group": "host_files_and_capabilities",
+      "original_type": "NV_STATUS (void **, NvU64)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 4937
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_bug_check",
+      "namespace_symbol": "s540Global_os_bug_check",
+      "group": "diagnostics",
+      "original_type": "void (NvU32, const char *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 4199
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_call_vgpu_vfio",
+      "namespace_symbol": "s540Global_os_call_vgpu_vfio",
+      "group": "virtualization_and_build_feature_facts",
+      "original_type": "NV_STATUS (void *, NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os-hypervisor.c",
+          "line": 896
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os-hypervisor.c",
+          "line": 903
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os-hypervisor.c",
+          "line": 915
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_cgroup_for_pid",
+      "namespace_symbol": "s540Global_os_cgroup_for_pid",
+      "group": "user_mapping_process_and_events",
+      "original_type": "void *(int, void *, int)",
+      "unavailable_policy": "output-preserving-NULL",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 2133
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_close_file",
+      "namespace_symbol": "s540Global_os_close_file",
+      "group": "host_files_and_capabilities",
+      "original_type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 4953
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_count_tail_pages",
+      "namespace_symbol": "s540Global_os_count_tail_pages",
+      "group": "numa_page_and_system_memory",
+      "original_type": "NvU32 (NvU64)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 4891
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_delete_record_for_crashLog",
+      "namespace_symbol": "s540Global_os_delete_record_for_crashLog",
+      "group": "diagnostics",
+      "original_type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 4759
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_device_vm_present",
+      "namespace_symbol": "s540Global_os_device_vm_present",
+      "group": "virtualization_and_build_feature_facts",
+      "original_type": "NV_STATUS (void)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os-hypervisor.c",
+          "line": 1001
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_disable_console_access",
+      "namespace_symbol": "s540Global_os_disable_console_access",
+      "group": "power_and_console",
+      "original_type": "void (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 2646
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 2823
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+          "line": 1851
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+          "line": 1900
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+          "line": 1942
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_dump_stack",
+      "namespace_symbol": "s540Global_os_dump_stack",
+      "group": "diagnostics",
+      "original_type": "void (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 4207
+        },
+        {
+          "source": "src/nvidia/src/kernel/gpu/bus/kern_bus_vbar2.c",
+          "line": 936
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_enable_console_access",
+      "namespace_symbol": "s540Global_os_enable_console_access",
+      "group": "power_and_console",
+      "original_type": "void (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 2732
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "line": 2842
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+          "line": 1876
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+          "line": 1921
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+          "line": 1956
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_enable_pci_req_atomics",
+      "namespace_symbol": "s540Global_os_enable_pci_req_atomics",
+      "group": "pci_low_level_and_vbios",
+      "original_type": "NV_STATUS (void *, enum os_pci_req_atomics_type)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 6311
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 6314
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 6317
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_flush_cpu_cache_all",
+      "namespace_symbol": "s540Global_os_flush_cpu_cache_all",
+      "group": "pci_low_level_and_vbios",
+      "original_type": "NV_STATUS (void)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 1823
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_flush_user_cache",
+      "namespace_symbol": "s540Global_os_flush_user_cache",
+      "group": "user_mapping_process_and_events",
+      "original_type": "NV_STATUS (void)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 2450
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_get_acpi_rsdp_from_uefi",
+      "namespace_symbol": "s540Global_os_get_acpi_rsdp_from_uefi",
+      "group": "rm_acpi_services",
+      "original_type": "NV_STATUS (NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 4717
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_get_grid_csp_support",
+      "namespace_symbol": "s540Global_os_get_grid_csp_support",
+      "group": "virtualization_and_build_feature_facts",
+      "original_type": "NvU32 (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os-hypervisor.c",
+          "line": 920
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os-hypervisor.c",
+          "line": 925
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_get_max_user_va",
+      "namespace_symbol": "s540Global_os_get_max_user_va",
+      "group": "user_mapping_process_and_events",
+      "original_type": "NvU64 (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 756
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_get_numa_node_memory_usage",
+      "namespace_symbol": "s540Global_os_get_numa_node_memory_usage",
+      "group": "numa_page_and_system_memory",
+      "original_type": "NV_STATUS (NvS32, NvU64 *, NvU64 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 6407
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_get_page",
+      "namespace_symbol": "s540Global_os_get_page",
+      "group": "numa_page_and_system_memory",
+      "original_type": "NV_STATUS (NvU64)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 4848
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_get_page_refcount",
+      "namespace_symbol": "s540Global_os_get_page_refcount",
+      "group": "numa_page_and_system_memory",
+      "original_type": "NvU32 (NvU64)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 4877
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_get_reclaimable_memory_usage",
+      "namespace_symbol": "s540Global_os_get_reclaimable_memory_usage",
+      "group": "numa_page_and_system_memory",
+      "original_type": "NvU64 (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 6135
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_imex_channel_count",
+      "namespace_symbol": "s540Global_os_imex_channel_count",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "NvS32 (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5595
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_imex_channel_get",
+      "namespace_symbol": "s540Global_os_imex_channel_get",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "NvS32 (NvU64)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5607
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_inject_vgx_msi",
+      "namespace_symbol": "s540Global_os_inject_vgx_msi",
+      "group": "virtualization_and_build_feature_facts",
+      "original_type": "NV_STATUS (NvU16, NvU64, NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os-hypervisor.c",
+          "line": 84
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_io_read_byte",
+      "namespace_symbol": "s540Global_os_io_read_byte",
+      "group": "pci_low_level_and_vbios",
+      "original_type": "NvU8 (NvU32)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 645
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/vbioscall.c",
+          "line": 102
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_io_read_dword",
+      "namespace_symbol": "s540Global_os_io_read_dword",
+      "group": "pci_low_level_and_vbios",
+      "original_type": "NvU32 (NvU32)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/vbioscall.c",
+          "line": 136
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_io_read_word",
+      "namespace_symbol": "s540Global_os_io_read_word",
+      "group": "pci_low_level_and_vbios",
+      "original_type": "NvU16 (NvU32)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 630
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/vbioscall.c",
+          "line": 119
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_io_write_byte",
+      "namespace_symbol": "s540Global_os_io_write_byte",
+      "group": "pci_low_level_and_vbios",
+      "original_type": "void (NvU32, NvU8)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 623
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/vbioscall.c",
+          "line": 111
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_io_write_dword",
+      "namespace_symbol": "s540Global_os_io_write_dword",
+      "group": "pci_low_level_and_vbios",
+      "original_type": "void (NvU32, NvU32)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/vbioscall.c",
+          "line": 145
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_io_write_word",
+      "namespace_symbol": "s540Global_os_io_write_word",
+      "group": "pci_low_level_and_vbios",
+      "original_type": "void (NvU32, NvU16)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 638
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/vbioscall.c",
+          "line": 128
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_iommu_sva_bind",
+      "namespace_symbol": "s540Global_os_iommu_sva_bind",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "NV_STATUS (void *, void **, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/src/kernel/gpu/mem_mgr/vaspace_api.c",
+          "line": 223
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_iommu_sva_unbind",
+      "namespace_symbol": "s540Global_os_iommu_sva_unbind",
+      "group": "dma_import_peer_uvm_fabric",
+      "original_type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/src/kernel/gpu/mem_mgr/vaspace_api.c",
+          "line": 556
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_is_bif_reset_supported",
+      "namespace_symbol": "s540Global_os_is_bif_reset_supported",
+      "group": "pci_low_level_and_vbios",
+      "original_type": "NvBool (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 3494
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_is_grid_supported",
+      "namespace_symbol": "s540Global_os_is_grid_supported",
+      "group": "virtualization_and_build_feature_facts",
+      "original_type": "NvBool (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os-hypervisor.c",
+          "line": 920
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os-hypervisor.c",
+          "line": 979
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os-hypervisor.c",
+          "line": 984
+        },
+        {
+          "source": "src/nvidia/src/kernel/gpu/device_ctrl.c",
+          "line": 234
+        },
+        {
+          "source": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+          "line": 5163
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_memcpy_from_user",
+      "namespace_symbol": "s540Global_os_memcpy_from_user",
+      "group": "user_mapping_process_and_events",
+      "original_type": "NV_STATUS (void *, const void *, NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/src/libraries/nvport/memory/memory_unix_kernel_os.c",
+          "line": 179
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_memcpy_to_user",
+      "namespace_symbol": "s540Global_os_memcpy_to_user",
+      "group": "user_mapping_process_and_events",
+      "original_type": "NV_STATUS (void *, const void *, NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+          "line": 571
+        },
+        {
+          "source": "src/nvidia/src/libraries/nvport/memory/memory_unix_kernel_os.c",
+          "line": 198
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_numa_add_gpu_memory",
+      "namespace_symbol": "s540Global_os_numa_add_gpu_memory",
+      "group": "numa_page_and_system_memory",
+      "original_type": "NV_STATUS (void *, NvU64, NvU64, NvU32 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 6435
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_numa_memblock_size",
+      "namespace_symbol": "s540Global_os_numa_memblock_size",
+      "group": "numa_page_and_system_memory",
+      "original_type": "NV_STATUS (NvU64 *)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 4772
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_numa_remove_gpu_memory",
+      "namespace_symbol": "s540Global_os_numa_remove_gpu_memory",
+      "group": "numa_page_and_system_memory",
+      "original_type": "NV_STATUS (void *, NvU64, NvU64, NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 6461
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_nv_cap_close_fd",
+      "namespace_symbol": "s540Global_os_nv_cap_close_fd",
+      "group": "host_files_and_capabilities",
+      "original_type": "void (int)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5331
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_nv_cap_create_dir_entry",
+      "namespace_symbol": "s540Global_os_nv_cap_create_dir_entry",
+      "group": "host_files_and_capabilities",
+      "original_type": "nv_cap_t *(nv_cap_t *, const char *, int)",
+      "unavailable_policy": "output-preserving-NULL",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5116
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5129
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5199
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5284
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5367
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_nv_cap_create_file_entry",
+      "namespace_symbol": "s540Global_os_nv_cap_create_file_entry",
+      "group": "host_files_and_capabilities",
+      "original_type": "nv_cap_t *(nv_cap_t *, const char *, int)",
+      "unavailable_policy": "output-preserving-NULL",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5211
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5296
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5376
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5385
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5394
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5403
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5412
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5421
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5430
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_nv_cap_destroy_entry",
+      "namespace_symbol": "s540Global_os_nv_cap_destroy_entry",
+      "group": "host_files_and_capabilities",
+      "original_type": "void (nv_cap_t *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5030
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_nv_cap_validate_and_dup_fd",
+      "namespace_symbol": "s540Global_os_nv_cap_validate_and_dup_fd",
+      "group": "host_files_and_capabilities",
+      "original_type": "int (const nv_cap_t *, int)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5550
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_offline_page_at_address",
+      "namespace_symbol": "s540Global_os_offline_page_at_address",
+      "group": "numa_page_and_system_memory",
+      "original_type": "NV_STATUS (NvU64)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 6521
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_pci_remove",
+      "namespace_symbol": "s540Global_os_pci_remove",
+      "group": "pci_low_level_and_vbios",
+      "original_type": "void (void *)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+          "line": 2740
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_pci_remove_supported",
+      "namespace_symbol": "s540Global_os_pci_remove_supported",
+      "group": "pci_low_level_and_vbios",
+      "original_type": "NvBool (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 4389
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_put_page",
+      "namespace_symbol": "s540Global_os_put_page",
+      "group": "numa_page_and_system_memory",
+      "original_type": "NV_STATUS (NvU64)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 4863
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_read_file",
+      "namespace_symbol": "s540Global_os_read_file",
+      "group": "host_files_and_capabilities",
+      "original_type": "NV_STATUS (void *, NvU8 *, NvU64, NvU64)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 5001
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_supports_kernel_suspend_notifiers",
+      "namespace_symbol": "s540Global_os_supports_kernel_suspend_notifiers",
+      "group": "power_and_console",
+      "original_type": "NvBool (void)",
+      "unavailable_policy": "entry-must-be-blocked-before-call",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+          "line": 957
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_tegra_igpu_perf_boost",
+      "namespace_symbol": "s540Global_os_tegra_igpu_perf_boost",
+      "group": "tegra_soc",
+      "original_type": "NV_STATUS (void *, NvBool, NvU32, int)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 3463
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_unlock_user_pages",
+      "namespace_symbol": "s540Global_os_unlock_user_pages",
+      "group": "user_mapping_process_and_events",
+      "original_type": "NV_STATUS (NvU64, void *, NvU32)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/escape.c",
+          "line": 195
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+          "line": 1242
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    },
+    {
+      "symbol": "os_write_file",
+      "namespace_symbol": "s540Global_os_write_file",
+      "group": "host_files_and_capabilities",
+      "original_type": "NV_STATUS (void *, NvU8 *, NvU64, NvU64)",
+      "unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
+      "c_references": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "line": 4977
+        }
+      ],
+      "runtime_reachability": "unproved; no exclusion granted by this inventory"
+    }
+  ],
+  "reviewed_branch_anchors": [
+    {
+      "id": "acpi-methods-before-gsp",
+      "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+      "line": 2109,
+      "anchor": "    RmInitAcpiMethods(pOS, pSys, pGpu);",
+      "implication": "ACPI method initialization is before the GSP boot block; non-console admission does not skip it."
+    },
+    {
+      "id": "acpi-initializer-guard",
+      "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+      "line": 5308,
+      "anchor": "    if (pSys->getProperty(pSys, PDB_PROP_SYS_NVIF_INIT_DONE))",
+      "implication": "Setting the property to bypass real initialization is not an implementation."
+    },
+    {
+      "id": "original-no-acpi-events-profile",
+      "source": "kernel-open/nvidia/nv-acpi.c",
+      "line": 1425,
+      "anchor": "#else // NV_LINUX_ACPI_EVENTS_SUPPORTED",
+      "implication": "Original driver explicitly supports no RM ACPI events/methods; an equivalent selected Darwin policy may return no RM handles and unsupported methods, without asserting hardware ACPI absence."
+    },
+    {
+      "id": "grid-fact-in-gsp-bootstrap",
+      "source": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+      "line": 5163,
+      "anchor": "        NVKV_NUM64(PLATFORM_FLAGS_IS_GRID_BUILD, !!os_is_grid_supported()) |",
+      "implication": "Actual build facts remain required even when virtualization request entry is disabled."
+    },
+    {
+      "id": "grid-build-original-policy",
+      "source": "kernel-open/nvidia/os-interface.c",
+      "line": 1547,
+      "anchor": "#if defined(NV_GRID_BUILD)",
+      "implication": "GRID state is selected build configuration, not a fabricated hardware-detection Boolean."
+    },
+    {
+      "id": "console-derived-at-original-entry",
+      "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+      "line": 1843,
+      "anchor": "    pNv->client_managed_console = rm_get_uefi_console_status(pNv);",
+      "implication": "Project context initialization alone does not determine the later original console branch."
+    },
+    {
+      "id": "soc-irq-device-property",
+      "source": "src/nvidia/arch/nvalloc/unix/src/unix_intr.c",
+      "line": 267,
+      "anchor": "    if (pGpu->getProperty(pGpu, PDB_PROP_GPU_TEGRA_SOC_NVDISPLAY))",
+      "implication": "Actual non-SoC facts and original GPU property can guard SoC IRQ callbacks; all other SoC wrappers still require separate review."
+    },
+    {
+      "id": "dynamic-pm-policy-read",
+      "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+      "line": 774,
+      "anchor": "    status = osReadRegistryDword(NULL, NV_REG_DYNAMIC_POWER_MANAGEMENT, pRegkeyValue);",
+      "implication": "A runtime D3-off profile must publish and read back actual original registry state and hold independent Darwin PM ownership."
+    },
+    {
+      "id": "dynamic-pm-never-value",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv-reg.h",
+      "line": 682,
+      "anchor": "#define NV_REG_DYNAMIC_POWER_MANAGEMENT_NEVER   0",
+      "implication": "The planned initial policy uses original documented NEVER value, not an invented numeric shortcut."
+    },
+    {
+      "id": "nvlink-off-policy",
+      "source": "src/nvidia/arch/nvalloc/unix/include/nv-reg.h",
+      "line": 523,
+      "anchor": "#define __NV_NVLINK_DISABLE NvLinkDisable",
+      "implication": "Original NvLinkDisable=1 suppresses initialization/training, but does not by itself eliminate NVLink library host primitives."
+    }
+  ]
+}

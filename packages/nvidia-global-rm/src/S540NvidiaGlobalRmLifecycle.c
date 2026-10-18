@@ -5,6 +5,7 @@
 #include "rmapi/rmapi.h"
 #include "resserv/rs_server.h"
 #include "S540NvidiaGlobalRm.h"
+#include "S540NvidiaGlobalRmProfile.h"
 #include "../../nvidia-global-rm-crypto/src/S540NvidiaGlobalCrypto.h"
 
 extern RsServer g_resServ;
@@ -18,6 +19,15 @@ static NvBool cryptoUnused(void)
     return snapshot.unavailable_calls == 0 &&
            snapshot.unavailable_symbol_mask == 0 && snapshot.counter_overflow == 0 &&
            snapshot.unavailable_symbol_mask_high == 0;
+}
+
+static NvBool cleanShutdown(void)
+{
+    S540NvidiaGlobalRmHostSnapshot host;
+    s540GlobalRmHostSnapshot(&host);
+    return SYS_GET_INSTANCE() == NULL && !portIsInitialized() &&
+        host.originalLiveAllocations == 0 && host.originalLiveBytes == 0 &&
+        host.invalidFrees == 0 && host.unavailableCalls == 0 && cryptoUnused();
 }
 
 static void inspect(S540NvidiaGlobalRmResult *out)
@@ -76,6 +86,11 @@ NV_STATUS s540GlobalRmInitialize(S540NvidiaGlobalRmResult *out)
     if (!host.initialized || host.unavailableCalls || host.invalidFrees ||
         !s540GlobalRmPlatformFacts() || !cryptoUnused())
         return out->startupStatus = NV_ERR_NOT_READY;
+    // Refuse before construction acquires any original global epoch. Its
+    // failure path invokes RmShutdownRm, which would otherwise destroy a
+    // preexisting registry even when os_registry_init refused ownership.
+    status = s540GlobalRmCheckRegistryCold();
+    if (status != NV_OK) return out->startupStatus = status;
     status = coreInitializeRm();
     out->startupStatus = status;
     if (status != NV_OK) {
@@ -83,7 +98,10 @@ NV_STATUS s540GlobalRmInitialize(S540NvidiaGlobalRmResult *out)
         // Its portable runtime/registry state still requires the original RM
         // shutdown entry. Each failure stage must retain this cleanup contract.
         RmShutdownRm();
-        out->cleanShutdown = SYS_GET_INSTANCE() == NULL && !portIsInitialized();
+        s540GlobalRmHostSnapshot(&host);
+        out->unavailableCalls = host.unavailableCalls;
+        out->osServiceMask = s540GlobalRmServiceMask();
+        out->cleanShutdown = cleanShutdown();
         return status;
     }
     running = NV_TRUE;
@@ -107,9 +125,7 @@ void s540GlobalRmShutdown(S540NvidiaGlobalRmResult *out)
     if (out) {
         out->unavailableCalls = host.unavailableCalls;
         out->osServiceMask = s540GlobalRmServiceMask();
-        out->cleanShutdown = SYS_GET_INSTANCE() == NULL && !portIsInitialized() &&
-            host.liveAllocations == 0 && host.liveBytes == 0 &&
-            host.invalidFrees == 0 && host.unavailableCalls == 0 && cryptoUnused();
+        out->cleanShutdown = cleanShutdown();
     }
 }
 

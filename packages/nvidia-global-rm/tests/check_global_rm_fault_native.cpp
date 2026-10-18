@@ -39,7 +39,7 @@ int main(int argc, char **argv)
     // Some upstream allocations are optional (diagnostics/caches). A legitimate
     // successful fallback is accepted only with all global invariants and the
     // same complete teardown as an allocation that refuses construction.
-    const bool validOutcome = status != NV_OK ||
+    const bool validOutcome = (status != NV_OK && result.cleanShutdown) ||
         (result.initialized && result.systemObject && result.children &&
          result.resourceServer && result.memoryExportClient && result.cleanShutdown);
     const bool passed = validOutcome && host.allocationFailures == 1 &&

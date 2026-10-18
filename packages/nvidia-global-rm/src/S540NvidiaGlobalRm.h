@@ -53,6 +53,10 @@ typedef struct S540NvidiaGlobalRmHostSnapshot {
     NvU32 invalidFrees;
     NvU32 unavailableCalls;
     NvBool initialized;
+    NvU64 originalLiveBytes;
+    NvU64 externalLiveBytes;
+    NvU32 originalLiveAllocations;
+    NvU32 externalLiveAllocations;
 } S540NvidiaGlobalRmHostSnapshot;
 
 typedef struct S540NvidiaGlobalRmResult {
@@ -78,6 +82,11 @@ NvBool s540GlobalRmHostShutdown(void);
 void s540GlobalRmHostSnapshot(S540NvidiaGlobalRmHostSnapshot *out);
 void *s540GlobalRmHostAllocate(NvU64 bytes);
 void s540GlobalRmHostFree(void *pointer);
+// Original os_alloc_mem/os_free_mem and NVLink host allocation boundaries use
+// this separate domain. A free must match the allocation's recorded domain;
+// original cleanup cannot release bootstrap context/firmware identities.
+void *s540GlobalRmHostAllocateOriginal(NvU64 bytes);
+void s540GlobalRmHostFreeOriginal(void *pointer);
 void s540GlobalRmRecordUnavailable(NvU32 service);
 void s540GlobalRmRecordService(NvU32 service);
 NvU64 s540GlobalRmServiceMask(void);

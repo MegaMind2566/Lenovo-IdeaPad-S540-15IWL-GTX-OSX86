@@ -1,0 +1,71 @@
+{
+  "adaptation": "Capture the typed source pointer exactly once in a GNU statement expression, then retain the null conditional and original inherited-pointer conversion. The original GNU11/Clang profile accepts typeof and statement expressions. No sanitizer is disabled.",
+  "adapted_sha256": "662e79efede7e4d36c275a494da5f42d4217e813dc25af12ea8b723b9a31b857",
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "compiler_observation": "Clang18.1.3 -O1 with fatal undefined sanitizer diagnoses the anonymous-union member expression in the unevaluated true branch of a literal-NULL conditional. The retained reduced reproducer demonstrates the same compiler interaction outside RM.",
+  "control_source_sha256": {
+    "tests/check_nvoc_cast_cpp_native.cpp": "935d0f65777929d4ef09caa92c82d672288ae1285e34d89372f780623274179f",
+    "tests/check_nvoc_cast_native.c": "4c9b9d6e8452d72d01f33ab938ff6135b7b223b7ad295d039721470e3ec8f961",
+    "tests/fixtures/nvoc_literal_null_reproducer.c": "508955c659a8e60191493773f42ab9d3f04a52bb6f758c6425658bb3760a50e1"
+  },
+  "controls": {
+    "c": {
+      "actual_generated_headers": [
+        "g_system_nvoc.h",
+        "g_object_nvoc.h"
+      ],
+      "checks_per_variant": 12,
+      "covered": [
+        "literal null",
+        "derived null",
+        "Object and OBJSYS inheritance",
+        "Dynamic RTTI address",
+        "nonnull expression exactly once",
+        "null expression exactly once",
+        "const-qualified source"
+      ]
+    },
+    "compiler": "Clang18.1.3 x86_64 ELF explicit host control; native Apple execution pending",
+    "cpp": {
+      "checks_per_variant": 12,
+      "scope": "Exact macro bytes extracted from checked prelude.h and compiled in a reduced C++ anonymous-union/inheritance fixture. Full original NVOC C header C++ compatibility is not claimed."
+    },
+    "full_original_corpus_rebuild_required": true,
+    "gpu_access": false,
+    "kernel_executed": false,
+    "variants": [
+      "plain",
+      "fatal address,undefined,function"
+    ]
+  },
+  "format": 1,
+  "full_original_host_validation": {
+    "allocation_failure_cases_per_variant": 156,
+    "external_allocation_domain_checks": 23,
+    "gpu_access": false,
+    "kernel_executed": false,
+    "leak_sanitizer": "Disabled only in explicit Linux local run because container process-inspection support is unavailable; host/service accounting verified zero. Native Apple builder retains default sanitizer configuration.",
+    "lifecycle_checks": 22,
+    "memory_retry_checks": 29,
+    "original_translation_units_per_variant": 1100,
+    "passed_allocation_cases_per_variant": 156,
+    "registry_epoch_checks": 23,
+    "source_profile": "10 reviewed overlays,12 changed source/header files",
+    "tracked_original_allocations_at_shutdown": 0,
+    "unavailable_calls": 0,
+    "variants": [
+      "plain",
+      "fatal address,undefined,function"
+    ]
+  },
+  "limits": [
+    "The full original NVOC headers predate C++ compatibility: qualified anonymous bit-fields and C99 array designators reject direct C++ inclusion. The new macro control does not silently rewrite those unrelated headers.",
+    "These controls do not establish kernel stack safety, global kernel startup, adapter startup or GPU operation."
+  ],
+  "original_contract": "staticCast already checks its source for NULL before the conversion; do not infer an actual runtime null dereference from the sanitizer diagnosis.",
+  "patch": "upstream/adapted/nvoc-static-cast-single-evaluation.patch",
+  "patch_sha256": "d30f8aa762dae4e73bf36e460f03f37b3a3efd819eab0542672943e2b5f4e5ec",
+  "production_entry": "remains_disabled",
+  "source": "src/nvidia/inc/libraries/nvoc/prelude.h",
+  "status": "passed-full-original-host-controls; native-Apple-execution-pending"
+}

@@ -88,6 +88,55 @@
       "repository": "apple-oss-distributions/xnu",
       "sha256": "e9bd91c0eece75af7c44d0c89ceb2911da6929e884329c5777c870a9aa11573c",
       "upstream_path": "bsd/sys/random.h"
+    },
+    {
+      "local": "reference/apple-copyio.h",
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "upstream_path": "bsd/libkern/copyio.h",
+      "sha256": "e4c53c7f0164f5cad7be1c958d76df66d5e9033e577c62cfa15863b2e181362e"
+    },
+    {
+      "local": "reference/apple-copyio.c",
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "upstream_path": "osfmk/x86_64/copyio.c",
+      "sha256": "0dedccfa7994a6903c59817ba32a565cbcf0c97425b7df6ab8100f3d4bd3c821"
+    },
+    {
+      "local": "reference/apple-libkern.exports",
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "upstream_path": "config/Libkern.exports",
+      "sha256": "f9256a3fe5fa4729660933d42b096d883ce2b8c1e2ffd25c06263b854ba0b1ac"
+    },
+    {
+      "local": "reference/nvlink-linux.c",
+      "repository": "NVIDIA/open-gpu-kernel-modules",
+      "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+      "upstream_path": "kernel-open/nvidia/nvlink_linux.c",
+      "sha256": "512da8863974dbada02318d606714c9e090baf88793ef3c5993e94815bb5e987"
+    },
+    {
+      "local": "reference/nvlink-os.h",
+      "repository": "NVIDIA/open-gpu-kernel-modules",
+      "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+      "upstream_path": "src/common/nvlink/interface/nvlink_os.h",
+      "sha256": "d4b1d8e3fcf365b39c0b90708ca4465bf3b642b89e9e13f400800989c9418037"
     }
-  ]
+  ],
+  "user_copy": {
+    "kernel": "copyin/copyout in the invoking non-kernel task, ordinary-thread context only",
+    "kernel_chunk_bytes": 1048576,
+    "native": "private nonblocking pipe with chunks <= PIPE_BUF; real OS fault/protection checking within the current process",
+    "failure": "INVALID_ADDRESS may leave a copied prefix; wrong-context/invalid-range refusals perform no copy",
+    "kernel_execution": "not_tested"
+  },
+  "nvlink_host_services": {
+    "allocation": "actual tracked host allocations; ordinary thread contract, GFP_KERNEL-style allocation",
+    "zero_bytes": "one owned byte with a freeable identity",
+    "sleep": "actual Darwin delay backend",
+    "assertion": "false condition reaches real fatal diagnostic policy; native harness uses an explicit endpoint fixture",
+    "hardware_nvlink_support": false
+  }
 }

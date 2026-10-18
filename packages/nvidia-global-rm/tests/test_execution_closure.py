@@ -47,6 +47,8 @@ class CoordinatorClosureTests(unittest.TestCase):
         self.objects = [self.directory / 'first.o', self.directory / 'second.o']
         self.root = P + 'rm_init_adapter'
         self.other = P + 'rm_execute_work_item'
+        self.gated_roots = {P + name for name in closure.GATED_LIFECYCLE_ROOTS}
+        self.all_roots = {self.root} | self.gated_roots
         self.provided = P + 'nv_alloc_pages'
         self.crypto = P + 'libspdm_random_bytes'
         self.reviewed_missing = P + 'nv_acpi_methods_init'
@@ -56,20 +58,20 @@ class CoordinatorClosureTests(unittest.TestCase):
         self.imports = {self.provided, self.crypto, self.reviewed_missing,
                         self.abi_missing, self.remap_missing, self.queue_provided, 'memcpy'}
         macho(self.objects[0], {self.root}, self.imports)
-        macho(self.objects[1], {self.other})
+        macho(self.objects[1], {self.other} | self.gated_roots)
         # Project callbacks are externals of original RM, never replacements
         # for original definitions. A separate regression rejects that overlap.
         macho(self.project, {self.provided, self.crypto, self.queue_provided},
               {self.root, self.provided, 'IOFixturePlatformImport'})
         self.source_contract = self.directory / 'source-contract.json'
-        self.source_contract.write_text(json.dumps({'defined_count': 2, 'namespace_sha256': 'a' * 64}))
+        self.source_contract.write_text(json.dumps({'defined_count': 4, 'namespace_sha256': 'a' * 64}))
         self.compiled = {
             'status': 'compiled', 'commit': closure.original.COMMIT,
             'source_namespace_verified': True, 'namespace_applied': True,
             'native_apple_compiler': True, 'cross_compile_probe': False,
             'source_profile': 'checked-cleanup-development',
             'object_sha256': {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in self.objects},
-            'namespace_contract': {'defined': sorted({self.root, self.other}),
+            'namespace_contract': {'defined': sorted({self.root, self.other} | self.gated_roots),
                                    'external': sorted(self.imports), 'namespace_sha256': 'a' * 64}}
         self.patches = ExitStack()
         self.addCleanup(self.patches.close)
@@ -90,7 +92,7 @@ class CoordinatorClosureTests(unittest.TestCase):
     def analyze(self, *, extra_imports=(), kind=11, dylib=False, cross_probe=False):
         def link(*args, **kwargs):
             self.link_arguments = args
-            macho(Path(args[args.index('-o') + 1]), {self.root},
+            macho(Path(args[args.index('-o') + 1]), self.all_roots,
                   self.imports | set(extra_imports), kind=kind, dylib=dylib)
         with mock.patch.object(closure.commands, 'run', side_effect=link) as command:
             result = closure.analyze_execution_closure(
@@ -104,7 +106,11 @@ class CoordinatorClosureTests(unittest.TestCase):
 
     def test_actual_project_roots_and_distinct_missing_contracts(self):
         result = self.analyze()
-        self.assertEqual(result['original_roots'], [self.root])
+        self.assertEqual(result['original_roots'], sorted(self.all_roots))
+        self.assertEqual(result['compiled_bridge_original_roots'], [self.root])
+        self.assertEqual(result['source_gated_global_lifecycle_roots'], sorted(self.gated_roots))
+        self.assertEqual(result['closure_scope'],
+                         'current-compiled-bridges-and-source-gated-global-lifecycle')
         self.assertEqual(result['provided_project_callbacks'], sorted({self.provided, self.queue_provided}))
         self.assertEqual(result['provided_unavailable_crypto'], [self.crypto])
         self.assertEqual(result['compiler_memory_helpers'], ['memcpy'])
@@ -125,7 +131,7 @@ class CoordinatorClosureTests(unittest.TestCase):
         self.assertEqual(result['current_kernel_global_lifecycle_gate'], 'refused-before-original-code')
         self.assertIn('-kext', self.link_arguments)
         self.assertNotIn('-bundle', self.link_arguments)
-        self.assertEqual(self.link_arguments.count('-exported_symbol'), 1)
+        self.assertEqual(self.link_arguments.count('-exported_symbol'), 3)
         self.assertIn('_' + self.root, self.link_arguments)
         self.assertNotIn('_' + self.other, self.link_arguments)
 
@@ -154,6 +160,15 @@ class CoordinatorClosureTests(unittest.TestCase):
         self.assertEqual(result['provided_without_selected_abi_contract'], [self.abi_missing])
         self.assertEqual(result['abi_inventory_status'], 'blocked')
         self.assertFalse(result['closure_implementation_complete'])
+
+    def test_typed_acpi_refusal_definition_is_not_an_operational_callback(self):
+        name = P + 'nv_acpi_dsm_method'
+        reviewed, crypto, _ = closure._reviewed_contracts()
+        result = closure._classify({name}, {name}, {name}, reviewed, crypto)
+        self.assertEqual(result['provided_unavailable_acpi_methods'], [name])
+        self.assertEqual(result['provided_project_callbacks'], [])
+        self.assertEqual(result['unmet_reviewed_callbacks'], [])
+        self.assertEqual(result['unreviewed_retained_imports'], [])
 
     def test_supplemental_inventory_preserves_selected_244_contracts(self):
         selected = json.loads(closure.EXTERNAL_CONTRACTS.read_text())
@@ -225,7 +240,7 @@ class CoordinatorClosureTests(unittest.TestCase):
             closure.analyze_execution_closure(self.project, self.objects, self.compiled, self.output)
         result = self.report()
         self.assertEqual(result['status'], 'failed')
-        self.assertEqual(result['original_roots'], [self.root])
+        self.assertEqual(result['original_roots'], sorted(self.all_roots))
         self.assertEqual(result['failure_phase'], 'link-original-coordinator-control')
         self.assertIn('actual linker stderr', result['failure'])
 
@@ -246,6 +261,24 @@ class CoordinatorClosureTests(unittest.TestCase):
              self.assertRaisesRegex(ValueError, 'lifecycle refusal needs a new source review'):
             self.analyze()
         self.assertEqual(self.report()['failure_phase'], 'validate-inputs')
+
+    def test_gated_lifecycle_dependencies_cannot_disappear_with_the_source_gate(self):
+        with mock.patch.object(closure, 'GATED_LIFECYCLE_ROOTS', ('unreviewed_entry',)), \
+             mock.patch.object(closure.commands, 'run') as command, \
+             self.assertRaisesRegex(ValueError, 'lacks the gated global lifecycle entries'):
+            closure.analyze_execution_closure(self.project, self.objects, self.compiled, self.output)
+        command.assert_not_called()
+        self.assertEqual(self.report()['failure_phase'], 'validate-inputs')
+
+    def test_changed_prospective_entry_requires_review_before_link(self):
+        changed = self.directory / 'lifecycle.c'
+        changed.write_text(closure.LIFECYCLE_SOURCE.read_text().replace(
+            'status = coreInitializeRm();', 'status = unreviewedEntry();'))
+        with mock.patch.object(closure, 'LIFECYCLE_SOURCE', changed), \
+             mock.patch.object(closure.commands, 'run') as command, \
+             self.assertRaisesRegex(ValueError, 'gated global lifecycle entries need a new source review'):
+            closure.analyze_execution_closure(self.project, self.objects, self.compiled, self.output)
+        command.assert_not_called()
 
 
 if __name__ == '__main__':

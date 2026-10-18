@@ -36,7 +36,10 @@ CHECKED_MANIFEST = 'checked-source-manifest.json'
 CHECKED_PATCHES = ('nvlog_printf-init-unwind.patch', 'journal-construction-guard.patch',
                    'thread-state-unwind.patch', 'portable-memory-init-checked.patch',
                    'resource-server-construction-unwind.patch',
-                   'system-resource-lifetime-unwind.patch', 'rmapi-lock-tls-failure-unwind.patch')
+                   'system-resource-lifetime-unwind.patch', 'rmapi-lock-tls-failure-unwind.patch',
+                   'registry-profile-init-propagation.patch',
+                   'nvoc-static-cast-single-evaluation.patch',
+                   'iterator-dispatch-typed-abi.patch')
 
 
 def _sha(data: bytes) -> str:
@@ -121,12 +124,13 @@ def _checked_profile(upstream: Path) -> tuple[dict, dict[str, bytes]]:
     if len(original) != 4005:
         raise ValueError('The pinned complete upstream file inventory changed.')
     manifest_path = PACKAGE / 'upstream/ADAPTATIONS.json'
-    audit_path = PACKAGE / 'upstream/adapted/COMBINED-ALLOCATION-AUDIT.json'
+    audit_path = PACKAGE / 'upstream/adapted/CHECKED-INTEGRATION-AUDIT.json'
     manifest, audit = json.loads(manifest_path.read_bytes()), json.loads(audit_path.read_bytes())
     adaptations = manifest['adaptations']
     if ([Path(item['patch']).name for item in adaptations] != list(CHECKED_PATCHES)
-            or audit['commit'] != COMMIT or manifest.get('commit') != COMMIT):
-        raise ValueError('The approved seven-overlay profile identity changed.')
+            or audit['commit'] != COMMIT or manifest.get('commit') != COMMIT
+            or audit.get('profile') != CHECKED_PROFILE):
+        raise ValueError('The approved checked-overlay profile identity changed.')
     adapted, patches = dict(original), []
     for item in adaptations:
         name = Path(item['patch']).name
@@ -147,9 +151,9 @@ def _checked_profile(upstream: Path) -> tuple[dict, dict[str, bytes]]:
         patches.append({'path': item['patch'], 'sha256': _sha(patch)})
     if patches != audit['patches']:
         raise ValueError('The combined source audit uses a different overlay set.')
-    approved = {item['path']: item['sha256'] for item in
-                [*audit['combined_sources'], audit['checked_memory_header']]}
-    approved.update({item['source']: item['adapted_sha256'] for item in adaptations[:3]})
+    approved = {item['path']: item['sha256'] for item in audit['composed_sources']}
+    if len(approved) != len(audit['composed_sources']):
+        raise ValueError('The composed source audit contains a duplicate source.')
     changed = {name: data for name, data in adapted.items() if data != original[name]}
     if set(changed) != set(approved) or any(_sha(data) != approved[name] for name, data in changed.items()):
         raise ValueError('The complete composed source/header bytes differ from their approved audit.')
@@ -283,7 +287,8 @@ def original_bridge_flags(upstream: Path, output: Path, compiler: Path,
             '-DNV_VERSION_STRING="' + RELEASE + '"', '-include', str(namespace.resolve(strict=True))]
 
 
-def macho_symbols(path: Path, *, expected_type: int = 1) -> tuple[set[str], set[str], list[str]]:
+def macho_symbols(path: Path, *, expected_type: int = 1,
+                  reviewed_project_initializers: bool = False) -> tuple[set[str], set[str], list[str]]:
     """Read exact external nlist records without requiring a host Mach-O nm."""
     data = path.read_bytes()
     if len(data) < 32:
@@ -308,7 +313,7 @@ def macho_symbols(path: Path, *, expected_type: int = 1) -> tuple[set[str], set[
                     raise ValueError('Invalid Mach-O section table.')
                 sections.append(data[section:section + 16].split(b'\0', 1)[0].decode('ascii'))
         offset += size
-    if '__mod_init_func' in sections or '__mod_term_func' in sections:
+    if not reviewed_project_initializers and ('__mod_init_func' in sections or '__mod_term_func' in sections):
         raise ValueError('An original RM object contains implicit initialization: ' + path.name)
     # Original architecture/profile gates intentionally produce empty objects.
     if table is None:
@@ -695,7 +700,7 @@ def main() -> int:
     parser.add_argument('--generate-namespace', action='store_true',
                         help='Generate and verify the private namespace before compiling it.')
     parser.add_argument('--checked-cleanup-overlays', action='store_true',
-                        help='After the unchanged baseline, compile the seven checked development-only overlays separately.')
+                        help='After the unchanged baseline, compile the approved checked development-only overlays separately.')
     parser.add_argument('--linker', type=Path,
                         help='Optional cross-probe Mach-O linker; native uses Apple ld.')
     args = parser.parse_args()

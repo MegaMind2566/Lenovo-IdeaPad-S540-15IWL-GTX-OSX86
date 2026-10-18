@@ -1,0 +1,76 @@
+{
+  "format": 1,
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "scope": "Registry initialization error propagation and selected profile ownership; no kernel runtime approval.",
+  "contract": "../../PROFILE-CONTRACTS.json",
+  "patch": {
+    "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+    "upstream_sha256": "dda3b014833c2e94680e5adea152011ffce72c8067782aceeecaefc28b7394d3",
+    "adapted_sha256": "878441d9563915ec06a73e903970a4134adfdeba3fb8bf8777ad1051b189a8f1",
+    "patch": "upstream/adapted/registry-profile-init-propagation.patch",
+    "patch_sha256": "eec24424d152f14a9dbcf92e2192626565ab08ed32ffdc65b081727d628d7759",
+    "validation": "Targeted profile fault controls and complete original lifecycle/fault sweep required; no runtime admission.",
+    "native_apple_execution": "pending",
+    "semantics": "Propagate original RmInitRegistry failure from osRmInitRm; verify the original derived RMNvLinkControl force-disable write and readback, destroy the admitted profile registry on that later error. Profile helper owns cold-registry initial rollback; do not clear preexisting global registry on preflight refusal."
+  },
+  "original_failure_path": {
+    "entry": "osRmInitRm -> RmInitRegistry -> os_registry_init",
+    "before": "RmInitRegistry return was ignored; selected-profile failure could continue RM construction.",
+    "after": "Initial status returned before later RM initialization. Profile helper destroys only its admitted initiallyempty registry on failed write/readback.",
+    "caller": "sysConstruct_IMPL checks osRmInitRm status and uses original failed-construction cleanup. Global facade subsequently invokes original RmShutdownRm to release portable/global state.",
+    "derived_nvlink_failure": "After successful profile admission, original RMNvLinkControl conversion failure/mismatch destroys original registry and returns failure. Original parent teardown remains responsible for remaining global objects.",
+    "entry_cold_preflight": "The project global lifecycle now checks actual original registry emptiness before coreInitializeRm, so a preexisting epoch never enters the original failure/shutdown path.",
+    "cleanup_report": "Failure and successful shutdown now use the same complete standalone Host allocation, invalid/unavailable and crypto cleanup predicate."
+  },
+  "targeted_controls": {
+    "registry_profile": {
+      "harness": "tests/check_registry_profile_native.c",
+      "checks": 62,
+      "failure_stages": 8,
+      "rollback_refusals": 3,
+      "registry_abi_fixture": true
+    },
+    "registry_original_stage_overlay": {
+      "harness": "tests/check_registry_overlay_native.c",
+      "generator": "tests/registry_overlay_source.py",
+      "checks": 13,
+      "source_extracted_original_stages": true,
+      "scope": "Only exact initial registry status and derived NVLink stage statements, not the full osRmInitRm body.",
+      "registry_abi_fixture": true
+    },
+    "acpi_profile": {
+      "harness": "tests/check_acpi_profile_native.c",
+      "checks": 21,
+      "real_host_observer": true,
+      "unsupported_method_calls": 6,
+      "invalid_init_output": 1,
+      "platform_facts_fixture": true
+    },
+    "local_clang_18": "All three controls passed ordinary and fatal address,undefined,function sanitizers.",
+    "full_original_global_lifecycle_and_allocation_faults": "Separate combined checked-original-source control required; not replaced by targeted fixtures.",
+    "native_apple_result": "pending combined workflow",
+    "kernel_execution": "not_tested",
+    "gpu_access": false,
+    "real_registry_epoch": {
+      "harness": "tests/check_registry_epoch_native.c",
+      "checks": 23,
+      "real_original_registry": true,
+      "result": "pending complete checked-original corpus execution"
+    },
+    "host_domains": {
+      "harness": "tests/check_host_domains_native.cpp",
+      "checks": 29,
+      "result": "passed ordinary and fatal address,undefined,function sanitizers locally"
+    },
+    "real_global_domains": {
+      "harness": "tests/check_global_domains_native.cpp",
+      "checks": 23,
+      "result": "pending complete checked-original corpus execution"
+    }
+  },
+  "standalone_osinit_output_sha256": "878441d9563915ec06a73e903970a4134adfdeba3fb8bf8777ad1051b189a8f1",
+  "composed_source_authority": "CHECKED-INTEGRATION-AUDIT.json maintained by combined builder, not this single-overlay record.",
+  "historical_seven_overlay_audit_rewritten": false,
+  "production_candidate_allowed": false,
+  "allocation_ownership_contract": "Actual host pointers now carry original/external domains. Original Os and NVLink allocation/frees use original-domain APIs; bootstrap context/timer/firmware use external APIs. Global cleanup requires original-domain empty without freeing external identities; outer HostShutdown requires all domains empty."
+}

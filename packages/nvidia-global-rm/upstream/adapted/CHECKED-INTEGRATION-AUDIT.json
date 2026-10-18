@@ -1,0 +1,111 @@
+{
+  "checked_memory_header": {
+    "path": "src/nvidia/inc/libraries/nvport/memory.h",
+    "sha256": "8c1741998b7990e40dda196492add447ddaf06d211cbc804c24e0f685c3ba4d0"
+  },
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "composed_sources": [
+    {
+      "path": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+      "sha256": "878441d9563915ec06a73e903970a4134adfdeba3fb8bf8777ad1051b189a8f1"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/containers/type_safety.h",
+      "sha256": "a3078bf758824cfd5f44735f9873d9509f831947b3d5b8346ef4a4b8bc372c04"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvoc/prelude.h",
+      "sha256": "662e79efede7e4d36c275a494da5f42d4217e813dc25af12ea8b723b9a31b857"
+    },
+    {
+      "path": "src/nvidia/inc/libraries/nvport/memory.h",
+      "sha256": "8c1741998b7990e40dda196492add447ddaf06d211cbc804c24e0f685c3ba4d0"
+    },
+    {
+      "path": "src/nvidia/src/kernel/core/system.c",
+      "sha256": "3dc0e6682078cd1ac2179b04e7161a13a6b44fcf1ea5f8961af7a386173f0a33"
+    },
+    {
+      "path": "src/nvidia/src/kernel/core/thread_state.c",
+      "sha256": "a412e2070fa2bb49d56941415d07e6176dedd4776c817aa66e36f78d8d9e8f66"
+    },
+    {
+      "path": "src/nvidia/src/kernel/diagnostics/journal.c",
+      "sha256": "4a191f030403e1fd4e2382d44c3082b564ee259d07878b6985bd92b5fc75ab39"
+    },
+    {
+      "path": "src/nvidia/src/kernel/diagnostics/nvlog_printf.c",
+      "sha256": "a1119ce4254b17bf6ce541b25ba3c9fc222690b9551be654e7aa8018b745aee8"
+    },
+    {
+      "path": "src/nvidia/src/kernel/rmapi/rmapi.c",
+      "sha256": "b40df0b5df61ca81ae03322771550e14167b4c093d489a593b9861ad6c1e93ae"
+    },
+    {
+      "path": "src/nvidia/src/libraries/nvport/core/core.c",
+      "sha256": "ab654590c63b55dad276da4edf9d1ab5f621b2d2f956a71e0e28aca36811bd1c"
+    },
+    {
+      "path": "src/nvidia/src/libraries/nvport/memory/memory_tracking.c",
+      "sha256": "2f0f0f56272725a6348bae85d04a1330bd7352d3421bf94a90fff2d9debf7618"
+    },
+    {
+      "path": "src/nvidia/src/libraries/resserv/src/rs_server.c",
+      "sha256": "ebde13dca12a851560fe6e77de6b2013ccd2470787e0db4ceef219b9bf58ae36"
+    }
+  ],
+  "format": 1,
+  "gpu_access": false,
+  "historical_seven_overlay_validation": {
+    "path": "upstream/adapted/COMBINED-ALLOCATION-AUDIT.json",
+    "scope": "Historical seven-overlay ELF fault evidence, not validation of the current expanded profile.",
+    "sha256": "2dde334b5f90f052ec8b8e5db49ec7afdfa0a47452933278c8bb2750e67c2092"
+  },
+  "kernel_execution": "not_tested",
+  "patches": [
+    {
+      "path": "upstream/adapted/nvlog_printf-init-unwind.patch",
+      "sha256": "66e6e390aa7c7cd660ce93af8fdba12ae4ea52ce74a111531cf09022f8a2257e"
+    },
+    {
+      "path": "upstream/adapted/journal-construction-guard.patch",
+      "sha256": "0963b27f9e0845d661d39137a1ebe148b432d615194e55ad76349fc1292bec85"
+    },
+    {
+      "path": "upstream/adapted/thread-state-unwind.patch",
+      "sha256": "cad0f0b64d46f1772e7abccda349744964bfd4a0242baf7c100092327dc63cee"
+    },
+    {
+      "path": "upstream/adapted/portable-memory-init-checked.patch",
+      "sha256": "373a565ff932d4d3dbcc2bdcc5bdd00f6a416928acf009322432692966fb7a60"
+    },
+    {
+      "path": "upstream/adapted/resource-server-construction-unwind.patch",
+      "sha256": "9c61e602194a9513db2c3435dbb0d82e44cf7f46d30a5a15221f884e7fa31f5a"
+    },
+    {
+      "path": "upstream/adapted/system-resource-lifetime-unwind.patch",
+      "sha256": "db5eca4ed2bd62164de354540eb2cc85c0fda6539e455eeb4215003477d94b6e"
+    },
+    {
+      "path": "upstream/adapted/rmapi-lock-tls-failure-unwind.patch",
+      "sha256": "3e677430c277f317cb9fa743861b9c437a62fc7e160aae214a8f922d3fe2de35"
+    },
+    {
+      "path": "upstream/adapted/registry-profile-init-propagation.patch",
+      "sha256": "eec24424d152f14a9dbcf92e2192626565ab08ed32ffdc65b081727d628d7759"
+    },
+    {
+      "path": "upstream/adapted/nvoc-static-cast-single-evaluation.patch",
+      "sha256": "d30f8aa762dae4e73bf36e460f03f37b3a3efd819eab0542672943e2b5f4e5ec"
+    },
+    {
+      "path": "upstream/adapted/iterator-dispatch-typed-abi.patch",
+      "sha256": "42d05eff5d60da7a5db3d8d0b456ad09378434ad47f18570b9ef0e5b2c49d1e6"
+    }
+  ],
+  "production_candidate_allowed": false,
+  "profile": "checked-cleanup-development",
+  "release": "615.78.08",
+  "validation_scope": "Exact source composition contract. CPU lifecycle/fault and native compiler results are recorded separately by the builders."
+}

@@ -38,6 +38,18 @@ not an initialized GPU driver or a replacement for the released v9 package.
   Successful DMA mapping publishes a separate opaque mapping token; successful
   unmapping restores the original allocation token. Raw Linux private layouts
   are never fabricated.
+- Bound-RM unmap/free operations retire each allocation separately while an IRQ
+  enable attempt remains undrained. Logical unmap revokes the DMA token and
+  returns the allocation identity; the same backend mapping, IOVA and pages
+  remain owned and cannot be recycled. Logical free revokes new CPU/DMA access.
+  Existing CPU aliases retain their exact ownership until their final close.
+  A remap of still-owned backing reuses its retained IOVA only after the real
+  provider, mapper and no-bounce translation pass revalidation. Generic Session
+  free/unmap operations retain their IRQ guard.
+- `nv_get_num_phys_pages` reads the bound allocation's actual page count.
+  Foreign, DMA-only, logically freed and stale allocation identities are refused
+  without changing the output. `nv_get_phys_pages` remains unavailable: its
+  original output is a Linux `struct page *` array, not physical addresses.
 - `nv_requires_dma_remap(nv_state_t *)` has the exact original scalar ABI.
   In NVIDIA `nv.c:5412`, its result is the inverse of the device's SWIOTLB
   bounce policy, not an IOMMU-presence test. `NV_TRUE` selects physical PTEs
@@ -72,11 +84,21 @@ session, firmware bytes and power resources alive throughout initialization and
 shutdown. Provider opening alone is not a dynamic platform power hold.
 
 Use the original NVIDIA ordering: disable the adapter and its hardware
-interrupts; drain deferred work and unregister the controller; run original
-adapter shutdown, DMA teardown and register teardown; unbind the empty RM
+interrupts; drain deferred work and unregister the controller; complete
+`drainRmRetirements(&session)` while the RM owner remains alive; run original
+adapter shutdown, DMA teardown and register teardown; drain any final retired
+CPU alias completion; unbind the empty RM
 callback registry; finally stop the session and release the provider/power
 resources. `Session::stop()` refuses while its RM binding is still active.
 Read interrupt statistics before stopping the session.
+
+`drainRmRetirements` performs the actual backend unmap, descriptor completion and
+free after `stopInterrupt()` has succeeded. Progress is recorded per allocation;
+a failed completion keeps the remaining binding and storage for a retry or
+quarantine. This also covers resources released inside the original adapter
+disable operation. An error from the void final CPU-unmap callback becomes a
+tracked retirement owner, rather than losing the backing after a reported free.
+Neither logical retirement nor `interruptArmed()==false` proves IRQ quiescence.
 
 A failed DMA completion, descriptor completion, clear, interrupt quiescence or
 provider restoration preserves ownership and fails the checkpoint. Kernel
@@ -87,12 +109,13 @@ owner and must not be used for a failed operational adapter session.
 
 ## Explicit remaining limits
 
-- Original GSP initialization and adapter disable release temporary allocations
-  while interrupts remain active. Per-allocation retirement for that path is
-  still unresolved; the session does not admit those frees by removing its
-  addressable-memory guard. A registered controller that has never attempted
-  enable permits original allocation unwind. Failed/partial enable retains DMA
-  storage until masking, controller disable and callback drain all succeed.
+- Active allocations and retirements share the bounded pool of 32 ownership
+  records, 8,192 pages per allocation and 128 MiB of retained backend storage.
+  The 33rd outstanding allocation fails without reusing a retired resource.
+  This capacity is tested, but its sufficiency for full NVIDIA initialization
+  is unproved: firmware/log configuration, GPU properties and bootstrap retry
+  paths change the allocation peak. The bounded retirement implementation does
+  not establish complete original-RM execution or an unlimited release service.
 
 - Complete global RM and real `rm_init_adapter` integration must pass before
   any package is offered for a GPU boot attempt. Native models and Mach-O
@@ -113,7 +136,7 @@ owner and must not be used for a failed operational adapter session.
 
 ## Validation
 
-The shared state-machine/ABI native harness currently passes 307 assertions and
+The shared state-machine/ABI native harness currently passes 396 assertions and
 128 complete allocation/map/unmap/cleanup cycles. It includes ownership refusal,
 constructor and completion quarantine, mapper admission, bounce/address-mask
 policy, CPU-map deferred free, contiguous output width, scoped PCI access and
@@ -127,12 +150,24 @@ delegation, missing/unknown/invalid policy, provider revocation, foreign and
 stale state, context failure and output preservation. Seven subprocess checks
 confirm that scalar callback violations terminate without a fabricated result.
 
+Retirement tests exercise init-order temporary releases, releases inside the
+hardware-mask callback, failed/partial enable, failed source/controller drain,
+per-allocation completion failures and retry, mapper revocation, safe remapping,
+CPU-alias lifetime and exact pool exhaustion. These are functional native
+ownership models; they do not execute the original GPU initialization body.
+
 Local Linux execution passed plain and fatal AddressSanitizer/UndefinedBehaviorSanitizer
 runs. LeakSanitizer could not run in the local container because process/task
 inspection was unavailable. The earlier isolated component cross-probe matched its 32-operation SDK
-reference. The current [native Apple build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39169319480) from `d81b198` compiled the actual transport inside all 25 execution
+reference. The earlier [native Apple build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39169319480) from `d81b198` compiled the actual transport inside all 25 execution
 units and matched the complete reviewed platform-import set; the DMA-policy
-violation path reuses the already reviewed panic import. All 307 transport
-checks passed plain and with fatal address, undefined-behavior and function-type
-sanitizers. The exact policy ABI compiled against the original NVIDIA header.
-Physical adapter execution remains unverified.
+violation path reuses the already reviewed panic import. That baseline's 307
+checks passed with fatal sanitizers. The retirement and page-count changes pass
+396 local Linux checks, including address, undefined-behavior and function-type
+sanitizers. Both callback ABIs compile against the pinned original NVIDIA
+header. The four changed production translation units also cross-compile to
+x86_64 Darwin Mach-O with the pinned kernel SDK, warnings as errors and the
+4 KiB frame bound. The backend's 31 platform imports are contained in the
+32-operation independent SDK reference; retirement adds no platform import.
+An authoritative native Apple rebuild and physical adapter execution remain
+separate requirements.

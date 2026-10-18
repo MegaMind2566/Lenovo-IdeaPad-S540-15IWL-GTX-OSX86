@@ -1,0 +1,293 @@
+{
+  "format": 1,
+  "component": "one reviewed IOKit power-service metaclass lifetime",
+  "status": "exact SDK compiler-reference verification required; kernel execution untested",
+  "class": "S540GspPowerKernel::S540NvidiaGspPowerService",
+  "implementation": {
+    "class_declaration": "platform/S540NvidiaGspPowerService.hpp",
+    "production_definition": "platform/S540NvidiaGspPower.cpp",
+    "independent_reference": "tests/sdk_power_metaclass_reference.cpp",
+    "verifier": "../../builders/nvidia_metaclass_initializers.py",
+    "regressions": "../nvidia-global-rm/tests/test_metaclass_initializers.py",
+    "reference_contract": "The reference includes the same complete class declaration and contains only OSDefineMetaClassAndStructors(S540NvidiaGspPowerService, IOService) in the same namespace. It is compiled with the production kernel C++ flags."
+  },
+  "loader_contract": {
+    "initializer_entries": 1,
+    "finalizer_entries": 1,
+    "admitted_sections": {
+      "__mod_init_func": 9,
+      "__mod_term_func": 10
+    },
+    "loader_code": "Executable __TEXT,__text; follow every local code relocation reachable from every loader entry.",
+    "comparison": "Require identical reachable instruction bytes and relocation offsets, widths, kinds, PC-relative modes, target symbols and addends against the independently compiled SDK reference. The class string must be exactly S540NvidiaGspPowerService; only its gMetaClass and MetaClass vtable may be touched.",
+    "normalization": [
+      "Canonicalize only Clang's translation-unit initializer basename.",
+      "Resolve rebased local text, class-string and data relocations to the same symbolic targets.",
+      "Remove at most 15 trailing bytes consisting solely of valid x86 alignment NOPs, never overlapping a relocated operand."
+    ],
+    "refused": [
+      "An additional initializer/finalizer or extra reachable code operation.",
+      "An interior code pointer, unrelocated loader entry, unsupported relocation, unexpected external/addend or other class metadata.",
+      "Alternate legacy constructor/destructor tables and init-offset loader tables.",
+      "A project object with loader entries unless it is the exact reviewed Power object; the linked project bridge must independently match the same reviewed graph."
+    ],
+    "scope": "The three imports below authorize only the verified metaclass loader graph, not all imports or arbitrary static initialization in an SDK reference or project object."
+  },
+  "compiler_policy": {
+    "required_kernel_cpp_flags": [
+      "-mkernel",
+      "-fapple-kext",
+      "-fno-exceptions",
+      "-fno-rtti",
+      "-fno-threadsafe-statics",
+      "-fno-use-cxa-atexit",
+      "-mllvm",
+      "-disable-atexit-based-global-dtor-lowering"
+    ],
+    "reason": "The kernel requires a real metaclass constructor and destructor. Clang's -fno-use-cxa-atexit alone does not disable LLVM18's later Mach-O global-dtor lowering pass. That pass otherwise replaces llvm.global_dtors with a second initializer registering __cxa_atexit. Disable that backend transformation; retain the real __mod_term_func entry consumed by XNU.",
+    "failure_policy": "Run the independent reference preflight before compiling the full original RM. Unknown compiler flags, missing finalizer, cxa registration or unmatched codegen fail the build. There is no fallback that omits destructors or accepts extra loader operations.",
+    "not_allowed": [
+      "-fno-c++-static-destructors",
+      "Accepting __cxa_atexit or __dso_handle because a compiler happens to emit them.",
+      "Blanket acceptance of C++ global constructors/finalizers."
+    ]
+  },
+  "reviewed_kernel_imports": [
+    {
+      "symbol": "__ZN11OSMetaClassC2EPKcPKS_j",
+      "declaration": "OSMetaClass base constructor",
+      "export_source": "apple-oss-distributions/xnu/config/Libkern.exports",
+      "line": 92
+    },
+    {
+      "symbol": "__ZN11OSMetaClassD2Ev",
+      "declaration": "OSMetaClass base destructor",
+      "export_source": "apple-oss-distributions/xnu/config/Libkern.exports",
+      "line": 94
+    },
+    {
+      "symbol": "__ZN9IOService10gMetaClassE",
+      "declaration": "IOService superclass metaclass",
+      "export_source": "apple-oss-distributions/xnu/config/IOKit.exports",
+      "line": 1454
+    }
+  ],
+  "public_export_review": {
+    "sources": [
+      "config/Libkern.exports",
+      "config/IOKit.exports",
+      "config/Mach.exports"
+    ],
+    "excluded_symbols": [
+      "___cxa_atexit",
+      "___dso_handle"
+    ],
+    "finding": "These excluded symbols are absent from the reviewed pinned public kernel export lists. A userspace trace header or successful dynamic-lookup link does not establish a kernel export."
+  },
+  "references": [
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "path": "libkern/c++/OSRuntime.cpp",
+      "git_blob": "d6b6c0f3a78b223d603a0475917e5e79709d0247",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/libkern/c%2B%2B/OSRuntime.cpp",
+      "anchors": [
+        {
+          "lines": [
+            130,
+            133
+          ],
+          "text": "gOSStructorSectionNames = { { SECT_MODINITFUNC, SECT_MODTERMFUNC }, ... }",
+          "meaning": "Normal kext C++ lifetime has both loader tables."
+        },
+        {
+          "lines": [
+            307,
+            315
+          ],
+          "text": "OSMetaClass::modHasInstance",
+          "meaning": "Finalization refuses metaclasses with existing instances."
+        },
+        {
+          "lines": [
+            327,
+            332
+          ],
+          "text": "OSRuntimeCallStructorsInSection(... sectionNames[kOSSectionNameFinalizer] ...)",
+          "meaning": "Successful teardown invokes the actual destructor table."
+        },
+        {
+          "lines": [
+            495,
+            502
+          ],
+          "text": "OSRuntimeCallStructorsInSection(... sectionNames[kOSSectionNameInitializer] ...)",
+          "meaning": "C++ startup invokes the actual constructor table."
+        },
+        {
+          "lines": [
+            505,
+            518
+          ],
+          "text": "We failed so call all of the destructors.",
+          "meaning": "Load unwind also requires the destructor table."
+        }
+      ]
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "path": "libkern/c++/OSMetaClass.cpp",
+      "git_blob": "4ad2fc7823268dd8c0570a99fd758807f03738cb",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/libkern/c%2B%2B/OSMetaClass.cpp",
+      "anchors": [
+        {
+          "lines": [
+            574,
+            640
+          ],
+          "text": "OSMetaClass::OSMetaClass",
+          "meaning": "Constructor records actual class size and superclass and enters the module-load metaclass state."
+        },
+        {
+          "lines": [
+            659,
+            721
+          ],
+          "text": "OSMetaClass::~OSMetaClass",
+          "meaning": "Destructor removes actual class/kext registration state."
+        }
+      ]
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "path": "config/Libkern.exports",
+      "git_blob": "366d2e4984b3afe2f2eb6a46487f8fb69b83dfb8",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/config/Libkern.exports",
+      "anchors": [
+        {
+          "lines": [
+            92,
+            94
+          ],
+          "text": "__ZN11OSMetaClassC2EPKcPKS_j; __ZN11OSMetaClassD2Ev",
+          "meaning": "Exact public constructor/destructor exports used by the loader graph."
+        }
+      ]
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "path": "config/IOKit.exports",
+      "git_blob": "03822d86c54a5affe32259444d53a4e68d8f044f",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/config/IOKit.exports",
+      "anchors": [
+        {
+          "lines": [
+            1454,
+            1454
+          ],
+          "text": "__ZN9IOService10gMetaClassE",
+          "meaning": "Exact public superclass metadata export used by the loader graph."
+        }
+      ]
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "path": "config/Mach.exports",
+      "git_blob": "af102a0a37c5f3ed11e908f17e58b7c72272171d",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/config/Mach.exports",
+      "anchors": [
+        {
+          "text": "Complete public export list reviewed for cxa/DSO registration symbols.",
+          "meaning": "No __cxa_atexit or __dso_handle export is admitted."
+        }
+      ]
+    },
+    {
+      "repository": "llvm/llvm-project",
+      "commit": "llvmorg-18.1.3",
+      "path": "llvm/lib/CodeGen/TargetPassConfig.cpp",
+      "git_blob": "599ca48189048c4ae5b0843ebf30286b719fa07c",
+      "url": "https://github.com/llvm/llvm-project/blob/llvmorg-18.1.3/llvm/lib/CodeGen/TargetPassConfig.cpp",
+      "anchors": [
+        {
+          "lines": [
+            103,
+            106
+          ],
+          "text": "disable-atexit-based-global-dtor-lowering",
+          "meaning": "Explicit backend control for kernel/kext destructor tables."
+        },
+        {
+          "lines": [
+            846,
+            850
+          ],
+          "text": "For MachO, lower @llvm.global_dtors into @llvm.global_ctors with __cxa_atexit() calls",
+          "meaning": "Explains why the frontend no-cxa flag alone is insufficient on the probed compiler."
+        }
+      ]
+    },
+    {
+      "repository": "llvm/llvm-project",
+      "commit": "llvmorg-18.1.3",
+      "path": "llvm/lib/CodeGen/TargetLoweringObjectFileImpl.cpp",
+      "git_blob": "a69b71451736faaad24bbe8cedfc4b0603b9909f",
+      "url": "https://github.com/llvm/llvm-project/blob/llvmorg-18.1.3/llvm/lib/CodeGen/TargetLoweringObjectFileImpl.cpp",
+      "anchors": [
+        {
+          "lines": [
+            1203,
+            1208
+          ],
+          "text": "__mod_init_func; __mod_term_func",
+          "meaning": "Mach-O object format emits real initializer/finalizer pointer tables."
+        },
+        {
+          "lines": [
+            1217,
+            1227
+          ],
+          "text": "kernel/kext environments do not provide this function",
+          "meaning": "The backend explicitly retains legacy destructor sections for kernel/kext when atexit lowering is disabled."
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "local_compiler": "Ubuntu Clang 18.1.3, cross-target x86_64-apple-macos15 with the pinned MacKernelSDK",
+    "sdk_repository": "acidanthera/MacKernelSDK",
+    "sdk_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+    "loader_graph_result": "Production Power and reference matched with exactly one initializer, one finalizer, two reachable loader functions and the three reviewed imports.",
+    "negative_control": "Objects built with only -fno-use-cxa-atexit retained two initializer entries, no finalizer and cxa/DSO imports; the tightened verifier rejects them.",
+    "regression_cases": 16,
+    "native_apple_compiler_execution": "pending authoritative native CI",
+    "output_identity": "Each build report records the actual/reference object hashes, independent source hash, shared class declaration hash and canonical reachable-loader-graph hash. These are regenerated after any class layout or compiler change.",
+    "final_local_cross_probe": {
+      "class_declaration_sha256": "57e12e03561fa290d80f0b92aff541dc70f2e3a073390a808d315baeb97b952a",
+      "reference_source_sha256": "3b7af79be023757e25d23510c7883243b93f8def8563d71d429a84ed61981d0a",
+      "object_sha256": "92fd53372149dfc7ce4bea8e23440edd1c040222eb415859fcadc13e344871c5",
+      "reference_object_sha256": "dad5a833f4607213bdece08315c492e504ad38d2be3d22d82dd008030efb5277",
+      "loader_graph_sha256": "06f302a7c41747d838bc0633631ee087f5e19954cbd6e037fb7c4a402799ae75",
+      "initializer_entries": 1,
+      "finalizer_entries": 1,
+      "loader_function_count": 2,
+      "loader_external_symbols": [
+        "__ZN11OSMetaClassC2EPKcPKS_j",
+        "__ZN11OSMetaClassD2Ev",
+        "__ZN9IOService10gMetaClassE"
+      ],
+      "scope": "Clang18 Mach-O cross-probe after adding the guarded revocationHooksInFlight field. These hashes identify that local compiler run, not a native Apple compiler run."
+    }
+  },
+  "limitations": [
+    "Codegen equivalence is not evidence that a kext was loaded or its metaclass registered on the laptop.",
+    "Metaclass verification is separate from PM callback ownership barriers and the retention of executable code during worker termination.",
+    "The verified loader graph does not authorize original RM/GSP entry, establish a stack budget or enable a production candidate."
+  ],
+  "kernel_execution": "not_tested",
+  "production_candidate_allowed": false
+}

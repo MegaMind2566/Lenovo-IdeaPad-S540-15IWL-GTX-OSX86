@@ -11,6 +11,7 @@
  * compilation error, rather than allowing two differently named prototypes.
  */
 typedef __typeof__(&nv_requires_dma_remap) S540PinnedDmaRemapAbi;
+typedef __typeof__(&nv_get_num_phys_pages) S540PinnedPageCountAbi;
 
 #include "../src/nv_device_services.h"
 
@@ -21,3 +22,6 @@ _Static_assert(__builtin_types_compatible_p(S540PinnedDmaRemapAbi,
 _Static_assert(__builtin_types_compatible_p(S540PinnedDmaRemapAbi,
                   __typeof__(&s540Global_nv_requires_dma_remap)),
                "Transport DMA-remap facade differs from the original ABI");
+_Static_assert(__builtin_types_compatible_p(S540PinnedPageCountAbi,
+                  __typeof__(&s540Global_nv_get_num_phys_pages)),
+               "Transport physical-page count differs from the original ABI");

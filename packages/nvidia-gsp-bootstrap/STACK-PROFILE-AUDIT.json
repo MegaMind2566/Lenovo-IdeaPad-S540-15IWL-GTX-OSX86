@@ -1,0 +1,402 @@
+{
+  "format": 1,
+  "component": "original RM CPU stack boundary and aggregate stack budget",
+  "status": "unresolved admission requirement; no alternate CPU stack switch implemented",
+  "profile": {
+    "architecture": "x86_64",
+    "nvidia_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+    "xnu_source_commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+    "sdk_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+    "kernel_execution": "not_tested",
+    "running_laptop_kernel_stack_configuration": "not_measured",
+    "production_candidate_allowed": false
+  },
+  "source_defaults": {
+    "page_bytes": 4096,
+    "release_without_kasan_or_debug": {
+      "kernel_stack_multiplier": 1,
+      "thread_stack_bytes": 16384,
+      "interrupt_stack_bytes": 16384
+    },
+    "debug_without_kasan": {
+      "thread_stack_bytes": 24576,
+      "interrupt_stack_bytes": 16384
+    },
+    "kasan": {
+      "thread_stack_bytes": 65536,
+      "interrupt_stack_bytes": 65536
+    },
+    "interpretation": "These are defaults of the pinned XNU source configuration, not measurements of the Lenovo's running kernel. KERNEL_STACK_MULTIPLIER can be defined by a kernel build and kernel_stack_pages can alter the actual thread-stack size."
+  },
+  "original_stack_ownership": {
+    "nvidia_stack_size_bytes": 12288,
+    "nvidia_stack_payload_bytes": 12272,
+    "metadata": "nv.h defines a size, a top pointer and a 16-byte-aligned NV_STACK_SIZE-16 byte array.",
+    "current_owner_behavior": "The project owns independent nvidia_stack_t buffers for original RM entry contexts. Allocation and initialization of these buffers do not change the CPU rsp or enlarge an XNU-managed thread or IRQ stack.",
+    "legacy_boundary": {
+      "profile_macro": "__use_altstack__",
+      "current_profile": "undefined",
+      "altstack_compiler_runtime_contract": "not_established",
+      "enabled_source_behavior": "NV_ENTER_RM_RUNTIME saves and replaces rbp; NV_EXIT_RM_RUNTIME checks and restores rbp. NV_API_CALL additionally requires the nonstandard compiler function attribute altstack(0). These components must be assessed together; the macros alone are not a CPU stack switch.",
+      "disabled_source_behavior": "NV_ENTER_RM_RUNTIME casts its arguments to void and NV_EXIT_RM_RUNTIME is empty.",
+      "direct_global_entry": "src/S540NvidiaGlobalRmLifecycle.c in the separate nvidia-global-rm package calls coreInitializeRm() directly. Per-device wrapper buffers are therefore not a stack boundary for global RM initialization."
+    }
+  },
+  "compiler_evidence": {
+    "local_compiler": "Ubuntu Clang 18.1.3",
+    "target": "x86_64-apple-macos15",
+    "flags": [
+      "-mkernel",
+      "-Werror=unknown-attributes",
+      "-fsyntax-only",
+      "-x",
+      "c",
+      "-"
+    ],
+    "negative_attribute_probe": {
+      "source": "void __attribute__((altstack(0))) stack_probe(void) {}",
+      "exit_code": 1,
+      "diagnostic": "unknown attribute 'altstack' ignored [-Werror,-Wunknown-attributes]"
+    },
+    "capability_probe": {
+      "source": "#if __has_attribute(altstack)\n#error altstack unexpectedly supported\n#endif",
+      "exit_code": 0,
+      "finding": "The local Clang18 cross-target reports no altstack attribute support."
+    },
+    "apple_clang_attribute_and_prologue_probe": "required_not_performed",
+    "limitation": "The local cross-compiler result is not a negative Apple Clang capability test. No supported Apple compiler/runtime convention that implements the original legacy stack boundary has been established."
+  },
+  "xnu_invariants": [
+    {
+      "source": "osfmk/kern/stack.c",
+      "contract": "XNU allocates thread stacks with its own size, alignment mask and both guard pages; the thread stack pointer belongs to scheduler-managed stack state."
+    },
+    {
+      "source": "osfmk/i386/thread.h:current_kernel_stack_depth",
+      "contract": "The computation reads rsp relative to per-CPU cpu_kernel_stack and panics when the resulting depth reaches kernel_stack_size. Its own comment requires execution on a real thread kernel stack, not an interrupt or exception stack."
+    },
+    {
+      "source": "osfmk/x86_64/cswitch.s:Load_context/Switch_context",
+      "contract": "Context switches derive the stack top from thread->kernel_stack plus kernel_stack_size, publish CPU_ACTIVE_STACK/CPU_KERNEL_STACK and restore rsp and saved register state from that managed stack."
+    },
+    {
+      "source": "osfmk/x86_64/idt64.s:bootstrap NMI handling",
+      "contract": "NMI recovery identifies thread versus interrupt stack using CPU_KERNEL_STACK, kernel_stack_mask and INTSTACK_SIZE, then copies machine state to the selected tracked stack."
+    },
+    {
+      "source": "osfmk/x86_64/idt64.s:kernel AST return",
+      "contract": "Kernel AST dispatch checks rsp against CPU_KERNEL_STACK and kernel_stack_mask; an address outside the recognized thread stack skips ast_taken_kernel."
+    },
+    {
+      "source": "osfmk/i386/pcb.c:machine_stack_attach; osfmk/kern/thread.h",
+      "contract": "A real stack attach updates thread->kernel_stack and the saved kernel state through a MACH_KERNEL_PRIVATE interface. This is not a third-party kext stack-enlargement API."
+    }
+  ],
+  "rejected_shortcuts": [
+    "Treating nvidia_stack_t allocation, a non-null top pointer or wrapper invocation as proof of a stack switch.",
+    "Enabling __use_altstack__ while ignoring an unknown altstack compiler attribute.",
+    "Pivoting rsp/rbp to arbitrary heap storage without preserving XNU scheduler, guard-page, NMI, exception, AST, preemption and unwind invariants.",
+    "Using a persistent kernel thread as evidence of a larger stack; the dispatcher changes ownership and thread identity only.",
+    "Treating per-frame -fstack-usage output, a source compilation pass, a fixture run or a sampled depth as an aggregate kernel stack-safety proof."
+  ],
+  "boot_argument_assessment": {
+    "name": "kernel_stack_pages",
+    "source_behavior": "stack_init parses the boot argument without a DEBUG-only guard and sets global kernel_stack_size to pages*PAGE_SIZE, then derives the matching mask.",
+    "scope": "XNU-managed thread stacks allocated under that boot configuration.",
+    "does_not_establish": [
+      "A per-kext stack reservation or exported runtime stack-switch API.",
+      "A larger INTSTACK_SIZE or a larger NMI/exception stack.",
+      "A proven aggregate original RM/GSP call-chain budget or permission to start original RM."
+    ],
+    "project_changes": "No boot argument or laptop configuration was changed by this audit."
+  },
+  "admission_requirements": [
+    "Establish the actual target kernel/compiler configuration and a supported execution boundary; native Apple compiler attribute/prologue evidence is required before relying on the original legacy mechanism.",
+    "Calculate aggregate production call-chain bounds separately for global lifecycle, adapter/GSP operations, timer/work-item callbacks and interrupt dispatch, including project wrappers and remaining framework stack headroom.",
+    "Resolve indirect calls, recursion, variable-sized frames and callback nesting; record unknown bounds instead of substituting a guessed numeric budget.",
+    "Assess sleeping, preemption, NMI/exception and AST behavior for any proposed boundary. A thread-only mechanism cannot silently cover interrupt entries.",
+    "Validate the chosen boundary and full call chains in the actual kernel before enabling original RM/GSP entry. Keep the existing readiness gates while any requirement remains unresolved."
+  ],
+  "references": [
+    {
+      "repository": "NVIDIA/open-gpu-kernel-modules",
+      "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+      "path": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "git_blob": "ba72129e1b99e95d1802448d10057132702373a1",
+      "url": "https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/arch/nvalloc/unix/include/nv.h",
+      "anchors": [
+        {
+          "lines": [
+            313,
+            314
+          ],
+          "text": "NV_RM_PAGE_SIZE (1 << NV_RM_PAGE_SHIFT)",
+          "meaning": "Original RM page size is 4096 bytes."
+        },
+        {
+          "lines": [
+            329,
+            340
+          ],
+          "text": "NV_STACK_SIZE (NV_RM_PAGE_SIZE * 3); nvidia_stack_s",
+          "meaning": "12KiB owned stack object with a 12272-byte aligned payload."
+        }
+      ]
+    },
+    {
+      "repository": "NVIDIA/open-gpu-kernel-modules",
+      "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+      "path": "src/nvidia/arch/nvalloc/unix/include/osapi.h",
+      "git_blob": "3ff254c466116dc7ab5933f97e4525161d9d8e3b",
+      "url": "https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/arch/nvalloc/unix/include/osapi.h",
+      "anchors": [
+        {
+          "lines": [
+            34,
+            34
+          ],
+          "text": "#if defined(__use_altstack__)",
+          "meaning": "Legacy boundary is compile-time conditional."
+        },
+        {
+          "lines": [
+            79,
+            97
+          ],
+          "text": "NV_ENTER_RM_RUNTIME; NV_EXIT_RM_RUNTIME; movq ... rbp",
+          "meaning": "Enabled branch manipulates rbp and requires the matching compiler convention."
+        },
+        {
+          "lines": [
+            101,
+            104
+          ],
+          "text": "NV_ENTER_RM_RUNTIME(sp,fp) { (void)sp; (void)fp; }",
+          "meaning": "Current undefined-macro profile has no stack switch."
+        }
+      ]
+    },
+    {
+      "repository": "NVIDIA/open-gpu-kernel-modules",
+      "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+      "path": "kernel-open/common/inc/nv-kernel-interface-api.h",
+      "git_blob": "183f9b4312eb0913c0a0a97e4db1f62a50b442c5",
+      "url": "https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/kernel-open/common/inc/nv-kernel-interface-api.h",
+      "anchors": [
+        {
+          "lines": [
+            35,
+            39
+          ],
+          "text": "NV_API_CALL __attribute__((altstack(0)))",
+          "meaning": "Legacy entry ABI requires a nonstandard compiler attribute when the macro is enabled; otherwise NV_API_CALL is empty."
+        }
+      ]
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "path": "osfmk/mach/i386/vm_param.h",
+      "git_blob": "4936fe4ceac15b708f53f71684cf9984113e4813",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/mach/i386/vm_param.h",
+      "anchors": [
+        {
+          "lines": [
+            102,
+            102
+          ],
+          "text": "I386_PGBYTES 4096",
+          "meaning": "x86 page size used by stack constants."
+        },
+        {
+          "lines": [
+            248,
+            267
+          ],
+          "text": "INTSTACK_SIZE; KERNEL_STACK_SIZE; KERNEL_STACK_MULTIPLIER",
+          "meaning": "KASAN, DEBUG and default release stack profiles remain distinct."
+        }
+      ]
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "path": "osfmk/kern/stack.c",
+      "git_blob": "4d8c9ec303706b9b6c8254b2342c2652b1ab6330",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/kern/stack.c",
+      "anchors": [
+        {
+          "lines": [
+            110,
+            131
+          ],
+          "text": "stack_init; PE_parse_boot_argn(\"kernel_stack_pages\", ...)",
+          "meaning": "Kernel owns the global thread-stack size/mask and boot-time override."
+        },
+        {
+          "lines": [
+            145,
+            181
+          ],
+          "text": "KMA_GUARD_FIRST | KMA_GUARD_LAST; kernel_stack_size + ptoa(2)",
+          "meaning": "Managed thread allocation includes two guard pages and alignment."
+        }
+      ]
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "path": "osfmk/i386/thread.h",
+      "git_blob": "a06e3745a9cd96cd6715a5bf44a15e45118753f3",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/i386/thread.h",
+      "anchors": [
+        {
+          "lines": [
+            193,
+            224
+          ],
+          "text": "current_kernel_stack_depth; cpu_kernel_stack; mov rsp",
+          "meaning": "Tracked thread stack and overflow invariants."
+        }
+      ]
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "path": "osfmk/i386/pcb.c",
+      "git_blob": "1888ce56b106c0045250d5c56c1e4ef6aaa7e1ed",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/i386/pcb.c",
+      "anchors": [
+        {
+          "lines": [
+            2134,
+            2162
+          ],
+          "text": "machine_stack_attach; thread->kernel_stack = stack; state->k_rsp",
+          "meaning": "Real stack attachment updates scheduler-owned stack state."
+        }
+      ]
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "path": "osfmk/x86_64/idt64.s",
+      "git_blob": "f96a481e3c18f5911de8893d0a1d0b79c94db560",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/x86_64/idt64.s",
+      "anchors": [
+        {
+          "lines": [
+            478,
+            515
+          ],
+          "text": "CPU_KERNEL_STACK; kernel_stack_mask; INTSTACK_SIZE",
+          "meaning": "NMI identifies and uses the actual managed thread/interrupt stack."
+        },
+        {
+          "lines": [
+            1604,
+            1623
+          ],
+          "text": "CPU_KERNEL_STACK; kernel_stack_mask; ast_taken_kernel",
+          "meaning": "AST return depends on recognizing rsp as a managed thread stack."
+        }
+      ]
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "path": "osfmk/x86_64/cswitch.s",
+      "git_blob": "e09e1e1793906686bf94078317b582f2ed1a66bd",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/x86_64/cswitch.s",
+      "anchors": [
+        {
+          "lines": [
+            77,
+            84
+          ],
+          "text": "TH_KERNEL_STACK; CPU_KERNEL_STACK; KSS_RSP",
+          "meaning": "Load_context publishes and restores the managed stack."
+        },
+        {
+          "lines": [
+            110,
+            130
+          ],
+          "text": "Switch_context",
+          "meaning": "Scheduler saves and restores thread kernel state using the tracked stack."
+        }
+      ]
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "path": "osfmk/kern/thread.h",
+      "git_blob": "7e55c4aa4af87f96341838a445b32a6313b361fe",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/kern/thread.h",
+      "anchors": [
+        {
+          "lines": [
+            267,
+            1362
+          ],
+          "text": "#ifdef MACH_KERNEL_PRIVATE",
+          "meaning": "The private region contains machine_stack_attach and machine_stack_detach."
+        },
+        {
+          "lines": [
+            1226,
+            1230
+          ],
+          "text": "machine_stack_attach; machine_stack_detach",
+          "meaning": "Stack attach/detach are not the public kernel_thread_start interface."
+        },
+        {
+          "lines": [
+            2019,
+            2022
+          ],
+          "text": "kernel_thread_start",
+          "meaning": "Public kernel thread creation is available; it does not take a custom stack-size parameter."
+        }
+      ]
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "path": "osfmk/kern/thread.c",
+      "git_blob": "f689e1e78ab55f8323af6dc6eb7f854f37ca77d4",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/kern/thread.c",
+      "anchors": [
+        {
+          "lines": [
+            1924,
+            1943
+          ],
+          "text": "kernel_thread_create; stack_alloc(thread)",
+          "meaning": "Normal kernel thread creation obtains an XNU-managed stack."
+        },
+        {
+          "lines": [
+            1959,
+            1988
+          ],
+          "text": "kernel_thread_start_priority; kernel_thread_start",
+          "meaning": "The persistent dispatcher uses normal managed kernel-thread creation."
+        }
+      ]
+    }
+  ],
+  "project_evidence": {
+    "dispatcher": "src/S540NvidiaGspDispatcher.cpp",
+    "dispatcher_contracts": "DISPATCHER-CONTRACTS.json",
+    "context": "src/S540NvidiaGspContext.c",
+    "global_lifecycle": "../nvidia-global-rm/src/S540NvidiaGlobalRmLifecycle.c",
+    "global_lifecycle_anchor": "status = coreInitializeRm();",
+    "compiler_profile": "../../builders/compile_nvidia_global_rm.py",
+    "review_origin": "Independent read-only stack_boundary review, followed by verification of the pinned source files and an isolated local Clang18 attribute capability probe.",
+    "aggregate_proof": "not_established",
+    "alternate_stack_switch": false,
+    "kernel_stack_enlarged": false,
+    "gpu_access": false
+  }
+}

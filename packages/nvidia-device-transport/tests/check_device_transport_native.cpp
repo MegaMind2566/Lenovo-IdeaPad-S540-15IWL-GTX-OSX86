@@ -20,7 +20,7 @@ void expect(bool condition, const char *message) {
     if (!condition) { std::fprintf(stderr, "Device transport assertion failed: %s\n", message); std::exit(1); }
 }
 enum class Fault { None, Start, Allocate, Physical, Map, DeviceAddress, Unmap, Release, Install, Arm, StopIrq, Stop };
-struct Memory { NvU8 *host; NvU32 pages; bool mapped; };
+struct Memory { NvU8 *host; NvU32 pages; bool mapped; NvU64 physical; };
 struct Fake {
     Fault fault = Fault::None;
     bool failRelease = false;
@@ -31,6 +31,12 @@ struct Fake {
     NV_STATUS remapStatus = NV_OK;
     NvU32 policyQueries = 0;
     NvU32 resources = 0;
+    NvU32 nextMemory = 0;
+    NvU32 mapCalls = 0;
+    NvU32 unmapCalls = 0;
+    NvU32 releaseCalls = 0;
+    NvU32 retainedValidations = 0;
+    bool retainedMappingValid = true;
     NvU32 registerReads = 0;
     bool active = false;
     bool ordinary = true;
@@ -41,6 +47,11 @@ struct Fake {
     bool failMask = false;
     bool failStopAfterMask = false;
     bool hardwareMaskRequired = false;
+    bool retireOnMask = false;
+    nv_state_t *maskState = nullptr;
+    nv_dma_device_t *maskDma = nullptr;
+    void *maskAllocation = nullptr;
+    NvU64 maskPages[2]{};
     NvU32 maskCalls = 0;
     NvU32 topCalls = 0;
     NvU32 lockedCalls = 0;
@@ -75,6 +86,7 @@ NV_STATUS allocate(void *opaque, NvU32 pages, bool, NvU32, void **out, NvU8 **ho
     memory->host = static_cast<NvU8 *>(std::calloc(pages, kPageBytes));
     if (!memory->host) { delete memory; return NV_ERR_NO_MEMORY; }
     memory->pages = pages;
+    memory->physical = 0x10000000ULL + NvU64(f.nextMemory++) * 0x100000;
     ++f.resources;
     *host = memory->host; *out = memory;
     return NV_OK;
@@ -83,12 +95,13 @@ NV_STATUS pageAddress(void *opaque, void *memory, NvU32 page, bool mapped, NvU64
     auto &f = *static_cast<Fake *>(opaque);
     auto *m = static_cast<Memory *>(memory);
     if (page >= m->pages || (mapped && !m->mapped)) return NV_ERR_INVALID_ARGUMENT;
-    out = (mapped ? 0x20000000ULL : 0x10000000ULL) + NvU64(page) * kPageBytes;
+    out = m->physical + (mapped ? 0x10000000ULL : 0) + NvU64(page) * kPageBytes;
     if ((!mapped && f.fault == Fault::Physical) || (mapped && f.fault == Fault::DeviceAddress)) ++out;
     return NV_OK;
 }
 NV_STATUS mapDma(void *opaque, void *memory, NvU32 bits) {
     auto &f = *static_cast<Fake *>(opaque);
+    ++f.mapCalls;
     auto *m = static_cast<Memory *>(memory);
     if (f.fault == Fault::Map || bits < 32) return NV_ERR_OPERATING_SYSTEM;
     m->mapped = true;
@@ -96,12 +109,14 @@ NV_STATUS mapDma(void *opaque, void *memory, NvU32 bits) {
 }
 NV_STATUS unmapDma(void *opaque, void *memory) {
     auto &f = *static_cast<Fake *>(opaque);
+    ++f.unmapCalls;
     if (f.fault == Fault::Unmap || f.failUnmap) return NV_ERR_OPERATING_SYSTEM;
     static_cast<Memory *>(memory)->mapped = false;
     return NV_OK;
 }
 NV_STATUS release(void *opaque, void *memory) {
     auto &f = *static_cast<Fake *>(opaque);
+    ++f.releaseCalls;
     auto *m = static_cast<Memory *>(memory);
     if (f.fault == Fault::Release || f.failRelease || m->mapped) return NV_ERR_OPERATING_SYSTEM;
     std::free(m->host); delete m; --f.resources;
@@ -162,10 +177,17 @@ NV_STATUS dmaRemapPolicy(void *opaque, DmaRemapPolicy &policy) {
     policy = f.remapPolicy;
     return NV_OK;
 }
+NV_STATUS validateRetainedDma(void *opaque, void *memory, NvU32 bits) {
+    auto &f = *static_cast<Fake *>(opaque);
+    ++f.retainedValidations;
+    return f.active && f.retainedMappingValid && static_cast<Memory *>(memory)->mapped &&
+           bits >= 32 && bits <= 64 ? NV_STATUS(NV_OK) : NV_STATUS(NV_ERR_INVALID_STATE);
+}
 Detail::Backend backend(Fake &f) {
     return Detail::Backend{&f, ordinary, start, stop, live, readIdentification,
         allocate, pageAddress, mapDma, unmapDma, release, install, arm, stopIrq,
-        nullptr, nullptr, nullptr, configRead, configWrite, nullptr, dmaRemapPolicy};
+        nullptr, nullptr, nullptr, configRead, configWrite, nullptr, dmaRemapPolicy,
+        validateRetainedDma};
 }
 bool top(void *opaque, bool &locked, bool &unlocked) {
     ++static_cast<Fake *>(opaque)->topCalls; locked = unlocked = true; return true;
@@ -175,6 +197,14 @@ void unlocked(void *opaque) { ++static_cast<Fake *>(opaque)->unlockedCalls; }
 NV_STATUS mask(void *opaque) {
     auto &f = *static_cast<Fake *>(opaque);
     ++f.maskCalls;
+    if (f.retireOnMask) {
+        void *allocation = f.maskAllocation;
+        NV_STATUS status = s540Global_nv_dma_unmap_alloc(f.maskDma, 2, f.maskPages, &allocation);
+        if (status != NV_OK) return status;
+        status = s540Global_nv_free_pages(f.maskState, 2, NV_FALSE, 0, allocation);
+        if (status != NV_OK) return status;
+        f.retireOnMask = false;
+    }
     return f.failMask ? NV_STATUS(NV_ERR_NOT_READY) : NV_STATUS(NV_OK);
 }
 bool ready(void *opaque) { return static_cast<Fake *>(opaque)->active && static_cast<Fake *>(opaque)->readyForInterrupt; }
@@ -392,6 +422,221 @@ void quarantineTests() {
     }
 }
 
+void pageCountTests() {
+    auto *state = reinterpret_cast<nv_state_t *>(NvUPtr(0x710));
+    auto *dma = reinterpret_cast<nv_dma_device_t *>(NvUPtr(0x810));
+    Fake f; Session session;
+    expect(session.start(backend(f)) == NV_OK && bindRmDevice(&session,state,dma) == NV_OK,
+           "physical count exact owner");
+    NvU64 pages[4]{}; void *allocation = nullptr;
+    expect(s540Global_nv_alloc_pages(state,4,4096,NV_FALSE,0,NV_TRUE,NV_FALSE,-1,pages,&allocation) == NV_OK,
+           "physical count backing");
+    NvU32 count = 91;
+    expect(s540Global_nv_get_num_phys_pages(allocation,nullptr) == NV_ERR_INVALID_ARGUMENT &&
+           s540Global_nv_get_num_phys_pages(reinterpret_cast<void *>(NvUPtr(123)),&count) == NV_ERR_OBJECT_NOT_FOUND && count == 91,
+           "invalid count output and foreign allocation are refused");
+    expect(s540Global_nv_get_num_phys_pages(allocation,&count) == NV_OK && count == 4,
+           "count comes from owned physical-page metadata");
+    void *original = allocation;
+    expect(s540Global_nv_dma_map_alloc(dma,4,pages,NV_FALSE,NV_FALSE,&allocation) == NV_OK &&
+           s540Global_nv_get_num_phys_pages(original,&count) == NV_OK && count == 4,
+           "DMA map does not replace the physical-allocation owner");
+    count = 92;
+    expect(s540Global_nv_get_num_phys_pages(allocation,&count) == NV_ERR_OBJECT_NOT_FOUND && count == 92,
+           "DMA mapping identity cannot masquerade as a physical allocation");
+    expect(s540Global_nv_dma_unmap_alloc(dma,4,pages,&allocation) == NV_OK,
+           "count fixture mapping cleanup");
+    void *mapping = nullptr;
+    void *host = s540Global_nv_alloc_kernel_mapping(state,allocation,0,0,4096,&mapping);
+    expect(host && s540Global_nv_free_pages(state,4,NV_FALSE,0,allocation) == NV_OK &&
+           s540Global_nv_get_num_phys_pages(allocation,&count) == NV_ERR_OBJECT_NOT_FOUND && count == 92,
+           "deferred CPU-alias free revokes public page-count access");
+    f.failRelease = true;
+    s540Global_nv_free_kernel_mapping(state,allocation,host,mapping);
+    expect(abiStatistics().retiredAllocations == 1 && !abiStatistics().mappings && f.resources == 1 &&
+           drainRmRetirements(&session) == NV_ERR_OPERATING_SYSTEM,
+           "void final CPU-unmap preserves completion failure as a retirement owner");
+    f.failRelease = false;
+    expect(drainRmRetirements(&session) == NV_OK && !f.resources &&
+           s540Global_nv_get_num_phys_pages(allocation,&count) == NV_ERR_OBJECT_NOT_FOUND && count == 92,
+           "retired and stale physical allocation cannot publish a count");
+    expect(unbindRmDevice(&session) == NV_OK &&
+           s540Global_nv_get_num_phys_pages(allocation,&count) == NV_ERR_INVALID_STATE && count == 92 &&
+           session.stop() == NV_OK, "unbound page count fails without output mutation");
+}
+
+void retirementTests() {
+    auto *state = reinterpret_cast<nv_state_t *>(NvUPtr(0x510));
+    auto *dma = reinterpret_cast<nv_dma_device_t *>(NvUPtr(0x610));
+    {
+        Fake f; Session session;
+        expect(session.start(backend(f)) == NV_OK && bindRmDevice(&session,state,dma) == NV_OK &&
+               session.installInterrupt(contract(f)) == NV_OK && session.armInterrupt() == NV_OK,
+               "active RM retirement owner");
+        NvU64 pages[2]{}; void *allocation = nullptr;
+        expect(s540Global_nv_alloc_pages(state,2,4096,NV_FALSE,0,NV_TRUE,NV_FALSE,-1,pages,&allocation) == NV_OK,
+               "init temporary backing allocated");
+        void *original = allocation; const NvU64 physical = pages[0];
+        void *cpuToken = nullptr;
+        void *host = s540Global_nv_alloc_kernel_mapping(state,original,0,0,4096,&cpuToken);
+        expect(host && cpuToken, "temporary CPU ownership tracked");
+        expect(s540Global_nv_dma_map_alloc(dma,2,pages,NV_FALSE,NV_FALSE,&allocation) == NV_OK,
+               "temporary live DMA mapping");
+        void *firstMapping = allocation; const NvU64 deviceAddress = pages[0];
+        expect(s540Global_nv_free_pages(state,2,NV_FALSE,0,original) == NV_ERR_IN_USE,
+               "logical DMA owner must retire before backing");
+        expect(s540Global_nv_dma_unmap_alloc(dma,1,pages,&allocation) == NV_ERR_INVALID_ARGUMENT &&
+               allocation == firstMapping && pages[0] == deviceAddress,
+               "wrong mapping geometry cannot transfer ownership");
+        f.fault = Fault::Physical;
+        expect(s540Global_nv_dma_unmap_alloc(dma,2,pages,&allocation) == NV_ERR_INVALID_ADDRESS &&
+               allocation == firstMapping && pages[0] == deviceAddress &&
+               !session.retirementStatistics().dmaMappings,
+               "invalid physical table cannot acknowledge logical unmap");
+        f.fault = Fault::None;
+        expect(s540Global_nv_dma_unmap_alloc(dma,2,pages,&allocation) == NV_OK &&
+               allocation == original && pages[0] == physical && !f.unmapCalls && !f.releaseCalls &&
+               session.retirementStatistics().dmaMappings == 1,
+               "active IRQ logical unmap retains exact IOVA and backing");
+        NvU32 count = 91;
+        expect(s540Global_nv_get_num_phys_pages(original,&count) == NV_OK && count == 2,
+               "retired DMA lease does not revoke its still-owned physical allocation");
+        void *stale = firstMapping;
+        expect(s540Global_nv_dma_unmap_alloc(dma,2,pages,&stale) == NV_ERR_OBJECT_NOT_FOUND,
+               "retired DMA token cannot unmap twice");
+        f.retainedMappingValid = false;
+        expect(s540Global_nv_dma_map_alloc(dma,2,pages,NV_FALSE,NV_FALSE,&allocation) == NV_ERR_INVALID_STATE &&
+               allocation == original && pages[0] == physical && f.mapCalls == 1 && !f.unmapCalls,
+               "revoked retained mapping preserves previous ownership");
+        f.retainedMappingValid = true; f.fault = Fault::DeviceAddress;
+        expect(s540Global_nv_dma_map_alloc(dma,2,pages,NV_FALSE,NV_FALSE,&allocation) == NV_ERR_INVALID_ADDRESS &&
+               allocation == original && pages[0] == physical && !f.unmapCalls,
+               "invalid retained address cannot trigger early backend teardown");
+        f.fault = Fault::None;
+        expect(s540Global_nv_dma_map_alloc(dma,2,pages,NV_FALSE,NV_FALSE,&allocation) == NV_OK &&
+               allocation != firstMapping && pages[0] == deviceAddress && f.mapCalls == 1 &&
+               f.retainedValidations == 3 && !session.retirementStatistics().dmaMappings,
+               "same backing remap revalidates and reuses the still-owned mapping");
+        expect(s540Global_nv_dma_unmap_alloc(dma,2,pages,&allocation) == NV_OK &&
+               s540Global_nv_free_pages(state,2,NV_FALSE,0,allocation) == NV_OK &&
+               !abiStatistics().retiredAllocations && abiStatistics().retiredDmaMappings == 1,
+               "free with live CPU alias waits for that specific alias");
+        void *extraCpu = nullptr;
+        expect(!s540Global_nv_alloc_kernel_mapping(state,allocation,0,0,4096,&extraCpu),
+               "logical free blocks new CPU aliases");
+        NvU64 nextPages[1]{}; void *next = nullptr;
+        expect(s540Global_nv_alloc_pages(state,1,4096,NV_FALSE,0,NV_TRUE,NV_FALSE,-1,nextPages,&next) == NV_OK &&
+               nextPages[0] != physical && f.resources == 2,
+               "retired backing is not recycled into another allocation");
+        expect(s540Global_nv_free_pages(state,1,NV_FALSE,0,next) == NV_OK &&
+               s540Global_nv_free_pages(state,1,NV_FALSE,0,next) == NV_ERR_OBJECT_NOT_FOUND,
+               "unmapped temporary backing retirement invalidates only its token");
+        s540Global_nv_free_kernel_mapping(state,original,host,cpuToken);
+        expect(abiStatistics().retiredAllocations == 2 && !abiStatistics().mappings &&
+               session.retirementStatistics().pages == 3 && !f.releaseCalls &&
+               s540Global_nv_get_kern_phys_address(reinterpret_cast<NvUPtr>(host)) == 0,
+               "last CPU alias transfers the original backing into retirement");
+        count = 92;
+        expect(s540Global_nv_get_num_phys_pages(original,&count) == NV_ERR_OBJECT_NOT_FOUND && count == 92,
+               "active IRQ retired allocation cannot expose a physical-page count");
+        expect(s540Global_nv_free_pages(state,2,NV_FALSE,0,original) == NV_ERR_OBJECT_NOT_FOUND &&
+               unbindRmDevice(&session) == NV_ERR_IN_USE && drainRmRetirements(&session) == NV_ERR_IN_USE,
+               "retired caller tokens are stale and real IRQ drain remains required");
+        f.failMask = true;
+        expect(session.stopInterrupt() == NV_ERR_OPERATING_SYSTEM &&
+               drainRmRetirements(&session) == NV_ERR_IN_USE && f.resources == 2 && !f.unmapCalls,
+               "failed hardware mask retains every retired resource");
+        f.failMask = false; f.failStopAfterMask = true;
+        expect(session.stopInterrupt() == NV_ERR_BUSY_RETRY &&
+               drainRmRetirements(&session) == NV_ERR_IN_USE && f.resources == 2,
+               "partial controller drain cannot reclaim retirement");
+        f.failStopAfterMask = false;
+        expect(session.stopInterrupt() == NV_OK && f.maskCalls == 2 && f.resources == 2,
+               "source and controller drain preserves retirement until explicit completion");
+        f.fault = Fault::Unmap;
+        expect(drainRmRetirements(&session) == NV_ERR_OPERATING_SYSTEM &&
+               abiStatistics().retiredAllocations == 2 && f.resources == 2 &&
+               unbindRmDevice(&session) == NV_ERR_IN_USE,
+               "backend unmap failure pins the exact retirement binding");
+        f.fault = Fault::None; f.failRelease = true;
+        expect(drainRmRetirements(&session) == NV_ERR_OPERATING_SYSTEM &&
+               abiStatistics().retiredAllocations == 2 && f.resources == 2,
+               "descriptor completion failure preserves already-unmapped backing");
+        const NvU32 completedUnmaps = f.unmapCalls;
+        f.failRelease = false;
+        expect(drainRmRetirements(&session) == NV_OK && f.unmapCalls == completedUnmaps &&
+               !f.resources && !abiStatistics().allocations &&
+               !session.retirementStatistics().allocations && !session.retirementStatistics().dmaMappings,
+               "retirement retry does not duplicate a successful backend unmap");
+        expect(drainRmRetirements(&session) == NV_OK && unbindRmDevice(&session) == NV_OK && session.stop() == NV_OK,
+               "completed retirement permits idempotent drain and final detach");
+    }
+    for (bool partialEnable : {false,true}) {
+        Fake f; Session session;
+        expect(session.start(backend(f)) == NV_OK && bindRmDevice(&session,state,dma) == NV_OK,
+               "disable-adapter retirement owner");
+        void *allocation = nullptr;
+        expect(s540Global_nv_alloc_pages(state,2,4096,NV_FALSE,0,NV_TRUE,NV_FALSE,-1,f.maskPages,&allocation) == NV_OK &&
+               s540Global_nv_dma_map_alloc(dma,2,f.maskPages,NV_FALSE,NV_FALSE,&allocation) == NV_OK &&
+               session.installInterrupt(contract(f)) == NV_OK,
+               "disable-adapter temporary DMA ownership");
+        f.fault = partialEnable ? Fault::Arm : Fault::None;
+        expect(session.armInterrupt() == (partialEnable ? NV_ERR_OPERATING_SYSTEM : NV_OK),
+               "retirement covers successful and partial controller enable");
+        f.fault = Fault::None; f.retireOnMask = true;
+        f.maskState = state; f.maskDma = dma; f.maskAllocation = allocation;
+        expect(session.stopInterrupt() == NV_OK && !f.retireOnMask && f.resources == 1 &&
+               !f.unmapCalls && !f.releaseCalls && abiStatistics().retiredAllocations == 1,
+               "original-disable-order callbacks retire while mask operation still owns the IRQ");
+        expect(drainRmRetirements(&session) == NV_OK && !f.resources &&
+               unbindRmDevice(&session) == NV_OK && session.stop() == NV_OK,
+               "disable-order retirement completes after actual drain");
+    }
+    {
+        Fake f; Session session;
+        NvU64 pages[2]{}; void *allocation = nullptr;
+        expect(session.start(backend(f)) == NV_OK && bindRmDevice(&session,state,dma) == NV_OK &&
+               s540Global_nv_alloc_pages(state,2,4096,NV_FALSE,0,NV_TRUE,NV_FALSE,-1,pages,&allocation) == NV_OK &&
+               s540Global_nv_dma_map_alloc(dma,2,pages,NV_FALSE,NV_FALSE,&allocation) == NV_OK &&
+               session.installInterrupt(contract(f)) == NV_OK && session.armInterrupt() == NV_OK,
+               "mapping-only retirement owner");
+        expect(s540Global_nv_dma_unmap_alloc(dma,2,pages,&allocation) == NV_OK &&
+               session.stopInterrupt() == NV_OK, "mapping-only lease reaches actual drain");
+        f.failRelease = true;
+        expect(s540Global_nv_free_pages(state,2,NV_FALSE,0,allocation) == NV_ERR_OPERATING_SYSTEM &&
+               f.unmapCalls == 1 && f.resources == 1,
+               "post-drain free failure can follow a successful retained-map completion");
+        expect(drainRmRetirements(&session) == NV_OK && f.unmapCalls == 1 &&
+               !session.retirementStatistics().dmaMappings && f.resources == 1,
+               "mapping retirement progress does not repeat an already completed unmap");
+        f.failRelease = false;
+        expect(s540Global_nv_free_pages(state,2,NV_FALSE,0,allocation) == NV_OK &&
+               !f.resources && unbindRmDevice(&session) == NV_OK && session.stop() == NV_OK,
+               "failed synchronous free preserves caller ownership for its own retry");
+    }
+    {
+        Fake f; Session session;
+        expect(session.start(backend(f)) == NV_OK && bindRmDevice(&session,state,dma) == NV_OK &&
+               session.installInterrupt(contract(f)) == NV_OK && session.armInterrupt() == NV_OK,
+               "bounded retirement capacity owner");
+        for (NvU32 i = 0; i < kMaximumAllocations; ++i) {
+            NvU64 page = 0; void *allocation = nullptr;
+            expect(s540Global_nv_alloc_pages(state,1,4096,NV_FALSE,0,NV_TRUE,NV_FALSE,-1,&page,&allocation) == NV_OK &&
+                   s540Global_nv_free_pages(state,1,NV_FALSE,0,allocation) == NV_OK,
+                   "retirement keeps its bounded ownership slot");
+        }
+        NvU64 unchanged = 91; void *unchangedToken = reinterpret_cast<void *>(NvUPtr(92));
+        expect(s540Global_nv_alloc_pages(state,1,4096,NV_FALSE,0,NV_TRUE,NV_FALSE,-1,&unchanged,&unchangedToken) == NV_ERR_INSUFFICIENT_RESOURCES &&
+               unchanged == 91 && unchangedToken == reinterpret_cast<void *>(NvUPtr(92)) &&
+               f.resources == kMaximumAllocations && !f.releaseCalls,
+               "bounded exhaustion cannot recycle retired pages or publish success");
+        expect(session.stopInterrupt() == NV_OK && drainRmRetirements(&session) == NV_OK && !f.resources,
+               "bounded retirement capacity reclaimed only after drain");
+        expect(unbindRmDevice(&session) == NV_OK && session.stop() == NV_OK,
+               "bounded retirement owner cleanup");
+    }
+}
+
 void irqLifecycleTests() {
     {
         Fake f; Session session;
@@ -472,7 +717,7 @@ int main() {
     expect(pciWriteKind(0xc,4,0,0xf900) == PciWriteKind::Refused, "unreviewed legacy command refused");
     expect(pciWriteKind(0x10,4,0,0) == PciWriteKind::Refused, "BAR mutation refused");
     expect(pciWriteKind(0x80,4,0,0) == PciWriteKind::Refused, "capability mutation lacks reviewed TU117 caller");
-    dmaRemapTests(); stateTests(); abiTests(); failures(); quarantineTests(); irqLifecycleTests();
+    dmaRemapTests(); stateTests(); abiTests(); failures(); quarantineTests(); irqLifecycleTests(); retirementTests(); pageCountTests();
     for (NvU32 i = 0; i < 128; ++i) {
         Fake f;
         Result result = check(backend(f));

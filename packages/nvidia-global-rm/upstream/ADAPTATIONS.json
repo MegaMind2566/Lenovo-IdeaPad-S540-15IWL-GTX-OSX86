@@ -114,6 +114,37 @@
       "source": "src/nvidia/src/kernel/rmapi/rmapi.c",
       "upstream_sha256": "cf0f6f8df903b9e39061ffa7cde0c528122c2aec7f10ba6ccbee82bcef6a6fe5",
       "validation": "combined-original-ELF-lifecycle-control-with-explicit-platform-and-privileged-CPU-fixtures"
+    },
+    {
+      "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+      "upstream_sha256": "dda3b014833c2e94680e5adea152011ffce72c8067782aceeecaefc28b7394d3",
+      "adapted_sha256": "878441d9563915ec06a73e903970a4134adfdeba3fb8bf8777ad1051b189a8f1",
+      "patch": "upstream/adapted/registry-profile-init-propagation.patch",
+      "patch_sha256": "eec24424d152f14a9dbcf92e2192626565ab08ed32ffdc65b081727d628d7759",
+      "validation": "Targeted profile fault controls and complete original lifecycle/fault sweep required; no runtime admission.",
+      "native_apple_execution": "pending",
+      "semantics": "Propagate original RmInitRegistry failure from osRmInitRm; verify the original derived RMNvLinkControl force-disable write and readback, destroy the admitted profile registry on that later error. Profile helper owns cold-registry initial rollback; do not clear preexisting global registry on preflight refusal."
+    },
+    {
+      "source": "src/nvidia/inc/libraries/nvoc/prelude.h",
+      "upstream_sha256": "831459de38939fca6da78b1ffebe5f77e600039c242cc7b63e81b5fe2e9b66c5",
+      "adapted_sha256": "662e79efede7e4d36c275a494da5f42d4217e813dc25af12ea8b723b9a31b857",
+      "patch": "upstream/adapted/nvoc-static-cast-single-evaluation.patch",
+      "patch_sha256": "d30f8aa762dae4e73bf36e460f03f37b3a3efd819eab0542672943e2b5f4e5ec",
+      "native_apple_execution": "pending",
+      "validation": "Fatal sanitizer reduced reproducer and actual NVOC C/C++ controls required; complete original lifecycle remains under validation.",
+      "semantics": "Evaluate typed source pointer once, then retain the original null guard and inherited-pointer conversion. The original ternary already guards NULL; Clang18 UBSan diagnoses the unevaluated literal-null anonymous-union branch. No sanitizer suppression or successful unavailable binding."
+    },
+    {
+      "source": "src/nvidia/inc/libraries/containers/type_safety.h",
+      "upstream_sha256": "d40049a95769128933be549bfbd3b8270014970c7533624c093aac6434e4644f",
+      "adapted_sha256": "a3078bf758824cfd5f44735f9873d9509f831947b3d5b8346ef4a4b8bc372c04",
+      "patch": "upstream/adapted/iterator-dispatch-typed-abi.patch",
+      "patch_sha256": "42d05eff5d60da7a5db3d8d0b456ad09378434ad47f18570b9ef0e5b2c49d1e6",
+      "native_apple_execution": "pending",
+      "validation": "Complete original lifecycle, registry epoch, memory retry and all observed allocation-failure controls with fatal address,undefined,function sanitizers required.",
+      "semantics": "Reuse the independently reviewed standalone ResourceServer C iterator dispatch: invoke the original implementation through its declared C signature, then assign its returned base iterator into the typed union. No incompatible function-pointer cast, changed iterator layout, sanitizer suppression or unavailable success.",
+      "precedent": "packages/nvidia-resource-server/upstream/adapted/iterator_macros.h.inc"
     }
   ],
   "automatic_original_source_replacement": false,

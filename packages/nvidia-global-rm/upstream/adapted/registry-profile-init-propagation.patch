@@ -1,0 +1,33 @@
+--- a/src/nvidia/arch/nvalloc/unix/src/osinit.c
++++ b/src/nvidia/arch/nvalloc/unix/src/osinit.c
+@@ -195,7 +195,9 @@
+ 
+     // have to init this before the debug subsystem, which will
+     // try to check the value of ResmanDebugLevel
+-    RmInitRegistry();
++    status = RmInitRegistry();
++    if (status != NV_OK)
++        return status;
+ 
+     NvU32 data = 0;
+     if ((osReadRegistryDword(NULL,
+@@ -242,7 +244,18 @@
+                 NV_REG_NVLINK_DISABLE, &data) == NV_OK) &&
+             (data == 1))
+     {
+-        osWriteRegistryDword(NULL, NV_REG_STR_RM_NVLINK_CONTROL, 0x1);
++        status = osWriteRegistryDword(NULL, NV_REG_STR_RM_NVLINK_CONTROL, 0x1);
++        if (status == NV_OK)
++        {
++            status = osReadRegistryDword(NULL, NV_REG_STR_RM_NVLINK_CONTROL, &data);
++            if ((status == NV_OK) && (data != 0x1))
++                status = NV_ERR_INVALID_STATE;
++        }
++        if (status != NV_OK)
++        {
++            RmDestroyRegistry(NULL);
++            return status;
++        }
+     }
+ 
+     if ((osReadRegistryDword(NULL,
