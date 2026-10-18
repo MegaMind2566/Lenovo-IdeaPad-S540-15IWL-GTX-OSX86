@@ -15,6 +15,13 @@
     "platform": "src/S540NvidiaGlobalRmFormat.cpp",
     "boundary": "src/S540NvidiaGlobalRmDiagnostics.h"
   },
+  "kernel_sdk_operations": {
+    "reference": "tests/sdk_import_reference.cpp",
+    "operation": "Actual bounded snprintf PCI/severity/Xid prefix formatting through the pinned IOLib declaration.",
+    "export_source": "../nvidia-darwin-services/reference/apple-libkern.exports",
+    "export": "_snprintf",
+    "admission": "Independent compiled SDK operation, compared with actual bridge imports; not an observed-symbol allowlist."
+  },
   "contracts": [
     {
       "symbol": "nv_dev_vprintf",

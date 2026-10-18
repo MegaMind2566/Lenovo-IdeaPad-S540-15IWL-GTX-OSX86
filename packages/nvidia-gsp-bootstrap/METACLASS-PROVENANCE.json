@@ -2,6 +2,7 @@
   "format": 1,
   "component": "one reviewed IOKit power-service metaclass lifetime",
   "status": "exact SDK compiler-reference verification required; kernel execution untested",
+  "target_kernel_admission_audit": "KXLD-ADMISSION-AUDIT.md",
   "class": "S540GspPowerKernel::S540NvidiaGspPowerService",
   "implementation": {
     "class_declaration": "platform/S540NvidiaGspPowerService.hpp",

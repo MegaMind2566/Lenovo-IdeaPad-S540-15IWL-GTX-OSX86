@@ -74,6 +74,7 @@ def audit_platform_imports(output: Path, kernel_flags: list[str], cpp_flags: lis
     baseline.update(hardware)
     baseline.update(services)
     references = [SERVICES / 'tests/sdk_import_reference.cpp',
+                  GLOBAL / 'tests/sdk_import_reference.cpp',
                   DEVICE / 'tests/sdk_import_reference.cpp',
                   GSP / 'platform/tests/sdk_import_reference.cpp',
                   GSP / 'platform/tests/sdk_power_reference.cpp',
