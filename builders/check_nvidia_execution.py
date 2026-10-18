@@ -277,7 +277,7 @@ def check(output: Path, assets: Path, *, upstream: Path | None = None,
         DEVICE / ('src/S540Nvidia' + name + '.cpp') for name in
         ('DeviceTransport', 'DeviceServices', 'DeviceCheck')],
         DEVICE / 'tests/check_device_transport_native.cpp',
-        {'component': 'nvidia-device-transport', 'checks': 396,
+        {'component': 'nvidia-device-transport', 'checks': 421,
          'production_checks': 21, 'unavailable_mapper_checks': 19,
          'lifecycle_cycles': 128, 'device_dma_verified': False,
          'hardware_interrupt_delivery': False, 'gpu_initialized': False},

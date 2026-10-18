@@ -107,9 +107,10 @@ including shutdown requested by the separate PM callback thread. Snapshots are
 published under a guard. A successful
 `prepare()` means resources/bindings are prepared, never an initialized GPU.
 `initialize()` has no caller-supplied readiness Boolean and refuses before
-original RM while complete ABI closure, original aggregate stack policy and
-full-adapter allocation capacity remain unresolved. The power gate uses the
-actual completed PM-child transition and monotonic revocation state.
+original RM while complete ABI closure, original aggregate stack policy,
+full-adapter allocation capacity and the original-entry power deadline remain
+unresolved. Actual completed PM-child and revocation observations are reported
+separately; they do not clear the `PowerLifetime` gate.
 
 The original GSP paths can unmap/free temporary buffers while interrupts are
 active. The transport now removes their caller visibility while retaining their
@@ -122,9 +123,16 @@ retirement is not evidence of that capacity.
 The power lease does not substitute a D0 sample for a lifetime request. It uses
 Apple's PM child protocol, completed transition, delayed acknowledgement and
 an independent external-hook lifetime count. Apple's bounded `PMstop` wait is
-not proof that the revocation owner can be freed. Emergency sleep and PM timeout escalation can
-still force a transition. Native PM events verify the owner/acknowledgement
-ordering; they do not establish an acquired power domain on the Lenovo.
+not proof that the revocation owner can be freed. The original FWSEC/Booter
+waits can allow at least 60 seconds during initialization, exceeding the lease's
+30-second acknowledgement budget. Queued cleanup cannot interrupt an original
+entry already running on that worker. Normal sleep can therefore expire the
+budget, independently of emergency power loss. On the pinned macOS source,
+ordinary drivers' `kIOPMPreventIdleSleep` state-table flags are ignored. The
+[deadline audit](platform/POWER-DEADLINE-AUDIT.md) records the required
+cooperative cancellation and bounded unwind proof before original entry can
+be admitted. Native PM events verify owner/acknowledgement ordering; they do
+not establish an acquired power domain on the Lenovo.
 
 The firmware-store native harness uses the actual approved pair and covers
 corruption, owner/thread mismatches, unchanged outputs, lease exhaustion,

@@ -19,6 +19,8 @@
         "addPowerChild establishes a real IOPowerConnection and asynchronously completes three dependent requests",
         "changePowerStateToPriv requests this private child's desire without overwriting the IOPCIDevice nub's request",
         "powerChangeDone is called after a completed transition; setPowerState entry alone is not completion",
+        "setPowerState returns an upper bound in microseconds; notifyControllingDriverDone applies a ten-second minimum and ackTimerTick advances after a tardy driver's timer expires",
+        "On macOS, updatePreventIdleSleepListInternal ignores normal drivers' kIOPMPreventIdleSleep state-table flags; driver desire does not prevent demand sleep",
         "handleAcknowledgeSetPowerState accepts an acknowledgement while setPowerState is still in flight",
         "PMstop sets PMStop and waits for prior PM driver callouts through waitForPMDriverCall, whose 15-second timeout is not an unconditional lifetime barrier",
         "An independent guarded count retains the external revocation owner until every requestStop hook returns; finish refuses before closing when that count is nonzero",
@@ -26,6 +28,29 @@
         "requestPowerDomainState is an internal PM-workloop operation and returns success without acting when called outside that thread",
         "IOPMPreventSystemSleep is a private undefined flag for third-party drivers; it is not used here",
         "checkSystemSleepAllowed permits low-battery or thermal emergency sleep before evaluating ordinary sleep-prevention clamps"
+      ]
+    },
+    {
+      "repository": "NVIDIA/open-gpu-kernel-modules",
+      "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+      "paths": [
+        "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+        "src/nvidia/arch/nvalloc/unix/src/os.c",
+        "src/nvidia/src/kernel/core/thread_state.c",
+        "src/nvidia/src/kernel/gpu/gpu_timeout.c",
+        "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+        "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_falcon_tu102.c",
+        "src/nvidia/src/kernel/gpu/arch/turing/kern_gpu_tu102.c",
+        "src/nvidia/src/kernel/gpu/gsp/message_queue_cpu.c",
+        "src/nvidia/interface/nvrm_registry.h"
+      ],
+      "deadline_audit": "POWER-DEADLINE-AUDIT.md",
+      "anchors": [
+        "rm_init_adapter creates DEVICE_INIT ThreadState; its default timeout is at least sixty seconds",
+        "FWSEC and Booter execution waits for Falcon halt with GPU_TIMEOUT_DEFAULT and therefore uses the current ThreadState deadline",
+        "GSP RPC polling bypasses ThreadState and allows 1.5 times the GPU default timeout; Unix defaults are four seconds for graphics and thirty for compute",
+        "The GSP bootstrap permits four attempts by default and resets ThreadState deadlines; this is not a whole-entry thirty-second bound",
+        "Queued PM shutdown on the same worker does not preempt the original call or supply cooperative cancellation"
       ]
     },
     {
@@ -53,6 +78,10 @@
     "power_down_ack_deadline_microseconds": 30000000,
     "exact_endpoint_power_connection_required": true,
     "completed_on_callback_required": true,
+    "completed_child_lease_clears_original_entry_power_gate": false,
+    "original_entry_power_lifetime_gate_blocked": true,
+    "original_entry_cancellation_and_teardown_deadline_proven": false,
+    "state_table_prevent_idle_flag_is_system_sleep_proof": false,
     "revocation_monotonic": true,
     "post_acceptance_is_not_acknowledgement": true,
     "ack_only_after_original_irq_dma_mmio_cleanup": true,

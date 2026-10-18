@@ -23,6 +23,7 @@
     "normalization": [
       "Canonicalize only Clang's translation-unit initializer basename.",
       "Resolve rebased local text, class-string and data relocations to the same symbolic targets.",
+      "Resolve a relocation to a defined __cstring symbol by its actual symbol.value + encoded addend, with section-range and in-section NUL-terminator checks, and compare the exact bytes just as for a section-relative cstring relocation. This does not change the relocation kind, width, PC-relative mode, offset or instruction-byte comparison.",
       "Remove at most 15 trailing bytes consisting solely of valid x86 alignment NOPs, never overlapping a relocated operand."
     ],
     "refused": [
@@ -263,8 +264,8 @@
     "sdk_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
     "loader_graph_result": "Production Power and reference matched with exactly one initializer, one finalizer, two reachable loader functions and the three reviewed imports.",
     "negative_control": "Objects built with only -fno-use-cxa-atexit retained two initializer entries, no finalizer and cxa/DSO imports; the tightened verifier rejects them.",
-    "regression_cases": 16,
-    "native_apple_compiler_execution": "pending authoritative native CI",
+    "regression_cases": 28,
+    "native_apple_compiler_execution": "CI run 39173389514 compiled 34 project units and matched the individual Power object to its SDK metaclass reference; the subsequent combined relocatable-link graph comparison failed.",
     "output_identity": "Each build report records the actual/reference object hashes, independent source hash, shared class declaration hash and canonical reachable-loader-graph hash. These are regenerated after any class layout or compiler change.",
     "final_local_cross_probe": {
       "class_declaration_sha256": "57e12e03561fa290d80f0b92aff541dc70f2e3a073390a808d315baeb97b952a",
@@ -281,6 +282,31 @@
         "__ZN9IOService10gMetaClassE"
       ],
       "scope": "Clang18 Mach-O cross-probe after adding the guarded revocationHooksInFlight field. These hashes identify that local compiler run, not a native Apple compiler run."
+    },
+    "framework_local_cross_probe": {
+      "compiler": "Ubuntu Clang 18.1.3, x86_64-apple-macos15 cross-target",
+      "sdk_framework_import_count": 285,
+      "defined_private_project_dependency_count": 5,
+      "defined_private_project_dependencies": [
+        "__ZN18S540GspPowerKernel25S540NvidiaGspPowerService13setPowerStateEmP9IOService",
+        "__ZN18S540GspPowerKernel25S540NvidiaGspPowerService15powerChangeDoneEm",
+        "__ZN18S540GspPowerKernel25S540NvidiaGspPowerService4freeEv",
+        "__ZN18S540GspPowerKernel25S540NvidiaGspPowerService4initEP12OSDictionary",
+        "__ZN18S540NvidiaGspPower6Detail8ProtocolC1Ev"
+      ],
+      "interpretation": "285 inherited/other SDK-reference dependencies and five actual private definitions are evidence of this local object pair, not a fixed approval list or native linked success."
+    },
+    "native_relocatable_link_after_cstring_normalization": "not_yet_verified; a native CI result is still required",
+    "native_link_preflight": {
+      "builder_mode": "build_nvidia_execution.py --metaclass-preflight",
+      "objects": [
+        "nvidia-darwin-services/src/S540NvidiaDarwinCheck.cpp",
+        "nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.cpp",
+        "nvidia-darwin-services/src/S540NvidiaDarwinRuntime.cpp"
+      ],
+      "operation": "Compile with the actual Apple kernel flags, require empty loader tables on both unrelated companions, use real xcrun ld -r with one companion before Power and one after, then require the exact independently compiled reference graph on the linked object before full original RM compilation.",
+      "diagnostics": "A failed comparison includes both actual and reference canonical graphs. The workflow preserves the actual Power, linked object and reference object for diagnosis.",
+      "success_claim": "No native linked success is claimed until this preflight and the full combined project link both pass."
     }
   },
   "limitations": [
@@ -289,5 +315,21 @@
     "The verified loader graph does not authorize original RM/GSP entry, establish a stack budget or enable a production candidate."
   ],
   "kernel_execution": "not_tested",
-  "production_candidate_allowed": false
+  "production_candidate_allowed": false,
+  "framework_import_contract": {
+    "distinct_from_loader_imports": "The exact loader graph above has only three framework imports. A concrete IOService subclass also has compiler-generated inherited virtual slots, whose framework dependencies are derived independently from the complete SDK reference object.",
+    "derivation": "After requiring the exact loader graph, derive the reference undefined-symbol set. Remove only private project dependencies actually defined by the linked project object; do not derive approvals from the actual project undefined-symbol set.",
+    "sdk_ancestry": [
+      "OSMetaClass",
+      "OSMetaClassBase",
+      "OSObject",
+      "IORegistryEntry",
+      "IOService"
+    ],
+    "namespace_check": "Remaining SDK dependencies must be mangled members of one of these exact SDK ancestors, including const and non-const members. Arbitrary C helpers and other project or unreviewed class namespaces are refused.",
+    "private_dependency_check": "Const and non-const S540GspPowerKernel and S540NvidiaGspPower::Detail::Protocol dependencies must have actual external section definitions in the project. An unresolved private virtual method cannot become an SDK dependency.",
+    "replacement_check": "Project definitions cannot replace an inherited framework operation named by the SDK reference.",
+    "integration": "audit_platform_imports still requires exact equality of the complete actual import set and the independently compiled SDK operation sets after the existing reviewed dependencies are accounted for.",
+    "not_an_observed_allowlist": true
+  }
 }

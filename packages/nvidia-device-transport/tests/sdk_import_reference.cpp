@@ -3,6 +3,7 @@
 #include <IOKit/IOBufferMemoryDescriptor.h>
 #include <IOKit/IODMACommand.h>
 #include <IOKit/IOMapper.h>
+#include <IOKit/IOPlatformExpert.h>
 #include <IOKit/IOLib.h>
 #include <IOKit/pci/IOPCIDevice.h>
 #include <kern/thread_call.h>
@@ -22,7 +23,7 @@ extern "C" IOBufferMemoryDescriptor *s540DeviceTransportSdkBuffer() {
 }
 extern "C" IODMACommand *s540DeviceTransportSdkDma(IOMapper *mapper, bool direct) {
     return IODMACommand::withSpecification(kIODMACommandOutputHost64, 32, 4096,
-        direct ? IODMACommand::kUnmapped : IODMACommand::kMapped,
+        direct ? IODMACommand::kBypassed : IODMACommand::kMapped,
         4096, 4096, mapper, nullptr);
 }
 extern "C" IOMapper *s540DeviceTransportSdkMapper(OSObject *object) {
@@ -30,6 +31,13 @@ extern "C" IOMapper *s540DeviceTransportSdkMapper(OSObject *object) {
 }
 extern "C" IOMapper *s540DeviceTransportSdkSystemMapper() {
     return __atomic_load_n(&IOMapper::gSystem, __ATOMIC_ACQUIRE);
+}
+extern "C" IOPlatformExpert *s540DeviceTransportSdkPublishedPlatform() {
+    IOPlatformExpert *platform = IOService::getPlatform();
+    if (!platform || platform->isInactive()) return nullptr;
+    OSObject *property = platform->copyProperty(kIOPlatformMapperPresentKey);
+    if (property) property->release();
+    return platform;
 }
 extern "C" bool s540DeviceTransportSdkProvider(IOPCIDevice *provider, IOService *owner) {
     const bool acquired = provider->lockForArbitration(false);

@@ -63,10 +63,16 @@
         "backend": "packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp",
         "backend_anchors": [
           "NV_STATUS dmaRemapPolicy(void *opaque, DmaRemapPolicy &policy) {",
-          "    const bool usable = live(p) && p->mapperMode == Mapper::Device && p->mapper &&",
-          "                        mapperStillValid(p);",
+          "    const bool usable = live(p) && (p->mapperMode == Mapper::Device ||",
+          "                        p->mapperMode == Mapper::Direct) && mapperStillValid(p);",
           "    if (!usable) return NV_ERR_NOT_SUPPORTED;",
-          "    policy = DmaRemapPolicy::MapPhysicalPagesWithoutBounce;"
+          "    policy = DmaRemapPolicy::MapPhysicalPagesWithoutBounce;",
+          "    if (p->mapperMode == Mapper::Direct) return attestDirect(p) == NV_OK;",
+          "    captured.platformIdentity = IOService::getPlatform();",
+          "    OSObject *platformMapper = p->directPlatform->copyProperty(kIOPlatformMapperPresentKey);",
+          "    OSObject *providerMapper = p->provider->copyProperty(\"iommu-parent\");",
+          "        64, kPageBytes, IODMACommand::kBypassed, kPageBytes, kPageBytes, nullptr, nullptr);",
+          "        IODMACommand::kBypassed : IODMACommand::kMapped, bytes, kPageBytes, p->mapper, nullptr);"
         ],
         "session": "packages/nvidia-device-transport/src/S540NvidiaDeviceTransport.cpp",
         "session_anchors": [
@@ -75,7 +81,8 @@
           "    if (captured != DmaRemapPolicy::MapPhysicalPagesWithoutBounce)",
           "    required = NV_TRUE;"
         ],
-        "semantics": "NV_TRUE selects explicit no-bounce mapping of CPU physical PTEs, not IOMMU presence. The currently opened device must positively retain its published mapper; unsupported direct or unresolved routes cannot select a Boolean bypass."
+        "semantics": "NV_TRUE selects explicit no-bounce mapping of CPU physical PTEs, not IOMMU presence. The currently opened device must retain its published mapper, or pass real kBypassed factory acceptance in the pinned post-publication Platform Expert profile. Raw null metadata cannot attest Direct; unknown, required, conflicting or revoked routes cannot select a Boolean bypass.",
+        "direct_route_contract": "packages/nvidia-device-transport/DIRECT-ROUTE-CONTRACT.json"
       }
     },
     {

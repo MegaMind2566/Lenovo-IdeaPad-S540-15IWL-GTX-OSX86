@@ -15,7 +15,7 @@ struct Images {
 };
 enum Gate : NvU32 {
     OriginalAbiClosure = 1U << 0,
-    PowerLifetime = 1U << 1,
+    PowerLifetime = 1U << 1, // Original entry/unwind must fit PM revocation deadline.
     AllocationRetirementUnderActiveIrq = 1U << 2,
     OriginalStackBoundary = 1U << 3
 };
@@ -29,6 +29,7 @@ struct Snapshot {
     bool globalInitialized, adapterInitialized, firmwareLoaded;
     bool interruptInstalled, interruptArmed;
     bool cleanupComplete, quarantined, nativeFixture;
+    // Actual lease observations; these do not clear the PowerLifetime gate.
     bool workerActive, powerDomainJoined, powerOnCompleted, powerRevoked, powerAcknowledged;
     NvU64 workerThread;
 };
@@ -45,8 +46,9 @@ struct Snapshot {
 // prepare() success proves only real resource/binding preparation. initialize()
 // unconditionally refuses BEFORE every original global/adapter entry: the ABI,
 // original stack boundary and allocation capacity while IRQs are active still
-// require validation. The power gate additionally checks the real PM child,
-// its completed on transition and monotonic revocation state. There
+// require validation. A real completed PM-child lease is required to prepare,
+// but PowerLifetime stays blocked: original waits can exceed the 30s revocation
+// budget, and no cooperative entry/unwind deadline has been established. There
 // is deliberately no caller-provided readiness flag to bypass those gates.
 //
 // On any cleanup failure retain this facade and retry stop from an ordinary thread.

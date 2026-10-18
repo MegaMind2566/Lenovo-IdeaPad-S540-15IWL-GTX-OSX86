@@ -62,6 +62,22 @@ struct RetirementStatistics {
     NvU32 pages;
 };
 namespace Detail {
+// Framework observations, never caller-supplied hardware readiness. The
+// transaction must also obtain a real IODMACommand kBypassed factory result.
+struct DirectRouteFacts {
+    void *platformIdentity;
+    bool platformLive;
+    bool platformMapperPresent;
+    bool providerMapperPresent;
+    bool factoryWouldNotWait;
+};
+struct DirectRouteBackend {
+    void *context;
+    NV_STATUS (*observe)(void *, DirectRouteFacts &);
+    NV_STATUS (*createBypassProbe)(void *, void **);
+    void (*releaseBypassProbe)(void *, void *);
+};
+NV_STATUS attestDirectRoute(const DirectRouteBackend &backend);
 // Shared state-machine boundary. Native tests replace only these OS/resource
 // operations; the kernel path supplies real IOPCIDevice/IODMACommand ownership.
 struct Backend {
@@ -212,7 +228,7 @@ enum class PciWriteKind : NvU32 { Refused, CommandBusMaster, RomDisable, Latency
 PciWriteKind pciWriteKind(NvU32 offset, NvU32 width, NvU32 previous, NvU32 value);
 bool dmaPageMatches(NvU64 originalPhysical, NvU64 deviceAddress, NvU64 translatedPhysical, NvU32 addressBits);
 Mapper selectMapperPolicy(bool providerPropertyPresent, bool publishedDeviceMapper,
-                          bool systemMapperAbsent);
+                          bool frameworkDirectAttested);
 const char *mapperName(Mapper mapper);
 } // namespace S540NvidiaDeviceTransport
 #endif

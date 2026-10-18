@@ -21,12 +21,50 @@ void expect(bool condition, const char *message) {
 }
 enum class Fault { None, Start, Allocate, Physical, Map, DeviceAddress, Unmap, Release, Install, Arm, StopIrq, Stop };
 struct Memory { NvU8 *host; NvU32 pages; bool mapped; NvU64 physical; };
+struct DirectFixture {
+    Detail::DirectRouteFacts before{reinterpret_cast<void *>(NvUPtr(0x900)),true,false,false,true};
+    Detail::DirectRouteFacts after = before;
+    NV_STATUS observationStatus = NV_OK;
+    NV_STATUS afterStatus = NV_OK;
+    NV_STATUS factoryStatus = NV_OK;
+    bool provideProbe = true;
+    bool factoryActive = false;
+    NvU32 factoryCalls = 0;
+    NvU32 releases = 0;
+    NvU32 liveProbes = 0;
+};
+NV_STATUS directObserve(void *opaque, Detail::DirectRouteFacts &facts) {
+    auto &f = *static_cast<DirectFixture *>(opaque);
+    const NV_STATUS status = f.factoryActive ? f.afterStatus : f.observationStatus;
+    if (status != NV_OK) return status;
+    facts = f.factoryActive ? f.after : f.before;
+    return NV_OK;
+}
+NV_STATUS directProbe(void *opaque, void **out) {
+    auto &f = *static_cast<DirectFixture *>(opaque);
+    ++f.factoryCalls;
+    if (f.provideProbe) {
+        *out = new NvU32(0x540);
+        ++f.liveProbes;
+        f.factoryActive = true;
+    }
+    return f.factoryStatus;
+}
+void directRelease(void *opaque, void *probe) {
+    auto &f = *static_cast<DirectFixture *>(opaque);
+    delete static_cast<NvU32 *>(probe);
+    ++f.releases; --f.liveProbes; f.factoryActive = false;
+}
+Detail::DirectRouteBackend directBackend(DirectFixture &f) {
+    return Detail::DirectRouteBackend{&f,directObserve,directProbe,directRelease};
+}
 struct Fake {
     Fault fault = Fault::None;
     bool failRelease = false;
     bool failUnmap = false;
     bool badSnapshot = false;
     Mapper mapper = Mapper::Device;
+    DirectFixture *direct = nullptr;
     DmaRemapPolicy remapPolicy = DmaRemapPolicy::MapPhysicalPagesWithoutBounce;
     NV_STATUS remapStatus = NV_OK;
     NvU32 policyQueries = 0;
@@ -95,13 +133,15 @@ NV_STATUS pageAddress(void *opaque, void *memory, NvU32 page, bool mapped, NvU64
     auto &f = *static_cast<Fake *>(opaque);
     auto *m = static_cast<Memory *>(memory);
     if (page >= m->pages || (mapped && !m->mapped)) return NV_ERR_INVALID_ARGUMENT;
-    out = m->physical + (mapped ? 0x10000000ULL : 0) + NvU64(page) * kPageBytes;
+    out = m->physical + (mapped && f.mapper != Mapper::Direct ? 0x10000000ULL : 0) + NvU64(page) * kPageBytes;
     if ((!mapped && f.fault == Fault::Physical) || (mapped && f.fault == Fault::DeviceAddress)) ++out;
     return NV_OK;
 }
 NV_STATUS mapDma(void *opaque, void *memory, NvU32 bits) {
     auto &f = *static_cast<Fake *>(opaque);
     ++f.mapCalls;
+    if (f.mapper == Mapper::Direct && (!f.direct || Detail::attestDirectRoute(directBackend(*f.direct)) != NV_OK))
+        return NV_ERR_NOT_SUPPORTED;
     auto *m = static_cast<Memory *>(memory);
     if (f.fault == Fault::Map || bits < 32) return NV_ERR_OPERATING_SYSTEM;
     m->mapped = true;
@@ -174,12 +214,19 @@ NV_STATUS dmaRemapPolicy(void *opaque, DmaRemapPolicy &policy) {
     auto &f = *static_cast<Fake *>(opaque);
     ++f.policyQueries;
     if (f.remapStatus != NV_OK) return f.remapStatus;
+    if (f.mapper == Mapper::Direct) {
+        if (!f.direct) return NV_ERR_NOT_SUPPORTED;
+        const NV_STATUS status = Detail::attestDirectRoute(directBackend(*f.direct));
+        if (status != NV_OK) return status;
+    }
     policy = f.remapPolicy;
     return NV_OK;
 }
 NV_STATUS validateRetainedDma(void *opaque, void *memory, NvU32 bits) {
     auto &f = *static_cast<Fake *>(opaque);
     ++f.retainedValidations;
+    if (f.mapper == Mapper::Direct && (!f.direct || Detail::attestDirectRoute(directBackend(*f.direct)) != NV_OK))
+        return NV_ERR_NOT_SUPPORTED;
     return f.active && f.retainedMappingValid && static_cast<Memory *>(memory)->mapped &&
            bits >= 32 && bits <= 64 ? NV_STATUS(NV_OK) : NV_STATUS(NV_ERR_INVALID_STATE);
 }
@@ -223,6 +270,94 @@ void expectDmaPolicyFatal(nv_state_t *state, const char *message) {
     expect(waitpid(child, &status, 0) == child, "DMA policy refusal subprocess reaped");
     expect(WIFSIGNALED(status) && WTERMSIG(status) == SIGABRT, message);
 }
+void directRouteTests() {
+    expect(Detail::attestDirectRoute(Detail::DirectRouteBackend{}) == NV_ERR_INVALID_ARGUMENT,
+           "direct admission requires actual observation and command operations");
+    for (NvU32 missing = 0; missing != 5; ++missing) {
+        DirectFixture f;
+        if (missing == 0) f.before.platformIdentity = nullptr;
+        if (missing == 1) f.before.platformLive = false;
+        if (missing == 2) f.before.platformMapperPresent = true;
+        if (missing == 3) f.before.providerMapperPresent = true;
+        if (missing == 4) f.before.factoryWouldNotWait = false;
+        expect(Detail::attestDirectRoute(directBackend(f)) == NV_ERR_NOT_SUPPORTED &&
+               !f.factoryCalls && !f.liveProbes,
+               "unpublished/inactive/mapped/unresolved framework never reaches a potentially waiting factory");
+    }
+    {
+        DirectFixture f; f.observationStatus = NV_ERR_BUSY_RETRY;
+        expect(Detail::attestDirectRoute(directBackend(f)) == NV_ERR_BUSY_RETRY && !f.factoryCalls,
+               "provider observation refusal cannot become direct policy");
+    }
+    {
+        DirectFixture f; f.provideProbe = false;
+        expect(Detail::attestDirectRoute(directBackend(f)) == NV_ERR_NOT_SUPPORTED &&
+               f.factoryCalls == 1 && !f.releases,
+               "settled-None metadata without a real accepted command never attests bypass");
+    }
+    {
+        DirectFixture f; f.factoryStatus = NV_ERR_NOT_SUPPORTED;
+        expect(Detail::attestDirectRoute(directBackend(f)) == NV_ERR_NOT_SUPPORTED &&
+               f.factoryCalls == 1 && f.releases == 1 && !f.liveProbes,
+               "partial factory refusal releases its resource without attesting policy");
+    }
+    for (NvU32 changed = 0; changed != 6; ++changed) {
+        DirectFixture f;
+        if (changed == 0) f.after.platformIdentity = reinterpret_cast<void *>(NvUPtr(0x901));
+        if (changed == 1) f.after.platformLive = false;
+        if (changed == 2) f.after.platformMapperPresent = true;
+        if (changed == 3) f.after.providerMapperPresent = true;
+        if (changed == 4) f.after.factoryWouldNotWait = false;
+        if (changed == 5) f.afterStatus = NV_ERR_BUSY_RETRY;
+        expect(Detail::attestDirectRoute(directBackend(f)) != NV_OK &&
+               f.factoryCalls == 1 && f.releases == 1 && !f.liveProbes,
+               "post-factory policy/provider change revokes admission and releases the probe");
+    }
+    {
+        DirectFixture proof;
+        expect(Detail::attestDirectRoute(directBackend(proof)) == NV_OK &&
+               proof.factoryCalls == 1 && proof.releases == 1 && !proof.liveProbes,
+               "completed framework observations and actual factory acceptance attest direct route");
+        Fake f; f.mapper = Mapper::Direct; f.direct = &proof;
+        Session session;
+        auto *state = reinterpret_cast<nv_state_t *>(NvUPtr(0x950));
+        auto *dma = reinterpret_cast<nv_dma_device_t *>(NvUPtr(0x960));
+        expect(session.start(backend(f)) == NV_OK && bindRmDevice(&session,state,dma) == NV_OK,
+               "attested direct route binds the exact RM owner");
+        NvBool required = NV_FALSE;
+        expect(queryRmDmaRemap(state,required) == NV_OK && required == NV_TRUE &&
+               s540Global_nv_requires_dma_remap(state) == NV_TRUE,
+               "direct IOKit route still requires NVIDIA's explicit mapping callbacks");
+        NvU64 pages[2]{}; void *allocation = nullptr;
+        expect(s540Global_nv_alloc_pages(state,2,4096,NV_FALSE,0,NV_TRUE,NV_FALSE,-1,pages,&allocation) == NV_OK,
+               "direct mapping has real fixture-owned physical backing");
+        const NvU64 physical = pages[0]; void *original = allocation;
+        expect(s540Global_nv_dma_map_alloc(dma,2,pages,NV_FALSE,NV_FALSE,&allocation) == NV_OK &&
+               pages[0] == physical && allocation != original &&
+               session.installInterrupt(contract(f)) == NV_OK && session.armInterrupt() == NV_OK,
+               "direct explicit map validates identity pages and retains distinct ownership");
+        expect(s540Global_nv_dma_unmap_alloc(dma,2,pages,&allocation) == NV_OK && !f.unmapCalls,
+               "direct logical unmap retains the prepared command while IRQ can run");
+        proof.after.providerMapperPresent = true;
+        required = NV_FALSE;
+        expect(queryRmDmaRemap(state,required) == NV_ERR_NOT_SUPPORTED && required == NV_FALSE &&
+               s540Global_nv_dma_map_alloc(dma,2,pages,NV_FALSE,NV_FALSE,&allocation) == NV_ERR_NOT_SUPPORTED &&
+               allocation == original && pages[0] == physical && !f.unmapCalls,
+               "new provider mapper revokes retained direct mapping without reclaiming addressable pages");
+        proof.after.providerMapperPresent = false;
+        expect(s540Global_nv_dma_map_alloc(dma,2,pages,NV_FALSE,NV_FALSE,&allocation) == NV_OK &&
+               pages[0] == physical && f.mapCalls == 1 && !f.unmapCalls,
+               "direct retained mapping can reactivate only after fresh framework attestation");
+        expect(s540Global_nv_dma_unmap_alloc(dma,2,pages,&allocation) == NV_OK &&
+               s540Global_nv_free_pages(state,2,NV_FALSE,0,allocation) == NV_OK &&
+               session.stopInterrupt() == NV_OK && drainRmRetirements(&session) == NV_OK &&
+               !f.resources && !proof.liveProbes && proof.factoryCalls == proof.releases,
+               "direct command probes and retirement owners all finish after actual IRQ drain");
+        expect(unbindRmDevice(&session) == NV_OK && session.stop() == NV_OK,
+               "attested direct lifecycle cleanup");
+    }
+}
+
 void dmaRemapTests() {
     auto *state = reinterpret_cast<nv_state_t *>(NvUPtr(0x300));
     auto *foreign = reinterpret_cast<nv_state_t *>(NvUPtr(0x301));
@@ -695,7 +830,7 @@ void irqLifecycleTests() {
 
 }
 int main() {
-    expect(selectMapperPolicy(false,false,true) == Mapper::Direct, "settled direct admission");
+    expect(selectMapperPolicy(false,false,true) == Mapper::Direct, "framework-attested direct admission");
     expect(selectMapperPolicy(false,false,false) == Mapper::Unavailable, "unknown/required/live unbound system mapper refused");
     expect(selectMapperPolicy(true,false,true) == Mapper::Unavailable, "unresolved provider mapper cannot fall back direct");
     expect(selectMapperPolicy(true,true,false) == Mapper::Device, "published device mapper admission");
@@ -717,7 +852,7 @@ int main() {
     expect(pciWriteKind(0xc,4,0,0xf900) == PciWriteKind::Refused, "unreviewed legacy command refused");
     expect(pciWriteKind(0x10,4,0,0) == PciWriteKind::Refused, "BAR mutation refused");
     expect(pciWriteKind(0x80,4,0,0) == PciWriteKind::Refused, "capability mutation lacks reviewed TU117 caller");
-    dmaRemapTests(); stateTests(); abiTests(); failures(); quarantineTests(); irqLifecycleTests(); retirementTests(); pageCountTests();
+    directRouteTests(); dmaRemapTests(); stateTests(); abiTests(); failures(); quarantineTests(); irqLifecycleTests(); retirementTests(); pageCountTests();
     for (NvU32 i = 0; i < 128; ++i) {
         Fake f;
         Result result = check(backend(f));

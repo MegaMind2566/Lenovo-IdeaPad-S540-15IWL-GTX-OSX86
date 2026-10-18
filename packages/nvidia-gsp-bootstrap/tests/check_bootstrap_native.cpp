@@ -243,9 +243,9 @@ int main(int argc, char **argv) {
             "no original entry or IRQ activation during preparation");
         expect(owner.initialize() == NV_ERR_NOT_SUPPORTED, "unresolved gates refuse before original entry");
         state = owner.snapshot();
-        expect(state.initializationRefused && state.prepared && state.blockedGates == 13 &&
+        expect(state.initializationRefused && state.prepared && state.blockedGates == 15 &&
             state.workerActive && state.workerThread && state.powerDomainJoined && state.powerOnCompleted,
-            "refusal retains reviewable prepared resources and all unresolved gates");
+            "completed lease retains prepared resources without clearing original-entry power deadline gate");
         NV_STATUS foreign = NV_OK;
         const NvU64 worker = state.workerThread;
         std::thread caller([&] { foreign = owner.initialize(); }); caller.join();

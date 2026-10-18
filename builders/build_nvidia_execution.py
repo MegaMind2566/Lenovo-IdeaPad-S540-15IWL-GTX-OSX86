@@ -64,7 +64,8 @@ def project_sources() -> tuple[list[Path], list[Path], list[Path]]:
 
 
 def audit_platform_imports(output: Path, kernel_flags: list[str], cpp_flags: list[str],
-                           linked_project: Path, original_definitions: list[str]) -> dict:
+                           linked_project: Path, original_definitions: list[str],
+                           metaclass_reference: Path) -> dict:
     """New imports must match authored SDK operations, never observed allowlists."""
     import build_nvidia_transport as transport
     baseline = set(transport.ADAPTER_IMPORTS)
@@ -87,11 +88,12 @@ def audit_platform_imports(output: Path, kernel_flags: list[str], cpp_flags: lis
         imports = transport.kernel_imports(obj)
         approved.update(imports)
         component_imports[source.relative_to(ROOT).as_posix()] = sorted(imports)
-    # The separately byte/relocation-verified loader graph admits only the
-    # kernel OSMetaClass lifetime operations, not its reference vtable's
-    # unresolved project virtual methods or arbitrary C++ runtime imports.
-    approved.update(metaclass.EXTERNALS)
-    component_imports['verified-power-metaclass-loader'] = sorted(metaclass.EXTERNALS)
+    # An actual IOService subclass also needs all inherited SDK virtual slots.
+    # Derive them from the independent same-declaration reference, after its
+    # exact loader proof, excluding only actual private project definitions.
+    inherited, project_dependencies = metaclass.framework_imports(linked_project, metaclass_reference)
+    approved.update(inherited)
+    component_imports['verified-power-metaclass-framework'] = sorted(inherited)
     previous_exports = set()
     dependencies = [ROOT / 'packages/nvidia-hardware-transport/src/S540NvidiaPci.cpp',
                     ROOT / 'packages/nvidia-hardware-transport/firmware/S540NvidiaFirmware.cpp']
@@ -115,6 +117,7 @@ def audit_platform_imports(output: Path, kernel_flags: list[str], cpp_flags: lis
             'platform_imports': sorted(platform_imports),
             'additional_sdk_imports': sorted(actual_new),
             'independent_references': component_imports,
+            'metaclass_reference_project_dependencies': sorted(project_dependencies),
             'existing_v9_approved_imports': sorted(baseline),
             'unreviewed_imports': [], 'missing_expected_imports': [],
             'reference_source_sha256': {source.relative_to(ROOT).as_posix():
@@ -238,7 +241,8 @@ def kernel_objects(upstream: Path, output: Path, assets: Path,
     linked_metaclass_review = metaclass.verify_metaclass_initializers(linked, metaclass_reference)
     partial['phase'] = 'audit-platform-imports'
     save_partial()
-    platform_import_audit = audit_platform_imports(output, kernel_flags, cpp_flags, linked, defined)
+    platform_import_audit = audit_platform_imports(
+        output, kernel_flags, cpp_flags, linked, defined, metaclass_reference)
     partial['phase'] = 'audit-actual-original-rm-closure'
     save_partial()
     execution_closure = closure.analyze_execution_closure(
@@ -317,6 +321,22 @@ def main() -> int:
                      '-c', str(GSP / 'platform/S540NvidiaGspPower.cpp'), '-o', str(actual),
                      diagnostic_log=args.output_dir / 'power-service-compile.log')
         record = metaclass.verify_metaclass_initializers(actual, reference)
+        # ld -r can change symbol/relocation encodings. Exercise the real linker
+        # before the expensive original RM build, including unrelated code
+        # before and after this one approved class initializer.
+        companions = []
+        for name in ('Check', 'Runtime'):
+            obj = args.output_dir / ('services-' + name + '.o')
+            commands.run('/usr/bin/xcrun', 'clang++', *flags, *cpp,
+                         '-c', str(SERVICES / ('src/S540NvidiaDarwin' + name + '.cpp')),
+                         '-o', str(obj), diagnostic_log=args.output_dir / ('services-' + name + '-compile.log'))
+            metaclass.verify_no_initializers(obj)
+            companions.append(obj)
+        linked = args.output_dir / 'power-service-linked.o'
+        commands.run('/usr/bin/xcrun', 'ld', '-r', '-arch', 'x86_64',
+                     str(companions[0]), str(actual), str(companions[1]), '-o', str(linked),
+                     diagnostic_log=args.output_dir / 'power-service-link.log')
+        record['linked_metaclass_audit'] = metaclass.verify_metaclass_initializers(linked, reference)
         record['kernel_cpp_flags'] = cpp
         (args.output_dir / 'metaclass-preflight.json').write_text(json.dumps(record, indent=2) + '\n')
         print('Power-service kernel loader preflight passed; no kernel code was executed.')

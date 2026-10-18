@@ -5,6 +5,7 @@
 #include <IOKit/IOBufferMemoryDescriptor.h>
 #include <IOKit/IODMACommand.h>
 #include <IOKit/IOMapper.h>
+#include <IOKit/IOPlatformExpert.h>
 #include <IOKit/IOLib.h>
 #include <IOKit/pci/IOPCIDevice.h>
 #include <libkern/OSByteOrder.h>
@@ -20,6 +21,7 @@ struct Platform {
     IOService *owner;
     IOMemoryMap *registers;
     IOMapper *mapper;
+    IOPlatformExpert *directPlatform;
     Mapper mapperMode;
     NvU64 hostBytes;
     RegisterView registerViews[32];
@@ -62,11 +64,64 @@ bool live(void *opaque) {
     auto *p = static_cast<Platform *>(opaque);
     return p->retained && p->opened && p->provider && !p->provider->isInactive();
 }
+NV_STATUS observeDirect(void *opaque, Detail::DirectRouteFacts &facts) {
+    auto *p = static_cast<Platform *>(opaque);
+    if (!ordinary(p) || !live(p) || !p->directPlatform) return NV_ERR_INVALID_STATE;
+    if (!p->provider->lockForArbitration(false)) return NV_ERR_BUSY_RETRY;
+    Detail::DirectRouteFacts captured{};
+    captured.platformIdentity = IOService::getPlatform();
+    captured.platformLive = captured.platformIdentity == p->directPlatform &&
+                            !p->directPlatform->isInactive();
+    OSObject *platformMapper = p->directPlatform->copyProperty(kIOPlatformMapperPresentKey);
+    OSObject *providerMapper = p->provider->copyProperty("iommu-parent");
+    captured.platformMapperPresent = platformMapper != nullptr;
+    captured.providerMapperPresent = providerMapper != nullptr;
+    // This read only refuses a factory that could wait. It does not attest
+    // bypass: the actual kBypassed command factory below must succeed too.
+    captured.factoryWouldNotWait =
+        __atomic_load_n(&IOMapper::gSystem, __ATOMIC_ACQUIRE) == nullptr;
+    if (platformMapper) platformMapper->release();
+    if (providerMapper) providerMapper->release();
+    p->provider->unlockForArbitration();
+    facts = captured;
+    return NV_OK;
+}
+NV_STATUS createBypassProbe(void *opaque, void **out) {
+    Detail::DirectRouteFacts now{};
+    const NV_STATUS status = observeDirect(opaque, now);
+    if (status != NV_OK) return status;
+    if (!now.platformIdentity || !now.platformLive || now.platformMapperPresent ||
+        now.providerMapperPresent || !now.factoryWouldNotWait) return NV_ERR_NOT_SUPPORTED;
+    // Pinned XNU PE start sets mapper-required before publishing getPlatform.
+    // After that boot decision no normal framework path writes Unknown or
+    // Required again: IOMapper::start can only publish a live mapper. Reject
+    // non-None before entry; kBypassed then asks IOKit itself to accept bypass.
+    // It fails if a live mapper appeared. Never call this from provider gates.
+    IODMACommand *command = IODMACommand::withSpecification(kIODMACommandOutputHost64,
+        64, kPageBytes, IODMACommand::kBypassed, kPageBytes, kPageBytes, nullptr, nullptr);
+    if (!command) return NV_ERR_NOT_SUPPORTED;
+    *out = command;
+    return NV_OK;
+}
+void releaseBypassProbe(void *, void *probe) {
+    static_cast<IODMACommand *>(probe)->release();
+}
+NV_STATUS attestDirect(Platform *p) {
+    if (!p->directPlatform) {
+        IOPlatformExpert *platform = IOService::getPlatform();
+        if (!platform || platform->isInactive()) return NV_ERR_NOT_SUPPORTED;
+        platform->retain();
+        p->directPlatform = platform;
+    }
+    return Detail::attestDirectRoute(Detail::DirectRouteBackend{
+        p, observeDirect, createBypassProbe, releaseBypassProbe});
+}
 NV_STATUS start(void *opaque, Snapshot &snapshot) {
     auto *p = static_cast<Platform *>(opaque);
     if (!p->provider || !p->owner || !ordinary(nullptr)) return NV_ERR_INVALID_ARGUMENT;
     if (!p->provider->lockForArbitration(false)) return NV_ERR_BUSY_RETRY;
     Snapshot value{};
+    bool providerMapperPresent = false;
     S540NvidiaPci::Context pci;
     bool ok = !p->provider->isInactive() && pci.bind(p->provider);
     S540NvidiaPci::Inventory inventory{};
@@ -102,13 +157,13 @@ NV_STATUS start(void *opaque, Snapshot &snapshot) {
             // addresses never establish device-address translation readiness.
             OSObject *property = p->provider->copyProperty("iommu-parent");
             const bool propertyPresent = property != nullptr;
+            providerMapperPresent = propertyPresent;
             if (property) {
                 p->mapper = OSDynamicCast(IOMapper, property);
                 if (p->mapper) p->mapper->retain();
                 property->release();
             }
-            const bool noSystemMapper = __atomic_load_n(&IOMapper::gSystem, __ATOMIC_ACQUIRE) == nullptr;
-            value.mapper = selectMapperPolicy(propertyPresent, p->mapper != nullptr, noSystemMapper);
+            value.mapper = selectMapperPolicy(propertyPresent, p->mapper != nullptr, false);
             p->mapperMode = value.mapper;
             value.dmaPolicySettled = value.mapper != Mapper::Unavailable;
             // Original Linux provider setup starts with a 32-bit DMA mask;
@@ -126,6 +181,12 @@ NV_STATUS start(void *opaque, Snapshot &snapshot) {
             p->owner->release(); p->provider->release(); p->retained = false;
         }
         return NV_ERR_NOT_SUPPORTED;
+    }
+    // Factory acceptance must run after releasing provider arbitration. Null
+    // mapper metadata alone never changes the route to Direct.
+    if (!providerMapperPresent && value.mapper == Mapper::Unavailable && attestDirect(p) == NV_OK) {
+        value.mapper = p->mapperMode = Mapper::Direct;
+        value.dmaPolicySettled = true;
     }
     snapshot = value;
     return NV_OK;
@@ -151,6 +212,7 @@ NV_STATUS stop(void *opaque) {
     }
     if (p->registers) { p->registers->release(); p->registers = nullptr; }
     if (p->mapper) { p->mapper->release(); p->mapper = nullptr; }
+    if (p->directPlatform) { p->directPlatform->release(); p->directPlatform = nullptr; }
     if (p->opened) { p->provider->close(p->owner); p->opened = false; }
     if (p->retained) {
         p->owner->release(); p->provider->release(); p->retained = false;
@@ -316,25 +378,25 @@ NV_STATUS unmapDma(void *, void *opaque) {
     return result;
 }
 bool mapperStillValid(Platform *p) {
+    if (p->mapperMode == Mapper::Direct) return attestDirect(p) == NV_OK;
+    if (!p->provider->lockForArbitration(false)) return false;
     OSObject *property = p->provider->copyProperty("iommu-parent");
     bool valid = false;
     if (p->mapperMode == Mapper::Device)
         valid = property && OSDynamicCast(IOMapper, property) == p->mapper;
-    else if (p->mapperMode == Mapper::Direct)
-        valid = !property && __atomic_load_n(&IOMapper::gSystem, __ATOMIC_ACQUIRE) == nullptr;
     if (property) property->release();
+    p->provider->unlockForArbitration();
     return valid;
 }
 NV_STATUS dmaRemapPolicy(void *opaque, DmaRemapPolicy &policy) {
     auto *p = static_cast<Platform *>(opaque);
     if (!ordinary(p) || !live(p)) return NV_ERR_INVALID_STATE;
-    if (!p->provider->lockForArbitration(false)) return NV_ERR_BUSY_RETRY;
-    // Positive attestation comes from this opened provider's published mapper
-    // and the exact mapping path below, which rejects every bounce alias.
+    // Positive attestation comes from the opened provider's published mapper,
+    // or real framework acceptance of kBypassed in the supported PE profile.
+    // The exact mapping path below also rejects every bounce alias.
     // A missing mapper/gSystem value never establishes the scalar RM policy.
-    const bool usable = live(p) && p->mapperMode == Mapper::Device && p->mapper &&
-                        mapperStillValid(p);
-    p->provider->unlockForArbitration();
+    const bool usable = live(p) && (p->mapperMode == Mapper::Device ||
+                        p->mapperMode == Mapper::Direct) && mapperStillValid(p);
     if (!usable) return NV_ERR_NOT_SUPPORTED;
     policy = DmaRemapPolicy::MapPhysicalPagesWithoutBounce;
     return NV_OK;
@@ -345,14 +407,16 @@ NV_STATUS validateRetainedDma(void *opaque, void *allocation, NvU32 addressBits)
     if (!ordinary(p) || !live(p) || !a || a->quarantined || !a->bufferPrepared ||
         !a->command || !a->commandPrepared || !a->attached ||
         addressBits < 32 || addressBits > 64) return NV_ERR_INVALID_STATE;
-    if (!p->provider->lockForArbitration(false)) return NV_ERR_BUSY_RETRY;
     bool valid = live(p) && mapperStillValid(p);
+    if (!valid) return NV_ERR_NOT_SUPPORTED;
+    if (!p->provider->lockForArbitration(false)) return NV_ERR_BUSY_RETRY;
     for (NvU32 i = 0; valid && i < a->pages; ++i) {
         const NvU64 physical = p->mapperMode == Mapper::Direct ? a->device[i] :
                                p->mapper->mapToPhysicalAddress(a->device[i]);
         valid = dmaPageMatches(a->physical[i], a->device[i], physical, addressBits);
     }
     p->provider->unlockForArbitration();
+    valid = valid && mapperStillValid(p);
     return valid ? NV_STATUS(NV_OK) : NV_STATUS(NV_ERR_INVALID_ADDRESS);
 }
 NV_STATUS mapDma(void *opaque, void *allocation, NvU32 addressBits) {
@@ -364,8 +428,8 @@ NV_STATUS mapDma(void *opaque, void *allocation, NvU32 addressBits) {
     const NvU64 bytes = NvU64(a->pages) * kPageBytes;
     a->command = IODMACommand::withSpecification(kIODMACommandOutputHost64,
         addressBits, kPageBytes, p->mapperMode == Mapper::Direct ?
-        IODMACommand::kUnmapped : IODMACommand::kMapped, bytes, kPageBytes, p->mapper, nullptr);
-    if (!a->command) return NV_ERR_NO_MEMORY;
+        IODMACommand::kBypassed : IODMACommand::kMapped, bytes, kPageBytes, p->mapper, nullptr);
+    if (!a->command) return p->mapperMode == Mapper::Direct ? NV_STATUS(NV_ERR_NOT_SUPPORTED) : NV_STATUS(NV_ERR_NO_MEMORY);
     a->attached = a->command->setMemoryDescriptor(a->buffer, false) == kIOReturnSuccess;
     bool ok = a->attached;
     if (ok) {

@@ -16,6 +16,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 | Guide | Purpose |
 |---|---|
 | [NVIDIA Resource Server and host services](../packages/nvidia-rm-services/README.md) | V9 confirmed: all 486 kernel startup checks, cleanup and 15 separate userspace firmware checks passed, with no warnings; completed checkpoint, no repeat requested |
+| [Original NVIDIA GSP integration](../packages/nvidia-gsp-bootstrap/README.md) | Development owner, transport and firmware preparation; original runtime remains gated, including cancellation and teardown within the macOS power deadline; no new laptop package |
 | [Original NVIDIA Resource Server](../packages/nvidia-resource-server/README.md) | Selected NVOC/library subsystem, real client/resource/access/sharing paths and explicit adaptations; not full global RM startup |
 | [Matching NVIDIA firmware assets](../packages/nvidia-firmware-assets/README.md) | Official release 615.78.08 GSP/UCODES byte hashes, parsing, provenance and full license; no device upload or execution |
 | [NVIDIA hardware-transport preparation](../packages/nvidia-hardware-transport/README.md) | V8 confirmed in the Tahoe kernel: all 390 combined startup checks passed, cleanup complete and no warnings; untranslated host preparation is not device DMA verification |
@@ -42,6 +43,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 ## Reference
 
 - [NVIDIA port assessment](reference/nvidia-port-assessment.md): pinned source, confirmed v9 Resource Server checkpoint, full-RM closure diagnostics and remaining GPU/GSP boundaries.
+- [Original-entry power deadline](../packages/nvidia-gsp-bootstrap/platform/POWER-DEADLINE-AUDIT.md): pinned NVIDIA wait budgets and Apple acknowledgement behavior; a completed child lease does not prove safe original RM entry during normal sleep.
 - [ACPI analysis](reference/acpi-analysis.md), [ACPI patch review](reference/acpi-patch-review.md) and [initial EFI delivery review](reference/efi-review.md).
 - [External disk installation](reference/installation.md) and [initial EFI instructions](reference/first-boot.md), written before the working configuration.
 - [Repository layout](reference/repository-layout.md), including the distinction between source modules and generated ZIP packages.

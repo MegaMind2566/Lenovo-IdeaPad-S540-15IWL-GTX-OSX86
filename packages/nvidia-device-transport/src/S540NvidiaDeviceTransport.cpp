@@ -19,6 +19,31 @@ void bytesCopy(void *destination, const void *source, NvU64 length) {
 }
 }
 namespace S540NvidiaDeviceTransport {
+namespace {
+bool directFactsAdmitProbe(const Detail::DirectRouteFacts &facts) {
+    return facts.platformIdentity && facts.platformLive && !facts.platformMapperPresent &&
+           !facts.providerMapperPresent && facts.factoryWouldNotWait;
+}
+}
+NV_STATUS Detail::attestDirectRoute(const DirectRouteBackend &backend) {
+    if (!backend.context || !backend.observe || !backend.createBypassProbe ||
+        !backend.releaseBypassProbe) return NV_ERR_INVALID_ARGUMENT;
+    DirectRouteFacts before{};
+    NV_STATUS status = backend.observe(backend.context, before);
+    if (status != NV_OK) return status;
+    if (!directFactsAdmitProbe(before)) return NV_ERR_NOT_SUPPORTED;
+    void *probe = nullptr;
+    status = backend.createBypassProbe(backend.context, &probe);
+    if (status == NV_OK && !probe) status = NV_ERR_NOT_SUPPORTED;
+    if (status == NV_OK) {
+        DirectRouteFacts after{};
+        status = backend.observe(backend.context, after);
+        if (status == NV_OK && (!directFactsAdmitProbe(after) ||
+            after.platformIdentity != before.platformIdentity)) status = NV_ERR_NOT_SUPPORTED;
+    }
+    if (probe) backend.releaseBypassProbe(backend.context, probe);
+    return status;
+}
 #if defined(KERNEL)
 void destroyDarwinBackend(void *);
 #endif
@@ -482,9 +507,9 @@ bool dmaPageMatches(NvU64 originalPhysical, NvU64 deviceAddress, NvU64 translate
     return deviceAddress + kPageBytes - 1 <= mask && translatedPhysical == originalPhysical;
 }
 Mapper selectMapperPolicy(bool providerPropertyPresent, bool publishedDeviceMapper,
-                          bool systemMapperAbsent) {
+                          bool frameworkDirectAttested) {
     if (providerPropertyPresent && publishedDeviceMapper) return Mapper::Device;
-    if (!providerPropertyPresent && systemMapperAbsent) return Mapper::Direct;
+    if (!providerPropertyPresent && frameworkDirectAttested) return Mapper::Direct;
     return Mapper::Unavailable;
 }
 const char *mapperName(Mapper mapper) {

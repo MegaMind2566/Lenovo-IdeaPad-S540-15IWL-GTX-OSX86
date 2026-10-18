@@ -13,7 +13,9 @@ import nvidia_metaclass_initializers as metaclass
 
 def fixture(path: Path, *, prefix=False, extra_entry=False, instruction=0x55,
             external=None, class_name=None, omit_pointer=False, interior=False,
-            bad_flags=False, vtable_addend=16, padding=0, omit_finalizer=False):
+            bad_flags=False, vtable_addend=16, padding=0, omit_finalizer=False,
+            imports=(), definitions=(), external_string=False, string_addend=0,
+            unterminated_string=False):
     """Small named-section/nlist/relocation records, not executable images."""
     base = 16 if prefix else 0
     text = bytearray(b'\x90' * (base + 80))
@@ -23,7 +25,7 @@ def fixture(path: Path, *, prefix=False, extra_entry=False, instruction=0x55,
     text[base + 64:base + 64] = b'\x90' * padding
     meta_address, vtable_address = len(text), len(text) + 40
     cstring_address = len(text) + 88
-    cstring = (class_name or metaclass.CLASS_NAME).encode() + b'\0'
+    cstring = (class_name or metaclass.CLASS_NAME).encode() + (b'X' if unterminated_string else b'\0')
     loader_address = (cstring_address + len(cstring) + 7) & ~7
     symbol_rows = [
         ('__GLOBAL__sub_I_' + ('actual.cpp' if prefix else 'reference.cpp'), 0x0e, 1, base),
@@ -33,9 +35,15 @@ def fixture(path: Path, *, prefix=False, extra_entry=False, instruction=0x55,
         ('__ZN11OSMetaClassD2Ev', 1, 0, 0),
         ('_runtime_body', 0x0e, 1, base + 64 + padding),
         ('__GLOBAL__D_a', 0x0e, 1, base + 48),
+        ('__ZN9IOService10gMetaClassE', 1, 0, 0),
     ]
     if prefix:
         symbol_rows.append(('_runtime_prefix', 0x0e, 1, 0))
+    symbol_rows.extend((name, 1, 0, 0) for name in imports)
+    symbol_rows.extend((name, 0x0f, 1, base + 64 + padding) for name in definitions)
+    string_symbol = len(symbol_rows)
+    if external_string:
+        symbol_rows.append(('L_class_name', 0x0e, 3, cstring_address))
     text_relocations = []
     for offset, symbol, addend in ((4, 3, 0), (12, 1, 0), (20, 2, vtable_addend),
                                    (52, 1, 0), (58, 4, 0)):
@@ -43,8 +51,11 @@ def fixture(path: Path, *, prefix=False, extra_entry=False, instruction=0x55,
         kind = 2 if symbol in (3, 4) else 1
         text_relocations.append((base + offset, symbol | (1 << 24) | (2 << 25) | (1 << 27) | (kind << 28)))
     string_offset = base + 28
-    struct.pack_into('<i', text, string_offset, cstring_address - (string_offset + 4))
-    text_relocations.append((string_offset, 3 | (1 << 24) | (2 << 25) | (1 << 28)))
+    struct.pack_into('<i', text, string_offset,
+                     string_addend if external_string else
+                     cstring_address - (string_offset + 4) + string_addend)
+    target = (string_symbol | (1 << 27)) if external_string else 3
+    text_relocations.append((string_offset, target | (1 << 24) | (2 << 25) | (1 << 28)))
     pointers = 2 if extra_entry else 1
     loader = bytearray(pointers * 8)
     loader_relocations = [] if omit_pointer else [(0, (3 << 25) | (1 << 27))]
@@ -121,6 +132,27 @@ class MetaclassInitializers(unittest.TestCase):
         fixture(self.actual, prefix=True, padding=7)
         self.assertEqual(self.verify()['status'], 'matched-exact-metaclass-codegen')
 
+    def test_defined_symbol_and_section_string_relocations_match(self):
+        fixture(self.actual, prefix=True, external_string=True)
+        self.assertEqual(self.verify()['status'], 'matched-exact-metaclass-codegen')
+
+    def test_defined_string_symbol_addend_changes_the_target(self):
+        fixture(self.actual, prefix=True, external_string=True, string_addend=1)
+        with self.assertRaisesRegex(ValueError, 'differs from the exact SDK'):
+            self.verify()
+
+    def test_defined_string_symbol_cannot_escape_its_section(self):
+        for addend in (-1, len(metaclass.CLASS_NAME) + 1):
+            with self.subTest(addend=addend):
+                fixture(self.actual, prefix=True, external_string=True, string_addend=addend)
+                with self.assertRaisesRegex(ValueError, 'outside its cstring section'):
+                    self.verify()
+
+    def test_defined_string_symbol_requires_terminator_inside_section(self):
+        fixture(self.actual, prefix=True, external_string=True, unterminated_string=True)
+        with self.assertRaisesRegex(ValueError, 'Unterminated loader class-name string'):
+            self.verify()
+
     def test_changed_instruction_rejected(self):
         fixture(self.actual, prefix=True, instruction=0x56)
         with self.assertRaisesRegex(ValueError, 'differs from the exact SDK'):
@@ -192,6 +224,69 @@ class MetaclassInitializers(unittest.TestCase):
         self.actual.write_bytes(self.actual.read_bytes()[:39])
         with self.assertRaisesRegex(ValueError, 'Truncated'):
             self.verify()
+
+    def test_framework_imports_derive_inherited_sdk_slots(self):
+        sdk_method = '__ZN9IOService5startEPS_'
+        sdk_const_method = '__ZNK8OSObject12getMetaClassEv'
+        fixture(self.reference, imports=(sdk_method, sdk_const_method))
+        fixture(self.actual, prefix=True, imports=(sdk_method, sdk_const_method))
+        inherited, dependencies = metaclass.framework_imports(self.actual, self.reference)
+        self.assertEqual(inherited, metaclass.EXTERNALS | {sdk_method, sdk_const_method})
+        self.assertEqual(dependencies, set())
+
+    def test_implemented_project_override_is_not_a_framework_import(self):
+        override = metaclass.CLASS_PREFIX + '4freeEv'
+        fixture(self.reference, imports=(override,))
+        fixture(self.actual, prefix=True, definitions=(override,))
+        inherited, dependencies = metaclass.framework_imports(self.actual, self.reference)
+        self.assertEqual(dependencies, {override})
+        self.assertNotIn(override, inherited)
+
+    def test_unimplemented_project_virtual_cannot_become_framework(self):
+        override = metaclass.CLASS_PREFIX + '4freeEv'
+        fixture(self.reference, imports=(override,))
+        fixture(self.actual, prefix=True, imports=(override,))
+        with self.assertRaisesRegex(ValueError, 'unimplemented project dependency'):
+            metaclass.framework_imports(self.actual, self.reference)
+
+    def test_const_protocol_dependency_requires_actual_definition(self):
+        dependency = '__ZNK18S540NvidiaGspPower6Detail8Protocol5readyEv'
+        fixture(self.reference, imports=(dependency,))
+        fixture(self.actual, prefix=True, imports=(dependency,))
+        with self.assertRaisesRegex(ValueError, 'unimplemented project dependency'):
+            metaclass.framework_imports(self.actual, self.reference)
+        fixture(self.actual, prefix=True, definitions=(dependency,))
+        inherited, dependencies = metaclass.framework_imports(self.actual, self.reference)
+        self.assertIn(dependency, dependencies)
+        self.assertNotIn(dependency, inherited)
+
+    def test_non_sdk_reference_dependencies_cannot_become_framework(self):
+        for dependency in ('_s540UnimplementedCBridge',
+                           '__ZN16S540PrivateOther4workEv',
+                           '__ZN20UnreviewedSdkService5startEv'):
+            with self.subTest(dependency=dependency):
+                fixture(self.reference, imports=(dependency,))
+                fixture(self.actual, prefix=True, imports=(dependency,))
+                with self.assertRaises(ValueError):
+                    metaclass.framework_imports(self.actual, self.reference)
+
+    def test_project_definition_cannot_replace_sdk_method(self):
+        sdk_method = '__ZN9IOService5startEPS_'
+        fixture(self.reference, imports=(sdk_method,))
+        fixture(self.actual, prefix=True, definitions=(sdk_method,))
+        with self.assertRaisesRegex(ValueError, 'replace an inherited framework operation'):
+            metaclass.framework_imports(self.actual, self.reference)
+
+    def test_extra_actual_import_is_never_added_to_sdk_approval(self):
+        extra = '_s540UnexpectedKernelCall'
+        fixture(self.actual, prefix=True, imports=(extra,))
+        inherited, dependencies = metaclass.framework_imports(self.actual, self.reference)
+        self.assertNotIn(extra, inherited | dependencies)
+
+    def test_framework_import_derivation_still_requires_exact_loader_code(self):
+        fixture(self.actual, prefix=True, instruction=0x56)
+        with self.assertRaisesRegex(ValueError, 'differs from the exact SDK'):
+            metaclass.framework_imports(self.actual, self.reference)
 
 
 if __name__ == '__main__':

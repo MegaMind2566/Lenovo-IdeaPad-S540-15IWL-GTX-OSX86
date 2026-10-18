@@ -25,11 +25,14 @@ not an initialized GPU driver or a replacement for the released v9 package.
   physical contiguity when requested, bounded CPU mappings and deferred free
   until the last CPU mapping closes. Limits are 8,192 pages per allocation,
   32 allocations and 128 MiB of total Darwin-owned page storage.
-- Device mappings use a retained published device `IOMapper`, or an explicit
-  direct command only when the provider has no `iommu-parent` property and
-  the atomically observed system mapper is null. The latter is XNU's settled
-  no-system-mapper state. Unknown, required, unresolved and conflicting mapper
-  states are refused without waiting. Admission is rechecked around preparation.
+- Device mappings use a retained published device `IOMapper`, or a Direct route
+  positively accepted by a real IOKit `kBypassed` command. Direct admission
+  retains the actual published, live Platform Expert, requires no platform
+  mapper-present property and no `iommu-parent` on the exact opened provider,
+  creates the real probe, then repeats those observations. Every Direct DMA
+  allocation also uses `kBypassed`. Raw null metadata never attests a route.
+  Unknown, required, unresolved and conflicting states are refused before a
+  potentially waiting factory. Admission is rechecked around preparation.
 - DMA page addresses respect the original RM's requested address width. Initial
   width is 32 bits, matching the original OS device setup. A mapping must resolve
   to the original physical pages: bounce buffers are refused because continually
@@ -58,12 +61,12 @@ not an initialized GPU driver or a replacement for the released v9 package.
   `Session::requiresDmaRemap(NvBool &)` is the status-bearing admission query
   before RM state exists. `queryRmDmaRemap(nv_state_t *, NvBool &)` additionally
   requires the exact active RM binding. Both preserve output on failure.
-  Darwin attests the supported policy only for this opened provider's retained,
-  published device mapper, revalidated under provider arbitration on each query.
-  The older `Direct` DMA exercise is insufficient for this admission: the
-  transport has no NVIDIA bypass-PTE implementation and no attested direct
-  provider policy. Direct, unknown, unresolved and revoked states therefore
-  return a status failure, never an inferred Boolean. The original scalar
+  Darwin attests the supported policy through this opened provider's retained
+  published device mapper, or the actual framework-accepted Direct route.
+  Both implement explicit no-bounce DMA mapping and return `NV_TRUE`; there is
+  no NVIDIA bypass-PTE implementation for `NV_FALSE`. Unknown, unresolved,
+  unattested and revoked routes return a status failure, never an inferred
+  Boolean. Each query repeats the real provider/platform attestation. The scalar
   callback terminates on a missed gate; it cannot return a fallback `NV_FALSE`.
 - Interrupt installation requires actual RM top-half/fault, locked and unlocked
   bottom-half, hardware-mask and dispatch-readiness callbacks. Public IOKit
@@ -109,6 +112,16 @@ owner and must not be used for a failed operational adapter session.
 
 ## Explicit remaining limits
 
+- Direct admission supports the normal single published Platform Expert boot
+  lifecycle recorded in [DIRECT-ROUTE-CONTRACT.json](DIRECT-ROUTE-CONTRACT.json).
+  Pinned XNU makes its mapper-required decision before publishing the Platform
+  Expert. After settled None, its remaining normal writer can only publish a
+  live mapper, which `kBypassed` rejects. An atomic null read is only the guard
+  against entering the sentinel wait; the accepted factory is positive proof.
+  Concurrent Platform Expert restart/replacement or external mapper-policy
+  writers fall outside this source argument. XNU's factory has no general
+  timeout, so this is not a deadline guarantee for arbitrary boot mutations.
+
 - Active allocations and retirements share the bounded pool of 32 ownership
   records, 8,192 pages per allocation and 128 MiB of retained backend storage.
   The 33rd outstanding allocation fails without reusing a retired resource.
@@ -136,7 +149,7 @@ owner and must not be used for a failed operational adapter session.
 
 ## Validation
 
-The shared state-machine/ABI native harness currently passes 396 assertions and
+The shared state-machine/ABI native harness currently passes 421 assertions and
 128 complete allocation/map/unmap/cleanup cycles. It includes ownership refusal,
 constructor and completion quarantine, mapper admission, bounce/address-mask
 policy, CPU-map deferred free, contiguous output width, scoped PCI access and
@@ -156,18 +169,26 @@ per-allocation completion failures and retry, mapper revocation, safe remapping,
 CPU-alias lifetime and exact pool exhaustion. These are functional native
 ownership models; they do not execute the original GPU initialization body.
 
+Direct-route tests cover real-factory delegation, missing/changed platform and
+provider facts, refusal before a possible wait, partial probe cleanup, output
+preservation, physical-identity DMA output and retained-map reactivation after
+IRQ retirement. Three provenance checks verify the pinned Apple copies, boot
+publication ordering, mapper writers and actual `kBypassed` rejection behavior.
+
 Local Linux execution passed plain and fatal AddressSanitizer/UndefinedBehaviorSanitizer
 runs. LeakSanitizer could not run in the local container because process/task
 inspection was unavailable. The earlier isolated component cross-probe matched its 32-operation SDK
 reference. The earlier [native Apple build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39169319480) from `d81b198` compiled the actual transport inside all 25 execution
 units and matched the complete reviewed platform-import set; the DMA-policy
 violation path reuses the already reviewed panic import. That baseline's 307
-checks passed with fatal sanitizers. The retirement and page-count changes pass
-396 local Linux checks, including address, undefined-behavior and function-type
+checks passed with fatal sanitizers. The current transport changes pass
+421 local Linux checks, including address, undefined-behavior and function-type
 sanitizers. Both callback ABIs compile against the pinned original NVIDIA
 header. The four changed production translation units also cross-compile to
 x86_64 Darwin Mach-O with the pinned kernel SDK, warnings as errors and the
-4 KiB frame bound. The backend's 31 platform imports are contained in the
-32-operation independent SDK reference; retirement adds no platform import.
+4 KiB frame bound. The backend's 32 platform imports are contained in the
+33-operation independent SDK reference. Direct adds `IOService::getPlatform`;
+the four production units together have 34 platform imports, including the
+already reviewed `panic` outside that reference.
 An authoritative native Apple rebuild and physical adapter execution remain
 separate requirements.

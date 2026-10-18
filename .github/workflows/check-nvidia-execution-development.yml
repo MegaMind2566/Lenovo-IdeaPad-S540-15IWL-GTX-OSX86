@@ -136,6 +136,7 @@ jobs:
             build/nvidia-execution/services-preflight/**/*.log
             build/nvidia-execution/metaclass-preflight/**/*.json
             build/nvidia-execution/metaclass-preflight/**/*.log
+            build/nvidia-execution/metaclass-preflight/*.o
             build/nvidia-execution/firmware-checks/firmware-assets-checks.json
             build/nvidia-execution/native-checks/execution-checks.json
             build/nvidia-execution/native-checks/**/*.json
@@ -143,6 +144,9 @@ jobs:
             build/nvidia-execution/kernel-checks/execution-kernel-build.json
             build/nvidia-execution/kernel-checks/**/*.json
             build/nvidia-execution/kernel-checks/**/*.log
+            build/nvidia-execution/kernel-checks/execution-bridge.o
+            build/nvidia-execution/kernel-checks/S540NvidiaGspPower.o
+            build/nvidia-execution/kernel-checks/sdk-power-metaclass-reference.o
             build/nvidia-execution/original-global-lifecycle/**/*.json
             build/nvidia-execution/original-global-lifecycle/**/*.log
           if-no-files-found: warn

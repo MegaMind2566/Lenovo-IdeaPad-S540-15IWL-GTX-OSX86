@@ -184,6 +184,15 @@ class Object:
         # canonical name in separately compiled/reference/relocatable objects.
         return sorted(matches, key=lambda value: value.name)[0]
 
+    def _cstring_target(self, section: Section, address: int) -> dict:
+        if not section.address <= address < section.address + section.size:
+            raise ValueError('Loader class-name target points outside its cstring section.')
+        offset = section.offset + address - section.address
+        end = self.data.find(b'\0', offset, section.offset + section.size)
+        if end < 0:
+            raise ValueError('Unterminated loader class-name string.')
+        return {'cstring': self.data[offset:end].decode('ascii')}
+
     def target(self, section: Section, relocation: Relocation) -> tuple[dict, Symbol | None]:
         start = section.offset + relocation.offset
         raw = int.from_bytes(self.data[start:start + relocation.width], 'little', signed=relocation.pc_relative)
@@ -199,6 +208,12 @@ class Object:
                     raise ValueError('Loader calls an interior code addend.')
                 function = self._code_symbol(symbol.section, symbol.value)
                 return {'function': _function_name(function.name)}, function
+            if target_section.name == '__cstring':
+                # A relocatable link may name a defined string symbol where
+                # the compiler used a section-relative relocation. Resolve
+                # the actual symbol+addend address; retain the exact string,
+                # relocation encoding and caller instruction comparison.
+                return self._cstring_target(target_section, symbol.value + raw), None
             return {'data': symbol.name, 'addend': raw}, None
         target_section = self.sections[relocation.symbol - 1]
         address = raw
@@ -211,11 +226,7 @@ class Object:
             function = self._code_symbol(relocation.symbol, address)
             return {'function': _function_name(function.name)}, function
         if target_section.name == '__cstring':
-            offset = target_section.offset + address - target_section.address
-            end = self.data.find(b'\0', offset, target_section.offset + target_section.size)
-            if end < 0:
-                raise ValueError('Unterminated loader class-name string.')
-            return {'cstring': self.data[offset:end].decode('ascii')}, None
+            return self._cstring_target(target_section, address), None
         symbols = [symbol for symbol in self._defined(relocation.symbol) if symbol.value <= address]
         if not symbols:
             raise ValueError('Loader data relocation has no named owner.')
@@ -321,12 +332,13 @@ def verify_no_initializers(path: Path) -> None:
 
 
 def verify_metaclass_initializers(actual: Path, reference: Path) -> dict:
+    import json
     reference_graph = Object(reference).loader_graph()
     _review_reference(reference_graph)
     actual_graph = Object(actual).loader_graph()
     if actual_graph != reference_graph:
-        raise ValueError('Actual loader initialization differs from the exact SDK metaclass reference.')
-    import json
+        raise ValueError('Actual loader initialization differs from the exact SDK metaclass reference: ' +
+                         json.dumps({'actual': actual_graph, 'reference': reference_graph}, sort_keys=True))
     canonical = json.dumps(reference_graph, sort_keys=True, separators=(',', ':')).encode()
     return {'format': 1, 'status': 'matched-exact-metaclass-codegen',
             'class': CLASS_NAME, 'initializer_entries': sum(
@@ -342,6 +354,44 @@ def verify_metaclass_initializers(actual: Path, reference: Path) -> dict:
             'reference_source_sha256': hashlib.sha256(REFERENCE.read_bytes()).hexdigest(),
             'class_declaration_sha256': hashlib.sha256(CLASS_HEADER.read_bytes()).hexdigest(),
             'kernel_execution': 'not_tested', 'production_candidate_allowed': False}
+
+
+def framework_imports(actual: Path, reference: Path) -> tuple[set[str], set[str]]:
+    """Derive inherited SDK-vtable imports without approving project methods.
+
+    The reference's compiler-generated IOService/OSMetaClass vtables refer to
+    the inherited framework methods as well as our declared virtual overrides.
+    Only overrides actually provided by the project can be subtracted. Their
+    private namespace is checked, so another unimplemented project method
+    cannot become a supposedly available framework operation.
+    """
+    verify_metaclass_initializers(actual, reference)
+    project = Object(actual)
+    defined = {symbol.name for symbol in project.symbols if symbol.section and
+               symbol.kind & 0xe0 == 0 and symbol.kind & 1 and symbol.kind & 0x0e == 0x0e}
+    undefined = {symbol.name for symbol in Object(reference).symbols if
+                 symbol.kind == 1 and not symbol.section and not symbol.value}
+    private_prefixes = tuple(prefix + owner for prefix in ('__ZN', '__ZNK')
+                             for owner in ('18S540GspPowerKernel',
+                                           '18S540NvidiaGspPower6Detail8Protocol'))
+    dependencies = {name for name in undefined if name.startswith(private_prefixes)}
+    if dependencies - defined:
+        raise ValueError('The metaclass reference has an unimplemented project dependency: ' +
+                         str(sorted(dependencies - defined)))
+    if (undefined & defined) - dependencies:
+        raise ValueError('Project definitions replace an inherited framework operation.')
+    # Only these actual SDK ancestors supply the reference's inherited slots.
+    # A private default member initializer can add other unresolved symbols
+    # without changing the loader graph; it must never approve those as SDK.
+    sdk_ancestors = ('OSMetaClass', 'OSMetaClassBase', 'OSObject',
+                     'IORegistryEntry', 'IOService')
+    framework_prefixes = tuple(prefix + str(len(owner)) + owner
+                               for prefix in ('__ZN', '__ZNK') for owner in sdk_ancestors)
+    framework = undefined - dependencies
+    if unreviewed := {name for name in framework if not name.startswith(framework_prefixes)}:
+        raise ValueError('The metaclass reference imports outside its SDK ancestry: ' +
+                         str(sorted(unreviewed)))
+    return framework, dependencies
 
 
 def compile_reference(output: Path, kernel_flags: list[str], cpp_flags: list[str],

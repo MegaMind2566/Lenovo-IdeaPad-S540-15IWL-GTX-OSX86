@@ -130,7 +130,10 @@ struct Owner::Impl {
         result.powerRevoked = lease.revoked;
         result.powerAcknowledged = lease.acknowledgementSent;
         result.blockedGates = kBlockedGates;
-        if (power.status() == NV_OK) result.blockedGates &= ~NvU32(PowerLifetime);
+        // A completed child lease proves current resource preparation, not a
+        // deadline-safe original entry. Some original init waits allow >=60s;
+        // the 30s PM acknowledgement budget cannot cover an uncancellable
+        // original call followed by shutdown on this same worker.
         if (context) {
             S540GspContextSnapshot facts{}; s540GspContextSnapshot(context, &facts);
             result.adapterInitialized = facts.adapterInitialized;
@@ -254,8 +257,9 @@ struct Owner::Impl {
         if (power.status() != NV_OK) { state.initializationStatus = NV_ERR_NOT_READY; return NV_ERR_NOT_READY; }
         state.initializationStatus = NV_ERR_NOT_SUPPORTED;
         // Persistent ownership and PM revocation do not prove native ABI
-        // closure, sufficient allocation capacity or a genuine kernel stack
-        // boundary for the original Resource Manager. Never enter it here.
+        // closure, sufficient allocation capacity, original-entry cancellation
+        // within the PM deadline, or a genuine kernel stack boundary for the
+        // original Resource Manager. Never enter it here.
         return NV_ERR_NOT_SUPPORTED;
     }
     NV_STATUS stop() {

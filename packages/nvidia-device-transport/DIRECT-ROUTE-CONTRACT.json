@@ -1,0 +1,65 @@
+{
+  "format": 1,
+  "status": "implemented-source-backed-profile; kernel-and-device-execution-unverified",
+  "repository": "apple-oss-distributions/xnu",
+  "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+  "license": "reference/APPLE_LICENSE",
+  "source_copies": [
+    {
+      "source": "iokit/IOKit/IOMapper.h",
+      "path": "reference/IOMapper.h",
+      "sha256": "87e82d46c961fb3caadc076939f1eb8313e2de636682f6826f57e8db34ee95ad",
+      "git_blob": "c451225adac0ee7e1aa72c49ed6c0f1c7430c446"
+    },
+    {
+      "source": "iokit/Kernel/IOMapper.cpp",
+      "path": "reference/IOMapper.cpp",
+      "sha256": "de81e9e4874a973888cedb64a3fde9abaa0b443c546d89df931e987b13179a3c",
+      "git_blob": "ce9bfe840f199a890512bbb690d8acaecc10a721"
+    },
+    {
+      "source": "iokit/Kernel/IOPlatformExpert.cpp",
+      "path": "reference/IOPlatformExpert.cpp",
+      "sha256": "1725bb19ea82cf4b5fc694f7a2c2cce488181a1b3aaac60bdc20505efc197ba3",
+      "git_blob": "b0e14a2bdb01f54c18a32e525258c657e6610bdc"
+    },
+    {
+      "source": "iokit/Kernel/IODMACommand.cpp",
+      "path": "reference/IODMACommand.cpp",
+      "sha256": "9ae5426721f4251fcca37a44cb99372e02a4a6c445bb7d2034f0a75e3721093b",
+      "git_blob": "bb0930d4c22d2060bc10de815286300a116aaaaa"
+    }
+  ],
+  "publication_accessor": {
+    "source": "iokit/Kernel/IOService.cpp",
+    "git_blob": "395e5ecf719bdb49edbcecfb6fcc9bfc994b0bf7",
+    "getter_lines": "1570-1574",
+    "getter": "IOPlatformExpert * IOService::getPlatform(void) returns gIOPlatform",
+    "setter_lines": "1597-1600",
+    "setter": "IOService::setPlatform(IOPlatformExpert *platform) assigns gIOPlatform = platform",
+    "sdk_reference": "tests/sdk_import_reference.cpp:s540DeviceTransportSdkPublishedPlatform"
+  },
+  "supported_profile": {
+    "platform": "The single live published root Platform Expert has completed its normal boot mapper decision; platform restart/replacement, external calls to setMapperRequired and external writes to IOMapper::gSystem are outside this profile.",
+    "provider": "The exact retained, opened PCI provider has no iommu-parent property; the same retained published Platform Expert has no kIOPlatformMapperPresentKey property.",
+    "negative_wait_guard": "An atomic gSystem == nullptr observation only rejects potential waiting. Unknown (1), Required (2), live mapper and all other values refuse before calling a factory. Null alone never admits a policy.",
+    "positive_attestation": "Create a real IODMACommand with kBypassed and no explicit mapper; require a non-null accepted command and repeat all real platform/provider observations before releasing the probe.",
+    "actual_dma_commands": "Every Direct allocation uses kBypassed, never kUnmapped. Preparation and each generated page must equal the original CPU physical backing and satisfy the requested address width.",
+    "revalidation": "Repeat positive attestation for every policy query, before and after initial DMA mapping, and before and after retained-map reactivation; refuse changed platform/provider metadata without releasing retained pages or IOVA.",
+    "scalar": "NV_TRUE selects NVIDIA explicit DMA callbacks for CPU physical PTEs. No NV_FALSE bypass-PTE path is implemented."
+  },
+  "bounded_factory_argument": [
+    "IOMapper.h:68-73 defines NoMapper=0, Unknown=1, HasMapper=2 and WaitMask=3; checkForSystemMapper only waits for flag values.",
+    "IOMapper.cpp:64 initially publishes Unknown. setMapperRequired at 143-153 can write Required/None; IOMapper::start at 118-122 can publish a live mapper.",
+    "IOPlatformExpert.cpp:157 calls setMapperRequired from its mapper-present property before setPlatform(this) at 175 publishes the platform. This is its only setMapperRequired call.",
+    "Within the normal already-published PE boot lifecycle there is no transition from settled None back to Unknown/Required. A later system IOMapper can only replace None with a live mapper, which kBypassed rejects without entering the sentinel wait.",
+    "IODMACommand.cpp:293-295 resolves the real system mapper for kBypassed; 326-330 rejects kBypassed when a mapper exists. kUnmapped would skip resolution and is not proof.",
+    "This is a supported boot-lifecycle source argument, not a general timed IODMACommand API. If the profile cannot be established, Direct remains unavailable."
+  ],
+  "remaining_limits": [
+    "No hardware flags, firmware readiness, GPU initialization, IRQ delivery or platform power lifetime are established by this route.",
+    "The probe can fail for allocation pressure; failure remains closed and preserves query output.",
+    "No timeout wrapper can safely make the original sentinel wait bounded; the route refuses unresolved/required states before factory entry.",
+    "Retirement retains the existing finite pool and does not prove full RM initialization allocation capacity."
+  ]
+}
