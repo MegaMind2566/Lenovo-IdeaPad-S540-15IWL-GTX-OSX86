@@ -318,3 +318,41 @@ The v9 [verified build record](../../README.md#documentation-and-downloads) reco
 ## Deferred brightness regression after the v9 checkpoint
 
 Brightness works normally when booting the non-NVIDIA EFI. The NVIDIA-test EFI has unavailable adjustment and a disabled system slider. In that configuration, Intel UHD 620 (`3EA5`) still exposes Metal 3 and the internal Full HD main display is online. Lilu 1.7.2, WhateverGreen 1.7.1 and BrightnessKeys 1.0.3 are loaded, `-igfxblr` is present and AppleBacklightDisplay is active. This establishes a difference between EFI configurations; the responsible setting or probe behavior has not been isolated. The working non-NVIDIA EFI is retained. Investigation is deferred by request, with no additional tests, packages or patches.
+
+
+## System Information audit: 19 October 2026
+
+The private System Information export includes IORegistry. The user identifies
+the active boot route as the external **240 GB test EFI**; the APFS macOS system
+is on the separate USB Samsung 960 EVO. This audit does not validate the 960 EVO's
+own EFI with the native Wi-Fi change. Raw reports and private config identifiers
+are excluded from the repository.
+
+| Component | Evidence and remaining boundary |
+|---|---|
+| Intel UHD Graphics 620 | IntelAccelerator and CFL framebuffer attached; Metal 3 reported. The compatibility device ID 3EA5 is intentional. |
+| Memory | 8 GB SK Hynix + 4 GB Samsung DDR4-2400, both reported OK; not a RAM stress test. |
+| Native Wi-Fi | AirportItlwm 2.4.0 loaded with the selected firmware and scanned networks. IORegistry exposes both Skywalk and the driver's Ethernet bridge; Network's Ethernet classification is compatible with this native fork. No standalone itlwm is shown loaded. |
+| Bluetooth | IntelBluetoothFirmware 2.4.0 and BlueToolFixup 2.7.2 loaded, controller On; no connected peripheral in this snapshot. Earlier user functional checks remain separate evidence. |
+| Audio | VoodooHDA 3.6.10 exposes internal speakers and microphone at 48 kHz; quality and resume are not newly tested. |
+| Webcam | Integrated UVC camera present; not a new recording test. |
+| USB | USBToolBox/UTBMap loaded, nine mapped HS/SS ports; both attached storage bridges negotiate 5 Gb/s. |
+| Battery | Good, 296 cycles, 100%, no permanent failure reported. Firmware capacity values are not a calibrated health or runtime measurement. |
+| Internal PM981a | IONVMeController attached and Windows volumes readable. The configured IONVMeFamily block does not prevent attachment in this boot. SMART Verified and TRIM Yes do not establish macOS reliability. |
+| SD reader | O2Micro 1217:8621 is present on PCIe without a specific child driver; Card Reader section empty. |
+| Fingerprint | Goodix 27C6:55B4 on HS02 has generic USB services; no biometric integration shown. |
+
+The next non-NVIDIA work is internal-NVMe handling/reliability, full lid/sleep/wake
+and peripheral recovery, measured runtime, SD support and fingerprint feasibility.
+Existing keyboard-icon and audio refinements remain deferred. Empty Thunderbolt
+information alone is not evidence of a missing supported controller.
+
+A private label-only config trial was prepared for the same test EFI. It names the
+CPU through the already loaded RestrictEvents 1.1.6, supplies the verified NVIDIA
+model and slot text, and corrects the panel EDID name descriptor from FE to FC with
+its checksum updated. The EDID differs in exactly two bytes; timing and IDs are
+preserved. CPU ProcessorType 0601 is required by RestrictEvents' four-core string
+patch. MacBookPro16,2 and all other platform identifiers are preserved. Both
+baseline and trial pass OpenCore 1.0.8 ocvalidate, and reversing the explicit edits
+reproduces the baseline. Displayed names remain **pending a laptop reboot**;
+no NVIDIA acceleration or new peripheral support is added by these labels.

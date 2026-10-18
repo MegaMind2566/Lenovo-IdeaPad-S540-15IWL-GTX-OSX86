@@ -20,13 +20,20 @@ EFI with this change. Hardware-label refinements will also target the test EFI.
 The native macOS menu and settings show the Wi-Fi switch, available networks and
 an active wireless connection. The user confirmed joining a network and Internet
 browsing, then reported reboot reconnection and Wi-Fi recovery after sleep working.
-These are user observations and supplied settings screenshots; no new kernel or
-collector report was analyzed. Wi-Fi recovery does not establish complete laptop
-suspend/wake behavior for other devices.
+These functional results are user observations and supplied settings screenshots.
+A subsequent System Information export with IORegistry confirms AirportItlwm 2.4.0
+loaded on the laptop, its firmware and scanned networks. Wi-Fi recovery does not
+establish complete laptop suspend/wake behavior for other devices.
 
 The existing service retained the name `Ethernet`, while already showing a Wi-Fi
 icon and the native wireless settings. Renaming that service to `Wi-Fi` corrected
 the label; it was the same active connection shown through two settings paths.
+The subsequent IORegistry also shows both `AirportItlwmSkywalkInterface` and
+`AirportItlwmEthernetInterface`, with the latter carrying BSD `en0`. This is the
+bridge implemented by the pinned native fork, not evidence of a second itlwm
+installation. Renaming the service does not change its interface class. The
+AirPort section's inactive snapshot does not override the user's connection tests;
+native throughput and long-term reliability remain unmeasured.
 
 The successful route used the compiled and signed driver from native Intel macOS
 CI run [39171971175](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39171971175),
