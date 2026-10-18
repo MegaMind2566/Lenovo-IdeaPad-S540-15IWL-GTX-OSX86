@@ -1,75 +1,70 @@
 # O2Micro SD reader: native-driver trial
 
-Trial result: **reader visible, card unreadable**, as reported by the user on
-October 19. Target: S540-15IWL GTX 81SW and its external
-240 GB test EFI. The operating system remains on the separate USB Samsung SSD.
+Current result: **native driver attached and card present, but card not
+configured**. The card remains unreadable. Target: S540-15IWL GTX 81SW and the
+external 240 GB test EFI; macOS remains on the separate USB Samsung SSD.
 
-The October 19 System Information/IORegistry export identifies the O2Micro
+## Verified hardware and driver
+
+The initial October 19 System Information/IORegistry export identifies O2Micro
 `1217:8621`, subsystem `17AA:3803`, SDHCI class `080501`, under
-`PciRoot(0x0)/Pci(0x1C,0x0)/Pci(0x0,0x0)`. No SD child driver is attached.
-Apple's native `AppleSDXC` 3.5.4 is already loaded as x86_64 on Darwin 25.6.0;
-being loaded does not establish attachment or support for this reader.
+`PciRoot(0x0)/Pci(0x1C,0x0)/Pci(0x0,0x0)`, without an attached SD driver.
+Native AppleSDXC 3.5.4 was already loaded as x86_64 on Darwin 25.6.0.
 
-## Exact scope
+The trial prepends NUL-terminated ASCII `pci14e4,16bc` to the reader's compatible
+Data property and preserves all its original compatibility entries and real
+vendor/device IDs. No extra kext, older Apple binary or root patch is distributed.
+No O2-specific PCI register/clock/power initialization was implemented here.
 
-The private trial config prepends the NUL-terminated ASCII `pci14e4,16bc` to the
-reader's existing `compatible` Data property. It preserves all original entries,
-including `pci1217,8621`, the subsystem identifier, class and ACPI name. The real
-vendor/device IDs are not changed. There is no additional kext, old Apple binary,
-root patch, PCI configuration-register write or O2-specific clock/power sequence.
+The subsequent export with the SD inserted now confirms this exact chain:
 
-This is a **matching hypothesis**, not a new driver or established SD support.
-The installed AppleSDXC 3.5.4 personality has not been read back, so its acceptance
-of this compatible name remains unverified. A no-effect result is possible.
+`1217:8621 -> AppleSDXC -> AppleSDXCSlot@1 -> AppleSDXCBlockStorageDevice -> IOBlockStorageDriver`
 
-The motivation is a [same-ID Fujitsu implementation](https://github.com/KrzysiuWojcik/Fujitsu-Lifebook-U749-Hackintosh/blob/main/README.md):
-its archived Monterey/Ventura setup reports `1217:8621` working through
-`14e4:16bc` plus CtlnaSDXC. Its current Tahoe section explicitly says the SD
-reader is untested. That result does not validate this native-only trial.
+AppleSDXC's actual IONameMatch includes `pci17a0,9755` and `pci14e4,16bc`;
+IONameMatched is `pci14e4,16bc`. The matching hypothesis is therefore verified on
+this laptop. The actual driver attachment is more than a new System Information
+label, but does not establish working card access.
 
-The machine-readable scope and acceptance criteria are in
-[sd-native-trial.json](../../config/profiles/sd-native-trial.json).
+## Remaining failure
 
-## Delivery and acceptance
+| Observation | Result |
+|---|---|
+| Card Present | Yes |
+| Card Configured | No |
+| Published IOMedia/BSD disk under the SD reader | None |
+| User-reported card/file reading | Not working |
 
-The private delivery contains one ready config, the previously working native
-Wi-Fi config for recovery, and short Italian instructions. It also retains the
-previously prepared CPU/panel/NVIDIA label edits, whose displayed results remain
-pending. Personal configs and reports are not committed here.
+The driver detects insertion and creates its storage service but does not finish
+card configuration or publish card media. This stops before partition/filesystem
+mounting. The exported slot clock/voltage values are not sufficient to identify
+the failing command or attribute the fault to a particular O2 quirk. The provided
+logs do not contain a usable SD initialization trace.
 
-Replace only `EFI/OC/config.plist` on the 240 GB test EFI. Boot that EFI, insert a
-test SD card, check mounting and file reading, eject it normally and reinsert it.
-Do not format or repartition any disk for this test. A successful config
-validation is separate from driver attachment and actual card operation.
+The next investigation concerns card initialization, including whether the card
+was present at boot or inserted later, before selecting any driver/register
+change. Another identical System Information export is not requested. Native
+card access, eject/reinsertion and resume remain unverified.
 
-If the native trial does not attach, obtain the installed AppleSDXC Info.plist
-and a new System Information export before selecting another matching or driver
-strategy. Do not stack CtlnaSDXC, arbitrary ID changes or unrelated ACPI tables.
+## Source and delivery scope
 
-## Other hardware scope
+A [same-ID Fujitsu implementation](https://github.com/KrzysiuWojcik/Fujitsu-Lifebook-U749-Hackintosh/blob/main/README.md)
+reports `1217:8621` working through `14e4:16bc` plus CtlnaSDXC on archived
+Monterey/Ventura setups. Its current Tahoe section explicitly says the SD reader
+is untested. That historical result motivated the native matching trial; it does
+not establish card access on this S540.
 
-The internal PM981a is detected and readable, including capacity/free space, and
-is removed from immediate fix priorities by the user. There is no new symptom
-justifying USB, Bluetooth or battery changes. The lid device is attached; the
-clamshell policy needs further analysis before a sleep patch. Fan telemetry
-requires verified EC addresses/scaling. Goodix enumeration does not supply native
-Touch ID support. These areas are not silently modified by the SD trial.
+The machine-readable scope is in
+[sd-native-trial.json](../../config/profiles/sd-native-trial.json). The private
+trial delivery contains one config, the previously working native Wi-Fi config
+for recovery and short Italian instructions. CPU/panel/NVIDIA label edits are
+retained and now confirmed in the subsequent export. Personal configs and raw
+reports are excluded from this repository.
 
+The internal PM981a is detected/readable and remains outside immediate fault
+priorities. The user explicitly requested removing its NVMe kernel block in the
+**next package**, not as an immediate separate change. That removal remains queued;
+no new private package has been generated from this audit.
 
-## Reported trial result: October 19
-
-The user reports that the reader appears in System Information but does not read
-the SD card. This is not a successful card-access checkpoint. Without a new
-IORegistry snapshot, neither driver attachment after this trial nor publication
-of a card media object is established. A filesystem/mounting problem cannot yet
-be distinguished from card initialization or driver-matching failure.
-
-The minimum next evidence is a new System Information export with the SD card
-inserted. Its IORegistry, Card Reader and storage sections can show the chain
-from PCI reader to driver, media/BSD disk and volume. The earlier export predates
-this trial and cannot prove the updated state. Read back the installed AppleSDXC
-personality if matching remains unresolved; no next driver patch is selected yet.
-
-The user also requested removal of the internal-NVMe kernel block **in the next
-package**, not as an immediate separate change. That removal is queued. Existing
-private deliveries are not silently changed while diagnosing this result.
+There is no new evidence justifying USB, Bluetooth or battery patches. The lid
+sensor is attached, fan telemetry needs verified firmware EC addresses/scaling,
+and Goodix USB enumeration does not provide native Touch ID integration.

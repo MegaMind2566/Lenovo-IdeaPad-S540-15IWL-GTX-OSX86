@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "reader-enumerated-card-unreadable-user-report",
+  "status": "driver-attached-card-present-unconfigured",
   "target": "Lenovo IdeaPad S540-15IWL GTX 81SW",
   "boot_scope": "external 240 GB test EFI",
   "kernel": "Darwin 25 / x86_64",
@@ -28,7 +28,7 @@
     "preserve_existing_compatible_entries": true,
     "preserve_hardware_vendor_and_device_ids": true,
     "additional_kexts": [],
-    "property_match_verified_for_installed_driver": false
+    "property_match_verified_for_installed_driver": true
   },
   "evidence": [
     {
@@ -48,12 +48,23 @@
   ],
   "laptop_result": {
     "date": "2026-10-19",
-    "source": "user report after the native matching trial",
+    "source": "subsequent private System Information export with SD inserted, October 19 2026",
     "reader_visible_in_system_information": true,
     "card_reading_confirmed": false,
-    "driver_attachment_verified_after_trial": false,
+    "driver_attachment_verified_after_trial": true,
     "media_enumeration_verified_after_trial": false,
-    "next_evidence": "new System Information export with the SD card inserted"
+    "next_evidence": "identify failed card-initialization operation or insertion/boot-state dependency; repeating the same SPX is unnecessary",
+    "card_present": true,
+    "card_configured": false,
+    "iomedia_published": false,
+    "io_name_matched": "pci14e4,16bc",
+    "driver_chain": [
+      "AppleSDXC",
+      "AppleSDXCSlot@1",
+      "AppleSDXCBlockStorageDevice",
+      "IOBlockStorageDriver"
+    ],
+    "media_enumeration_checked_after_trial": true
   },
   "next_package": {
     "remove_internal_nvme_kernel_block": true,

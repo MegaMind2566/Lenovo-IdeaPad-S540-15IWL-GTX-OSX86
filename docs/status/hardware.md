@@ -367,3 +367,39 @@ the exact O2Micro 1217:8621 path through its compatible property, while retainin
 real IDs and original compatibility entries. Native AppleSDXC 3.5.4 is loaded,
 but its matching personality and actual card operation remain unverified. No
 USB, Bluetooth, battery or sleep-policy setting is changed by this trial.
+
+
+## Follow-up names and SD audit: 19 October 2026
+
+The subsequent private System Information export with the SD inserted confirms
+the three label changes on the 240 GB test EFI:
+
+| Item | Reported label and verified boundary |
+|---|---|
+| CPU | Intel Core i7-8565U; four cores and Hyper-Threading. The displayed 2 GHz is unchanged from before the name edit and is not a new live frequency test. |
+| Internal panel | NV156FHM-N61, 1920x1080. EDID checksum valid and exactly bytes 111/127 differ from the original; timing and identifiers preserved. |
+| Intel GPU | Intel UHD Graphics 620 with IntelAccelerator and the Intel Metal plugin. |
+| NVIDIA GPU | NVIDIA GeForce GTX 1650 Max-Q, slot GPU interna; physical 10DE:1F91 retained, only the existing probe/generic framebuffer. |
+| RAM | 8 GB SK Hynix + 4 GB Samsung DDR4-2400, both reported OK. |
+| Internal NVMe | Samsung MZVLB512HBJQ-000L2, same capacity and readable Windows volume; outside immediate fault priorities. |
+| Other peripherals | Audio, Bluetooth, Wi-Fi, USB/storage, battery and UVC camera retain the preceding parameters; no new regression evident in this snapshot. |
+
+The NVIDIA display entry now includes a Metal 3 field, while also reporting no
+loaded graphics kext. IORegistry contains only IntelAccelerator and the Intel
+MetalPluginName; NVIDIA still has S540NvidiaPCIProbe 0.9.0 and generic NDRV support,
+with no NVIDIA accelerator/Metal plugin. The profiler field is misleading and is
+not a new acceleration result. The cause of the closed reporter's inconsistent
+output is not established. The config contains no Metal-capability injection.
+
+MacBookPro16,2/MacBook Pro remains the compatibility identity. Magic Trackpad 2
+is VoodooInput's emulation of the physical ELAN device. Generic SSD/AHCI controller
+labels, Voodoo audio labels and Apple/THIRD_PARTY_DONGLE in Bluetooth are driver/API
+representations; the USB Bluetooth device remains Intel 8087:0AAA. The report's
+memory-upgradability field does not establish the Lenovo's physical upgrade options.
+
+The [SD trial](../../packages/sd-native/README.md) now has a verified native match:
+AppleSDXC is attached through IONameMatched=pci14e4,16bc and the slot reports
+Card Present=Yes, Card Configured=No. Block-storage services exist but no IOMedia
+or card disk is published. The remaining failure is before card media/volume
+publication, rather than a demonstrated filesystem/mounting problem. Card access
+remains unresolved. No repeat SPX is requested from this same state.
