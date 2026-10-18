@@ -203,3 +203,8 @@ A follow-up export confirms CPU/panel/NVIDIA labels. The NVIDIA entry's Metal 3
 field is misleading: only Intel has an accelerator and Metal plugin. Native SD
 matching now works, but card configuration fails before IOMedia publication.
 The NVMe-block removal remains queued for the next package, as requested.
+
+Hardware v2 now prepares the requested NVMe-block removal plus the memory
+upgradeability flag correction. Config validation passed; installation/UI are
+pending. The SD initialization failure is retained for one focused read-only
+insertion trace, not another identical full SPX or an unverified driver change.

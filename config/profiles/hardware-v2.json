@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "status": "prepared-config-validated-runtime-pending",
+  "target": "Lenovo IdeaPad S540-15IWL GTX 81SW",
+  "boot_scope": "external 240 GB test EFI",
+  "baseline": "user-tested native Wi-Fi, CPU/panel/NVIDIA names and native SD driver attachment",
+  "changes": {
+    "remove_kernel_block_identifier": "com.apple.iokit.IONVMeFamily",
+    "system_memory_status_before": "Auto",
+    "system_memory_status_after": "Upgradable"
+  },
+  "memory_hardware": {
+    "soldered_gb": 4,
+    "sodimm_slots": 1,
+    "installed_sodimm_gb": 8,
+    "capacity_or_timing_override": false
+  },
+  "sd": {
+    "driver_attached": true,
+    "card_present": true,
+    "card_configured": false,
+    "new_functional_sd_patch_included": false,
+    "diagnostic_collector": "packages/sd-native/RACCOGLI-ERRORE-SD.command",
+    "collector_changes_driver_debug_flags": false
+  },
+  "nvidia": {
+    "label_confirmed": true,
+    "acceleration": false,
+    "profiler_metal_field_is_not_capability_evidence": true,
+    "new_capability_injection": false
+  },
+  "additional_kexts": [],
+  "sources": [
+    "https://psref.lenovo.com/syspool/Sys/PDF/IdeaPad/ideapad_S540_15IWL_GTX/ideapad_S540_15IWL_GTX_Spec.PDF",
+    "https://github.com/acidanthera/OpenCorePkg/blob/1.0.8/Docs/Configuration.tex"
+  ]
+}

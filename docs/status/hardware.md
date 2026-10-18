@@ -403,3 +403,18 @@ Card Present=Yes, Card Configured=No. Block-storage services exist but no IOMedi
 or card disk is published. The remaining failure is before card media/volume
 publication, rather than a demonstrated filesystem/mounting problem. Card access
 remains unresolved. No repeat SPX is requested from this same state.
+
+
+### Hardware v2 correction scope
+
+A private follow-up config removes the requested IONVMeFamily block and sets
+SystemMemoryStatus=Upgradable, consistent with the exact model's 4 GB soldered
+memory plus one SO-DIMM socket. OpenCore's setting changes the memory-replacement
+PlatformFeature, without altering the reported 12 GB, timings or compatibility
+model. Both edits are config-validated and runtime/UI confirmation is pending.
+The previously confirmed CPU/panel/NVIDIA names and SD driver attachment are
+retained. A focused read-only SD insertion capture accompanies the delivery;
+no new SD initialization patch is claimed.
+
+Primary memory references: [Lenovo PSREF](https://psref.lenovo.com/syspool/Sys/PDF/IdeaPad/ideapad_S540_15IWL_GTX/ideapad_S540_15IWL_GTX_Spec.PDF)
+and [OpenCore 1.0.8 configuration](https://github.com/acidanthera/OpenCorePkg/blob/1.0.8/Docs/Configuration.tex).

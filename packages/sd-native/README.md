@@ -68,3 +68,30 @@ no new private package has been generated from this audit.
 There is no new evidence justifying USB, Bluetooth or battery patches. The lid
 sensor is attached, fan telemetry needs verified firmware EC addresses/scaling,
 and Goodix USB enumeration does not provide native Touch ID integration.
+
+
+## Hardware v2 corrections and focused SD capture
+
+The next private config removes the IONVMeFamily block as requested and changes
+SystemMemoryStatus from Auto to Upgradable. Lenovo's exact S540-15IWL GTX PSREF
+specifies 4 GB soldered plus one SO-DIMM socket, populated with 8 GB here.
+OpenCore 1.0.8 documents Upgradable as clearing the soldered-system-memory
+PlatformFeature flag. No capacity, timing or CPU-frequency value is overridden;
+MacBookPro16,2 and private identifiers remain unchanged. The displayed memory
+status awaits the next boot.
+
+The [hardware v2 profile](../../config/profiles/hardware-v2.json) records the exact
+two config edits. Reversing both reproduces the complete prior config. The
+private config passes OpenCore 1.0.8 ocvalidate. Recovery uses the preceding SD
+trial config, including its former NVMe block and Auto memory status.
+
+[RACCOGLI-ERRORE-SD.command](RACCOGLI-ERRORE-SD.command) performs one focused
+read-only capture around card removal/reinsertion. It collects the SD subtree
+before/after, filtered unified logs, card-reader output, disk list and installed
+AppleSDXC Info.plist. It reads debug.SDXC if available and does not alter it.
+Logging may contain no driver messages even with --debug/--level debug; those
+options do not enable an undocumented driver debug mask. No new functional SD
+patch or old driver is included. Personal diagnostic output remains private.
+
+Generic controller/API labels, the CPU speed field and the misleading NVIDIA
+profiler Metal field are not changed through speculative capability injections.

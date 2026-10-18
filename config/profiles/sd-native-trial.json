@@ -68,6 +68,8 @@
   },
   "next_package": {
     "remove_internal_nvme_kernel_block": true,
-    "authorization": "user requested removal in the next package only; current delivery unchanged"
+    "authorization": "user authorized the next hardware correction package",
+    "delivery_profile": "config/profiles/hardware-v2.json",
+    "removal_status": "prepared-and-config-validated-runtime-pending"
   }
 }
