@@ -1,0 +1,86 @@
+{
+  "adapter_initialized": false,
+  "artifact": {
+    "bytes": 32541798,
+    "id": 12157728735,
+    "sha256": "e303e417eb5e7a8f98816541c0ad2d0d8da6509e95a3e91839f27267cf3a002d"
+  },
+  "component_controls": {
+    "authoritative_darwin_execution": true,
+    "checks_per_variant": 2398,
+    "host_system": "Darwin",
+    "status": "passed",
+    "variants": [
+      "native",
+      "sanitized"
+    ]
+  },
+  "failed_step": "Verify one actual typed NVOC dispatch against native IR and machine code",
+  "failure_reason": "The proof tool passed a relative output path to a compiler running from the original source cwd. Complete native compilation, component controls, kernel bridge link controls and original global lifecycle controls had already passed. This is not an overall green workflow.",
+  "format": 1,
+  "gsp_initialized": false,
+  "hardware_test_ready": false,
+  "job_id": 117839402512,
+  "kernel_bridge_controls": {
+    "executable": false,
+    "link_control_status": "passed",
+    "original_roots": [
+      "s540Global_RmDestroyRegistry",
+      "s540Global_RmPackageRegistry",
+      "s540Global_RmReadRegistryDword",
+      "s540Global_RmShutdownRm",
+      "s540Global_RmWriteRegistryDword",
+      "s540Global_coreInitializeRm",
+      "s540Global_rm_acquire_api_lock",
+      "s540Global_rm_acquire_gpu_lock",
+      "s540Global_rm_destroy_event_locks",
+      "s540Global_rm_disable_adapter",
+      "s540Global_rm_execute_work_item",
+      "s540Global_rm_free_private_state",
+      "s540Global_rm_gpu_handle_mmu_faults",
+      "s540Global_rm_init_adapter",
+      "s540Global_rm_init_event_locks",
+      "s540Global_rm_init_private_state",
+      "s540Global_rm_is_supported_device",
+      "s540Global_rm_isr",
+      "s540Global_rm_isr_bh",
+      "s540Global_rm_isr_bh_unlocked",
+      "s540Global_rm_release_api_lock",
+      "s540Global_rm_release_gpu_lock",
+      "s540Global_rm_run_nano_timer_callback",
+      "s540Global_rm_run_rc_callback",
+      "s540Global_rm_shutdown_adapter"
+    ],
+    "status": "compiled"
+  },
+  "kernel_execution": "not_tested",
+  "limits": [
+    "The failing typed NVOC step requires a fresh native run after the path fix.",
+    "This evidence applies only to the exact source commit and does not validate subsequent candidates.",
+    "Callbacks, aggregate stack, PM/producer closure and authentic GSP/DMA-stop admission remain separate requirements."
+  ],
+  "original_global_controls": {
+    "all_cases_passed": true,
+    "allocation_failure_cases_per_variant": 156,
+    "host_system": "Darwin",
+    "status": "passed",
+    "unavailable_calls": {
+      "native": 0,
+      "sanitized": 0
+    }
+  },
+  "overall_workflow_conclusion": "failure",
+  "production_candidate_allowed": false,
+  "reports_sha256": {
+    "kernel-checks/execution-kernel-build.json": "898d9da278c07b81642c32b882f645217abb754b1afd34309035f93ed56ee8b1",
+    "native-checks/execution-checks.json": "1ff8b4619715aff22f7931c96ecab2dd65ad462cc25b8381d950acd9c97bb1a1",
+    "original-global-lifecycle/global-lifecycle-checks.json": "41bb73cf5f05b81286ba0073460e1b9aaa2c9d722388c6d562f42d5cb4d5af6d",
+    "original-rm/checked-namespaced/darwin-compile.json": "c9b106015b7197275d5f8e9ac10d5c7a6d190594ac601b309e5477b1425e2ab9",
+    "original-rm/namespaced/darwin-compile.json": "eba526635568a9397dd46f1198578a5357d90c7bcf59006a0358bc3706666c1a",
+    "original-rm/original/darwin-compile.json": "b91dfac7b1f4b037befe21d0c8dbc0e3f7bced33be3f7744765dc289c983e5a2",
+    "prospective-checks/combined-profile/combined-profile-audit.json": "85ba0b189582a6c43678fee6d3d41d12c1dbdde0bf7661fe6055a084d0318108"
+  },
+  "source_commit": "2e3ffbb460f4b2384c36edcea84acb5241fee66f",
+  "workflow_run": 39182950863,
+  "workflow_url": "https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39182950863"
+}

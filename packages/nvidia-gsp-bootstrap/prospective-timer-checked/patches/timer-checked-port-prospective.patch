@@ -1,0 +1,44 @@
+--- a/packages/nvidia-gsp-bootstrap/timers/S540NvidiaGspTimersOriginal.c
++++ b/packages/nvidia-gsp-bootstrap/timers/S540NvidiaGspTimersOriginal.c
+@@ -244,13 +244,23 @@
+     if (deleting) { s540DarwinTimerDestroy(item->timer); s540GlobalRmHostFree(item); }
+     return NV_OK;
+ }
++NV_STATUS s540GspTimersCancelNano(nv_state_t *nv, nv_nano_timer_t *timer) {
++    S540GspDeviceTimers *device = find_device(nv);
++    NV_STATUS status = device ? cancel_nano(device, timer, NV_FALSE) : NV_ERR_INVALID_STATE;
++    if (status != NV_OK) reject(device);
++    return status;
++}
++NV_STATUS s540GspTimersDestroyNano(nv_state_t *nv, nv_nano_timer_t *timer) {
++    S540GspDeviceTimers *device = find_device(nv);
++    NV_STATUS status = device ? cancel_nano(device, timer, NV_TRUE) : NV_ERR_INVALID_STATE;
++    if (status != NV_OK) reject(device);
++    return status;
++}
+ void NV_API_CALL nv_cancel_nano_timer(nv_state_t *nv, nv_nano_timer_t *timer) {
+-    S540GspDeviceTimers *device = find_device(nv);
+-    if (!device || cancel_nano(device, timer, NV_FALSE) != NV_OK) reject(device);
++    (void)s540GspTimersCancelNano(nv, timer);
+ }
+ void NV_API_CALL nv_destroy_nano_timer(nv_state_t *nv, nv_nano_timer_t *timer) {
+-    S540GspDeviceTimers *device = find_device(nv);
+-    if (!device || cancel_nano(device, timer, NV_TRUE) != NV_OK) reject(device);
++    (void)s540GspTimersDestroyNano(nv, timer);
+ }
+ NV_STATUS s540GspTimersStop(nv_state_t *nv) {
+     S540GspDeviceTimers *device = find_device(nv);
+--- a/packages/nvidia-gsp-bootstrap/timers/S540NvidiaGspTimers.h
++++ b/packages/nvidia-gsp-bootstrap/timers/S540NvidiaGspTimers.h
+@@ -6,6 +6,11 @@
+ extern "C" {
+ #endif
+ struct nv_state_t;
++struct nv_nano_timer;
++// Exact checked counterparts of the public void callbacks.
++// Success drains the direct timer callback only, not accepted RM work.
++NV_STATUS s540GspTimersCancelNano(struct nv_state_t *, struct nv_nano_timer *);
++NV_STATUS s540GspTimersDestroyNano(struct nv_state_t *, struct nv_nano_timer *);
+ // Bind after HostInitialize and before original adapter initialization. Stop
+ // before adapter/global state is destroyed. Unbind only after every original
+ // RM timer user has relinquished its references. Failed cancellation retains

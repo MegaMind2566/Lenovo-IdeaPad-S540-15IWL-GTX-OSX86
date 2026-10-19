@@ -1,0 +1,39 @@
+--- a/src/nvidia/src/kernel/gpu/timer/timer.c
++++ b/src/nvidia/src/kernel/gpu/timer/timer.c
+@@ -1659,6 +1659,7 @@
+ {
+     TMR_EVENT_PVT *pScan = pTmr->pRmActiveOSTimerEventList;
+     NvU64 currentSysTime, elapsedTime;
++    NV_STATUS status;
+ 
+     // Disable Timer interrupt.
+     tmrSetAlarmIntrDisable_HAL(pGpu, pTmr);
+@@ -1671,6 +1672,8 @@
+     while (pScan != NULL)
+     {
+         currentSysTime = portTimeGetUptimeNanoseconds();
++        status = tmrEventCancelOSTimer_HAL(pTmr, (TMR_EVENT *)pScan);
++        if (status != NV_OK) return status;
+         //
+         // If somehow any of the time difference is negative,
+         // we will use the  original time duration.
+@@ -1684,7 +1687,6 @@
+             }
+         }
+ 
+-        tmrEventCancelOSTimer_HAL(pTmr, (TMR_EVENT *)pScan);
+         pScan = pScan->pNext;
+     }
+     return NV_OK;
+--- a/src/nvidia/src/kernel/gpu/timer/timer_ostimer.c
++++ b/src/nvidia/src/kernel/gpu/timer/timer_ostimer.c
+@@ -184,7 +184,8 @@
+     {
+         // Cancel the callback of OS timer
+         status = osCancelNanoTimer(pGpu->pOsGpuInfo, pTmrEvent->super.pOSTmrCBdata);
+-        pTmrEvent->super.flags &= ~TMR_FLAG_OS_TIMER_QUEUED;
++        if (status == NV_OK)
++            pTmrEvent->super.flags &= ~TMR_FLAG_OS_TIMER_QUEUED;
+     }
+     else
+     {

@@ -1,0 +1,77 @@
+{
+  "source": {
+    "format": 1,
+    "upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+    "original_sha256": {
+      "src/nvidia/src/kernel/gpu/timer/timer.c": "6bd867db774d01b96976968598f5cfad01e343e745d8b08fe84e1f6a9c4b5c18",
+      "src/nvidia/src/kernel/gpu/timer/timer_ostimer.c": "9710b89d0725d433b993ba803983bde1262096e7f62b81d39d0bc8f816ff5bb3"
+    },
+    "prospective_sha256": {
+      "src/nvidia/src/kernel/gpu/timer/timer.c": "1b894dcbddd90aee416b7f3b845bc5f773d7771fd25a08d1ee867f86dd304058",
+      "src/nvidia/src/kernel/gpu/timer/timer_ostimer.c": "1263d833053badbbc65185126e861c81f29cf70dd33aaa64ee9afe7bb2d9d95c"
+    },
+    "backend_cancellation_status_proven": false,
+    "callback_return_proven": false,
+    "original_entry_admission": false
+  },
+  "controls": {
+    "native": {
+      "format": 1,
+      "component": "nvidia-gsp-timer-cancel-status",
+      "checks": 49,
+      "failures": 0,
+      "status": "passed",
+      "actual_original_bodies": 2,
+      "execution": "native-user-space",
+      "kernel_execution": "not_tested",
+      "gpu_access": false,
+      "backend_cancellation_status_proven": false,
+      "callback_return_proven": false,
+      "original_entry_admission": false
+    },
+    "sanitized": {
+      "format": 1,
+      "component": "nvidia-gsp-timer-cancel-status",
+      "checks": 49,
+      "failures": 0,
+      "status": "passed",
+      "actual_original_bodies": 2,
+      "execution": "native-user-space",
+      "kernel_execution": "not_tested",
+      "gpu_access": false,
+      "backend_cancellation_status_proven": false,
+      "callback_return_proven": false,
+      "original_entry_admission": false
+    }
+  },
+  "unmodified_original_controls": {
+    "native": {
+      "format": 1,
+      "component": "nvidia-gsp-timer-cancel-status",
+      "checks": 49,
+      "failures": 10,
+      "status": "failed",
+      "actual_original_bodies": 2,
+      "execution": "native-user-space",
+      "kernel_execution": "not_tested",
+      "gpu_access": false,
+      "backend_cancellation_status_proven": false,
+      "callback_return_proven": false,
+      "original_entry_admission": false
+    },
+    "sanitized": {
+      "format": 1,
+      "component": "nvidia-gsp-timer-cancel-status",
+      "checks": 49,
+      "failures": 10,
+      "status": "failed",
+      "actual_original_bodies": 2,
+      "execution": "native-user-space",
+      "kernel_execution": "not_tested",
+      "gpu_access": false,
+      "backend_cancellation_status_proven": false,
+      "callback_return_proven": false,
+      "original_entry_admission": false
+    }
+  }
+}

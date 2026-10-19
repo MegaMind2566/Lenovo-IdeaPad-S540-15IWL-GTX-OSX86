@@ -27,6 +27,26 @@ The corrected collector cross-compiles all 1,100 baseline original objects and
 binds absent `.su` files only to unchanged objects with no executable bytes.
 A fresh native run is still required for this complete checkpoint.
 
+Follow-up run `39182950863`, exact source `2e3ffbb460f4b2384c36edcea84acb5241fee66f`,
+has now passed complete native original-source compilation, all 2,398 component
+controls in both variants, the actual kernel bridge/link controls and all 156
+original global allocation-failure cases in each variant. Its last typed NVOC
+proof step failed because its relative output path was interpreted from the
+original source working directory. The workflow is therefore **not green**.
+[The exact partial native evidence](../nvidia-global-rm/NATIVE-CHECKPOINT-VALIDATION.json)
+records that failure and the successful preceding steps separately. The path
+fix has an end-to-end real compiler/disassembler regression control; a new
+native run must validate it and subsequent candidate changes.
+
+The next isolated profile is documented in [prospective-v3](prospective-v3/README.md).
+It composes the memory, cancellation and checked-timer changes without changing
+the frozen ten-overlay production defaults. Its 25 changed original C units,
+three real C bridges and actual SDK timer backend pass cross compilation;
+the separate timer candidate passes 483 controls per variant. Native Apple
+validation of these additions is pending. Accepted callback borrowers,
+pre-lock terminal drains and guards before original owner destruction remain
+required even when direct timer cancellation succeeds.
+
 | Requirement | Current evidence and remaining work |
 |---|---|
 | Original callback contracts | [The complete 110-callback ledger](../nvidia-global-rm/CALLBACK-PROFILE-AUDIT.md) distinguishes implemented services, official disabled queries, unavailable operations and lifetime guards. Definitions alone do not close operational coverage. Remaining internal/error routes require implementation or independent exclusion. |

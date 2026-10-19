@@ -231,6 +231,9 @@ def prove(reference: dict, source_root: Path, *, owner: str, field: str,
           output: Path, decoder: list[str] | None = None, namespace: str = '') -> dict:
     unit = stack.load_capture(reference)
     catalog_record = catalog(source_root, header, generated, field)
+    # Compile commands run from the original source directory. Bind every
+    # generated output to this invocation's actual destination first.
+    output = output.resolve()
     output.mkdir(parents=True, exist_ok=True)
     source = output / 'typed-nvoc-probe.c'
     source.write_text(probe_source(include, owner, field, catalog_record['targets']))

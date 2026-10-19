@@ -1,0 +1,13 @@
+--- a/src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c
++++ b/src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c
+@@ -398,6 +398,10 @@
+ {
+     NV_STATUS status;
+     KernelFalcon *pKernelFalcon = staticCast(pKernelGsp, KernelFalcon);
++
++    // A prior completed stop cannot attest this new boot attempt.
++    // Invalidate it before Scrubber, FWSEC, reset or Booter can run.
++    pKernelGsp->bGspRmUnloaded = NV_FALSE;
+ 
+     // Execute Scrubber if needed
+     if (((bootMode == KGSP_BOOT_MODE_SR_RESUME) || (bootMode == KGSP_BOOT_MODE_NORMAL)) &&

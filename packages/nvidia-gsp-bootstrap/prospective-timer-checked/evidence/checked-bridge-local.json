@@ -1,0 +1,111 @@
+{
+  "source": {
+    "format": 1,
+    "original_os_sha256": "057b50fcb738be90a073b60f63e70559706864ddcec3bf703282563173e3dce4",
+    "proposed_os_sha256": "ebab1a350b827b4979183c944615d91024fd5c9a61b8bb8856cdda77484025af",
+    "original_port_c_sha256": "440dfef59ace90e9272bd2c01fbeb399a8bf88fa656e7c715f015a7b75e7e5c9",
+    "original_port_h_sha256": "97bee996b9adec1e1208f5a67ab4a83d4a121b23185afdfa28a565ba35c80cad",
+    "proposed_port_c_sha256": "c03ad97a6437d331403d765b1d5b2e5b20c4c13197c9cd4c19883766d6275d3a",
+    "proposed_port_h_sha256": "7d76a6f947ca7071ec66bf35bf9f2eb151665741e430a204cbaa776259eb1cc0",
+    "accepted_event_borrowers_drained": false,
+    "original_entry_admission": false
+  },
+  "controls": {
+    "native": {
+      "format": 1,
+      "component": "nvidia-gsp-checked-timer-bridge",
+      "checks": 16,
+      "failures": 0,
+      "status": "passed",
+      "actual_original_bodies": 2,
+      "real_timer_backend": true,
+      "direct_callback_return_verified": true,
+      "accepted_event_borrowers_drained": false,
+      "execution": "native-user-space",
+      "kernel_execution": "not_tested",
+      "gpu_access": false,
+      "original_entry_admission": false
+    },
+    "sanitized": {
+      "format": 1,
+      "component": "nvidia-gsp-checked-timer-bridge",
+      "checks": 16,
+      "failures": 0,
+      "status": "passed",
+      "actual_original_bodies": 2,
+      "real_timer_backend": true,
+      "direct_callback_return_verified": true,
+      "accepted_event_borrowers_drained": false,
+      "execution": "native-user-space",
+      "kernel_execution": "not_tested",
+      "gpu_access": false,
+      "original_entry_admission": false
+    }
+  },
+  "unmodified_original_controls": {
+    "native": {
+      "format": 1,
+      "component": "nvidia-gsp-checked-timer-bridge",
+      "checks": 16,
+      "failures": 4,
+      "status": "failed",
+      "actual_original_bodies": 2,
+      "real_timer_backend": true,
+      "direct_callback_return_verified": true,
+      "accepted_event_borrowers_drained": false,
+      "execution": "native-user-space",
+      "kernel_execution": "not_tested",
+      "gpu_access": false,
+      "original_entry_admission": false
+    },
+    "sanitized": {
+      "format": 1,
+      "component": "nvidia-gsp-checked-timer-bridge",
+      "checks": 16,
+      "failures": 4,
+      "status": "failed",
+      "actual_original_bodies": 2,
+      "real_timer_backend": true,
+      "direct_callback_return_verified": true,
+      "accepted_event_borrowers_drained": false,
+      "execution": "native-user-space",
+      "kernel_execution": "not_tested",
+      "gpu_access": false,
+      "original_entry_admission": false
+    }
+  },
+  "legacy_void_abi_controls": {
+    "native": {
+      "component": "nvidia-gsp-timers",
+      "format": 1,
+      "status": "passed",
+      "checks": 34,
+      "failures": 0,
+      "rc_callbacks": 1,
+      "nano_callbacks": 2,
+      "callback_fixture": true,
+      "stack_abi_verified": true,
+      "quarantine_retention_verified": true,
+      "cleanup": true,
+      "execution": "native-user-space",
+      "kernel_execution": "not_tested",
+      "gpu_access": false
+    },
+    "sanitized": {
+      "component": "nvidia-gsp-timers",
+      "format": 1,
+      "status": "passed",
+      "checks": 34,
+      "failures": 0,
+      "rc_callbacks": 1,
+      "nano_callbacks": 2,
+      "callback_fixture": true,
+      "stack_abi_verified": true,
+      "quarantine_retention_verified": true,
+      "cleanup": true,
+      "execution": "native-user-space",
+      "kernel_execution": "not_tested",
+      "gpu_access": false
+    }
+  }
+}

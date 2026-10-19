@@ -1,0 +1,188 @@
+--- a/src/nvidia/src/kernel/gpu/timer/timer.c
++++ b/src/nvidia/src/kernel/gpu/timer/timer.c
+@@ -341,7 +341,8 @@
+  *
+  * @param[in]   pEvent   The callback to be cancelled
+  */
+-void tmrEventCancel_IMPL
++static NV_STATUS
++_s540TmrEventCancelChecked
+ (
+     OBJTMR         *pTmr,
+     TMR_EVENT      *pEventPublic
+@@ -355,24 +356,26 @@
+ 
+     if (pEventPublic == NULL)
+     {
+-        return;
++        return NV_OK;
+     }
+ 
+     NV_ASSERT(!pEvent->bLegacy);
+ 
+-    pEvent->bInUse = NV_FALSE;
+-
+     if (tmrIsOSTimer(pTmr, pEventPublic))
+     {
+         NV_STATUS status = NV_OK;
+-        _tmrScanCallbackOSTimer(pTmr, pEvent);
+         status = tmrEventCancelOSTimer_HAL(pTmr, pEventPublic);
+         if (status != NV_OK)
+         {
+             NV_PRINTF(LEVEL_ERROR, "Failed in cancel of OS timer callback\n");
+-        }
+-        return;
+-    }
++            return status;
++        }
++        _tmrScanCallbackOSTimer(pTmr, pEvent);
++        pEvent->bInUse = NV_FALSE;
++        return NV_OK;
++    }
++
++    pEvent->bInUse = NV_FALSE;
+ 
+     if (bRemovedHead)
+     {
+@@ -398,10 +401,20 @@
+         if (pChaser == NULL)
+         {
+             // The callback wasn't currently scheduled, nothing to change.
+-            return;
++            return NV_OK;
+         }
+         pChaser->pNext = pEvent->pNext;
+     }
++    return NV_OK;
++}
++
++void tmrEventCancel_IMPL
++(
++    OBJTMR *pTmr,
++    TMR_EVENT *pEventPublic
++)
++{
++    (void)_s540TmrEventCancelChecked(pTmr, pEventPublic);
+ }
+ 
+ /*!
+@@ -410,30 +423,46 @@
+  *
+  * @param[in]   pEvent   The callback to cancel and free.
+  */
+-void tmrEventDestroy_IMPL
++static NV_STATUS
++_s540TmrEventDestroyChecked
+ (
+     OBJTMR     *pTmr,
+     TMR_EVENT  *pEventPublic
+ )
+ {
+     TMR_EVENT_PVT *pEvent = (TMR_EVENT_PVT *)pEventPublic;
+-
+-    if (pEvent != NULL)
+-    {
+-        NV_ASSERT(!pEvent->bLegacy);
+-        if (tmrIsOSTimer(pTmr, pEventPublic))
+-        {
+-            _tmrScanCallbackOSTimer(pTmr, pEvent);
+-
+-            // OS timer destroying will cancel the timer
+-            tmrEventDestroyOSTimer_HAL(pTmr, pEventPublic);
+-        }
+-        else
+-        {
+-            tmrEventCancel(pTmr, pEventPublic);
+-        }
+-        portMemFree(pEvent);
+-    }
++    NV_STATUS status;
++
++    if (pEvent == NULL)
++        return NV_OK;
++
++    NV_ASSERT(!pEvent->bLegacy);
++    if (tmrIsOSTimer(pTmr, pEventPublic))
++    {
++        // Keep the active list and callback payload until checked destruction.
++        status = tmrEventDestroyOSTimer_HAL(pTmr, pEventPublic);
++        if (status != NV_OK)
++            return status;
++        _tmrScanCallbackOSTimer(pTmr, pEvent);
++        pEvent->bInUse = NV_FALSE;
++    }
++    else
++    {
++        status = _s540TmrEventCancelChecked(pTmr, pEventPublic);
++        if (status != NV_OK)
++            return status;
++    }
++    portMemFree(pEvent);
++    return NV_OK;
++}
++
++void tmrEventDestroy_IMPL
++(
++    OBJTMR *pTmr,
++    TMR_EVENT *pEventPublic
++)
++{
++    (void)_s540TmrEventDestroyChecked(pTmr, pEventPublic);
+ }
+ 
+ /*!
+@@ -1767,7 +1796,8 @@
+         TMR_EVENT *pTmrEvent = pNotifyEvent->pTmrEvent;
+         if (pTmrEvent != NULL)
+         {
+-            tmrEventDestroy(pTmr, pTmrEvent);
++            if (_s540TmrEventDestroyChecked(pTmr, pTmrEvent) != NV_OK)
++                return;
+             pNotifyEvent->pGpu = NULL;
+             pNotifyEvent->pTmrEvent = NULL;
+         }
+@@ -1915,9 +1945,7 @@
+ {
+     OBJTMR    *pTmr   = GPU_GET_TIMER(pGpu);
+     TMR_EVENT *pEvent = (TMR_EVENT *)NvP64_VALUE(pParams->pEvent);
+-    tmrEventCancel(pTmr, pEvent);
+-
+-    return NV_OK;
++    return _s540TmrEventCancelChecked(pTmr, pEvent);
+ }
+ 
+ /*!
+@@ -1936,11 +1964,13 @@
+     OBJTMR    *pTmr   = GPU_GET_TIMER(pGpu);
+     TMR_EVENT *pEvent = (TMR_EVENT *)NvP64_VALUE(pParams->pEvent);
+ 
+-    // Free our temporary wrapper storage
+-    portMemFree(pEvent->pUserData);
+-
+-    tmrEventDestroy(pTmr, pEvent);
+-
++    void *pUserData = pEvent != NULL ? pEvent->pUserData : NULL;
++    NV_STATUS status = _s540TmrEventDestroyChecked(pTmr, pEvent);
++    if (status != NV_OK)
++        return status;
++
++    // Keep wrapper storage until event destruction returns success.
++    portMemFree(pUserData);
+     return NV_OK;
+ }
+ 
+--- a/src/nvidia/src/kernel/gpu/timer/timer_ostimer.c
++++ b/src/nvidia/src/kernel/gpu/timer/timer_ostimer.c
+@@ -219,7 +219,11 @@
+     {
+         // Cancel the callback of OS timer
+         status = osDestroyNanoTimer(pGpu->pOsGpuInfo, pTmrEvent->super.pOSTmrCBdata);
+-        pTmrEvent->super.flags &= ~TMR_FLAG_OS_TIMER_QUEUED;
++        if (status == NV_OK)
++        {
++            pTmrEvent->super.flags &= ~TMR_FLAG_OS_TIMER_QUEUED;
++            pTmrEvent->super.pOSTmrCBdata = NULL;
++        }
+     }
+     else
+     {

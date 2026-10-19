@@ -1,0 +1,30 @@
+--- a/src/nvidia/arch/nvalloc/unix/src/os.c
++++ b/src/nvidia/arch/nvalloc/unix/src/os.c
+@@ -21,6 +21,7 @@
+  * DEALINGS IN THE SOFTWARE.
+  */
+ 
++#include "S540NvidiaGspTimers.h"
+ #include <nv.h>                     // NV device driver interface
+ #include <nv-priv.h>
+ #include <nv-caps.h>
+@@ -6108,8 +6109,7 @@
+     void *pTimer
+ )
+ {
+-    nv_cancel_nano_timer(pOsGpuInfo, (nv_nano_timer_t *)pTimer);
+-    return NV_OK;
++    return s540GspTimersCancelNano(pOsGpuInfo, (nv_nano_timer_t *)pTimer);
+ }
+ 
+ /*!
+@@ -6126,8 +6126,7 @@
+     void *pTimer
+ )
+ {
+-    nv_destroy_nano_timer(pOsGpuInfo, (nv_nano_timer_t *)pTimer);
+-    return NV_OK;
++    return s540GspTimersDestroyNano(pOsGpuInfo, (nv_nano_timer_t *)pTimer);
+ }
+ 
+ NvU64 osGetReclaimableMemoryUsage(void)

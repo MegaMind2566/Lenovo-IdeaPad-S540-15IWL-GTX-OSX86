@@ -1,0 +1,75 @@
+{
+  "source": {
+    "format": 1,
+    "upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+    "source": "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c",
+    "original_sha256": "df312262254d712e8340c2d428bb5869354756f41b7a5758aac2f1825fdf2550",
+    "prospective_sha256": "52e7cbe402c4ac2a971c89ffdadcc23c416262eb67e70b3a3bdd396ae8c00baf",
+    "hardware_admission": false,
+    "dma_stop_receipt_issued": false
+  },
+  "controls": {
+    "native": {
+      "format": 1,
+      "component": "nvidia-gsp-bootstrap-stop-epoch",
+      "checks": 90,
+      "failures": 0,
+      "status": "passed",
+      "actual_original_bodies": 1,
+      "phase_fault_cases": 22,
+      "boot_modes": 4,
+      "execution": "native-user-space",
+      "kernel_execution": "not_tested",
+      "gpu_access": false,
+      "dma_stop_receipt_issued": false,
+      "original_entry_admission": false
+    },
+    "sanitized": {
+      "format": 1,
+      "component": "nvidia-gsp-bootstrap-stop-epoch",
+      "checks": 90,
+      "failures": 0,
+      "status": "passed",
+      "actual_original_bodies": 1,
+      "phase_fault_cases": 22,
+      "boot_modes": 4,
+      "execution": "native-user-space",
+      "kernel_execution": "not_tested",
+      "gpu_access": false,
+      "dma_stop_receipt_issued": false,
+      "original_entry_admission": false
+    }
+  },
+  "unmodified_original_controls": {
+    "native": {
+      "format": 1,
+      "component": "nvidia-gsp-bootstrap-stop-epoch",
+      "checks": 90,
+      "failures": 46,
+      "status": "failed",
+      "actual_original_bodies": 1,
+      "phase_fault_cases": 22,
+      "boot_modes": 4,
+      "execution": "native-user-space",
+      "kernel_execution": "not_tested",
+      "gpu_access": false,
+      "dma_stop_receipt_issued": false,
+      "original_entry_admission": false
+    },
+    "sanitized": {
+      "format": 1,
+      "component": "nvidia-gsp-bootstrap-stop-epoch",
+      "checks": 90,
+      "failures": 46,
+      "status": "failed",
+      "actual_original_bodies": 1,
+      "phase_fault_cases": 22,
+      "boot_modes": 4,
+      "execution": "native-user-space",
+      "kernel_execution": "not_tested",
+      "gpu_access": false,
+      "dma_stop_receipt_issued": false,
+      "original_entry_admission": false
+    }
+  }
+}

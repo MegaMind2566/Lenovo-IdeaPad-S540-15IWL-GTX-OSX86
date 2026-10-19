@@ -1,0 +1,25 @@
+--- a/packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c
++++ b/packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c
+@@ -124,6 +124,11 @@
+     const NvU64 value = word();
+     return generation(value) && (value & BOUND) && (value & (OPERATION | CLEANUP)) && ownerThread();
+ }
++NvBool s540GspCancellationSkipOptionalCurrent(void) {
++    const NvU64 value = word();
++    return generation(value) && (value & BOUND) &&
++        (value & (OPERATION | CLEANUP)) && (value & REVOKED) && ownerThread();
++}
+ NV_STATUS s540GspCancellationCheckCurrent(void) {
+     return s540GspCancellationCheckState(__atomic_load_n(&slot.state, __ATOMIC_ACQUIRE));
+ }
+--- a/packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.h
++++ b/packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.h
+@@ -40,6 +40,8 @@
+  * while CPU interrupts are disabled; Pause requires restored ordinary context.
+  */
+ NvBool s540GspCancellationCurrentScopeActive(void);
++/* Optional diagnostics may stop immediately in either phase. */
++NvBool s540GspCancellationSkipOptionalCurrent(void);
+ NV_STATUS s540GspCancellationCheckCurrent(void);
+ NV_STATUS s540GspCancellationPauseCurrent(void);
+ /* The original unwind must explicitly enter cleanup. Revocation then stops

@@ -95,6 +95,37 @@ jobs:
           --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
           --cc /usr/bin/clang
           --output build/nvidia-execution/prospective-checks/combined-profile
+      - name: Compile the second isolated prospective profile with memory and timer status fixes
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-v2/check_combined_profile.py
+          --repo . --upstream build-src/nvidia-upstream
+          --checked-source build/nvidia-execution/original-rm/checked-source
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --cc /usr/bin/clang
+          --output build/nvidia-execution/prospective-checks/combined-profile-v2
+      - name: Exercise second-profile epoch, log, timer and memory failure controls
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-v2/check_body_controls.py
+          --upstream build-src/nvidia-upstream
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --output build/nvidia-execution/prospective-checks/v2-bodies
+      - name: Exercise checked timer boundaries and original event retirement ordering
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-timer-checked/check_timer_checked.py
+          --upstream build-src/nvidia-upstream
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --output build/nvidia-execution/prospective-checks/timer-checked
+      - name: Compile the third isolated profile with the actual checked timer port
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-v3/check_combined_profile.py
+          --repo . --upstream build-src/nvidia-upstream
+          --checked-source build/nvidia-execution/original-rm/checked-source
+          --v2-output build/nvidia-execution/prospective-checks/combined-profile-v2
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --cc /usr/bin/clang --cxx /usr/bin/clang++
+          --kernel-sdk build-src/MacKernelSDK
+          --timer-control-report build/nvidia-execution/prospective-checks/timer-checked/timer-checked-controls.json
+          --output build/nvidia-execution/prospective-checks/combined-profile-v3
       - name: Exercise revocation of the actual original wait bodies in user space
         run: >-
           python3 packages/nvidia-gsp-bootstrap/cancellation/check_cancellation.py

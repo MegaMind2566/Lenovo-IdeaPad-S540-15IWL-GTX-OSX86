@@ -1,0 +1,28 @@
+{
+  "files": {
+    "ALL-CALLERS.json": "6d6691f945d2afe56d51c815c3c68a57151dd9bd403f277711b0938fcc166472",
+    "OWNER-GATES.md": "f93256574a5d625d801c95f01c023a60191edb508b21e1c59dd622bf6de17040",
+    "README.md": "3cd128e9040b439bec81a9c5423edafe62f4201df78a274da2806540cdf41728",
+    "SOURCE-CONTRACT.json": "7a1b6ce37b441e1b8af3bea3b3958818160aaa23c312d4651388676df41370fa",
+    "check_timer_checked.py": "f51d80462d8ba14d5133ce870d6e2e629db120d11a81fb2f38167b3107166cca",
+    "evidence/cancel-status-cross.json": "e8ca85781377d3c5c64381c6016815bcae12de9451927bc400ba7558c16a1497",
+    "evidence/cancel-status-local.json": "2d8f1d866622e0c51968348a62ede104fbf6e89c5be94131960d0fc5fbb26f09",
+    "evidence/checked-bridge-cross-sdk.json": "8d20e105db4ea576c06fc954130747141632ddb5fef74143fc6b8fdbb1b9a2c2",
+    "evidence/checked-bridge-local.json": "504a43b2c31d55bec7918a4b4f7889eaca325958dc434980e13502f9c0aad0a5",
+    "evidence/event-order-cross.json": "af6e18c514e632d0e4f0e36dd88c33b5562571ce227f81bc7d1d69c744928cef",
+    "evidence/event-order-local.json": "4e20417d6404ee350c43519da8f630b40b9ed03232fb17a07d013d054ad1cde8",
+    "patches/timer-cancel-status-prospective.patch": "2a11f85f46a0271edf5b9d313f2225a829f2dec99a98c3f9e400025775437441",
+    "patches/timer-checked-port-prospective.patch": "6d0df269ac9219fc5819fddb98c1f70df53551ec1a0a046f8aad41195f15041b",
+    "patches/timer-event-order-prospective.patch": "4e54abc2e91fc4ddf5b9577980ae5028f9c052a3d980bed32d1b3bce02470c2c",
+    "patches/timer-os-status-prospective.patch": "72e272649dcf2df68d653f680baf4d3308000837fadf9b826a6ea52f528278a5",
+    "tests/check_cancel_status_bodies.c": "268cad6a6bba4ae4490c0ee2e72b96d5289c95f7520fe0f2370b1c18e1725cb8",
+    "tests/check_cancel_status_native.cpp": "c428e909f5fb0ba74fd786d8319860368f8b0c302116e03b0cdd52165612f111",
+    "tests/check_checked_bridge.c": "5961acc0ce8d7f2cd71655ff3203273e7505c4285f0b7f166b2ff67771711ac8",
+    "tests/check_event_order_bodies.c": "218825babe121d0d6b50da6d35ea498a3782c9f9536aad8fc15f492e7d00f416",
+    "tests/check_event_order_native.cpp": "d1944a6e717222b33253085a88cc1aaa6a4e7a6f826da815e02b2632fd5cc98a"
+  },
+  "format": 1,
+  "original_entry_admission": false,
+  "production_profile_modified": false,
+  "profile": "isolated-timer-checked-input-freeze"
+}

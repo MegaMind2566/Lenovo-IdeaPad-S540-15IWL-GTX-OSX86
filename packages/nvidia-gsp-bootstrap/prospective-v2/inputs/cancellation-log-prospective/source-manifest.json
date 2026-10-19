@@ -1,0 +1,29 @@
+{
+  "format": 1,
+  "status": "isolated-prospective-not-composed",
+  "upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "original_sha256": {
+    "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c": "ed6d7020a8a1772bc44608178aa13a77a72b8bf0eabe3293c12bc9d2b122c6c9",
+    "src/common/uproc/os/libos-v3.1.0/lib/liblogdecode.c": "9ef254ac68337f98b771edbf13abbc258cb0be96b6164c631e81d596ee6fa9cc"
+  },
+  "prospective_sha256": {
+    "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c": "412f5b51ba8effecd4d2b20348fc0fcd4cfadf586f950c06b0a71b235e3c9444",
+    "src/common/uproc/os/libos-v3.1.0/lib/liblogdecode.c": "414205ad28d213c5b391bc54911519d8f8a7d1d66901000e0b30dd4ec33d004d"
+  },
+  "port_baseline_sha256": {
+    "S540NvidiaGspCancellation.c": "7220c072b5a32e81bfee39f2966aaeefcd59308cf688dd6c47e03bb17f675a42",
+    "S540NvidiaGspCancellation.h": "02f6c5af5e5fab29be2172d30ffd1cea47dd740d98fa74d710c426ba4535421b"
+  },
+  "port_prospective_sha256": {
+    "S540NvidiaGspCancellation.c": "f5cf0c934342c71ec193a55ad7d972786dd87bf0d0c3fcacf0303a0eb7880a9f",
+    "S540NvidiaGspCancellation.h": "a63bb08341cefc34fab533a645d136ebbea92069f90ae50cbddadadeca6db048"
+  },
+  "actual_test_bodies": [
+    "kgspDumpGspLogs_IMPL",
+    "libosExtractLogs_decode",
+    "libosMergeNvlog",
+    "libosExtractLogs"
+  ],
+  "hardware_admission": false,
+  "aggregate_pm_deadline_proven": false
+}

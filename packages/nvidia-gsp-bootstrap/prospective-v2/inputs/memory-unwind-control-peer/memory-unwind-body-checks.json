@@ -1,0 +1,85 @@
+{
+  "format": 1,
+  "component": "nvidia-prospective-memory-unwind-body-controls",
+  "status": "passed",
+  "approved_profile": false,
+  "execution": "native-user-space",
+  "kernel_execution": "not_tested",
+  "gpu_access": false,
+  "original_source_sha256": {
+    "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c": "c1cbd0b0bb814d5ca1d0a022d59a4b91ae90ca2663ee5d48621f7527d85cd897",
+    "src/nvidia/src/kernel/mem_mgr/virtual_mem.c": "7b9949bc423a29ba8cc16ee50590bb5e3eaaef394d6bdd8f531cbfc2fff0fb9a",
+    "src/nvidia/src/kernel/gpu/bus/kern_bus.c": "f1c120125c79dc97877462994a68372b53e43e00dfae04b6dd57dc0a18e0d1bf",
+    "src/nvidia/src/kernel/mem_mgr/gpu_vaspace.c": "091272a127f93c1beaa56adaf5aa66d42213c6a6ca5a9b569fef9d5d0e5a165f"
+  },
+  "generator_sha256": "8cf4cdb4f297d49da2578204776ef7c5ec4d2ef24be8b8393e8cf229945100d5",
+  "fixture_sha256": "c63d296e916dd8d3a7b21865299bf696a851e8fb22c2bd7c1affef9125f51cf7",
+  "patch_sha256": {
+    "physical-import-publication-prospective.patch": "74de77f90efbe6a3043de87f1accce4e007e54ca49fd84ab663edaa9c61ebb1c",
+    "indirect-peer-map-unwind-prospective.patch": "271ef6ec6389a66b29ab2926a379cc5e5525ad99dd9664a5fcfa52296b3865d8",
+    "peer-bar-borrowed-owner-prospective.patch": "69bf46ab391e8bf631d8ba4583317963e493bf1fd415b97124d2415720342764"
+  },
+  "full_function_bodies": [
+    "static NV_STATUS\nosCreateOsDescriptorFromPhysAddr\n(",
+    "NV_STATUS\nvirtmemMapTo_IMPL\n(",
+    "RmPhysAddr\nkbusSetupPeerBarAccess_IMPL\n("
+  ],
+  "outer_catch_exact_fragment": true,
+  "modeled_dependencies": true,
+  "results": {
+    "baseline": {
+      "extracted_bodies_sha256": "088e71560529bcf9bf2880a6ba45689ebbd2e76c15841b887c5b2d16a579c2b3",
+      "variants": {
+        "plain": {
+          "format": 1,
+          "status": "failed",
+          "failures": 23,
+          "checks": 127,
+          "execution": "native-user-space",
+          "kernel_execution": "not_tested",
+          "gpu_access": false,
+          "actual_complete_function_bodies": true,
+          "modeled_dependencies": true
+        },
+        "fatal-sanitizers": {
+          "format": 1,
+          "status": "failed",
+          "failures": 23,
+          "checks": 127,
+          "execution": "native-user-space",
+          "kernel_execution": "not_tested",
+          "gpu_access": false,
+          "actual_complete_function_bodies": true,
+          "modeled_dependencies": true
+        }
+      }
+    },
+    "candidate": {
+      "extracted_bodies_sha256": "bb13c76e1e0533491ba546f1eabbf4adee931becb4531c39219ea07f4d9f39df",
+      "variants": {
+        "plain": {
+          "format": 1,
+          "status": "passed",
+          "failures": 0,
+          "checks": 127,
+          "execution": "native-user-space",
+          "kernel_execution": "not_tested",
+          "gpu_access": false,
+          "actual_complete_function_bodies": true,
+          "modeled_dependencies": true
+        },
+        "fatal-sanitizers": {
+          "format": 1,
+          "status": "passed",
+          "failures": 0,
+          "checks": 127,
+          "execution": "native-user-space",
+          "kernel_execution": "not_tested",
+          "gpu_access": false,
+          "actual_complete_function_bodies": true,
+          "modeled_dependencies": true
+        }
+      }
+    }
+  }
+}

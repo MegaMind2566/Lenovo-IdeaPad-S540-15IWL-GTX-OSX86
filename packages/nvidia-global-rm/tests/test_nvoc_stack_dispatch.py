@@ -167,6 +167,40 @@ class ActualMachOProbe(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn('NVOC candidate type', result.stderr)
 
+    def test_relative_output_survives_actual_compilation_from_source_cwd(self):
+        decoder = None
+        if sys.platform != 'darwin':
+            objdump = (os.environ.get('S540_STACK_TEST_OBJDUMP') or
+                       shutil.which('llvm-objdump') or shutil.which('llvm-objdump-18'))
+            if not objdump:
+                self.skipTest('Actual Mach-O disassembler required for the complete path control.')
+            decoder = [objdump, '--macho', '--disassemble', '--no-show-raw-insn',
+                       '--no-symbolic-operands']
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory).resolve()
+            root = base / 'source'
+            root.mkdir()
+            _, header, generated = NvocStackDispatch().source_tree(root)
+            source, obj = root / 'entry.c', base / 'entry.o'
+            source.write_text('#include "device.h"\n'
+                              'int entry(struct Device *p, int n) { return dispatch(p, n) + 1; }\n')
+            command = [self.compiler, '-target', 'x86_64-apple-macos15', '-O2',
+                       '-ffreestanding', '-fno-pic', '-fno-stack-protector', '-std=gnu11',
+                       '-I', str(root), '-fstack-usage', '-c', 'entry.c', '-o', str(obj)]
+            subprocess.run(command, cwd=root, check=True, capture_output=True)
+            capture = nvoc.stack.capture_usage(source, obj, command, cwd=root)
+            previous = Path.cwd()
+            try:
+                os.chdir(base)
+                result = nvoc.prove(capture, root, owner='Device', field='__dispatch__',
+                    header=header, generated=generated, include='device.h', function='entry',
+                    output=Path('proof'), decoder=decoder)
+            finally:
+                os.chdir(previous)
+            self.assertEqual(Path(result['path']).parent, base / 'proof')
+            self.assertTrue((base / 'proof/original-with-names.o').is_file())
+            self.assertFalse((root / 'proof').exists())
+
 
 if __name__ == '__main__':
     unittest.main()

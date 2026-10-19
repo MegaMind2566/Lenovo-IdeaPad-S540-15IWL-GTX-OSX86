@@ -244,7 +244,7 @@ def check(output: Path, upstream: Path, namespace: Path, *, host_control: bool =
     c_common = ['-O1', '-g', '-Wall', '-Wextra', '-Werror', '-Wno-unused-parameter',
                 '-I', str(ROOT / 'packages/nvidia-os-adapter/upstream/include')]
     cpp_common = [*target, '-O1', '-g', '-Wall', '-Wextra', '-Werror', '-std=c++17', '-pthread',
-                  '-ffunction-sections', '-fdata-sections',
+                  '-ffunction-sections', '-fdata-sections', '-fno-exceptions', '-fno-rtti',
                   '-I', str(ROOT / 'packages/nvidia-os-adapter/upstream/include')]
     progress = commands.ComponentProgress(output / 'global-lifecycle-checks.json', {
         'component': 'nvidia-original-global-lifecycle', 'host_system': platform.system(),

@@ -1,0 +1,105 @@
+--- a/src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c
++++ b/src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c
+@@ -21,6 +21,7 @@
+  * DEALINGS IN THE SOFTWARE.
+  */
+ 
++#include "S540NvidiaGspCancellation.h"
+ #include "resserv/rs_server.h"
+ 
+ #include "gpu/gsp/kernel_gsp.h"
+@@ -6036,13 +6037,14 @@
+     NvBool bSyncNvLog
+ )
+ {
++    if (s540GspCancellationSkipOptionalCurrent()) return;
+     if (RMCFG_FEATURE_RM_NEW_TRACER_ETW ||
+         pKernelGsp->bInInit || pKernelGsp->pLogElf || bSyncNvLog ||
+         pKernelGsp->bHasVgpuLogs)
+     {
+         while (!portAtomicCompareAndSwapS32(&pKernelGsp->logDumpLock, 1, 0))
+         {
+-            if (osIsRaisedIRQL())
++            if (s540GspCancellationSkipOptionalCurrent() || osIsRaisedIRQL())
+             {
+                 // called at DPC/ISR and there is contention, just bail
+                 return;
+@@ -6051,7 +6053,8 @@
+             osSpinLoop();
+         }
+ 
+-        _kgspDumpGspLogsUnlocked(pKernelGsp, bSyncNvLog);
++        if (!s540GspCancellationSkipOptionalCurrent())
++            _kgspDumpGspLogsUnlocked(pKernelGsp, bSyncNvLog);
+ 
+         portAtomicCompareAndSwapS32(&pKernelGsp->logDumpLock, 0, 1);
+     }
+--- a/src/common/uproc/os/libos-v3.1.0/lib/liblogdecode.c
++++ b/src/common/uproc/os/libos-v3.1.0/lib/liblogdecode.c
+@@ -24,6 +24,7 @@
+  * ----------------------------------------------------------------------
+  */
+ 
++#include "S540NvidiaGspCancellation.h"
+ #ifdef NVRM
+ 
+ #    include <core/core.h>
+@@ -1065,6 +1066,7 @@
+ 
+     for (index = 0; index < valid_elements;)
+     {
++        if (s540GspCancellationSkipOptionalCurrent()) return;
+         LIBOS_LOG_DECODE_RECORD *pRec = (LIBOS_LOG_DECODE_RECORD *)&scratchBuffer[index];
+         const char *format;
+         const char *filename;
+@@ -1441,6 +1443,7 @@
+     // Copy records in order of highest time stamp.
+     for (;;)
+     {
++        if (s540GspCancellationSkipOptionalCurrent()) return;
+         timeStamp = LIBOS_LOG_TIMESTAMP_END;
+         pLog      = NULL; // for debugging.
+ 
+@@ -1624,6 +1627,7 @@
+     // Copy records in order of highest time stamp.
+     for (;;)
+     {
++        if (s540GspCancellationSkipOptionalCurrent()) return;
+         LIBOS_LOG_DECODE_LOG *pLog      = NULL; // for debugging.
+         NvU64 timeStamp = LIBOS_LOG_TIMESTAMP_END;
+         NvU64 previousPut;
+@@ -1807,6 +1811,7 @@
+     }
+ 
+     libosMergeNvlog(logDecode, &totalNumNewEntries);
++    if (s540GspCancellationSkipOptionalCurrent()) return;
+ 
+     if (bNvLogNoWrap)
+     {
+@@ -1838,6 +1843,7 @@
+     NvBool hasMergedNvlogBuffers = NV_FALSE;
+     for (i = 0; i < logDecode->numLogBuffers; i++)
+     {
++        if (s540GspCancellationSkipOptionalCurrent()) return;
+         LIBOS_LOG_DECODE_LOG *pLog = &logDecode->log[i];
+ 
+         if (pLog->libosLogDecodeFlags & LIBOS_LOG_DECODE_LOG_FLAG_NVLOG_DISABLED)
+@@ -2571,6 +2577,7 @@
+ void libosExtractLogs(LIBOS_LOG_DECODE *logDecode, NvBool bSyncNvLog)
+ {
+     NvU64 i = 0;
++    if (s540GspCancellationSkipOptionalCurrent()) return;
+     for (i = 0; i < logDecode->numLogBuffers; i++)
+     {
+         if (logDecode->log[i].physicLogBuffer)
+@@ -2583,8 +2590,10 @@
+         libosExtractLogs_decode(logDecode);
+ #endif
+ #if LIBOS_LOG_TO_NVLOG
++    if (s540GspCancellationSkipOptionalCurrent()) return;
+     libosExtractLogs_nvlog(logDecode, bSyncNvLog);
+ #endif
++    if (s540GspCancellationSkipOptionalCurrent()) return;
+     // Update the previous put pointers.
+     for (i = 0; i < logDecode->numLogBuffers; i++)
+     {

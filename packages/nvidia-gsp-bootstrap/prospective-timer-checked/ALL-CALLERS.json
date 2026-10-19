@@ -1,0 +1,586 @@
+{
+  "format": 1,
+  "upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "scope": "direct tmrEventCancel/tmrEventDestroy calls in original src/nvidia/src/kernel",
+  "callers": [
+    {
+      "source": "src/nvidia/src/kernel/diagnostics/gpu_acct.c",
+      "line": 1537,
+      "function": "gpuacctStopTimerCallbacks",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "3453be61a83e98530daa3d719121d3052bf37f4cf6ccfa5b357126ebf1a9ffc1",
+      "call_and_following_lines": [
+        "        tmrEventDestroy(pTmr, pGpuInstanceInfo->pTmrEvent);",
+        "        pGpuInstanceInfo->pTmrEvent = NULL;",
+        "    }",
+        "",
+        "done:",
+        "    portMemFree(pGpuInstanceInfo->pSamplesParams);",
+        "    pGpuInstanceInfo->pSamplesParams = NULL;"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/conf_compute/conf_compute.c",
+      "line": 537,
+      "function": "confComputeStatePreUnload_KERNEL",
+      "callee": "tmrEventCancel",
+      "source_sha256": "60515e69a36c49a6870da80cd166cfa1a54ebd96aa42c4e3adc83cee9cf92c7e",
+      "call_and_following_lines": [
+        "                tmrEventCancel(pTmr, pConfCompute->keyRotationTimeoutInfo[i].pTimer);",
+        "                portMemFree(pConfCompute->keyRotationTimeoutInfo[i].pTimer->pUserData);",
+        "                tmrEventDestroy(pTmr, pConfCompute->keyRotationTimeoutInfo[i].pTimer);",
+        "                pConfCompute->keyRotationTimeoutInfo[i].pTimer = NULL;",
+        "            }",
+        "        }",
+        "        tempStatus = confComputeEnableKeyRotationCallback_HAL(pGpu, pConfCompute, NV_FALSE);"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/conf_compute/conf_compute.c",
+      "line": 539,
+      "function": "confComputeStatePreUnload_KERNEL",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "60515e69a36c49a6870da80cd166cfa1a54ebd96aa42c4e3adc83cee9cf92c7e",
+      "call_and_following_lines": [
+        "                tmrEventDestroy(pTmr, pConfCompute->keyRotationTimeoutInfo[i].pTimer);",
+        "                pConfCompute->keyRotationTimeoutInfo[i].pTimer = NULL;",
+        "            }",
+        "        }",
+        "        tempStatus = confComputeEnableKeyRotationCallback_HAL(pGpu, pConfCompute, NV_FALSE);",
+        "        if (tempStatus != NV_OK)",
+        "        {"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/conf_compute/conf_compute_key_rotation.c",
+      "line": 347,
+      "function": "confComputePerformKeyRotation_IMPL",
+      "callee": "tmrEventCancel",
+      "source_sha256": "ed71476879c941be8b001ba6ca2a01ea026c72f0cb2ba1134033db248a5565f8",
+      "call_and_following_lines": [
+        "            tmrEventCancel(pTmr, pConfCompute->keyRotationTimeoutInfo[h2dIndex].pTimer);",
+        "        }",
+        "    }",
+        "",
+        "    if (bWorkItem)",
+        "    {",
+        "        // Queue workitem to perform key rotation"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/conf_compute/conf_compute_key_rotation.c",
+      "line": 624,
+      "function": "confComputeStopKeyRotationTimer_IMPL",
+      "callee": "tmrEventCancel",
+      "source_sha256": "ed71476879c941be8b001ba6ca2a01ea026c72f0cb2ba1134033db248a5565f8",
+      "call_and_following_lines": [
+        "        tmrEventCancel(pTmr, pConfCompute->keyRotationTimeoutInfo[h2dKeyIndex].pTimer);",
+        "        NV_PRINTF(LEVEL_INFO, \"Stopped key rotation timeout timer for key 0x%x with time left = %lldns\\n\",",
+        "                                h2dKey, pConfCompute->keyRotationTimeoutInfo[h2dKeyIndex].timeLeftNs);",
+        "    }",
+        "    else",
+        "    {",
+        "        pConfCompute->keyRotationTimeoutInfo[h2dKeyIndex].timeLeftNs = (NvU64)(pConfCompute->keyRotationTimeout) *"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/external_device/arch/kepler/kern_gsync_p2060.c",
+      "line": 780,
+      "function": "gsyncAttachExternalDevice_P2060",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "30f4ecddc690ec140795ed4a6ab3a18406f7ca513f487e21a2682e195188212c",
+      "call_and_following_lines": [
+        "    tmrEventDestroy(pTmr, pThis->FrameCountData.pTimerEvents[gpuInstance]);",
+        "    pThis->FrameCountData.pTimerEvents[gpuInstance] = NULL;",
+        "    tmrEventDestroy(pTmr, pExtdev->WatchdogControl.pTimerEvents[gpuInstance]);",
+        "    pExtdev->WatchdogControl.pTimerEvents[gpuInstance] = NULL;",
+        "    return NV_FALSE;",
+        "}",
+        ""
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/external_device/arch/kepler/kern_gsync_p2060.c",
+      "line": 782,
+      "function": "gsyncAttachExternalDevice_P2060",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "30f4ecddc690ec140795ed4a6ab3a18406f7ca513f487e21a2682e195188212c",
+      "call_and_following_lines": [
+        "    tmrEventDestroy(pTmr, pExtdev->WatchdogControl.pTimerEvents[gpuInstance]);",
+        "    pExtdev->WatchdogControl.pTimerEvents[gpuInstance] = NULL;",
+        "    return NV_FALSE;",
+        "}",
+        "",
+        "/*",
+        " * Destroy the device P2060."
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/external_device/arch/kepler/kern_gsync_p2060.c",
+      "line": 815,
+      "function": "extdevDestroy_P2060",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "30f4ecddc690ec140795ed4a6ab3a18406f7ca513f487e21a2682e195188212c",
+      "call_and_following_lines": [
+        "            tmrEventDestroy(pTmr, pThis->FrameCountData.pTimerEvents[gpuInstance]);",
+        "            pThis->FrameCountData.pTimerEvents[gpuInstance] = NULL;",
+        "            tmrEventDestroy(pTmr, pExternalDevice->WatchdogControl.pTimerEvents[gpuInstance]);",
+        "            pExternalDevice->WatchdogControl.pTimerEvents[gpuInstance] = NULL;",
+        "",
+        "            if (pThis->Iface[iface].GpuInfo.connected)",
+        "            {"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/external_device/arch/kepler/kern_gsync_p2060.c",
+      "line": 817,
+      "function": "extdevDestroy_P2060",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "30f4ecddc690ec140795ed4a6ab3a18406f7ca513f487e21a2682e195188212c",
+      "call_and_following_lines": [
+        "            tmrEventDestroy(pTmr, pExternalDevice->WatchdogControl.pTimerEvents[gpuInstance]);",
+        "            pExternalDevice->WatchdogControl.pTimerEvents[gpuInstance] = NULL;",
+        "",
+        "            if (pThis->Iface[iface].GpuInfo.connected)",
+        "            {",
+        "                if (pExternalDevice->ReferenceCount == 0)",
+        "                {"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/external_device/kern_external_device.c",
+      "line": 194,
+      "function": "extdevCancelWatchdog",
+      "callee": "tmrEventCancel",
+      "source_sha256": "231393cdda1082388546d1d583c2046f5aba0253a5afb149be239310f5925c1c",
+      "call_and_following_lines": [
+        "    tmrEventCancel(pTmr, pExtDevice->WatchdogControl.pTimerEvents[gpuGetInstance(pGpu)]);",
+        "",
+        "    // ... then lower the flag!",
+        "    pExtDevice->WatchdogControl.Scheduled = NV_FALSE;",
+        "",
+        "    return NV_OK;",
+        "}"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/fsp/kern_fsp.c",
+      "line": 261,
+      "function": "kfspCleanupBootState_IMPL",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "84ba2a49c08aa490aad40fe737b42d135e3bf11969e76ca257a8e5f425c51e54",
+      "call_and_following_lines": [
+        "        tmrEventDestroy(pTmr, pKernelFsp->pPollEvent);",
+        "        pKernelFsp->pPollEvent = NULL;",
+        "    }",
+        "",
+        "    portMemFree(pKernelFsp->pCotPayload);",
+        "    pKernelFsp->pCotPayload = NULL;",
+        ""
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/gpuvideo/videoeventlist.c",
+      "line": 470,
+      "function": "_videoTimerDestroy",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "f006c9666f2af61cf9eaa59cec292f627c998ca738092e97aba5a8b557ff8f41",
+      "call_and_following_lines": [
+        "        tmrEventDestroy(pTmr, pGpu->pVideoTimerEvent);",
+        "        pGpu->pVideoTimerEvent = NULL;",
+        "    }",
+        "}",
+        "",
+        "void",
+        "nvEventBufferVideoCallback"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/gr/fecs_event_list.c",
+      "line": 936,
+      "function": "_fecsTimerDestroy",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "74d9cb411c2a4b14b8ef5ea16e54e57b3a046e0a531f3c4278067af2974924fa",
+      "call_and_following_lines": [
+        "        tmrEventDestroy(pTmr, pFecsGlobalTraceInfo->pFecsTimerEvent);",
+        "        pFecsGlobalTraceInfo->pFecsTimerEvent = NULL;",
+        "    }",
+        "}",
+        "",
+        "NV_STATUS",
+        "fecsHandleFecsLoggingError"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/nvlink/arch/blackwell/kernel_nvlink_gb100.c",
+      "line": 533,
+      "function": "knvlinkFabricHealthMask_WORKITEM",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "486f6c4cff783b66c7d50dd2772999a6132e08d8ef3dc77d1d4593277137373c",
+      "call_and_following_lines": [
+        "    tmrEventDestroy(pTmr, pEvent);",
+        "    pKernelNvlink->pFabricHealthMaskTmrEvent = NULL;",
+        "    return NV_OK;",
+        "}",
+        "",
+        "NV_STATUS",
+        "knvlinkAbmFabricHealthMaskUpdate_GB100"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/nvlink/arch/blackwell/kernel_nvlink_gb100.c",
+      "line": 570,
+      "function": "knvlinkAbmFabricHealthMaskUpdate_GB100",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "486f6c4cff783b66c7d50dd2772999a6132e08d8ef3dc77d1d4593277137373c",
+      "call_and_following_lines": [
+        "            tmrEventDestroy(pTmr, pKernelNvlink->pFabricHealthMaskTmrEvent);",
+        "            pKernelNvlink->pFabricHealthMaskTmrEvent = NULL;",
+        "            return status;",
+        "        }",
+        "",
+        "        gpuFabricProbeGetFabricHealthStatus(pGpu->pGpuFabricProbeInfoKernel, &healthStatusMask);",
+        "        healthStatusMask = FLD_SET_DRF(LINK, _INBAND_FABRIC_HEALTH_MASK, _ROUTE_UPDATE,"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/nvlink/arch/blackwell/kernel_nvlink_gb100.c",
+      "line": 583,
+      "function": "knvlinkAbmFabricHealthMaskUpdate_GB100",
+      "callee": "tmrEventCancel",
+      "source_sha256": "486f6c4cff783b66c7d50dd2772999a6132e08d8ef3dc77d1d4593277137373c",
+      "call_and_following_lines": [
+        "        tmrEventCancel(pTmr, pKernelNvlink->pFabricHealthMaskTmrEvent);",
+        "        status = tmrEventScheduleRel(pTmr, pKernelNvlink->pFabricHealthMaskTmrEvent,",
+        "                                     NVLINK_FABRIC_HEALTH_MASK_TIMER_DELAY_NS);",
+        "        if (status != NV_OK)",
+        "        {",
+        "            tmrEventDestroy(pTmr, pKernelNvlink->pFabricHealthMaskTmrEvent);",
+        "            pKernelNvlink->pFabricHealthMaskTmrEvent = NULL;"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/nvlink/arch/blackwell/kernel_nvlink_gb100.c",
+      "line": 588,
+      "function": "knvlinkAbmFabricHealthMaskUpdate_GB100",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "486f6c4cff783b66c7d50dd2772999a6132e08d8ef3dc77d1d4593277137373c",
+      "call_and_following_lines": [
+        "            tmrEventDestroy(pTmr, pKernelNvlink->pFabricHealthMaskTmrEvent);",
+        "            pKernelNvlink->pFabricHealthMaskTmrEvent = NULL;",
+        "            return status;",
+        "        }",
+        "    }",
+        "",
+        "    return NV_OK;"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/nvlink/arch/rubin/kernel_nvlink_gr100.c",
+      "line": 470,
+      "function": "knvlinkSetupResiliencyCallbacks_GR100",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "fdd9ae167939b77f515eb39771cce573ddb950dd19133a5b977eaeaa9b0ad2d6",
+      "call_and_following_lines": [
+        "        tmrEventDestroy(pTmr, pResiliencyInfo->pAbmRetryEvent);",
+        "        pResiliencyInfo->pAbmRetryEvent = NULL;",
+        "        pResiliencyInfo->pLfmRetryEvent = NULL;",
+        "        return status;",
+        "    }",
+        "    return NV_OK;",
+        " }"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/nvlink/arch/rubin/kernel_nvlink_gr100.c",
+      "line": 494,
+      "function": "knvlinkDestroyResiliencyCallbacks_GR100",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "fdd9ae167939b77f515eb39771cce573ddb950dd19133a5b977eaeaa9b0ad2d6",
+      "call_and_following_lines": [
+        "        tmrEventDestroy(pTmr, pResiliencyInfo->pAbmRetryEvent);",
+        "        pResiliencyInfo->pAbmRetryEvent = NULL;",
+        "    }",
+        "",
+        "    if (pResiliencyInfo->pLfmRetryEvent != NULL)",
+        "    {",
+        "        tmrEventDestroy(pTmr, pResiliencyInfo->pLfmRetryEvent);"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/nvlink/arch/rubin/kernel_nvlink_gr100.c",
+      "line": 500,
+      "function": "knvlinkDestroyResiliencyCallbacks_GR100",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "fdd9ae167939b77f515eb39771cce573ddb950dd19133a5b977eaeaa9b0ad2d6",
+      "call_and_following_lines": [
+        "        tmrEventDestroy(pTmr, pResiliencyInfo->pLfmRetryEvent);",
+        "        pResiliencyInfo->pLfmRetryEvent = NULL;",
+        "    }",
+        " }"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/nvlink/kernel_nvlinkstate.c",
+      "line": 1111,
+      "function": "_knvlinkPurgeState",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "0b3cba10e92dc30f928cc6d8677971e27a8aca8e9a8e70a75d8b2129c3003b7d",
+      "call_and_following_lines": [
+        "            tmrEventDestroy(pTmr, pKernelNvlink->nvlinkLinks[linkId].pTmrEvent);",
+        "            pKernelNvlink->nvlinkLinks[linkId].pTmrEvent = NULL;",
+        "        }",
+        "    }",
+        "    FOR_EACH_IN_BITVECTOR_END();",
+        "",
+        "    // RM disables NVLink at runtime in Hopper so device un-registration can't be skipped"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/spdm/arch/hopper/spdm_gh100.c",
+      "line": 1416,
+      "function": "spdmUnregisterFromHeartbeats_GH100",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "830327ccaf6e12808752451fe216b60473c2c47d166e05b75a6b6d3c34e567e3",
+      "call_and_following_lines": [
+        "    tmrEventDestroy(pTmr, pSpdm->pHeartbeatEvent);",
+        "    pSpdm->pHeartbeatEvent    = NULL;",
+        "    pSpdm->heartbeatPeriodSec = 0;",
+        "",
+        "    return status;",
+        "}",
+        ""
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/subdevice/subdevice.c",
+      "line": 218,
+      "function": "subdeviceDestruct_IMPL",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "c922530c41441f3518c45be27f51e322ceb533f1654c8f29d694348b8e0533f0",
+      "call_and_following_lines": [
+        "        tmrEventDestroy(pTmr, pSubdevice->pTimerEvent);",
+        "        pSubdevice->pTimerEvent = NULL;",
+        "        pSubdevice->notifyActions[NV2080_NOTIFIERS_TIMER] = NV2080_CTRL_EVENT_SET_NOTIFICATION_ACTION_DISABLE;",
+        "    }",
+        "",
+        "    subdeviceRestoreLockedClock(pSubdevice, pCallContext);",
+        ""
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/subdevice/subdevice_ctrl_timer_kernel.c",
+      "line": 71,
+      "function": "subdeviceCtrlCmdTimerCancel_IMPL",
+      "callee": "tmrEventCancel",
+      "source_sha256": "bd3b1b3a57ffdf69f7deecab80a85b91144d1c093c4821056b69b68f47e999ff",
+      "call_and_following_lines": [
+        "        tmrEventCancel(pTmr, pSubdevice->pTimerEvent);",
+        "",
+        "        pSubdevice->notifyActions[NV2080_NOTIFIERS_TIMER] = NV2080_CTRL_EVENT_SET_NOTIFICATION_ACTION_DISABLE;",
+        "    }",
+        "    return NV_OK;",
+        "}",
+        ""
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/subdevice/subdevice_ctrl_timer_kernel.c",
+      "line": 177,
+      "function": "timerSchedule",
+      "callee": "tmrEventCancel",
+      "source_sha256": "bd3b1b3a57ffdf69f7deecab80a85b91144d1c093c4821056b69b68f47e999ff",
+      "call_and_following_lines": [
+        "            tmrEventCancel(pTmr, pSubdevice->pTimerEvent);",
+        "        }",
+        "    }",
+        "    else",
+        "    {",
+        "        NV_ASSERT_OK_OR_RETURN(tmrEventCreate(pTmr,",
+        "                                &pSubdevice->pTimerEvent,"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/timed_semaphore.c",
+      "line": 256,
+      "function": "tsemaDestruct_IMPL",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "39729273dfe4e6396f06527433c46c760acab603753bdee36336eb724e6efe55",
+      "call_and_following_lines": [
+        "    tmrEventDestroy(pTmr, pTimedSemSw->pTmrEvent);",
+        "    pTimedSemSw->pTmrEvent = NULL;",
+        "",
+        "    chandesIsolateOnDestruct(pChannelDescendant);",
+        "",
+        "    // Remove all the entries from the queue.",
+        "    listDestroy(&pTimedSemSw->entryList);"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/timed_semaphore.c",
+      "line": 294,
+      "function": "tsemaCtrlCmdFlush_IMPL",
+      "callee": "tmrEventCancel",
+      "source_sha256": "39729273dfe4e6396f06527433c46c760acab603753bdee36336eb724e6efe55",
+      "call_and_following_lines": [
+        "        tmrEventCancel(pTmr, pTimedSemaSwObject->pTmrEvent);",
+        "        _class9074TimerCallback(pGpu, pTmr, pTimedSemaSwObject->pTmrEvent);",
+        "    }",
+        "",
+        "    return NV_OK;",
+        "} // end of tsemaCtrlCmdFlush_IMPL",
+        ""
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/timer/timer.c",
+      "line": 433,
+      "function": "tmrEventDestroy_IMPL",
+      "callee": "tmrEventCancel",
+      "source_sha256": "6bd867db774d01b96976968598f5cfad01e343e745d8b08fe84e1f6a9c4b5c18",
+      "call_and_following_lines": [
+        "            tmrEventCancel(pTmr, pEventPublic);",
+        "        }",
+        "        portMemFree(pEvent);",
+        "    }",
+        "}",
+        "",
+        "/*!"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/timer/timer.c",
+      "line": 1768,
+      "function": "tmrapiDeregisterEvents_IMPL",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "6bd867db774d01b96976968598f5cfad01e343e745d8b08fe84e1f6a9c4b5c18",
+      "call_and_following_lines": [
+        "            tmrEventDestroy(pTmr, pTmrEvent);",
+        "            pNotifyEvent->pGpu = NULL;",
+        "            pNotifyEvent->pTmrEvent = NULL;",
+        "        }",
+        "",
+        "        pNotifyEvent = pNotifyEvent->Next;",
+        "    }"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/timer/timer.c",
+      "line": 1916,
+      "function": "tmrCtrlCmdEventCancel",
+      "callee": "tmrEventCancel",
+      "source_sha256": "6bd867db774d01b96976968598f5cfad01e343e745d8b08fe84e1f6a9c4b5c18",
+      "call_and_following_lines": [
+        "    tmrEventCancel(pTmr, pEvent);",
+        "",
+        "    return NV_OK;",
+        "}",
+        "",
+        "/*!",
+        " * Cancel and destroys an existing event. It also cleans up the special"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/gpu/timer/timer.c",
+      "line": 1940,
+      "function": "tmrCtrlCmdEventDestroy",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "6bd867db774d01b96976968598f5cfad01e343e745d8b08fe84e1f6a9c4b5c18",
+      "call_and_following_lines": [
+        "    tmrEventDestroy(pTmr, pEvent);",
+        "",
+        "    return NV_OK;",
+        "}",
+        "",
+        "NV_STATUS tmrEventServiceTimer_IMPL",
+        "("
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/os/os_timer.c",
+      "line": 89,
+      "function": "osDestroy1HzCallbacks",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "78da8c6f23d9732dc4ff393b83553ecf06d800699362b70bc67a5f867dd41b4c",
+      "call_and_following_lines": [
+        "        tmrEventDestroy(pTmr, pTmr->pOs1HzEvent);",
+        "        pTmr->pOs1HzEvent = NULL;",
+        "    }",
+        "",
+        "    pTmr->pOs1HzCallbackList = NULL;",
+        "    pTmr->pOs1HzCallbackFreeList = NULL;",
+        "    return NV_OK;"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/os/os_timer.c",
+      "line": 197,
+      "function": "osRemove1HzCallback",
+      "callee": "tmrEventCancel",
+      "source_sha256": "78da8c6f23d9732dc4ff393b83553ecf06d800699362b70bc67a5f867dd41b4c",
+      "call_and_following_lines": [
+        "        tmrEventCancel(pTmr, pTmr->pOs1HzEvent);",
+        "    }",
+        "}",
+        "",
+        "static void _osRunAll1HzCallbacks(OBJGPU *pGpu)",
+        "{",
+        "    OBJTMR             *pTmr = GPU_GET_TIMER(pGpu);"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    },
+    {
+      "source": "src/nvidia/src/kernel/rmapi/event_notification.c",
+      "line": 1017,
+      "function": "_removeEventNotification",
+      "callee": "tmrEventDestroy",
+      "source_sha256": "14e732f7131a31ee95685e882d995a795bedf582fa7fddc0ccc5bd7a55894233",
+      "call_and_following_lines": [
+        "            tmrEventDestroy(GPU_GET_TIMER(nextEvent->pGpu), nextEvent->pTmrEvent);",
+        "            nextEvent->pGpu = NULL;",
+        "            nextEvent->pTmrEvent = NULL;",
+        "        }",
+        "",
+        "        *ppOldEvent = nextEvent;",
+        "    }"
+      ],
+      "selected_tu117_first_transaction_reachability_proven": false
+    }
+  ],
+  "call_count": 34,
+  "selected_profile_reachability_proven": false,
+  "all_owner_destructors_statusful": false,
+  "original_entry_admission": false
+}

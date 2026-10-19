@@ -1,0 +1,47 @@
+{
+  "actual_compiler_dependency_files": 756,
+  "additional_patch_sha256": "0673de9ace3224420291bf4ff10933773012e51c1436a98b656640aa91159e17",
+  "all_combined_patch_sha256": "bf484b637f5217c7a78d1663b575ef10b5e15077c0c9a35726c38befa204c7e1",
+  "approved_profile": false,
+  "body_control_validation": {
+    "path": "BODY-CONTROL-VALIDATION.json",
+    "sha256": "1fa27d0b9f8ec5e8696d27d73c45b2f86a587b828b518e640783ad07af5cf969"
+  },
+  "body_runner_sha256": "473896bbe9b8283376e26c415bc89b9aa6039abc1b0229cbcb384c459693f918",
+  "changed_original_source_header_files": 29,
+  "combined_tree_sha256": "ada09ea95aa4296d533034616835aa43ac99c95b1ff7af51f76de349dd0f7a00",
+  "compile_dependencies": {
+    "path": "COMPILE-DEPENDENCIES.json",
+    "sha256": "cfb1d80f45a8515290a303310409b31354b9e476fa47519b1042b986543a9fe5"
+  },
+  "compiler": "Ubuntu clang version 18.1.3 (1ubuntu1)",
+  "compiler_sha256": "8ef402d453d1ba4902e4ee0f0f847f6cfa01400c95aa43c24e97818b9c0e3f45",
+  "cross_compile_probe": true,
+  "format": 1,
+  "frozen_project_input_files": 68,
+  "gpu_access": false,
+  "helper_sha256": "cbeb2618560673d0cb8a2b051431b1ead3d31c948e6029a3cec1815dc97d7429",
+  "kernel_execution": "not_tested",
+  "limits": [
+    "Only 25 changed original C units and two strong project C bridges are compiled; not the shared-header fanout through all 1100.",
+    "These isolated source-body controls have explicit models and do not execute a combined adapter/GSP attempt.",
+    "The per-function 4096-byte frame check is not a complete call-chain stack proof.",
+    "Timer void wrappers, event destruction and backend callback-return ownership remain unresolved.",
+    "No target KXLD, PM acknowledgement, DMA quiescence, receipt issuance or kernel/GPU execution is established."
+  ],
+  "native_apple_compiler": false,
+  "original_units_compiled": 25,
+  "production_candidate_allowed": false,
+  "profile": "isolated-prospective-combined-v2",
+  "project_bridges_compiled": 2,
+  "source_body_controls": {
+    "epoch": 90,
+    "memory": 127,
+    "optional_logs": 37,
+    "timers": 49
+  },
+  "source_contract_sha256": "ce3fe72438c0548098d94fc0147b7ad036307378578e0b9c418a74aae96b938e",
+  "status": "passed",
+  "v1_reconstructed_byte_exact": true,
+  "v1_source_contract_sha256": "061f027f1eb6a1e2ea9c36a0ce8cd75b4d599026e8421a60e7dc2b78c2078894"
+}

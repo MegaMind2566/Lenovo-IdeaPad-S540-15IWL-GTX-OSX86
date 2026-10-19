@@ -1,0 +1,60 @@
+{
+  "accepted_work_borrowers_closed": false,
+  "aggregate_pm_deadline_proven": false,
+  "all_void_owner_callers_statusful": false,
+  "baseline_failures_each_variant": {
+    "cancel_status": 10,
+    "checked_real_backend": 4,
+    "event_order": 165
+  },
+  "direct_native_callback_return_verified": true,
+  "dma_stop_receipt_issued": false,
+  "final_project_sha256": {
+    "packages/nvidia-gsp-bootstrap/timers/S540NvidiaGspTimers.h": "7d76a6f947ca7071ec66bf35bf9f2eb151665741e430a204cbaa776259eb1cc0",
+    "packages/nvidia-gsp-bootstrap/timers/S540NvidiaGspTimersOriginal.c": "c03ad97a6437d331403d765b1d5b2e5b20c4c13197c9cd4c19883766d6275d3a"
+  },
+  "final_source_sha256": {
+    "src/nvidia/arch/nvalloc/unix/src/os.c": "ebab1a350b827b4979183c944615d91024fd5c9a61b8bb8856cdda77484025af",
+    "src/nvidia/src/kernel/gpu/timer/timer.c": "dcdf96fe256b23085dbd16253899631a09b53f70fae6e6bf877d75bf4141bf97",
+    "src/nvidia/src/kernel/gpu/timer/timer_ostimer.c": "34dc43998e56b2e73f98cff6c7012e0a908d5f6a577c582a480512a46d562876"
+  },
+  "format": 1,
+  "gpu_access": false,
+  "kernel_execution": "not_tested",
+  "local_controls_each_variant": {
+    "cancel_status": 49,
+    "checked_real_backend": 16,
+    "event_order": 384,
+    "legacy_void_abi": 34
+  },
+  "original_entry_admission": false,
+  "original_project_sha256": {
+    "packages/nvidia-gsp-bootstrap/timers/S540NvidiaGspTimers.h": "97bee996b9adec1e1208f5a67ab4a83d4a121b23185afdfa28a565ba35c80cad",
+    "packages/nvidia-gsp-bootstrap/timers/S540NvidiaGspTimersOriginal.c": "440dfef59ace90e9272bd2c01fbeb399a8bf88fa656e7c715f015a7b75e7e5c9"
+  },
+  "original_source_sha256": {
+    "src/nvidia/arch/nvalloc/unix/src/os.c": "057b50fcb738be90a073b60f63e70559706864ddcec3bf703282563173e3dce4",
+    "src/nvidia/src/kernel/gpu/timer/timer.c": "6bd867db774d01b96976968598f5cfad01e343e745d8b08fe84e1f6a9c4b5c18",
+    "src/nvidia/src/kernel/gpu/timer/timer_ostimer.c": "9710b89d0725d433b993ba803983bde1262096e7f62b81d39d0bc8f816ff5bb3"
+  },
+  "patches": [
+    {
+      "path": "patches/timer-cancel-status-prospective.patch",
+      "sha256": "2a11f85f46a0271edf5b9d313f2225a829f2dec99a98c3f9e400025775437441"
+    },
+    {
+      "path": "patches/timer-event-order-prospective.patch",
+      "sha256": "4e54abc2e91fc4ddf5b9577980ae5028f9c052a3d980bed32d1b3bce02470c2c"
+    },
+    {
+      "path": "patches/timer-os-status-prospective.patch",
+      "sha256": "72e272649dcf2df68d653f680baf4d3308000837fadf9b826a6ea52f528278a5"
+    },
+    {
+      "path": "patches/timer-checked-port-prospective.patch",
+      "sha256": "6d0df269ac9219fc5819fddb98c1f70df53551ec1a0a046f8aad41195f15041b"
+    }
+  ],
+  "profile": "isolated-prospective-timer-checked-not-admitted",
+  "upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5"
+}
