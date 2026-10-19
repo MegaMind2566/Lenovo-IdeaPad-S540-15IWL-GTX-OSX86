@@ -185,7 +185,7 @@ class ActualObjects(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);(root/'source.c').write_text('int exact;\n')
             paths=proof.Paths([('/unavailable/original',root)])
-            self.assertEqual(paths.checked_file('/unavailable/original/source.c',proof.stack.sha(root/'source.c')),root/'source.c')
+            self.assertEqual(paths.checked_file('/unavailable/original/source.c',proof.stack.sha(root/'source.c')),(root/'source.c').resolve())
             with self.assertRaises(ValueError):paths.checked_file('/unavailable/original/source.c','0'*64)
             with self.assertRaises(FileNotFoundError):paths.path('/unavailable/original/missing.c')
 
