@@ -93,6 +93,22 @@ class NvocStackDispatch(unittest.TestCase):
         text = ir_body(field_index=7).replace('%actual', '%__dispatch__')
         self.assertEqual(nvoc.indirect_gep(text, 'entry')['llvm_member_index'], 7)
 
+    def test_typed_member_gep_accepts_canonical_llvm_no_wrap_flags(self):
+        for flags in ('', 'inbounds', 'nuw', 'nusw', 'inbounds nuw', 'nusw nuw'):
+            with self.subTest(flags=flags):
+                text = ir_body().replace('getelementptr inbounds ',
+                    'getelementptr ' + (flags + ' ' if flags else ''))
+                self.assertEqual(nvoc.indirect_gep(text, 'entry')['llvm_member_index'], 1)
+
+    def test_no_wrap_flags_cannot_justify_byte_offsets_or_dynamic_members(self):
+        for replacement in ('getelementptr inbounds nuw i8, ptr %object, i64 8',
+                            'getelementptr inbounds nuw %struct.Device, ptr %object, i64 0, i32 %index',
+                            'getelementptr unknown %struct.Device, ptr %object, i64 0, i32 1'):
+            with self.subTest(replacement=replacement), self.assertRaises(ValueError):
+                nvoc.indirect_gep(ir_body().replace(
+                    'getelementptr inbounds %struct.Device, ptr %object, i64 0, i32 1',
+                    replacement), 'entry')
+
     def test_multiple_indirect_calls_cannot_be_matched_by_machine_order(self):
         with self.assertRaisesRegex(ValueError, 'exactly one'):
             nvoc.indirect_gep(ir_body('  %other = call i32 %actual(ptr %object, i32 8)\n'), 'entry')
@@ -168,6 +184,8 @@ class ActualMachOProbe(unittest.TestCase):
             self.assertIn('NVOC candidate type', result.stderr)
 
     def test_relative_output_survives_actual_compilation_from_source_cwd(self):
+        evidence = os.environ.get('S540_NVOC_TEST_EVIDENCE_DIR')
+        evidence = Path(evidence).resolve() if evidence else None
         decoder = None
         if sys.platform != 'darwin':
             objdump = (os.environ.get('S540_STACK_TEST_OBJDUMP') or
@@ -197,6 +215,13 @@ class ActualMachOProbe(unittest.TestCase):
                     output=Path('proof'), decoder=decoder)
             finally:
                 os.chdir(previous)
+                if evidence:
+                    evidence.mkdir(parents=True, exist_ok=True)
+                    shutil.copytree(root, evidence / 'source', dirs_exist_ok=True)
+                    if (base / 'proof').is_dir():
+                        shutil.copytree(base / 'proof', evidence / 'proof', dirs_exist_ok=True)
+                    for measured in base.glob('entry.*'):
+                        shutil.copy2(measured, evidence / measured.name)
             self.assertEqual(Path(result['path']).parent, base / 'proof')
             self.assertTrue((base / 'proof/original-with-names.o').is_file())
             self.assertFalse((root / 'proof').exists())

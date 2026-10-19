@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleIdentifier</key><string>org.osx86.S540ProspectiveLoader</string>
+<key>CFBundleVersion</key><string>0.0.1</string>
+<key>S540SourceOnly</key><true/>
+<key>S540OriginalEntryPolicy</key><string>closed</string>
+<key>IOKitPersonalities</key><dict><key>IdleControlOnly</key><dict>
+<key>CFBundleIdentifier</key><string>org.osx86.S540ProspectiveLoader</string>
+<key>IOClass</key><string>S540ProspectiveLoaderControl</string>
+<key>IOProviderClass</key><string>IOResources</string>
+<key>IOResourceMatch</key><string>IOKit</string>
+<key>IOMatchCategory</key><string>S540ProspectiveLoaderControl</string>
+</dict></dict>
+<!-- No executable/dependency declaration or installable bundle is supplied.
+     A final image must retain the same exact RM roots and use reviewed actual
+     dependency interfaces; target loader acceptance has not been observed. -->
+</dict></plist>

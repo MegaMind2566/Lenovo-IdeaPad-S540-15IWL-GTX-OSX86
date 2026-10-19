@@ -1,0 +1,327 @@
+{
+  "format": 1,
+  "component": "source-only-prospective-loader",
+  "source_only": true,
+  "automatic_production_inclusion": false,
+  "entry_policy_closed": true,
+  "target_loader_admission_proven": false,
+  "original_rm_entry_implemented": false,
+  "production_candidate_allowed": false,
+  "kernel_execution": "not_tested",
+  "gpu_access": false,
+  "protocol": {
+    "version": 1,
+    "snapshot_bytes": 64,
+    "request_bytes": 16,
+    "request_fields": [
+      "format",
+      "bytes",
+      "generation"
+    ],
+    "selectors": {
+      "snapshot": 0,
+      "request_once": 1
+    },
+    "no_external_ready_or_privilege_boolean": true
+  },
+  "observations": {
+    "module_entry_accepted": "actual project module-entry callback only",
+    "control_service_started": "actual IOResources control-service start callback only",
+    "either_callback_proves_loader_command_returned_success": false,
+    "target_loader_admission_proven": "always0 in this prototype; no supported exported OSKext isStarted query is invented"
+  },
+  "authorization": {
+    "open": "clientHasPrivilege(owningTask,kIOClientPrivilegeAdministrator)",
+    "every_call": "clientHasPrivilege(current_task(),kIOClientPrivilegeAdministrator)",
+    "connection_send_right_transfer_grants_privilege": false,
+    "user_permission_flags_accepted": false,
+    "actual_kernel_permission_execution_verified": false,
+    "maximum_live_clients": 1,
+    "maximum_live_control_services": 1
+  },
+  "generation": "Actual control IORegistryEntry ID after framework attachment; zero refused; never an arbitrary user-supplied readiness token.",
+  "one_shot": "Only a correctly sized/versioned root request with matching generation consumes the one request. It returns NV_ERR_NOT_READY from the actual fixed closed policy; malformed/unauthorized/stale requests do not consume it. Closing denies new calls; stop does not reset the consumed epoch.",
+  "phase_side_effects": {
+    "metaclass_initializers": "exact independent SDK registration reference only",
+    "module_entry": "CPU lock and metadata state only",
+    "probe": "inherited framework default only",
+    "start": "actual IOResources identity, CPU-side control state, register control service only",
+    "all": "No original calls, NVIDIA provider preparation, firmware, PM driver registration, IRQ, DMA or original request dispatcher."
+  },
+  "runtime": {
+    "archive": "MacKernelSDK Library/x86_64/libkmod.a",
+    "legacy_cplus_runtime_used": false,
+    "actual_archive_members": [
+      {
+        "defined": [
+          "OSKextGetCurrentIdentifier",
+          "OSKextGetCurrentLoadTag",
+          "OSKextGetCurrentVersionString",
+          "_start"
+        ],
+        "member": "c_start.o",
+        "sha256": "c12bfb074bd60be7e4dfee810fda8ff34bdda69e10350c14bb35b53b52eadc5d",
+        "undefined": [
+          "_realmain",
+          "kmod_info"
+        ]
+      },
+      {
+        "defined": [
+          "_stop"
+        ],
+        "member": "c_stop.o",
+        "sha256": "ede1baf68430c87bae4d54111f2168f9ff92eb9cad2c0954db75cd2a7007a2b7",
+        "undefined": [
+          "_antimain"
+        ]
+      }
+    ],
+    "archive_sha256": "7a751671bbe96c9c7b5416078df600b768c00c0dc5178d8acd8f52539c7ccd4e",
+    "reason": "C wrappers use realmain/antimain and own kmod_info. The modern reviewed OSKext source performs C++ initialization before entry; do not link obsolete libkmodc++ OSRuntimeInitializeCPP(kmod_info_t*,void*) ABI.",
+    "unload": "Actual service/client and OSMetaClass instance counts must be empty; normal framework termination/unload serialization is required. Incomplete owner teardown refuses module stop; no unconditional unload is authorized."
+  },
+  "same_image_original_roots": {
+    "count": 25,
+    "symbols": [
+      "s540Global_RmDestroyRegistry",
+      "s540Global_RmPackageRegistry",
+      "s540Global_RmReadRegistryDword",
+      "s540Global_RmShutdownRm",
+      "s540Global_RmWriteRegistryDword",
+      "s540Global_coreInitializeRm",
+      "s540Global_rm_acquire_api_lock",
+      "s540Global_rm_acquire_gpu_lock",
+      "s540Global_rm_destroy_event_locks",
+      "s540Global_rm_disable_adapter",
+      "s540Global_rm_execute_work_item",
+      "s540Global_rm_free_private_state",
+      "s540Global_rm_gpu_handle_mmu_faults",
+      "s540Global_rm_init_adapter",
+      "s540Global_rm_init_event_locks",
+      "s540Global_rm_init_private_state",
+      "s540Global_rm_is_supported_device",
+      "s540Global_rm_isr",
+      "s540Global_rm_isr_bh",
+      "s540Global_rm_isr_bh_unlocked",
+      "s540Global_rm_release_api_lock",
+      "s540Global_rm_release_gpu_lock",
+      "s540Global_rm_run_nano_timer_callback",
+      "s540Global_rm_run_rc_callback",
+      "s540Global_rm_shutdown_adapter"
+    ],
+    "typed_actual_header_fields": true,
+    "object_pointer_relocations_verified": 25,
+    "n_no_dead_strip_verified": true,
+    "original_function_invocations": 0,
+    "final_image_retention_verified": false,
+    "requirement": "Link this exact keeper into the same complete reviewed final image; verify final retained roots/imports. A smaller probe or a separate declaration-only image cannot establish the later full image link."
+  },
+  "original_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "original_header_sha256": {
+    "src/nvidia/arch/nvalloc/unix/include/nv.h": "02ce4b371e0a8dd26f62a320e88c8382dcf31a21b727503a66abcaea9eecf09b",
+    "src/nvidia/arch/nvalloc/unix/include/osapi.h": "1c547039ccfa61deff34bc39bd0e733c0c33344cef6f2af5fc3775c80ee92cfd",
+    "src/nvidia/inc/kernel/core/core.h": "d5a5015f0b56af9a90e8ada8a3627d2a1c9456faea6773f51e1053b5f10acc23"
+  },
+  "primary_sources": [
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "source": "libkern/c++/OSKext.cpp",
+      "git_blob": "9252d101a2ef146992b93563a7a065a9450a80d5",
+      "lines": [
+        6727,
+        6836
+      ],
+      "meaning": "loadExecutable precedes start; personalities after start success; loaded flag precedes start.",
+      "permalink": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/libkern/c%2B%2B/OSKext.cpp"
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "source": "libkern/c++/OSKext.cpp",
+      "git_blob": "9252d101a2ef146992b93563a7a065a9450a80d5",
+      "lines": [
+        8387,
+        8505
+      ],
+      "meaning": "OSRuntimeInitializeCPP precedes module start; started flag only after both succeed.",
+      "permalink": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/libkern/c%2B%2B/OSKext.cpp"
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "source": "libkern/c++/OSKext.cpp",
+      "git_blob": "9252d101a2ef146992b93563a7a065a9450a80d5",
+      "lines": [
+        8546,
+        8637
+      ],
+      "meaning": "Normal kernel stop refuses references and finalizes C++ only after successful stop.",
+      "permalink": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/libkern/c%2B%2B/OSKext.cpp"
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "source": "libkern/c++/OSRuntime.cpp",
+      "git_blob": "d6b6c0f3a78b223d603a0475917e5e79709d0247",
+      "lines": [
+        439,
+        545
+      ],
+      "meaning": "Actual metaclass constructors execute before module entry; registration is real kernel work.",
+      "permalink": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/libkern/c%2B%2B/OSRuntime.cpp"
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "source": "iokit/Kernel/IOUserClient.cpp",
+      "git_blob": "e3c0911f3359a2ecb723baadd6b97e0b3e3dbf38",
+      "lines": [
+        1446,
+        1508
+      ],
+      "meaning": "Administrator privilege reads actual task security token UID0.",
+      "permalink": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/iokit/Kernel/IOUserClient.cpp"
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "source": "iokit/Kernel/IOUserClient.cpp",
+      "git_blob": "e3c0911f3359a2ecb723baadd6b97e0b3e3dbf38",
+      "lines": [
+        4339,
+        4347
+      ],
+      "meaning": "Kernel IOKit itself authenticates current_task with clientHasPrivilege administrator.",
+      "permalink": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/iokit/Kernel/IOUserClient.cpp"
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "source": "iokit/Kernel/IOService.cpp",
+      "git_blob": "395e5ecf719bdb49edbcecfb6fcc9bfc994b0bf7",
+      "lines": [
+        781,
+        816
+      ],
+      "meaning": "Base probe/start and CPU-side IOService initialization do not prepare a PCI device or register a PM driver.",
+      "permalink": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/iokit/Kernel/IOService.cpp"
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "source": "iokit/Kernel/IOService.cpp",
+      "git_blob": "395e5ecf719bdb49edbcecfb6fcc9bfc994b0bf7",
+      "lines": [
+        1582,
+        1586
+      ],
+      "meaning": "getResourceService returns the actual framework IOResources service.",
+      "permalink": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/iokit/Kernel/IOService.cpp"
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "source": "iokit/Kernel/IORegistryEntry.cpp",
+      "git_blob": "1d6b3aab856cbdc868774d476fbc84754fa110e5",
+      "lines": [
+        2083,
+        2088
+      ],
+      "meaning": "Registry attachment assigns an entry ID under the registry write lock.",
+      "permalink": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/iokit/Kernel/IORegistryEntry.cpp"
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "source": "iokit/Kernel/IORegistryEntry.cpp",
+      "git_blob": "1d6b3aab856cbdc868774d476fbc84754fa110e5",
+      "lines": [
+        2147,
+        2155
+      ],
+      "meaning": "Generation is observed actual registry entry ID, not a user property.",
+      "permalink": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/iokit/Kernel/IORegistryEntry.cpp"
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "source": "config/Mach.exports",
+      "git_blob": "af102a0a37c5f3ed11e908f17e58b7c72272171d",
+      "lines": null,
+      "meaning": "Reviewed public Mach KPI exports current_task.",
+      "permalink": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/config/Mach.exports"
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "source": "config/IOKit.exports",
+      "git_blob": "03822d86c54a5affe32259444d53a4e68d8f044f",
+      "lines": null,
+      "meaning": "Reviewed IOKit KPI exports clientHasPrivilege, getRegistryEntryID and getResourceService.",
+      "permalink": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/config/IOKit.exports"
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "source": "config/Libkern.exports",
+      "git_blob": "366d2e4984b3afe2f2eb6a46487f8fb69b83dfb8",
+      "lines": null,
+      "meaning": "Reviewed Libkern KPI exports OSMetaClass getInstanceCount.",
+      "permalink": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/config/Libkern.exports"
+    }
+  ],
+  "reviewed_sdk_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+  "reference_sdk_inputs_sha256": {
+    "Headers/IOKit/IOService.h": "b63a858ca74fe35b6e1d6af6ff7f558da14fdb97eba7410e46db181545112ab1",
+    "Headers/IOKit/IOUserClient.h": "ba9d61502e5e155597dc1e7f3d00de9c2a2261055938952067e1f783b8635f90",
+    "Headers/IOKit/IORegistryEntry.h": "b0189e02eab0c447513ede708d92f0072f65b0bb96134d9aca9c6778f6c07939",
+    "Headers/IOKit/IOLib.h": "ca6e68412763e599845945852dbb966b82f5641786f9c1113c0276e72a12eba4",
+    "Headers/libkern/c++/OSMetaClass.h": "b745b27adf91a89324a8057ee57ce75b9df799e44c7f303048145e9f0037c875",
+    "Headers/kern/task.h": "be14572c893c93ddc9fd51bf5c3d55cf908c5a29255e2011cca73675a44f7c5a",
+    "Headers/mach/kmod.h": "17dcdc1fb20211dab697cc46ef29053688598661506835f7d47ff94d699ff726",
+    "Library/x86_64/libkmod.a": "7a751671bbe96c9c7b5416078df600b768c00c0dc5178d8acd8f52539c7ccd4e",
+    "Library/kmod/c_start.c": "2dffd2880dbe7f37df5d5cd6fb0573a603e462ef759105caf959b2cb1406fe96",
+    "Library/kmod/c_stop.c": "061a10dba798abc95bf5438ca302d9fbf3a996c262f9d0cbe9eadc420472ba83"
+  },
+  "validation": {
+    "state_checks_per_variant": 46,
+    "native_variants": [
+      "plain",
+      "fatal-ASan-UBSan-function"
+    ],
+    "local_native_status": "passed-host-user-space-controls",
+    "local_sdk_status": "passed-MachO-cross-controls",
+    "sdk_git_identity_locally_verified": false,
+    "native_apple_user_control_compile": "required in upcoming native check; local host has no macOS userspace SDK",
+    "two_metaclass_graph": "exact-independent-SDK-reference-match",
+    "root_address_object": "25exactrelocations,no_dead_strip,nooriginalcalls,noinitializer",
+    "actual_target_loader_execution": false,
+    "actual_IOUserClient_permission_execution": false,
+    "source_contract_checks": 6
+  },
+  "remaining_admission": [
+    "Supported target loader success for the exact same final image, dependencies and root/import retention is still required before original entry. Neither a module callback nor class service start is fabricated proof of a completed load command.",
+    "The complete reviewed non-target prerequisites (actual callback/profile exclusions, aggregate stack, cancellation/deadline, PM, status-preserving failure and hardware-DMA stop proof) must close independently.",
+    "This prototype contains no original-entry implementation or admission setter. Future source integration requires a new reviewed real gate validator and owned transaction; root privilege alone never enables RM.",
+    "The template has no executable/dependency declaration and no installable bundle. No module is loaded by tests or the control tool.",
+    "Normal framework object/unload serialization and every final subclass/inherited target resolution must be validated by the supported target loader; no exact25G241 ABI claim follows from older primary source."
+  ],
+  "source_sha256": {
+    "Info.prototype.plist": "632086fc56bbfd907726dea1427bb41f6285992c843b76682edef27a2d8b88d4",
+    "S540ProspectiveLoaderKernel.cpp": "30803d1544f30b845ad871c8096b54c18e5733d6d61cd00a9084198005a8fa3d",
+    "S540ProspectiveLoaderKernel.hpp": "81d56ef7aa7873e94dc355202ef21b44f460dbefdc84237d65481993f6e1c626",
+    "S540ProspectiveLoaderKmod.cpp": "33e8371b7a5880515ba6625f642ccefd2c593463aa4c91fd1f3ce87f4c2e7052",
+    "S540ProspectiveLoaderProtocol.h": "2231c56534cbb49223af350d0e51216874c1d9a1ab2bd5f6af425347752da36a",
+    "S540ProspectiveLoaderState.c": "f1d95ec85bf22f10108b0245e5a24156afb2a66fda557fe269c149a0335f8204",
+    "S540ProspectiveLoaderState.h": "3d4b8620cb3d01807bcbc6447a71e9411e494bd642a574a24785ffde826464e4",
+    "check_loader.py": "93d3059c64edc795855686aa65952c4cc095c23f700c0c350d81b565e28167b2",
+    "roots/S540NvidiaGspOriginalRoots.c": "3a0e7dc194656727ca86b0bd6ed46651ed26257806e7a87a682a30f9d9ba2a5d",
+    "roots/S540NvidiaGspOriginalRoots.h": "5011309c7a9e004a0023bfef14c68221c9b0141e9614aea0de1cc25702641e35",
+    "tests/check_loader_state_native.cpp": "cd6e442f66d47a1f258190162e2acc834fd71a09a9acc30d2e5e528e9c86e8b0",
+    "tests/s540_prospective_ctl.c": "901dc008a5f1e9ba2589d819652cd9a40f3cc20e33daa27e849abf31c3bcc314",
+    "tests/sdk_loader_metaclass_reference.cpp": "7f8278a2bc2688888c0c3e0288c38757a41e38227d5c958c8a58b6d7c26c669a",
+    "tests/test_loader_contracts.py": "44bd4f2a754688540f45666bffd689e603f96b4102bbfbab3c4c8b15dc776671"
+  }
+}

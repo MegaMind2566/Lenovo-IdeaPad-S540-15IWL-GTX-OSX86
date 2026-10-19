@@ -1,0 +1,102 @@
+{
+  "format": 1,
+  "status": "exact-checkpoint3-selected-route-evidence",
+  "identity": {
+    "checkpoint": "reviewed-native-checkpoint3",
+    "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+    "proof_script_sha256": "b3b00a623b3eb1957de41ab8c4d2ad4e085d594a3be9ae88cea31683932969a0",
+    "macho_parser_sha256": "07570071ac3ca5a5bbb54c989ff9a39a2af071bb6a9b53c86acc1d8414e59a56",
+    "instruction_parser_sha256": "79a14393d69452d01ad42067b9933ccc842abc98fc50ee443051a96b601d8abd",
+    "native_report_sha256": "898d9da278c07b81642c32b882f645217abb754b1afd34309035f93ed56ee8b1",
+    "source_manifest_sha256": "fa3bba8ac628728a34da6dcbd552436f3a2210b7b72543ac08a83c49cd1a54c7",
+    "source_tree_sha256": "974b546adf0affb862adce77d632ea5449e3647036624c87c991eb4442d4dbc8",
+    "source_inventory_sha256": "046e91651a5f70c06502c7c5e9eaf8cccb054db72ce5814417bae2289e7d2562",
+    "project_bridge_sha256": "9be1c07e96346eccd4e2d470e7f4059bc4509a4fdbf6a02217225b40d8d9b258",
+    "final_linked_image_sha256_from_report": "a066acb8525e15a691588cb3d6c4ff24acd56a858e975de4ec30ca852bd77dc7"
+  },
+  "evidence": {
+    "identifier_occurrences": [
+      {
+        "source": "src/nvidia/generated/g_kernel_nvlink_nvoc.h",
+        "line": 1527,
+        "symbol": "knvlinkRotateEncryptionKeys_IMPL"
+      },
+      {
+        "source": "src/nvidia/generated/g_kernel_nvlink_nvoc.h",
+        "line": 1529,
+        "symbol": "knvlinkRotateEncryptionKeys"
+      },
+      {
+        "source": "src/nvidia/generated/g_kernel_nvlink_nvoc.h",
+        "line": 1534,
+        "symbol": "knvlinkRotateEncryptionKeys"
+      },
+      {
+        "source": "src/nvidia/generated/g_kernel_nvlink_nvoc.h",
+        "line": 1534,
+        "symbol": "knvlinkRotateEncryptionKeys_IMPL"
+      },
+      {
+        "source": "src/nvidia/src/kernel/gpu/nvlink/kernel_nvlink.c",
+        "line": 3910,
+        "symbol": "knvlinkRotateEncryptionKeys_IMPL"
+      }
+    ],
+    "rotation_symbol_records": [
+      {
+        "object": "kernel_nvlink.o",
+        "defined": true,
+        "kind": 15,
+        "address": 21024
+      }
+    ],
+    "compiled_original_roots": [
+      "s540Global_RmDestroyRegistry",
+      "s540Global_RmPackageRegistry",
+      "s540Global_RmReadRegistryDword",
+      "s540Global_RmWriteRegistryDword",
+      "s540Global_rm_acquire_api_lock",
+      "s540Global_rm_acquire_gpu_lock",
+      "s540Global_rm_destroy_event_locks",
+      "s540Global_rm_disable_adapter",
+      "s540Global_rm_execute_work_item",
+      "s540Global_rm_free_private_state",
+      "s540Global_rm_gpu_handle_mmu_faults",
+      "s540Global_rm_init_adapter",
+      "s540Global_rm_init_event_locks",
+      "s540Global_rm_init_private_state",
+      "s540Global_rm_is_supported_device",
+      "s540Global_rm_isr",
+      "s540Global_rm_isr_bh",
+      "s540Global_rm_isr_bh_unlocked",
+      "s540Global_rm_release_api_lock",
+      "s540Global_rm_release_gpu_lock",
+      "s540Global_rm_run_nano_timer_callback",
+      "s540Global_rm_run_rc_callback",
+      "s540Global_rm_shutdown_adapter"
+    ],
+    "source_gated_roots": [
+      "s540Global_RmShutdownRm",
+      "s540Global_coreInitializeRm"
+    ],
+    "source_file_count": 4005,
+    "source_inventory_file_count": 3957,
+    "original_object_count": 1100,
+    "external_incoming_relocations": 0,
+    "local_incoming_relocations": 0,
+    "same_object_direct_incoming_branches": 0,
+    "reflection_export_info_bytes_hex": "00000000000000000000000000000000",
+    "reflection_export_info_relocations": 0,
+    "rotation_member_field_occurrences": 0,
+    "fixed_crypto_record": "../CRYPTO-REACHABILITY.json",
+    "fixed_crypto_record_changed": false,
+    "other_source_guard_rows": 63,
+    "whole_crypto_implemented": false,
+    "future_profile_requires_fresh_source_object_and_root_review": true
+  },
+  "crypto_operation_implemented": false,
+  "whole_crypto_admission": false,
+  "kernel_execution": "not_tested",
+  "gpu_access": false,
+  "production_candidate_allowed": false
+}

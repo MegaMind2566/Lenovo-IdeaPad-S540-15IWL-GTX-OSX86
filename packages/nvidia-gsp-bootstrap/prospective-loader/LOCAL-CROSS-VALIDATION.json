@@ -1,0 +1,164 @@
+{
+  "component": "nvidia-prospective-loader",
+  "format": 1,
+  "gpu_access": false,
+  "host_architecture": "x86_64",
+  "host_system": "Linux",
+  "kernel_execution": "not_tested",
+  "original_rm_called": false,
+  "production_candidate_allowed": false,
+  "sdk_controls": {
+    "actual_backend_import_count": 344,
+    "compiler": "Ubuntu clang version 18.1.3 (1ubuntu1)",
+    "gpu_access": false,
+    "kernel_execution": "not_tested",
+    "metaclass": {
+      "actual_object_sha256": "d35667e48795dd1a8ad46ac1e6de86ca553da4aa5eff1e412aaf2890bcd5caa8",
+      "classes": [
+        "S540ProspectiveLoaderControl",
+        "S540ProspectiveLoaderClient"
+      ],
+      "graph_sha256": "0364f61e64dc288b558bad333ef1bf144949b681f56dd7568fb097fe597c6eb8",
+      "loader_entries": 2,
+      "loader_external_symbols": [
+        "__ZN11OSMetaClassC2EPKcPKS_j",
+        "__ZN11OSMetaClassD2Ev",
+        "__ZN12IOUserClient10gMetaClassE",
+        "__ZN9IOService10gMetaClassE"
+      ],
+      "loader_function_count": 2,
+      "reference_object_sha256": "3f140ee319eab0ed6fb34ba7d2692263501d932c9b6be4eb68f8c4ba76f3822d",
+      "status": "exact-two-metaclass-reference-match",
+      "target_kernel_execution": "not_tested"
+    },
+    "module_runtime": {
+      "archive": "Library/x86_64/libkmod.a",
+      "archive_sha256": "7a751671bbe96c9c7b5416078df600b768c00c0dc5178d8acd8f52539c7ccd4e",
+      "legacy_cplus_runtime_used": false,
+      "members": [
+        {
+          "defined": [
+            "OSKextGetCurrentIdentifier",
+            "OSKextGetCurrentLoadTag",
+            "OSKextGetCurrentVersionString",
+            "_start"
+          ],
+          "member": "c_start.o",
+          "sha256": "c12bfb074bd60be7e4dfee810fda8ff34bdda69e10350c14bb35b53b52eadc5d",
+          "undefined": [
+            "_realmain",
+            "kmod_info"
+          ]
+        },
+        {
+          "defined": [
+            "_stop"
+          ],
+          "member": "c_stop.o",
+          "sha256": "ede1baf68430c87bae4d54111f2168f9ff92eb9cad2c0954db75cd2a7007a2b7",
+          "undefined": [
+            "_antimain"
+          ]
+        }
+      ]
+    },
+    "native_apple_compiler": false,
+    "object_sha256": {
+      "S540ProspectiveLoaderKernel": "d35667e48795dd1a8ad46ac1e6de86ca553da4aa5eff1e412aaf2890bcd5caa8",
+      "S540ProspectiveLoaderKmod": "35d3394a568a71809f6f9f9fc79db57a05520fbdf7532f2c56cdab0a9742482a",
+      "S540ProspectiveLoaderState": "1b0b06466d972b05ca43c640ccf0b290f90af2afe5131580d2c28035b6c75a90",
+      "sdk_loader_metaclass_reference": "3f140ee319eab0ed6fb34ba7d2692263501d932c9b6be4eb68f8c4ba76f3822d"
+    },
+    "original_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+    "original_roots": {
+      "exact_pointer_relocations": 25,
+      "final_link_retention_verified": false,
+      "n_no_dead_strip": true,
+      "object_sha256": "ded51a7b64262c0950e3cbaa8c8115125622d7071d31cdb0942c5fa3108cfec0",
+      "original_calls": false,
+      "root_count": 25,
+      "roots": [
+        "s540Global_RmDestroyRegistry",
+        "s540Global_RmPackageRegistry",
+        "s540Global_RmReadRegistryDword",
+        "s540Global_RmShutdownRm",
+        "s540Global_RmWriteRegistryDword",
+        "s540Global_coreInitializeRm",
+        "s540Global_rm_acquire_api_lock",
+        "s540Global_rm_acquire_gpu_lock",
+        "s540Global_rm_destroy_event_locks",
+        "s540Global_rm_disable_adapter",
+        "s540Global_rm_execute_work_item",
+        "s540Global_rm_free_private_state",
+        "s540Global_rm_gpu_handle_mmu_faults",
+        "s540Global_rm_init_adapter",
+        "s540Global_rm_init_event_locks",
+        "s540Global_rm_init_private_state",
+        "s540Global_rm_is_supported_device",
+        "s540Global_rm_isr",
+        "s540Global_rm_isr_bh",
+        "s540Global_rm_isr_bh_unlocked",
+        "s540Global_rm_release_api_lock",
+        "s540Global_rm_release_gpu_lock",
+        "s540Global_rm_run_nano_timer_callback",
+        "s540Global_rm_run_rc_callback",
+        "s540Global_rm_shutdown_adapter"
+      ],
+      "typed_actual_original_header_references": true
+    },
+    "private_namespace_sha256": "cb79f788baddb7f046e870b1e2e09bfde310b4b12417ec8c737fad1ef440f7a1",
+    "production_candidate_allowed": false,
+    "reviewed_kernel_sdk_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+    "sdk_git_identity_verified": false,
+    "status": "passed-development-sdk-controls",
+    "userspace_control_tool": "not-compiled; real-userspace-macOS-SDK-required"
+  },
+  "source_only": true,
+  "source_sha256": {
+    "Info.prototype.plist": "632086fc56bbfd907726dea1427bb41f6285992c843b76682edef27a2d8b88d4",
+    "S540ProspectiveLoaderKernel.cpp": "30803d1544f30b845ad871c8096b54c18e5733d6d61cd00a9084198005a8fa3d",
+    "S540ProspectiveLoaderKernel.hpp": "81d56ef7aa7873e94dc355202ef21b44f460dbefdc84237d65481993f6e1c626",
+    "S540ProspectiveLoaderKmod.cpp": "33e8371b7a5880515ba6625f642ccefd2c593463aa4c91fd1f3ce87f4c2e7052",
+    "S540ProspectiveLoaderProtocol.h": "2231c56534cbb49223af350d0e51216874c1d9a1ab2bd5f6af425347752da36a",
+    "S540ProspectiveLoaderState.c": "f1d95ec85bf22f10108b0245e5a24156afb2a66fda557fe269c149a0335f8204",
+    "S540ProspectiveLoaderState.h": "3d4b8620cb3d01807bcbc6447a71e9411e494bd642a574a24785ffde826464e4",
+    "check_loader.py": "93d3059c64edc795855686aa65952c4cc095c23f700c0c350d81b565e28167b2",
+    "roots/S540NvidiaGspOriginalRoots.c": "3a0e7dc194656727ca86b0bd6ed46651ed26257806e7a87a682a30f9d9ba2a5d",
+    "roots/S540NvidiaGspOriginalRoots.h": "5011309c7a9e004a0023bfef14c68221c9b0141e9614aea0de1cc25702641e35",
+    "tests/check_loader_state_native.cpp": "cd6e442f66d47a1f258190162e2acc834fd71a09a9acc30d2e5e528e9c86e8b0",
+    "tests/s540_prospective_ctl.c": "901dc008a5f1e9ba2589d819652cd9a40f3cc20e33daa27e849abf31c3bcc314",
+    "tests/sdk_loader_metaclass_reference.cpp": "7f8278a2bc2688888c0c3e0288c38757a41e38227d5c958c8a58b6d7c26c669a",
+    "tests/test_loader_contracts.py": "44bd4f2a754688540f45666bffd689e603f96b4102bbfbab3c4c8b15dc776671"
+  },
+  "state_controls": {
+    "fatal": {
+      "checks": 46,
+      "component": "nvidia-prospective-loader-state",
+      "entry_policy_closed": true,
+      "execution": "native-user-space",
+      "failures": 0,
+      "format": 1,
+      "gpu_access": false,
+      "kernel_execution": "not_tested",
+      "original_rm_called": false,
+      "status": "passed",
+      "target_loader_admission_proven": false
+    },
+    "plain": {
+      "checks": 46,
+      "component": "nvidia-prospective-loader-state",
+      "entry_policy_closed": true,
+      "execution": "native-user-space",
+      "failures": 0,
+      "format": 1,
+      "gpu_access": false,
+      "kernel_execution": "not_tested",
+      "original_rm_called": false,
+      "status": "passed",
+      "target_loader_admission_proven": false
+    }
+  },
+  "status": "passed-development-controls",
+  "target_loader_admission_proven": false,
+  "validation_scope": "Local Linux CPU controls and supplied SDK cross-compilation only; no macOS user-control compilation or kernel loading."
+}

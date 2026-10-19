@@ -47,6 +47,26 @@ validation of these additions is pending. Accepted callback borrowers,
 pre-lock terminal drains and guards before original owner destruction remain
 required even when direct timer cancellation succeeds.
 
+Run `39208972401`, source `43db7c6a385491899dc3d8b00f4e0f29b276fe96`,
+failed before any job step started; its first retry also has no steps or logs.
+The repository-check job failed at the same pre-start boundary. The user
+confirmed that the GitHub budget was exhausted and authorized restarting after
+restoring it. Both jobs have been restarted. The pre-start failures provide no
+compilation or execution evidence for the additions.
+
+After that restart, the repository check passed. The native job reached the
+compiler controls but failed the new end-to-end NVOC fixture because its LLVM
+GEP parser rejected the compiler's output. The next parser revision supports
+documented canonical no-wrap flags and retains diagnostic IR/object inputs.
+Byte-offset guesses and dynamic member indices still fail. A fresh native
+run must establish the actual Apple-compiler result.
+
+The [isolated idle-loader prototype](prospective-loader/README.md) passes its
+local state and SDK controls, with entry permanently closed. The separate
+[checkpoint3 rotation-entry proof](../nvidia-global-rm-crypto/selected-route-proof/README.md)
+checks the exact historical native inputs; it cannot be transferred to a new
+source profile by changing hashes alone.
+
 | Requirement | Current evidence and remaining work |
 |---|---|
 | Original callback contracts | [The complete 110-callback ledger](../nvidia-global-rm/CALLBACK-PROFILE-AUDIT.md) distinguishes implemented services, official disabled queries, unavailable operations and lifetime guards. Definitions alone do not close operational coverage. Remaining internal/error routes require implementation or independent exclusion. |

@@ -20,6 +20,10 @@ import nvidia_stack_usage as stack
 IDENTIFIER = r'[A-Za-z_][A-Za-z_0-9]*'
 SSA = r'%[-A-Za-z$._0-9]+'
 METADATA = r'(?:,\s*![A-Za-z_0-9.]+\s+!\d+)*'
+# LLVM's canonical spelling can add no-wrap guarantees to the same typed
+# member address. These flags never replace the required struct and indices.
+# https://llvm.org/docs/LangRef.html#getelementptr-instruction
+GEP_FLAGS = r'(?:(?: inbounds| nusw)(?: nuw)?| nuw)?'
 
 
 def _strip_comments(text: str) -> str:
@@ -108,10 +112,12 @@ def indirect_gep(text: str, function: str) -> dict:
 
 def gep_definition(body: str, value: str) -> dict:
     matches = list(re.finditer(r'^\s*' + re.escape(value) +
-        r'\s*=\s*getelementptr(?: inbounds)?\s+%struct\.(' + IDENTIFIER + r'),\s*ptr\s+(' + SSA +
+        r'\s*=\s*getelementptr' + GEP_FLAGS + r'\s+%struct\.(' + IDENTIFIER + r'),\s*ptr\s+(' + SSA +
         r'),\s*i64 0,\s*i32 (\d+)' + METADATA + r'\s*$', body, re.M))
     if len(matches) != 1:
-        raise ValueError('Callee does not use one constant typed struct member GEP.')
+        actual = re.findall(r'^\s*' + re.escape(value) + r'\s*=.*$', body, re.M)
+        raise ValueError('Callee does not use one constant typed struct member GEP: ' +
+                         json.dumps(actual)[:1000])
     match = matches[0]
     return {'llvm_struct': match[1], 'llvm_member_index': int(match[3]), 'receiver': match[2]}
 

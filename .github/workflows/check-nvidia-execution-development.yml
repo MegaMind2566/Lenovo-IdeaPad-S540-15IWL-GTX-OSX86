@@ -49,6 +49,8 @@ jobs:
       - name: Verify compiler diagnostics and native kernel link
         run: python3 packages/nvidia-global-rm/tests/test_compile_diagnostics.py
       - name: Verify checked source isolation and complete execution closure controls
+        env:
+          S540_NVOC_TEST_EVIDENCE_DIR: build/nvidia-execution/tooling-controls/nvoc-relative-output
         run: |
           python3 packages/nvidia-global-rm/tests/test_checked_source.py
           python3 packages/nvidia-global-rm/tests/test_execution_closure.py
@@ -126,6 +128,13 @@ jobs:
           --kernel-sdk build-src/MacKernelSDK
           --timer-control-report build/nvidia-execution/prospective-checks/timer-checked/timer-checked-controls.json
           --output build/nvidia-execution/prospective-checks/combined-profile-v3
+      - name: Verify the isolated idle loader and privileged one-shot refusal
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-loader/check_loader.py
+          --output-dir build/nvidia-execution/prospective-checks/loader
+          --upstream build-src/nvidia-upstream
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --sdk build-src/MacKernelSDK
       - name: Exercise revocation of the actual original wait bodies in user space
         run: >-
           python3 packages/nvidia-gsp-bootstrap/cancellation/check_cancellation.py
@@ -220,6 +229,7 @@ jobs:
         with:
           name: NVIDIA-execution-development-validation
           path: |
+            build/nvidia-execution/tooling-controls/**
             build/nvidia-execution/original-rm/darwin-compile.json
             build/nvidia-execution/original-rm/dependency-controls.json
             build/nvidia-execution/original-rm/checked-darwin-compile.json
