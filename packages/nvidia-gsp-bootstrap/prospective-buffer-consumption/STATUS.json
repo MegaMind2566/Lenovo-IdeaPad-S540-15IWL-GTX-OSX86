@@ -1,0 +1,16 @@
+{
+  "schema": "s540-prospective-buffer-consumption-status-v1",
+  "status": "design-not-implemented",
+  "evidence_level": "source-only",
+  "active_irq_retirement": "pending",
+  "hardware_runtime_executed": false,
+  "receipt_issuer_implemented": false,
+  "per_record_consumption_verifier_implemented": false,
+  "production_default_changed": false,
+  "AllocationRetirementUnderActiveIrq_cleared": false,
+  "session_hardware_dma_stop_proved": false,
+  "all_gpu_engines_dma_stopped": false,
+  "full_bootstrap_allocation_topology_closed": false,
+  "hardware_test_admitted": false,
+  "scope": "One original positive lifetime boundary for the external-bindata root; all other owned buffers retain their original lifetime and require separate closure."
+}

@@ -1,0 +1,74 @@
+{
+  "adapter_initialized": false,
+  "aggregate_stack_proven": false,
+  "artifact": {
+    "downloaded_and_digest_verified": true,
+    "files": 13434,
+    "id": 12172376955,
+    "zip_sha256": "0f537da059a315d9b36169ab1fdfa45a5f633777a434facf5ad8da8f0852f0c1"
+  },
+  "evidence_sha256": {
+    "kernel-checks/execution-kernel-build.json": "898d9da278c07b81642c32b882f645217abb754b1afd34309035f93ed56ee8b1",
+    "kernel-checks/nvoc-reset-stack-proof/typed-nvoc-dispatch.json": "88c16906c9f23af1447d28069c579abd3c0850b6be284a94dbb8b277600e8def",
+    "native-checks/execution-checks.json": "fc6313b35ce32255aaaf3de2baf8f7581a439f3b340d0abdbd3dfd5e0de0ff09",
+    "original-global-lifecycle/global-lifecycle-checks.json": "dc4e1f7fd24f18b6d620536a1c4ba81174e191b86c5cfdba32c13e0735b6acc6",
+    "prospective-checks/first-transaction/first-transaction-validation.json": "974caeda8174e566858bcc0184f8f17c9a551b174a772455a5ced1aac027cfc2"
+  },
+  "first_transaction": {
+    "controls_per_variant": {
+      "fatal-sanitized": {
+        "actual_original_bodies": 20,
+        "host": 267,
+        "joint": 24,
+        "original_boundaries": 74,
+        "queue": 20,
+        "timer": 24,
+        "total": 429
+      },
+      "plain": {
+        "actual_original_bodies": 20,
+        "host": 267,
+        "joint": 24,
+        "original_boundaries": 74,
+        "queue": 20,
+        "timer": 24,
+        "total": 429
+      }
+    },
+    "kernel_target_compile_actions": {
+      "host_and_producers": 4,
+      "original_and_typed_probe": 9,
+      "services_and_context": 5,
+      "strong_record_and_participants": 2,
+      "total": 20
+    }
+  },
+  "format": 1,
+  "gpu_access": false,
+  "gsp_initialized": false,
+  "installable_candidate_generated": false,
+  "kernel_execution": "not_tested",
+  "native_component_checks_per_variant": {
+    "native": 2398,
+    "sanitized": 2398
+  },
+  "not_covered": [
+    "Subsequent RM-lock ownership and exact GPU-instance binding successors.",
+    "Subsequent composed complete-image compiler/linker, RC, shutdown protocol and retained diagnostic source profile.",
+    "Subsequent selected-root stack analysis and definition binder."
+  ],
+  "original_global_allocation_failure_cases_per_variant": {
+    "native": 156,
+    "sanitized": 156
+  },
+  "production_candidate_allowed": false,
+  "scope": "Exact a60109e native checkpoint: frozen original profiles, first-transaction/Host retention, disabled UVM and OS-event source policy.",
+  "status": "passed-native-development-checkpoint",
+  "workflow": {
+    "conclusion": "success",
+    "head_sha": "a60109e4cf48b7614514f8565fae2d2325bfc359",
+    "job_id": 117947087601,
+    "run_id": 39218234557,
+    "url": "https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39218234557"
+  }
+}

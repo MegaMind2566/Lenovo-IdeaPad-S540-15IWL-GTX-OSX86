@@ -1,0 +1,15 @@
+{
+  "complete_function": "gpuEnterShutdown_IMPL",
+  "complete_function_body_sha256": "2b6816b9964aea0e35261b844d8a23d453cb48e533df973fabede3d3024a9281",
+  "first_transaction_source_contract_sha256": "ed4da324212df92ea630b65421e4cb20a49287e9f618035702145ff3de31920b",
+  "format": 1,
+  "gpu_source": "src/nvidia/src/kernel/gpu/gpu.c",
+  "gpu_source_sha256": "4e5d5f438acf9ca591f35d793009265afac0c21fc4818eabeff52271019ddc31",
+  "normal_protocol_only": true,
+  "original_entry_admission": false,
+  "physical_reclamation_authorized": false,
+  "production_candidate_allowed": false,
+  "profile": "isolated-original-gsp-shutdown-protocol-without-final-destruction",
+  "upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "whole_gpu_dma_stop_proven": false
+}

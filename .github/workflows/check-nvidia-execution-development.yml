@@ -20,6 +20,11 @@ on:
       - 'builders/nvidia_stack_usage.py'
       - 'builders/nvidia_nvoc_stack_dispatch.py'
       - 'builders/nvidia_nvoc_ast.py'
+      - 'builders/nvidia_nvoc_definitions.py'
+      - 'builders/nvidia_combined_metaclasses.py'
+      - 'builders/compose_nvidia_first_transaction.py'
+      - 'builders/link_nvidia_first_transaction.py'
+      - 'builders/nvidia_stack_root_closure.py'
       - 'builders/build_nvidia_execution.py'
       - '.github/workflows/check-nvidia-execution-development.yml'
   workflow_dispatch:
@@ -57,6 +62,11 @@ jobs:
           python3 packages/nvidia-global-rm/tests/test_execution_closure.py
           python3 packages/nvidia-global-rm/tests/test_stack_usage.py
           python3 packages/nvidia-global-rm/tests/test_nvoc_stack_dispatch.py
+          python3 packages/nvidia-global-rm/tests/test_nvoc_definitions.py
+          python3 packages/nvidia-global-rm/tests/test_combined_metaclasses.py
+          python3 packages/nvidia-global-rm/tests/test_first_transaction_composition.py
+          python3 packages/nvidia-global-rm/tests/test_stack_root_closure.py
+          python3 builders/link_nvidia_first_transaction.py --self-test
       - name: Check native Darwin services before full RM compilation
         run: >-
           python3 builders/check_nvidia_execution.py --services-preflight
@@ -151,6 +161,52 @@ jobs:
           --cc /usr/bin/clang --cxx /usr/bin/clang++
           --sdk build-src/MacKernelSDK
           --v3-root build/nvidia-execution/prospective-checks/combined-profile-v3
+      - name: Verify actual original API, GPU and allocation-lock ownership observations
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-rm-lock-ownership/check_lock_ownership.py
+          --upstream build-src/nvidia-upstream
+          --v3-root build/nvidia-execution/prospective-checks/combined-profile-v3/source
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --output build/nvidia-execution/prospective-checks/rm-lock-ownership
+          --sdk build-src/MacKernelSDK
+      - name: Verify exact GPU-instance binding with actual original attach and worker bodies
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-work-gpu-binding/check.py
+          --upstream build-src/nvidia-upstream
+          --v3-root build/nvidia-execution/prospective-checks/combined-profile-v3
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --output build/nvidia-execution/prospective-checks/work-gpu-binding
+          --cc /usr/bin/clang --cxx /usr/bin/clang++
+      - name: Compile complete GPU-binding original units and actual kernel backends
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-work-gpu-binding/compile_full.py
+          --upstream build-src/nvidia-upstream
+          --v3-root build/nvidia-execution/prospective-checks/combined-profile-v3
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --output build/nvidia-execution/prospective-checks/work-gpu-kernel
+          --cc /usr/bin/clang --cxx /usr/bin/clang++ --sdk build-src/MacKernelSDK
+      - name: Verify real RC timer participants without invented event-owner rows
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-event-owner-policy/check.py
+          --upstream build-src/nvidia-upstream
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --host-overlay build/nvidia-execution/prospective-checks/first-transaction/host/overlay
+          --output build/nvidia-execution/prospective-checks/rc-participant
+          --cc /usr/bin/clang --cxx /usr/bin/clang++ --sdk build-src/MacKernelSDK
+      - name: Verify the typed one-shot original shutdown protocol without reclaiming owners
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-shutdown-protocol/check.py
+          --upstream build-src/nvidia-upstream
+          --v3-root build/nvidia-execution/prospective-checks/combined-profile-v3
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --output build/nvidia-execution/prospective-checks/shutdown-protocol
+          --cc /usr/bin/clang --cxx /usr/bin/clang++ --sdk build-src/MacKernelSDK
+      - name: Verify source-backed Darwin identity, capability and NVLink utility callbacks
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-platform-closure/check_platform_closure.py
+          --upstream build-src/nvidia-upstream
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --output build/nvidia-execution/prospective-checks/platform-closure
       - name: Exercise isolated unavailable OS-event feature guards
         run: >-
           python3 packages/nvidia-gsp-bootstrap/prospective-os-event-policy/check_event_policy.py
@@ -214,6 +270,17 @@ jobs:
           --compiled-directory build/nvidia-execution/original-rm
           --checked-cleanup-overlays
           --output-dir build/nvidia-execution/kernel-checks
+      - name: Verify all three SDK metaclasses after the actual combined relocatable link
+        run: |
+          xcrun ld -r -arch x86_64 \
+            build/nvidia-execution/kernel-checks/S540NvidiaGspPower.o \
+            build/nvidia-execution/prospective-checks/loader/sdk/S540ProspectiveLoaderKernel.o \
+            -o build/nvidia-execution/kernel-checks/combined-metaclasses.o
+          python3 builders/nvidia_combined_metaclasses.py \
+            --image build/nvidia-execution/kernel-checks/combined-metaclasses.o \
+            --power-reference build/nvidia-execution/kernel-checks/sdk-power-metaclass-reference.o \
+            --loader-reference build/nvidia-execution/prospective-checks/loader/sdk/sdk_loader_metaclass_reference.o \
+            --output build/nvidia-execution/kernel-checks/combined-metaclass-audit.json
       - name: Execute the checked original global lifecycle and every allocation failure in user space
         run: >-
           python3 builders/check_nvidia_global_lifecycle.py
@@ -230,6 +297,43 @@ jobs:
           python3 builders/nvidia_nvoc_stack_dispatch.py
           --capture build/nvidia-execution/original-rm/checked-namespaced/kernel_gsp.stack.json
           --output build/nvidia-execution/kernel-checks/nvoc-reset-stack-proof
+      - name: Bind the typed NVOC targets to their actual defining objects
+        run: >-
+          python3 builders/nvidia_nvoc_definitions.py
+          --proof build/nvidia-execution/kernel-checks/nvoc-reset-stack-proof/typed-nvoc-dispatch.json
+          --manifest build/nvidia-execution/original-rm/checked-namespaced/stack-usage-manifest.json
+          --output build/nvidia-execution/kernel-checks/nvoc-reset-stack-proof/target-definitions.json
+      - name: Measure selected RM and public-wrapper root closure with every actual object present
+        run: >-
+          python3 builders/nvidia_stack_root_closure.py
+          --rm-manifest build/nvidia-execution/original-rm/checked-namespaced/stack-usage-manifest.json
+          --project-manifest build/nvidia-execution/kernel-checks/stack-usage-manifest.json
+          --output build/nvidia-execution/kernel-checks/selected-root-stack-closure.json
+      - name: Compose exact retained-diagnostic Host control inputs
+        run: >-
+          python3 builders/compose_nvidia_first_transaction.py
+          --upstream build-src/nvidia-upstream
+          --v3-root build/nvidia-execution/prospective-checks/combined-profile-v3
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --output build/nvidia-execution/composed-host-inputs
+      - name: Exercise actual retained Host backing on master, queue and direct timer participants
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-retained-diagnostic/check.py
+          --composition build/nvidia-execution/composed-host-inputs/composition.json
+          --upstream build-src/nvidia-upstream
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --output build/nvidia-execution/prospective-checks/retained-diagnostic
+          --cc /usr/bin/clang --cxx /usr/bin/clang++
+      - name: Rebuild and link the same complete retained RC and shutdown development image
+        run: >-
+          python3 builders/link_nvidia_first_transaction.py
+          --upstream build-src/nvidia-upstream
+          --v3-root build/nvidia-execution/prospective-checks/combined-profile-v3
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --kernel-sdk build-src/MacKernelSDK
+          --assets-dir build/nvidia-execution/firmware
+          --output build/nvidia-execution/first-transaction-image
+          --retained-diagnostic --rc-participant --shutdown-protocol --platform-closure
       - name: Record the unresolved production milestone explicitly
         shell: bash
         run: |
@@ -275,13 +379,14 @@ jobs:
             build/nvidia-execution/metaclass-preflight/**/*.log
             build/nvidia-execution/metaclass-preflight/*.o
             build/nvidia-execution/firmware-checks/firmware-assets-checks.json
+            build/nvidia-execution/firmware/NVIDIA-DRIVER-LICENSE.txt
             build/nvidia-execution/native-checks/execution-checks.json
             build/nvidia-execution/native-checks/**/*.json
             build/nvidia-execution/native-checks/**/*.log
             build/nvidia-execution/kernel-checks/execution-kernel-build.json
             build/nvidia-execution/kernel-checks/**/*.json
             build/nvidia-execution/kernel-checks/**/*.log
-            build/nvidia-execution/kernel-checks/execution-bridge.o
+            build/nvidia-execution/kernel-checks/*.o
             build/nvidia-execution/kernel-checks/S540NvidiaGspPower.o
             build/nvidia-execution/kernel-checks/sdk-power-metaclass-reference.o
             build/nvidia-execution/kernel-checks/**/*.su
@@ -295,6 +400,13 @@ jobs:
             build/nvidia-execution/prospective-checks/**/*.o
             build/nvidia-execution/prospective-checks/**/*.su
             build/nvidia-execution/prospective-checks/adapter-compile/*.o
+            build/nvidia-execution/first-transaction-image/**/*.json
+            build/nvidia-execution/first-transaction-image/**/*.log
+            build/nvidia-execution/first-transaction-image/**/*.o
+            build/nvidia-execution/first-transaction-image/**/*.su
+            build/nvidia-execution/first-transaction-image/**/*.stack.json
+            build/nvidia-execution/first-transaction-image/**/*.bin
+            build/nvidia-execution/first-transaction-image/**/*.macho
             build/nvidia-execution/original-global-lifecycle/**/*.json
             build/nvidia-execution/original-global-lifecycle/**/*.log
           if-no-files-found: warn

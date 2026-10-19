@@ -1,0 +1,412 @@
+{
+  "create_external": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+    "lines": [
+      6584,
+      6600
+    ],
+    "role": "external ucodes copied into one radix3 allocation",
+    "range_sha256": "697b4ada895bec97291524b935ef74028901c25ed05e291132bc80b85f74ba9e",
+    "source_sha256": "e4d612fb7bbf28b55a388b05766f654dd60ff53106da0829256999a6380c8c78"
+  },
+  "create_radix3": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+    "lines": [
+      6627,
+      6791
+    ],
+    "role": "table geometry, one root allocation, AT_GPU physical entries, CPU unmap, error cleanup",
+    "range_sha256": "18edc5e89bcf03a28fa04fef7d62772d0d23624315722d7922c206111217c4f5",
+    "source_sha256": "e4d612fb7bbf28b55a388b05766f654dd60ff53106da0829256999a6380c8c78"
+  },
+  "publish_external": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+    "lines": [
+      6245,
+      6250
+    ],
+    "role": "publish root AT_GPU address and ucodes logical size in bindataArgs",
+    "range_sha256": "8fcf1e7d0f25939fac0a38613d16c32321a41f9e6bc4ec6e13adb39827c36b65",
+    "source_sha256": "e4d612fb7bbf28b55a388b05766f654dd60ff53106da0829256999a6380c8c78"
+  },
+  "init_rpc": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+    "lines": [
+      5320,
+      5368
+    ],
+    "role": "successful synchronous INIT plus decoded response precedes external bindata memdesc free/destroy/null",
+    "range_sha256": "7550a630932a9b3c2f160bd48777136a1d35a514e2c193c81dee2d269422d0a5",
+    "source_sha256": "e4d612fb7bbf28b55a388b05766f654dd60ff53106da0829256999a6380c8c78"
+  },
+  "decode": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+    "lines": [
+      7880,
+      7902
+    ],
+    "role": "both nvkv decode status and key handler status must be NV_OK",
+    "range_sha256": "294bd734d0d1e1fc2dd06c15f1346e64618496b04b5215819b96e0efdf4687b3",
+    "source_sha256": "e4d612fb7bbf28b55a388b05766f654dd60ff53106da0829256999a6380c8c78"
+  },
+  "opcode": {
+    "path": "src/nvidia/interface/gmcapi/gmcapi_table.h",
+    "lines": [
+      74,
+      95
+    ],
+    "role": "GSP_INIT physical 0x00010001 has flags 0, dynamic request and response",
+    "range_sha256": "1fb498b7312ef54fb5578540ab5e26e221ca428bb35441bbc9f826b699ee6b73",
+    "source_sha256": "e2d03c9e5685809d1dc4c52d7ffb22957075b5291d1d8e0966a7d11874da9d16"
+  },
+  "dispatch": {
+    "path": "src/nvidia/src/kernel/core/gmcapi_impl.c",
+    "lines": [
+      124,
+      149
+    ],
+    "role": "bSync selected from command table; returned status is response.status after successful transport",
+    "range_sha256": "82251b80589259379129ec248024dea04057905a39702044c0eb5cb11f6ee952",
+    "source_sha256": "1b663edaa07f104c69fd421996d2ce68bc58a03feced96d5969c0a289f23b177"
+  },
+  "command_wrapper": {
+    "path": "src/nvidia/inc/kernel/core/gmcapi_impl.h",
+    "lines": [
+      103,
+      134
+    ],
+    "role": "gmcapiCommand returns dispatch status, output size only on success",
+    "range_sha256": "246d5c13bfcca3c155b079496a7065ac30dd256644c11880b33a7c4ce8813df8",
+    "source_sha256": "1ef04f9771b28b39f8b04567f84f934a4daa87ac9d4ec67e3efe587ea6bc132d"
+  },
+  "send_receive": {
+    "path": "src/nvidia/src/kernel/gpu/gpu.c",
+    "lines": [
+      7837,
+      7901
+    ],
+    "role": "GPU lock, sequence, staging copy, transport wait, response bound and response copy",
+    "range_sha256": "f58d88aaf9e7452fb5fac55c6f28d38c93b783fccac52e5c0e182204b815bcf5",
+    "source_sha256": "981e1db33e9902c19798046cf4909604096ddc881fb895b0792b3131e91acdd0"
+  },
+  "poll_match": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+    "lines": [
+      1968,
+      2005
+    ],
+    "role": "matching GMC command ID and request sequence; response flag only an NV_ASSERT in original",
+    "range_sha256": "9ec230123030b96b0488e95ad68ac6bfcdb51e4403471d15bc5c7a04a6541663",
+    "source_sha256": "e4d612fb7bbf28b55a388b05766f654dd60ff53106da0829256999a6380c8c78"
+  },
+  "poll_completion": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+    "lines": [
+      3370,
+      3400
+    ],
+    "role": "expected response yields warning which actual poll transforms into NV_OK",
+    "range_sha256": "50d280bff156b70cc259fa433eae2cba1b9eeba7c5e69a1ae9c1e93c92037c88",
+    "source_sha256": "e4d612fb7bbf28b55a388b05766f654dd60ff53106da0829256999a6380c8c78"
+  },
+  "normal_boot": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c",
+    "lines": [
+      392,
+      485
+    ],
+    "role": "boot stages, link status queue, successful kgspSendInitRpcs return",
+    "range_sha256": "f174df94d4ecbd2f79c5761736852269904935ea17f8c1b0739160b5aaf79f1b",
+    "source_sha256": "7f1d2a6356f98f0975a3130449522b7f8d7569cd85ddb2255f6cce1ccf06bd1a"
+  },
+  "fallback_external": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c",
+    "lines": [
+      165,
+      216
+    ],
+    "role": "destructor boot-args fallback frees external bindata if INIT did not complete",
+    "range_sha256": "fa1e08a982533f878458df48219181608ac4723f3a62cf61e6c094bdb3cd2185",
+    "source_sha256": "7f1d2a6356f98f0975a3130449522b7f8d7569cd85ddb2255f6cce1ccf06bd1a"
+  },
+  "gsp_destructor": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+    "lines": [
+      5980,
+      6018
+    ],
+    "role": "all persistent GSP owned allocation free calls, no local hardware stop in helper",
+    "range_sha256": "728b35857e1747c739283d38b1fe277aef314a132fb426637557ae522d903288",
+    "source_sha256": "e4d612fb7bbf28b55a388b05766f654dd60ff53106da0829256999a6380c8c78"
+  },
+  "normal_destroy": {
+    "path": "src/nvidia/src/kernel/gpu/gpu.c",
+    "lines": [
+      4114,
+      4204
+    ],
+    "role": "gpuStateDestroy calls completed GSP unload before later generic kernel-object cleanup",
+    "range_sha256": "39acc02b03018fddbce097f86ddf81a528b680fc6769182f28e336675746d649",
+    "source_sha256": "981e1db33e9902c19798046cf4909604096ddc881fb895b0792b3131e91acdd0"
+  },
+  "gsp_unload": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+    "lines": [
+      5860,
+      5960
+    ],
+    "role": "suspend RPC, processor-suspended observation and teardown; only then unloaded bit",
+    "range_sha256": "9bd4b953e6e6a68bee3e3bd12cc130f277edafc10417d93de85cecfdee9ec17b",
+    "source_sha256": "e4d612fb7bbf28b55a388b05766f654dd60ff53106da0829256999a6380c8c78"
+  },
+  "free_root": {
+    "path": "src/nvidia/src/kernel/gpu/mem_mgr/mem_desc.c",
+    "lines": [
+      1547,
+      1626
+    ],
+    "role": "deferred refcount cases; all IOMMU mappings; OS backing free",
+    "range_sha256": "15211efa37a481d7038eaa6034b17e54261605580bd72c74ffd986326799bcd3",
+    "source_sha256": "ea2c53aafb5fcf1b6237a7ae46044cf0ed14a57da1eb3bc012dab2142b83d454"
+  },
+  "destroy_root": {
+    "path": "src/nvidia/src/kernel/gpu/mem_mgr/mem_desc.c",
+    "lines": [
+      594,
+      674
+    ],
+    "role": "decrement refcount and deferred free/destroy fallback",
+    "range_sha256": "7482e7f432e70fddb802714f1ec59b2035faeef776215a44d967ed0efab2743c",
+    "source_sha256": "ea2c53aafb5fcf1b6237a7ae46044cf0ed14a57da1eb3bc012dab2142b83d454"
+  },
+  "free_iovas": {
+    "path": "src/nvidia/src/kernel/gpu/mem_mgr/mem_desc.c",
+    "lines": [
+      555,
+      583
+    ],
+    "role": "root walks every IOMMU mapping, child mapping handling",
+    "range_sha256": "f894d37e30284c2ad625fbae49c8a6667faaa03f9b8fff84232ebaafffe12903",
+    "source_sha256": "ea2c53aafb5fcf1b6237a7ae46044cf0ed14a57da1eb3bc012dab2142b83d454"
+  },
+  "destroy_iovas": {
+    "path": "src/nvidia/src/kernel/mem_mgr/io_vaspace.c",
+    "lines": [
+      513,
+      561
+    ],
+    "role": "destroy all child IOVA mappings before root osIovaUnmap",
+    "range_sha256": "9eed42de28066bc38dbb84bfe58f07f801ec812136fc5ed951e68575bb2f7d7b",
+    "source_sha256": "03a0d09ce474b3eb4d8be43a1a3d4bf25f4fc182954daaf5932cc1ad1200a60d"
+  },
+  "free_pages": {
+    "path": "src/nvidia/src/kernel/gpu/mem_mgr/mem_desc.c",
+    "lines": [
+      1462,
+      1481
+    ],
+    "role": "all ActualSize/OS pages of ADDR_SYSMEM freed together",
+    "range_sha256": "95093a8b93361805eea2de327a2477fb697377396d1704a21c822d281db941dc",
+    "source_sha256": "ea2c53aafb5fcf1b6237a7ae46044cf0ed14a57da1eb3bc012dab2142b83d454"
+  },
+  "os_free": {
+    "path": "src/nvidia/arch/nvalloc/unix/src/os.c",
+    "lines": [
+      1126,
+      1161
+    ],
+    "role": "nv_free_pages over root memdata and OS page count; void caller sees only assertion",
+    "range_sha256": "1f0a90877111162f6a144b4b953e24a47a23c55e4bb28b5d5d0e76fe50839474",
+    "source_sha256": "9e0907d3a54fd71ef6ff01966b6c443ea8f7711d00d151bd7ba1f5171268abd5"
+  },
+  "boot_metadata": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c",
+    "lines": [
+      740,
+      768
+    ],
+    "role": "SEC2 Booter gets root firmware, bootloader, signature and optional crashcat addresses",
+    "range_sha256": "bfd7f77499b30e4df5aaf2ccd81a3638fe8c807426baad97eba5d27f58539d76",
+    "source_sha256": "7f1d2a6356f98f0975a3130449522b7f8d7569cd85ddb2255f6cce1ccf06bd1a"
+  },
+  "booter": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_booter_tu102.c",
+    "lines": [
+      82,
+      121
+    ],
+    "role": "metadata address in SEC2 mailbox 0/1 and run Booter Load on SEC2",
+    "range_sha256": "f3bad8cd050b96bff8f3b0bbcef4a5528e7f0f0f0cf4a347c5b618b62276177b",
+    "source_sha256": "0ad08940d95b9106b672af2cc7b83fa748371e337f96c9eead2af929ad4147f1"
+  },
+  "booter_wait": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_falcon_tu102.c",
+    "lines": [
+      382,
+      438
+    ],
+    "role": "exec actual Falcon ucode, wait HALTED, read mailboxes",
+    "range_sha256": "6eb47509a086c82724bdd7da50d746189d7ab78e9922d24e1c4cdc82559ff4f2",
+    "source_sha256": "0913c6d6f8d5a33426aa6df6010fc598ad2cfcac689240c9ef185323dde7a91a"
+  },
+  "boot_args": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+    "lines": [
+      6900,
+      7089
+    ],
+    "role": "persistent common init args allocation, lifetime free, LibOS log and RMARGS addresses",
+    "range_sha256": "b4abe61b3633e8b7b72983aa9f1bcffe3882383a701951cf4491b38b3bd689b0",
+    "source_sha256": "e4d612fb7bbf28b55a388b05766f654dd60ff53106da0829256999a6380c8c78"
+  },
+  "message_queues": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/message_queue_cpu.c",
+    "lines": [
+      209,
+      340
+    ],
+    "role": "one shared queue allocation containing page table, command and status queues",
+    "range_sha256": "b98ea58b51a9656d9f66f16d0aff8f2ee5d9364f07c69a9f646a15aa04daadcc",
+    "source_sha256": "426b45f7cd754a80068d0093e67f7308dcd0dd828056dc4c5abf8d872af69f57"
+  },
+  "message_queue_free": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/message_queue_cpu.c",
+    "lines": [
+      440,
+      473
+    ],
+    "role": "CPU work staging cleanup then shared backing unmap/free/destroy",
+    "range_sha256": "2bc3e4af42f6fbeee1e5ae949bb6535c10af702e73a7fc559920d1309a90df5e",
+    "source_sha256": "426b45f7cd754a80068d0093e67f7308dcd0dd828056dc4c5abf8d872af69f57"
+  },
+  "logs": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+    "lines": [
+      3925,
+      4176
+    ],
+    "role": "LibOS2 filters only INIT and RM logs, lifetime and stop polling before free",
+    "range_sha256": "0a5d4feb1ad509cf3084e8d2e457afbd16f172667fc5d9ea5e07b67c330aba6f",
+    "source_sha256": "e4d612fb7bbf28b55a388b05766f654dd60ff53106da0829256999a6380c8c78"
+  },
+  "state_monitor": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+    "lines": [
+      4399,
+      4464
+    ],
+    "role": "4KB shared RM state buffer allocation and lifetime free",
+    "range_sha256": "67ce05984343a62286e897b9698f47117c3c8319530d2f1668789deb7d7cc48d",
+    "source_sha256": "e4d612fb7bbf28b55a388b05766f654dd60ff53106da0829256999a6380c8c78"
+  },
+  "notify": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+    "lines": [
+      4607,
+      4675
+    ],
+    "role": "notify surface unconditionally allocated for GSP client, GSP-written completion semantics",
+    "range_sha256": "54696ebb664151da79e4b364ccc534a1d7bbf9b5ba6943786704aafc46dfafde",
+    "source_sha256": "e4d612fb7bbf28b55a388b05766f654dd60ff53106da0829256999a6380c8c78"
+  },
+  "system_info_pa": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+    "lines": [
+      5054,
+      5066
+    ],
+    "role": "sim-only PA and notify surface PA serialized in INIT system info",
+    "range_sha256": "d09b3a800818bce3c1f65d2ff84704c2495ac43658621b2feee00efd7515e99d",
+    "source_sha256": "e4d612fb7bbf28b55a388b05766f654dd60ff53106da0829256999a6380c8c78"
+  },
+  "optional_args": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+    "lines": [
+      6215,
+      6249
+    ],
+    "role": "profiler conditional, sysmem heap zero for nonzero-FB, state-monitor PA, external radix3",
+    "range_sha256": "5963f6b339f5dd4f4b075d05afd2561f43d91fe1c70497bc2f2d8fe3c8dd5050",
+    "source_sha256": "e4d612fb7bbf28b55a388b05766f654dd60ff53106da0829256999a6380c8c78"
+  },
+  "crashcat_configuration": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c",
+    "lines": [
+      67,
+      91
+    ],
+    "role": "zeroed Falcon config, enable monitoring but no allocQueueSize assignment",
+    "range_sha256": "10824fa14ba438fc98dd8562ae4f87f43aacc36506931fff53e800f75de18678",
+    "source_sha256": "7f1d2a6356f98f0975a3130449522b7f8d7569cd85ddb2255f6cce1ccf06bd1a"
+  },
+  "crashcat_queue": {
+    "path": "src/nvidia/src/kernel/gpu/falcon/kernel_crashcat_engine.c",
+    "lines": [
+      49,
+      113
+    ],
+    "role": "only allocQueueSize>0 creates host queue; unload unregister/free",
+    "range_sha256": "f358cb779a9191edb6d74e50f1888d3819596664dcf502d096091f12397fc278",
+    "source_sha256": "cc0c4371e4f01ecbe508d12023ef557f62ae2095878769a291b624ddf5107678"
+  },
+  "firmware_fetch": {
+    "path": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+    "lines": [
+      1958,
+      1989
+    ],
+    "role": "TU117 external ucodes supplied by firmware service, not GB10Y skipped branch",
+    "range_sha256": "4ddca73c291a02a6ced0e7b002c0d919486e5f1053a6e0c753d1feb7046b13a0",
+    "source_sha256": "71cc56d73625b91d762712d5cdb146222e2a177dc85fa45511cf2b0a67f9981a"
+  },
+  "log_hal": {
+    "path": "src/nvidia/generated/g_kernel_gsp_nvoc.c",
+    "lines": [
+      1819,
+      1840
+    ],
+    "role": "TU117 log count uses LibOS2",
+    "range_sha256": "756dea1cd5bada28db1f8c347ee70d170a8ce84f3e4a08b6b2112454c58e7a88",
+    "source_sha256": "3efc3c328576587dd34924829c9d607ad8515f9ca455ee5ce1e4d6ffafb45673"
+  },
+  "libos_hal": {
+    "path": "src/nvidia/generated/g_kernel_gsp_nvoc.c",
+    "lines": [
+      1991,
+      2011
+    ],
+    "role": "TU117 LibOS2 binding",
+    "range_sha256": "6155b2da53379e6d510825475cccd56d41e1f016c386f1d3a31eb09c0feb51aa",
+    "source_sha256": "3efc3c328576587dd34924829c9d607ad8515f9ca455ee5ce1e4d6ffafb45673"
+  },
+  "log_ids": {
+    "path": "src/nvidia/arch/nvalloc/common/inc/nv-firmware-chip-family-select.h",
+    "lines": [
+      105,
+      119
+    ],
+    "role": "only LOGINIT and LOGRM from non-vgpu bare-metal init list support LibOS2",
+    "range_sha256": "9e68df5046b6900b8af3bfd08d17c62e5535932bcfc35d74359a22075a6d8398",
+    "source_sha256": "b2d199bdd7ed8a54863418080cb736cd425f7112aa42a96c4d0f6406bf45b159"
+  },
+  "direct_image": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_falcon_tu102.c",
+    "lines": [
+      160,
+      209
+    ],
+    "role": "direct Falcon image copied using CPU IMEM/DMEM PIO, host pImage address not provided as DMA source",
+    "range_sha256": "c72748bdb54c46c3f71b2aad458398547ccb92a538a8bb984d69e3dcf740f93b",
+    "source_sha256": "0913c6d6f8d5a33426aa6df6010fc598ad2cfcac689240c9ef185323dde7a91a"
+  },
+  "fwsec_loader": {
+    "path": "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_falcon_tu102.c",
+    "lines": [
+      321,
+      362
+    ],
+    "role": "FWSEC with-loader sysmem code/data addresses given to Falcon DMA loader",
+    "range_sha256": "3aea90e5bb3666918f992fdf3b65696b04907bc22b01173e74883b825dcbb10d",
+    "source_sha256": "0913c6d6f8d5a33426aa6df6010fc598ad2cfcac689240c9ef185323dde7a91a"
+  }
+}

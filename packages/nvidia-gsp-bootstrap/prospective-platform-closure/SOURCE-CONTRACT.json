@@ -1,0 +1,49 @@
+{
+  "callbacks": [
+    "os_get_is_openrm",
+    "nv_dynamic_power_available",
+    "os_get_tegra_platform",
+    "nvlink_strcpy",
+    "nvlink_strlen",
+    "nvlink_strcmp",
+    "nvlink_get_platform_time"
+  ],
+  "configuration": "S540_NVIDIA_DARWIN_PLATFORM_CLOSURE=1; NV_PM_RUNTIME_AVAILABLE absent; non-Tegra x86-64 Unix ABI",
+  "format": 1,
+  "gpu_access": false,
+  "intentional_absence_query_is_not_an_unavailable_operation": true,
+  "invalid_identity_output_records_unavailable": true,
+  "kernel_execution": "not_tested",
+  "non_tegra_query_preserves_output": true,
+  "nvlink_hardware_implemented": false,
+  "original_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "original_source_sha256": {
+    "kernel-open/nvidia/nv.c": "ce04946d288cf0251668a2d847acceb2a39af9dac2f13bb005f53759c774dbf7",
+    "kernel-open/nvidia/nvlink_linux.c": "512da8863974dbada02318d606714c9e090baf88793ef3c5993e94815bb5e987",
+    "kernel-open/nvidia/os-interface.c": "0c8fe2749ec4ee12f1dbbd884cfbc8f1c8a7750903de7453b01c2f6b92e0f6d6",
+    "src/common/nvlink/interface/nvlink_os.h": "d4b1d8e3fcf365b39c0b90708ca4465bf3b642b89e9e13f400800989c9418037",
+    "src/nvidia/arch/nvalloc/unix/include/nv.h": "02ce4b371e0a8dd26f62a320e88c8382dcf31a21b727503a66abcaea9eecf09b",
+    "src/nvidia/arch/nvalloc/unix/include/os-interface.h": "bd281e48ff06b481033fc2fb29a891710a2b4d66fb009cc2b752ab6e90f2113b",
+    "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c": "a0b6639b517612e3e0c5b4c76abf317378bf0a91409ca27e5bb172e3395053fa",
+    "src/nvidia/arch/nvalloc/unix/src/os.c": "057b50fcb738be90a073b60f63e70559706864ddcec3bf703282563173e3dce4",
+    "src/nvidia/generated/g_gpu_nvoc.h": "8c11f9341181e06e22bde6f1722275d057796b0a7cd796f28fb2fba0058d8a9c"
+  },
+  "production_candidate_allowed": false,
+  "production_default_changed": false,
+  "repository_dependency_sha256": {
+    "packages/nvidia-darwin-services/src/S540NvidiaDarwinPlatform.cpp": "e1d25f901d22b1471830da3ec58a44a73c926cd3ad3764d18e1ce67d91e3878b",
+    "packages/nvidia-darwin-services/src/S540NvidiaDarwinServices.h": "b2e71cc940a78e52b304345cdc7f54b955272df3f5683c51842121ff0761672b",
+    "packages/nvidia-darwin-services/src/S540NvidiaDarwinSync.cpp": "a57a4397ac8064e2dd2c0702be1b761e8640d0d6edffdcc80cbb1f2d27b791f6",
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRm.h": "8ca8e0eac4a52b0d755c7693a2adda6e938bd057db77037b827a835df3133be2",
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRmHost.cpp": "a9202786c8a66cb1b89bdc6d2513edeb0e893330a560071035f8707615cbb377"
+  },
+  "runtime_power_implemented": false,
+  "source_sha256": {
+    "S540ProspectivePlatformClosure.c": "42a7c0e15df5e83ab776c6e26083e2b0eaf3db126a15f86fa8a8ce1f9d162d82",
+    "check_platform_closure.py": "e73ee1d2e01c8998b89f27578fb242ab10f2945dec230828393f885f98cbd379",
+    "prepare_original_controls.py": "5378743011879e46e767a3ff784f2d1a7656470870c5eb9d4818289037b2f319",
+    "tests/check_platform_closure.c": "298731261c415c257f8c41a5582b883467b7ec98d65973380f3c52b1809a39fe",
+    "tests/test_source_contracts.py": "ba5f6c55e630a46b6d3f870689800fbac7acfb2fff148b486da25d2ebc933943"
+  },
+  "tegra_platform_implemented": false
+}

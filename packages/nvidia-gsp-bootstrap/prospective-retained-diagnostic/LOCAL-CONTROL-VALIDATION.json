@@ -1,0 +1,27 @@
+{
+  "actual_host_and_strong_record": true,
+  "actual_queue_direct_timer_participants": true,
+  "cases": 7,
+  "complete_1100_final_profile_validated": false,
+  "composed_original_changed_units": [
+    "src/nvidia/arch/nvalloc/unix/src/osapi.c"
+  ],
+  "composed_project_units": 55,
+  "control_report_sha256": "56b213c84fa87a2babca7a13f135bf5c1f20d475540ed434cca024b69e5228fc",
+  "controls_per_variant": 29,
+  "execution": "Linux x86_64 explicit host-control, Clang18",
+  "format": 1,
+  "gpu_access": false,
+  "kernel_execution": "not_tested",
+  "native_apple_execution": false,
+  "original_entry_admission": false,
+  "original_metadata_and_lock_endpoints": "explicit parent test fixtures",
+  "production_candidate_allowed": false,
+  "sanitizers": "fatal ASan/UBSan/function; ASAN_OPTIONS=detect_leaks=0 due executor LSan task-file restriction",
+  "source_sha256": {
+    "check.py": "e8ff4253b61efa015c71c4cecfd9a46112b72332cd69460ed3d47ec200bb5897",
+    "check_host.c": "c4c1c84ff0c68e359eac097f2aecb69d18e7323a974c40cbeabad2366e4e037d",
+    "prepare.py": "201f47b56f26b89594cff13da639487405f14e82ee5715be614572417e3329da"
+  },
+  "status": "passed-local-host-controls-and-composed-project-cross-compilation"
+}

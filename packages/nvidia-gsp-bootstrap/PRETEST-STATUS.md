@@ -1,85 +1,67 @@
 # Single Lenovo test: prerequisite status
 
-The requested deliverable is one controlled original RM/GSP initialization and
-shutdown attempt on the S540 TU117. **It is not ready for installation.** The
-working Lenovo checkpoint remains v9; no repeat v9 hardware test is requested.
-Brightness, external displays and NVIDIA power-off work remain deferred.
+The next hardware milestone is one controlled original RM/GSP initialization
+attempt on the S540 TU117. **No installable candidate is ready.** The confirmed
+Lenovo checkpoint remains v9. Brightness, external displays and electrical
+NVIDIA power-off work remain deferred.
 
-The last completed native Intel macOS validation is source commit
-`76e0f43c6c1eaf5f259acbe73846e89ecd9be1a7`, Actions run `39175620059`.
-Its exact evidence remains in
-[NATIVE-INTEGRATION-VALIDATION.json](../nvidia-global-rm/NATIVE-INTEGRATION-VALIDATION.json).
-It does not validate subsequent edits. The ten approved original-source
-overlays and their historical audits are preserved unchanged.
+## Exact completed native checkpoint
 
-The subsequent software checkpoint adds explicit central-policy and validated
-EFI RSDP lookup contracts, optional PCI identity outputs used by the originals,
-and source-backed memory/crypto refusal inventories. The isolated combined
-prospective profile compiles its 19 changed original C units and two real
-cancellation bridges; it remains separate from the approved ten overlays.
-Three further memory-unwind candidates pass their actual-body fault controls.
-None of these changes establishes original adapter or GSP runtime success.
+Intel macOS Actions run
+[39218234557](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39218234557)
+passed completely at source `a60109e4cf48b7614514f8565fae2d2325bfc359`.
+The downloaded artifact digest is verified. Its results cover:
 
-The first two follow-up native runs stopped in development instrumentation:
-canonical macOS path comparison, then missing compiler `.su` output for truly
-code-empty translation units. Both cases have explicit regression controls.
-The corrected collector cross-compiles all 1,100 baseline original objects and
-binds absent `.su` files only to unchanged objects with no executable bytes.
-A fresh native run is still required for this complete checkpoint.
+- 2,398 component controls in each ordinary/sanitized variant.
+- 429 first-transaction/Host/queue/timer controls in each variant.
+- All 156 original global allocation-failure cases in each variant.
+- Full original-source compilation, kernel bridge/link controls, firmware
+  validation, disabled UVM, unavailable OS-event policy and the measured typed
+  NVOC dispatch.
 
-Follow-up run `39182950863`, exact source `2e3ffbb460f4b2384c36edcea84acb5241fee66f`,
-has now passed complete native original-source compilation, all 2,398 component
-controls in both variants, the actual kernel bridge/link controls and all 156
-original global allocation-failure cases in each variant. Its last typed NVOC
-proof step failed because its relative output path was interpreted from the
-original source working directory. The workflow is therefore **not green**.
-[The exact partial native evidence](../nvidia-global-rm/NATIVE-CHECKPOINT-VALIDATION.json)
-records that failure and the successful preceding steps separately. The path
-fix has an end-to-end real compiler/disassembler regression control; a new
-native run must validate it and subsequent candidate changes.
+[NATIVE-FIRST-TRANSACTION-VALIDATION.json](../nvidia-global-rm/NATIVE-FIRST-TRANSACTION-VALIDATION.json)
+binds these claims to exact source and artifact hashes. This run does not cover
+subsequent edits. Earlier native records remain historical evidence.
 
-The next isolated profile is documented in [prospective-v3](prospective-v3/README.md).
-It composes the memory, cancellation and checked-timer changes without changing
-the frozen ten-overlay production defaults. Its 25 changed original C units,
-three real C bridges and actual SDK timer backend pass cross compilation;
-the separate timer candidate passes 483 controls per variant. Native Apple
-validation of these additions is pending. Accepted callback borrowers,
-pre-lock terminal drains and guards before original owner destruction remain
-required even when direct timer cancellation succeeds.
+## Subsequent combined source work
 
-Run `39208972401`, source `43db7c6a385491899dc3d8b00f4e0f29b276fe96`,
-failed before any job step started; its first retry also has no steps or logs.
-The repository-check job failed at the same pre-start boundary. The user
-confirmed that the GitHub budget was exhausted and authorized restarting after
-restoring it. Both jobs have been restarted. The pre-start failures provide no
-compilation or execution evidence for the additions.
+The new complete-image composer combines the frozen V3/first-transaction source
+with exact GPU-instance binding and API/GPU/allocation-lock observations. All
+1,100 original units compile locally against the composed source/headers; all
+53 project units compile with real cancellation participants. These results
+are explicit Linux Mach-O cross-compilation, not a new Apple/kernel execution.
 
-After that restart, the repository check passed. The native job reached the
-compiler controls but failed the new end-to-end NVOC fixture because its LLVM
-GEP parser rejected the compiler's output. The next parser revision supports
-documented canonical no-wrap flags and retains diagnostic IR/object inputs.
-Byte-offset guesses and dynamic member indices still fail. A fresh native
-run must establish the actual Apple-compiler result.
+The fixed retained-diagnostic, RC-participant, shutdown-protocol and seven-callback
+platform source options compose together. All 56 resulting project units and
+the changed original `osapi.c` compile locally. The final complete native source profile
+still needs its own 1,100-unit rebuild and actual same-image link.
 
-The [isolated idle-loader prototype](prospective-loader/README.md) passes its
-local state and SDK controls, with entry permanently closed. The separate
-[checkpoint3 rotation-entry proof](../nvidia-global-rm-crypto/selected-route-proof/README.md)
-checks the exact historical native inputs; it cannot be transferred to a new
-source profile by changing hashes alone.
+The retained Host policy pins associated physical backing from transaction
+start, with separate logical-retirement counters and no invented error. Its
+29 controls per variant include actual queue/direct-timer authorization,
+concurrent duplicate frees and a genuine earlier service refusal. It issues no
+hardware-stop or final-release receipt. Direct Darwin timer/workqueue/guard
+allocations need their own retained lifetime; Host pinning does not cover them.
 
-| Requirement | Current evidence and remaining work |
+The typed one-shot shutdown bridge calls the exact original
+`gpuEnterShutdown_IMPL`: state unload plus normal GSP shutdown, without
+`gpuStateDestroy`. Its 191 controls per variant and two complete TU compilations
+are software evidence with declared hardware/token fixtures. It is not the
+current production teardown path and does not attest universal DMA cessation.
+
+## Remaining integrated admission
+
+| Requirement | Remaining work |
 |---|---|
-| Original callback contracts | [The complete 110-callback ledger](../nvidia-global-rm/CALLBACK-PROFILE-AUDIT.md) distinguishes implemented services, official disabled queries, unavailable operations and lifetime guards. Definitions alone do not close operational coverage. Remaining internal/error routes require implementation or independent exclusion. |
-| Device memory and PCI identity | [Memory contracts](../nvidia-device-transport/MEMORY-CONTRACTS.json) cover exact original ABI checks, actual retained PCI DVSEC reads, refusal boundaries and bounded allocation diagnostics. Failed requests preserve output and ownership. |
-| DMA lifetime | IRQ drain and actual hardware DMA cessation are separate requirements. Logical frees retain backing and IOVA through original engine destruction until an exact session/generation receipt is independently validated. The approved source profile has no receipt issuer. |
-| Adapter failure ownership | A failed original Boolean initialization now quarantines its context. [Prospective checked unwind](adapter/ADAPTER-STATUS-AUDIT.json) propagates lock and teardown errors and preserves residual ownership. Its original-source changes remain isolated pending complete composition and review. |
-| GSP teardown | [Prospective source changes](cancellation/GSP-TEARDOWN-STATUS-PROSPECTIVE.md) preserve first errors from actual suspend/reset/FWSEC/Booter and original GPU unload phases. Partial boot and void engine destructors require retained DMA ownership; no stopped bit is accepted as a substitute for a successful operation. |
-| PM revocation | [Cancellation controls](cancellation/README.md) use a fixed generation-tagged record and the original PM event timestamp. Cancellation of actual source wait bodies and conditional lock acquisition is distinct from completed hardware cleanup. The PowerLifetime gate remains closed. |
-| Kernel stack | The compiler records source/object-bound stack usage and direct machine-code edges. Unresolved indirect dispatch, recursion, dynamic frames and external depth remain unknown, not zero. Aggregate entry bounds still require proof. No heap stack switch is used. |
-| Target kernel | The supplied report identifies macOS 26.7.1, build 25G241, Darwin 25.6.0. Public SDK compilation and inherited-class ancestry do not establish actual target export/vtable resolution. No private report identifiers are required in this repository. |
-| Final validation | The development workflow now retains stack measurements and exercises isolated prospective error paths. New source changes require a fresh native Intel macOS run, followed by evidence tied to that exact source/artifact. |
+| Complete final image | Native full-profile compile, actual dead-stripped kext link, exact original/private closure, three metaclasses, firmware and retained typed roots in the same image. Full-input unresolved symbols are not automatically live selected-root requirements. |
+| Original locks/lifetime | Connect the actual lock observer to a serialized global/context epoch with ISR/DPC exclusion. A zero current-thread lock mask is not all-thread quiescence. |
+| Callback producers | Compose genuine RC behavior and hard-IRQ/coalesced-BH participation, including master-thread pending drains and a non-destructive persistent hardware-mask phase. Do not invent EVENT/OWNER policy rows for plain 1Hz callbacks. |
+| Allocation ownership | Acquire the real session hardware-DMA hold before any original attempt. Preserve CPU objects, direct service backends, DMA backing/mappings, context and module text after the retained diagnostic. |
+| Kernel stack | Measured frames and direct edges are available. Recursive components, indirect calls, external depth and complete wrapper/IRQ headroom still prevent an aggregate bound. Unknown paths are not zero. |
+| PM/cancellation | Establish actual cleanup/producer ordering within the PM deadline. A software drain or PMstop is not a hardware-stop receipt. |
+| Operational entry | The production KERNEL global entry and bootstrap initializer still refuse. A complete retained transaction and actual target-loader success must precede original GPU entry; loading the idle image alone is not an RM/GSP initialization test. |
 
-Source-body controls execute actual extracted original functions with explicit
-dependency fixtures; they do not execute a GPU or establish kernel runtime
-success. Cross compilation is reported separately from native Apple compiler
-validation. No candidate ZIP is produced while admission remains unresolved.
+The supplied target report identifies macOS 26.7.1/build25G241, Darwin25.6.0.
+Public SDK compilation does not demonstrate exact target export/vtable loading.
+Hardware results are observations for the eventual Lenovo test; software checks
+do not establish GSP firmware execution or graphics acceleration.

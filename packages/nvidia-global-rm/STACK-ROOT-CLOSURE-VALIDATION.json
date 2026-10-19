@@ -1,0 +1,324 @@
+{
+  "aggregate_stack_proven": false,
+  "artifact": {
+    "artifact_id": 12168978908,
+    "downloaded_and_verified": true,
+    "native_workflow_head": "9c238972f6e49ff53e14e29d5147d6e19d980b40",
+    "run_id": 39213796174,
+    "zip_sha256": "616ea1f890bfe280badc0e92f6bc7a98a49ee43b9ecd4936fbbe3b503ecd0290"
+  },
+  "control_groups": 17,
+  "controls": "Linux Clang18 cross-target actual Mach-O plus conservative graph controls; native fixture execution pending next CI.",
+  "decoded_function_count": 29224,
+  "decoded_object_count": 1101,
+  "demonstrated_stack_overflow": false,
+  "format": 1,
+  "graph_sha256": "11423628d70cf912735b4cb478a87e392301eda67351502214e16644c940bcd3",
+  "independent_replay_sha256": "034bc2a6c3d6b5cbd669384691ab22e697b18f5e431d4f141ec63ec49c7720f4",
+  "independent_review": "SCC partitions compared with mutual-reachability partitions on 1,000 random directed graphs; no mismatch.",
+  "kernel_execution": "not_tested",
+  "missing_project_object_units": 41,
+  "missing_project_policy": "Each selected root retains an incomplete-project-input-inventory barrier; no finite bound is admitted even for a retained leaf.",
+  "native_object_provenance": "Prior successful macOS build; this tool independently re-decodes retained exact object bytes on Linux.",
+  "production_candidate_allowed": false,
+  "production_default_changed": false,
+  "project_manifest_sha256": "71b79e5654b9ce964eae6edb4f73ce95a28dae9d5f83f0ba2566a5da41036a1b",
+  "public_entry_scope": "Current KERNEL global wrapper returns before original RM initialization; gpuEnterShutdown_IMPL is an isolated prerequisite, not a demonstrated public teardown caller.",
+  "refactor_candidates": [
+    {
+      "evidence_scope": "Exact original RM object/source capture; compiled path only, no demonstrated runtime peak.",
+      "functions": [
+        "utilGzGetData",
+        "huft_build"
+      ],
+      "recorded_static_frames_bytes": [
+        584,
+        1080
+      ],
+      "source": "src/nvidia/src/lib/zlib/inflate.c",
+      "suggested_review": "Move large decompressor automatic workspace to an explicitly owned allocation while preserving allocation failure handling and reentrancy."
+    },
+    {
+      "evidence_scope": "Prior compiler metadata only; standalone project objects are not retained in this artifact.",
+      "functions": [
+        "s540GlobalRmLogV",
+        "s540GlobalRmDeviceLogV"
+      ],
+      "prior_compiler_records_bytes": [
+        1064,
+        1112
+      ],
+      "source": "packages/nvidia-global-rm/src/S540NvidiaGlobalRmFormat.cpp",
+      "suggested_review": "Reduce the two 1024-byte automatic log buffers while preserving allocation-free and concurrent logging semantics."
+    }
+  ],
+  "rm_manifest_sha256": "9644d8cb73d3e020bd7fa22c1849c786fc603491f32222b498fcb607d89dafe9",
+  "roots": {
+    "adapter_initialize_prerequisite": {
+      "barrier_count": 1178,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 363,
+        "incomplete-project-input-inventory": 1,
+        "indirect-control-transfer": 797,
+        "non-strong-code-definition": 2,
+        "non-strong-external-definition": 4,
+        "recursion-cycle": 4,
+        "unreviewed-special-control-transfer": 7
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "diagnostic_acyclic_frame_sum_bytes": 5872,
+      "ranked_barrier_sources": [
+        {
+          "barrier_count": 96,
+          "source_basename": "os.c"
+        },
+        {
+          "barrier_count": 82,
+          "source_basename": "nvlink_training.c"
+        },
+        {
+          "barrier_count": 75,
+          "source_basename": "gpu.c"
+        },
+        {
+          "barrier_count": 68,
+          "source_basename": "nvlink_initialize.c"
+        },
+        {
+          "barrier_count": 68,
+          "source_basename": "kernel_gsp.c"
+        }
+      ],
+      "reachable_function_count": 2943,
+      "recursive_component_count": 4,
+      "symbol": "_s540Global_rm_init_adapter"
+    },
+    "current_adapter_disable_prerequisite": {
+      "barrier_count": 343,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 140,
+        "incomplete-project-input-inventory": 1,
+        "indirect-control-transfer": 201,
+        "recursion-cycle": 1
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "diagnostic_acyclic_frame_sum_bytes": 2304,
+      "ranked_barrier_sources": [
+        {
+          "barrier_count": 58,
+          "source_basename": "os.c"
+        },
+        {
+          "barrier_count": 25,
+          "source_basename": "sync_unix_kernel_os.c"
+        },
+        {
+          "barrier_count": 19,
+          "source_basename": "mem_desc.c"
+        },
+        {
+          "barrier_count": 16,
+          "source_basename": "kern_disp.c"
+        },
+        {
+          "barrier_count": 16,
+          "source_basename": "memory_tracking.c"
+        }
+      ],
+      "reachable_function_count": 1367,
+      "recursive_component_count": 1,
+      "symbol": "_s540Global_rm_disable_adapter"
+    },
+    "current_adapter_shutdown_prerequisite": {
+      "barrier_count": 553,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 213,
+        "incomplete-project-input-inventory": 1,
+        "indirect-control-transfer": 332,
+        "recursion-cycle": 4,
+        "unreviewed-special-control-transfer": 3
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "diagnostic_acyclic_frame_sum_bytes": 2368,
+      "ranked_barrier_sources": [
+        {
+          "barrier_count": 71,
+          "source_basename": "os.c"
+        },
+        {
+          "barrier_count": 43,
+          "source_basename": "kernel_gsp.c"
+        },
+        {
+          "barrier_count": 27,
+          "source_basename": "kern_disp.c"
+        },
+        {
+          "barrier_count": 27,
+          "source_basename": "sync_unix_kernel_os.c"
+        },
+        {
+          "barrier_count": 24,
+          "source_basename": "liblogdecode.c"
+        }
+      ],
+      "reachable_function_count": 1796,
+      "recursive_component_count": 4,
+      "symbol": "_s540Global_rm_shutdown_adapter"
+    },
+    "global_initialize_prerequisite": {
+      "barrier_count": 348,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 165,
+        "incomplete-project-input-inventory": 1,
+        "indirect-control-transfer": 180,
+        "recursion-cycle": 2
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "diagnostic_acyclic_frame_sum_bytes": 3328,
+      "ranked_barrier_sources": [
+        {
+          "barrier_count": 77,
+          "source_basename": "os.c"
+        },
+        {
+          "barrier_count": 30,
+          "source_basename": "sync_unix_kernel_os.c"
+        },
+        {
+          "barrier_count": 19,
+          "source_basename": "mem_desc.c"
+        },
+        {
+          "barrier_count": 17,
+          "source_basename": "memory_tracking.c"
+        },
+        {
+          "barrier_count": 16,
+          "source_basename": "kern_disp.c"
+        }
+      ],
+      "reachable_function_count": 1533,
+      "recursive_component_count": 2,
+      "symbol": "_s540Global_coreInitializeRm"
+    },
+    "gpu_enter_shutdown_isolated_prerequisite": {
+      "barrier_count": 516,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 186,
+        "incomplete-project-input-inventory": 1,
+        "indirect-control-transfer": 322,
+        "recursion-cycle": 4,
+        "unreviewed-special-control-transfer": 3
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "diagnostic_acyclic_frame_sum_bytes": 1480,
+      "ranked_barrier_sources": [
+        {
+          "barrier_count": 67,
+          "source_basename": "os.c"
+        },
+        {
+          "barrier_count": 43,
+          "source_basename": "kernel_gsp.c"
+        },
+        {
+          "barrier_count": 27,
+          "source_basename": "kern_disp.c"
+        },
+        {
+          "barrier_count": 26,
+          "source_basename": "sync_unix_kernel_os.c"
+        },
+        {
+          "barrier_count": 24,
+          "source_basename": "liblogdecode.c"
+        }
+      ],
+      "reachable_function_count": 1700,
+      "recursive_component_count": 4,
+      "symbol": "_s540Global_gpuEnterShutdown_IMPL"
+    },
+    "public_context_disable": {
+      "barrier_count": 2,
+      "barrier_reason_counts": {
+        "incomplete-project-input-inventory": 1,
+        "missing-root-definition": 1
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 0,
+      "diagnostic_acyclic_frame_sum_bytes": null,
+      "ranked_barrier_sources": [],
+      "reachable_function_count": 0,
+      "recursive_component_count": 0,
+      "symbol": "_s540GspContextDisableAdapter"
+    },
+    "public_context_initialize": {
+      "barrier_count": 2,
+      "barrier_reason_counts": {
+        "incomplete-project-input-inventory": 1,
+        "missing-root-definition": 1
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 0,
+      "diagnostic_acyclic_frame_sum_bytes": null,
+      "ranked_barrier_sources": [],
+      "reachable_function_count": 0,
+      "recursive_component_count": 0,
+      "symbol": "_s540GspContextInitializeAdapter"
+    },
+    "public_context_shutdown": {
+      "barrier_count": 2,
+      "barrier_reason_counts": {
+        "incomplete-project-input-inventory": 1,
+        "missing-root-definition": 1
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 0,
+      "diagnostic_acyclic_frame_sum_bytes": null,
+      "ranked_barrier_sources": [],
+      "reachable_function_count": 0,
+      "recursive_component_count": 0,
+      "symbol": "_s540GspContextShutdownAdapter"
+    },
+    "public_global_initialize": {
+      "barrier_count": 2,
+      "barrier_reason_counts": {
+        "incomplete-project-input-inventory": 1,
+        "missing-root-definition": 1
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 0,
+      "diagnostic_acyclic_frame_sum_bytes": null,
+      "ranked_barrier_sources": [],
+      "reachable_function_count": 0,
+      "recursive_component_count": 0,
+      "symbol": "_s540GlobalRmInitialize"
+    }
+  },
+  "runtime_peak_demonstrated": false,
+  "status": "selected-root-barriers-established-on-verified-native-artifact",
+  "test_source_sha256": "dd83d0d5c3ab40d43458681a84ca0f7b4172dc00ef8f8c666b2e56977f1be9ef",
+  "tool_sha256": {
+    "nvidia_metaclass_initializers.py": "07570071ac3ca5a5bbb54c989ff9a39a2af071bb6a9b53c86acc1d8414e59a56",
+    "nvidia_nvoc_definitions.py": "8bc5a377ff27be9b848ece1d16b044eb22044ef5ed27e1f2f43417a4e7196b00",
+    "nvidia_stack_root_closure.py": "4abc2acc4d9b85a95e76fe574191a55b304e48d46aafddbdddb9baad07a74050",
+    "nvidia_stack_usage.py": "79a14393d69452d01ad42067b9933ccc842abc98fc50ee443051a96b601d8abd"
+  },
+  "typed_candidate_binding_applied": false,
+  "verified_input_count": 4511
+}

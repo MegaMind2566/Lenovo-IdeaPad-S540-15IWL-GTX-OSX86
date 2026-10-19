@@ -1,0 +1,68 @@
+{
+  "actual_initializer_stores": 5,
+  "additional_binding_checks": [
+    "Compile command -c/-o operands resolve to exact captured source/object, including recorded working directory",
+    "Capture and stack usage files are exact object sidecars",
+    "Each measured frame symbol has an actual text definition",
+    "Relocation identity preserves exact symbol linkage and weak-reference descriptor"
+  ],
+  "aggregate_stack_proven": false,
+  "artifact": {
+    "artifact_id": 12168978908,
+    "downloaded_and_verified": true,
+    "native_workflow_head": "9c238972f6e49ff53e14e29d5147d6e19d980b40",
+    "run_id": 39213796174,
+    "zip_sha256": "616ea1f890bfe280badc0e92f6bc7a98a49ee43b9ecd4936fbbe3b503ecd0290"
+  },
+  "callee_stack_bounds": "not_established",
+  "control_execution": "Linux Clang 18 cross-target actual Mach-O objects; native Apple fixture execution pending next CI",
+  "control_groups": 12,
+  "external_target": {
+    "bytes_sha256": "42789c073fdcd3646cb1c40aafc9c9a62c5ab1ab2c265168f9877ca02a9fb72b",
+    "capture_sha256": "ba0927dae13a1660326b1a5f912cb182b423a9ee78f6fc0c50c8705e5bfd865f",
+    "end": 33072,
+    "object_sha256": "0460cec4d4536837cd9de2cfb0bb02951182b263910e86672947dff4155e0e68",
+    "relocations": [],
+    "section": "__text",
+    "section_index": 1,
+    "source_sha256": "287b204497d90139836f15b1d05a5abca50a67cd2c235e0351194c00153a2257",
+    "start": 32992,
+    "symbol": "_s540Global_gpuMarkDeviceForReset_IMPL"
+  },
+  "field_offset_bytes": 264,
+  "format": 1,
+  "function": "kgspRecvPoll_IMPL",
+  "independent_replay_sha256": "b8ac8557391b86c70c76ef8bba1f128ce304c5ce80a7faa346c40223dd71c46c",
+  "kernel_execution": "not_tested",
+  "local_target": {
+    "bytes_sha256": "d2ab8203028d0fd0f38a26a56ead69432a2d559edce75c71f08c1f0a45e6b64b",
+    "capture_sha256": "9d0cb9b1b79b6c6b232567a13ad14904aef109db22429ed2afe98f89932c3522",
+    "end": 15552,
+    "object_sha256": "4bc0970392f9bfd03a4db43a30eddbb870b7c03641fb58eeaf655ae4dd007224",
+    "relocations": [],
+    "section": "__text",
+    "section_index": 1,
+    "source_sha256": "1ac5687a07fb6c22eab9d314603d6750caf5fe317a92f973ba4a68cac161f823",
+    "start": 15536,
+    "symbol": "_gpuMarkDeviceForReset_395e98"
+  },
+  "manifest_object_count": 1100,
+  "manifest_sha256": "9644d8cb73d3e020bd7fa22c1849c786fc603491f32222b498fcb607d89dafe9",
+  "native_object_provenance": "Prior full successful macOS workflow, not a new native compilation by this binder",
+  "production_candidate_allowed": false,
+  "production_default_changed": false,
+  "proof_sha256": "0d733f44dff370e4bdff2610f4bc528d45d19200596dcc304867bf0b407e1a57",
+  "receiver_ownership_and_initialization": "pending; factory dominance, lifetime, aliases and external/project writers not proved",
+  "scope": "one typed NVOC dispatch; exact measured manifest only",
+  "stack_graph_updated": false,
+  "status": "passed-definition-binding-on-verified-native-artifact",
+  "target_definition_binding": "established-for-measured-manifest",
+  "test_source_sha256": "0d62f256ae0d72d34c4a801d0d0ad091c96917e847fd7a6681a99fe671dc334a",
+  "tool_sha256": {
+    "nvidia_metaclass_initializers.py": "07570071ac3ca5a5bbb54c989ff9a39a2af071bb6a9b53c86acc1d8414e59a56",
+    "nvidia_nvoc_definitions.py": "8bc5a377ff27be9b848ece1d16b044eb22044ef5ed27e1f2f43417a4e7196b00",
+    "nvidia_nvoc_stack_dispatch.py": "8fea6d7db125565b61ef39ff8736565b13d108d11b9aaf0d6f91d13f7f938b4c",
+    "nvidia_stack_usage.py": "79a14393d69452d01ad42067b9933ccc842abc98fc50ee443051a96b601d8abd"
+  },
+  "verified_input_count": 4390
+}

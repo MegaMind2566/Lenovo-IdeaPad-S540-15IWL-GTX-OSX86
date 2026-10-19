@@ -1,0 +1,41 @@
+{
+  "schema": "s540-prospective-buffer-consumption-freeze-v1",
+  "status": "design-not-implemented",
+  "source_only": true,
+  "active_irq_retirement": "pending",
+  "inventory_rule": "Exact regular files listed below plus this FROZEN-SHA256.json; no extra files or symlinks.",
+  "files": [
+    {
+      "path": "PROVENANCE.json",
+      "sha256": "cb8e4507bf56845132749ac38254a41c3dadfca19cd2589267a6694d783a9f64",
+      "bytes": 1715
+    },
+    {
+      "path": "README.md",
+      "sha256": "68321b3677c482d26814f12120a8ccbedb67e0abb2558d724374bac00fd03c99",
+      "bytes": 2120
+    },
+    {
+      "path": "STATUS.json",
+      "sha256": "8201280919ff0e3a430510b92fe70192f83c74a9838c3cdd2fee6edea28276b8",
+      "bytes": 746
+    },
+    {
+      "path": "first-transaction-dma-buffer-ledger.json",
+      "sha256": "7e4db3ea77cddaca8acfd40555279712b2b4bd406d0b1dd598f0c56f2b699241",
+      "bytes": 31939
+    },
+    {
+      "path": "source-anchors.json",
+      "sha256": "56bd24affd0612dcdb2f7a379b4c75763debeaf107d7cca1b90a7ff4bce68d97",
+      "bytes": 16136
+    },
+    {
+      "path": "source-freeze.json",
+      "sha256": "a594438bbf0d14365229d176b2601699a72555e07de4ec6543d9a71e7e871c99",
+      "bytes": 7482
+    }
+  ],
+  "inventory_encoding": "UTF-8, sorted path + NUL + lowercase SHA256 + NUL + decimal bytes + LF per file",
+  "inventory_sha256": "688e549a4c1264432cab43f8ab1d6e47e1cae933d761b826c37f3e8f3ed261b6"
+}

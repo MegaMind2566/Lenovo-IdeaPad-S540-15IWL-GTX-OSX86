@@ -1,0 +1,94 @@
+{
+  "actual_complete_bodies": 15,
+  "actual_dependency_files": 525,
+  "complete_original_translation_units": 3,
+  "descriptor_policy": "unchanged packaged rows; extra typed owner/event rows only in executable control",
+  "explicit_fixtures": [
+    "API/GPU lock endpoints",
+    "GPU manager object lookup",
+    "RM runtime stack entry/exit",
+    "NVOC cast and empty timer list",
+    "hardware-time endpoint"
+  ],
+  "format": 1,
+  "frozen_parent_sha256": "7084ff0cf9c795a3f1dc5f4cc24fb53652b46462c336978e33d072bc4fcb2366",
+  "full_lock_capability_refused": true,
+  "gpu_access": false,
+  "hardware_admission": false,
+  "host_control": true,
+  "kernel_execution": "not_tested",
+  "kernel_target_compile_actions": 9,
+  "native_apple_execution": false,
+  "original_entry_admission": false,
+  "production_modified": false,
+  "provenance_negative_controls": {
+    "cases": {
+      "host_inventory_drift": {
+        "reason": "Supplied Host overlay is not the exact frozen replay",
+        "refused": true
+      },
+      "namespace_drift": {
+        "reason": "The verified V3 private namespace changed",
+        "refused": true
+      }
+    },
+    "format": 1,
+    "hardware_admission": false,
+    "status": "passed"
+  },
+  "remaining_boundaries": [
+    "native Apple compiler validation of this successor",
+    "composition with separate actual RM lock-ownership successor",
+    "earlier constructor/HAL rollback and callback ownership",
+    "final GPU deletion/private release ownership",
+    "aggregate stack and bounded PM shutdown",
+    "hardware GSP/DMA stop receipts",
+    "production/kernel/GPU runtime admission"
+  ],
+  "reports": {
+    "compile_output_directory": "work-gpu-binding-full-isolated",
+    "control_output_directory": "work-gpu-binding-controls-isolated",
+    "control_results_sha256": "84d528f567a417b197744c2b957ea41b3b8e04598f4190673c40bd9839ab811b",
+    "kernel_target_compilation_sha256": "a59f410256edc5756600b65a2db72c0bffd92953fbb304214d63a817948119cc",
+    "provenance_negative_controls_sha256": "02c8b4dd1a28efd4ce1408d39eeccb39a560de838cceabab222996b58138f34a",
+    "provenance_negative_output_directory": "work-gpu-binding-negative"
+  },
+  "results": {
+    "fatal-sanitizers": {
+      "actual_original_bodies": 15,
+      "cases": 13,
+      "checks": 39,
+      "failures": 0,
+      "format": 1,
+      "gpu_access": false,
+      "hardware_admission": false,
+      "real_record_services_host": true,
+      "status": "passed"
+    },
+    "plain": {
+      "actual_original_bodies": 15,
+      "cases": 13,
+      "checks": 39,
+      "failures": 0,
+      "format": 1,
+      "gpu_access": false,
+      "hardware_admission": false,
+      "real_record_services_host": true,
+      "status": "passed"
+    }
+  },
+  "status": "passed-local-controls-and-cross-compilation",
+  "successor_source_sha256": {
+    "binding-fixture-endpoints.inc": "b37ab61660d793546591862604124e6b8031a0ce38d9b54621884955e50bb6f0",
+    "check.py": "d9fe2f0b29af952c6fddc57b91ba7d36cdd21cfa6013934c2d2df84aa125dc97",
+    "check_controls.c": "ab77a85d2f0060b1db092faf7644ed63aff9d0e77824402def4c8dfcbc4b08b2",
+    "compile_full.py": "86fe7a1179f9b262c8ebcdcc268c9fba3661919f33814085fa0b9601d043bc9a",
+    "original-gpu.c.inc": "e0e1257dc1424e9a23ecc778e1a9818ee9d2ce88a73b429f2afac2f1c1f88f98",
+    "original-gpu.h.inc": "4971d1d82c4025257ddba4fd7f278f9a8c3fca02dae5f8bb767d43b735e4a7d4",
+    "prepare.py": "3660f23321e5054215653b29b79261cd56641b3c090ffc61051facce7d067000",
+    "record-gpu.c.inc": "81281dd665d8a5ab275eb03e2539e83ca0f27f3b4f9026f6e873f46b98345cab",
+    "record-gpu.h.inc": "f84b8d567b87f1f3aaea43dcd5fb7d01ee68dcf4c933c09376cbeedbbc8c4e6a"
+  },
+  "validated_parent_commit": "6a94504",
+  "validation_isolation": "detached worktree of exact parent checkpoint; successor source files copied byte-identically"
+}

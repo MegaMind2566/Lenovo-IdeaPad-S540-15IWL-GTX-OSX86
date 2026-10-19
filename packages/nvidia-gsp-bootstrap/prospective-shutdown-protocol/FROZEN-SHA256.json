@@ -1,0 +1,52 @@
+{
+  "schema": "s540-isolated-shutdown-protocol-freeze-v1",
+  "status": "source-backed-successor-no-admission",
+  "inventory_rule": "Exact regular files listed below plus this manifest; Python __pycache__ is generated and excluded.",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "ebddf499c66e68c07e704ae8e9c7e22401548a607b368cc957e5d89b35c0b356",
+      "bytes": 4373
+    },
+    {
+      "path": "S540NvidiaShutdownProtocol.c",
+      "sha256": "1ee064c0ea38e829274dd13cf25fb386719e6f922e3b25d6e03a5db2a59bc2ba",
+      "bytes": 8626
+    },
+    {
+      "path": "S540NvidiaShutdownProtocol.h",
+      "sha256": "1c42336558e9b6da56d6d9339659c13402c8ffb9d67dbd47030912f2520436a1",
+      "bytes": 1074
+    },
+    {
+      "path": "SOURCE-CONTRACT.json",
+      "sha256": "73f0b7ce251a50b454c741f21536e0541177172a6bf86d635de016006376b45c",
+      "bytes": 764
+    },
+    {
+      "path": "STATUS.json",
+      "sha256": "7246931aac304d2facdd9ed3dbdebbb1efbbefdcf4420900a5c57a841e05b3d6",
+      "bytes": 845
+    },
+    {
+      "path": "SourceProfile.h",
+      "sha256": "2ee4eb3c8e143dbb440412f321ce922db6aa26657ab5a125365b9abc82ed97ca",
+      "bytes": 178
+    },
+    {
+      "path": "check.py",
+      "sha256": "9bea1023e934ed5225fafd9a82cf4b397c1805443ae458e2eac9549d0596530c",
+      "bytes": 10908
+    },
+    {
+      "path": "check_protocol.c",
+      "sha256": "22170fc6034d9c97266dbec848025eb249d2df38b325ad28f2e20aabc714e94d",
+      "bytes": 10841
+    },
+    {
+      "path": "evidence/local-control-and-full-tu-compilation.json",
+      "sha256": "f20617678221af42208085b53aca7558babf6a111db05051ad5060f663a4c013",
+      "bytes": 328921
+    }
+  ]
+}

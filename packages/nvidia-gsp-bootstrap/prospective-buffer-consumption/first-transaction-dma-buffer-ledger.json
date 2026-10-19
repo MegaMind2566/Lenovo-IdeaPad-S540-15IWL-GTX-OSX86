@@ -1,0 +1,546 @@
+{
+  "schema": "s540-gsp-dma-buffer-scope-audit-v1",
+  "created_utc": "2026-10-19T08:03:18.267507+00:00",
+  "mode": "read-only source audit; no runtime execution or hardware measurements",
+  "scope": "Pinned TU117 normal boot/first GSP_INIT transaction, V3 overlay snapshot. Includes persistent owned buffers whose addresses are published by this path. No claim of full dynamic RPC callback closure.",
+  "upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "v3_tree_sha256": "fa8498c3958a559a3466ef6dd4e541bfcea9f55d8809d0a422c784cacd703029",
+  "source_freeze_sha256": "a594438bbf0d14365229d176b2601699a72555e07de4ec6543d9a71e7e871c99",
+  "source_anchors_sha256": "56bd24affd0612dcdb2f7a379b4c75763debeaf107d7cca1b90a7ff4bce68d97",
+  "finding": "The original source has an explicit per-buffer consumption boundary for pExternalBindata: successful synchronous GSP_INIT response and successful static-info decode, then free while GSP remains live. Thus all-GPU-engines-stopped is not the original positive lifetime contract for this one copied root. This does not authenticate a receipt today, clear the session hardware-DMA lease, or prove other buffer retirement.",
+  "external_bindata": {
+    "name": "pKernelGsp->pExternalBindata",
+    "role": "external ucodes binary copied for GSP initialization",
+    "direct_member_occurrences": {
+      "raw": [
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+          "line": 5351,
+          "text": "if (pKernelGsp->pExternalBindata != NULL)"
+        },
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+          "line": 5353,
+          "text": "memdescFree(pKernelGsp->pExternalBindata);"
+        },
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+          "line": 5354,
+          "text": "memdescDestroy(pKernelGsp->pExternalBindata);"
+        },
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+          "line": 5355,
+          "text": "pKernelGsp->pExternalBindata = NULL;"
+        },
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+          "line": 6229,
+          "text": "if (pKernelGsp->pExternalBindata != NULL)"
+        },
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+          "line": 6231,
+          "text": "pGspArgs->bindataArgs.radix3 = memdescGetPhysAddr(pKernelGsp->pExternalBindata, AT_GPU, 0);"
+        },
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+          "line": 6579,
+          "text": "kgspCreateRadix3(pGpu, pKernelGsp, &pKernelGsp->pExternalBindata,"
+        },
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c",
+          "line": 210,
+          "text": "if (pKernelGsp->pExternalBindata != NULL)"
+        },
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c",
+          "line": 212,
+          "text": "memdescFree(pKernelGsp->pExternalBindata);"
+        },
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c",
+          "line": 213,
+          "text": "memdescDestroy(pKernelGsp->pExternalBindata);"
+        },
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c",
+          "line": 214,
+          "text": "pKernelGsp->pExternalBindata = NULL;"
+        },
+        {
+          "path": "src/nvidia/generated/g_kernel_gsp_nvoc.h",
+          "line": 616,
+          "text": "MEMORY_DESCRIPTOR *pExternalBindata;"
+        }
+      ],
+      "v3": [
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+          "line": 5357,
+          "text": "if (pKernelGsp->pExternalBindata != NULL)"
+        },
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+          "line": 5359,
+          "text": "memdescFree(pKernelGsp->pExternalBindata);"
+        },
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+          "line": 5360,
+          "text": "memdescDestroy(pKernelGsp->pExternalBindata);"
+        },
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+          "line": 5361,
+          "text": "pKernelGsp->pExternalBindata = NULL;"
+        },
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+          "line": 6245,
+          "text": "if (pKernelGsp->pExternalBindata != NULL)"
+        },
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+          "line": 6247,
+          "text": "pGspArgs->bindataArgs.radix3 = memdescGetPhysAddr(pKernelGsp->pExternalBindata, AT_GPU, 0);"
+        },
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+          "line": 6595,
+          "text": "kgspCreateRadix3(pGpu, pKernelGsp, &pKernelGsp->pExternalBindata,"
+        },
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c",
+          "line": 210,
+          "text": "if (pKernelGsp->pExternalBindata != NULL)"
+        },
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c",
+          "line": 212,
+          "text": "memdescFree(pKernelGsp->pExternalBindata);"
+        },
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c",
+          "line": 213,
+          "text": "memdescDestroy(pKernelGsp->pExternalBindata);"
+        },
+        {
+          "path": "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c",
+          "line": 214,
+          "text": "pKernelGsp->pExternalBindata = NULL;"
+        },
+        {
+          "path": "src/nvidia/generated/g_kernel_gsp_nvoc.h",
+          "line": 616,
+          "text": "MEMORY_DESCRIPTOR *pExternalBindata;"
+        }
+      ]
+    },
+    "construction": {
+      "actual_call": "kgspCreateRadix3(pGpu,pKernelGsp,&pKernelGsp->pExternalBindata,NULL,pGspFw->pUcodesBin,pGspFw->ucodesBinSize)",
+      "memdesc_kind": "fresh owning root, ADDR_SYSMEM, NV_MEMORY_NONCONTIGUOUS, NV_MEMORY_CACHED, KERNEL_MODE; not a submem descriptor",
+      "allocation_shape": "One memdesc/backing allocation contains ALL radix levels and ALL copied ucodes data pages. No per-leaf memdesc, no per-leaf free.",
+      "cpu_mapping": "temporary memdescMap for table construction and data copy; memdescUnmap before kgspCreateRadix3 returns",
+      "address_publication": "GSP_ARGUMENTS_CACHED.bindataArgs.radix3 = root AT_GPU address; bindataArgs.size = logical ucodesBinSize. Intermediate PDE and leaf PTE entries are also AT_GPU addresses obtained from SAME root allocation.",
+      "hardware_consumer": "GSP RM/LibOS runtime consumes external bindata via radix3. Host C gives it to GSP arguments; it does not hand this root directly to CE/GR/FECS/other engine DMA registers. Firmware can redistribute/copied ucodes; absence of additional firmware DMA use cannot be established by this C audit.",
+      "observed_firmware_input": {
+        "path": "ucodes_tu10x.bin",
+        "bytes": 8837632,
+        "sha256": "6027ab3736f733b5a06e6e61aaae957d1f990426a263849ebcfa8a49eeb4a5d0"
+      },
+      "geometry_from_source_not_runtime_measurement": {
+        "rm_page_bytes": 4096,
+        "radix_entries_per_page": 512,
+        "root_table_pages": 1,
+        "middle_table_pages": 1,
+        "leaf_table_pages": 5,
+        "data_pages": 2158,
+        "table_pages": 7,
+        "allocation_pages": 2165,
+        "allocation_bytes": 8867840,
+        "logical_data_bytes": 8837632,
+        "data_offset_bytes": 28672,
+        "tail_padding_bytes": 1536
+      },
+      "actual_alloc_rounding": "memdescActualSize/OS allocator may round further, especially first huge-page request. Formula is requested radix allocation size, not actual peak or physical pages measured on hardware.",
+      "anchors": [
+        "create_external",
+        "create_radix3",
+        "publish_external"
+      ]
+    },
+    "normal_consumption_contract": {
+      "exact_command": "GMCAPI_CMD_GSP_INIT",
+      "numeric_opcode_hex": "0x00010001",
+      "flags": 0,
+      "synchronous": true,
+      "required_original_order": [
+        "normal TU102 bootstrap has linked actual GSP status queue",
+        "allocate 48KB CPU static-info response staging buffer",
+        "gmcapiCommand executes GSP_INIT synchronously with encodedSystemInfo input",
+        "gpuSendGmcRpc assigns request sequence and copies input into CPU RPC staging",
+        "kgspSendRpc sends actual command queue; polling waits for matching command ID and sequence",
+        "gmcapiDispatch only returns NV_OK after successful transport and GMC response.status == NV_OK",
+        "_kgspDecodeGspStaticInfo must return NV_OK from both nvkvDecode and key handler context status",
+        "publish gspRmInitialized NV_TRUE and clear unloaded bit; heartbeat optional",
+        "ONLY THEN memdescFree(pExternalBindata), memdescDestroy(pExternalBindata), and NULL field",
+        "free CPU static-info staging buffer; return NV_OK"
+      ],
+      "shutdown_before_positive_free": "NONE: GSP remains running; IRQ/DMA session remains active. This is an original protocol consumption lifetime, not a hardware/session stop receipt.",
+      "evidence_strength": "Original host source treats successful INIT response + successful decode as consuming copied bindata. The free and explicit destructor comment corroborate it. It is not a formal firmware-side no-future-read proof, a hardware trace, a signed acknowledgement, or a whole-device DMA stop.",
+      "response_flags_caveat": "Expected GMC response path asserts RESPONSE flag rather than a checked rejection. A successor receipt must hard-check actual response class/flags as well as command and sequence; flags must not be inferred from NV_OK.",
+      "anchors": [
+        "opcode",
+        "dispatch",
+        "command_wrapper",
+        "send_receive",
+        "poll_match",
+        "poll_completion",
+        "init_rpc",
+        "decode",
+        "normal_boot",
+        "fallback_external"
+      ]
+    },
+    "whole_release_graph": [
+      {
+        "call": "memdescFree(root)",
+        "effect": "On RefCount>1 with Allocated==1: only bDeferredFree=true and return. On not allocated or remaining Allocated count: returns without physical free. A receipt cannot assume physical release from the void return."
+      },
+      {
+        "call": "_memdescFreeIommuMappings(root)",
+        "effect": "For UNIX/MODS non-ARM root, destroy EVERY root IOMMU mapping; each root destroys all child submappings, removes root from memdesc, calls osIovaUnmap, frees mapping metadata. Scope is full root, not just first radix page."
+      },
+      {
+        "call": "_memSubDeviceFreeAndDestroy(root)",
+        "effect": "Handle any actual subdevice descriptors; selected fresh root construction does not itself create them. Full runtime identity/alias inventory is still required."
+      },
+      {
+        "call": "_memdescFreeInternal(root) -> osFreePages(root)",
+        "effect": "Uses ActualSize/pageArrayGranularity and osFreePagesInternal -> nv_free_pages(memdata) for ALL pages (tables + copied data + allocator rounding) of the owning root."
+      },
+      {
+        "call": "memdescDestroy(root)",
+        "effect": "Removes descriptor ref; at zero releases metadata and remaining IOMMU state, may trigger deferred or previously omitted free. Additional ref/child state can delay destruction."
+      },
+      {
+        "call": "pKernelGsp->pExternalBindata=NULL",
+        "effect": "Original source clears member after void calls; safe port must not let metadata/destructor/nulling proceed when release is refused or incomplete."
+      }
+    ],
+    "release_anchors": [
+      "free_root",
+      "destroy_root",
+      "free_iovas",
+      "destroy_iovas",
+      "free_pages",
+      "os_free"
+    ],
+    "failure_and_alternative_paths": [
+      {
+        "path": "ucodes absent",
+        "result": "No external root constructed/published. TU117 OS firmware fetch normally requires ucodes except GB10Y; do not silently use absent branch as target proof."
+      },
+      {
+        "path": "create root fails",
+        "result": "kgspCreateRadix3 returns failed status before bindataArgs publication; there may be partial root state only if create itself provided it. No consumed receipt."
+      },
+      {
+        "path": "huge page allocation fails with NO_MEMORY",
+        "result": "Retries allocation of SAME root at regular page size; no second external root is returned. Other alloc failure reaches error cleanup."
+      },
+      {
+        "path": "allocation or CPU mapping fails in kgspCreateRadix3",
+        "result": "error_ret calls memdescFree/destroy and nulls output BEFORE publication to GSP arguments on this first, fresh construction. This can use a proven never-exposed allocation path, not INIT-consumed receipt."
+      },
+      {
+        "path": "later binary prepare/build-id allocation fails",
+        "result": "Already built external root remains in member for later lifecycle cleanup; actual entry phase must decide whether ever published. No consumption receipt."
+      },
+      {
+        "path": "static-info 48KB CPU allocation fails",
+        "result": "NV_ERR_NO_MEMORY returns before INIT; external root remains. No INIT receipt."
+      },
+      {
+        "path": "GSP_INIT request send, poll timeout, cancellation, transport, response bounds, or response status fails",
+        "result": "goto done frees only CPU static-info staging; external root remains, no consumption receipt. RPC may already have reached device, so not a never-exposed allocation."
+      },
+      {
+        "path": "successful INIT RPC but static-info decode/key handler fails",
+        "result": "goto done frees CPU staging; external root remains. Follow original conservative lifetime: no consumption receipt even if firmware may already have consumed it."
+      },
+      {
+        "path": "INIT+decode succeeds but actual root release refused/incomplete",
+        "result": "Current original free calls are void; proposed port must intercept before first free/destructor mutation and retain root identity/backing/IOVA if any release step cannot safely complete. Do not clear member, spend receipt twice, or treat NV_OK from outer function as physical retirement."
+      },
+      {
+        "path": "early bootstrap/health failure and final destruct",
+        "result": "kgspFreeBootArgs_TU102 fallback frees root if still non-NULL, with explicit already-freed-after-INIT_DONE comment. The free helper itself performs no hardware stop. A failed or incomplete normal unload is not proof to permit this fallback."
+      },
+      {
+        "path": "boot retry/resume/re-entry",
+        "result": "Successor must forbid reuse/re-exposure of consumed root or stale bindataArgs address across a new generation. The original success path does not clear bindataArgs fields. A single-shot owner and exact publication ledger are required; no generic replay grant."
+      }
+    ],
+    "identity_and_alias_limits": [
+      "All named direct member accesses are inventoried below; the selected fresh constructor never calls memdescCreateSubMem on this root. This is source evidence, not a dynamic whole-program pointer-alias proof.",
+      "One receipt covers exactly one root allocation generation/serial and all of its physical pages and mappings; it cannot be used for a different copied buffer, recycled address, child metadata, other device owner, or later boot attempt.",
+      "Selected original source has no kgspFreeRadix3_IMPL function. The actual release path is memdescFree+memdescDestroy on the root.",
+      "Root reference counts, subdevice descriptors, peer mappings, IOVA mapping generations, and any OS/backend resource rounding must be captured from actual ownership records, not inferred from member-pointer equality."
+    ]
+  },
+  "normal_boot_dma_families": [
+    {
+      "name": "WPR metadata pWprMetaV1Descriptor",
+      "exposure": "Root SYSMEM AT_GPU PA in SEC2 Booter mailbox via _kgspGetBooterLoadArgs normal boot; includes all nested physical sources below.",
+      "hardware_consumer": "SEC2 Booter Load; source comments say Booter loads/verifies/boots into WPR2.",
+      "lifetime": "Persistent through GSP lifetime; free in kgspFreeBootArgs_TU102 from kgspDestruct. No early consumption free in selected source.",
+      "anchors": [
+        "booter",
+        "boot_metadata",
+        "fallback_external",
+        "gsp_destructor"
+      ]
+    },
+    {
+      "name": "GSP firmware radix3 pGspUCodeRadix3Descriptor",
+      "exposure": "WPR metadata.sysmemAddrOfRadix3Elf, sizeOfRadix3Elf; one root holds radix tables plus copied image.",
+      "hardware_consumer": "SEC2 Booter Load reads firmware and copies to WPR2. C radix helper comment broadly calls post-copy consumer GSP; do not turn it into exclusive hardware endpoint proof.",
+      "lifetime": "Free only kgspFreeBootArgs_TU102 on final destructor, not after Booter success. No approved early receipt.",
+      "anchors": [
+        "create_radix3",
+        "boot_metadata",
+        "fallback_external"
+      ]
+    },
+    {
+      "name": "GSP boot binary pGspRmBootUcodeMemdesc",
+      "exposure": "WPR metadata.sysmemAddrOfBootloader plus monitor code/data/manifest offsets.",
+      "hardware_consumer": "SEC2 Booter Load reads/copies boot image into device WPR2.",
+      "lifetime": "_kgspFreeBootBinaryImage from kgspDestruct; immediate fail cleanup occurs during host preparation before publication.",
+      "anchors": [
+        "boot_metadata",
+        "gsp_destructor"
+      ]
+    },
+    {
+      "name": "Firmware signature pSignatureMemdesc",
+      "exposure": "WPR metadata.sysmemAddrOfSignature and size; code requires Booter DMA 256-byte alignment.",
+      "hardware_consumer": "SEC2 Booter verification DMA.",
+      "lifetime": "kgspFreeBootArgs_TU102 final destructor; no early success receipt in source.",
+      "anchors": [
+        "boot_metadata",
+        "fallback_external"
+      ]
+    },
+    {
+      "name": "LibOS init-args pLibosInitArgumentsDescriptor",
+      "exposure": "AT_GPU PA written GSP mailbox registers via kgspProgramLibosBootArgsAddr_TU102 before Booter starts RISC-V.",
+      "hardware_consumer": "GSP boot/runtime processor consumes LibOS memory-region table.",
+      "lifetime": "kgspFreeBootArgsCommon from final destructor.",
+      "anchors": [
+        "boot_args",
+        "normal_boot"
+      ]
+    },
+    {
+      "name": "RMARGS pGspArgumentsDescriptor",
+      "exposure": "AT_GPU PA and size in LibOS init region id RMARGS; contains message queues, state monitor, bindata.",
+      "hardware_consumer": "GSP RM/LibOS.",
+      "lifetime": "kgspFreeBootArgsCommon final destructor; cached bindataArgs can remain stale after successful external free, therefore exact one-shot/re-exposure discipline required.",
+      "anchors": [
+        "boot_args",
+        "optional_args"
+      ]
+    },
+    {
+      "name": "Shared RPC queue pMQCollection->pSharedMemDesc",
+      "exposure": "One root containing AT_GPU page table + command and status queues; GSP args.sharedMemPhysAddr points first page.",
+      "hardware_consumer": "GSP reads command ring and writes status ring/headers, CPU writes command and reads status; exact system-memory DMA actor beyond GSP cannot be independently proven from firmware here.",
+      "lifetime": "_kgspFreeRpcInfrastructure->GspMsgQueuesCleanup final destructor; CPU staging pWorkArea/pRpc are separate CPU objects.",
+      "anchors": [
+        "message_queues",
+        "message_queue_free",
+        "gsp_destructor"
+      ]
+    },
+    {
+      "name": "LibOS logs LOGINIT and LOGRM",
+      "exposure": "Two LibOS2 task buffers; per-buffer AT_GPU PA in second word and LibOS init-region list. TU117 count=2, no LibOS3 INTR/MNOC/DEBUG/ROOT/RMON buffers and no kernel log.",
+      "hardware_consumer": "GSP INIT/RM tasks write log SYSMEM; CPU log decoder reads.",
+      "lifetime": "_kgspFreeLibosLoggingStructures stops log polling, dumps, deregisters flush callback, destroys decoder then unmaps/frees both buffers. This does not itself stop GSP writer; relies outer normal shutdown.",
+      "anchors": [
+        "logs",
+        "boot_args",
+        "log_hal",
+        "libos_hal",
+        "log_ids"
+      ]
+    },
+    {
+      "name": "RM state monitor pRmStateMonitorBufferMD",
+      "exposure": "Optional successful 4KB shared allocation; AT_GPU PA/size in rmStateMonitorBufferArgs. Allocation failure is checked non-fatally by kgspInitRm; arguments zero unless both pointer and descriptor exist.",
+      "hardware_consumer": "GSP state-monitor service writes shared buffer.",
+      "lifetime": "kgspFreeRmStateMonitorBuffer final destructor.",
+      "anchors": [
+        "state_monitor",
+        "optional_args",
+        "gsp_destructor"
+      ]
+    },
+    {
+      "name": "Notify-operation pNotifyOpSurfMemDesc",
+      "exposure": "Unconditional GSP constructor allocation; AT_GPU PA serialized in system-info field NOTIFY_OP_SHARED_SURF_PHYS_ADDR and delivered by GSP_INIT.",
+      "hardware_consumer": "GSP completion/status writes per structure comments; TU117 notify dispatch may refuse operations, but that does not erase actual address publication.",
+      "lifetime": "_kgspFreeNotifyOpSharedSurface final destructor.",
+      "anchors": [
+        "notify",
+        "system_info_pa",
+        "gsp_destructor"
+      ]
+    },
+    {
+      "name": "External ucodes pExternalBindata",
+      "exposure": "One root radix3 copied from ucodes_tu10x.bin and published via GSP args.",
+      "hardware_consumer": "GSP initialization consumer.",
+      "lifetime": "Successful synchronous GSP_INIT + decode frees entire root while GSP/IRQ remains active. Failure retains for final destructor.",
+      "anchors": [
+        "create_external",
+        "publish_external",
+        "init_rpc",
+        "fallback_external"
+      ]
+    },
+    {
+      "name": "FWSEC code/data (VBIOS dependent)",
+      "exposure": "TU102 executor accepts WITH_LOADER or DIRECT. WITH_LOADER publishes pCodeMemDesc/pDataMemDesc AT_GPU bases in Falcon DMEM loader descriptor ctxDma=PHYS_SYS_NCOH; DIRECT CPU-copies image into IMEM/DMEM.",
+      "hardware_consumer": "GSP Falcon running FWSEC/FRTS/SB loader consumes sysmem code/data if WITH_LOADER; direct pImage itself is CPU PIO staging.",
+      "lifetime": "kgspFreeFlcnUcode final destructor (or allocation failure before execution). Same FWSEC object may be reused for shutdown SB, so first successful FRTS does not justify early free.",
+      "anchors": [
+        "fwsec_loader",
+        "direct_image",
+        "booter_wait",
+        "gsp_destructor"
+      ]
+    }
+  ],
+  "conditional_and_cpu_only_exclusions": [
+    {
+      "name": "CrashCat host queue",
+      "condition": "Not allocated by TU102 kgspConfigureFalcon: zeroed config leaves allocQueueSize=0. Generic WPR metadata branch publishes queue only if descriptor exists.",
+      "limit": "Different constructor/configuration or new allocation would add runtime DMA backing; do not assume globally absent.",
+      "anchors": [
+        "crashcat_configuration",
+        "crashcat_queue",
+        "boot_metadata"
+      ]
+    },
+    {
+      "name": "Profiler samples",
+      "condition": "pProfilerSamples and pProfilerSamplesMD both non-NULL; selected full source only contains reads in kgspPopulateGspRmInitArgs, no non-generated writer/allocation found.",
+      "limit": "Do not turn absence of named writes into whole-program alias proof.",
+      "anchors": [
+        "optional_args"
+      ]
+    },
+    {
+      "name": "SYSMEM heap",
+      "condition": "Only bGpuArchIsZeroFb; TU117 has physical FB, current target should choose zero PA/size branch.",
+      "limit": "Requires actual frozen device facts to admit; not a guessed target flag.",
+      "anchors": [
+        "optional_args",
+        "boot_args"
+      ]
+    },
+    {
+      "name": "Simulation access buffer",
+      "condition": "Only IS_SIMULATION allocation and address publication; physical Lenovo excludes if actual platform facts prove bare metal.",
+      "anchors": [
+        "system_info_pa"
+      ]
+    },
+    {
+      "name": "RATS crash shared buffer",
+      "condition": "Compile feature plus runtime enable; allocated and published by RPC only AFTER GSP_INIT/bootstrap success.",
+      "limit": "Not part of first INIT transaction; later kgspInitRm still can expose new backing. Default/compile gate was not promoted by this audit.",
+      "anchors": [
+        "gsp_destructor"
+      ]
+    },
+    {
+      "name": "Suspend/resume radix3 + metadata",
+      "condition": "Prepared only PM/suspend/resume path; normal boot _kgspGetBooterLoadArgs selects WPR metadata.",
+      "limit": "Not silently authorized by first-transaction receipt; must keep separate generation/operation proof."
+    },
+    {
+      "name": "Booter load/unload image pImage",
+      "condition": "TU102 DIRECT ucode path is CPU PIO staging, no host source PA passed; newer BOOT_FROM_HS memdesc path is not accepted by TU102 executor.",
+      "limit": "SEC2 Booter itself subsequently DMA-reads metadata/image sources. PIO image staging observation does not stop those DMAs.",
+      "anchors": [
+        "direct_image",
+        "booter_wait"
+      ]
+    },
+    {
+      "name": "Encoded system info, registry table, static-info response, firmware handles/log ELF/build ID",
+      "condition": "CPU staging/storage is copied into queue or used by decoder; those host pointer addresses are not passed as DMA backing directly in selected code.",
+      "limit": "Encoded bytes contain other device addresses (notify surface and hardware BARs), and registry/system info serialized values can configure firmware. Do not classify all payload data as inert."
+    }
+  ],
+  "candidate_consumption_receipt": {
+    "status": "DESIGN ONLY; implementation pending; no issuer, production default, admission bit, verifier, or hardware gate changed",
+    "name": "one-root GSP_INIT bindata-consumed capability",
+    "semantics": "Authorized internal evidence that this exact external-bindata root has passed the original semantic consumption boundary. Permits retiring ONLY this root (all tables/data/actual OS pages and owned IOVA mappings) while session IRQ/GSP stay active. It is NOT SessionHardwareDmaStop, GPU engine halt, completed GSP unload, proof of source text unload, or generic allocation retirement.",
+    "authentication_meaning": "Kernel-owned unforgeable capability tied to actual owner/record and real function execution; no caller boolean/token derived from RPC NV_OK alone. This is not cryptographic firmware attestation.",
+    "bind_fields": [
+      "frozen source/profile digest and exact original hook-site identity",
+      "owner identity and one-shot first-transaction generation",
+      "nv_state and actual OBJGPU/KernelGsp object identities (validated before dereference)",
+      "external-root memdesc identity plus monotonic allocation serial, backend resource identity, actual byte/page bounds",
+      "exact AT_GPU publication root address plus immutable ordered page-address/mapping-generation digest for all table/data/rounded backing",
+      "unique command 0x00010001 request sequence, boot attempt epoch and actual response class/RESPONSE flag",
+      "transport completion and firmware response.status==NV_OK AND successful bounded static-info decode/key-handler status",
+      "no prior sticky refusal/cancellation, no re-exposure/new boot, no outstanding CPU borrowers or conflicting release permits",
+      "single-use retirement phase and actual backend unmap/free completion; distinguish physical freed vs metadata completion"
+    ],
+    "proposed_state_machine": [
+      "fresh root Reserved (not published)",
+      "Published only after source-bound args publication on this owner generation",
+      "InitRequestInFlight bound to actual request sequence",
+      "Consumed observed only after actual synchronous successful INIT and successful decode, immediately BEFORE original first memdescFree mutation",
+      "one scoped retire permit reserved before free; sticky refusal after issue does not permit unrelated frees",
+      "retirement complete only after every owned IOVA/backend page release confirms completion, then metadata/nulling commit",
+      "any invalidation, stale identity, mutation, replay, failure, partial completion or unknown alias -> retain/quarantine remaining ownership; never global hardware-DMA hold clear"
+    ],
+    "necessary_open_work": [
+      "Prove exact source hook / compiled body and immutable root-to-backend mapping; no guessed memdesc layout or synthetic artifact-only receipt.",
+      "Hard-check response type/flags at real matched response path; original assertion alone cannot authenticate a release capability.",
+      "Prove ordering and queue response stability under real GPU locks/ordinary worker; bind release after successful decoder result, not callback completion guessed from outer NV_OK.",
+      "No direct release admission if record is submem, multi-owner, has unknown child/peer IOVA, live aliases/borrows, changed page list, previously retired, or identity reuse.",
+      "Retain memdesc/KernelGsp member before any void destructive call if scoped permission cannot be obtained; propagate release failures without clearing owner field.",
+      "Original argument page retains old bindataArgs address after free. Prove no later access/republication (single-shot contract) or implement reviewed invalidation, without treating zeroed host bytes as device DMA fence.",
+      "Firmware-side consumer semantics are only represented by the original host free contract; decide explicit acceptance of pinned signed firmware protocol, not generic NV_OK. No firmware disassembly performed.",
+      "Exercise negative controls: wrong owner/gen/serial/sequence/response flags, send failure, timeout/cancel, response error, decode failure, address alias/reuse, partial unmap/free, repeated retirement and boot re-entry.",
+      "Run authoritative native and target-specific checks before changing AllocationRetirementUnderActiveIrq. Whole gate still needs all other actual allocations and PM/IRQ producer/stack closure."
+    ]
+  },
+  "normal_shutdown_scope": "Persistent queue/log/args/boot sources are freed by object destruction after the normal completed outer unload path. Source helper calls themselves do not query hardware halt. Existing read-only stop audit covers suspend mailbox + FWSEC SB + SEC2 Booter unload/WPR2 checks; those are not repeated here and do not independently prove all-engine DMA cessation.",
+  "limits": [
+    "No actual hardware addresses/IOVA, DMA transactions or engine halt states measured. No fixed full allocation count/peak asserted.",
+    "Expected hardware consumers are source-bound address publication endpoints, not exclusive firmware-engine ownership proofs. Proprietary GSP can initiate additional operations.",
+    "GSP poll processes asynchronous RPC/GMC events before matching INIT response; dynamic requests may expose additional backing. This is not full incoming-event/root closure.",
+    "The selected C source has neither _kgspGetGspRmBootParams nor kgspFreeRadix3_IMPL. Actual interfaces are kgspPopulateGspRmInitArgs/LibOS args/WPR metadata and root memdesc free.",
+    "Source call success is not physical backend release success; void free/destructor paths need a source-bound checked integration.",
+    "No production source, existing frozen executable package, hardware stop verifier, production admission default or issuer was modified by this source audit. This package persists design and evidence only."
+  ],
+  "gates": {
+    "AllocationRetirementUnderActiveIrq_cleared": false,
+    "session_hardware_dma_stop_proved": false,
+    "all_gpu_engines_dma_stopped": false,
+    "full_bootstrap_allocation_topology_closed": false,
+    "hardware_test_admitted": false
+  },
+  "artifact_status": "design-not-implemented",
+  "active_irq_retirement": "pending"
+}

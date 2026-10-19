@@ -1,0 +1,33 @@
+{
+  "schema": "s540-prospective-buffer-consumption-provenance-v1",
+  "upstream_repository": "NVIDIA/open-gpu-kernel-modules",
+  "upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "v3_tree_sha256": "fa8498c3958a559a3466ef6dd4e541bfcea9f55d8809d0a422c784cacd703029",
+  "source_path_base": "upstream repository root; V3 paths use the same relative layout",
+  "origin_ledger_sha256": "9a99701df6a3f771f90be9c94b93dc7d064c266c6cb2a388b6028f76f095131b",
+  "persisted_ledger_sha256": "7e4db3ea77cddaca8acfd40555279712b2b4bd406d0b1dd598f0c56f2b699241",
+  "transformations_from_origin": [
+    {
+      "json_pointer": "/external_bindata/construction/observed_firmware_input/path",
+      "change": "Replace local absolute asset path with the firmware basename ucodes_tu10x.bin; firmware bytes/SHA and all technical evidence unchanged."
+    },
+    {
+      "json_pointer": "/artifact_status",
+      "change": "Add explicit design-not-implemented status."
+    },
+    {
+      "json_pointer": "/active_irq_retirement",
+      "change": "Add explicit pending status."
+    },
+    {
+      "json_pointer": "/limits/5",
+      "change": "Clarify that this repository package persists only evidence/design; no production source or issuer changed."
+    }
+  ],
+  "byte_identical_origin_files": {
+    "source-freeze.json": "a594438bbf0d14365229d176b2601699a72555e07de4ec6543d9a71e7e871c99",
+    "source-anchors.json": "56bd24affd0612dcdb2f7a379b4c75763debeaf107d7cca1b90a7ff4bce68d97"
+  },
+  "privacy": "No SPX, machine serial, hardware UUID, actual device physical address, actual IOVA, credentials, or private local filesystem path included. Firmware hash identifies the generic pinned NVIDIA asset.",
+  "source_only": true
+}

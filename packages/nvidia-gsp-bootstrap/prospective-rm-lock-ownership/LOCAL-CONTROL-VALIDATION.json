@@ -1,0 +1,162 @@
+{
+  "actual_kernel_execution": "not_tested",
+  "actual_original_complete_bodies": 10,
+  "actual_original_private_types": [
+    "GPULOCK",
+    "GPULOCKINFO",
+    "RMAPI_LOCK"
+  ],
+  "configuration_negative_controls": [
+    {
+      "flags": [],
+      "rejected": true
+    },
+    {
+      "flags": [
+        "-DS540_NVIDIA_NO_LEGACY_RM_SEMAPHORE=0"
+      ],
+      "rejected": true
+    },
+    {
+      "flags": [
+        "-DS540_NVIDIA_NO_LEGACY_RM_SEMAPHORE=2"
+      ],
+      "rejected": true
+    }
+  ],
+  "detailed_report_sha256": "c22328243ff99f555f24892a4fd50d1e819ee2186ef0685e03993f63408ea0c9",
+  "execution": "Linux x86_64 explicit host-control, Ubuntu Clang 18.1.3",
+  "format": 1,
+  "frozen_first_transaction_modified": false,
+  "full_original_source_units": [
+    "src/nvidia/src/kernel/core/locks.c",
+    "src/nvidia/src/kernel/rmapi/rmapi.c",
+    "src/nvidia/arch/nvalloc/unix/src/os.c"
+  ],
+  "gpu_access": false,
+  "invocation": {
+    "ASAN_OPTIONS": "detect_leaks=0",
+    "entry": "check_lock_ownership.py",
+    "host_control": true,
+    "namespace": "exact sealed S540GlobalRmNamespace.h",
+    "output": "${SCRATCH}/rm-lock-ownership-audit-output-guards",
+    "sdk": "exact pinned archive and extracted full inventory",
+    "upstream": "exact original commit 1a82fbfda8f321b056eb3568850f9316c5e465c5",
+    "v3_input": "exact materialized prospective-v3 plus unchanged project-overlay companion",
+    "working_directory": "${REPO}"
+  },
+  "kernel_compile_scope": "Three complete original C translation units and the typed query, targeting x86_64 Mach-O. Original C units do not consume IOKit declarations; SDK identity is checked separately.",
+  "kernel_target_compile_actions": [
+    {
+      "object": "locks-kernel.o",
+      "object_sha256": "27c9516b048669e91396ffe79ec42b0d13247846ca16e4fed8576c6a84f14475",
+      "source": "src/nvidia/src/kernel/core/locks.c",
+      "source_sha256": "4ef306b2cafdfc6af21b43a97835c1e758e1d3d323d4ab48e10a59a140fb5a43"
+    },
+    {
+      "object": "rmapi-kernel.o",
+      "object_sha256": "8573706faeabe7408b645ee74af9b5c21adb98696849ac3b36ed48b47abde45d",
+      "source": "src/nvidia/src/kernel/rmapi/rmapi.c",
+      "source_sha256": "99c6892af9395f693d50472d95153dddd7d6e2930f4cc65c0c31bec37362b170"
+    },
+    {
+      "object": "os-kernel.o",
+      "object_sha256": "590f94fdcbadcae3a0d1bfd4887dc92f3eba7949d767f21494eb683e217effc0",
+      "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+      "source_sha256": "9e0907d3a54fd71ef6ff01966b6c443ea8f7711d00d151bd7ba1f5171268abd5"
+    },
+    {
+      "object": "S540ProspectiveRmLockOwnership-kernel.o",
+      "object_sha256": "756cd0559fd0da95f1c5b606ac8b575279e9630d456701722ba5eaaed7e1fdfd",
+      "source": "S540ProspectiveRmLockOwnership.c",
+      "source_sha256": "c585314473a465550aeeb1922dfc43c17d4f3be1fa52026044b1a8005fe157d5"
+    }
+  ],
+  "native_apple_execution": false,
+  "original_body_controls": {
+    "native": {
+      "actual_original_bodies": 10,
+      "checks": 78,
+      "component": "prospective-rm-lock-ownership",
+      "execution": "native-user-space",
+      "failures": 0,
+      "format": 1,
+      "gpu_access": false,
+      "kernel_execution": "not_tested",
+      "original_entry_admission": false,
+      "state_and_lifecycle_fixtures": true,
+      "status": "passed"
+    },
+    "sanitized": {
+      "actual_original_bodies": 10,
+      "checks": 78,
+      "component": "prospective-rm-lock-ownership",
+      "execution": "native-user-space",
+      "failures": 0,
+      "format": 1,
+      "gpu_access": false,
+      "kernel_execution": "not_tested",
+      "original_entry_admission": false,
+      "state_and_lifecycle_fixtures": true,
+      "status": "passed"
+    }
+  },
+  "original_entry_admission": false,
+  "production_candidate_allowed": false,
+  "production_default_changed": false,
+  "remaining_integration_requirements": [
+    "An existing serialized completed global-RM lifetime epoch must protect the query against global destruction and ISR/DPC owner transfers; the query does not issue or authenticate this epoch.",
+    "Final combined-image definition and relocation binding remains unproved.",
+    "The current-thread result does not establish foreign-thread quiescence, producer closure, owner destruction, DMA/GSP cessation, target-kernel admission or stack bounds.",
+    "Native Apple replay remains required for this exact candidate."
+  ],
+  "sanitizer_scope": {
+    "enabled": [
+      "address",
+      "undefined",
+      "function"
+    ],
+    "leak_sanitizer": false,
+    "object_counter_cleanup": true,
+    "reason": "The first fresh run was aborted by LeakSanitizer because /proc/<pid>/task is unavailable in this executor. The complete replay uses detect_leaks=0; no LeakSanitizer pass is claimed.",
+    "recover_after_error": false
+  },
+  "sdk_identity": {
+    "archive_sha256": "8931e622b6d16a7052cb2c2dabe16be06963a34b747f19e6cda2bbe8bc7e2557",
+    "file_count": 1232,
+    "provided": true,
+    "reference_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+    "source": "exact pinned archive and full file inventory",
+    "tree_sha256": "50d4e3689ba17a2865ad707dc6ba70f4273a6b12fe8faa1ea15bb02f92ce0fc8",
+    "used_by_original_c_tus": false
+  },
+  "source_contract_tests": {
+    "added_refusals": [
+      "standalone source-overlapping output",
+      "pre-existing output",
+      "pinned source symlink even with matching bytes"
+    ],
+    "report_sha256": "e80faf05a14fca3f55989dc83f0e4204be34a2abbb62c1975abc09293b7d8efb",
+    "status": "passed",
+    "tests": 7
+  },
+  "source_inputs": {
+    "candidate_sources": {
+      "S540ProspectiveRmLockOwnership.c": "c585314473a465550aeeb1922dfc43c17d4f3be1fa52026044b1a8005fe157d5",
+      "S540ProspectiveRmLockOwnership.h": "f78536e385d6f1382ef726189140c9d6f26d886cc64f64e572056f6d836d9856",
+      "check_lock_ownership.py": "e76b9cd72b878860a933a9cdf575517dea664b7f4818005b6ff82d8220ca0e04",
+      "original-api-query.inc": "1a4d6401c273322fdc9eea23f677c462750adbaa671a5b3c0afe3b99085600e8",
+      "original-gpu-query.inc": "7f303496b937ccf2119f283f7010328fffb3ebbf757e819e7c6c02790e1bb961",
+      "prepare.py": "4e42c7a6c11a4f3bc990310ac9be07cc31123bf998b8224b8309e0a5a3fde17a",
+      "tests/check_lock_ownership.c": "10e45606e2d06713dc7c12ae9dbf8f5ab646ee8f3b5ea2a8cebdce5909647343",
+      "tests/context_control.cpp": "fbb58476701ee8bd95327dc4503a2ef872cfc1b2f9cb3efd84605cbf08711f20",
+      "tests/test_source_contracts.py": "dd3c1bea46d88a503b23c46fecdd820648ec78b61622a30330985679bf2562a3"
+    },
+    "contract_sha256": "9de2488ca1c740d2c84950ba2a0fd8b0cddca17be72a20e80f38390fbc1e37d9",
+    "v3_files_verified": 4005,
+    "v3_project_files_verified": 28,
+    "v3_project_tree_sha256": "ec8108f56f4b59b8c9937953206efffba6820d1b6998c55303ceee9d64bc8eb5",
+    "v3_tree_sha256": "fa8498c3958a559a3466ef6dd4e541bfcea9f55d8809d0a422c784cacd703029"
+  },
+  "status": "passed-local-source-controls-and-kernel-target-compilation"
+}

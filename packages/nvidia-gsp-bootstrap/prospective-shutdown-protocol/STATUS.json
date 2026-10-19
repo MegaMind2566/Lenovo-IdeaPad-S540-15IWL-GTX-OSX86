@@ -1,0 +1,22 @@
+{
+  "format": 1,
+  "status": "isolated-source-backed-successor",
+  "base_profile": "prospective-v3-plus-frozen-first-transaction-overlay",
+  "original_function": "gpuEnterShutdown_IMPL",
+  "local_control_scenarios": 24,
+  "local_checks_per_variant": 191,
+  "local_variants": ["plain", "fatal-address-undefined-function-sanitizers"],
+  "complete_original_gpu_tu_cross_compiled": true,
+  "complete_typed_bridge_cross_compiled": true,
+  "native_apple_validation": false,
+  "kernel_execution": false,
+  "gpu_access": false,
+  "runtime_protocol_observed": false,
+  "whole_device_dma_stop_proven": false,
+  "dma_stop_receipt_issued": false,
+  "physical_reclamation_authorized": false,
+  "safe_gpu_destruction": false,
+  "original_entry_admission": false,
+  "production_candidate_allowed": false,
+  "outer_retained_diagnostic_integration": "pending"
+}
