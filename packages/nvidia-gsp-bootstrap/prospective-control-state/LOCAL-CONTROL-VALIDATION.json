@@ -1,0 +1,27 @@
+{
+  "accepted_callback_master_publication_negative": true,
+  "actual_original_handle_lookup": true,
+  "actual_original_spinlock_bodies": 3,
+  "actual_strong_record_and_retained_backends": true,
+  "checks_per_variant": {
+    "fatal-sanitized": 44,
+    "plain": 44
+  },
+  "evidence_path": "/workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/control-state-8/control-state-checks.json",
+  "evidence_sha256": "f8a5d4afa54da234dd345551a17d97728e7e6b3569e5318ba344e9e6fa05a378",
+  "execution": "Linux userspace plus actual Intel macOS Mach-O cross-compilation",
+  "fatal_diagnostic_handler": "explicit-process-exit-observer",
+  "format": 1,
+  "gpu_access": false,
+  "kernel_execution": "not_tested",
+  "kernel_target_compilation_actions": 1,
+  "leak_sanitizer": "disabled; Linux container process inspection is unavailable",
+  "native_apple_execution": false,
+  "negative_profiles": 6,
+  "original_entry_admission": false,
+  "original_metadata_and_token_readers": "explicit-parent-CPU-fixtures",
+  "os_event_route_whole_image_exclusion": "requires separately verified exact3sourceguards and final rm_ioctl absence",
+  "production_candidate_allowed": false,
+  "source_contract_sha256": "1549a877fd5c75b682de632ff51d3f0d1c19184b32ce53746191526f83994daa",
+  "status": "passed-isolated-control-state-source-controls"
+}

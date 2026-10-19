@@ -1,0 +1,6 @@
+NVRM: _sysCreateOs: RM Access Sys Cap creation failed: 0x56
+NVRM: s540Global_nvAssertFailedNoLog: Assertion failed: pThreadEntry != NULL @ tls.c:380
+NVRM: s540Global_nvAssertFailedNoLog: Assertion failed: pThreadEntry != NULL @ tls.c:380
+NVRM: --- last print repeated 312532 times ---
+NVRM: s540Global_nvAssertFailedNoLog: Assertion failed: pThreadEntry != NULL @ tls.c:380
+NVRM: s540Global_nvAssertFailedNoLog: Assertion failed: pThreadEntry != NULL @ tls.c:380

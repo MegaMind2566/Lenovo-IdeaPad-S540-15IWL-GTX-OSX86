@@ -1,0 +1,124 @@
+{
+  "actual_backend_methods": true,
+  "actual_dependency_count": 538,
+  "actual_host_lifecycle": true,
+  "actual_strong_record": true,
+  "additional_translation_units": 0,
+  "authoritative_darwin_execution": false,
+  "compiler_binary_sha256": {
+    "/workspace/scratch/4915cee8ab26/toolchain/root/usr/bin/clang++-18": "8ef402d453d1ba4902e4ee0f0f847f6cfa01400c95aa43c24e97818b9c0e3f45",
+    "/workspace/scratch/4915cee8ab26/toolchain/root/usr/bin/clang-18": "8ef402d453d1ba4902e4ee0f0f847f6cfa01400c95aa43c24e97818b9c0e3f45"
+  },
+  "compiler_identity": {
+    "cc": {
+      "path": "/workspace/scratch/4915cee8ab26/toolchain/root/usr/bin/clang-18",
+      "version": "Ubuntu clang version 18.1.3 (1ubuntu1)"
+    },
+    "cxx": {
+      "path": "/workspace/scratch/4915cee8ab26/toolchain/root/usr/bin/clang++-18",
+      "version": "Ubuntu clang version 18.1.3 (1ubuntu1)"
+    }
+  },
+  "composition_sha256": "b1d8e59d3b30b111eb3afdc82c5c30b4baaf4fdbc747feacd992aebad4bc627e",
+  "final_release_issued": false,
+  "fixtures": [
+    "unused aborting original metadata adapters",
+    "raw timer wrapper absent no-binding return hook",
+    "pauses in actual native allocate/deallocate, Host guard release, and owner reservation endpoints"
+  ],
+  "format": 1,
+  "full_report": "/workspace/scratch/4915cee8ab26/retained-backends-controls-native-runner/control-results.json",
+  "full_report_sha256": "20248e2d24b09a8b334364821cf05b5287e496cb21a97519bd784afa874337ee",
+  "gpu_access": false,
+  "hardware_admission": false,
+  "host_control": true,
+  "host_system": "Linux",
+  "integration_boundaries": [
+    "fresh whole-image composition/compile/link",
+    "transport Platform/IRQ retention and participant lifetime",
+    "GSP wrapper lease settlement unchanged",
+    "hardware callback/DMA/module-text lifetime not certified"
+  ],
+  "kernel_cross_objects": [
+    {
+      "object_sha256": "4c6ade316ac33138998753640e9d1b573be9c12f82a8c43a283d8b9375436e08",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c"
+    },
+    {
+      "object_sha256": "f9dda8fce30f93a117eae547cb2cf42357d5578f2827a1e6c32bf4b648242044",
+      "source": "packages/nvidia-darwin-services/src/S540NvidiaDarwinPlatform.cpp"
+    },
+    {
+      "object_sha256": "d26dec232d863e895bba86d731b9137514eb62f343c68ed1db10067c96b0a05b",
+      "source": "packages/nvidia-darwin-services/src/S540NvidiaDarwinSync.cpp"
+    },
+    {
+      "object_sha256": "b15a9c6ccd9a43279a9baafb721639e2f21e5115422ca0bc793d69d6b437bcba",
+      "source": "packages/nvidia-darwin-services/src/S540NvidiaDarwinTimer.cpp"
+    },
+    {
+      "object_sha256": "21bacdb71346e86297f8757c181dd2811917fd171495384db51e88aaef2f0bff",
+      "source": "packages/nvidia-darwin-services/src/S540NvidiaDarwinWork.cpp"
+    },
+    {
+      "object_sha256": "49761a097a1862d72b6d85466cc6f156da6c7c1e4561f88479f39379fd00911f",
+      "source": "packages/nvidia-darwin-services/src/S540NvidiaDarwinProcess.cpp"
+    },
+    {
+      "object_sha256": "b73d5cc61e9a39556802738ab3da14fd4822b3dbd74529c0357324a71ebd7b57",
+      "source": "packages/nvidia-global-rm/src/S540NvidiaGlobalRmHost.cpp"
+    }
+  ],
+  "kernel_cross_units": 7,
+  "kernel_execution": "not_tested",
+  "native_darwin_compilation": false,
+  "native_macos_link": false,
+  "native_mode_negative": {
+    "linux_without_host_control_refused": true,
+    "output_created": false
+  },
+  "negative_controls": {
+    "changed_host_bytes_refused": true,
+    "double_application_refused": true,
+    "output_inside_input_refused": true,
+    "symlink_input_refused": true
+  },
+  "negative_report_sha256": "54ac7096654b25f8d7b686054509c6ecf135a319c5c30a894716b6635163d686",
+  "original_entry_admission": false,
+  "production_candidate_allowed": false,
+  "results": {
+    "fatal-sanitizers": {
+      "cases": 14,
+      "checks": 130,
+      "failures": 0,
+      "status": "passed"
+    },
+    "plain": {
+      "cases": 14,
+      "checks": 130,
+      "failures": 0,
+      "status": "passed"
+    }
+  },
+  "runtime_policy": "permanent-retention-no-reclaim",
+  "sdk_identity": {
+    "archive_sha256": "8931e622b6d16a7052cb2c2dabe16be06963a34b747f19e6cda2bbe8bc7e2557",
+    "file_count": 1232,
+    "provided": true,
+    "reference_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+    "source": "exact pinned archive and full file inventory",
+    "tree_sha256": "50d4e3689ba17a2865ad707dc6ba70f4273a6b12fe8faa1ea15bb02f92ce0fc8",
+    "used_by_original_c_tus": false
+  },
+  "source_files_changed": 9,
+  "source_manifest_sha256": "cc7ca75b6854a1640a6823207cc94da570b776a744ac1efee41ffd38376986ed",
+  "source_sha256": {
+    "/workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/packages/nvidia-gsp-bootstrap/prospective-retained-backends/check.cpp": "18f48e3d5e5830c8f217f8f34f4491c0b3a5d0c43f2e3ad643ccc72b345892a8",
+    "/workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/packages/nvidia-gsp-bootstrap/prospective-retained-backends/check.py": "f423d9223f1f7328d140ced5799bc57cee71a545c5c12163c72a10ee6d8927e2",
+    "/workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/packages/nvidia-gsp-bootstrap/prospective-retained-backends/internal.hpp.inc": "5ba9a98a5619d94733cff6f4e1d7b61035f75d59320ac196dd210d48be231a02",
+    "/workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/packages/nvidia-gsp-bootstrap/prospective-retained-backends/platform.cpp.inc": "105082d65e80614fd6547d968f20c0370577efdbe138b996e8b3e762e0f5537e",
+    "/workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/packages/nvidia-gsp-bootstrap/prospective-retained-backends/prepare.py": "358f0f2060864a70d89a8f56c41dcf767495e75d18ca1db871c58cbe6f904255",
+    "/workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/packages/nvidia-gsp-bootstrap/prospective-retained-backends/record-api.c.inc": "a6fcc83caafdd61f9092d6b67c6cfca2201842ae3ffa63c81d695b5ad6750705"
+  },
+  "status": "passed"
+}

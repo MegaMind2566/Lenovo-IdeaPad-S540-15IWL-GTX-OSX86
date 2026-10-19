@@ -1,0 +1,36 @@
+{
+  "format": 1,
+  "original_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "original_entry_admission": false,
+  "original_function_sha256": "f646c7eef0ad298d7a90256f220b1deb7368c4e293c6c8c03321e19406307373",
+  "original_source_sha256": {
+    "src/nvidia/arch/nvalloc/unix/include/nv.h": "02ce4b371e0a8dd26f62a320e88c8382dcf31a21b727503a66abcaea9eecf09b",
+    "src/nvidia/arch/nvalloc/unix/include/osapi.h": "1c547039ccfa61deff34bc39bd0e733c0c33344cef6f2af5fc3775c80ee92cfd",
+    "src/nvidia/arch/nvalloc/unix/src/osinit.c": "dda3b014833c2e94680e5adea152011ffce72c8067782aceeecaefc28b7394d3",
+    "src/nvidia/arch/nvalloc/unix/src/vbioscall.c": "39b4f21425e02e51df9f4e33e225108fe4abb29e9663190649e456737d31d835"
+  },
+  "primary_mode_implemented": false,
+  "production_candidate_allowed": false,
+  "profile": "actual-original-nonprimary-x86-emulation-only",
+  "project_source_sha256": {
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c": "9f8fee42cd2e9ffb2c86a0de368d259fa8879b70398becf7c508887dd941181f",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.h": "848b26f96094d0775b1dcaa5a8aa2aa6e3b9d80b7b6a351a79e610ecb029e8e2"
+  },
+  "proposed_function_sha256": "961971cef161f70aa5d3e1d0148e6538cc26d05e6572b2a3332fc3b67408b2aa",
+  "proposed_source_sha256": "4e8597e15d9a9c39bcef4a74a8b745d872c3a5d11b8d6806b1cf3b0033e139e7",
+  "removed_callbacks": [
+    "os_io_read_byte",
+    "os_io_read_word",
+    "os_io_read_dword",
+    "os_io_write_byte",
+    "os_io_write_word",
+    "os_io_write_dword",
+    "nv_get_updated_emu_seg"
+  ],
+  "required_per_original_source_compile_definition": "S540_NVIDIA_NONPRIMARY_X86_EMULATION=1",
+  "source_sha256": {
+    "check.py": "fd435f88f3fa9136025d5407ff623593bd419c77f79cb4da6192c3f31199351f",
+    "prepare.py": "1589cb1d855f7e94182b908073706a5382bd06a0b79818c9cce475c3acd119dd"
+  },
+  "unchanged_nonprimary_branch": "    if (!NV_PRIMARY_VGA(NV_GET_NV_STATE(pGpu)))     // not the primary GPU\n        return NV_OK;"
+}

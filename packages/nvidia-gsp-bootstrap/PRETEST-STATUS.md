@@ -36,12 +36,34 @@ platform source options compose together. All 56 resulting project units and
 the changed original `osapi.c` compile locally. The final complete native source profile
 still needs its own 1,100-unit rebuild and actual same-image link.
 
+The subsequent fixed live-ABI profile composes 60 project units, retained
+direct-service backends and the serialized global-epoch record. Its 60 project
+units and five changed complete original units compile locally. A strict
+exploratory Linux Mach-O bundle link of 1,163 actual objects has no unresolved
+private callbacks; its 439 public imports are within the same 445 reviewed SDK
+operations. This is not an Apple kext link or a target-loader success. Actual
+OS-event guards and the nonprimary-only emulation profile are selected; the
+native final verifier independently requires the character/event insertion
+dispatcher to be absent.
+
 The retained Host policy pins associated physical backing from transaction
 start, with separate logical-retirement counters and no invented error. Its
 29 controls per variant include actual queue/direct-timer authorization,
 concurrent duplicate frees and a genuine earlier service refusal. It issues no
 hardware-stop or final-release receipt. Direct Darwin timer/workqueue/guard
-allocations need their own retained lifetime; Host pinning does not cover them.
+allocations have a separate retained-backends successor with 130 checks per
+variant, including zero-heap HostShutdown and preowner allocation/free races.
+It does not cover the direct transport Platform/IRQ backend lifetime.
+
+Actual original global construction under BeginOwner passes ordinary and
+fatal-sanitized CPU controls: all 15 globals and the resource-server client are
+constructed, with 154 allocations and six logical temporary retirements, no
+physical frees and no unknown NVOC deletion. A later global-epoch fault test
+exposed a retained-mode OOM at allocation 154: original sysConstruct cleanup
+tries to acquire a newly allocated TLS entry after sticky allocation refusal,
+and an ignored resource-server cleanup failure loops. The retained construction
+failure path is being corrected; healthy construction does not close this
+failure case or permit kernel entry.
 
 The typed one-shot shutdown bridge calls the exact original
 `gpuEnterShutdown_IMPL`: state unload plus normal GSP shutdown, without
@@ -54,7 +76,7 @@ current production teardown path and does not attest universal DMA cessation.
 | Requirement | Remaining work |
 |---|---|
 | Complete final image | Native full-profile compile, actual dead-stripped kext link, exact original/private closure, three metaclasses, firmware and retained typed roots in the same image. Full-input unresolved symbols are not automatically live selected-root requirements. |
-| Original locks/lifetime | Connect the actual lock observer to a serialized global/context epoch with ISR/DPC exclusion. A zero current-thread lock mask is not all-thread quiescence. |
+| Original locks/lifetime | Validate the serialized global/context epoch and close the retained late-OOM construction failure before kernel entry, with ISR/DPC exclusion. A zero current-thread lock mask is not all-thread quiescence. |
 | Callback producers | Compose genuine RC behavior and hard-IRQ/coalesced-BH participation, including master-thread pending drains and a non-destructive persistent hardware-mask phase. Do not invent EVENT/OWNER policy rows for plain 1Hz callbacks. |
 | Allocation ownership | Acquire the real session hardware-DMA hold before any original attempt. Preserve CPU objects, direct service backends, DMA backing/mappings, context and module text after the retained diagnostic. |
 | Kernel stack | Measured frames and direct edges are available. Recursive components, indirect calls, external depth and complete wrapper/IRQ headroom still prevent an aggregate bound. Unknown paths are not zero. |

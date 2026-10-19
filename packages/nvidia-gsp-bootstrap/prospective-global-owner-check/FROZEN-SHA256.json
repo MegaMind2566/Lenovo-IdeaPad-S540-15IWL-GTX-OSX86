@@ -1,0 +1,12 @@
+{
+  "files": {
+    "Probe.h": "ccb8b4bc6fa978f30b77b4731be9175cfd0ba14824dfe97a6505d76f8e8cf80f",
+    "README.md": "687db785d3f59f66d8f16dd4861dc2727c09a7a8908952385967a5a71baa6302",
+    "STATUS.json": "9647cae129e94c081af90d3a9c91b51b731703ebb1b0bc98f3989134454f0489",
+    "check.py": "b9ea6b3397146f324401ee24e13f57eb4df113ca80c446dee29c706a0c2204c6",
+    "check_global_owner.cpp": "cef2f19eda666cd3d9dd880298156fa03e6f8622fe96cf69c7188a8480de2555",
+    "evidence/local-full-global-owner-integration.json": "7fa6537e3a9606e4959b52b8863b0b29c0764608bd668e2cbad703c72f196dae",
+    "record_probe.inc": "b52cc0f272b2a4acf2ed089e972ac0f3a77df8b76bd8977d207a44c0b4aa4bc1"
+  },
+  "format": 1
+}

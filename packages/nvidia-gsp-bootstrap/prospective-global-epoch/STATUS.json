@@ -1,0 +1,25 @@
+{
+  "actual_project_units": 54,
+  "assertions_per_variant": 138,
+  "complete_actual_original_units": 1098,
+  "complete_kernel_cross_translation_units": 2,
+  "format": 1,
+  "generated_identification_units": 1,
+  "global_allocation_failure_closure": false,
+  "global_destruction_implemented": false,
+  "gpu_access": false,
+  "kernel_execution": false,
+  "kernel_gate_preserved": true,
+  "known_blocked_negative_ordinal": 154,
+  "native_apple_validation": false,
+  "original_entry_admission": false,
+  "physical_reclamation_authorized": false,
+  "positive_scenarios_per_variant": 10,
+  "privileged_cpu_fixture_units": 1,
+  "production_candidate_allowed": false,
+  "status": "isolated-retained-global-epoch-with-known-late-oom-blocker",
+  "variants": [
+    "plain",
+    "fatal-address-undefined-function-sanitizers"
+  ]
+}

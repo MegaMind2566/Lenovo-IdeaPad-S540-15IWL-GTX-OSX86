@@ -1,0 +1,36 @@
+{
+  "format": 1,
+  "original_entry_admission": false,
+  "original_sha256": {
+    "kernel-open/nvidia/nv.c": "ce04946d288cf0251668a2d847acceb2a39af9dac2f13bb005f53759c774dbf7",
+    "src/nvidia/arch/nvalloc/unix/include/nv-chardev-numbers.h": "405047bb836229f55f39955d2565e2aad2e470bd796bdf6b6f7a8795fe12ea64",
+    "src/nvidia/arch/nvalloc/unix/include/nv.h": "02ce4b371e0a8dd26f62a320e88c8382dcf31a21b727503a66abcaea9eecf09b",
+    "src/nvidia/arch/nvalloc/unix/src/os.c": "057b50fcb738be90a073b60f63e70559706864ddcec3bf703282563173e3dce4",
+    "src/nvidia/arch/nvalloc/unix/src/osapi.c": "e4336f0e3bb55122680e0d344f970c123664122c2415134b7a6b517c98fcbe75",
+    "src/nvidia/src/libraries/nvport/sync/inc/sync_unix_kernel_os_def.h": "889cc48b45b592bd8052add7b98a07b689ee508efaf32533cbfe780cf1505fba",
+    "src/nvidia/src/libraries/nvport/sync/sync_unix_kernel_os.c": "251ec5da384f6cddd51c3ebbef09fde118734687c83955c3a085652bcce53372"
+  },
+  "production_candidate_allowed": false,
+  "project_sha256": {
+    "packages/nvidia-gsp-bootstrap/prospective-loader/S540ProspectiveLoaderKernel.cpp": "30803d1544f30b845ad871c8096b54c18e5733d6d61cd00a9084198005a8fa3d",
+    "packages/nvidia-gsp-bootstrap/prospective-loader/S540ProspectiveLoaderKernel.hpp": "81d56ef7aa7873e94dc355202ef21b44f460dbefdc84237d65481993f6e1c626",
+    "packages/nvidia-gsp-bootstrap/prospective-os-event-policy/prepare_event_policy.py": "f8c6b81d145356d391eb4cfdc7caa881b7096509c972bbc1d81f8d4cf56975e1",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c": "9f8fee42cd2e9ffb2c86a0de368d259fa8879b70398becf7c508887dd941181f"
+  },
+  "selected_profile": {
+    "adapter_ordinal": "0 only for bound exact one TU117 identity",
+    "character_devices_registered": 0,
+    "control_ordinal": 255,
+    "control_state": "static permanent nv_state_t plus original PORT_SPINLOCK initialized by real os_alloc_spinlock",
+    "file_reference_registration_api": false,
+    "final_release_implemented": false,
+    "os_event_creation": "composed original constructor/notification guards must refuse OS events"
+  },
+  "source_sha256": {
+    "S540NvidiaControlState.c": "7a03e5e0c3a5237cd09b7c3768604ee29bb8b5bf0b38504e373ac422dea77e0e",
+    "S540NvidiaControlState.h": "753141e7002c4f38acaeb2e774844505df76b18a075aa4684dfd9ae1c3594bf0",
+    "check.py": "ebd4b27fa52d8d7430d6beb836aeff4038bcf0a4627c7c252e55af139b02dcc1",
+    "check_control.c": "8bb580a467732be7834709bd724bbec6802fb8be5219b7c9724e111a49a3f318"
+  },
+  "upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5"
+}

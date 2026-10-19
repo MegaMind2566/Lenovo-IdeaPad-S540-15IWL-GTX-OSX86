@@ -365,11 +365,16 @@ def verify_closed_loader_policy(composed: Path) -> dict:
 
 def project_unit_count(value: dict) -> int:
     profiles = value.get('fixed_source_profiles', {})
-    for name in ('retained_diagnostic', 'rc_participant', 'shutdown_protocol', 'platform_closure'):
+    selections=('retained_diagnostic', 'rc_participant', 'shutdown_protocol', 'platform_closure',
+                'retained_backends', 'global_epoch', 'live_abi_closure')
+    for name in selections:
         if name in profiles and type(profiles[name]) is not bool:
             raise ValueError('A fixed source-profile selection must be a real Boolean')
     expected = (53 + int(profiles.get('rc_participant', False)) +
-                int(profiles.get('shutdown_protocol', False)) + int(profiles.get('platform_closure', False)))
+                int(profiles.get('shutdown_protocol', False)) + int(profiles.get('platform_closure', False)) +
+                4*int(profiles.get('live_abi_closure', False)))
+    if profiles.get('live_abi_closure') and any(profiles.get(name) is not True for name in selections[:-1]):
+        raise ValueError('The live ABI source profile requires all retained transaction dependencies')
     if len(value['project_translation_units']) != expected:
         raise ValueError('The source composition lost a baseline or selected successor translation unit')
     for name in ('original_entry_admission', 'hardware_admission', 'final_release_issued', 'stop_receipt_issued'):
@@ -382,6 +387,44 @@ def require_fresh_native_composition(plan_only: bool, composition_dir: Path | No
     if not plan_only and composition_dir is not None:
         raise ValueError('Native image builds require a fresh canonical composition and compile; '
                          '--composition-dir is accepted only with --plan-only')
+
+
+def verify_source_definitions(command: list[str], expected: dict, scoped: set[str]) -> None:
+    observed={name:[] for name in scoped}
+    index=0
+    while index<len(command):
+        flag=command[index];index+=1
+        if flag in ('-D','-U'):
+            if index==len(command):raise ValueError('Incomplete source-profile definition option')
+            flag+=command[index];index+=1
+        if flag.startswith('-D'):
+            name,_,value=flag[2:].partition('=')
+            if name in scoped:observed[name].append(value or '1')
+        elif flag.startswith('-U') and flag[2:] in scoped:
+            raise ValueError('A fixed source-profile definition was explicitly undefined')
+    if any(values != ([expected[name]] if name in expected else []) for name,values in observed.items()):
+        raise ValueError('Fixed source-profile definitions escaped or differ from their exact source')
+
+
+def verify_closed_character_frontend(image: Image, value: dict) -> dict:
+    profiles=value.get('fixed_source_profiles',{})
+    if not profiles.get('live_abi_closure'):
+        return {'selected':False,'character_frontend_exclusion_proven':False}
+    ingress=profiles.get('live_abi_source_profile',{}).get('control_event_ingress',{})
+    if ingress.get('sole_control_event_insertion_function')!='allocate_os_event' or \
+            ingress.get('original_user_dispatcher')!='rm_ioctl' or \
+            ingress.get('private_user_dispatcher_exposed_by_loader') is not False:
+        raise ValueError('The live control-state source profile lost its exact event insertion route')
+    forbidden={'_'+original.PREFIX+'rm_ioctl','_rm_ioctl',
+               '_'+original.PREFIX+'allocate_os_event','_allocate_os_event'}
+    retained=sorted(symbol['name'] for symbol in image.symbols if
+        any(symbol['name']==name or symbol['name'].startswith((name+'.',name+'$')) for name in forbidden)
+        and symbol['kind']&0x0e==0x0e and symbol['section'])
+    if retained:raise ValueError('A character-device/event insertion frontend survived final dead stripping: '+repr(retained))
+    return {'selected':True,'character_frontend_exclusion_proven':True,
+        'forbidden_defined_symbols':sorted(forbidden),'retained_forbidden_symbols':[],
+        'source_ingress':ingress,'closed_loader_source_verified_separately':True,
+        'os_event_delivery_implemented':False}
 
 
 def compilation_inputs(directory: Path, report: dict, *, original_units: bool,
@@ -398,13 +441,17 @@ def compilation_inputs(directory: Path, report: dict, *, original_units: bool,
     if len(rows) != (1100 if original_units else expected_project_units):
         raise ValueError('Final link lost an exact original/project translation unit')
     folder = directory / ('original-objects' if original_units else 'project-objects')
+    manifest=composition.verify_composition(directory)
+    per_original=manifest.get('fixed_source_profiles',{}).get('per_original_source_compile_definitions',{})
+    scoped={name for definitions in per_original.values() for name in definitions}
+    scoped.update(name for item in manifest['project_translation_units']
+                  for name in item.get('compile_definitions',{}) if name.startswith('S540_NVIDIA_'))
     if original_units:
         if planned_original_sources is None or len(set(planned_original_sources)) != 1100:
             raise ValueError('Original native reuse requires the actual exact 1100-source make plan')
         expected_sources = set(planned_original_sources)
         source_rows = {}
     else:
-        manifest = json.loads((directory / 'composition.json').read_text())
         source_rows = {row['source']: row for row in manifest['project_translation_units']}
         if len(source_rows) != expected_project_units:
             raise ValueError('The canonical project source inventory is incomplete')
@@ -419,6 +466,9 @@ def compilation_inputs(directory: Path, report: dict, *, original_units: bool,
                       else directory / 'source' / relative)
             expected_source_hash = row['source_sha256']
             expected_cwd = directory / 'source/src/nvidia'
+            expected_definitions=per_original.get(row['source'],{})
+            if row.get('compile_definitions',{})!=expected_definitions:
+                raise ValueError('Original compiler per-source definitions differ from exact source profile')
         else:
             declared = source_rows[row['source']]
             if row['kind'] != declared['kind'] or row['sha256'] != declared['sha256']:
@@ -427,6 +477,8 @@ def compilation_inputs(directory: Path, report: dict, *, original_units: bool,
                 raise ValueError('Compiler per-source definitions differ from the composed source row')
             source, expected_source_hash = directory / 'project' / relative, declared['sha256']
             expected_cwd = directory / 'project'
+            expected_definitions=declared.get('compile_definitions',{})
+        verify_source_definitions(row['command'],expected_definitions,scoped)
         if sha(source) != expected_source_hash:
             raise ValueError('Native compiler source bytes changed: ' + row['source'])
         cwd = Path(row['cwd']).resolve(strict=True)
@@ -582,13 +634,16 @@ def build(args) -> dict:
                 successor_manifest=args.successor_manifest,
                 project_successor_manifest=args.project_successor_manifest,
                 retained_diagnostic=args.retained_diagnostic, rc_participant=args.rc_participant,
-                shutdown_protocol=args.shutdown_protocol, platform_closure=args.platform_closure)
+                shutdown_protocol=args.shutdown_protocol, platform_closure=args.platform_closure,
+                retained_backends=args.retained_backends, global_epoch=args.global_epoch,
+                live_abi_closure=args.live_abi_closure)
         else:
             composed = args.composition_dir.resolve(strict=True)
             value = composition.verify_composition(composed)
             if args.successor_manifest or args.project_successor_manifest:
                 raise ValueError('Successor manifests cannot alter a reused composition')
-            for name in ('retained_diagnostic', 'rc_participant', 'shutdown_protocol', 'platform_closure'):
+            for name in ('retained_diagnostic', 'rc_participant', 'shutdown_protocol', 'platform_closure',
+                         'retained_backends', 'global_epoch', 'live_abi_closure'):
                 if getattr(args, name) and value.get('fixed_source_profiles', {}).get(name) is not True:
                     raise ValueError('Requested fixed source profile is absent from reused composition: ' + name)
         report.update(composition_directory=str(composed), composition_sha256=sha(composed / 'composition.json'))
@@ -761,6 +816,7 @@ def build(args) -> dict:
         report['final_original_roots'] = verify_roots(final, expected_type=11)
         report['final_loader_pointers'] = verify_final_loader_pointers(final, loader_entries)
         report['final_embedded_firmware'] = firmware.verify_embedded_firmware(final)
+        report['final_character_frontend'] = verify_closed_character_frontend(final_image,value)
         composition.verify_composition(composed)
         verify_closed_loader_policy(composed)
         compilation_inputs(composed, originals, original_units=True,
@@ -835,10 +891,46 @@ def self_test() -> dict:
                                  'shutdown_protocol': True, 'stop_receipt_issued': False}}
     assert project_unit_count(selected) == 55
     checks += 1
+    closed={'project_translation_units':[{}]*60,'fixed_source_profiles':{name:True for name in
+        ('retained_diagnostic','rc_participant','shutdown_protocol','platform_closure',
+         'retained_backends','global_epoch','live_abi_closure')}}
+    assert project_unit_count(closed)==60
+    checks += 1
+    scoped={'S540_NVIDIA_NO_OS_EVENT_BACKEND','S540_NVIDIA_NO_CHARACTER_DEVICE'}
+    verify_source_definitions(['clang','-D','S540_NVIDIA_NO_OS_EVENT_BACKEND=1'],
+                              {'S540_NVIDIA_NO_OS_EVENT_BACKEND':'1'},scoped)
+    verify_source_definitions(['clang'],{},scoped)
+    checks += 2
+    for command,expected in [
+        (['-DS540_NVIDIA_NO_OS_EVENT_BACKEND=1'],{}),
+        ([],{'S540_NVIDIA_NO_OS_EVENT_BACKEND':'1'}),
+        (['-DS540_NVIDIA_NO_OS_EVENT_BACKEND=0'],{'S540_NVIDIA_NO_OS_EVENT_BACKEND':'1'}),
+        (['-DS540_NVIDIA_NO_OS_EVENT_BACKEND=1']*2,{'S540_NVIDIA_NO_OS_EVENT_BACKEND':'1'}),
+        (['-D','S540_NVIDIA_NO_OS_EVENT_BACKEND=1','-U','S540_NVIDIA_NO_OS_EVENT_BACKEND'],
+             {'S540_NVIDIA_NO_OS_EVENT_BACKEND':'1'})]:
+        try:verify_source_definitions(command,expected,scoped)
+        except ValueError:checks+=1
+        else:raise AssertionError('Escaped or modified source-profile definitions were accepted')
+    class FrontendFixture:
+        symbols=[]
+    frontend_profile={'fixed_source_profiles':{'live_abi_closure':True,'live_abi_source_profile':
+        {'control_event_ingress':{'sole_control_event_insertion_function':'allocate_os_event',
+          'original_user_dispatcher':'rm_ioctl','private_user_dispatcher_exposed_by_loader':False}}}}
+    assert verify_closed_character_frontend(FrontendFixture(),frontend_profile)['character_frontend_exclusion_proven']
+    checks+=1
+    for name in ('_s540Global_rm_ioctl','_allocate_os_event','_allocate_os_event.cold.1'):
+        fixture=FrontendFixture();fixture.symbols=[{'name':name,'kind':0x0e,'section':1}]
+        try:verify_closed_character_frontend(fixture,frontend_profile)
+        except ValueError:checks+=1
+        else:raise AssertionError('A live character/event insertion frontend was admitted')
     for invalid, phrase in [
         ({**selected, 'project_translation_units': [{}] * 54}, 'selected successor translation unit'),
         ({**selected, 'fixed_source_profiles': {**selected['fixed_source_profiles'],
-                                               'stop_receipt_issued': True}}, 'stop/release receipt')]:
+                                               'stop_receipt_issued': True}}, 'stop/release receipt'),
+        ({**closed,'fixed_source_profiles':{**closed['fixed_source_profiles'],'global_epoch':False}},
+             'retained transaction dependencies'),
+        ({**closed,'fixed_source_profiles':{**closed['fixed_source_profiles'],'live_abi_closure':1}},
+             'real Boolean')]:
         try:
             project_unit_count(invalid)
         except ValueError as error:
@@ -1013,6 +1105,9 @@ def main() -> int:
     parser.add_argument('--rc-participant', action='store_true')
     parser.add_argument('--shutdown-protocol', action='store_true')
     parser.add_argument('--platform-closure', action='store_true')
+    parser.add_argument('--retained-backends', action='store_true')
+    parser.add_argument('--global-epoch', action='store_true')
+    parser.add_argument('--live-abi-closure', action='store_true')
     parser.add_argument('--plan-only', action='store_true')
     args = parser.parse_args()
     if args.self_test:

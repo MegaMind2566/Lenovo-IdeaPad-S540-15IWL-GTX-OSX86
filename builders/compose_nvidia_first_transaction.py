@@ -40,6 +40,13 @@ ORIGINAL_PROJECT_OWNERS = {
     's540FirstTxnOriginalDescriptorCount': 'src/nvidia/arch/nvalloc/unix/src/osapi.c',
     's540FirstTxnObjDeleteChecked': 'src/nvidia/src/libraries/nvoc/src/runtime.c'}
 SOURCE_SUFFIXES = {'.c', '.cpp', '.h', '.hpp', '.inc'}
+LIVE_ORIGINAL_DEFINITIONS = {
+    'src/nvidia/arch/nvalloc/unix/src/vbioscall.c': {
+        'S540_NVIDIA_NONPRIMARY_X86_EMULATION': '1'},
+    'src/nvidia/src/kernel/rmapi/event_api.c': {'S540_NVIDIA_NO_OS_EVENT_BACKEND': '1'},
+    'src/nvidia/src/kernel/rmapi/event_buffer.c': {'S540_NVIDIA_NO_OS_EVENT_BACKEND': '1'},
+    'src/nvidia/src/kernel/gpu/mem_mgr/sem_surf.c': {'S540_NVIDIA_NO_OS_EVENT_BACKEND': '1'}}
+CONTROL_UNIT = 'packages/nvidia-gsp-bootstrap/prospective-control-state/S540NvidiaControlState.c'
 
 
 def sha(path: Path) -> str:
@@ -132,9 +139,34 @@ def copy_code(source: Path, destination: Path) -> None:
             shutil.copyfile(path, target)
 
 
+def checked_contract(path: Path, groups: dict[str, Path]) -> dict:
+    """Verify actual reviewed source bytes without rewriting their contracts."""
+    value = json.loads(path.read_text())
+    for group, root in groups.items():
+        if not value.get(group):
+            raise ValueError('Source contract requires nonempty hashes: ' + group)
+        for relative, digest in value[group].items():
+            source = root / checked_relative(relative)
+            if source.is_symlink() or sha(source) != digest:
+                raise ValueError('Fixed source contract changed: ' + str(source))
+    return value
+
+
+def original_source_flags(value: dict, relative: str) -> list[str]:
+    """Allow the exact original feature macros only on their reviewed units."""
+    profiles = value.get('fixed_source_profiles', {})
+    expected = LIVE_ORIGINAL_DEFINITIONS if profiles.get('live_abi_closure') else {}
+    if profiles.get('per_original_source_compile_definitions', {}) != expected:
+        raise ValueError('Unreviewed per-original-source compile definitions')
+    return ['-D' + name + '=' + definition
+            for name, definition in sorted(expected.get(relative, {}).items())]
+
+
 def fixed_profile_overlays(source: Path, project: Path, output: Path, *,
                            retained_diagnostic: bool, rc_participant: bool,
                            shutdown_protocol: bool, platform_closure: bool = False,
+                           retained_backends: bool = False, global_epoch: bool = False,
+                           live_abi_closure: bool = False,
                            upstream: Path | None = None) -> tuple[dict, dict]:
     """Compose selected real source successors; these flags grant no admission."""
     additions, edits, helpers, exports = {}, [], {}, {}
@@ -180,6 +212,28 @@ def fixed_profile_overlays(source: Path, project: Path, output: Path, *,
         for relative, text in sorted(changed.items()):
             replace_file('project', relative, text, 'retained-diagnostic')
         exports['s540FirstTxnHostRetainDiagnostic'] = retained.RECORD
+    for enabled, profile, directory_name, names in [
+            (retained_backends, 'retained-backends', 'prospective-retained-backends',
+             ['s540FirstTxnBackendBegin', 's540FirstTxnBackendEnd', 's540FirstTxnBackendBeginRelease']),
+            (global_epoch, 'global-epoch', 'prospective-global-epoch',
+             ['s540FirstTxnMasterIdentity', 's540FirstTxnGlobalReadMaster',
+              's540FirstTxnGlobalGetSnapshot', 's540FirstTxnGlobalEnter',
+              's540FirstTxnGlobalAbort', 's540FirstTxnGlobalOriginalReturned',
+              's540FirstTxnGlobalValidated'])]:
+        if not enabled:
+            continue
+        directory = GSP / directory_name
+        for path in directory.rglob('*'):
+            if path.is_file() and (path.suffix in SOURCE_SUFFIXES or path.suffix == '.py'):
+                helpers[path.relative_to(ROOT).as_posix()] = sha(path)
+        transform = load('s540_composition_' + profile.replace('-', '_'), directory / 'prepare.py')
+        before = {name: (project / name).read_text() for name in transform.INPUTS}
+        changed = transform.transforms(before)
+        if set(changed) != set(before):
+            raise ValueError('Fixed lifetime successor changed its exact source set: ' + profile)
+        for relative, text in sorted(changed.items()):
+            replace_file('project', relative, text, profile)
+        exports.update({name: transform.RECORD for name in names})
     shutdown = None
     if shutdown_protocol:
         directory = GSP / 'prospective-shutdown-protocol'
@@ -239,18 +293,111 @@ def fixed_profile_overlays(source: Path, project: Path, output: Path, *,
             'runtime_pm_available_macro': 'must remain absent; even a definition of zero is refused',
             'runtime_power_implemented': False, 'tegra_platform_implemented': False,
             'nvlink_hardware_implemented': False}
+    live = None
+    if live_abi_closure:
+        if upstream is None:
+            raise ValueError('Live ABI closure requires the actual original source tree')
+        directory = GSP / 'prospective-live-abi-closure/nonprimary-x86'
+        contract_path = directory / 'SOURCE-CONTRACT.json'
+        nonprimary_contract_sha = sha(contract_path)
+        contract = checked_contract(contract_path, {'source_sha256': directory,
+            'original_source_sha256': upstream, 'project_source_sha256': ROOT})
+        prepare = directory / 'prepare.py'
+        helpers[prepare.relative_to(ROOT).as_posix()] = sha(prepare)
+        emulation = load('s540_composition_nonprimary_x86', prepare)
+        replace_file('original', emulation.SOURCE,
+            emulation.overlay((source / emulation.SOURCE).read_text()), 'nonprimary-x86-emulation')
+        mapping_directory = GSP / 'prospective-mapping-closure'
+        mapping_guard = mapping_directory / 'profile_guard.py'
+        helpers[mapping_guard.relative_to(ROOT).as_posix()] = sha(mapping_guard)
+        mapping = load('s540_composition_mapping_guard', mapping_guard)
+        mapping_profile = mapping.validate_profile(project)
+        configurations = [
+            ('prospective-uvm-disabled', 'UVM-DISABLED-CONTRACTS.json',
+             'S540ProspectiveUvmDisabled.c',
+             ['nv_schedule_uvm_isr', 'nv_schedule_uvm_drain_p2p', 'nv_schedule_uvm_resume_p2p'],
+             {'S540_NVIDIA_NO_UVM_BACKEND': '1'},
+             {'source_sha256': None, 'original_source_sha256': upstream}),
+            ('prospective-mapping-closure', 'SOURCE-CONTRACT.json',
+             'S540NvidiaMappingClosure.c',
+             ['nv_acquire_mmap_lock', 'nv_release_mmap_lock',
+              'nv_get_all_mappings_revoked_locked', 'nv_set_safe_to_mmap_locked', 'nv_revoke_gpu_mappings'],
+             {'S540_NVIDIA_NO_USER_MAPPINGS': '1'}, {'source_sha256': None}),
+            ('prospective-live-platform-closure', 'SOURCE-CONTRACT.json',
+             'S540ProspectiveLivePlatformClosure.c',
+             ['os_is_bif_reset_supported', 'os_allocate_temporary_file', 'os_close_file',
+              'os_read_file', 'os_write_file', 'os_disable_console_access', 'os_enable_console_access'],
+             {'S540_NVIDIA_LIVE_PLATFORM_CLOSURE': '1', 'S540_NVIDIA_MANUAL_ADAPTER_START': '1',
+              'S540_NVIDIA_NO_FILE_BACKEND': '1', 'S540_NVIDIA_NO_NVIDIA_CONSOLE': '1'},
+             {'source_sha256': None, 'original_source_sha256': upstream,
+              'repository_dependency_sha256': ROOT}),
+            ('prospective-control-state', 'SOURCE-CONTRACT.json', 'S540NvidiaControlState.c',
+             ['nv_get_ctl_state', 'nv_get_dev_minor', 'nv_get_file_private',
+              'nv_put_file_private', 'nv_post_event'],
+             {'S540_NVIDIA_NO_CHARACTER_DEVICE': '1', 'S540_NVIDIA_NO_OS_EVENT_BACKEND': '1'},
+             {'source_sha256': None, 'original_sha256': upstream, 'project_sha256': ROOT})]
+        contracts = {}
+        for name, contract_name, filename, callbacks, definitions, groups in configurations:
+            directory = GSP / name
+            contract_path = directory / contract_name
+            module_contract = checked_contract(contract_path,
+                {key: root or directory for key, root in groups.items()})
+            unit = 'packages/nvidia-gsp-bootstrap/' + name + '/' + filename
+            replace_file('project', unit, (directory / filename).read_text(), 'live-abi-closure')
+            additions[unit] = 'original-c'
+            expected = [original.PREFIX + callback for callback in callbacks]
+            private_exports.update({symbol: unit for symbol in expected})
+            if name == 'prospective-control-state':
+                public = ['s540ControlStatePrepare', 's540ControlStateBindAdapter']
+                exports.update({symbol: unit for symbol in public})
+                expected += public
+            per_source_definitions[unit] = definitions
+            row_requirements[unit] = {'compile_definitions': definitions,
+                'expected_definitions': sorted(expected)}
+            if name == 'prospective-uvm-disabled':
+                row_requirements[unit]['expected_imports'] = []
+            elif name == 'prospective-mapping-closure':
+                if module_contract['callbacks'] != callbacks:
+                    raise ValueError('Mapping profile changed its exact original callbacks')
+                row_requirements[unit]['expected_imports'] = sorted(module_contract['expected_imports'])
+            elif name == 'prospective-live-platform-closure':
+                if module_contract['callbacks'] != callbacks:
+                    raise ValueError('Live platform profile changed its exact original callbacks')
+                row_requirements[unit]['expected_imports'] = sorted([
+                    's540FirstTxnGetSnapshot', 's540GlobalRmRecordServiceName',
+                    's540GlobalRmRecordUnavailable', original.PREFIX + 'os_bug_check'])
+            contracts[name] = sha(contract_path)
+        row_requirements[CONTROL_UNIT]['original_include_directories'] = ['src/nvidia/src/libraries']
+        live = {'source_contract_sha256': contracts,
+            'nonprimary_source_contract_sha256': nonprimary_contract_sha,
+            'mapping_profile': mapping_profile, 'primary_emulation_implemented': False,
+            'control_event_ingress': {
+                'original_osapi_source': 'src/nvidia/arch/nvalloc/unix/src/osapi.c',
+                'original_osapi_source_sha256': sha(upstream / 'src/nvidia/arch/nvalloc/unix/src/osapi.c'),
+                'composed_osapi_source_sha256': sha(source / 'src/nvidia/arch/nvalloc/unix/src/osapi.c'),
+                'sole_control_event_insertion_function': 'allocate_os_event',
+                'original_user_dispatcher': 'rm_ioctl',
+                'original_ioctl': 'NV_ESC_ALLOC_OS_EVENT',
+                'private_user_dispatcher_exposed_by_loader': False,
+                'final_dead_strip_dispatcher_absence_requires_independent_link_check': True},
+            'user_mapping_ingress': False, 'file_descriptor_registration': False,
+            'os_event_delivery': False, 'runtime_pm_implemented': False}
     for name, digest in helpers.items():
         if sha(ROOT / name) != digest:
             raise ValueError('A fixed source-profile helper changed during composition: ' + name)
     return additions, {'retained_diagnostic': retained_diagnostic, 'rc_participant': rc_participant,
         'shutdown_protocol': shutdown_protocol, 'platform_closure': platform_closure,
+        'retained_backends': retained_backends, 'global_epoch': global_epoch,
+        'live_abi_closure': live_abi_closure,
         'transform_helper_sha256': helpers,
         'exact_source_replacements': edits, 'additional_project_exports': exports,
         'additional_private_original_exports': private_exports,
         'source_row_requirements': row_requirements,
         'per_source_compile_definitions': per_source_definitions,
+        'per_original_source_compile_definitions': LIVE_ORIGINAL_DEFINITIONS if live_abi_closure else {},
         'shutdown_source_profile': shutdown,
         'platform_source_profile': platform,
+        'live_abi_source_profile': live,
         'required_compile_definitions': {'S540_NVIDIA_NO_LEGACY_RM_SEMAPHORE': '1'},
         'original_entry_admission': False, 'hardware_admission': False,
         'final_release_issued': False, 'stop_receipt_issued': False}
@@ -260,7 +407,16 @@ def materialize(upstream: Path, v3_root: Path, namespace: Path, output: Path,
                 *, successor_manifest: Path | None = None,
                 project_successor_manifest: Path | None = None,
                 retained_diagnostic: bool = False, rc_participant: bool = False,
-                shutdown_protocol: bool = False, platform_closure: bool = False) -> dict:
+                shutdown_protocol: bool = False, platform_closure: bool = False,
+                retained_backends: bool = False, global_epoch: bool = False,
+                live_abi_closure: bool = False) -> dict:
+    if retained_backends and not retained_diagnostic:
+        raise ValueError('Retained backends require the exact retained diagnostic Host')
+    if global_epoch and not (retained_diagnostic and retained_backends):
+        raise ValueError('Global epoch requires retained diagnostic Host and backends')
+    if live_abi_closure and not all([retained_diagnostic, rc_participant, shutdown_protocol,
+                                   platform_closure, retained_backends, global_epoch]):
+        raise ValueError('Live ABI closure requires all four fixed profiles, retained backends and global epoch')
     upstream = original._pinned_upstream(upstream)
     v3_root, namespace = v3_root.resolve(strict=True), namespace.resolve(strict=True)
     inputs = [upstream, v3_root, namespace, GSP, ROOT / 'packages/nvidia-global-rm',
@@ -269,7 +425,8 @@ def materialize(upstream: Path, v3_root: Path, namespace: Path, output: Path,
         successor_manifest = successor_manifest.resolve(strict=True)
         inputs.append(successor_manifest.parent)
     if project_successor_manifest:
-        if retained_diagnostic or rc_participant or shutdown_protocol or platform_closure:
+        if any([retained_diagnostic, rc_participant, shutdown_protocol, platform_closure,
+                retained_backends, global_epoch, live_abi_closure]):
             raise ValueError('Fixed source profiles and an arbitrary project successor require separate compositions')
         project_successor_manifest = project_successor_manifest.resolve(strict=True)
         inputs.append(project_successor_manifest.parent)
@@ -291,6 +448,24 @@ def materialize(upstream: Path, v3_root: Path, namespace: Path, output: Path,
     source = output / 'source'
     shutil.copytree(work['base_source'], source)
     replaced = {}
+    event_profile = None
+    if live_abi_closure:
+        directory = GSP / 'prospective-os-event-policy'
+        contract = checked_contract(directory / 'OS-EVENT-POLICY-CONTRACTS.json',
+            {'source_sha256': directory, 'base_sources_sha256': source,
+             'supporting_original_source_sha256': upstream})
+        event = load('s540_composition_os_event_prepare', directory / 'prepare_event_policy.py')
+        event_profile = event.prepare(v3_root / 'source', output / 'inputs/os-event-policy')
+        if event_profile['proposed_source_sha256'] != contract['proposed_source_sha256']:
+            raise ValueError('The exact three original OS-event guards changed')
+        for relative, digest in sorted(contract['proposed_source_sha256'].items()):
+            target = source / relative
+            before = sha(target)
+            shutil.copyfile(output / 'inputs/os-event-policy/source' / relative, target)
+            if sha(target) != digest:
+                raise ValueError('The original OS-event successor source changed')
+            replaced[relative] = [{'layer': 'os-event-policy', 'input_sha256': before,
+                                   'output_sha256': digest}]
     for label, directory in [('first-transaction', work['parent_source']),
                              ('work-gpu-binding', work['source']),
                              ('rm-lock-ownership', output / 'inputs/rm-lock')]:
@@ -304,6 +479,10 @@ def materialize(upstream: Path, v3_root: Path, namespace: Path, output: Path,
             replaced.setdefault(relative, []).append({'layer': label, 'input_sha256': before,
                                                       'output_sha256': sha(target)})
     successor = apply_exact_successor(source, successor_manifest) if successor_manifest else None
+    if event_profile:
+        for relative, digest in event_profile['proposed_source_sha256'].items():
+            if sha(source / relative) != digest:
+                raise ValueError('A later source layer replaced the mandatory OS-event guard')
     # Keep project-relative includes real: use a complete code/header companion,
     # then replace one source per canonical path rather than appending objects.
     project = output / 'project'
@@ -322,6 +501,10 @@ def materialize(upstream: Path, v3_root: Path, namespace: Path, output: Path,
              'nvidia-firmware-assets/src', 'nvidia-os-adapter/upstream/include']
     if platform_closure:
         names.append('nvidia-gsp-bootstrap/prospective-platform-closure')
+    if live_abi_closure:
+        names += ['nvidia-gsp-bootstrap/' + name for name in [
+            'prospective-uvm-disabled', 'prospective-mapping-closure',
+            'prospective-control-state', 'prospective-live-platform-closure']]
     for name in names:
         copy_code(ROOT / 'packages' / name, project / 'packages' / name)
     # V3 owns checked cancellation and timer declarations, before stronger ports.
@@ -350,7 +533,15 @@ def materialize(upstream: Path, v3_root: Path, namespace: Path, output: Path,
         project / 'packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c')
     fixed_additions, profiles = fixed_profile_overlays(source, project, output,
         retained_diagnostic=retained_diagnostic, rc_participant=rc_participant,
-        shutdown_protocol=shutdown_protocol, platform_closure=platform_closure, upstream=upstream)
+        shutdown_protocol=shutdown_protocol, platform_closure=platform_closure,
+        retained_backends=retained_backends, global_epoch=global_epoch,
+        live_abi_closure=live_abi_closure, upstream=upstream)
+    profiles['os_event_source_profile'] = event_profile
+    if live_abi_closure:
+        profiles['live_abi_source_profile']['control_event_ingress'].update({
+            'exact_guarded_original_source_sha256': event_profile['proposed_source_sha256'],
+            'os_event_source_contract_sha256': sha(
+                GSP / 'prospective-os-event-policy/OS-EVENT-POLICY-CONTRACTS.json')})
     project_successor = (apply_exact_successor(project, project_successor_manifest)
                          if project_successor_manifest else None)
     cpp, c, plain = execution.project_sources()
@@ -417,6 +608,8 @@ def verify_composition(output: Path) -> dict:
             raise ValueError('Composed input inventory changed: ' + directory)
     if sha(output / value['namespace']) != value['namespace_sha256']:
         raise ValueError('Composed namespace changed')
+    # This also refuses unknown macro names/units before any compiler executes.
+    original_source_flags(value, '')
     return value
 
 
@@ -500,6 +693,10 @@ def original_definition_owners(rows: list[dict], directory: Path) -> tuple[dict,
 def composed_bridge_flags(upstream: Path, output: Path, compiler: Path) -> list[str]:
     """Use the real original build ABI with every original header composed."""
     value = verify_composition(output)
+    if value.get('fixed_source_profiles', {}).get('live_abi_closure'):
+        guard = load('s540_compile_mapping_profile_guard',
+                     GSP / 'prospective-mapping-closure/profile_guard.py')
+        guard.validate_profile(output / 'project')
     row = original.original_commands(upstream, output / 'bridge-profile', compiler)[0]
     source_root = output / 'source/src/nvidia'
     flags, index = row[1:row.index('-c')], 0
@@ -572,6 +769,11 @@ def compile_project_objects(upstream: Path, output: Path, cc: Path, cxx: Path,
                     raise ValueError('Unreviewed per-source compile definitions')
                 flags += ['-D' + name + '=' + definition
                           for name, definition in sorted(row['compile_definitions'].items())]
+            if row.get('original_include_directories'):
+                if row['source'] != CONTROL_UNIT or row['original_include_directories'] != ['src/nvidia/src/libraries']:
+                    raise ValueError('Unreviewed per-source original include directories')
+                for relative in row['original_include_directories']:
+                    flags += ['-I', str(output / 'source' / checked_relative(relative))]
             dep = obj.with_suffix('.d')
             command = [str(compiler), *flags, '-Wframe-larger-than=4096',
                 '-Werror=frame-larger-than', '-fstack-usage', '-MD', '-MF', str(dep),
@@ -705,7 +907,8 @@ def compile_original_subset(upstream: Path, output: Path, compiler: Path,
             index, base = matches[relative]
             source = output / 'source' / relative
             obj = Path(base[base.index('-o') + 1]);dep = obj.with_suffix('.d')
-            command = [*base, *extra, '-MD', '-MF', str(dep)]
+            definitions = original_source_flags(value, relative)
+            command = [*base, *extra, *definitions, '-MD', '-MF', str(dep)]
             original.execute(command, cwd=source_root, timeout=300,
                 diagnostic_log=objects / ('compile-%04d.log' % index))
             definitions, imports, _ = original.macho_symbols(obj)
@@ -723,6 +926,8 @@ def compile_original_subset(upstream: Path, output: Path, compiler: Path,
                     raise ValueError('Raw original dependency escaped composed source')
                 dependencies[str(path)] = sha(path)
             rows.append({'source': relative, 'source_sha256': sha(source), 'object': obj.name,
+                'compile_definitions': value.get('fixed_source_profiles', {}).get(
+                    'per_original_source_compile_definitions', {}).get(relative, {}),
                 'object_sha256': sha(obj), 'definitions': sorted(definitions), 'imports': sorted(imports),
                 'command': command, 'cwd': str(source_root), 'dependency_sha256': dependencies,
                 'stack_usage': stack.capture_usage(source, obj, command, cwd=source_root,
@@ -779,7 +984,7 @@ def compile_original_objects(upstream: Path, output: Path, compiler: Path, *, ho
                     source.resolve(strict=True).relative_to(output / 'source').as_posix())
         if path.is_absolute() and source != generated:
             raise ValueError('Unexpected external original source: ' + str(source))
-        command = [*row, *extra]
+        command = [*row, *extra, *original_source_flags(value, relative)]
         obj = Path(row[row.index('-o') + 1])
         dep = obj.with_suffix('.d')
         command += ['-MD', '-MF', str(dep)]
@@ -797,6 +1002,8 @@ def compile_original_objects(upstream: Path, output: Path, compiler: Path, *, ho
                 raise ValueError('Raw upstream dependency escaped composed tree: ' + str(dependency))
             dependencies[str(dependency)] = sha(dependency)
         return {'source': relative, 'source_sha256': sha(source), 'object': obj.name,
+            'compile_definitions': value.get('fixed_source_profiles', {}).get(
+                'per_original_source_compile_definitions', {}).get(relative, {}),
             'object_sha256': sha(obj), 'definitions': sorted(defined), 'imports': sorted(undefined),
             'dependency_sha256': dependencies, 'command': command, 'cwd': str(source_root),
             'stack_usage': stack.capture_usage(source.resolve(strict=True), obj, command,
@@ -834,6 +1041,9 @@ def main() -> int:
     parser.add_argument('--rc-participant', action='store_true')
     parser.add_argument('--shutdown-protocol', action='store_true')
     parser.add_argument('--platform-closure', action='store_true')
+    parser.add_argument('--retained-backends', action='store_true')
+    parser.add_argument('--global-epoch', action='store_true')
+    parser.add_argument('--live-abi-closure', action='store_true')
     parser.add_argument('--compile-original', action='store_true')
     parser.add_argument('--cc', type=Path, default=Path('/usr/bin/clang'))
     parser.add_argument('--host-control', action='store_true')
@@ -844,7 +1054,10 @@ def main() -> int:
                         retained_diagnostic=args.retained_diagnostic,
                         rc_participant=args.rc_participant,
                         shutdown_protocol=args.shutdown_protocol,
-                        platform_closure=args.platform_closure)
+                        platform_closure=args.platform_closure,
+                        retained_backends=args.retained_backends,
+                        global_epoch=args.global_epoch,
+                        live_abi_closure=args.live_abi_closure)
     if args.compile_original:
         value = compile_original_objects(args.upstream, args.output, args.cc, host_control=args.host_control)
     print(json.dumps({'status': value['status'], 'original_entry_admission': False,

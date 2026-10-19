@@ -1,0 +1,146 @@
+{
+  "actual_host_queues_timers": true,
+  "actual_original_complete_callers": [
+    "RmIndicateIdle",
+    "RmForceGpuNotIdle"
+  ],
+  "actual_strong_record": true,
+  "configuration_negative_controls": 7,
+  "controls": {
+    "fatal-sanitizers": {
+      "actual_original_callers": 2,
+      "actual_strong_record": true,
+      "cases": 11,
+      "checks": 30,
+      "failures": 0,
+      "gpu_access": false,
+      "real_mutex": true,
+      "status": "passed"
+    },
+    "plain": {
+      "actual_original_callers": 2,
+      "actual_strong_record": true,
+      "cases": 11,
+      "checks": 30,
+      "failures": 0,
+      "gpu_access": false,
+      "real_mutex": true,
+      "status": "passed"
+    }
+  },
+  "dma_stop_receipt": false,
+  "execution": {
+    "compilers": {
+      "cc": {
+        "path": "/workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/../toolchain/root/usr/bin/clang-18",
+        "version": "Ubuntu clang version 18.1.3 (1ubuntu1)"
+      },
+      "cxx": {
+        "path": "/workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/../toolchain/root/usr/bin/clang++-18",
+        "version": "Ubuntu clang version 18.1.3 (1ubuntu1)"
+      }
+    },
+    "fatal_sanitizer_errors": true,
+    "host_control": true,
+    "leak_sanitizer_disabled_for_restricted_linux": true,
+    "native_apple_execution": false,
+    "sanitizers": [
+      "address",
+      "undefined",
+      "function"
+    ],
+    "system": "Linux"
+  },
+  "format": 1,
+  "full_evidence": {
+    "path": "build/mapping-closure-controls-7/mapping-controls.json",
+    "sha256": "0f5f9b4602a63c57114eaead8ee879b0f25a6f0885e4f6209e7ee02ec36eab43"
+  },
+  "gpu_access": false,
+  "input_files_sha256": {
+    "README.md": "b121bc04d1f7dcaf8d163212a0cfcfde0f83715f838da7d76d17e31945748342",
+    "S540NvidiaMappingClosure.c": "bcd15fb0400d6d7ca1a2fe116d796e722523412a64bddd3c67111474bf02ff75",
+    "SOURCE-CONTRACT.json": "9baa9b29a8e96ebf9f227efa1ae2ee008b42e012643c9ab752cd6346737662ff",
+    "check.py": "d6b4ca35aa0ee6605155ef73a7e3b8ae6f3c8814acf2b0c55f07bcc9afb9e266",
+    "check_controls.c": "3ba5677221d303caa4894b01f8f2394ef844b302ade5c116d0ae10de978201b1",
+    "failure_fixture.cpp": "6967cdbf45100983ea588ec5a86887994b352eaac016e5ff43c5330b89aad8a6",
+    "profile_guard.py": "7cb8ad9946153e3cadf8d0c766b1f773cc2c0ba7ee6cd1810623c405ae0a3bdf"
+  },
+  "kernel_definitions": [
+    "s540Global_nv_acquire_mmap_lock",
+    "s540Global_nv_get_all_mappings_revoked_locked",
+    "s540Global_nv_release_mmap_lock",
+    "s540Global_nv_revoke_gpu_mappings",
+    "s540Global_nv_set_safe_to_mmap_locked"
+  ],
+  "kernel_execution": "not_tested",
+  "kernel_imports": [
+    "s540Darwin_os_acquire_mutex",
+    "s540Darwin_os_alloc_mutex",
+    "s540Darwin_os_get_current_thread",
+    "s540Darwin_os_release_mutex",
+    "s540Darwin_os_semaphore_may_sleep",
+    "s540FirstTxnGetSnapshot",
+    "s540FirstTxnHostCaptureAllocation",
+    "s540FirstTxnObserveServiceRefusal"
+  ],
+  "kernel_target_compile_actions": 2,
+  "mapping_mutex_permanently_retained": true,
+  "original_entry_admission": false,
+  "original_source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+  "original_source_sha256": "a0b6639b517612e3e0c5b4c76abf317378bf0a91409ca27e5bb172e3395053fa",
+  "original_upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "production_modified": false,
+  "real_darwin_mutex": true,
+  "scope": "Isolated genuine retained-image user-mapping backend; no original-entry or hardware admission",
+  "selected_profile": {
+    "apple_reference": {
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "mapClientMemory64_requires": [
+        "clientMemoryForType result kIOReturnSuccess",
+        "non-null IOMemoryDescriptor",
+        "!memory->hasSharingContext()"
+      ],
+      "path": "iokit/Kernel/IOUserClient.cpp",
+      "repository": "apple-oss-distributions/xnu",
+      "source_sha256": "a09c525b144ecbf834bb2b69f0c78b93358601ee22045340609b30acc8e0a6e7",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/iokit/Kernel/IOUserClient.cpp"
+    },
+    "callbacks": [
+      "nv_acquire_mmap_lock",
+      "nv_release_mmap_lock",
+      "nv_get_all_mappings_revoked_locked",
+      "nv_set_safe_to_mmap_locked",
+      "nv_revoke_gpu_mappings"
+    ],
+    "dma_stop_receipt": false,
+    "expected_imports": [
+      "s540Darwin_os_acquire_mutex",
+      "s540Darwin_os_alloc_mutex",
+      "s540Darwin_os_get_current_thread",
+      "s540Darwin_os_release_mutex",
+      "s540Darwin_os_semaphore_may_sleep",
+      "s540FirstTxnGetSnapshot",
+      "s540FirstTxnHostCaptureAllocation",
+      "s540FirstTxnObserveServiceRefusal"
+    ],
+    "format": 1,
+    "loader_source_sha256": {
+      "packages/nvidia-gsp-bootstrap/prospective-loader/S540ProspectiveLoaderKernel.cpp": "30803d1544f30b845ad871c8096b54c18e5733d6d61cd00a9084198005a8fa3d",
+      "packages/nvidia-gsp-bootstrap/prospective-loader/S540ProspectiveLoaderKernel.hpp": "81d56ef7aa7873e94dc355202ef21b44f460dbefdc84237d65481993f6e1c626"
+    },
+    "source_sha256": {
+      "README.md": "b121bc04d1f7dcaf8d163212a0cfcfde0f83715f838da7d76d17e31945748342",
+      "S540NvidiaMappingClosure.c": "bcd15fb0400d6d7ca1a2fe116d796e722523412a64bddd3c67111474bf02ff75",
+      "check.py": "d6b4ca35aa0ee6605155ef73a7e3b8ae6f3c8814acf2b0c55f07bcc9afb9e266",
+      "check_controls.c": "3ba5677221d303caa4894b01f8f2394ef844b302ade5c116d0ae10de978201b1",
+      "failure_fixture.cpp": "6967cdbf45100983ea588ec5a86887994b352eaac016e5ff43c5330b89aad8a6",
+      "profile_guard.py": "7cb8ad9946153e3cadf8d0c766b1f773cc2c0ba7ee6cd1810623c405ae0a3bdf"
+    },
+    "status": "verified-fixed-no-user-mapping-loader",
+    "user_client_present": true,
+    "user_mapping_ingress": false
+  },
+  "status": "passed-isolated-mapping-controls",
+  "user_mapping_ingress": false
+}

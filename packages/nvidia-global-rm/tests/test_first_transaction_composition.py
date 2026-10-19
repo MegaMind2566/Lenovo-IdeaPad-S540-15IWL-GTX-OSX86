@@ -13,7 +13,7 @@ import compose_nvidia_first_transaction as compose
 class CompositionIntegrity(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
-        self.root = Path(self.temporary.name)
+        self.root = Path(self.temporary.name).resolve()
 
     def tearDown(self):
         self.temporary.cleanup()
@@ -115,6 +115,31 @@ class CompositionIntegrity(unittest.TestCase):
         obj.write_bytes(b'foreign compile')
         with self.assertRaisesRegex(ValueError, 'object'):
             compose.verify_compiled_rows([row], self.root)
+
+    def test_original_feature_macros_are_confined_to_exact_guarded_sources(self):
+        value = {'fixed_source_profiles': {'live_abi_closure': True,
+            'per_original_source_compile_definitions': compose.LIVE_ORIGINAL_DEFINITIONS}}
+        self.assertEqual(compose.original_source_flags(value,
+            'src/nvidia/arch/nvalloc/unix/src/vbioscall.c'),
+            ['-DS540_NVIDIA_NONPRIMARY_X86_EMULATION=1'])
+        self.assertEqual(compose.original_source_flags(value,
+            'src/nvidia/src/kernel/rmapi/event_api.c'), ['-DS540_NVIDIA_NO_OS_EVENT_BACKEND=1'])
+        self.assertEqual(compose.original_source_flags(value,
+            'src/nvidia/arch/nvalloc/unix/src/osapi.c'), [])
+        value['fixed_source_profiles']['per_original_source_compile_definitions'] = {
+            **compose.LIVE_ORIGINAL_DEFINITIONS,
+            'src/nvidia/arch/nvalloc/unix/src/osapi.c': {'S540_NVIDIA_NO_OS_EVENT_BACKEND': '1'}}
+        with self.assertRaisesRegex(ValueError, 'per-original-source'):
+            compose.original_source_flags(value, 'src/nvidia/arch/nvalloc/unix/src/osapi.c')
+
+    def test_full_live_source_profile_refuses_missing_lifetime_dependencies(self):
+        absent = self.root / 'absent'
+        with self.assertRaisesRegex(ValueError, 'requires all four'):
+            compose.materialize(absent, absent, absent, absent, live_abi_closure=True)
+        with self.assertRaisesRegex(ValueError, 'retained diagnostic Host'):
+            compose.materialize(absent, absent, absent, absent, retained_backends=True)
+        with self.assertRaisesRegex(ValueError, 'Global epoch requires'):
+            compose.materialize(absent, absent, absent, absent, global_epoch=True)
 
 
 if __name__ == '__main__':

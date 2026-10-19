@@ -1,0 +1,47 @@
+{
+  "bif_hardware_reset_safety_proved": false,
+  "bif_identity_policy": "manual adapter start only; exact retained transaction nv",
+  "callbacks": [
+    "os_is_bif_reset_supported",
+    "os_allocate_temporary_file",
+    "os_close_file",
+    "os_read_file",
+    "os_write_file",
+    "os_disable_console_access",
+    "os_enable_console_access"
+  ],
+  "console_backend_implemented": false,
+  "file_failure_preserves_output": true,
+  "file_operations_implemented": false,
+  "format": 1,
+  "gpu_access": false,
+  "kernel_execution": "not_tested",
+  "nonnull_close_and_console_calls_fail_stop": true,
+  "original_entry_admission": false,
+  "original_source_sha256": {
+    "kernel-open/nvidia/nv.c": "ce04946d288cf0251668a2d847acceb2a39af9dac2f13bb005f53759c774dbf7",
+    "kernel-open/nvidia/os-interface.c": "0c8fe2749ec4ee12f1dbbd884cfbc8f1c8a7750903de7453b01c2f6b92e0f6d6",
+    "src/nvidia/arch/nvalloc/unix/include/os-interface.h": "bd281e48ff06b481033fc2fb29a891710a2b4d66fb009cc2b752ab6e90f2113b",
+    "src/nvidia/arch/nvalloc/unix/src/os.c": "057b50fcb738be90a073b60f63e70559706864ddcec3bf703282563173e3dce4",
+    "src/nvidia/arch/nvalloc/unix/src/osapi.c": "e4336f0e3bb55122680e0d344f970c123664122c2415134b7a6b517c98fcbe75",
+    "src/nvidia/generated/g_os_nvoc.h": "3444dbac90e159e4a0bb1434738e595bc6fa5b77ecf5b55544de6a6eb96fc107",
+    "src/nvidia/src/kernel/gpu/device_ctrl.c": "f2eb076a74322f96029230b9aca48885d1206717a577df419e360f4c95454c1d",
+    "src/nvidia/src/kernel/gpu/mem_mgr/arch/maxwell/fbsr_gm107.c": "ce20f4ff751fc9f74d66109dad8597d58f9ad2d6cc8c885f3467f0aac61afb33"
+  },
+  "production_candidate_allowed": false,
+  "production_default_changed": false,
+  "repository_dependency_sha256": {
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRm.h": "8ca8e0eac4a52b0d755c7693a2adda6e938bd057db77037b827a835df3133be2",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c": "556f17711c0e444ff186400a548baf1609e2dc220783199ca6cd97d575283f7c",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.h": "eb7f9b38fd7bb3b6df88b14dfc382ee5a5d426a22ef246b51f657b010ca6ed2c",
+    "packages/nvidia-gsp-bootstrap/prospective-loader/S540ProspectiveLoaderKernel.cpp": "30803d1544f30b845ad871c8096b54c18e5733d6d61cd00a9084198005a8fa3d",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c": "9f8fee42cd2e9ffb2c86a0de368d259fa8879b70398becf7c508887dd941181f"
+  },
+  "source_sha256": {
+    "S540ProspectiveLivePlatformClosure.c": "4472d6f2db83b199e8c45d9cb203fce41c80d3607c7bf130c2cc0421eb788aa9",
+    "check_live_platform.py": "b92e3ecbb4f851dc9b556cd8bc7406741abecf3500dc28ebde8b39e6ab076247",
+    "prepare_original_controls.py": "b9c0918902531cab645ce88f1c2c824b733a9cb121ebac4aae558948faede941",
+    "tests/check_live_platform.c": "325ff910592776deba9e585835da00c72fe812c6d2303132df1278794e6c24f1",
+    "tests/test_source_contracts.py": "3dc6975c95967e2044d25f0c184dfe8550e0c6bf60dbf9b6852cbefc9ff23e80"
+  }
+}

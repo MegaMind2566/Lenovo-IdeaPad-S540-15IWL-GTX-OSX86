@@ -1,0 +1,99 @@
+ld64.lld-18: error: undefined symbol: _s540Global_nv_release_mmap_lock
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/dynamic-power.o:(symbol _timerCallbackToIndicateIdle+0x126)
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/dynamic-power.o:(symbol _RmIndicateIdle+0xb9)
+
+ld64.lld-18: error: undefined symbol: _s540Global_nv_get_all_mappings_revoked_locked
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/dynamic-power.o:(symbol _timerCallbackToIndicateIdle+0x3f)
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/dynamic-power.o:(symbol _RmIndicateIdle+0x54)
+
+ld64.lld-18: error: undefined symbol: _s540Global_nv_acquire_mmap_lock
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/dynamic-power.o:(symbol _timerCallbackToIndicateIdle+0x37)
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/dynamic-power.o:(symbol _RmIndicateIdle+0x4c)
+
+ld64.lld-18: error: undefined symbol: _s540Global_nv_revoke_gpu_mappings
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/dynamic-power.o:(symbol _RmHandleIdleSustained+0x41)
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/dynamic-power.o:(symbol _RmHandleIdleSustained+0x37)
+
+ld64.lld-18: error: undefined symbol: _s540Global_nv_set_safe_to_mmap_locked
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/dynamic-power.o:(symbol _RmIndicateIdle+0xfc)
+
+ld64.lld-18: error: undefined symbol: _s540Global_nv_schedule_uvm_isr
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _s540Global_osQueueMMUFaultHandler+0x1e)
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _s540Global_osQueueMMUFaultHandler+0x16)
+
+ld64.lld-18: error: undefined symbol: _s540Global_nv_schedule_uvm_drain_p2p
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _s540Global_osQueueDrainP2PHandler+0xa)
+
+ld64.lld-18: error: undefined symbol: _s540Global_nv_schedule_uvm_resume_p2p
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _s540Global_osQueueResumeP2PHandler+0xa)
+
+ld64.lld-18: error: undefined symbol: _s540Global_nv_get_ctl_state
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _postEvent+0xbe)
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _postEvent+0x2a)
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _s540Global_osDereferenceObjectCount+0xf)
+>>> referenced 1 more times
+
+ld64.lld-18: error: undefined symbol: _s540Global_nv_post_event
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _postEvent+0xb4)
+
+ld64.lld-18: error: undefined symbol: _s540Global_nv_get_file_private
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _s540Global_cliresCtrlCmdOsUnixExportObjectToFd_IMPL+0xa5)
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _s540Global_cliresCtrlCmdOsUnixCreateExportObjectFd_IMPL+0x44)
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _s540Global_cliresCtrlCmdOsUnixExportObjectsToFd_IMPL+0x46)
+>>> referenced 3 more times
+
+ld64.lld-18: error: undefined symbol: _s540Global_nv_put_file_private
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _s540Global_cliresCtrlCmdOsUnixExportObjectToFd_IMPL+0x7d)
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _s540Global_cliresCtrlCmdOsUnixCreateExportObjectFd_IMPL+0x73)
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _s540Global_cliresCtrlCmdOsUnixExportObjectsToFd_IMPL+0x17e)
+>>> referenced 4 more times
+
+ld64.lld-18: error: undefined symbol: _s540Global_os_is_bif_reset_supported
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _s540Global_osModifyGpuSwStatePersistence+0x12)
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _s540Global_osIsBifResetSupported+0xa)
+
+ld64.lld-18: error: undefined symbol: _s540Global_os_allocate_temporary_file
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _s540Global_osAllocateTemporaryFile+0xa)
+
+ld64.lld-18: error: undefined symbol: _s540Global_os_close_file
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _s540Global_osCloseFile+0xa)
+
+ld64.lld-18: error: undefined symbol: _s540Global_os_write_file
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _s540Global_osWriteToFile+0xa)
+
+ld64.lld-18: error: undefined symbol: _s540Global_os_read_file
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _s540Global_osReadFromFile+0xa)
+
+ld64.lld-18: error: undefined symbol: _s540Global_nv_get_dev_minor
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/os.o:(symbol _s540Global_osRmCapRegisterGpu+0x2b)
+
+ld64.lld-18: error: undefined symbol: _s540Global_os_enable_console_access
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-retained-rc-shutdown/changed-original-objects/osapi.o:(symbol _s540Global_rm_init_adapter+0x10e)
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-retained-rc-shutdown/changed-original-objects/osapi.o:(symbol _s540Global_s540RmDisableAdapterChecked+0xba)
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-retained-rc-shutdown/changed-original-objects/osapi.o:(symbol _s540Global_s540RmShutdownAdapterChecked+0xab)
+
+ld64.lld-18: error: undefined symbol: _s540Global_os_disable_console_access
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-retained-rc-shutdown/changed-original-objects/osapi.o:(symbol _s540Global_rm_init_adapter+0x6e)
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-retained-rc-shutdown/changed-original-objects/osapi.o:(symbol _s540Global_s540RmDisableAdapterChecked+0x74)
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-retained-rc-shutdown/changed-original-objects/osapi.o:(symbol _s540Global_s540RmShutdownAdapterChecked+0x71)
+
+ld64.lld-18: error: undefined symbol: _s540Global_nv_get_updated_emu_seg
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/vbioscall.o:(symbol _s540Global_RmInitX86EmuState+0xf8)
+
+ld64.lld-18: error: undefined symbol: _s540Global_os_io_read_byte
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/vbioscall.o:(symbol _x_inb+0xa)
+
+ld64.lld-18: error: undefined symbol: _s540Global_os_io_read_word
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/vbioscall.o:(symbol _x_inw+0xa)
+
+ld64.lld-18: error: undefined symbol: _s540Global_os_io_read_dword
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/vbioscall.o:(symbol _x_inl+0xa)
+
+ld64.lld-18: error: undefined symbol: _s540Global_os_io_write_byte
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/vbioscall.o:(symbol _x_outb+0xa)
+
+ld64.lld-18: error: undefined symbol: _s540Global_os_io_write_word
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/vbioscall.o:(symbol _x_outw+0xa)
+
+ld64.lld-18: error: undefined symbol: _s540Global_os_io_write_dword
+>>> referenced by /workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/build/composed-first-transaction-agent1/original-objects/vbioscall.o:(symbol _x_outl+0xa)

@@ -1,0 +1,210 @@
+{
+  "format": 1,
+  "status": "reviewed-no-public-per-thread-stack-size-control-established",
+  "xnu_reference_commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+  "sdk_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+  "references": [
+    {
+      "path": "osfmk/kern/stack.c",
+      "git_blob_sha": "4d8c9ec303706b9b6c8254b2342c2652b1ab6330",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/kern/stack.c"
+    },
+    {
+      "path": "osfmk/kern/thread.c",
+      "git_blob_sha": "f689e1e78ab55f8323af6dc6eb7f854f37ca77d4",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/kern/thread.c"
+    },
+    {
+      "path": "osfmk/kern/thread.h",
+      "git_blob_sha": "7e55c4aa4af87f96341838a445b32a6313b361fe",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/kern/thread.h"
+    },
+    {
+      "path": "config/Mach.exports",
+      "git_blob_sha": "af102a0a37c5f3ed11e908f17e58b7c72272171d",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/config/Mach.exports"
+    },
+    {
+      "path": "config/Mach.x86_64.exports",
+      "git_blob_sha": "09d50d0f15370c0fb3f8f6c7c5075087ae022466",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/config/Mach.x86_64.exports"
+    },
+    {
+      "path": "config/Libkern.exports",
+      "git_blob_sha": "366d2e4984b3afe2f2eb6a46487f8fb69b83dfb8",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/config/Libkern.exports"
+    },
+    {
+      "path": "osfmk/mach/i386/vm_param.h",
+      "git_blob_sha": "4936fe4ceac15b708f53f71684cf9984113e4813",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/mach/i386/vm_param.h"
+    },
+    {
+      "path": "osfmk/i386/thread.h",
+      "git_blob_sha": "a06e3745a9cd96cd6715a5bf44a15e45118753f3",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/i386/thread.h"
+    },
+    {
+      "path": "osfmk/i386/machine_routines.h",
+      "git_blob_sha": "6a7346b7e709ddbb5a5fd69fd328c161fb2313be",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/i386/machine_routines.h"
+    },
+    {
+      "path": "osfmk/i386/machine_routines.c",
+      "git_blob_sha": "0e5918bbd5ece7121cfd2be4a1db5060c1790733",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/i386/machine_routines.c"
+    }
+  ],
+  "public_api": {
+    "kernel_thread_start": {
+      "arguments": [
+        "thread_continue_t continuation",
+        "void *parameter",
+        "thread_t *new_thread"
+      ],
+      "sdk_header": "Headers/kern/thread.h",
+      "sdk_lines": [
+        147,
+        160
+      ],
+      "size_argument": false
+    },
+    "separate_larger_stack_thread_api_established": false,
+    "thread_set_kernel_stack_declared_in_sdk": false
+  },
+  "implementation_chain": [
+    {
+      "source": "osfmk/kern/thread.c",
+      "function": "kernel_thread_start",
+      "lines": [
+        1983,
+        1988
+      ],
+      "behavior": "Calls kernel_thread_start_priority with priority -1; no size argument."
+    },
+    {
+      "source": "osfmk/kern/thread.c",
+      "function": "kernel_thread_start_priority",
+      "lines": [
+        1959,
+        1977
+      ],
+      "behavior": "Calls kernel_thread_create, then starts the thread."
+    },
+    {
+      "source": "osfmk/kern/thread.c",
+      "function": "kernel_thread_create",
+      "lines": [
+        1924,
+        1948
+      ],
+      "behavior": "Calls stack_alloc; reserved_stack retains that same stack identity."
+    },
+    {
+      "source": "osfmk/kern/stack.c",
+      "function": "stack_alloc",
+      "lines": [
+        187,
+        191
+      ],
+      "behavior": "Attaches stack_alloc_internal result to the kernel thread."
+    },
+    {
+      "source": "osfmk/kern/stack.c",
+      "function": "stack_alloc_internal",
+      "lines": [
+        141,
+        181
+      ],
+      "behavior": "Allocates global kernel_stack_size plus two guard pages, or reuses a stack from the kernel pool."
+    }
+  ],
+  "source_backed_boot_tunable": {
+    "name": "kernel_stack_pages",
+    "source": "osfmk/kern/stack.c",
+    "lines": [
+      109,
+      131
+    ],
+    "behavior": "Global boot-time kernel thread stack size; parsed value multiplies PAGE_SIZE before allocation.",
+    "per_thread_api": false,
+    "verified_for_actual_target_kernel": false,
+    "independent_irq_stack_size_unchanged": true,
+    "aggregate_stack_bound_established": false
+  },
+  "rejected_shortcuts": [
+    {
+      "name": "stack_privilege",
+      "source": "osfmk/kern/stack.c",
+      "lines": [
+        393,
+        402
+      ],
+      "reason": "Official implementation is obsolete and does nothing; no size control."
+    },
+    {
+      "name": "thread_set_kernel_stack",
+      "reason": "No declaration in the reviewed SDK or matching symbol in the three reviewed export lists; no supported API established."
+    },
+    {
+      "name": "kernel_thread_start_priority/kernel_thread_create/stack_alloc/kernel_stack_size",
+      "reason": "No matching symbols in reviewed public export lists; private source declarations are not KEXT contracts, and these routines still use global stack size."
+    },
+    {
+      "name": "ml_stack_remaining",
+      "source": "osfmk/i386/machine_routines.c",
+      "lines": [
+        1205,
+        1213
+      ],
+      "reason": "Implementation uses real IRQ/thread stack metadata, but declaration alone is insufficient: no export established in reviewed lists."
+    },
+    {
+      "name": "custom RSP switch to allocated memory",
+      "reason": "No public API established to update kernel scheduler/stack metadata for such a stack. Private current_kernel_stack_depth uses CPU kernel-stack metadata; allocation alone does not supply the required invariant."
+    },
+    {
+      "name": "NVIDIA nvidia_stack_t allocation",
+      "reason": "Measured original compilation does not enable __use_altstack__; NV_ENTER_RM_RUNTIME is the no-op macro branch. This buffer does not enlarge the XNU thread stack."
+    }
+  ],
+  "reviewed_exports": {
+    "files": [
+      "config/Mach.exports",
+      "config/Mach.x86_64.exports",
+      "config/Libkern.exports"
+    ],
+    "present_selected_symbols": [
+      "_kernel_thread_start"
+    ],
+    "absent_selected_symbols": [
+      "_kernel_thread_start_priority",
+      "_kernel_thread_create",
+      "_thread_set_kernel_stack",
+      "_kernel_stack_size",
+      "_stack_alloc",
+      "_stack_privilege",
+      "_ml_stack_remaining",
+      "_ml_stack_base",
+      "_ml_stack_size"
+    ]
+  },
+  "source_default_only": {
+    "source": "osfmk/mach/i386/vm_param.h",
+    "lines": [
+      247,
+      267
+    ],
+    "release_thread_stack": "I386_PGBYTES * 4 * KERNEL_STACK_MULTIPLIER; multiplier defaults to 1",
+    "release_irq_stack": "I386_PGBYTES * 4",
+    "debug_and_kasan_change_defaults": true,
+    "actual_target_configuration_established": false
+  },
+  "conclusion": "A dedicated public kernel thread supplies clean entry depth, not a selectable larger stack. Source-backed global boot tuning is a possible experiment only after actual-target correlation; it cannot close indirect/recursive RM bounds or IRQ headroom by itself.",
+  "target_kernel_source_correspondence": "not_established",
+  "operational_stack_gate_closed": false,
+  "aggregate_stack_proven": false,
+  "kernel_execution": "not_tested",
+  "production_candidate_allowed": false,
+  "production_default_changed": false
+}

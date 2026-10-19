@@ -324,7 +324,51 @@ jobs:
           --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
           --output build/nvidia-execution/prospective-checks/retained-diagnostic
           --cc /usr/bin/clang --cxx /usr/bin/clang++
-      - name: Rebuild and link the same complete retained RC and shutdown development image
+      - name: Compose actual retained lifetime control inputs
+        run: >-
+          python3 builders/compose_nvidia_first_transaction.py
+          --upstream build-src/nvidia-upstream
+          --v3-root build/nvidia-execution/prospective-checks/combined-profile-v3
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --output build/nvidia-execution/composed-lifetime-inputs
+          --retained-diagnostic --rc-participant --shutdown-protocol --platform-closure
+      - name: Exercise actual retained timer queue lock PID and Host lifetimes
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-retained-backends/check.py
+          --composition build/nvidia-execution/composed-lifetime-inputs/composition.json
+          --upstream build-src/nvidia-upstream --kernel-sdk build-src/MacKernelSDK
+          --output build/nvidia-execution/prospective-checks/retained-backends
+          --cc /usr/bin/clang --cxx /usr/bin/clang++
+      - name: Exercise permanent control state with the actual original spinlock and handle lookup
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-control-state/check.py
+          --composition build/nvidia-execution/composed-host-inputs/composition.json
+          --upstream build-src/nvidia-upstream
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --output build/nvidia-execution/prospective-checks/control-state
+          --cc /usr/bin/clang --cxx /usr/bin/clang++
+      - name: Verify actual no-user-mapping ownership and original dynamic power callers
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-mapping-closure/check.py
+          --upstream build-src/nvidia-upstream
+          --v3-root build/nvidia-execution/prospective-checks/combined-profile-v3
+          --host-overlay build/nvidia-execution/prospective-checks/first-transaction/host/overlay
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --output build/nvidia-execution/prospective-checks/mapping-closure
+          --cc /usr/bin/clang --cxx /usr/bin/clang++
+      - name: Verify exact manual initialization and unavailable file and console routes
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-live-platform-closure/check_live_platform.py
+          --upstream build-src/nvidia-upstream
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --output build/nvidia-execution/prospective-checks/live-platform-closure
+      - name: Verify exact nonprimary original emulation source profile
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-live-abi-closure/nonprimary-x86/check.py
+          --upstream build-src/nvidia-upstream
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --output build/nvidia-execution/prospective-checks/nonprimary-emulation
+      - name: Rebuild and link the same complete retained image with actual live ABI closure
         run: >-
           python3 builders/link_nvidia_first_transaction.py
           --upstream build-src/nvidia-upstream
@@ -334,6 +378,7 @@ jobs:
           --assets-dir build/nvidia-execution/firmware
           --output build/nvidia-execution/first-transaction-image
           --retained-diagnostic --rc-participant --shutdown-protocol --platform-closure
+          --retained-backends --global-epoch --live-abi-closure
       - name: Record the unresolved production milestone explicitly
         shell: bash
         run: |

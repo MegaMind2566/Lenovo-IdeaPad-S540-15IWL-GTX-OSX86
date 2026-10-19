@@ -1,0 +1,34 @@
+{
+  "callbacks": [
+    "os_io_read_byte",
+    "os_io_read_word",
+    "os_io_read_dword",
+    "os_io_write_byte",
+    "os_io_write_word",
+    "os_io_write_dword"
+  ],
+  "expected_imports": [],
+  "format": 1,
+  "kernel_execution": "not_tested",
+  "original_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "original_entry_admission": false,
+  "original_source_sha256": {
+    "kernel-open/nvidia/os-interface.c": "0c8fe2749ec4ee12f1dbbd884cfbc8f1c8a7750903de7453b01c2f6b92e0f6d6",
+    "src/nvidia/arch/nvalloc/unix/include/nv.h": "02ce4b371e0a8dd26f62a320e88c8382dcf31a21b727503a66abcaea9eecf09b",
+    "src/nvidia/arch/nvalloc/unix/include/os-interface.h": "bd281e48ff06b481033fc2fb29a891710a2b4d66fb009cc2b752ab6e90f2113b",
+    "src/nvidia/arch/nvalloc/unix/src/vbioscall.c": "39b4f21425e02e51df9f4e33e225108fe4abb29e9663190649e456737d31d835"
+  },
+  "port_instructions_executed": false,
+  "production_candidate_allowed": false,
+  "profile": "six-real-x86-port-io-callbacks",
+  "required_compile_definition": "S540_NVIDIA_DARWIN_PORT_IO=1",
+  "sdk_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+  "sdk_source_sha256": {
+    "Headers/architecture/i386/pio.h": "a6e0b667878e1b52b56c25e5d36767d9569fd48f307c07680267fa2633132fb2"
+  },
+  "source_sha256": {
+    "S540ProspectivePortIo.c": "f3e05d025a0ffc8a5cad5e140dc1bf9d1ec8451cc163a17fdf77a8cca60dcabc",
+    "check.py": "d588e07eb8c343c20c13a60bfb082495f7f7a137dc6670e98cb895fa1b387ce5",
+    "sdk_port_io_reference.c": "659c032599c3d48d27ee906662496787386fc3f8e84096b33be414d10f53389d"
+  }
+}

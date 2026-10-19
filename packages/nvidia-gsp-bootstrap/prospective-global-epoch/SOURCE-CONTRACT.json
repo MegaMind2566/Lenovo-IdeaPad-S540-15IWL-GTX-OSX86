@@ -1,0 +1,32 @@
+{
+  "changed_project_sources": [
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.h",
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRmLifecycle.c"
+  ],
+  "component": "permanent-serialized-original-global-epoch",
+  "composition_used_by_cpu_controls_sha256": "b1d8e59d3b30b111eb3afdc82c5c30b4baaf4fdbc747feacd992aebad4bc627e",
+  "format": 1,
+  "global_allocation_failure_closure": false,
+  "helper_dependency_sha256": {
+    "packages/nvidia-gsp-bootstrap/cancellation/prepare_wait_candidates.py": "f8e0099f904b5e1a756e628985ef991c9a09475214f52a38c921ccc5df6de471"
+  },
+  "kernel_gate_preserved": true,
+  "known_blocked_negative_ordinal": 154,
+  "lifecycle_parent_sha256": "0f5b036bc979809ff267ef26b5a86bbf5cf1e6a48853b0ae02b64e6e82e19c4c",
+  "original_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "original_entry_admission": false,
+  "production_candidate_allowed": false,
+  "required_predecessors": [
+    "retained-diagnostic",
+    "retained-backends",
+    "sealed-basic-lock-ownership"
+  ],
+  "runtime_contract": [
+    "genuine ordinary master identity only",
+    "one-shot original global entry and distinct actual outcome",
+    "all original global result invariants plus sticky failure",
+    "actual API/GPU/allocation query only after complete globals",
+    "never execute RmShutdownRm or reclaim through this selected lifecycle"
+  ]
+}
