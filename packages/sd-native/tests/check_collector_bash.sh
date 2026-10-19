@@ -39,7 +39,7 @@ check_status() {
     printf 'PASS: %s\n' "$name"
 }
 
-check_status completed-command 0 3 /bin/true
+check_status completed-command 0 3 /bin/bash -c 'exit 0'
 check_status command-exit-status 7 3 /bin/bash -c 'exit 7'
 check_status command-timeout 124 1 /bin/sleep 10
 
