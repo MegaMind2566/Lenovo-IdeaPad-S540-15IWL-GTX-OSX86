@@ -1,0 +1,160 @@
+{
+  "format": 1,
+  "component": "nvidia-global-system-services",
+  "upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "scope": "Three exact original callbacks with real source-backed platform semantics; native CPU controls and compile proof do not admit target-kernel execution.",
+  "callbacks": [
+    {
+      "symbol": "os_get_max_user_va",
+      "original_type": "NvU64 (void)",
+      "category": "implemented-platform-address-space-observation",
+      "semantics": "Return public Darwin x86_64 MACH_VM_MAX_ADDRESS, the bound XNU actually assigns to a 64-bit user map, including calls from this kernel-worker-only bootstrap. Never query kernel_task/current_task kernel map.",
+      "value": 140737486258176,
+      "profile": "Darwin x86_64 64-bit-only bootstrap worker; no userspace request dispatch exposed.",
+      "source": [
+        "kernel-open/nvidia/os-interface.c:1239-1242",
+        "src/nvidia/src/kernel/os/os_init.c:407-416",
+        "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c:5061-5062"
+      ],
+      "sdk_macro_must_equal_reviewed_bound": true,
+      "actual_target_kernel_profile_verified": false,
+      "target_limit": "Minimal current Lenovo facts are Darwin 25.6.0 / macOS 26.7.1 build 25G241. Exact target admission is separate and stillmandatory; the older public XNU/SDK agreement is development source evidence."
+    },
+    {
+      "symbol": "os_dump_stack",
+      "original_type": "void (void)",
+      "category": "implemented-bounded-real-diagnostic",
+      "semantics": "Collect up to 32 actual kernel return addresses with exported OSBacktrace and emit each through IOLog. No OSReportWithBacktrace sleeping mutex; collection may correctly yield 0 if thread/frame chain invalid. Native control uses actual execinfo backtrace, not a fake stack.",
+      "source": [
+        "kernel-open/nvidia/os-interface.c:1384-1387",
+        "src/nvidia/arch/nvalloc/unix/src/os.c:4205-4208",
+        "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c:2676,2960"
+      ],
+      "maximum_frames": 32,
+      "target_export_admission_verified": false
+    },
+    {
+      "symbol": "os_get_reclaimable_memory_usage",
+      "original_type": "NvU64 (void)",
+      "category": "implemented-selected-allocator-pool-observation",
+      "semantics": "NVIDIA-owned recycling pool bytes are 0 because selected Host/Session allocators have no recycling pool. Allocated/wired and DMA-retired buffers remain owned until release; they are not reclaimable pools. This does not report host free RAM.",
+      "source": [
+        "kernel-open/nvidia/nv-vm.c:1238-1270",
+        "kernel-open/nvidia/os-interface.c:2478-2481"
+      ],
+      "recycling_pool_count": 0,
+      "returned_bytes": 0,
+      "future_pool_introduction_requires_profile_and_callback_change": true
+    }
+  ],
+  "primary_apple_sources": [
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "source": "osfmk/mach/i386/vm_param.h",
+      "git_blob": "4936fe4ceac15b708f53f71684cf9984113e4813",
+      "sha256": "f75032c88c27276b5cb07ce587c9b80f145826de829faa4ceb96289cbea47c82",
+      "permalink": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/mach/i386/vm_param.h",
+      "anchors": [
+        {
+          "lines": [
+            179,
+            192
+          ],
+          "meaning": "64-bit user-map bound and MACH_VM_MAX_ADDRESS, distinct from legacy 32-bit VM_MAX_ADDRESS."
+        }
+      ]
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "source": "osfmk/vm/vm_map.c",
+      "git_blob": "fb4fae0136e0c53233cf2deb3bd498d86ebf8d7c",
+      "sha256": "25e61323f40fa0d5dc3da5b01f8eb2e1dc78f5338b41a7a43e7d86ad04cae039",
+      "permalink": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/vm/vm_map.c",
+      "anchors": [
+        {
+          "lines": [
+            21667,
+            21674
+          ],
+          "meaning": "x86 vm_map_set_64bit sets actual map max to MACH_VM_MAX_ADDRESS."
+        },
+        {
+          "lines": [
+            21894,
+            21902
+          ],
+          "meaning": "vm_compute_max_offset(true) returns same maximum on x86."
+        }
+      ]
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "source": "libkern/gen/OSDebug.cpp",
+      "git_blob": "b90a601e3c6a9a44471db9eb0cc7329d0ff8e041",
+      "sha256": "f9df0fd443630cc63d36cd4173fd7e53ef213139b70c1d65f64c543122d7c1cd",
+      "permalink": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/libkern/gen/OSDebug.cpp",
+      "anchors": [
+        {
+          "lines": [
+            75,
+            104
+          ],
+          "meaning": "OSReportWithBacktrace takes a report mutex; it is not used by this boundary."
+        },
+        {
+          "lines": [
+            155,
+            218
+          ],
+          "meaning": "OSBacktrace bounded x86 frame-pointer traversal validates stack/return address and does not allocate."
+        }
+      ]
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "source": "config/Libkern.exports",
+      "git_blob": "366d2e4984b3afe2f2eb6a46487f8fb69b83dfb8",
+      "sha256": "f9256a3fe5fa4729660933d42b096d883ce2b8c1e2ffd25c06263b854ba0b1ac",
+      "permalink": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/config/Libkern.exports",
+      "anchors": [
+        {
+          "symbols": [
+            "_OSBacktrace"
+          ],
+          "meaning": "Pinned framework namespace exports real collector."
+        }
+      ]
+    }
+  ],
+  "ownership_backend_sources": [
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRmHost.cpp",
+    "packages/nvidia-device-transport/src/S540NvidiaDeviceTransport.cpp",
+    "packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp"
+  ],
+  "source_sha256": {
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRmSystem.h": "96ad0510d6b9adab5d09d50a11f327faddd640ee693437efd1947989d292d1d4",
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRmSystem.c": "4da3c2a2ee604ef8dbb6824ae5f44039d1c235357569784f9bb812f439f2591b",
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRmSystemBackend.cpp": "cf00e0e583a64f425a54bf1e51bf67d55f7be8a4ef4412fc999feebecc2f6e03",
+    "packages/nvidia-global-rm/tests/check_system_native.c": "5dbb6658b06f49b2b808cd97eff16c7a53d27e218d13550410ea4f1e9e161d7a",
+    "packages/nvidia-global-rm/tests/sdk_import_reference.cpp": "c4d8d3e012dd9cbd9fd44bb6098e886660270392ff21651bdb8b56d9197af079"
+  },
+  "validation": {
+    "original_header_abi_assertions": 3,
+    "native_control_expected_checks": 18,
+    "local_plain_and_sanitized": "passed 18 checks each; explicit Linux control",
+    "native_apple": "required_ci",
+    "actual_target_kernel": "not_admitted",
+    "kernel_execution": "not_tested",
+    "gpu_access": false
+  },
+  "production_candidate_allowed": false,
+  "ownership_backend_source_sha256": {
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRmHost.cpp": "a9202786c8a66cb1b89bdc6d2513edeb0e893330a560071035f8707615cbb377",
+    "packages/nvidia-device-transport/src/S540NvidiaDeviceTransport.cpp": "1b0084053398fbc5a15008280359954ccca52e9763ba28cb0d0ae7079a1bb62e",
+    "packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp": "57a3805c1308a0c96ac5cd1e224273825bf018fb158b3c001f0618fcdf82d4b2"
+  }
+}

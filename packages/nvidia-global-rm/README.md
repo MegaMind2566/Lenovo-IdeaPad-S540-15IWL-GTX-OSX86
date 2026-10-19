@@ -54,8 +54,9 @@ The current [adaptation manifest](upstream/ADAPTATIONS.json) records **ten
 approved patches**, composed into **twelve source/header files** by the
 [checked integration audit](upstream/adapted/CHECKED-INTEGRATION-AUDIT.json).
 The seven cleanup families below retain their historical fault evidence. The
-[current native validation](NATIVE-INTEGRATION-VALIDATION.json) separately covers
-the complete expanded profile.
+[last completed native validation](NATIVE-INTEGRATION-VALIDATION.json) separately covers
+that exact expanded source revision. Subsequent prerequisites and their current
+limits are recorded in the [single-test status](../nvidia-gsp-bootstrap/PRETEST-STATUS.md).
 
 | Path | Adaptation | Development result |
 | --- | --- | --- |

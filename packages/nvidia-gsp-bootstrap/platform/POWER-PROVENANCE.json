@@ -83,6 +83,7 @@
     "original_entry_cancellation_and_teardown_deadline_proven": false,
     "state_table_prevent_idle_flag_is_system_sleep_proof": false,
     "revocation_monotonic": true,
+    "original_pm_event_timestamp_preserved_across_late_state_binding": true,
     "post_acceptance_is_not_acknowledgement": true,
     "ack_only_after_original_irq_dma_mmio_cleanup": true,
     "cleanup_refusal_retains_owner_and_pending_ack": true,

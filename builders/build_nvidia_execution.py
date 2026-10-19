@@ -19,6 +19,7 @@ import nvidia_execution_commands as commands
 import nvidia_execution_closure as closure
 import embed_nvidia_firmware as firmware
 import nvidia_metaclass_initializers as metaclass
+import nvidia_stack_usage as stack_usage
 
 ROOT = Path(__file__).resolve().parents[1]
 GLOBAL = ROOT / 'packages/nvidia-global-rm'
@@ -43,8 +44,9 @@ def project_sources() -> tuple[list[Path], list[Path], list[Path]]:
     directories = [GLOBAL / 'src', SERVICES / 'src', DEVICE / 'src',
                    GSP / 'src', GSP / 'platform', GSP / 'evidence', GSP / 'timers']
     cpp = sorted({path for directory in directories for path in directory.glob('*.cpp')})
-    original_c = sorted({path for directory in (GLOBAL / 'src', GSP / 'src', GSP / 'evidence', GSP / 'timers')
-                         for path in directory.glob('*.c')})
+    original_c = sorted({path for directory in (GLOBAL / 'src', DEVICE / 'src', GSP / 'src', GSP / 'evidence', GSP / 'timers')
+                         for path in directory.glob('*.c')} |
+                        {GSP / 'cancellation/S540NvidiaGspCancellation.c'})
     plain_c = [CRYPTO / 'src/S540NvidiaGlobalCrypto.c']
     cpp += [ASSETS / 'src/S540NvidiaFirmwareAssets.cpp']
     required = {GLOBAL / 'src/S540NvidiaGlobalRmHost.cpp',
@@ -188,8 +190,15 @@ def kernel_objects(upstream: Path, output: Path, assets: Path,
     bridge = original.original_bridge_flags(
         upstream, compilation_root / ('checked-namespaced' if checked_cleanup_overlays else 'namespaced'),
         Path('/usr/bin/clang'), namespace, checked_source=checked_source)
+    stack_capability = {
+        'c': stack_usage.verify_codegen(['/usr/bin/xcrun', 'clang'],
+            [*kernel_flags, '-std=c11'], output / 'stack-usage-capability-c', native_apple=True),
+        'cpp': stack_usage.verify_codegen(['/usr/bin/xcrun', 'clang++'],
+            [*kernel_flags, *cpp_flags], output / 'stack-usage-capability-cpp',
+            cpp=True, native_apple=True)}
     objects = list(original_objects)
     project_objects = []
+    project_stack = []
     for source in [*cpp, *c, *plain_c]:
         obj = output / (source.stem + '.o')
         if source in c:
@@ -205,10 +214,12 @@ def kernel_objects(upstream: Path, output: Path, assets: Path,
         else:
             flags = [*kernel_flags, *cpp_flags, '-Wframe-larger-than=4096']
             compiler = 'clang++'
-        commands.run('/usr/bin/xcrun', compiler, *flags,
-                      '-c', str(source), '-o', str(obj),
+        command = ['/usr/bin/xcrun', compiler, *flags, '-fstack-usage',
+                   '-c', str(source), '-o', str(obj)]
+        commands.run(*command,
                       diagnostic_log=output / (source.stem + '-compile.log'))
         transport.macho(obj, 1)
+        project_stack.append(stack_usage.capture_usage(source, obj, command, native_apple=True))
         if source == GSP / 'platform/S540NvidiaGspPower.cpp':
             metaclass_object_review = metaclass.verify_metaclass_initializers(obj, metaclass_reference)
         else:
@@ -217,6 +228,13 @@ def kernel_objects(upstream: Path, output: Path, assets: Path,
         project_objects.append(obj)
         partial['completed_project_sources'].append(source.relative_to(ROOT).as_posix())
         save_partial()
+    project_stack_manifest = stack_usage.usage_manifest(
+        project_stack, output / 'stack-usage-manifest.json')
+    partial['phase'] = 'audit-compiler-stack-usage'
+    save_partial()
+    stack_audit = stack_usage.audit(
+        [compiled.get('stack_usage'), project_stack_manifest], output / 'stack-audit.json',
+        expected_objects=[*original_objects, *project_objects])
     partial['phase'] = 'embed-firmware'
     save_partial()
     assembly, embedding = firmware.emit_assembly(assets, output)
@@ -261,6 +279,9 @@ def kernel_objects(upstream: Path, output: Path, assets: Path,
               'platform_import_audit': platform_import_audit,
               'power_metaclass_object_audit': metaclass_object_review,
               'linked_power_metaclass_audit': linked_metaclass_review,
+              'stack_usage_capability': stack_capability,
+              'stack_usage': project_stack_manifest,
+              'aggregate_stack_audit': stack_audit,
               'execution_closure': execution_closure,
               'checked_cleanup_overlays': checked_cleanup_overlays,
               'original_header_profile': 'checked-cleanup-development' if checked_source else 'unchanged-baseline',

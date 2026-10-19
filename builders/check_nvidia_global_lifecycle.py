@@ -26,6 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PACKAGE = ROOT / 'packages/nvidia-global-rm'
 SERVICES = ROOT / 'packages/nvidia-darwin-services'
 CRYPTO = ROOT / 'packages/nvidia-global-rm-crypto'
+DEVICE = ROOT / 'packages/nvidia-device-transport'
 CPU_SOURCE = 'arch/nvalloc/unix/src/asm/x86/nv_rdcr.c'
 CPU_FIXTURE = PACKAGE / 'tests/fixtures/nv_rdcr_fixture.c'
 SERVICE_NAMES = ('Platform', 'Sync', 'Work', 'Timer', 'Process', 'Runtime', 'Check', 'UserCopy')
@@ -261,13 +262,16 @@ def check(output: Path, upstream: Path, namespace: Path, *, host_control: bool =
         objects, compilation = _compile_original(work, upstream, checked, namespace, cc,
                                                  instrumentation, host_control=host_control)
         project = []
-        header_directories = (PACKAGE / 'src', SERVICES / 'src', CRYPTO / 'src',
+        header_directories = (PACKAGE / 'src', SERVICES / 'src', CRYPTO / 'src', DEVICE / 'src',
                               ROOT / 'packages/nvidia-os-adapter/upstream/include')
         project_header_hashes = {path.relative_to(ROOT).as_posix(): _digest(path)
             for directory in header_directories for path in sorted(directory.rglob('*'))
             if path.is_file() and path.suffix in ('.h', '.hpp')}
+        receipt_header = DEVICE / 'tests/dma_stop_receipt_fixture.h'
+        project_header_hashes[receipt_header.relative_to(ROOT).as_posix()] = _digest(receipt_header)
         project_source_hashes = {}
-        for source in sorted((PACKAGE / 'src').glob('*.c')):
+        for source in (*sorted((PACKAGE / 'src').glob('*.c')),
+                       DEVICE / 'src/S540NvidiaUnsupportedMemory.c'):
             project_source_hashes[source.relative_to(ROOT).as_posix()] = _digest(source)
             obj = work / (source.stem + '.o')
             commands.run(*cc, *bridge, *c_common, *instrumentation, '-c', str(source), '-o', str(obj),
@@ -275,6 +279,10 @@ def check(output: Path, upstream: Path, namespace: Path, *, host_control: bool =
             project.append(obj)
         for source in (PACKAGE / 'src/S540NvidiaGlobalRmHost.cpp',
                        PACKAGE / 'src/S540NvidiaGlobalRmFormat.cpp',
+                       PACKAGE / 'src/S540NvidiaGlobalRmSystemBackend.cpp',
+                       DEVICE / 'src/S540NvidiaDeviceServices.cpp',
+                       DEVICE / 'src/S540NvidiaDeviceTransport.cpp',
+                       DEVICE / 'tests/dma_stop_receipt_fixture.cpp',
                        *(SERVICES / ('src/S540NvidiaDarwin' + name + '.cpp') for name in SERVICE_NAMES)):
             project_source_hashes[source.relative_to(ROOT).as_posix()] = _digest(source)
             obj = work / (source.stem + '.o')
@@ -294,6 +302,11 @@ def check(output: Path, upstream: Path, namespace: Path, *, host_control: bool =
         compilation['project_source_sha256'] = project_source_hashes
         compilation['project_header_sha256'] = project_header_hashes
         compilation['project_object_sha256'] = {path.name: _digest(path) for path in project}
+        compilation['dma_stop_receipt_fixture'] = {
+            'source': (DEVICE / 'tests/dma_stop_receipt_fixture.cpp').relative_to(ROOT).as_posix(),
+            'native_control_only': True, 'production_binding': False,
+            'scope': 'No device Session or DMA epoch is started by these global controls; no receipt is issued.',
+            'production_context_verifier_executed': False}
         defined = set().union(*(_symbols(path, host_control)[0] for path in project))
         boundaries = _private_boundaries(work, defined)
         obj = work / 'native-unavailable-boundaries.o'

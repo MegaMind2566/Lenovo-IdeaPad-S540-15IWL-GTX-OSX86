@@ -165,9 +165,14 @@ def timer_case(output: Path, upstream: Path, namespace: Path, *, host_control: b
 def context_metadata_case(output: Path, upstream: Path, namespace: Path, *, host_control: bool) -> dict:
     return original_header_case(output, 'gsp-context-metadata', upstream, namespace, [
         ROOT / 'packages/nvidia-global-rm-crypto/src/S540NvidiaGlobalCrypto.c',
+        DEVICE / 'src/S540NvidiaUnsupportedMemory.c',
+        GLOBAL / 'src/S540NvidiaGlobalRmFeatureProfile.c',
+        GLOBAL / 'src/S540NvidiaGlobalRmOs.c',
+        GLOBAL / 'src/S540NvidiaGlobalRmDiagnostics.c',
         GSP / 'src/S540NvidiaGspContext.c',
         GSP / 'timers/S540NvidiaGspTimersOriginal.c',
         GSP / 'tests/check_context_metadata_native.c'], [
+        DEVICE / 'src/S540NvidiaDeviceTransport.cpp', DEVICE / 'src/S540NvidiaDeviceServices.cpp',
         *(SERVICES / ('src/S540NvidiaDarwin' + name + '.cpp') for name in SERVICE_NAMES),
         GLOBAL / 'src/S540NvidiaGlobalRmHost.cpp', GLOBAL / 'src/S540NvidiaGlobalRmFormat.cpp'],
         {'component': 'nvidia-gsp-context-metadata', 'checks': 16, 'refusal_cases': 4,
@@ -180,12 +185,17 @@ def context_metadata_case(output: Path, upstream: Path, namespace: Path, *, host
 def context_lifecycle_case(output: Path, upstream: Path, namespace: Path, *, host_control: bool) -> dict:
     return original_header_case(output, 'gsp-context-lifecycle', upstream, namespace, [
         ROOT / 'packages/nvidia-global-rm-crypto/src/S540NvidiaGlobalCrypto.c',
+        DEVICE / 'src/S540NvidiaUnsupportedMemory.c',
+        GLOBAL / 'src/S540NvidiaGlobalRmFeatureProfile.c',
+        GLOBAL / 'src/S540NvidiaGlobalRmOs.c',
+        GLOBAL / 'src/S540NvidiaGlobalRmDiagnostics.c',
         GSP / 'src/S540NvidiaGspContext.c',
         GSP / 'timers/S540NvidiaGspTimersOriginal.c',
         GSP / 'tests/check_context_lifecycle_native.c'], [
+        DEVICE / 'src/S540NvidiaDeviceTransport.cpp', DEVICE / 'src/S540NvidiaDeviceServices.cpp',
         *(SERVICES / ('src/S540NvidiaDarwin' + name + '.cpp') for name in SERVICE_NAMES),
         GLOBAL / 'src/S540NvidiaGlobalRmHost.cpp', GLOBAL / 'src/S540NvidiaGlobalRmFormat.cpp'],
-        {'component': 'nvidia-gsp-context-lifecycle', 'checks': 26,
+        {'component': 'nvidia-gsp-context-lifecycle', 'checks': 33,
          'real_timer_binding': True, 'recoverable_detach_refusals': 2,
          'original_rm_executed': False, 'callback_fixture': True, 'cleanup': True,
          'crypto_lifetime_refusals': 2},
@@ -196,9 +206,14 @@ def context_lifecycle_case(output: Path, upstream: Path, namespace: Path, *, hos
 def bootstrap_case(output: Path, upstream: Path, namespace: Path, assets: Path, *, host_control: bool) -> dict:
     return original_header_case(output, 'gsp-bootstrap-owner', upstream, namespace, [
         ROOT / 'packages/nvidia-global-rm-crypto/src/S540NvidiaGlobalCrypto.c',
+        DEVICE / 'src/S540NvidiaUnsupportedMemory.c',
+        GLOBAL / 'src/S540NvidiaGlobalRmFeatureProfile.c',
+        GLOBAL / 'src/S540NvidiaGlobalRmOs.c',
+        GLOBAL / 'src/S540NvidiaGlobalRmDiagnostics.c',
         DEVICE / 'tests/check_transport_policy_abi.c',
         GSP / 'src/S540NvidiaGspContext.c',
         GSP / 'timers/S540NvidiaGspTimersOriginal.c',
+        GSP / 'cancellation/S540NvidiaGspCancellation.c',
         GSP / 'tests/check_bootstrap_boundary_native.c'], [
         GSP / 'src/S540NvidiaGspBootstrap.cpp',
         GSP / 'src/S540NvidiaGspDispatcher.cpp',
@@ -210,7 +225,7 @@ def bootstrap_case(output: Path, upstream: Path, namespace: Path, assets: Path, 
         DEVICE / 'src/S540NvidiaDeviceTransport.cpp', DEVICE / 'src/S540NvidiaDeviceServices.cpp',
         *(SERVICES / ('src/S540NvidiaDarwin' + name + '.cpp') for name in SERVICE_NAMES),
         GLOBAL / 'src/S540NvidiaGlobalRmHost.cpp', GLOBAL / 'src/S540NvidiaGlobalRmFormat.cpp'],
-        {'component': 'nvidia-gsp-bootstrap-owner', 'checks': 83,
+        {'component': 'nvidia-gsp-bootstrap-owner', 'checks': 89,
          'preparation_verified': True, 'cleanup_retry_verified': True,
          'platform_fixture': True, 'original_entry_tripwires': True,
          'real_context_store_transport_timers': True, 'original_rm_executed': False,
@@ -236,6 +251,42 @@ def registry_overlay_case(output: Path, upstream: Path, namespace: Path, *, host
          'source_extracted_stages': True, 'registry_abi_fixture': True},
         host_control=host_control, dead_strip=True,
         extra_c_flags=['-std=gnu11', '-Werror', '-Wno-unused-parameter', '-I', str(header.parent)])
+
+
+def cancellation_record_case(output: Path, upstream: Path, namespace: Path, *, host_control: bool) -> dict:
+    here = GSP / 'cancellation'
+    return original_header_case(output, 'gsp-cancellation-record', upstream, namespace,
+        [here / 'S540NvidiaGspCancellation.c'],
+        [here / 'check_cancellation_native.cpp',
+         *(SERVICES / ('src/S540NvidiaDarwin' + name + '.cpp') for name in SERVICE_NAMES)],
+        {'component': 'nvidia-gsp-cancellation', 'checks': 38,
+         'concurrent_revocation_producers': 16, 'deadline_extension_refused': True,
+         'cleanup_phase_distinct': True, 'original_entry_admission': False},
+        host_control=host_control, dead_strip=True,
+        extra_c_flags=['-std=gnu11', '-Werror', '-Wno-unused-parameter'])
+
+
+def original_cancellation_waits_case(output: Path, upstream: Path, namespace: Path,
+                                     *, host_control: bool) -> dict:
+    here = GSP / 'cancellation'
+    spec = importlib.util.spec_from_file_location(
+        's540_prospective_wait_source', here / 'prepare_wait_candidates.py')
+    assert spec is not None and spec.loader is not None
+    source = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(source)
+    proposed = output / 'prospective-cancellation-waits'
+    source.prepare(upstream, proposed)
+    return original_header_case(output, 'gsp-original-cancellation-waits', upstream, namespace,
+        [here / 'S540NvidiaGspCancellation.c', here / 'S540NvidiaGspCancellationOriginal.c',
+         here / 'check_original_wait_bodies.c'],
+        [here / 'check_original_waits_native.cpp',
+         *(SERVICES / ('src/S540NvidiaDarwin' + name + '.cpp') for name in SERVICE_NAMES)],
+        {'component': 'nvidia-gsp-original-wait-cancellation', 'checks': 40,
+         'actual_original_wait_bodies': 4, 'revoked_during_wait': True,
+         'hardware_cleanup_proven': False, 'original_entry_admission': False},
+        host_control=host_control, dead_strip=True,
+        extra_c_flags=['-std=gnu11', '-Werror', '-Wno-unused-parameter',
+                       '-I', str(here), '-I', str(proposed)])
 
 
 @commands.logged(report='execution-checks.json')
@@ -275,9 +326,10 @@ def check(output: Path, assets: Path, *, upstream: Path | None = None,
          'external_storage_preserved': True, 'cleanup': True}, host_control=host_control))
     progress.component('device_transport', lambda: native_case(output, 'device-transport', [
         DEVICE / ('src/S540Nvidia' + name + '.cpp') for name in
-        ('DeviceTransport', 'DeviceServices', 'DeviceCheck')],
+        ('DeviceTransport', 'DeviceServices', 'DeviceCheck')] + [
+            DEVICE / 'tests/dma_stop_receipt_fixture.cpp'],
         DEVICE / 'tests/check_device_transport_native.cpp',
-        {'component': 'nvidia-device-transport', 'checks': 421,
+        {'component': 'nvidia-device-transport', 'checks': 466,
          'production_checks': 21, 'unavailable_mapper_checks': 19,
          'lifecycle_cycles': 128, 'device_dma_verified': False,
          'hardware_interrupt_delivery': False, 'gpu_initialized': False},
@@ -308,6 +360,30 @@ def check(output: Path, assets: Path, *, upstream: Path | None = None,
         output, upstream, namespace, host_control=host_control))
     progress.component('gsp_context_lifecycle', lambda: context_lifecycle_case(
         output, upstream, namespace, host_control=host_control))
+    progress.component('memory_callbacks', lambda: original_header_case(
+        output, 'memory-callbacks', upstream, namespace, [
+            DEVICE / 'src/S540NvidiaUnsupportedMemory.c',
+            DEVICE / 'tests/check_memory_callback_abi.c'], [
+            DEVICE / 'src/S540NvidiaDeviceTransport.cpp',
+            DEVICE / 'src/S540NvidiaDeviceServices.cpp',
+            DEVICE / 'tests/dma_stop_receipt_fixture.cpp',
+            DEVICE / 'tests/check_memory_callbacks_native.cpp'],
+        {'component': 'nvidia-memory-callbacks', 'checks': 63,
+         'guard_subprocesses': 9, 'linux_page_layouts_fabricated': False,
+         'memory_operations_implemented': False},
+        host_control=host_control, dead_strip=True,
+        extra_c_flags=['-std=gnu11', '-Werror', '-Wno-unused-parameter']))
+    progress.component('pci_pdi', lambda: original_header_case(
+        output, 'pci-pdi', upstream, namespace, [
+            DEVICE / 'tests/check_transport_policy_abi.c'], [
+            DEVICE / 'src/S540NvidiaDeviceTransport.cpp',
+            DEVICE / 'src/S540NvidiaDeviceServices.cpp',
+            DEVICE / 'tests/dma_stop_receipt_fixture.cpp',
+            DEVICE / 'tests/check_pci_pdi_native.cpp'],
+        {'component': 'nvidia-pci-pdi', 'checks': 40,
+         'maximum_capability_iterations': 480, 'hardware_pdi_read': False},
+        host_control=host_control, dead_strip=True,
+        extra_c_flags=['-std=gnu11', '-Werror', '-Wno-unused-parameter']))
     progress.component('global_diagnostics', lambda: original_header_case(
         output, 'global-diagnostics', upstream, namespace, [
             GLOBAL / 'src/S540NvidiaGlobalRmDiagnostics.c',
@@ -330,6 +406,31 @@ def check(output: Path, assets: Path, *, upstream: Path | None = None,
         {'component': 'nvidia-global-host-services', 'checks': 28,
          'real_os_copy': True, 'usercopy_kernel_execution': False,
          'fatal_endpoint_fixture': True, 'build_profile_verified': True, 'cleanup': True},
+        host_control=host_control, dead_strip=True,
+        extra_c_flags=['-std=gnu11', '-Werror', '-Wno-unused-parameter']))
+    progress.component('global_system', lambda: original_header_case(
+        output, 'global-system', upstream, namespace, [
+            GLOBAL / 'src/S540NvidiaGlobalRmSystem.c',
+            GLOBAL / 'tests/check_system_native.c'], [
+            GLOBAL / 'src/S540NvidiaGlobalRmSystemBackend.cpp'],
+        {'component': 'nvidia-global-system', 'checks': 18,
+         'darwin_source_profile_user_map_limit': 140737486258176,
+         'target_kernel_admission': False, 'nvidia_recycling_pool_bytes': 0},
+        host_control=host_control, dead_strip=True,
+        extra_c_flags=['-std=gnu11', '-Werror', '-Wno-unused-parameter']))
+    progress.component('feature_profile', lambda: original_header_case(
+        output, 'feature-profile', upstream, namespace, [
+            GLOBAL / 'src/S540NvidiaGlobalRmFeatureProfile.c',
+            GLOBAL / 'src/S540NvidiaGlobalRmOs.c',
+            GLOBAL / 'src/S540NvidiaGlobalRmDiagnostics.c',
+            GLOBAL / 'tests/check_feature_profile_native.c'], [
+            *(SERVICES / ('src/S540NvidiaDarwin' + name + '.cpp') for name in SERVICE_NAMES),
+            GLOBAL / 'src/S540NvidiaGlobalRmHost.cpp',
+            GLOBAL / 'src/S540NvidiaGlobalRmFormat.cpp'],
+        {'component': 'nvidia-feature-profile', 'checks': 55,
+         'exact_original_headers': True, 'platform_device_fixture': True,
+         'official_disabled_queries': True, 'unavailable_operations': 11,
+         'fatal_ownership_tripwires': 4, 'cleanup': True},
         host_control=host_control, dead_strip=True,
         extra_c_flags=['-std=gnu11', '-Werror', '-Wno-unused-parameter']))
     progress.component('registry_profile', lambda: original_header_case(
@@ -369,6 +470,10 @@ def check(output: Path, assets: Path, *, upstream: Path | None = None,
         {'component': 'nvidia-gsp-power-protocol', 'checks': 15,
          'pm_events_fixture': True, 'native_protocol_only': True,
          'power_domain_acquired': False}, dead_strip=True, host_control=host_control))
+    progress.component('gsp_cancellation_record', lambda: cancellation_record_case(
+        output, upstream, namespace, host_control=host_control))
+    progress.component('gsp_original_cancellation_waits', lambda: original_cancellation_waits_case(
+        output, upstream, namespace, host_control=host_control))
     progress.component('gsp_bootstrap_owner', lambda: bootstrap_case(
         output, upstream, namespace, assets, host_control=host_control))
     inputs = [path for package in (SERVICES, DEVICE, GLOBAL, GSP)

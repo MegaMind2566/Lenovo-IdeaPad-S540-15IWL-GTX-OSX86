@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 #include "../src/S540NvidiaDeviceTransport.hpp"
 #include "../src/nv_device_services.h"
+#include "dma_stop_receipt_fixture.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -462,6 +463,9 @@ void abiTests() {
     auto *state = reinterpret_cast<nv_state_t *>(NvUPtr(0x100));
     auto *dma = reinterpret_cast<nv_dma_device_t *>(NvUPtr(0x200));
     expect(bindRmDevice(&session, state, dma) == NV_OK, "exact opaque device binding");
+    expect(!abiStatistics().allocationAttempts && !abiStatistics().allocationFailures &&
+           !abiStatistics().peakAllocationRecords && !abiStatistics().peakRegisteredBytes,
+           "new RM binding starts an empty allocation observation");
     expect(session.stop() == NV_ERR_IN_USE && session.active(), "RM binding pins session lifetime");
     NvU16 vendor = 0xbeef, deviceId = 0xbeef;
     void *pci = s540Global_os_pci_init_handle(0,1,0,0,&vendor,&deviceId);
@@ -469,6 +473,9 @@ void abiTests() {
     expect(!s540Global_os_pci_init_handle(1,1,0,0,&vendor,&deviceId) && !vendor && !deviceId, "foreign PCI segment cannot alias target");
     NvU32 config = 0;
     expect(s540Global_os_pci_read_dword(pci,0x100,&config) == NV_OK && config == 0x12345678, "extended configuration ABI");
+    NvU64 pdi = 0x1234;
+    expect(s540Global_nv_pci_read_gpu_pdi_from_dvsec(state,&pdi) == NV_ERR_INVALID_OFFSET && pdi == 0x1234,
+           "bound PDI callback uses the actual Session config reads and preserves malformed-data error");
     expect(s540Global_os_pci_read_dword(pci,4095,&config) == NV_ERR_INVALID_ARGUMENT && config == 0x12345678, "configuration bounds preserve output");
     expect(s540Global_os_pci_read_dword(reinterpret_cast<void *>(NvUPtr(1)),0,&config) == NV_ERR_INVALID_STATE, "forged PCI handle refused");
     expect(s540Global_os_pci_write_word(pci,4,6) == NV_OK && f.command == 6, "original bus-master command route");
@@ -477,6 +484,10 @@ void abiTests() {
     expect(s540Global_nv_is_gpu_accessible(state) == NV_FALSE && s540Global_nv_match_gpu_os_info(state,&f) == NV_FALSE, "absent OS user client cannot grant GPU authorization");
     NvU64 ptes[4] = {1,2,3,4}; void *allocation = reinterpret_cast<void *>(NvUPtr(99));
     expect(s540Global_nv_alloc_pages(state,4,4096,NV_FALSE,0,NV_TRUE,NV_FALSE,-1,ptes,&allocation) == NV_OK, "exact allocation ABI");
+    expect(abiStatistics().allocationAttempts == 1 && !abiStatistics().allocationFailures &&
+           abiStatistics().largestRequestedPages == 4 && abiStatistics().peakAllocationRecords == 1 &&
+           abiStatistics().peakRegisteredBytes == 16384,
+           "allocation diagnostics measure admitted record and backing peaks");
     void *original = allocation;
     expect(s540Global_nv_dma_map_alloc(dma,4,ptes,NV_FALSE,NV_TRUE,&allocation) == NV_ERR_NOT_SUPPORTED && allocation == original && ptes[0] == 0x10000000, "read-only map refusal preserves INOUT ownership");
     expect(s540Global_nv_dma_map_alloc(dma,3,ptes,NV_FALSE,NV_FALSE,&allocation) == NV_ERR_INVALID_ARGUMENT && allocation == original, "page count mismatch preserves ownership");
@@ -502,7 +513,22 @@ void abiTests() {
         expect(s540Global_nv_dma_unmap_alloc(dma,2,contiguousPages,&contiguous) == NV_OK && contiguous == originalContiguous && contiguousPages[1] == 0xbbb, "contiguous unmap publishes one physical base");
         expect(s540Global_nv_free_pages(state,2,NV_TRUE,cache,contiguous) == NV_OK, "exact cache type allocation release");
     }
+    allocation = reinterpret_cast<void *>(NvUPtr(99));
+    expect(s540Global_nv_alloc_pages(state,kMaximumPages+1,4096,NV_FALSE,0,NV_TRUE,NV_FALSE,-1,ptes,&allocation) == NV_ERR_NOT_SUPPORTED &&
+           allocation == reinterpret_cast<void *>(NvUPtr(99)) && abiStatistics().allocationAttempts == 4 &&
+           abiStatistics().allocationFailures == 1 && abiStatistics().largestRequestedPages == kMaximumPages+1 &&
+           abiStatistics().lastFailedPages == kMaximumPages+1 && abiStatistics().lastFailedPageBytes == 4096 &&
+           abiStatistics().lastAllocationFailure == NV_ERR_NOT_SUPPORTED && !f.resources,
+           "bounded refusal records the exact failed demand without allocating or changing ownership");
+    f.fault = Fault::Allocate;
+    expect(s540Global_nv_alloc_pages(state,2,4096,NV_FALSE,0,NV_TRUE,NV_FALSE,-1,ptes,&allocation) == NV_ERR_NO_MEMORY &&
+           abiStatistics().allocationFailures == 2 && abiStatistics().lastFailedPages == 2 &&
+           abiStatistics().lastAllocationFailure == NV_ERR_NO_MEMORY && !f.resources,
+           "real backend failure is distinguished from the configured transport bound");
+    f.fault = Fault::None;
     expect(unbindRmDevice(&session) == NV_OK, "device ABI unbind");
+    expect(!abiStatistics().allocationAttempts && !abiStatistics().allocationFailures &&
+           !abiStatistics().peakRegisteredBytes, "final unbind clears the completed binding diagnostics");
     expect(session.stop() == NV_OK, "ABI owner stop");
 }
 void failures() {
@@ -765,6 +791,12 @@ void retirementTests() {
                unchanged == 91 && unchangedToken == reinterpret_cast<void *>(NvUPtr(92)) &&
                f.resources == kMaximumAllocations && !f.releaseCalls,
                "bounded exhaustion cannot recycle retired pages or publish success");
+        expect(abiStatistics().allocationAttempts == kMaximumAllocations+1 &&
+               abiStatistics().allocationFailures == 1 &&
+               abiStatistics().peakAllocationRecords == kMaximumAllocations &&
+               abiStatistics().peakRegisteredBytes == NvU64(kMaximumAllocations)*4096 &&
+               abiStatistics().lastAllocationFailure == NV_ERR_INSUFFICIENT_RESOURCES,
+               "retired records remain included in the measured peak and exact exhaustion cause");
         expect(session.stopInterrupt() == NV_OK && drainRmRetirements(&session) == NV_OK && !f.resources,
                "bounded retirement capacity reclaimed only after drain");
         expect(unbindRmDevice(&session) == NV_OK && session.stop() == NV_OK,
@@ -772,6 +804,153 @@ void retirementTests() {
     }
 }
 
+void hardwareDmaLifetimeTests() {
+    auto *state = reinterpret_cast<nv_state_t *>(NvUPtr(0xa100));
+    auto *dma = reinterpret_cast<nv_dma_device_t *>(NvUPtr(0xa200));
+    S540DmaStopFixture::reset();
+    {
+        Fake f; Session session;
+        expect(beginRmHardwareDma(&session) == NV_ERR_INVALID_STATE,
+               "hardware DMA hold requires the exact active RM binding");
+        expect(session.start(backend(f)) == NV_OK && bindRmDevice(&session,state,dma) == NV_OK &&
+               session.installInterrupt(contract(f)) == NV_OK && session.armInterrupt() == NV_OK,
+               "hardware DMA owner and controller established");
+        NvU64 rawPages[1]{}; void *raw = nullptr;
+        expect(session.allocate(1,rawPages,&raw) == NV_OK && session.mapDma(raw,rawPages) == NV_OK,
+               "generic backing exists before original hardware entry");
+        expect(beginRmHardwareDma(&session) == NV_OK && session.hardwareDmaLifetimeHeld() &&
+               session.hardwareDmaGeneration() != 0,
+               "beginning original entry conservatively holds independent DMA lifetime");
+        const NvU64 epoch = session.hardwareDmaGeneration();
+        expect(beginRmHardwareDma(&session) == NV_ERR_STATE_IN_USE &&
+               session.hardwareDmaGeneration() == epoch,
+               "a second begin cannot erase an unproved DMA generation");
+        NvU64 pages[2]{}; void *allocation = nullptr;
+        expect(s540Global_nv_alloc_pages(state,2,4096,NV_FALSE,0,NV_TRUE,NV_FALSE,-1,pages,&allocation) == NV_OK &&
+               s540Global_nv_dma_map_alloc(dma,2,pages,NV_FALSE,NV_FALSE,&allocation) == NV_OK,
+               "original entry owns published RM backing and IOVA");
+        void *mapping = nullptr;
+        void *allocationIdentity = allocation;
+        expect(session.stopInterrupt() == NV_OK && !session.interruptInstalled() &&
+               s540Global_nv_dma_unmap_alloc(dma,2,pages,&allocation) == NV_OK &&
+               allocation != allocationIdentity && !f.unmapCalls,
+               "logical unmap after IRQ drain retains IOVA while GSP DMA lifetime is held");
+        f.retainedMappingValid = false;
+        allocationIdentity = allocation;
+        const NvU64 retainedPhysical = pages[0];
+        expect(s540Global_nv_dma_map_alloc(dma,2,pages,NV_FALSE,NV_FALSE,&allocation) == NV_ERR_INVALID_STATE &&
+               allocation == allocationIdentity && pages[0] == retainedPhysical && !f.unmapCalls,
+               "failed retained-map revalidation after IRQ drain cannot tear down old IOVA");
+        f.retainedMappingValid = true;
+        void *host = s540Global_nv_alloc_kernel_mapping(state,allocation,0,0,4096,&mapping);
+        expect(host && mapping && session.hardwareDmaLifetimeHeld(),
+               "IRQ teardown leaves GSP backing and borrowed CPU ownership intact");
+        expect(session.hardwareDmaLifetimeHeld() && drainRmRetirements(&session) == NV_ERR_IN_USE &&
+               !f.unmapCalls && !f.releaseCalls,
+               "IRQ drain is insufficient to reclaim memory while GSP DMA can continue");
+        expect(s540Global_nv_free_pages(state,2,NV_FALSE,0,allocation) == NV_OK && f.resources == 2,
+               "engine destruction after IRQ drain only logically frees backing");
+        s540Global_nv_free_kernel_mapping(state,allocation,host,mapping);
+        expect(abiStatistics().retiredAllocations == 1 && abiStatistics().retiredDmaMappings == 1 &&
+               !abiStatistics().mappings && f.resources == 2 && !f.unmapCalls && !f.releaseCalls,
+               "final CPU alias close after engine destruction retains pages and IOVA");
+        expect(session.unmapDma(raw,rawPages) == NV_ERR_IN_USE && session.release(raw) == NV_ERR_IN_USE &&
+               unbindRmDevice(&session) == NV_ERR_IN_USE && session.stop() == NV_ERR_IN_USE,
+               "generic release and owner teardown cannot bypass the hardware hold");
+        expect(confirmRmHardwareDmaStopped(&session,nullptr) == NV_ERR_INVALID_ARGUMENT &&
+               session.hardwareDmaLifetimeHeld(), "missing stop receipt preserves the hold");
+        const auto *forged = reinterpret_cast<const S540GspDmaStopReceipt *>(NvUPtr(1));
+        expect(confirmRmHardwareDmaStopped(&session,forged) == NV_ERR_NOT_SUPPORTED &&
+               session.hardwareDmaLifetimeHeld(), "unissued receipt is never dereferenced or admitted");
+        const auto *wrongState = S540DmaStopFixture::issue(dma,&session,epoch,true);
+        const auto *wrongSession = S540DmaStopFixture::issue(state,&f,epoch,true);
+        const auto *wrongEpoch = S540DmaStopFixture::issue(state,&session,epoch+1,true);
+        expect(confirmRmHardwareDmaStopped(&session,wrongState) == NV_ERR_INVALID_STATE &&
+               confirmRmHardwareDmaStopped(&session,wrongSession) == NV_ERR_INVALID_STATE &&
+               confirmRmHardwareDmaStopped(&session,wrongEpoch) == NV_ERR_INVALID_STATE &&
+               session.hardwareDmaLifetimeHeld(), "receipt must match original state, Session and generation");
+        const auto *stillRunning = S540DmaStopFixture::issue(state,&session,epoch,false);
+        const auto *failedStop = S540DmaStopFixture::issue(state,&session,epoch,true,NV_ERR_TIMEOUT);
+        expect(confirmRmHardwareDmaStopped(&session,stillRunning) == NV_ERR_BUSY_RETRY &&
+               confirmRmHardwareDmaStopped(&session,failedStop) == NV_ERR_TIMEOUT &&
+               session.hardwareDmaLifetimeHeld() && drainRmRetirements(&session) == NV_ERR_IN_USE &&
+               f.resources == 2 && !f.unmapCalls,
+               "failed or incomplete GSP stop preserves all pages and mappings for quarantine");
+        const auto *stopped = S540DmaStopFixture::issue(state,&session,epoch,true);
+        expect(confirmRmHardwareDmaStopped(&session,stopped) == NV_OK &&
+               !session.hardwareDmaLifetimeHeld() && S540DmaStopFixture::calls() == 7,
+               "only accepted original authority clears the matching hardware hold");
+        expect(drainRmRetirements(&session) == NV_OK && f.resources == 1 &&
+               f.unmapCalls == 1 && f.releaseCalls == 1,
+               "complete IRQ and hardware proofs permit exact retired-map completion");
+        expect(session.unmapDma(raw,rawPages) == NV_OK && session.release(raw) == NV_OK && !f.resources,
+               "generic backing is reclaimed only after both lifetime conditions");
+        expect(confirmRmHardwareDmaStopped(&session,stopped) == NV_ERR_INVALID_STATE &&
+               unbindRmDevice(&session) == NV_OK && session.stop() == NV_OK,
+               "a consumed hardware generation cannot be confirmed twice");
+    }
+    {
+        Fake f; Session session;
+        NvU64 pages[1]{}; void *allocation = nullptr;
+        expect(session.start(backend(f)) == NV_OK && bindRmDevice(&session,state,dma) == NV_OK &&
+               session.installInterrupt(contract(f)) == NV_OK && session.armInterrupt() == NV_OK &&
+               beginRmHardwareDma(&session) == NV_OK &&
+               s540Global_nv_alloc_pages(state,1,4096,NV_FALSE,0,NV_TRUE,NV_FALSE,-1,pages,&allocation) == NV_OK &&
+               s540Global_nv_free_pages(state,1,NV_FALSE,0,allocation) == NV_OK,
+               "independent hardware proof can precede controller drain");
+        const auto *stopped = S540DmaStopFixture::issue(state,&session,session.hardwareDmaGeneration(),true);
+        expect(confirmRmHardwareDmaStopped(&session,stopped) == NV_OK &&
+               drainRmRetirements(&session) == NV_ERR_IN_USE && f.resources == 1 && !f.releaseCalls,
+               "GSP stopped receipt is insufficient while an IRQ enable attempt remains undrained");
+        expect(session.stopInterrupt() == NV_OK && drainRmRetirements(&session) == NV_OK &&
+               !f.resources && unbindRmDevice(&session) == NV_OK && session.stop() == NV_OK,
+               "both proofs are required irrespective of their completion order");
+    }
+    {
+        Fake f; Session session;
+        expect(session.start(backend(f)) == NV_OK && bindRmDevice(&session,state,dma) == NV_OK &&
+               beginRmHardwareDma(&session) == NV_OK, "never-armed original init still holds DMA lifetime");
+        const NvU64 first = session.hardwareDmaGeneration();
+        const auto *old = S540DmaStopFixture::issue(state,&session,first,true);
+        expect(drainRmRetirements(&session) == NV_ERR_IN_USE && unbindRmDevice(&session) == NV_ERR_IN_USE,
+               "empty registry and never-armed IRQ cannot fabricate a hardware stop");
+        expect(confirmRmHardwareDmaStopped(&session,old) == NV_OK && beginRmHardwareDma(&session) == NV_OK &&
+               session.hardwareDmaGeneration() != first, "a later original entry gets a fresh sealed generation");
+        NvU64 page = 0; void *allocation = nullptr;
+        expect(s540Global_nv_alloc_pages(state,1,4096,NV_FALSE,0,NV_TRUE,NV_FALSE,-1,&page,&allocation) == NV_OK &&
+               s540Global_nv_free_pages(state,1,NV_FALSE,0,allocation) == NV_OK &&
+               f.resources == 1 && !f.releaseCalls, "never-armed failed-init unwind retains actual backing");
+        expect(confirmRmHardwareDmaStopped(&session,old) == NV_ERR_INVALID_STATE &&
+               drainRmRetirements(&session) == NV_ERR_IN_USE && f.resources == 1,
+               "old successful receipt cannot release a new DMA generation");
+        const auto *current = S540DmaStopFixture::issue(state,&session,session.hardwareDmaGeneration(),true);
+        expect(confirmRmHardwareDmaStopped(&session,current) == NV_OK && drainRmRetirements(&session) == NV_OK &&
+               !f.resources && unbindRmDevice(&session) == NV_OK && session.stop() == NV_OK,
+               "matching failed-init stop receipt permits final owned cleanup");
+    }
+    for (Fault fault : {Fault::Map, Fault::DeviceAddress}) {
+        Fake f; Session session;
+        NvU64 page = 0; void *allocation = nullptr;
+        expect(session.start(backend(f)) == NV_OK && bindRmDevice(&session,state,dma) == NV_OK &&
+               beginRmHardwareDma(&session) == NV_OK &&
+               s540Global_nv_alloc_pages(state,1,4096,NV_FALSE,0,NV_TRUE,NV_FALSE,-1,&page,&allocation) == NV_OK,
+               "failed new mapping begins with owned physical backing and conservative hold");
+        f.fault = fault;
+        const void *identity = allocation;
+        expect(s540Global_nv_dma_map_alloc(dma,1,&page,NV_FALSE,NV_FALSE,&allocation) != NV_OK &&
+               allocation == identity && page == 0x10000000 &&
+               f.unmapCalls == (fault == Fault::DeviceAddress ? 1U : 0U) && !f.releaseCalls,
+               "unpublished failed command can clean up without discarding an older published IOVA");
+        f.fault = Fault::None;
+        expect(s540Global_nv_free_pages(state,1,NV_FALSE,0,allocation) == NV_OK &&
+               drainRmRetirements(&session) == NV_ERR_IN_USE && f.resources == 1 && !f.releaseCalls,
+               "failed mapping does not prove that original physical backing can be reclaimed");
+        const auto *stopped = S540DmaStopFixture::issue(state,&session,session.hardwareDmaGeneration(),true);
+        expect(confirmRmHardwareDmaStopped(&session,stopped) == NV_OK && drainRmRetirements(&session) == NV_OK &&
+               !f.resources && unbindRmDevice(&session) == NV_OK && session.stop() == NV_OK,
+               "matching receipt finishes retained backing after unpublished-command cleanup");
+    }
+}
 void irqLifecycleTests() {
     {
         Fake f; Session session;
@@ -852,7 +1031,7 @@ int main() {
     expect(pciWriteKind(0xc,4,0,0xf900) == PciWriteKind::Refused, "unreviewed legacy command refused");
     expect(pciWriteKind(0x10,4,0,0) == PciWriteKind::Refused, "BAR mutation refused");
     expect(pciWriteKind(0x80,4,0,0) == PciWriteKind::Refused, "capability mutation lacks reviewed TU117 caller");
-    directRouteTests(); dmaRemapTests(); stateTests(); abiTests(); failures(); quarantineTests(); irqLifecycleTests(); retirementTests(); pageCountTests();
+    directRouteTests(); dmaRemapTests(); stateTests(); abiTests(); failures(); quarantineTests(); irqLifecycleTests(); retirementTests(); pageCountTests(); hardwareDmaLifetimeTests();
     for (NvU32 i = 0; i < 128; ++i) {
         Fake f;
         Result result = check(backend(f));

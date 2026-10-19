@@ -6,6 +6,7 @@
 #include "../platform/S540NvidiaGspPlatform.hpp"
 #include "../platform/S540NvidiaGspPower.hpp"
 #include "../timers/S540NvidiaGspTimers.h"
+#include "../cancellation/S540NvidiaGspCancellation.h"
 #include "../../nvidia-device-transport/src/nv_device_services.h"
 #include "../../nvidia-firmware-assets/src/S540NvidiaFirmwareAssets.hpp"
 #include "../../nvidia-darwin-services/src/S540NvidiaDarwinServices.h"
@@ -64,6 +65,7 @@ struct Owner::Impl {
     S540NvidiaGspFirmware::Store firmware;
     S540GspContext *context;
     NvU64 thread;
+    S540GspCancellationToken cancellationToken;
     void *gsp, *ucodes, *snapshotGuard;
     char osVersion[128], osDate[128];
     bool host, deviceBound, firmwareBound, timersBound, platformBound, nativeFixture;
@@ -77,7 +79,7 @@ struct Owner::Impl {
     void *nativeActionContext;
     bool nativeAckFailure;
 #endif
-    Impl() : context(nullptr), thread(0), gsp(nullptr), ucodes(nullptr), snapshotGuard(nullptr),
+    Impl() : context(nullptr), thread(0), cancellationToken(0), gsp(nullptr), ucodes(nullptr), snapshotGuard(nullptr),
         osVersion{}, osDate{}, host(false), deviceBound(false), firmwareBound(false),
         timersBound(false), platformBound(false), nativeFixture(false), state{}, published{},
         provider(nullptr), service(nullptr), images{}, nativeBackend(nullptr)
@@ -88,7 +90,14 @@ struct Owner::Impl {
     bool owned() const { NvU64 current = 0; return ordinary(current) && current == thread; }
     static NV_STATUS postRevocation(void *owner) {
         auto *self = static_cast<Impl *>(owner);
-        return self ? self->dispatcher.post(PowerRevoked) : NV_STATUS(NV_ERR_INVALID_STATE);
+        if (!self) return NV_ERR_INVALID_STATE;
+        const auto token = __atomic_load_n(&self->cancellationToken, __ATOMIC_ACQUIRE);
+        // Publish independently of the worker queue: an original wait may be
+        // executing there and cannot dispatch this stop until it returns.
+        const NV_STATUS revoked = token ? s540GspCancellationRevokeAt(token,
+            self->power.snapshot().revokedAtNs) : NV_STATUS(NV_OK);
+        const NV_STATUS posted = self->dispatcher.post(PowerRevoked);
+        return posted != NV_OK ? posted : revoked;
     }
     static NV_STATUS action(void *owner, NvU32 command) {
         auto *self = static_cast<Impl *>(owner);
@@ -128,7 +137,15 @@ struct Owner::Impl {
         result.powerDomainJoined = lease.domainJoined;
         result.powerOnCompleted = lease.onCompleted;
         result.powerRevoked = lease.revoked;
+        result.powerRevokedAtNs = lease.revokedAtNs;
         result.powerAcknowledged = lease.acknowledgementSent;
+        const auto token = __atomic_load_n(&cancellationToken, __ATOMIC_ACQUIRE);
+        S540GspCancellationSnapshot cancellation{};
+        if (token && s540GspCancellationGetSnapshot(token, &cancellation) == NV_OK) {
+            result.cancellationBound = cancellation.bound;
+            result.cancellationRevoked = cancellation.revoked;
+            result.cancellationDeadlineNs = cancellation.deadlineNs;
+        }
         result.blockedGates = kBlockedGates;
         // A completed child lease proves current resource preparation, not a
         // deadline-safe original entry. Some original init waits allow >=60s;
@@ -227,6 +244,16 @@ struct Owner::Impl {
         status = s540GspContextSetDetacher(context, &detacher); if (status != NV_OK) return failed(status);
         auto *nv = static_cast<nv_state_t *>(s540GspContextState(context));
         auto *dma = static_cast<nv_dma_device_t *>(s540GspContextDmaDevice(context));
+        S540GspCancellationToken token = 0;
+        status = s540GspCancellationBind(nv, &token); if (status != NV_OK) return failed(status);
+        __atomic_store_n(&cancellationToken, token, __ATOMIC_RELEASE);
+        // A PM down may have arrived before this exact original identity
+        // existed. Carry that real monotonic PM event into the new binding.
+        const auto powerState = power.snapshot();
+        if (powerState.revoked) {
+            status = s540GspCancellationRevokeAt(token, powerState.revokedAtNs);
+            return failed(status == NV_OK ? NV_STATUS(NV_ERR_NOT_READY) : status);
+        }
         status = platform.bindState(nv); if (status != NV_OK) return failed(status);
         platformBound = true;
         status = S540NvidiaDeviceTransport::bindRmDevice(&transport, nv, dma); if (status != NV_OK) return failed(status);
@@ -266,8 +293,21 @@ struct Owner::Impl {
         if (state.cleanupComplete) return NV_OK;
         state.prepared = false;
         NV_STATUS status = NV_OK;
+        const auto cancellation = __atomic_load_n(&cancellationToken, __ATOMIC_ACQUIRE);
+        if (cancellation) {
+            S540GspCancellationSnapshot facts{};
+            status = s540GspCancellationGetSnapshot(cancellation, &facts);
+            if (status != NV_OK) goto retained;
+            if (facts.phase != S540_GSP_CANCEL_IDLE) { status = NV_ERR_IN_USE; goto retained; }
+        }
         if (context) {
             S540GspContextSnapshot facts{}; s540GspContextSnapshot(context, &facts);
+            // The active original Boolean API cannot attest a failed init's
+            // partial unwind. Preserve its quarantined owners rather than
+            // attempting an initialized-device teardown or retirement drain.
+            if (facts.adapterAttempted && !facts.adapterInitialized) {
+                status = NV_ERR_INVALID_STATE; goto retained;
+            }
             // Original disable runs while IRQ/MMIO/DMA/power are still live.
             if (facts.adapterInitialized && !facts.adapterDisabled) {
                 status = s540GspContextDisableAdapter(context); if (status != NV_OK) goto retained;
@@ -275,12 +315,14 @@ struct Owner::Impl {
             if (transport.interruptInstalled()) {
                 status = transport.stopInterrupt(); if (status != NV_OK) goto retained;
             }
+            if (facts.adapterInitialized && !facts.adapterShutdown) {
+                status = s540GspContextShutdownAdapter(context, NV_TRUE); if (status != NV_OK) goto retained;
+            }
+            // IRQ quiescence alone does not stop GSP DMA. The checked original
+            // shutdown must complete before any retired backing/IOVA can drain.
             if (deviceBound) {
                 status = S540NvidiaDeviceTransport::drainRmRetirements(&transport);
                 if (status != NV_OK) goto retained;
-            }
-            if (facts.adapterInitialized && !facts.adapterShutdown) {
-                status = s540GspContextShutdownAdapter(context, NV_TRUE); if (status != NV_OK) goto retained;
             }
             if (s540GlobalRmIsInitialized()) { status = NV_ERR_IN_USE; goto retained; }
             status = s540GspContextDestroy(context, NV_TRUE, nullptr); if (status != NV_OK) goto retained;
@@ -305,6 +347,14 @@ struct Owner::Impl {
         // PM callouts. A refused acknowledgement retains lease and dispatcher.
         status = power.acknowledgeRevocation(); if (status != NV_OK) goto retained;
         status = power.stop(); if (status != NV_OK) goto retained;
+        if (cancellation) {
+            S540GspCancellationSnapshot facts{};
+            status = s540GspCancellationGetSnapshot(cancellation, &facts); if (status != NV_OK) goto retained;
+            state.cancellationRevoked = facts.revoked; state.cancellationDeadlineNs = facts.deadlineNs;
+            status = s540GspCancellationUnbind(cancellation); if (status != NV_OK) goto retained;
+            __atomic_store_n(&cancellationToken, S540GspCancellationToken{0}, __ATOMIC_RELEASE);
+            state.cancellationBound = false;
+        }
         state.cleanupComplete = true; state.ownsResources = false;
         state.quarantined = false; state.cleanupStatus = NV_OK;
         return NV_OK;

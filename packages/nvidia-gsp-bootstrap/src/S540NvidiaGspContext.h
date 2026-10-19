@@ -3,6 +3,7 @@
 #define S540_NVIDIA_GSP_CONTEXT_H
 #include "../../nvidia-os-adapter/upstream/include/nvtypes.h"
 #include "../../nvidia-os-adapter/upstream/include/nvstatus.h"
+#include "S540NvidiaGspDmaStop.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

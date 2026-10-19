@@ -3,6 +3,8 @@
 #include "nv.h"
 #include "os-interface.h"
 #include "S540NvidiaGspContext.h"
+#include "../../nvidia-global-rm/src/S540NvidiaGlobalRmFeatureProfile.h"
+#include "../../nvidia-device-transport/src/nv_unsupported_memory.h"
 #include "../../nvidia-global-rm/src/S540NvidiaGlobalRm.h"
 #include "../../nvidia-darwin-services/src/S540NvidiaDarwinServices.h"
 #include "../../nvidia-global-rm-crypto/src/S540NvidiaGlobalCrypto.h"
@@ -51,13 +53,29 @@ static NvBool cleanHost(void)
 {
     S540NvidiaGlobalRmHostSnapshot host;
     S540NvidiaGlobalCryptoSnapshot crypto;
+    S540DeviceMemoryStatistics memory;
     s540GlobalRmHostSnapshot(&host);
     s540Global_crypto_snapshot(&crypto);
+    memory = s540DeviceMemoryStatistics();
     // Crypto refusals are lifetime-monotonic. Neither a clean host snapshot
     // nor a zero delta since this adapter trial can erase an earlier refusal.
     return host.initialized && !host.unavailableCalls && !host.invalidFrees &&
+        !memory.unavailableOperationsEver && !memory.lifetimeViolationsEver &&
         !crypto.unavailable_calls && !crypto.unavailable_symbol_mask &&
         !crypto.unavailable_symbol_mask_high && !crypto.counter_overflow;
+}
+NV_STATUS s540GspContextValidateDmaStopReceipt(const void *state,
+    const void *sessionIdentity, NvU64 generation,
+    const S540GspDmaStopReceipt *receipt)
+{
+    S540GspContext *context = __atomic_load_n(&metadataContext, __ATOMIC_ACQUIRE);
+    if (!state || !sessionIdentity || !generation || !receipt)
+        return NV_ERR_INVALID_ARGUMENT;
+    if (!owner(context) || state != &context->nv) return NV_ERR_INVALID_STATE;
+    // The approved original profile still exposes void shutdown and loses
+    // GSP teardown errors. It has no receipt issuer. Never accept a pointer
+    // supplied by a caller or infer DMA cessation from IRQ quiescence.
+    return NV_ERR_NOT_SUPPORTED;
 }
 NV_STATUS s540GspContextCreate(const S540GspDeviceFacts *facts, S540GspContext **out)
 {
@@ -197,13 +215,27 @@ NV_STATUS s540GspContextPrepare(S540GspContext *context)
 }
 NV_STATUS s540GspContextInitializeAdapter(S540GspContext *context)
 {
+    NV_STATUS profile;
     if (!owner(context) || !context->state.privateState || context->state.adapterAttempted ||
         !cleanHost()) return NV_ERR_INVALID_STATE;
+    profile = s540GlobalRmFeatureProfilePreflight(&context->nv);
+    if (profile != NV_OK) return profile;
     context->state.adapterAttempted = NV_TRUE;
     context->state.adapterInitialized = rm_init_adapter(&context->stacks[MAIN], &context->nv);
-    if (!context->state.adapterInitialized) return NV_ERR_NOT_READY;
+    if (!context->state.adapterInitialized) {
+        // The original Boolean does not certify complete rollback: its
+        // internal void shutdown can fail to acquire a GPU lock or ignore a
+        // teardown error. Retain the entire owner until a checked original
+        // unwind profile can establish actual residual ownership.
+        context->state.quarantined = NV_TRUE;
+        return NV_ERR_NOT_READY;
+    }
     context->nv.flags |= NV_FLAG_INITIALIZED;
-    return cleanHost() ? NV_OK : NV_ERR_INVALID_STATE;
+    if (!cleanHost() || s540GlobalRmFeatureProfilePreflight(&context->nv) != NV_OK) {
+        context->state.quarantined = NV_TRUE;
+        return NV_ERR_INVALID_STATE;
+    }
+    return NV_OK;
 }
 NV_STATUS s540GspContextDisableAdapter(S540GspContext *context)
 {
@@ -239,8 +271,9 @@ NV_STATUS s540GspContextReleaseOriginalState(S540GspContext *context, NvBool irq
         status = s540GspTimersStop(&context->nv);
         if (status != NV_OK) return status;
     }
-    // A failed original init performs its internal GPU unwind. No Linux
-    // initialized-device teardown is fabricated for a never initialized GPU.
+    // Failed original adapter attempts are quarantined above. Only contexts
+    // that never attempted adapter initialization, or completed a separately
+    // confirmed shutdown, can reach private-state release here.
     if (context->deviceQueue) {
         status = s540DarwinWorkQueueStop(context->deviceQueue);
         if (status != NV_OK) goto quarantine;

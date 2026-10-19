@@ -13,6 +13,7 @@ struct Snapshot {
     bool revoked, acknowledgementPending, acknowledgementSent, stopped;
     bool nativeFixture;
     NvU32 callbacks, revocationPosts, postFailures, revocationHooksInFlight;
+    NvU64 revokedAtNs;
 };
 namespace Detail {
 // Callback protocol shared by the actual IOService and explicit native event
@@ -22,6 +23,7 @@ public:
     Protocol();
     void requested();
     bool setState(bool on); // true only when a stop must actually be posted
+    void revocationObserved(NvU64 eventNs);
     void completed();
     void posted(NV_STATUS);
     void acknowledged();

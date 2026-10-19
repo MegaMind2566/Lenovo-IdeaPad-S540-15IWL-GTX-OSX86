@@ -1,0 +1,29 @@
+# Selected TU117 callback profile
+
+The [machine audit](CALLBACK-PROFILE-AUDIT.json) classifies all 110 missing original callbacks from the verified native run 39175620059, source `76e0f43c6c1eaf5f259acbe73846e89ecd9be1a7`. That baseline includes the prospective `coreInitializeRm` and `RmShutdownRm` roots. Its historical [132-callback inventory](TU117-BOOTSTRAP-ABI.md) remains separate.
+
+The count is a source inventory, not a list of 110 services required by this laptop. Some original backends explicitly support disabled features. Other callbacks perform real operations that remain unavailable. Every row retains the exact original ABI, source hashes, caller evidence and remaining proof. Lexical references do not establish complete runtime reachability, and no whole-program runtime exclusion is certified by this audit.
+
+| Inventory | Source classification | Consequence |
+| --- | --- | --- |
+| 40 memory callbacks | 4 disabled platform queries; 4 original empty releases; 23 unavailable operations; 9 lifetime/scalar tripwires | [Memory contracts](../nvidia-device-transport/MEMORY-CONTRACTS.json) distinguish actual supported branches from operations that must fail admission if reached. No Linux page layout or successful imported-memory operation is fabricated. |
+| 30 feature callbacks | 12 disabled capability branches; 4 no-resource branches; 2 queries/control operations on verified zero SoC IRQ state; 1 mixed query/operation boundary; 11 unavailable operations | [Feature contracts](FEATURE-PROFILE-CONTRACTS.json) require actual selected build choices and captured TU117 state. A negative presence query does not implement a requested clock, IPC, vGPU or capability operation. |
+| 40 central callbacks | 3 system implementations and 1 actual PCI PDI probe added; 36 further route/backend obligations remain | [System contracts](SYSTEM-CONTRACTS.json) and the memory contract's PCI PDI section describe the real implementations. Defining a typed refusal does not complete the remaining obligations. |
+
+The concrete init requirements include the real user-address-space limit, the PCI PDI/UUID probe, and endpoint identity. `os_get_max_user_va` feeds GSP bootstrap serialization independently of exposed user clients. `nv_pci_read_gpu_pdi_from_dvsec` must measure absence before the original PCI PBI fallback is allowed. `nv_get_dev_minor` is evaluated before the later `nvidia_caps_root == NULL` guard, so that guard does not exclude its scalar call. `os_is_bif_reset_supported` also controls the inverse init-on-probe policy; reporting unsupported reset alone would change unrelated persistence semantics.
+
+The system implementation uses the public Darwin x86_64 `MACH_VM_MAX_ADDRESS` bound. Pinned XNU actually assigns this bound to a 64-bit user map; the legacy `VM_MAX_ADDRESS` macro is a different 32-bit value. This is source-profile evidence. The exact Lenovo Darwin 25.6.0 / macOS 26.7.1 build 25G241 kernel has not been admitted against the public source/exports. The bounded `OSBacktrace` implementation prints actual frames; native controls exercise a real userspace stack collector. NVIDIA reclaimable memory means only NVIDIA recycling pools; the selected wired allocator has none, and deferred DMA allocations remain owned rather than reclaimable.
+
+The intended bootstrap interface exposes preparation, init/disable/shutdown, interrupts, timers and owned work. It exposes no user request dispatcher, imported-memory client interface or RM S-state/hibernate request. This excludes those external entry surfaces, not every internal call they might share with initialization or error recovery. In particular:
+
+- `rm_init_adapter` recomputes console status through `nv_get_screen_info`; a zero initial field is insufficient. Current screen output requires actual Intel-console verification and exhaustive exclusion of the NVIDIA endpoint.
+- Legacy emulator setup and VBIOS execution have original non-primary-VGA guards, but retained byte/word OS port forwards still need dispatch review. Real port reads cannot be replaced with guessed values.
+- Checked `DynamicPowerManagement=0` selects the original `NEVER` state and stops normal idle engagement. Stateful mmap locks/revocation still need a complete alternate-entry review or a real ownership backend.
+- Disabled RM ACPI events do not exclude UEFI ACPI-table discovery. `os_get_acpi_rsdp_from_uefi` serves chipset discovery through a separate route.
+- Disabled video-memory preservation alone does not exclude temporary files: original FBSR code documents a configuration that still uses them. Original suspend/FBSR entries must remain sealed or have a real filesystem backend.
+- UVM ISR/resume declarations return `NV_STATUS` in the selected RM header, while the pinned Linux backend defines `void`. The mismatch needs an explicit reviewed ABI decision; an empty branch cannot justify invented success.
+- GSP timeout/assertion paths can require a real stack diagnostic even when normal initialization would succeed.
+
+The closure checker now consumes both independent feature/memory ledgers. It reports disabled branches, unavailable operations, mixed query/operation callbacks and lifetime tripwires separately from ordinary provided callbacks. Unknown imports or an empty raw missing-symbol set cannot erase these blockers. The six unavailable ACPI methods and 64 unavailable crypto operations remain separate obligations outside this 110-row baseline.
+
+Local original-header controls passed plain and fatal ASan/UBSan/function instrumentation for system services (18 checks), feature profile (55), memory boundaries (63), and PCI PDI traversal (40). These controls do not execute an adapter, verify physical DMA or admit the target kernel. The frozen ten-patch original source profile is unchanged; the production owner remains gated.

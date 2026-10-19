@@ -17,6 +17,8 @@ on:
       - 'builders/nvidia_execution_commands.py'
       - 'builders/nvidia_execution_closure.py'
       - 'builders/nvidia_metaclass_initializers.py'
+      - 'builders/nvidia_stack_usage.py'
+      - 'builders/nvidia_nvoc_stack_dispatch.py'
       - 'builders/build_nvidia_execution.py'
       - '.github/workflows/check-nvidia-execution-development.yml'
   workflow_dispatch:
@@ -50,6 +52,8 @@ jobs:
         run: |
           python3 packages/nvidia-global-rm/tests/test_checked_source.py
           python3 packages/nvidia-global-rm/tests/test_execution_closure.py
+          python3 packages/nvidia-global-rm/tests/test_stack_usage.py
+          python3 packages/nvidia-global-rm/tests/test_nvoc_stack_dispatch.py
       - name: Check native Darwin services before full RM compilation
         run: >-
           python3 builders/check_nvidia_execution.py --services-preflight
@@ -64,6 +68,36 @@ jobs:
           python3 builders/compile_nvidia_global_rm.py
           --upstream build-src/nvidia-upstream --generate-namespace --checked-cleanup-overlays
           --output-dir build/nvidia-execution/original-rm
+      - name: Verify the feature source contracts against the pinned originals
+        run: >-
+          python3 packages/nvidia-global-rm/tests/test_feature_profile_contracts.py
+          --upstream build-src/nvidia-upstream
+      - name: Compile the isolated prospective statusful adapter without approving it
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/adapter/tests/check_unwind_compile.py
+          --upstream build-src/nvidia-upstream
+          --checked-source build/nvidia-execution/original-rm/checked-source
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --output build/nvidia-execution/prospective-checks/adapter-compile
+      - name: Exercise prospective adapter error propagation with explicit hardware fixtures
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/adapter/tests/check_unwind_bodies.py
+          --upstream build-src/nvidia-upstream
+          --checked-source build/nvidia-execution/original-rm/checked-source
+          --cc /usr/bin/clang
+          --output build/nvidia-execution/prospective-checks/adapter-bodies
+      - name: Exercise revocation of the actual original wait bodies in user space
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/cancellation/check_cancellation.py
+          --upstream build-src/nvidia-upstream
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --output build/nvidia-execution/prospective-checks/cancellation
+      - name: Exercise prospective GSP teardown errors with explicit hardware fixtures
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/cancellation/check_gsp_teardown_status.py
+          --upstream build-src/nvidia-upstream
+          --cxx /usr/bin/clang++
+          --output build/nvidia-execution/prospective-checks/gsp-teardown
       - name: Install the pinned bounded archive decoder in a private environment
         shell: bash
         run: |
@@ -99,6 +133,11 @@ jobs:
           --upstream build-src/nvidia-upstream
           --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
           --output-dir build/nvidia-execution/original-global-lifecycle
+      - name: Verify one actual typed NVOC dispatch against native IR and machine code
+        run: >-
+          python3 builders/nvidia_nvoc_stack_dispatch.py
+          --capture build/nvidia-execution/original-rm/checked-namespaced/kernel_gsp.stack.json
+          --output build/nvidia-execution/kernel-checks/nvoc-reset-stack-proof
       - name: Record the unresolved production milestone explicitly
         shell: bash
         run: |
@@ -131,6 +170,11 @@ jobs:
             build/nvidia-execution/original-rm/original/contract/SOURCE-CONTRACT.json
             build/nvidia-execution/original-rm/namespaced/darwin-compile.json
             build/nvidia-execution/original-rm/**/compile-results.json
+            build/nvidia-execution/original-rm/**/*.su
+            build/nvidia-execution/original-rm/**/*.stack.json
+            build/nvidia-execution/original-rm/**/stack-usage-*.json
+            build/nvidia-execution/original-rm/checked-namespaced/*.stack-graph.json
+            build/nvidia-execution/original-rm/checked-namespaced/*.o
             build/nvidia-execution/original-rm/**/*dependency-control.log
             build/nvidia-execution/services-preflight/**/*.json
             build/nvidia-execution/services-preflight/**/*.log
@@ -147,6 +191,12 @@ jobs:
             build/nvidia-execution/kernel-checks/execution-bridge.o
             build/nvidia-execution/kernel-checks/S540NvidiaGspPower.o
             build/nvidia-execution/kernel-checks/sdk-power-metaclass-reference.o
+            build/nvidia-execution/kernel-checks/**/*.su
+            build/nvidia-execution/kernel-checks/**/*.stack.json
+            build/nvidia-execution/kernel-checks/**/*.stack-graph.json
+            build/nvidia-execution/prospective-checks/**/*.json
+            build/nvidia-execution/prospective-checks/**/*.log
+            build/nvidia-execution/prospective-checks/adapter-compile/*.o
             build/nvidia-execution/original-global-lifecycle/**/*.json
             build/nvidia-execution/original-global-lifecycle/**/*.log
           if-no-files-found: warn

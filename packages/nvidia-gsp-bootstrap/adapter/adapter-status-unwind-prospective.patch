@@ -1,0 +1,566 @@
+--- a/src/nvidia/arch/nvalloc/unix/src/osinit.c
++++ b/src/nvidia/arch/nvalloc/unix/src/osinit.c
+@@ -781,6 +781,24 @@
+ {
+ }
+ 
++static struct {
++    nv_state_t *owner;
++    NvU32 gpuInstance;
++    NvU32 deviceInstance;
++} s540RmPendingDevice;
++
++static nv_state_t *s540RmGspAttemptOwner;
++
++static NV_STATUS s540RmCleanupPendingDevice(nv_state_t *nv)
++{
++    if (s540RmPendingDevice.owner != nv) return NV_ERR_INVALID_STATE;
++    NV_STATUS status = gpumgrDestroyDevice(s540RmPendingDevice.deviceInstance);
++    if (status != NV_OK) return status;
++    rmGpuLockFree(s540RmPendingDevice.gpuInstance);
++    portMemSet(&s540RmPendingDevice, 0, sizeof(s540RmPendingDevice));
++    return NV_OK;
++}
++
+ static void
+ osInitNvMapping(
+     nv_state_t *nv,
+@@ -799,6 +817,12 @@
+ 
+     NV_PRINTF(LEVEL_INFO, "osInitNvMapping:\n");
+ 
++    if (s540RmPendingDevice.owner != NULL) {
++        status->rmStatus = NV_ERR_STATE_IN_USE;
++        RM_SET_ERROR(*status, RM_INIT_GPU_GPUMGR_CREATE_DEV_FAILED);
++        return;
++    }
++
+     // allocate the next available gpu device number
+     status->rmStatus = gpumgrAllocGpuInstance(pDeviceReference);
+     if (status->rmStatus != NV_OK)
+@@ -828,14 +852,19 @@
+         return;
+     }
+ 
++    s540RmPendingDevice.owner = nv;
++    s540RmPendingDevice.gpuInstance = *pDeviceReference;
++    s540RmPendingDevice.deviceInstance = deviceInstance;
++
+     // init attach state
+     gpuAttachArg = portMemAllocNonPaged(sizeof(GPUATTACHARG));
+     if (gpuAttachArg == NULL)
+     {
+         NV_PRINTF(LEVEL_ERROR, "*** Cannot allocate gpuAttachArg\n");
+         RM_SET_ERROR(*status, RM_INIT_GPU_GPUMGR_ALLOC_GPU_FAILED);
+-        // RM_BASIC_LOCK_MODEL: free GPU lock
+-        rmGpuLockFree(*pDeviceReference);
++        status->rmStatus = NV_ERR_NO_MEMORY;
++        NV_STATUS cleanupStatus = s540RmCleanupPendingDevice(nv);
++        if (cleanupStatus != NV_OK) status->rmStatus = cleanupStatus;
+         return;
+     }
+ 
+@@ -900,14 +929,14 @@
+     portMemFree(gpuAttachArg);
+     if (status->rmStatus != NV_OK)
+     {
+-        gpumgrDestroyDevice(deviceInstance);
++        NV_STATUS cleanupStatus = s540RmCleanupPendingDevice(nv);
++        if (cleanupStatus != NV_OK) status->rmStatus = cleanupStatus;
+         RM_SET_ERROR(*status, RM_INIT_GPU_GPUMGR_ATTACH_GPU_FAILED);
+         NV_PRINTF(LEVEL_ERROR, "*** Cannot attach gpu\n");
+-        // RM_BASIC_LOCK_MODEL: free GPU lock
+-        rmGpuLockFree(*pDeviceReference);
+         return;
+     }
+     nvp->flags |= NV_INIT_FLAG_GPUMGR_ATTACH;
++    portMemSet(&s540RmPendingDevice, 0, sizeof(s540RmPendingDevice));
+ 
+     pGpu = gpumgrGetGpu(*pDeviceReference);
+ 
+@@ -1194,7 +1223,7 @@
+     return NV_OK;
+ }
+ 
+-static void
++static NV_STATUS
+ RmTeardownDeviceDma(
+     nv_state_t *nv
+ )
+@@ -1205,11 +1234,11 @@
+         OBJVMM *pVmm = SYS_GET_VMM(pSys);
+         OBJVASPACE *pIOVAS;
+ 
+-        if (NV_OK == vmmGetVaspaceFromId(pVmm, nv->iovaspace_id, IO_VASPACE_A, &pIOVAS))
+-        {
+-            vmmDestroyVaspace(pVmm, pIOVAS);
+-        }
+-    }
++        NV_STATUS status = vmmGetVaspaceFromId(pVmm, nv->iovaspace_id, IO_VASPACE_A, &pIOVAS);
++        if (status != NV_OK) return status;
++        vmmDestroyVaspace(pVmm, pIOVAS);
++    }
++    return NV_OK;
+ }
+ 
+ static void
+@@ -1774,23 +1803,29 @@
+     return rmStatus;
+ }
+ 
+-static void RmUnixFreeRmApi(
++static NV_STATUS RmUnixFreeRmApiChecked(
+     nv_state_t *nv
+ )
+ {
+-    if (rmGpuLocksAcquire(GPUS_LOCK_FLAGS_NONE, RM_LOCK_MODULES_DESTROY) == NV_OK)
++    NV_STATUS status = rmGpuLocksAcquire(GPUS_LOCK_FLAGS_NONE, RM_LOCK_MODULES_DESTROY);
++    if (status != NV_OK) return status;
+     {
+         RM_API *pRmApi = rmapiGetInterface(RMAPI_GPU_LOCK_INTERNAL);
+ 
+         if (nv->rmapi.hClient != 0)
+         {
+-            pRmApi->Free(pRmApi, nv->rmapi.hClient, nv->rmapi.hClient);
++            status = pRmApi->Free(pRmApi, nv->rmapi.hClient, nv->rmapi.hClient);
++            if (status != NV_OK) {
++                rmGpuLocksRelease(GPUS_LOCK_FLAGS_NONE, NULL);
++                return status;
++            }
+         }
+ 
+         portMemSet(&nv->rmapi, 0, sizeof(nv->rmapi));
+ 
+         rmGpuLocksRelease(GPUS_LOCK_FLAGS_NONE, NULL);
+     }
++    return NV_OK;
+ }
+ 
+ static NvBool RmUnixAllocRmApi(
+@@ -1809,7 +1844,7 @@
+     status = rmGpuLocksAcquire(GPUS_LOCK_FLAGS_NONE, RM_LOCK_MODULES_INIT);
+     if (status != NV_OK)
+     {
+-        return status;
++        return NV_FALSE;
+     }
+ 
+     if (pRmApi->AllocWithHandle(
+@@ -1894,7 +1929,8 @@
+     // UNLOCK: release GPUs lock
+     rmGpuLocksRelease(GPUS_LOCK_FLAGS_NONE, NULL);
+ 
+-    RmUnixFreeRmApi(nv);
++    // The sole RmInitAdapter caller owns the one checked shutdown.
++    // Preserve partial handles here; never perform a hidden first Free.
+     return NV_FALSE;
+ }
+ 
+@@ -2123,6 +2159,12 @@
+     //
+     if (IS_GSP_CLIENT(pGpu))
+     {
++        if (s540RmGspAttemptOwner != NULL) {
++            status.rmStatus = NV_ERR_STATE_IN_USE;
++            RM_SET_ERROR(status, RM_INIT_FIRMWARE_INIT_FAILED);
++            goto shutdown;
++        }
++        s540RmGspAttemptOwner = nv;
+         status.rmStatus = kgspInitRm(pGpu, GPU_GET_KERNEL_GSP(pGpu), &gspFw);
+         if (status.rmStatus != NV_OK)
+         {
+@@ -2373,7 +2415,9 @@
+     gpumgrThreadDisableExpandedGpuVisibility();
+ 
+     // call ShutdownAdapter to undo anything we've done above
+-    RmShutdownAdapter(nv);
++    // Preserve partial GPU/DMA/register ownership when cleanup fails.
++    if (s540GspCancellationBeginCleanupState(nv) != NV_OK) goto failed;
++    (void)RmShutdownAdapterChecked(nv);
+ 
+  failed:
+     NV_DEV_PRINTF(NV_DBG_ERRORS, nv, "RmInitAdapter failed! (0x%x:0x%x:%d)\n",
+@@ -2389,13 +2433,18 @@
+     return retVal;
+ }
+ 
+-void RmShutdownAdapter(
++NV_STATUS RmShutdownAdapterChecked(
+     nv_state_t *nv
+ )
+ {
+     nv_priv_t *nvp = NV_GET_NV_PRIV(nv);
+     OBJGPU *pGpu = NV_GET_NV_PRIV_PGPU(nv);
+-    NV_STATUS rmStatus;
++    NV_STATUS rmStatus = NV_OK;
++    NvBool gpuDetached = NV_FALSE;
++
++    if (s540RmPendingDevice.owner == nv) return NV_ERR_INVALID_STATE;
++    if (s540RmGspAttemptOwner == nv && !(nvp->flags & NV_INIT_FLAG_GPU_STATE))
++        return NV_ERR_NOT_READY;
+ 
+     if ((pGpu != NULL) && (nvp->flags & NV_INIT_FLAG_GPUMGR_ATTACH))
+     {
+@@ -2409,9 +2458,11 @@
+         // initialized, and to continue accessing the GPU undergoing shutdown
+         // after state destroy. RmUnixFreeRmApi will also require it.
+         //
+-        NV_ASSERT_OK(gpumgrThreadEnableExpandedGpuVisibility());
+-
+-        RmUnixFreeRmApi(nv);
++        rmStatus = gpumgrThreadEnableExpandedGpuVisibility();
++        if (rmStatus != NV_OK) return rmStatus;
++
++        rmStatus = RmUnixFreeRmApiChecked(nv);
++        if (rmStatus != NV_OK) goto visibility_done;
+ 
+         nv->ud.cpu_address = 0;
+         nv->ud.size = 0;
+@@ -2420,10 +2471,15 @@
+         // LOCK: lock all clients in case of eGPU hot unplug, which
+         // will not wait for all existing RM clients to stop using the GPU.
+         //
+-        if (!nv->is_external_gpu || serverLockAllClients(&g_resServ) == NV_OK)
++        if (nv->is_external_gpu) {
++            rmStatus = serverLockAllClients(&g_resServ);
++            if (rmStatus != NV_OK) goto visibility_done;
++        }
++        
+         {
+             // LOCK: acquire GPUs lock
+-            if (rmGpuLocksAcquire(GPUS_LOCK_FLAGS_NONE, RM_LOCK_MODULES_DESTROY) == NV_OK)
++            rmStatus = rmGpuLocksAcquire(GPUS_LOCK_FLAGS_NONE, RM_LOCK_MODULES_DESTROY);
++            if (rmStatus == NV_OK)
+             {
+                 RmDestroyPowerManagement(nv);
+ 
+@@ -2435,11 +2491,15 @@
+                 {
+                     if (nvp->flags & NV_INIT_FLAG_CORE_LOGIC)
+                     {
+-                        teardownCoreLogic(pOS, pGpu);
++                        rmStatus = teardownCoreLogic(pOS, pGpu);
++                        if (rmStatus != NV_OK) goto gpu_unlock;
++                        nvp->flags &= ~NV_INIT_FLAG_CORE_LOGIC;
+                     }
+                     else if (nvp->flags & NV_INIT_FLAG_SCALABILITY)
+                     {
+-                        osTeardownScalability(pGpu);
++                        rmStatus = osTeardownScalability(pGpu);
++                        if (rmStatus != NV_OK) goto gpu_unlock;
++                        nvp->flags &= ~NV_INIT_FLAG_SCALABILITY;
+                     }
+                 }
+ 
+@@ -2459,13 +2519,15 @@
+                 if (nvp->flags & NV_INIT_FLAG_GPU_STATE_LOAD)
+                 {
+                     rmStatus = gpuStateUnload(pGpu, GPU_STATE_DEFAULT);
+-                    NV_ASSERT(rmStatus == NV_OK);
++                    if (rmStatus != NV_OK) goto gpu_unlock;
++                    nvp->flags &= ~NV_INIT_FLAG_GPU_STATE_LOAD;
+                 }
+ 
+                 if (nvp->flags & NV_INIT_FLAG_GPU_STATE)
+                 {
+                     rmStatus = gpuStateDestroy(pGpu);
+-                    NV_ASSERT(rmStatus == NV_OK);
++                    if (rmStatus != NV_OK) goto gpu_unlock;
++                    nvp->flags &= ~NV_INIT_FLAG_GPU_STATE;
+                 }
+ 
+                 if (IS_DCE_CLIENT(pGpu))
+@@ -2474,6 +2536,7 @@
+                     if (rmStatus != NV_OK)
+                     {
+                         NV_PRINTF(LEVEL_ERROR, "DCE firmware RM Shutdown failure\n");
++                        goto gpu_unlock;
+                     }
+                 }
+ 
+@@ -2490,23 +2553,31 @@
+                 RmFreeX86EmuState(pGpu);
+ #endif
+ 
+-                gpumgrDetachGpu(gpuInstance);
+-                gpumgrDestroyDevice(deviceInstance);
++                rmStatus = gpumgrDetachGpu(gpuInstance);
++                if (rmStatus != NV_OK) goto gpu_unlock;
++                gpuDetached = NV_TRUE;
++                nvp->pGpu = NULL;
++                nvp->flags &= ~NV_INIT_FLAG_GPUMGR_ATTACH;
++                rmStatus = gpumgrDestroyDevice(deviceInstance);
++                if (rmStatus != NV_OK) goto gpu_unlock;
+ 
+                 if (nvp->flags & NV_INIT_FLAG_DMA)
+                 {
+-                    RmTeardownDeviceDma(nv);
++                    rmStatus = RmTeardownDeviceDma(nv);
++                    if (rmStatus != NV_OK) goto gpu_unlock;
++                    nvp->flags &= ~NV_INIT_FLAG_DMA;
+                 }
+ 
+                 RmClearPrivateState(nv);
+ 
+                 RmUnInitAcpiMethods(pSys);
+ 
++gpu_unlock:
+                 // UNLOCK: release GPUs lock
+                 rmGpuLocksRelease(GPUS_LOCK_FLAGS_NONE, NULL);
+ 
+                 // RM_BASIC_LOCK_MODEL: free GPU lock
+-                rmGpuLockFree(deviceInstance);
++                if (gpuDetached) rmGpuLockFree(deviceInstance);
+             }
+ 
+             // UNLOCK: unlock all clients for eGPU hot unplug path
+@@ -2518,15 +2589,32 @@
+         // Expanded GPU visibility in GPUMGR is no longer needed once the
+         // GPU is removed from GPUMGR.
+         //
++visibility_done:
+         gpumgrThreadDisableExpandedGpuVisibility();
+ 
+     }
+     else
+     {
++        if (pGpu != NULL || (nvp->flags & ~NV_INIT_FLAG_DMA) ||
++                nv->rmapi.hClient != 0) return NV_ERR_INVALID_STATE;
++        if (nvp->flags & NV_INIT_FLAG_DMA) {
++            rmStatus = RmTeardownDeviceDma(nv);
++            if (rmStatus != NV_OK) return rmStatus;
++            nvp->flags &= ~NV_INIT_FLAG_DMA;
++        }
+         RmClearPrivateState(nv);
+     }
+ 
+-    RmTeardownRegisters(nv);
++    if (rmStatus != NV_OK) return rmStatus;
++    rmStatus = RmTeardownRegisters(nv);
++    if (rmStatus == NV_OK && s540RmGspAttemptOwner == nv)
++        s540RmGspAttemptOwner = NULL;
++    return rmStatus;
++}
++
++void RmShutdownAdapter(nv_state_t *nv)
++{
++    (void)RmShutdownAdapterChecked(nv);
+ }
+ 
+ void RmPartiallyDisableAdapter(
+@@ -2538,18 +2626,21 @@
+     nv_stop_rc_timer(nv);
+ }
+ 
+-void RmDisableAdapter(
++NV_STATUS RmDisableAdapterChecked(
+     nv_state_t *nv
+ )
+ {
+-    NV_STATUS  rmStatus;
++    NV_STATUS  rmStatus = NV_OK;
+     OBJGPU    *pGpu = NV_GET_NV_PRIV_PGPU(nv);
+     NvU32      gpuMask;
+     nv_priv_t *nvp  = NV_GET_NV_PRIV(nv);
+ 
++    if (s540RmGspAttemptOwner == nv && !(nvp->flags & NV_INIT_FLAG_GPU_STATE))
++        return NV_ERR_NOT_READY;
++
+     if (pGpu == NULL)
+     {
+-        return;
++        return NV_OK;
+     }
+ 
+     gpumgrSetCurrentGpuInstance(pGpu->gpuInstance);
+@@ -2581,11 +2672,16 @@
+     // LOCK: lock all clients in case of eGPU hot unplug, which
+     // will not wait for all existing RM clients to stop using the GPU.
+     //
+-    if (!nv->is_external_gpu || serverLockAllClients(&g_resServ) == NV_OK)
++    if (nv->is_external_gpu) {
++        rmStatus = serverLockAllClients(&g_resServ);
++        if (rmStatus != NV_OK) goto instance_done;
++    }
++    
+     {
+ 
+         // LOCK: acquire GPUs lock
+-        if (rmGpuLocksAcquire(GPUS_LOCK_FLAGS_NONE, RM_LOCK_MODULES_DESTROY) == NV_OK)
++        rmStatus = rmGpuLocksAcquire(GPUS_LOCK_FLAGS_NONE, RM_LOCK_MODULES_DESTROY);
++        if (rmStatus == NV_OK)
+         {
+             //
+             // Free the client allocated resources.
+@@ -2605,7 +2701,8 @@
+             OBJOS     *pOS  = SYS_GET_OS(pSys);
+             if (pCl != NULL)
+             {
+-                teardownCoreLogic(pOS, pGpu);
++                rmStatus = teardownCoreLogic(pOS, pGpu);
++                if (rmStatus != NV_OK) goto disable_gpu_unlock;
+                 nvp->flags &= ~NV_INIT_FLAG_CORE_LOGIC;
+             }
+ 
+@@ -2622,10 +2719,10 @@
+             if (nvp->flags & NV_INIT_FLAG_GPU_STATE_LOAD)
+             {
+                 rmStatus = gpuStateUnload(pGpu, GPU_STATE_DEFAULT);
+-                NV_ASSERT(rmStatus == NV_OK);
+-                nvp->flags &= ~NV_INIT_FLAG_GPU_STATE_LOAD;
++                if (rmStatus == NV_OK) nvp->flags &= ~NV_INIT_FLAG_GPU_STATE_LOAD;
+             }
+ 
++disable_gpu_unlock:
+             // UNLOCK: release GPUs lock
+             rmGpuLocksRelease(GPUS_LOCK_FLAGS_NONE, NULL);
+         }
+@@ -2635,7 +2732,22 @@
+             serverUnlockAllClients(&g_resServ);
+     }
+ 
++instance_done:
+     gpumgrSetCurrentGpuInstance(NV_U32_MAX);
++    return rmStatus;
++}
++
++void RmDisableAdapter(nv_state_t *nv)
++{
++    (void)RmDisableAdapterChecked(nv);
++}
++
++NvBool s540RmAdapterHasResources(nv_state_t *nv)
++{
++    nv_priv_t *nvp = NV_GET_NV_PRIV(nv);
++    return s540RmPendingDevice.owner == nv || s540RmGspAttemptOwner == nv ||
++        (nvp != NULL && (nvp->pGpu != NULL || nvp->flags != 0)) ||
++        nv->rmapi.hClient != 0 || (nv->regs != NULL && nv->regs->map != NULL);
+ }
+ 
+ NV_STATUS RmGetAdapterStatus(
+--- a/src/nvidia/arch/nvalloc/unix/src/osapi.c
++++ b/src/nvidia/arch/nvalloc/unix/src/osapi.c
+@@ -1882,18 +1882,22 @@
+     return retval;
+ }
+ 
+-void NV_API_CALL rm_disable_adapter(
++NV_STATUS NV_API_CALL s540RmDisableAdapterChecked(
+     nvidia_stack_t *sp,
+     nv_state_t *pNv
+ )
+ {
+     THREAD_STATE_NODE threadState;
+     void      *fp;
++    NV_STATUS  status = NV_OK;
+ 
+     NV_ENTER_RM_RUNTIME(sp,fp);
+     threadStateInit(&threadState, THREAD_STATE_FLAGS_NONE);
+-
+-    NV_ASSERT_OK(os_flush_work_queue(pNv->queue, NV_TRUE));
++    status = s540GspCancellationBeginCleanupState(pNv);
++    if (status != NV_OK) goto runtime_done;
++
++    status = os_flush_work_queue(pNv->queue, NV_TRUE);
++    if (status != NV_OK) goto runtime_done;
+ 
+     if (pNv->client_managed_console && !pNv->sysmem_mapped_console)
+     {
+@@ -1901,15 +1905,16 @@
+     }
+ 
+     // LOCK: acquire API lock
+-    if (rmapiLockAcquire(API_LOCK_FLAGS_NONE, RM_LOCK_MODULES_DESTROY) == NV_OK)
++    status = rmapiLockAcquire(API_LOCK_FLAGS_NONE, RM_LOCK_MODULES_DESTROY);
++    if (status == NV_OK)
+     {
+         if (pNv->flags & NV_FLAG_PERSISTENT_SW_STATE)
+         {
+-            RmPartiallyDisableAdapter(pNv);
++            status = NV_ERR_NOT_SUPPORTED;
+         }
+         else
+         {
+-            RmDisableAdapter(pNv);
++            status = RmDisableAdapterChecked(pNv);
+         }
+ 
+         // UNLOCK: release API lock
+@@ -1921,21 +1926,26 @@
+         os_enable_console_access();
+     }
+ 
+-    NV_ASSERT_OK(os_flush_work_queue(pNv->queue, NV_TRUE));
++    if (status == NV_OK) status = os_flush_work_queue(pNv->queue, NV_TRUE);
++runtime_done:
+     threadStateFree(&threadState, THREAD_STATE_FLAGS_NONE);
+     NV_EXIT_RM_RUNTIME(sp,fp);
+-}
+-
+-void NV_API_CALL rm_shutdown_adapter(
++    return status;
++}
++
++NV_STATUS NV_API_CALL s540RmShutdownAdapterChecked(
+     nvidia_stack_t *sp,
+     nv_state_t *pNv
+ )
+ {
+     THREAD_STATE_NODE threadState;
+     void      *fp;
++    NV_STATUS  status = NV_OK;
+ 
+     NV_ENTER_RM_RUNTIME(sp,fp);
+     threadStateInit(&threadState, THREAD_STATE_FLAGS_NONE);
++    status = s540GspCancellationBeginCleanupState(pNv);
++    if (status != NV_OK) goto runtime_done;
+ 
+     if (pNv->client_managed_console && !pNv->sysmem_mapped_console)
+     {
+@@ -1943,9 +1953,10 @@
+     }
+ 
+     // LOCK: acquire API lock
+-    if (rmapiLockAcquire(API_LOCK_FLAGS_NONE, RM_LOCK_MODULES_DESTROY) == NV_OK)
+-    {
+-        RmShutdownAdapter(pNv);
++    status = rmapiLockAcquire(API_LOCK_FLAGS_NONE, RM_LOCK_MODULES_DESTROY);
++    if (status == NV_OK)
++    {
++        status = RmShutdownAdapterChecked(pNv);
+ 
+         // UNLOCK: release API lock
+         rmapiLockRelease();
+@@ -1956,8 +1967,20 @@
+         os_enable_console_access();
+     }
+ 
++runtime_done:
+     threadStateFree(&threadState, THREAD_STATE_FLAGS_NONE);
+     NV_EXIT_RM_RUNTIME(sp,fp);
++    return status;
++}
++
++void NV_API_CALL rm_disable_adapter(nvidia_stack_t *sp, nv_state_t *nv)
++{
++    (void)s540RmDisableAdapterChecked(sp, nv);
++}
++
++void NV_API_CALL rm_shutdown_adapter(nvidia_stack_t *sp, nv_state_t *nv)
++{
++    (void)s540RmShutdownAdapterChecked(sp, nv);
+ }
+ 
+ NV_STATUS NV_API_CALL rm_exclude_adapter(
+--- a/src/nvidia/arch/nvalloc/unix/include/osapi.h
++++ b/src/nvidia/arch/nvalloc/unix/include/osapi.h
+@@ -110,6 +110,9 @@
+ 
+ NvBool     RmInitAdapter          (nv_state_t *);
+ NvBool     RmPartiallyInitAdapter (nv_state_t *);
++NV_STATUS  s540GspCancellationBeginCleanupState(const void *);
++NV_STATUS  RmShutdownAdapterChecked(nv_state_t *);
++NV_STATUS  RmDisableAdapterChecked(nv_state_t *);
+ void       RmShutdownAdapter      (nv_state_t *);
+ void       RmDisableAdapter       (nv_state_t *);
+ void       RmPartiallyDisableAdapter(nv_state_t *);

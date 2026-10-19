@@ -5,17 +5,6 @@
 #include "os-interface.h"
 #include "../../nvidia-global-rm/src/S540NvidiaGlobalRm.h"
 #include <stdlib.h>
-void *NV_API_CALL os_mem_set(void *out, NvU8 value, NvU32 bytes) {
-    volatile NvU8 *p = out;
-    while (bytes--) *p++ = value;
-    return out;
-}
-void *NV_API_CALL os_mem_copy(void *out, const void *in, NvU32 bytes) {
-    volatile NvU8 *to = out;
-    const volatile NvU8 *from = in;
-    while (bytes--) *to++ = *from++;
-    return out;
-}
 NvBool s540GlobalRmIsInitialized(void) { return NV_FALSE; }
 NV_STATUS s540GlobalRmInitialize(S540NvidiaGlobalRmResult *out) {
     (void)out; abort();

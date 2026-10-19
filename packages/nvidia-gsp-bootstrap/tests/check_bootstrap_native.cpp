@@ -26,6 +26,7 @@ unsigned checks;
 nv_state_t *fixtureState;
 bool fixturePlatformStopFailure;
 bool fixturePlatformUnbindFailure;
+S540NvidiaGspBootstrap::Owner *fixtureEarlyPowerRevocation;
 void expect(bool value, const char *reason) {
     ++checks;
     if (!value) { std::fprintf(stderr, "Bootstrap check failed: %s\n", reason); std::exit(1); }
@@ -165,6 +166,10 @@ NV_STATUS S540NvidiaGspPlatform::Context::collect(S540NvidiaGlobalRmPlatformFact
     out->format = 1; out->known = S540_GLOBAL_FACT_ALL;
     out->cpuCount = 1; out->cpuFrequencyHz = 2000000000ULL; out->osMajor = 25;
     out->osVersion = impl_->osVersion; out->osDate = impl_->osDate;
+    if (fixtureEarlyPowerRevocation) {
+        auto *owner = fixtureEarlyPowerRevocation; fixtureEarlyPowerRevocation = nullptr;
+        return owner->revokePowerNativeForTest();
+    }
     return NV_OK;
 }
 NV_STATUS S540NvidiaGspPlatform::Context::collectDeviceFacts(S540GspDeviceFacts *out, void *handle) {
@@ -227,6 +232,20 @@ int main(int argc, char **argv) {
     }
     expectCold();
     {
+        S540NvidiaGspBootstrap::Owner owner; ResourceFixture fixture;
+        fixtureEarlyPowerRevocation = &owner;
+        expect(owner.prepareNativeForTest(&provider, backend(fixture), images) == NV_ERR_NOT_READY,
+            "PM down before original identity publication refuses preparation");
+        const auto state = owner.snapshot();
+        expect(state.cleanupComplete && !state.ownsResources && !state.workerActive &&
+            state.powerRevoked && state.cancellationRevoked && !state.cancellationBound,
+            "early PM event drains real prepared owners without original entry");
+        expect(state.powerRevokedAtNs &&
+            state.cancellationDeadlineNs == state.powerRevokedAtNs + 30000000000ULL,
+            "late exact-state binding preserves actual earlier PM event deadline");
+        expectCold();
+    }
+    {
         S540NvidiaGspBootstrap::Owner owner;
         expect(owner.initialize() == NV_ERR_INVALID_STATE && owner.stop() == NV_OK,
             "cold initialization refuses without owning anything");
@@ -236,7 +255,7 @@ int main(int argc, char **argv) {
         auto state = owner.snapshot();
         expect(state.prepared && state.hostInitialized && state.platformBound &&
             state.transportBound && state.firmwareBound && state.timersBound &&
-            state.firmwareCopied && state.dmaPolicyAdmitted && state.nativeFixture,
+            state.firmwareCopied && state.dmaPolicyAdmitted && state.nativeFixture && state.cancellationBound,
             "preparation evidence distinguishes fixture and actual owned bindings");
         expect(!state.globalInitialized && !state.adapterInitialized && !state.firmwareLoaded &&
             !state.interruptInstalled && !state.interruptArmed,
@@ -288,12 +307,14 @@ int main(int argc, char **argv) {
         expect(owner.revokePowerNativeForTest() == NV_OK, "PM down posts to persistent worker");
         expect(owner.runNativeForTest(inspect, nullptr) == NV_OK, "barrier waits for posted PM shutdown action");
         const auto state = owner.snapshot();
-        expect(state.powerRevoked && !state.powerAcknowledged && state.quarantined &&
+        expect(state.powerRevoked && state.cancellationRevoked && state.cancellationBound &&
+            state.cancellationDeadlineNs && !state.powerAcknowledged && state.quarantined &&
             state.ownsResources && state.workerActive && !fixture.active && !fixtureState,
             "failed ack retains PM owner and worker after real RM resources drain");
         expect(owner.failPowerAcknowledgementNativeForTest(false) == NV_OK && owner.stop() == NV_OK,
             "retry acknowledges only after cleanup and joins persistent worker");
-        expect(owner.snapshot().powerAcknowledged && !owner.snapshot().workerActive,
+        expect(owner.snapshot().powerAcknowledged && !owner.snapshot().workerActive &&
+            owner.snapshot().cancellationRevoked && !owner.snapshot().cancellationBound,
             "completed PM acknowledgement reported separately from enqueue acceptance");
         expectCold();
     }

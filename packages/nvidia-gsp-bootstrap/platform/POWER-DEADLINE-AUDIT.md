@@ -71,14 +71,16 @@ cancel original RM execution or extend physical power availability.
 
 ## Required evidence before original entry
 
-The PM callback currently enqueues `PowerRevoked` on the same persistent worker
-that would execute `rm_init_adapter` and disable/unload. The dispatcher drains
+The PM callback now publishes an exact-state atomic revocation record before
+enqueuing `PowerRevoked` on the same persistent worker that would execute
+`rm_init_adapter` and disable/unload. The current checked original profile does
+not yet consume that record. The dispatcher drains
 accepted commands in order; it cannot execute stop while an earlier original
 call is still running. OS scheduling/yielding inside RM does not dispatch a
 pending owner command. Killing or reentering that worker is not a cancellation
 strategy.
 
-The reviewed original waits provide no common PM cancellation contract.
+The reviewed checked original waits provide no common PM cancellation contract.
 `kgspRecvPoll` can leave after an RPC/condition, timeout, or a real GPU-state
 failure; its condition callback is not supplied for the normal synchronous
 initialization RPC. `osIsGpuShutdown` reads the real `nv_state_t::is_shutdown`
@@ -97,6 +99,12 @@ disable/unload, IRQ quiescence and real DMA/MMIO retirement, with margin before
 the actual PM deadline. Fault tests must revoke during those original waits and
 prove complete cleanup before acknowledgement. No such integrated cancellation
 and shutdown bound is established by the current source profile.
+
+The [isolated cancellation candidate](../cancellation/README.md) adds checks to
+actual original wait bodies and suppresses explicit-abort boot retry. Its CPU
+fault controls revoke during those bodies; they do not establish hardware
+cleanup or close this gate. The candidate is separate from the frozen checked
+source profile while statusful unwind and drain contracts are reviewed.
 
 [gfw]: https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/src/kernel/gpu/arch/turing/kern_gpu_tu102.c#L454
 [falcon]: https://github.com/NVIDIA/open-gpu-kernel-modules/blob/1a82fbfda8f321b056eb3568850f9316c5e465c5/src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_falcon_tu102.c#L382

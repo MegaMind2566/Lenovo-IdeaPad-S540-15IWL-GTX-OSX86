@@ -34,6 +34,7 @@ struct Binding {
     void *pciHandle;
     Allocation allocations[kMaximumAllocations];
     Mapping mappings[64];
+    AbiStatistics allocationDiagnostics;
 };
 Binding binding{};
 NvU64 abiGeneration = 0;
@@ -50,6 +51,26 @@ void *token(bool mapping) {
 }
 bool stateValid(nv_state_t *state) {
     return ordinary() && binding.session && binding.session->active() && state == binding.state;
+}
+void increment(NvU32 &value) { if (value != ~NvU32(0)) ++value; }
+NV_STATUS allocationFailed(NvU32 pages, NvU64 pageBytes, NV_STATUS status) {
+    auto &diagnostics = binding.allocationDiagnostics;
+    increment(diagnostics.allocationFailures);
+    diagnostics.lastFailedPages = pages;
+    diagnostics.lastFailedPageBytes = pageBytes;
+    diagnostics.lastAllocationFailure = status;
+    return status;
+}
+void allocationRegistered() {
+    NvU32 records = 0;
+    NvU64 bytes = 0;
+    for (const auto &entry : binding.allocations) if (entry.token) {
+        ++records;
+        bytes += NvU64(entry.pages) * kPageBytes;
+    }
+    auto &diagnostics = binding.allocationDiagnostics;
+    if (records > diagnostics.peakAllocationRecords) diagnostics.peakAllocationRecords = records;
+    if (bytes > diagnostics.peakRegisteredBytes) diagnostics.peakRegisteredBytes = bytes;
 }
 [[noreturn]] void deviceContractViolation(const char *message) {
     // Scalar/void callbacks cannot encode a failed ownership contract as an
@@ -77,6 +98,9 @@ NV_STATUS release(Allocation &entry) {
     return status;
 }
 }
+extern "C" [[noreturn]] void s540DeviceMemoryContractViolation(const char *message) {
+    deviceContractViolation(message);
+}
 NV_STATUS S540NvidiaDeviceTransport::bindRmDevice(Session *session, nv_state_t *state,
                                                   nv_dma_device_t *dma) {
     if (!ordinary() || !session || !session->active() || !state || !dma)
@@ -102,6 +126,8 @@ NV_STATUS S540NvidiaDeviceTransport::unbindRmDevice(Session *session) {
 NV_STATUS S540NvidiaDeviceTransport::drainRmRetirements(Session *session) {
     if (!ordinary() || !session || binding.session != session || !session->active())
         return NV_ERR_INVALID_STATE;
+    const NV_STATUS ready = session->checkRmRetirementDrain();
+    if (ready != NV_OK) return ready;
     for (auto &entry : binding.allocations) if (entry.token && (entry.retired || entry.dmaRetirement)) {
         const NV_STATUS status = session->reclaimRmRetirement(entry.sessionToken);
         if (status != NV_OK) return status;
@@ -109,6 +135,17 @@ NV_STATUS S540NvidiaDeviceTransport::drainRmRetirements(Session *session) {
         else entry.dmaRetirement = false;
     }
     return NV_OK;
+}
+NV_STATUS S540NvidiaDeviceTransport::beginRmHardwareDma(Session *session) {
+    if (!ordinary() || !session || binding.session != session || !stateValid(binding.state))
+        return NV_ERR_INVALID_STATE;
+    return session->beginHardwareDmaLifetime(binding.state);
+}
+NV_STATUS S540NvidiaDeviceTransport::confirmRmHardwareDmaStopped(Session *session,
+    const S540GspDmaStopReceipt *receipt) {
+    if (!ordinary() || !session || binding.session != session || !stateValid(binding.state))
+        return NV_ERR_INVALID_STATE;
+    return session->confirmHardwareDmaStopped(receipt);
 }
 NV_STATUS S540NvidiaDeviceTransport::queryRmDmaRemap(nv_state_t *state, NvBool &required) {
     if (!stateValid(state)) return NV_ERR_INVALID_STATE;
@@ -128,8 +165,20 @@ extern "C" NV_STATUS NV_API_CALL s540Global_nv_get_num_phys_pages(void *allocati
     *pages = entry->pages;
     return NV_OK;
 }
+namespace {
+NV_STATUS readBoundPciDword(void *opaque, NvU32 offset, NvU32 &value) {
+    return static_cast<Session *>(opaque)->readConfig(offset, 4, value);
+}
+}
+extern "C" NV_STATUS NV_API_CALL s540Global_nv_pci_read_gpu_pdi_from_dvsec(
+    nv_state_t *state, NvU64 *pdi) {
+    if (!state || !pdi) return NV_ERR_INVALID_ARGUMENT;
+    if (!stateValid(state)) return NV_ERR_INVALID_STATE;
+    return Detail::readPciPdi(Detail::PciDwordReader{binding.session, readBoundPciDword}, *pdi);
+}
 S540NvidiaDeviceTransport::AbiStatistics S540NvidiaDeviceTransport::abiStatistics() {
-    AbiStatistics out{}; out.bound = binding.session != nullptr;
+    AbiStatistics out = binding.allocationDiagnostics;
+    out.bound = binding.session != nullptr;
     for (const auto &entry : binding.allocations) if (entry.token) {
         ++out.allocations; if (entry.mapped) ++out.dmaMappings;
         if (entry.retired) ++out.retiredAllocations;
@@ -142,20 +191,24 @@ extern "C" NV_STATUS NV_API_CALL s540Global_nv_alloc_pages(nv_state_t *state,
     NvU32 pages, NvU64 pageSize, NvBool contiguous, NvU32 cache, NvBool zeroed,
     NvBool unencrypted, NvS32 node, NvU64 *ptes, void **privateData) {
     if (!stateValid(state)) return NV_ERR_INVALID_STATE;
+    auto &diagnostics = binding.allocationDiagnostics;
+    increment(diagnostics.allocationAttempts);
+    if (pages > diagnostics.largestRequestedPages) diagnostics.largestRequestedPages = pages;
     if (!ptes || !privateData || !pages || contiguous > 1 || zeroed > 1 || unencrypted > 1)
-        return NV_ERR_INVALID_ARGUMENT;
+        return allocationFailed(pages, pageSize, NV_ERR_INVALID_ARGUMENT);
     if (pageSize != kPageBytes || pages > kMaximumPages || cache > 2 || unencrypted || node != -1)
-        return NV_ERR_NOT_SUPPORTED;
+        return allocationFailed(pages, pageSize, NV_ERR_NOT_SUPPORTED);
     Allocation *entry = nullptr;
     for (auto &candidate : binding.allocations) if (!candidate.token) { entry = &candidate; break; }
-    if (!entry) return NV_ERR_INSUFFICIENT_RESOURCES;
+    if (!entry) return allocationFailed(pages, pageSize, NV_ERR_INSUFFICIENT_RESOURCES);
     void *id = token(false);
-    if (!id) return NV_ERR_INSUFFICIENT_RESOURCES;
+    if (!id) return allocationFailed(pages, pageSize, NV_ERR_INSUFFICIENT_RESOURCES);
     void *sessionToken = nullptr;
     NV_STATUS status = binding.session->allocate(pages, ptes, &sessionToken, contiguous != 0, cache);
-    if (status != NV_OK) return status;
+    if (status != NV_OK) return allocationFailed(pages, pageSize, status);
     entry->token = id; entry->sessionToken = sessionToken;
     entry->pages = pages; entry->cache = cache; entry->contiguous = contiguous != 0;
+    allocationRegistered();
     *privateData = id;
     return NV_OK;
 }

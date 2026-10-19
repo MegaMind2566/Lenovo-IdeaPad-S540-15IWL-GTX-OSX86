@@ -1,0 +1,1553 @@
+{
+  "format": 1,
+  "upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "owner": "global_native",
+  "scope": "Source-bound selected Darwin x86-64 physical TU117 feature backend. Describes30 callbacks of the prior110 missing-callback set. Does not establish kernel execution, original adapter success, whole-program route exclusion or production admission.",
+  "selected_profile_version": 1,
+  "immutable_backend_choices": {
+    "imex_channel_count": 0,
+    "linux_capability_filesystem": false,
+    "linux_i2c_adapter_registration": false,
+    "linux_cgroup_backend": false,
+    "tegra_common_clock": false,
+    "tegra_dce_ipc": false,
+    "tegra_host1x": false,
+    "tegra_imp_icc": false,
+    "tegra_devfreq": false,
+    "vgpu_kvm": false,
+    "vgx_hypervisor": false,
+    "device_vm": false,
+    "grid": false
+  },
+  "runtime_preflight": {
+    "entry": "s540GlobalRmFeatureProfilePreflight",
+    "required_actual_facts": "Completed initialized real HostFacts; no unavailable service or invalid free counters; no vGPU hypervisor, IMEX, dma-buf, confidential-compute or capability-root backend.",
+    "required_original_state": {
+      "vendor": "10de",
+      "device": "1f91",
+      "subsystem_vendor": "17aa",
+      "subsystem_device": "3806",
+      "revision": "a1",
+      "cached_pci_config_identity_must_match": true,
+      "forbidden_flags": [
+        "NV_FLAG_SOC_DISPLAY",
+        "NV_FLAG_PASSTHRU",
+        "NV_FLAG_CONTROL"
+      ],
+      "is_tegra_pci_igpu": false,
+      "num_soc_irqs": 0,
+      "dma_buf_supported": false,
+      "coherent_gpu_mem_mode": "NV_COHERENT_GPU_MEM_MODE_NONE"
+    },
+    "caller_obligation": "Call against the actual captured original nv_state before adapter entry; treat any later unavailable operation as failure and unwind with actual ownership. An arbitrary fixture or a preflight result alone is not admission.",
+    "does_not_prove": [
+      "platform power lease",
+      "IRQ registration or quiescence",
+      "kernel stack bound",
+      "GSP firmware execution",
+      "DMA coherency",
+      "all original dispatch/error/unwind routes"
+    ]
+  },
+  "classification_counts": {
+    "mixed_disabled_query_and_unavailable_operation": 1,
+    "official_disabled_capability": 12,
+    "official_disabled_no_owned_resource": 4,
+    "provided_unavailable_operation": 11,
+    "selected_zero_soc_irq_state": 2
+  },
+  "source_sha256": {
+    "kernel-open/common/inc/nv-hypervisor.h": "733409c43ab65708bf5563b76e4dea9d1dfbe1d5cfa0d846fbba511a1186f932",
+    "kernel-open/nvidia/nv-caps-imex.c": "760ef99f2d4c683b38de345523b678910604129803008f3687727b1bea290297",
+    "kernel-open/nvidia/nv-caps.c": "2bbc71f8a42defccfcf19b41e384074425c06b947601b4ef22dbe94629675eba",
+    "kernel-open/nvidia/nv-clk.c": "5322fdd3cc906438b999fd5b8e1563e373276f13055663806e12c6218f494b9d",
+    "kernel-open/nvidia/nv-host1x.c": "4c0f8c85f9ad6ff084361e8c83131eda6ed498aedb205bbb5e56132792cac39e",
+    "kernel-open/nvidia/nv-i2c.c": "b56d2df5ee98fd21232fd259fdc44610e40d37427be72a841af10095a877a495",
+    "kernel-open/nvidia/nv-imp.c": "cbb1c3e25490e7e46a6e163c74c6f56c503ecbd6060fddb673b9b7cc0ebd3c9f",
+    "kernel-open/nvidia/nv-ipc-soc.c": "78de439a8ee4f35a9428150dc61ef281f2893507b2fac3509c4cc4b817cfff19",
+    "kernel-open/nvidia/nv-platform.c": "1104c45a2a09182b9b427bffc04b5db2120d09cb3303b30d854101033d6c0299",
+    "kernel-open/nvidia/nv-reg.h": "a8bff18c6dbeb7f19f5a5e5bbdd9a211329c7a989bb058ee1573395ffe36264f",
+    "kernel-open/nvidia/nv.c": "ce04946d288cf0251668a2d847acceb2a39af9dac2f13bb005f53759c774dbf7",
+    "kernel-open/nvidia/nvlink_caps.c": "224d42493c07f7be0f9c192193fc45556c55ed7ca7fabf43b3bbcfe729418ea9",
+    "kernel-open/nvidia/os-interface.c": "0c8fe2749ec4ee12f1dbbd884cfbc8f1c8a7750903de7453b01c2f6b92e0f6d6",
+    "src/nvidia/arch/nvalloc/unix/include/nv.h": "02ce4b371e0a8dd26f62a320e88c8382dcf31a21b727503a66abcaea9eecf09b",
+    "src/nvidia/arch/nvalloc/unix/include/os-interface.h": "bd281e48ff06b481033fc2fb29a891710a2b4d66fb009cc2b752ab6e90f2113b",
+    "src/nvidia/arch/nvalloc/unix/src/os-hypervisor.c": "f81270cb29c0cdb1cb1bf9e2cfc62a8c5ad0f215de95a55c06ca8991238e77cb",
+    "src/nvidia/arch/nvalloc/unix/src/os.c": "057b50fcb738be90a073b60f63e70559706864ddcec3bf703282563173e3dce4",
+    "src/nvidia/arch/nvalloc/unix/src/osapi.c": "e4336f0e3bb55122680e0d344f970c123664122c2415134b7a6b517c98fcbe75",
+    "src/nvidia/arch/nvalloc/unix/src/osinit.c": "dda3b014833c2e94680e5adea152011ffce72c8067782aceeecaefc28b7394d3",
+    "src/nvidia/arch/nvalloc/unix/src/unix_intr.c": "952e1ccb8b3214c83cfb54748324131900eaff68986169ad7e794be29ef86819"
+  },
+  "callbacks": [
+    {
+      "symbol": "nv_acquire_fabric_mgmt_cap",
+      "namespace_symbol": "s540Global_nv_acquire_fabric_mgmt_cap",
+      "original_type": "NV_STATUS (int, int *)",
+      "original_declaration": "NV_STATUS NV_API_CALL nv_acquire_fabric_mgmt_cap (int, int*);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "lines": [
+          1068,
+          1068
+        ]
+      },
+      "classification": "official_disabled_capability",
+      "selected_semantics": "Initializes valid duplicate output to-1 then returns INSUFFICIENT_PERMISSIONS. Null output is INVALID_ARGUMENT.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv.c",
+          "lines": [
+            5896,
+            5905
+          ]
+        },
+        {
+          "source": "kernel-open/nvidia/nvlink_caps.c",
+          "lines": [
+            37,
+            69
+          ]
+        },
+        {
+          "source": "kernel-open/nvidia/nv-caps.c",
+          "lines": [
+            510,
+            563
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5481,
+            5489
+          ]
+        }
+      ],
+      "caller_expectation": "Without an owned Linux fabric-management capability, validation denies authority. This is not an NVLink hardware observation or a fabric service.",
+      "required_profile_conditions": [
+        "No Linux capability backend/entries; nvidia_caps_root remainsNULL."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "no-increment-for-stated-semantics",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "nv_control_soc_irqs",
+      "namespace_symbol": "s540Global_nv_control_soc_irqs",
+      "original_type": "void (nv_state_t *, NvBool)",
+      "original_declaration": "void NV_API_CALL nv_control_soc_irqs (nv_state_t *, NvBool bEnable);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "lines": [
+          1065,
+          1065
+        ]
+      },
+      "classification": "selected_zero_soc_irq_state",
+      "selected_semantics": "Exact zero-iteration control behavior for the verified selected original nv_state; invalid/unknown/nonzero SoC IRQ state is fatal.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv.c",
+          "lines": [
+            5855,
+            5887
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/unix_intr.c",
+          "lines": [
+            620,
+            628
+          ]
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/unix_intr.c",
+          "lines": [
+            647,
+            655
+          ]
+        }
+      ],
+      "caller_expectation": "Original IRQ enable/disable calls this only for the Tegra display property. This implementation does not register, enable or acknowledge ordinary PCI/MSI interrupts.",
+      "required_profile_conditions": [
+        "Exact selected TU117 original state; num_soc_irqs == 0; no SoC-display/control/passthrough flags; no Tegra iGPU."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "no-increment-for-stated-semantics",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "nv_disable_clk",
+      "namespace_symbol": "s540Global_nv_disable_clk",
+      "original_type": "void (nv_state_t *, TEGRASOC_WHICH_CLK)",
+      "original_declaration": "void NV_API_CALL nv_disable_clk (nv_state_t *, TEGRASOC_WHICH_CLK);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "lines": [
+          1166,
+          1166
+        ]
+      },
+      "classification": "official_disabled_no_owned_resource",
+      "selected_semantics": "Void no-op, matching the original disabled clock backend which owns no clock handles.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-clk.c",
+          "lines": [
+            35,
+            43
+          ]
+        },
+        {
+          "source": "kernel-open/nvidia/nv-clk.c",
+          "lines": [
+            553,
+            560
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+          "lines": [
+            1254,
+            1262
+          ]
+        }
+      ],
+      "caller_expectation": "RmEnableDeviceClks continues on failed max-frequency query before enable/set; teardown calls the disabled void branch. The GPU property guard is evidence, not whole-program unreachability.",
+      "required_profile_conditions": [
+        "CONFIG_COMMON_CLK absent; no clock handle acquisition is implemented."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "no-increment-for-stated-semantics",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "nv_enable_clk",
+      "namespace_symbol": "s540Global_nv_enable_clk",
+      "original_type": "NV_STATUS (nv_state_t *, TEGRASOC_WHICH_CLK)",
+      "original_declaration": "NV_STATUS NV_API_CALL nv_enable_clk (nv_state_t *, TEGRASOC_WHICH_CLK);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "lines": [
+          1165,
+          1165
+        ]
+      },
+      "classification": "provided_unavailable_operation",
+      "selected_semantics": "NV_ERR_NOT_SUPPORTED; sticky unavailable operation.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-clk.c",
+          "lines": [
+            35,
+            43
+          ]
+        },
+        {
+          "source": "kernel-open/nvidia/nv-clk.c",
+          "lines": [
+            544,
+            551
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+          "lines": [
+            1228,
+            1236
+          ]
+        }
+      ],
+      "caller_expectation": "RmEnableDeviceClks continues on failed max-frequency query before enable/set; teardown calls the disabled void branch. The GPU property guard is evidence, not whole-program unreachability.",
+      "required_profile_conditions": [
+        "CONFIG_COMMON_CLK absent; no clock handle acquisition is implemented."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "increment-and-refuse",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "nv_get_current_irq_type",
+      "namespace_symbol": "s540Global_nv_get_current_irq_type",
+      "original_type": "nv_soc_irq_type_t (nv_state_t *)",
+      "original_declaration": "nv_soc_irq_type_t NV_API_CALL nv_get_current_irq_type(nv_state_t*);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "lines": [
+          1323,
+          1323
+        ]
+      },
+      "classification": "selected_zero_soc_irq_state",
+      "selected_semantics": "NV_SOC_IRQ_INVALID_TYPE is the original loop result when num_soc_irqs == 0; invalid/unknown/nonzero SoC state is fatal.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-platform.c",
+          "lines": [
+            184,
+            197
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/unix_intr.c",
+          "lines": [
+            358,
+            366
+          ]
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/unix_intr.c",
+          "lines": [
+            703,
+            711
+          ]
+        }
+      ],
+      "caller_expectation": "Reports an empty SoC IRQ table only. It supplies no current ordinary PCI interrupt identity.",
+      "required_profile_conditions": [
+        "Same exact selected zero-SoC-IRQ original state as control."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "no-increment-for-stated-semantics",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "nv_get_max_freq",
+      "namespace_symbol": "s540Global_nv_get_max_freq",
+      "original_type": "NV_STATUS (nv_state_t *, TEGRASOC_WHICH_CLK, NvU32 *)",
+      "original_declaration": "NV_STATUS NV_API_CALL nv_get_max_freq (nv_state_t *, TEGRASOC_WHICH_CLK, NvU32 *);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "lines": [
+          1168,
+          1168
+        ]
+      },
+      "classification": "official_disabled_capability",
+      "selected_semantics": "NV_ERR_NOT_SUPPORTED; output unchanged.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-clk.c",
+          "lines": [
+            35,
+            43
+          ]
+        },
+        {
+          "source": "kernel-open/nvidia/nv-clk.c",
+          "lines": [
+            572,
+            580
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+          "lines": [
+            1221,
+            1229
+          ]
+        }
+      ],
+      "caller_expectation": "RmEnableDeviceClks continues on failed max-frequency query before enable/set; teardown calls the disabled void branch. The GPU property guard is evidence, not whole-program unreachability.",
+      "required_profile_conditions": [
+        "CONFIG_COMMON_CLK absent; no clock handle acquisition is implemented."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "no-increment-for-stated-semantics",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "nv_get_syncpoint_aperture",
+      "namespace_symbol": "s540Global_nv_get_syncpoint_aperture",
+      "original_type": "NV_STATUS (NvU32, NvU64 *, NvU64 *, NvU32 *)",
+      "original_declaration": "NV_STATUS NV_API_CALL nv_get_syncpoint_aperture(NvU32, NvU64 *, NvU64 *, NvU32 *);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "lines": [
+          1348,
+          1348
+        ]
+      },
+      "classification": "official_disabled_capability",
+      "selected_semantics": "NV_ERR_NOT_SUPPORTED; all three aperture outputs unchanged.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-host1x.c",
+          "lines": [
+            30,
+            39
+          ]
+        },
+        {
+          "source": "kernel-open/nvidia/nv-host1x.c",
+          "lines": [
+            70,
+            82
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            6277,
+            6285
+          ]
+        }
+      ],
+      "caller_expectation": "Failure supplies no mapping or aperture; no Host1x resource is acquired.",
+      "required_profile_conditions": [
+        "NV_LINUX_NVHOST_H_PRESENT and NV_LINUX_HOST1X_NEXT_H_PRESENT absent."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "no-increment-for-stated-semantics",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "nv_i2c_add_adapter",
+      "namespace_symbol": "s540Global_nv_i2c_add_adapter",
+      "original_type": "void *(nv_state_t *, NvU32)",
+      "original_declaration": "void* NV_API_CALL nv_i2c_add_adapter (nv_state_t *, NvU32);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "lines": [
+          1016,
+          1016
+        ]
+      },
+      "classification": "official_disabled_capability",
+      "selected_semantics": "NULL exactly matches disabled Linux I2C adapter registration; no physical I2C hardware absence is claimed.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-i2c.c",
+          "lines": [
+            515,
+            526
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+          "lines": [
+            4325,
+            4333
+          ]
+        }
+      ],
+      "caller_expectation": "RmI2cAddGpuPorts is called during adapter init and stores the optional OS adapter pointer. A disabled registration supplies no I2C handle.",
+      "required_profile_conditions": [
+        "CONFIG_I2C and CONFIG_I2C_MODULE absent."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "no-increment-for-stated-semantics",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "nv_imp_get_import_data",
+      "namespace_symbol": "s540Global_nv_imp_get_import_data",
+      "original_type": "NV_STATUS (TEGRA_IMP_IMPORT_DATA *)",
+      "original_declaration": "NV_STATUS NV_API_CALL nv_imp_get_import_data (TEGRA_IMP_IMPORT_DATA *);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "lines": [
+          1119,
+          1119
+        ]
+      },
+      "classification": "official_disabled_capability",
+      "selected_semantics": "NV_ERR_NOT_SUPPORTED; output unchanged.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-imp.c",
+          "lines": [
+            48,
+            68
+          ]
+        },
+        {
+          "source": "kernel-open/nvidia/nv-imp.c",
+          "lines": [
+            126,
+            149
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5910,
+            5918
+          ]
+        }
+      ],
+      "caller_expectation": "Original os wrapper queries import data only for PDB_PROP_GPU_TEGRA_SOC_NVDISPLAY, otherwise NOT_SUPPORTED.",
+      "required_profile_conditions": [
+        "BPMP/MC IMP feature macros absent."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "no-increment-for-stated-semantics",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "nv_imp_get_uefi_data",
+      "namespace_symbol": "s540Global_nv_imp_get_uefi_data",
+      "original_type": "NV_STATUS (nv_state_t *, NvU32 *, NvU32 *)",
+      "original_declaration": "NV_STATUS NV_API_CALL nv_imp_get_uefi_data (nv_state_t *nv, NvU32 *iso_bw_kbps, NvU32 *floor_bw_kbps);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "lines": [
+          1120,
+          1120
+        ]
+      },
+      "classification": "official_disabled_capability",
+      "selected_semantics": "Valid output pointers are both initialized to zero before NV_ERR_NOT_SUPPORTED, matching the original order. Invalid pointers return INVALID_ARGUMENT without a write.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-imp.c",
+          "lines": [
+            81,
+            124
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5939,
+            5947
+          ]
+        }
+      ],
+      "caller_expectation": "The original wrapper forwards a query; zeros are specified initialization accompanying an error, never successful bandwidth data.",
+      "required_profile_conditions": [
+        "NV_SUPPORTS_PLATFORM_DISPLAY_DEVICE absent or zero."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "no-increment-for-stated-semantics",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "nv_imp_icc_set_bw",
+      "namespace_symbol": "s540Global_nv_imp_icc_set_bw",
+      "original_type": "NV_STATUS (nv_state_t *, NvU32, NvU32)",
+      "original_declaration": "NV_STATUS NV_API_CALL nv_imp_icc_set_bw (nv_state_t *nv, NvU32 avg_bw_kbps, NvU32 floor_bw_kbps);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "lines": [
+          1122,
+          1122
+        ]
+      },
+      "classification": "provided_unavailable_operation",
+      "selected_semantics": "NV_ERR_NOT_SUPPORTED and sticky unavailable operation.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-imp.c",
+          "lines": [
+            363,
+            412
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            6047,
+            6055
+          ]
+        }
+      ],
+      "caller_expectation": "No bandwidth-control service is implemented; the official disabled status does not make an operation usable.",
+      "required_profile_conditions": [
+        "ICC/BPMP/MC/Tegra platform feature macros absent."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "increment-and-refuse",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "nv_set_freq",
+      "namespace_symbol": "s540Global_nv_set_freq",
+      "original_type": "NV_STATUS (nv_state_t *, TEGRASOC_WHICH_CLK, NvU32)",
+      "original_declaration": "NV_STATUS NV_API_CALL nv_set_freq (nv_state_t *, TEGRASOC_WHICH_CLK, NvU32);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "lines": [
+          1170,
+          1170
+        ]
+      },
+      "classification": "provided_unavailable_operation",
+      "selected_semantics": "NV_ERR_NOT_SUPPORTED; sticky unavailable operation.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-clk.c",
+          "lines": [
+            35,
+            43
+          ]
+        },
+        {
+          "source": "kernel-open/nvidia/nv-clk.c",
+          "lines": [
+            592,
+            600
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+          "lines": [
+            1235,
+            1243
+          ]
+        }
+      ],
+      "caller_expectation": "RmEnableDeviceClks continues on failed max-frequency query before enable/set; teardown calls the disabled void branch. The GPU property guard is evidence, not whole-program unreachability.",
+      "required_profile_conditions": [
+        "CONFIG_COMMON_CLK absent; no clock handle acquisition is implemented."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "increment-and-refuse",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "nv_tegra_dce_client_ipc_send_recv",
+      "namespace_symbol": "s540Global_nv_tegra_dce_client_ipc_send_recv",
+      "original_type": "NV_STATUS (NvU32, void *, NvU32)",
+      "original_declaration": "NV_STATUS NV_API_CALL nv_tegra_dce_client_ipc_send_recv(NvU32, void *, NvU32);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "lines": [
+          1139,
+          1139
+        ]
+      },
+      "classification": "provided_unavailable_operation",
+      "selected_semantics": "NV_ERR_NOT_SUPPORTED and sticky unavailable operation; handle/message outputs preserved.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-ipc-soc.c",
+          "lines": [
+            128,
+            136
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5827,
+            5835
+          ]
+        }
+      ],
+      "caller_expectation": "Actual IPC registration, transport and release are not implemented. Any invocation invalidates the selected attempt.",
+      "required_profile_conditions": [
+        "DCE IPC header/config absent; no DCE owner or handle acquired."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "increment-and-refuse",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "nv_tegra_dce_register_ipc_client",
+      "namespace_symbol": "s540Global_nv_tegra_dce_register_ipc_client",
+      "original_type": "NV_STATUS (NvU32, void *, nvTegraDceClientIpcCallback, NvU32 *)",
+      "original_declaration": "NV_STATUS NV_API_CALL nv_tegra_dce_register_ipc_client(NvU32, void *, nvTegraDceClientIpcCallback, NvU32 *);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "lines": [
+          1138,
+          1138
+        ]
+      },
+      "classification": "provided_unavailable_operation",
+      "selected_semantics": "NV_ERR_NOT_SUPPORTED and sticky unavailable operation; handle/message outputs preserved.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-ipc-soc.c",
+          "lines": [
+            117,
+            126
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5779,
+            5787
+          ]
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5781,
+            5789
+          ]
+        }
+      ],
+      "caller_expectation": "Actual IPC registration, transport and release are not implemented. Any invocation invalidates the selected attempt.",
+      "required_profile_conditions": [
+        "DCE IPC header/config absent; no DCE owner or handle acquired."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "increment-and-refuse",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "nv_tegra_dce_unregister_ipc_client",
+      "namespace_symbol": "s540Global_nv_tegra_dce_unregister_ipc_client",
+      "original_type": "NV_STATUS (NvU32)",
+      "original_declaration": "NV_STATUS NV_API_CALL nv_tegra_dce_unregister_ipc_client(NvU32);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "lines": [
+          1140,
+          1140
+        ]
+      },
+      "classification": "provided_unavailable_operation",
+      "selected_semantics": "NV_ERR_NOT_SUPPORTED and sticky unavailable operation; handle/message outputs preserved.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-ipc-soc.c",
+          "lines": [
+            138,
+            142
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5803,
+            5811
+          ]
+        }
+      ],
+      "caller_expectation": "Actual IPC registration, transport and release are not implemented. Any invocation invalidates the selected attempt.",
+      "required_profile_conditions": [
+        "DCE IPC header/config absent; no DCE owner or handle acquired."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "increment-and-refuse",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "nv_tegra_get_rm_interface_type",
+      "namespace_symbol": "s540Global_nv_tegra_get_rm_interface_type",
+      "original_type": "NvU32 (NvU32)",
+      "original_declaration": "NvU32 NV_API_CALL nv_tegra_get_rm_interface_type(NvU32);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "lines": [
+          1137,
+          1137
+        ]
+      },
+      "classification": "official_disabled_capability",
+      "selected_semantics": "The exact NvU32 ABI returns NV_ERR_NOT_SUPPORTED, as in the original disabled DCE branch; it is an error code, not a guessed interface type.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-ipc-soc.c",
+          "lines": [
+            111,
+            115
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5743,
+            5751
+          ]
+        }
+      ],
+      "caller_expectation": "The result is used by the DCE IPC callback dispatcher. No DCE client can be registered by this backend.",
+      "required_profile_conditions": "NV_LINUX_PLATFORM_TEGRA_DCE_DCE_CLIENT_IPC_H_PRESENT absent.",
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "no-increment-for-stated-semantics",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "os_add_record_for_crashLog",
+      "namespace_symbol": "s540Global_os_add_record_for_crashLog",
+      "original_type": "void (void *, NvU32)",
+      "original_declaration": "void NV_API_CALL os_add_record_for_crashLog (void *, NvU32);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+        "lines": [
+          179,
+          179
+        ]
+      },
+      "classification": "official_disabled_no_owned_resource",
+      "selected_semantics": "Void empty callback, exactly as the pinned official Unix backend; input buffer remains untouched.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/os-interface.c",
+          "lines": [
+            1784,
+            1786
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            4742,
+            4750
+          ]
+        }
+      ],
+      "caller_expectation": "The original backend owns no registration for these hooks; real os_dump_stack diagnostics are a separate required service.",
+      "required_profile_conditions": [],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "no-increment-for-stated-semantics",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "os_call_vgpu_vfio",
+      "namespace_symbol": "s540Global_os_call_vgpu_vfio",
+      "original_type": "NV_STATUS (void *, NvU32)",
+      "original_declaration": "NV_STATUS NV_API_CALL os_call_vgpu_vfio (void *, NvU32);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+        "lines": [
+          181,
+          181
+        ]
+      },
+      "classification": "mixed_disabled_query_and_unavailable_operation",
+      "selected_semantics": "NV_ERR_NOT_SUPPORTED with input buffer unchanged. Commands2/3 are ordinary disabled presence queries; wake/remove command1 and all other commands increment unavailable.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/os-interface.c",
+          "lines": [
+            1792,
+            1797
+          ]
+        },
+        {
+          "source": "kernel-open/common/inc/nv-hypervisor.h",
+          "lines": [
+            40,
+            42
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os-hypervisor.c",
+          "lines": [
+            893,
+            901
+          ]
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os-hypervisor.c",
+          "lines": [
+            900,
+            908
+          ]
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os-hypervisor.c",
+          "lines": [
+            912,
+            920
+          ]
+        }
+      ],
+      "caller_expectation": "Presence helpers return the status; wake/remove ignores it, so the sticky unavailable observer independently invalidates that operation.",
+      "required_profile_conditions": [
+        "NV_VGPU_KVM_BUILD absent; actual captured facts must report !vgpuHypervisor."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "query-allowed-operation-increments",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "os_cgroup_for_pid",
+      "namespace_symbol": "s540Global_os_cgroup_for_pid",
+      "original_type": "void *(int, void *, int)",
+      "original_declaration": "void* NV_API_CALL os_cgroup_for_pid(int pid, void *pidInfo, int impl);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+        "lines": [
+          291,
+          291
+        ]
+      },
+      "classification": "official_disabled_capability",
+      "selected_semantics": "NULL exactly matches the original cgrp initialization with neither supported cgroup backend.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/os-interface.c",
+          "lines": [
+            2993,
+            3033
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            2130,
+            2138
+          ]
+        }
+      ],
+      "caller_expectation": "NULL is absence of a Linux cgroup object, not memory/accounting readiness.",
+      "required_profile_conditions": [
+        "NV_DMEM_CGROUP_PRESENT and NV_MISC_CGROUP_PRESENT absent."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "no-increment-for-stated-semantics",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "os_delete_record_for_crashLog",
+      "namespace_symbol": "s540Global_os_delete_record_for_crashLog",
+      "original_type": "void (void *)",
+      "original_declaration": "void NV_API_CALL os_delete_record_for_crashLog (void *);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+        "lines": [
+          180,
+          180
+        ]
+      },
+      "classification": "official_disabled_no_owned_resource",
+      "selected_semantics": "Void empty callback, exactly as the pinned official Unix backend; input buffer remains untouched.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/os-interface.c",
+          "lines": [
+            1788,
+            1790
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            4756,
+            4764
+          ]
+        }
+      ],
+      "caller_expectation": "The original backend owns no registration for these hooks; real os_dump_stack diagnostics are a separate required service.",
+      "required_profile_conditions": [],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "no-increment-for-stated-semantics",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "os_device_vm_present",
+      "namespace_symbol": "s540Global_os_device_vm_present",
+      "original_type": "NV_STATUS (void)",
+      "original_declaration": "NV_STATUS NV_API_CALL os_device_vm_present (void);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+        "lines": [
+          182,
+          182
+        ]
+      },
+      "classification": "official_disabled_capability",
+      "selected_semantics": "NV_ERR_NOT_SUPPORTED, exactly the non-DeviceVM build branch.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/os-interface.c",
+          "lines": [
+            2966,
+            2973
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os-hypervisor.c",
+          "lines": [
+            998,
+            1002
+          ]
+        }
+      ],
+      "caller_expectation": "The original presence helper forwards the status. No DeviceVM session or guest identity is fabricated.",
+      "required_profile_conditions": [
+        "NV_DEVICE_VM_BUILD absent."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "no-increment-for-stated-semantics",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "os_imex_channel_count",
+      "namespace_symbol": "s540Global_os_imex_channel_count",
+      "original_type": "NvS32 (void)",
+      "original_declaration": "NvS32 NV_API_CALL os_imex_channel_count (void);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+        "lines": [
+          211,
+          211
+        ]
+      },
+      "classification": "official_disabled_capability",
+      "selected_semantics": "Returns explicitly selected compile-time channel count0. The original NVreg_ImexChannelCount documentation defines0 as disabled.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-caps-imex.c",
+          "lines": [
+            95,
+            98
+          ]
+        },
+        {
+          "source": "kernel-open/nvidia/nv-caps-imex.c",
+          "lines": [
+            176,
+            180
+          ]
+        },
+        {
+          "source": "kernel-open/nvidia/nv-reg.h",
+          "lines": [
+            923,
+            960
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5592,
+            5600
+          ]
+        }
+      ],
+      "caller_expectation": "Original feature advertising and subscription require IMEX support AND a nonzero count. The existing selected data facade declares support false.",
+      "required_profile_conditions": [
+        "S540_GLOBAL_RM_IMEX_CHANNEL_COUNT fixed0; os_imex_channel_is_supported false; no Linux filesystem/IMEX channel backend."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "no-increment-for-stated-semantics",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "os_imex_channel_get",
+      "namespace_symbol": "s540Global_os_imex_channel_get",
+      "original_type": "NvS32 (NvU64)",
+      "original_declaration": "NvS32 NV_API_CALL os_imex_channel_get (NvU64);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+        "lines": [
+          210,
+          210
+        ]
+      },
+      "classification": "official_disabled_capability",
+      "selected_semantics": "Returns-1: denied/nonexistent Linux channel, exactly the original no-filesystem branch.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-caps-imex.c",
+          "lines": [
+            58,
+            93
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5604,
+            5612
+          ]
+        }
+      ],
+      "caller_expectation": "Subscription first rejects disabled support/count; a negative channel is insufficient permission and acquires no channel.",
+      "required_profile_conditions": [
+        "No Linux filesystem access backend; fixed channel count0."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "no-increment-for-stated-semantics",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "os_inject_vgx_msi",
+      "namespace_symbol": "s540Global_os_inject_vgx_msi",
+      "original_type": "NV_STATUS (NvU16, NvU64, NvU32)",
+      "original_declaration": "NV_STATUS NV_API_CALL os_inject_vgx_msi (NvU16, NvU64, NvU32);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+        "lines": [
+          168,
+          168
+        ]
+      },
+      "classification": "provided_unavailable_operation",
+      "selected_semantics": "NV_ERR_NOT_SUPPORTED and sticky unavailable operation.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/os-interface.c",
+          "lines": [
+            1526,
+            1543
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os-hypervisor.c",
+          "lines": [
+            81,
+            89
+          ]
+        }
+      ],
+      "caller_expectation": "Guest MSI delivery is not implemented and cannot be treated as host PCI/MSI delivery.",
+      "required_profile_conditions": [
+        "NV_VGX_HYPER absent."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "increment-and-refuse",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "os_nv_cap_close_fd",
+      "namespace_symbol": "s540Global_os_nv_cap_close_fd",
+      "original_type": "void (int)",
+      "original_declaration": "void NV_API_CALL os_nv_cap_close_fd (int);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+        "lines": [
+          209,
+          209
+        ]
+      },
+      "classification": "official_disabled_no_owned_resource",
+      "selected_semantics": "Only sentinel-1 is a no-op (owns nothing); any other descriptor is fatal rather than silently pretending to release it.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-caps.c",
+          "lines": [
+            565,
+            624
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5328,
+            5336
+          ]
+        }
+      ],
+      "caller_expectation": "Original cleanup recognizes-1 as no ownership. The port adds a stricter unsupported-owner tripwire than the original all-empty no-filesystem branch.",
+      "required_profile_conditions": [
+        "No descriptor can be acquired by this selected backend."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "no-increment-for-stated-semantics",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "os_nv_cap_create_dir_entry",
+      "namespace_symbol": "s540Global_os_nv_cap_create_dir_entry",
+      "original_type": "nv_cap_t *(nv_cap_t *, const char *, int)",
+      "original_declaration": "nv_cap_t* NV_API_CALL os_nv_cap_create_dir_entry (nv_cap_t *, const char *, int);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+        "lines": [
+          205,
+          205
+        ]
+      },
+      "classification": "provided_unavailable_operation",
+      "selected_semantics": "NULL and sticky unavailable operation; creates no entry.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-caps.c",
+          "lines": [
+            635,
+            648
+          ]
+        },
+        {
+          "source": "kernel-open/nvidia/nv-caps.c",
+          "lines": [
+            729,
+            755
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5113,
+            5121
+          ]
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5126,
+            5134
+          ]
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5196,
+            5204
+          ]
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5281,
+            5289
+          ]
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5364,
+            5372
+          ]
+        }
+      ],
+      "caller_expectation": "These are actual Linux proc/capability allocation/destruction operations, not generic official disabled no-ops. No reachability proof is supplied; original dev-minor evaluation before the caps-root guard is separately unresolved.",
+      "required_profile_conditions": [
+        "nvidia_caps_rootNULL alone is not whole-program route exclusion; any reached operation invalidates the attempt."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "increment-and-refuse",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "os_nv_cap_create_file_entry",
+      "namespace_symbol": "s540Global_os_nv_cap_create_file_entry",
+      "original_type": "nv_cap_t *(nv_cap_t *, const char *, int)",
+      "original_declaration": "nv_cap_t* NV_API_CALL os_nv_cap_create_file_entry (nv_cap_t *, const char *, int);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+        "lines": [
+          206,
+          206
+        ]
+      },
+      "classification": "provided_unavailable_operation",
+      "selected_semantics": "NULL and sticky unavailable operation; creates no entry.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-caps.c",
+          "lines": [
+            635,
+            648
+          ]
+        },
+        {
+          "source": "kernel-open/nvidia/nv-caps.c",
+          "lines": [
+            692,
+            727
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5208,
+            5216
+          ]
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5293,
+            5301
+          ]
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5373,
+            5381
+          ]
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5382,
+            5390
+          ]
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5391,
+            5399
+          ]
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5400,
+            5408
+          ]
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5409,
+            5417
+          ]
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5418,
+            5426
+          ]
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5427,
+            5435
+          ]
+        }
+      ],
+      "caller_expectation": "These are actual Linux proc/capability allocation/destruction operations, not generic official disabled no-ops. No reachability proof is supplied; original dev-minor evaluation before the caps-root guard is separately unresolved.",
+      "required_profile_conditions": [
+        "nvidia_caps_rootNULL alone is not whole-program route exclusion; any reached operation invalidates the attempt."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "increment-and-refuse",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "os_nv_cap_destroy_entry",
+      "namespace_symbol": "s540Global_os_nv_cap_destroy_entry",
+      "original_type": "void (nv_cap_t *)",
+      "original_declaration": "void NV_API_CALL os_nv_cap_destroy_entry (nv_cap_t *);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+        "lines": [
+          207,
+          207
+        ]
+      },
+      "classification": "provided_unavailable_operation",
+      "selected_semantics": "Fatal unsupported owner violation.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-caps.c",
+          "lines": [
+            635,
+            648
+          ]
+        },
+        {
+          "source": "kernel-open/nvidia/nv-caps.c",
+          "lines": [
+            787,
+            796
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5027,
+            5035
+          ]
+        }
+      ],
+      "caller_expectation": "These are actual Linux proc/capability allocation/destruction operations, not generic official disabled no-ops. No reachability proof is supplied; original dev-minor evaluation before the caps-root guard is separately unresolved.",
+      "required_profile_conditions": [
+        "nvidia_caps_rootNULL alone is not whole-program route exclusion; any reached operation invalidates the attempt."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "increment-and-refuse",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "os_nv_cap_validate_and_dup_fd",
+      "namespace_symbol": "s540Global_os_nv_cap_validate_and_dup_fd",
+      "original_type": "int (const nv_cap_t *, int)",
+      "original_declaration": "int NV_API_CALL os_nv_cap_validate_and_dup_fd (const nv_cap_t *, int);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+        "lines": [
+          208,
+          208
+        ]
+      },
+      "classification": "official_disabled_capability",
+      "selected_semantics": "Returns-1, matching the no-filesystem branch; no host descriptor is duplicated or accepted.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-caps.c",
+          "lines": [
+            510,
+            563
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            5547,
+            5555
+          ]
+        }
+      ],
+      "caller_expectation": "A negative duplicate is a capability-validation failure, never a successful authority grant.",
+      "required_profile_conditions": [
+        "NV_FILESYSTEM_ACCESS_AVAILABLE absent or zero; no capability entry owned."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "no-increment-for-stated-semantics",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    },
+    {
+      "symbol": "os_tegra_igpu_perf_boost",
+      "namespace_symbol": "s540Global_os_tegra_igpu_perf_boost",
+      "original_type": "NV_STATUS (void *, NvBool, NvU32, int)",
+      "original_declaration": "NV_STATUS NV_API_CALL os_tegra_igpu_perf_boost (void *, NvBool, NvU32, int);",
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+        "lines": [
+          212,
+          212
+        ]
+      },
+      "classification": "provided_unavailable_operation",
+      "selected_semantics": "NV_ERR_NOT_SUPPORTED and sticky unavailable operation.",
+      "implementation_evidence": [
+        {
+          "source": "kernel-open/nvidia/os-interface.c",
+          "lines": [
+            2432,
+            2476
+          ]
+        }
+      ],
+      "original_caller_evidence": [
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            3460,
+            3468
+          ]
+        }
+      ],
+      "caller_expectation": "No Tegra devfreq operation is implemented. The official disabled status does not claim successful power/performance control.",
+      "required_profile_conditions": [
+        "CONFIG_PM_DEVFREQ and NV_UPDATE_DEVFREQ_PRESENT absent."
+      ],
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "unavailable_observer": "increment-and-refuse",
+      "caller_evidence_kind": "lexical original call sites; not a whole-program reachability claim"
+    }
+  ],
+  "validation": {
+    "native_user_space_fixture": {
+      "checks_each_variant": 55,
+      "variants": [
+        "plain",
+        "fatal-address-undefined-function-sanitizers"
+      ],
+      "platform_device_values_are_fixtures": true,
+      "fatal_child_controls": 4,
+      "unavailable_operation_calls_in_parent": 11,
+      "kernel_execution": false,
+      "gpu_access": false
+    },
+    "kernel_cross_compile": {
+      "target": "x86_64-apple-darwin24",
+      "exact_original_headers": true,
+      "callback_and_profile_definitions": 32,
+      "known_project_dependencies": 13,
+      "static_initializers": 0,
+      "execution": false
+    },
+    "new_native_apple_integration": "pending after integration; previous134-global/156-fault baseline predates these30definitions",
+    "production_admission": false
+  },
+  "unchanged_original_profile": {
+    "checked_patch_count": 10,
+    "modified_by_this_feature_backend": false
+  },
+  "related_unresolved_boundary": "nv_get_dev_minor is evaluated before original nvidia_caps_root guard in osRmCapRegisterGpu; this contract supplies neither a guessed Linux minor nor a claim that NULL caps root eliminates that evaluation."
+}

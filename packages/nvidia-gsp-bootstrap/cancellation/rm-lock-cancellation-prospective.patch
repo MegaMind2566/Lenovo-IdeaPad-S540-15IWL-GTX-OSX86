@@ -1,0 +1,161 @@
+--- a/src/nvidia/src/kernel/rmapi/rmapi.c
++++ b/src/nvidia/src/kernel/rmapi/rmapi.c
+@@ -34,6 +34,7 @@
+ #include "diagnostics/tracer.h"
+ #include "tls/tls.h"
+ #include "core/thread_state.h"
++#include "S540NvidiaGspCancellation.h"
+ #include "gpu_mgr/gpu_mgr.h"
+ #include "resource_desc.h"
+ #include "ctrl/ctrl0000/ctrl0000system.h"
+@@ -592,6 +593,12 @@
+     // behavior (providing exclusive access to the resource).
+     //
+     flags = osApiLockAcquireConfigureFlags(flags);
++    if (s540GspCancellationCurrentScopeActive())
++    {
++        rmStatus = s540GspCancellationCheckCurrent();
++        if (rmStatus != NV_OK)
++            return rmStatus;
++    }
+     if (flags & API_LOCK_FLAGS_COND_ACQUIRE)
+     {
+         if ((flags & RMAPI_LOCK_FLAGS_READ))
+@@ -609,6 +616,48 @@
+             else
+             {
+                 rmStatus = NV_ERR_TIMEOUT_RETRY;
++            }
++        }
++    }
++    else if (s540GspCancellationCurrentScopeActive())
++    {
++        NvBool acquired = NV_FALSE;
++        const NvBool readOnly = !!(flags & RMAPI_LOCK_FLAGS_READ);
++
++        // This experimental scope has no supported low-priority aging contract.
++        if (flags & RMAPI_LOCK_FLAGS_LOW_PRIORITY)
++            return NV_ERR_NOT_SUPPORTED;
++
++        if (!readOnly)
++            portAtomicIncrementU32(&g_RmApiLock.contentionCount);
++        do
++        {
++            rmStatus = s540GspCancellationCheckCurrent();
++            if (rmStatus != NV_OK)
++                break;
++            acquired = readOnly ?
++                portSyncRwLockAcquireReadConditional(g_RmApiLock.pLock) :
++                portSyncRwLockAcquireWriteConditional(g_RmApiLock.pLock);
++            if (!acquired)
++                rmStatus = s540GspCancellationPauseCurrent();
++        } while (!acquired && rmStatus == NV_OK);
++        if (!readOnly)
++            portAtomicDecrementU32(&g_RmApiLock.contentionCount);
++
++        if (acquired)
++        {
++            // Do not publish owner/TLS state for a cancelled acquisition.
++            rmStatus = s540GspCancellationCheckCurrent();
++            if (rmStatus != NV_OK)
++            {
++                if (readOnly)
++                    portSyncRwLockReleaseRead(g_RmApiLock.pLock);
++                else
++                    portSyncRwLockReleaseWrite(g_RmApiLock.pLock);
++            }
++            else if (!readOnly)
++            {
++                g_RmApiLock.threadId = threadId;
+             }
+         }
+     }
+--- a/src/nvidia/src/kernel/core/locks.c
++++ b/src/nvidia/src/kernel/core/locks.c
+@@ -32,6 +32,7 @@
+ #include "core/core.h"
+ #include "core/locks.h"
+ #include "core/thread_state.h"
++#include "S540NvidiaGspCancellation.h"
+ #include "diagnostics/tracer.h"
+ #include "gpu/timer/objtmr.h"
+ #include <os/os.h>
+@@ -658,9 +659,29 @@
+     NvU32     loopCount;
+     NvU32     ownedMask;
+     NvU32     prevMask;
+-
++    const NvU32 requestedGpuMask = gpuMask;
++    NvBool    bCancellableWait;
++    NvBool    bCancellationScope;
++
++retry_without_tokens:
++    // A failed preflight has committed no count, token, owner or mask change.
++    gpuMask = requestedGpuMask;
++    gpuMaskLocked = 0;
++    bLockAll = NV_FALSE;
++    bAcquireAllocLock = NV_FALSE;
++    bGpuAllocLockLocked = NV_FALSE;
+     bHighIrql = (portSyncExSafeToSleep() == NV_FALSE);
+     bCondAcquireCheck = ((flags & GPU_LOCK_FLAGS_COND_ACQUIRE) != 0);
++    if (pGpuLockedMask)
++        *pGpuLockedMask = 0;
++    bCancellationScope = s540GspCancellationCurrentScopeActive();
++    bCancellableWait = !bHighIrql && !bCondAcquireCheck && bCancellationScope;
++    if (bCancellationScope)
++    {
++        status = s540GspCancellationCheckCurrent();
++        if (status != NV_OK)
++            return status;
++    }
+ 
+     if (pGpuLockedMask)
+         *pGpuLockedMask = 0;
+@@ -837,6 +858,36 @@
+         NV_ASSERT_FAILED("Recursive acquire of the GPU alloc lock or locking order violation");
+         status = NV_ERR_INVALID_LOCK_STATE;
+         goto done;
++    }
++
++    if (bCancellableWait && !bCondAcquireCheck)
++    {
++        // Keep the original flags: COND_ACQUIRE changes interrupt semantics.
++        // Preflight every target under the same state lock before any count--.
++        for (gpuInst = _gpuInstLoopHead(gpuMask);
++             _gpuInstLoopShouldContinue(gpuInst);
++             gpuInst = _gpuInstLoopNext(gpuInst, gpuMask))
++        {
++            if (gpuInst == GPU_INST_ALLOC_LOCK)
++            {
++                if (!bAcquireAllocLock)
++                    continue;
++                pGpuLock = pAllocLock;
++            }
++            else
++            {
++                pGpuLock = &rmGpuLockInfo.gpuLocks[gpuInst];
++            }
++            if (pGpuLock->bRunning || pGpuLock->count <= 0)
++            {
++                portSyncSpinlockRelease(rmGpuLockInfo.pLock);
++                threadPriorityRestore();
++                status = s540GspCancellationPauseCurrent();
++                if (status != NV_OK)
++                    return status;
++                goto retry_without_tokens;
++            }
++        }
+     }
+ 
+     // Get start wait time if measuring lock times
+@@ -1067,6 +1118,10 @@
+ done:
+     portSyncSpinlockRelease(rmGpuLockInfo.pLock);
+ 
++    // A cancellation race after commit uses the original coherent rollback.
++    if (status == NV_OK && bCancellationScope)
++        status = s540GspCancellationCheckCurrent();
++
+     if (status != NV_OK)
+     {
+         threadPriorityRestore();

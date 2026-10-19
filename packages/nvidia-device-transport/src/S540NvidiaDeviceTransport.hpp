@@ -3,6 +3,7 @@
 #define S540_NVIDIA_DEVICE_TRANSPORT_HPP
 #include "../../nvidia-os-adapter/upstream/include/nvtypes.h"
 #include "../../nvidia-os-adapter/upstream/include/nvstatus.h"
+#include "../../nvidia-gsp-bootstrap/src/S540NvidiaGspDmaStop.h"
 class IOPCIDevice;
 class IOService;
 namespace S540NvidiaDeviceTransport {
@@ -78,6 +79,13 @@ struct DirectRouteBackend {
     void (*releaseBypassProbe)(void *, void *);
 };
 NV_STATUS attestDirectRoute(const DirectRouteBackend &backend);
+struct PciDwordReader {
+    void *context;
+    NV_STATUS (*read)(void *, NvU32, NvU32 &);
+};
+// Exact pinned NVIDIA extended-capability/DVSEC3 traversal and PDI validity
+// rules. A missing capability differs from malformed or unreadable PCI data.
+NV_STATUS readPciPdi(const PciDwordReader &, NvU64 &);
 // Shared state-machine boundary. Native tests replace only these OS/resource
 // operations; the kernel path supplies real IOPCIDevice/IODMACommand ownership.
 struct Backend {
@@ -119,6 +127,13 @@ public:
 #endif
     NV_STATUS stop();
     NV_STATUS setRmBinding(bool bound);
+    // Beginning is a conservative lifetime hold before any original entry
+    // that can start GPU DMA. Only the fixed original-state receipt verifier
+    // can establish the matching session/generation has actually stopped.
+    NV_STATUS beginHardwareDmaLifetime(const void *originalState);
+    NV_STATUS confirmHardwareDmaStopped(const S540GspDmaStopReceipt *);
+    NvU64 hardwareDmaGeneration() const;
+    bool hardwareDmaLifetimeHeld() const;
     bool active() const;
     Snapshot snapshot() const;
     void *pciHandle() const;
@@ -142,14 +157,16 @@ public:
     NV_STATUS mapDma(void *token, NvU64 *devicePages);
     NV_STATUS unmapDma(void *token, NvU64 *physicalPages);
     // Exact bound-RM ownership transfers. While an IRQ enable attempt remains
-    // undrained, acknowledge logical retirement but retain the same non-reusable
-    // backing and IOVA. Generic release/unmap keep their stronger IRQ guard.
+    // undrained OR hardware DMA lifetime is unproved, acknowledge logical
+    // retirement but retain the same backing and IOVA. Reclamation requires
+    // both independent conditions, including after IRQ teardown succeeds.
     NV_STATUS releaseRmAllocation(void *token, bool &deferred);
     // Preserve a logically freed allocation after a void CPU-unmap callback
     // cannot report a backend completion error to the original owner.
     NV_STATUS retainRmAllocation(void *token);
     NV_STATUS unmapRmDma(void *token, NvU64 *physicalPages, bool &deferred);
     NV_STATUS reclaimRmRetirement(void *token);
+    NV_STATUS checkRmRetirementDrain() const;
     RetirementStatistics retirementStatistics() const;
     NV_STATUS address(void *token, NvU32 page, NvU64 &deviceAddress);
     NV_STATUS borrowHost(void *token, NvU64 offset, NvU64 length, void **address);
@@ -189,6 +206,9 @@ private:
     bool irqArmAttempted_;
     bool platformOwned_;
     bool rmBound_;
+    bool hardwareDmaHeld_;
+    const void *hardwareDmaState_;
+    NvU64 hardwareDmaGeneration_;
     Allocation *find(void *token);
     Allocation *findOwned(void *token);
     bool ordinary() const;

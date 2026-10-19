@@ -1,0 +1,130 @@
+{
+  "format": 1,
+  "repository": "NVIDIA/open-gpu-kernel-modules",
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "status": "finite-enforced-budget; global-initialization-capacity-not-established",
+  "global_capacity_proved": false,
+  "budget_increased": false,
+  "limits": {
+    "active_plus_retired_allocation_records": 32,
+    "pages_per_allocation": 8192,
+    "page_bytes": 4096,
+    "maximum_backend_host_bytes": 134217728
+  },
+  "source_sha256": {
+    "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c": "ed6d7020a8a1772bc44608178aa13a77a72b8bf0eabe3293c12bc9d2b122c6c9",
+    "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c": "df312262254d712e8340c2d428bb5869354756f41b7a5758aac2f1825fdf2550",
+    "src/nvidia/src/kernel/gpu/gsp/message_queue_cpu.c": "de4371a1734b72dd6109da1f055ea170f4b0bd6778d13c62f5b430ac13052f51",
+    "src/nvidia/interface/nvrm_registry.h": "8de487f1f624a628d2c5efffc9d25de2669ac5764f7420cd09da6c53aab1556f",
+    "src/common/uproc/os/common/include/libos_init_args.h": "75174fb8b643fa28537acba0cf3d936f292e99a1590762ccd4936be093ae33a1",
+    "src/nvidia/generated/g_kernel_gsp_nvoc.c": "3efc3c328576587dd34924829c9d607ad8515f9ca455ee5ce1e4d6ffafb45673",
+    "src/nvidia/generated/g_kernel_gsp_nvoc.h": "efac7b363ef50c4a97f91b8395115822b4b7a32d3f6272fa722da7f639217b78",
+    "src/nvidia/arch/nvalloc/common/inc/nv-firmware-chip-family-select.h": "b2d199bdd7ed8a54863418080cb736cd425f7112aa42a96c4d0f6406bf45b159",
+    "src/nvidia/arch/nvalloc/unix/src/osinit.c": "dda3b014833c2e94680e5adea152011ffce72c8067782aceeecaefc28b7394d3",
+    "kernel-open/common/inc/nv-linux.h": "b652154742225a92a808797b75e595ee5707cf6a9e8c2f0987ca78616f22a5b5"
+  },
+  "pinned_firmware_local_measurement": {
+    "name": "gsp_tu10x.bin",
+    "sha256": "0c6124c11d59900a05ab5461e5fc7087fc6687a1badead49a7eeca6ed13eeb3b",
+    "elf_bytes": 22901632,
+    "fwimage_bytes": 22887880,
+    "radix_page_bytes": 4096,
+    "entries_per_radix_page": 512,
+    "radix_pages_root_to_data": [
+      1,
+      1,
+      11,
+      5588
+    ],
+    "radix_allocation_pages": 5601,
+    "radix_allocation_bytes": 22941696,
+    "fits_single_allocation_limit": true,
+    "source": "kernel_gsp.c:6573-6580,6611-6699; libos_init_args.h:48; actual pinned ELF section table",
+    "signature_sections": {
+      ".fwsignature_ga100": 4096,
+      ".fwsignature_tu11x": 4096,
+      ".fwsignature_tu10x": 4096
+    }
+  },
+  "source_local_demands": [
+    {
+      "name": "GSP message queues",
+      "source": "message_queue_cpu.c:63-135,242-279",
+      "default_bytes": 528384,
+      "allocation_records": 1,
+      "scope": "Silicon defaults command256KiB + status256KiB +4096-byte PTE table. Status size accepts registry override; not a global bound."
+    },
+    {
+      "name": "Turing boot argument descriptors",
+      "source": "kernel_gsp_tu102.c:128-156; kernel_gsp.c:6899-6941; libos_init_args.h:31",
+      "default_bytes": 12288,
+      "allocation_records": 3,
+      "scope": "WPR metadata4096, LIBOS init args4096, GSP arguments4096. Zero-FB sysmem heap is a separate conditional allocation; no Zero-FB flag is fabricated."
+    },
+    {
+      "name": "TU117 LIBOS logging selection",
+      "source": "g_kernel_gsp_nvoc.c:1997-2001; g_kernel_gsp_nvoc.h:2342-2344; nv-firmware-chip-family-select.h:108-119; kernel_gsp.c:4055-4167",
+      "scope": "TU117 HAL selects LIBOS2. Baremetal task table accepts INIT and RM; other listed tasks are LIBOS3 only. Release defaults64KiB each; optional kernel log and registry overrides are separate."
+    },
+    {
+      "name": "Firmware/external bindata descriptors",
+      "source": "kernel_gsp.c:6250-6295,6347-6385,6510-6582",
+      "scope": "Bootloader image comes from actual bindata size, one signature descriptor, one image radix descriptor, optional external bindata radix descriptor. Their simultaneous lifetime depends on original phase."
+    },
+    {
+      "name": "Trace crash buffer",
+      "source": "kernel_gsp.c:4294-4360; nvrm_registry.h:3440-3461",
+      "scope": "Default50 NV_RATS_RECORD entries, clamped10..10000 on explicit override; one descriptor when enabled. Record size requires the exact original C profile."
+    },
+    {
+      "name": "State monitor optional buffer",
+      "source": "kernel_gsp.c:4413-4458,5692-5693; nvrm_registry.h:3486-3489; nv-linux.h:500-541",
+      "requested_bytes": 4096,
+      "scope": "Always requests ALLOC_IN_UNPROTECTED_MEMORY. Current transport refuses unencrypted=true rather than claiming decryption. Original call uses NV_CHECK_OK and continues; optional-buffer failure must be reported and classified by the original-error audit."
+    }
+  ],
+  "why_no_global_32_record_proof": [
+    "These local sites do not exhaust every original engine construction, RPC response, memory descriptor, large-page retry and shutdown allocation. A source-file count is not an allocation-lifetime trace.",
+    "Pinned firmware .fwimage size proves one concrete request fits; it does not bound other firmware/static-info-dependent allocations.",
+    "Registry log and queue overrides, optional external bindata and chip/config-dependent descriptors change demand. The intended profile must freeze relevant values before using a numeric peak claim.",
+    "GSP boot retries default to4 (nvrm_registry.h:2854; kernel_gsp.c:5712-5764), but safe release/reuse depends on exact failure phase and actual interrupt drain. Do not multiply a default static list and call it a global proof.",
+    "kernel_gsp.c:5351-5355 frees external bindata after INIT_DONE. osinit.c:2580-2630 releases RM resources before IRQ teardown, and engine destruction can precede late kgspUnload. Logical frees retain records/backing/IOVA until BOTH actual interrupt drain and accepted matching original hardware-DMA stop receipt."
+  ],
+  "runtime_observation": {
+    "api": "AbiStatistics abiStatistics(); capture before unbindRmDevice resets the completed binding.",
+    "fields": [
+      "allocationAttempts",
+      "allocationFailures",
+      "peakAllocationRecords",
+      "largestRequestedPages",
+      "peakRegisteredBytes",
+      "lastFailedPages",
+      "lastFailedPageBytes",
+      "lastAllocationFailure"
+    ],
+    "peak_scope": "Successfully registered bound-RM allocation backing, including non-reusable retired records. Failed-constructor backend quarantines are not registered peak storage; failures remain separately reported.",
+    "failure_semantics": "Exceeding a record/page/byte budget never fabricates ownership or recycles a retirement. Preserve original allocation/PTE output and exact error; retain failed cleanup owners.",
+    "first_hardware_attempt_precondition": "Status-preserving original initialization failure and complete real adapter/GSP/IRQ/DMA teardown, or explicit persistent quarantine owner. The active ten-overlay original profile has no DMA stop receipt issuer and remains gated. This audit alone does not authorize hardware execution."
+  },
+  "native_evidence": {
+    "transport_assertions": 466,
+    "tests": "tests/check_device_transport_native.cpp; budget-refusal/backend-failure/retired-record peak observations and retry-safe ownership",
+    "hardware_allocation_high_water": "not_observed",
+    "kernel_execution": "not_tested"
+  },
+  "pinned_external_bindata_local_measurement": {
+    "name": "ucodes_tu10x.bin",
+    "sha256": "6027ab3736f733b5a06e6e61aaae957d1f990426a263849ebcfa8a49eeb4a5d0",
+    "bytes": 8837632,
+    "radix_pages_root_to_data": [
+      1,
+      1,
+      5,
+      2158
+    ],
+    "radix_allocation_pages": 2165,
+    "radix_allocation_bytes": 8867840,
+    "fits_single_allocation_limit": true,
+    "source": "kernel_gsp.c:6576-6582,6611-6699; pinned immutable UCODES asset"
+  }
+}

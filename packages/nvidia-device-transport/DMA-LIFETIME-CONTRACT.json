@@ -1,0 +1,56 @@
+{
+  "format": 1,
+  "status": "independent-DMA-retention-implemented; original-stop-receipt-issuer-unavailable-in-active-profile",
+  "original_profile_modified": false,
+  "hardware_execution_allowed": false,
+  "source_problem": {
+    "repository": "NVIDIA/open-gpu-kernel-modules",
+    "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+    "original_order": "src/nvidia/arch/nvalloc/unix/src/osinit.c: rm_shutdown_adapter destroys engine state before late kgspUnload; original engine frees can occur after controller drain while GSP still runs.",
+    "logical_unmap": "src/nvidia/arch/nvalloc/unix/src/os.c:4099-4146; successful nv_dma_unmap_alloc revokes original logical mapping metadata.",
+    "consequence": "IRQ exclusion does not prove hardware DMA stopped. Physical pages and exact retained IOVA must survive those logical frees until independent positive original shutdown proof."
+  },
+  "entry_contract": {
+    "api": "NV_STATUS beginRmHardwareDma(Session *);",
+    "timing": "The ordinary-thread serialized owner calls this before any original adapter entry that may start GPU DMA, after exact RM binding. Beginning is conservative retention, never a hardware readiness claim.",
+    "identity": "Capture exact bound nv_state pointer, Session identity and new globally unique nonzero generation; a repeated begin while held refuses without replacing them.",
+    "getters": [
+      "Session::hardwareDmaGeneration()",
+      "Session::hardwareDmaLifetimeHeld()"
+    ]
+  },
+  "stop_contract": {
+    "api": "NV_STATUS confirmRmHardwareDmaStopped(Session *, const S540GspDmaStopReceipt *);",
+    "header": "../nvidia-gsp-bootstrap/src/S540NvidiaGspDmaStop.h",
+    "fixed_verifier": "NV_STATUS s540GspContextValidateDmaStopReceipt(const void *originalState, const void *sessionIdentity, NvU64 sessionGeneration, const S540GspDmaStopReceipt *receipt);",
+    "production_dependency": "Strong direct reference to the original Context bridge. No weak import, caller callback, caller-populated structure or Boolean can clear the hold.",
+    "receipt": "Opaque type owned by the reviewed original bridge; transport never constructs or dereferences it. Verification must match exact original state, Session and generation and positively prove original GSP/adapter teardown.",
+    "failure": "Missing, foreign, stale, failed or unissued proof preserves every page, IOVA, binding and lifetime hold. A successful proof cannot be replayed to clear a newer generation.",
+    "active_ten_overlay_profile": "The actual Context bridge has no issuer and returns NV_ERR_NOT_SUPPORTED. A begun lifetime therefore remains retained; the operational owner gate stays blocked. A prospective checked teardown patch is not active-profile proof."
+  },
+  "reclamation": [
+    "Both independent conditions are required: every attempted IRQ enable has successfully drained AND a begun hardware-DMA lifetime has an accepted matching stop receipt.",
+    "nv_free_pages and nv_dma_unmap_alloc acknowledge exact logical per-allocation retirement while either condition remains unproved, retaining original physical backing, command and IOVA.",
+    "Final nv_free_kernel_mapping closure obeys the same rule; CPU aliases retain their legitimate token identity until close and cannot trigger early backing release.",
+    "Generic Session::release/unmapDma cannot bypass the hold. Private physical release and registry drain check both conditions too, even if the retirement registry is empty.",
+    "Unbinding or stopping the Session refuses while the hardware lifetime is held. Backend completion failure after proof retains progress and owners for retry/quarantine.",
+    "The owner obtains original stop proof, confirms it, then drains retirement before Context destruction/unbinding. Controller drain alone is never a stop proof."
+  ],
+  "native_evidence": {
+    "test": "tests/check_device_transport_native.cpp:hardwareDmaLifetimeTests",
+    "new_assertions": 38,
+    "transport_total_assertions": 466,
+    "authority_fixture": "tests/dma_stop_receipt_fixture.cpp",
+    "fixture_scope": "Native-only sealed mock authority, rejected at compile time under KERNEL; absent/unissued receipts refuse. It never supplies a production receipt or executes original GPU teardown.",
+    "coverage": [
+      "Logical unmap and engine free after IRQ teardown retain pages and exact IOVA while GSP lifetime is held.",
+      "Final CPU alias close retains backing; generic free/unmap and owner unbind/stop cannot bypass retention.",
+      "Null, unissued, foreign-state, foreign-Session, stale-generation, failed and still-running receipts refuse without reclamation.",
+      "Hardware proof before IRQ drain still cannot reclaim, and IRQ drain before hardware proof still cannot reclaim.",
+      "Never-armed failed-init lifetime and empty registry still need a matching positive receipt; successful old receipts cannot clear a new generation.",
+      "Unpublished failed mapping constructors may clean up their new command, while failed retained-map revalidation after IRQ drain never tears down old IOVA."
+    ],
+    "kernel_execution": "not_tested",
+    "gpu_access": false
+  }
+}

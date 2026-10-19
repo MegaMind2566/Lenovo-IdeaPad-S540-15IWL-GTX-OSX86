@@ -170,6 +170,55 @@ class CoordinatorClosureTests(unittest.TestCase):
         self.assertEqual(result['unmet_reviewed_callbacks'], [])
         self.assertEqual(result['unreviewed_retained_imports'], [])
 
+    def test_defined_memory_refusals_and_lifetime_guards_are_not_operational(self):
+        operation, guard = P + 'nv_register_phys_pages', P + 'os_get_page_refcount'
+        reviewed, crypto, _ = closure._reviewed_contracts()
+        result = closure._classify({operation, guard}, {operation, guard},
+                                   {operation, guard}, reviewed, crypto)
+        self.assertEqual(result['provided_unavailable_memory_operations'], [operation])
+        self.assertEqual(result['provided_memory_lifetime_guards'], [guard])
+        self.assertEqual(result['provided_project_callbacks'], [])
+        self.assertEqual(result['unmet_reviewed_callbacks'], [])
+        self.assertFalse(closure.implementation_complete(result))
+
+    def test_disabled_feature_query_does_not_hide_mixed_or_unavailable_operation(self):
+        query, mixed, unavailable = (P + 'os_device_vm_present',
+                                     P + 'os_call_vgpu_vfio', P + 'nv_set_freq')
+        reviewed, crypto, _ = closure._reviewed_contracts()
+        names = {query, mixed, unavailable}
+        result = closure._classify(names, names, names, reviewed, crypto)
+        self.assertEqual(result['provided_disabled_profile_callbacks'], [query])
+        self.assertEqual(result['provided_partially_available_feature_operations'], [mixed])
+        self.assertEqual(result['provided_unavailable_feature_operations'], [unavailable])
+        self.assertEqual(result['provided_project_callbacks'], [])
+        self.assertFalse(closure.implementation_complete(result))
+
+    def test_unknown_retained_import_cannot_complete_implementation(self):
+        name = P + 'invented_unknown_callback'
+        reviewed, crypto, _ = closure._reviewed_contracts()
+        result = closure._classify({name}, set(), set(), reviewed, crypto)
+        self.assertEqual(result['unreviewed_retained_imports'], [name])
+        self.assertFalse(closure.implementation_complete(result))
+
+    def test_profile_review_rejects_changed_original_source(self):
+        reviewed, _, _ = closure._reviewed_contracts()
+        upstream = self.directory / 'changed-profile-upstream'
+        source = upstream / 'src/nvidia/arch/nvalloc/unix/include/nv.h'
+        source.parent.mkdir(parents=True)
+        source.write_text('/* Selected feature conditions cannot survive a changed source. */')
+        with self.assertRaisesRegex(ValueError, 'profile original source hash changed'):
+            closure.review_profile_contracts(reviewed, upstream)
+
+    def test_profile_review_rejects_unknown_classification(self):
+        reviewed, _, _ = closure._reviewed_contracts()
+        changed = json.loads(closure.FEATURE_PROFILE_CONTRACTS.read_text())
+        changed['callbacks'][0]['classification'] = 'invented-success-default'
+        manifest = self.directory / 'changed-feature-profile.json'
+        manifest.write_text(json.dumps(changed))
+        with mock.patch.object(closure, 'FEATURE_PROFILE_CONTRACTS', manifest), \
+                self.assertRaisesRegex(ValueError, 'invalid ABI/category'):
+            closure.review_profile_contracts(reviewed)
+
     def test_supplemental_inventory_preserves_selected_244_contracts(self):
         selected = json.loads(closure.EXTERNAL_CONTRACTS.read_text())
         supplemental = json.loads(closure.COORDINATOR_CONTRACTS.read_text())

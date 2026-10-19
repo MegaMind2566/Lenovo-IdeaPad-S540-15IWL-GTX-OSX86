@@ -24,6 +24,7 @@ NV_STATUS NV_API_CALL s540Global_nv_dma_unmap_alloc(nv_dma_device_t *, NvU64,
 void NV_API_CALL s540Global_nv_set_dma_address_size(nv_state_t *, NvU32);
 NvBool NV_API_CALL s540Global_nv_requires_dma_remap(nv_state_t *);
 NV_STATUS NV_API_CALL s540Global_nv_get_num_phys_pages(void *, NvU32 *);
+NV_STATUS NV_API_CALL s540Global_nv_pci_read_gpu_pdi_from_dvsec(nv_state_t *, NvU64 *);
 NvU64 NV_API_CALL s540Global_nv_get_kern_phys_address(NvU64);
 void *NV_API_CALL s540Global_os_pci_init_handle(NvU32, NvU8, NvU8, NvU8, NvU16 *, NvU16 *);
 NV_STATUS NV_API_CALL s540Global_os_pci_read_byte(void *, NvU32, NvU8 *);
@@ -46,15 +47,22 @@ namespace S540NvidiaDeviceTransport {
 // the complete RM device owner. Opaque identities are compared, not dereferenced.
 NV_STATUS bindRmDevice(Session *session, nv_state_t *state, nv_dma_device_t *dma);
 NV_STATUS unbindRmDevice(Session *session);
-// Call after a successful real interrupt drain and before unbinding. Progress
-// is recorded per allocation; a failed backend completion retains its owner.
+// Call after real interrupt drain AND accepted original hardware-DMA stop
+// receipt (if begun), before unbinding. Partial completion preserves its owner.
 NV_STATUS drainRmRetirements(Session *session);
+NV_STATUS beginRmHardwareDma(Session *session);
+NV_STATUS confirmRmHardwareDmaStopped(Session *session, const S540GspDmaStopReceipt *receipt);
 // Unlike the original scalar ABI, the admission query can report unknown
 // policy. A coordinator must check it before allowing an RM entry to execute.
 NV_STATUS queryRmDmaRemap(nv_state_t *state, NvBool &required);
 struct AbiStatistics {
     NvU32 allocations; NvU32 mappings; NvU32 dmaMappings; bool bound;
     NvU32 retiredAllocations; NvU32 retiredDmaMappings;
+    NvU32 allocationAttempts; NvU32 allocationFailures;
+    NvU32 peakAllocationRecords; NvU32 largestRequestedPages;
+    NvU64 peakRegisteredBytes;
+    NvU32 lastFailedPages; NvU64 lastFailedPageBytes;
+    NV_STATUS lastAllocationFailure;
 };
 AbiStatistics abiStatistics();
 Session *boundRmSession();

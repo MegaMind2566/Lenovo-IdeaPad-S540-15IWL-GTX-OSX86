@@ -80,7 +80,11 @@
     "never_armed_original_unwind": true,
     "partial_controller_enable_retains_dma": true,
     "bounded_active_irq_retirement": true,
-    "active_irq_rm_retirement_complete": false
+    "active_irq_rm_retirement_complete": false,
+    "typed_memory_boundaries": "MEMORY-CONTRACTS.json; unavailable operations do not become implementation-complete by symbol definition",
+    "capacity_audit": "CAPACITY-AUDIT.json; finite enforced budget, no global initialization peak proof",
+    "pci_dvsec_pdi": "Real bound Session configuration reads; original bounded traversal, fallback/status distinction and exact ABI",
+    "independent_hardware_dma_lifetime": "DMA-LIFETIME-CONTRACT.json; requires matching opaque original stop receipt in addition to actual IRQ drain; active profile has no issuer"
   },
   "retirement": {
     "scope": "Exact bound-RM allocation records only; generic Session release/unmap retain their IRQ guards.",
@@ -134,7 +138,12 @@
     "initial_interrupt_mask": "xnu/iokit/Kernel/IOInterruptController.cpp and IOPCIFamily/IOPCIMessagedInterruptController.cpp"
   },
   "local_evidence": {
-    "native_assertions": 421,
+    "native_assertions": 466,
+    "memory_boundary_native_assertions": 63,
+    "memory_boundary_guard_subprocesses": 9,
+    "memory_boundary_original_abi_comparisons": 40,
+    "pci_pdi_native_assertions": 40,
+    "memory_pdi_darwin_macho_crossprobe": "Four production C++ units, one original-header C bridge and both ABI TUs passed pinned SDK/Werror/frame4096; no additional platform imports; not native Apple execution",
     "retirement_darwin_macho_crossprobe": "four production translation units passed with pinned SDK, Werror and 4096-byte frame bound; not native Apple execution",
     "retirement_backend_platform_imports": 32,
     "retirement_backend_imports_outside_sdk_reference": 0,
@@ -150,7 +159,9 @@
     "reviewed_production_import_outside_sdk_reference": "panic; already used by the baseline scalar-policy contract-violation path",
     "native_kernel_execution": false,
     "native_gpu_access": false,
-    "leak_sanitizer": "unavailable-local-container"
+    "leak_sanitizer": "unavailable-local-container",
+    "hardware_dma_lifetime_new_assertions": 38,
+    "native_dma_authority_fixture": "tests/dma_stop_receipt_fixture.cpp; native-only, KERNEL compilation forbidden, not production proof"
   },
   "native_apple_validation": {
     "status": "passed",

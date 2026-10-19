@@ -12,6 +12,10 @@ coverage, target-kernel resolution, a usable original kernel stack boundary,
 sufficient full-adapter allocation capacity and the original-entry PM deadline
 remain requirements.
 
+[The single-test prerequisite record](PRETEST-STATUS.md) distinguishes the last
+completed native validation from subsequent source changes and isolated
+prospective original-source controls.
+
 ## Implemented components
 
 | Component | Behavior |

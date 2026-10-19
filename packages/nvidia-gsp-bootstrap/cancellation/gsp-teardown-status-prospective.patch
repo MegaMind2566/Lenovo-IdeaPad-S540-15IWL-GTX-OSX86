@@ -1,0 +1,256 @@
+--- a/src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c
++++ b/src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c
+@@ -5856,10 +5856,16 @@
+     NV_STATUS rpcStatus = NV_OK;
+     NV_STATUS status;
+ 
++    // Only this function's completed suspend-and-teardown path publishes this bit.
++    if (pKernelGsp->bGspRmUnloaded)
++        return NV_OK;
++
+     if (pKernelGsp->bGspRmForceUnloaded)
+     {
+-        NV_PRINTF(LEVEL_ERROR, "skipping attempt to unload GSP-RM after force unload\n");
+-        return NV_OK;
++        // The force-unload caller also sets its bit after a failed unload.
++        // It therefore cannot substitute for successful hardware quiescence.
++        NV_PRINTF(LEVEL_ERROR, "cannot attest completed GSP-RM force unload\n");
++        return NV_ERR_INVALID_STATE;
+     }
+ 
+ #if RMCFG_FEATURE_GSPRM_BULLSEYE || defined(GSPRM_BULLSEYE_ENABLE)
+@@ -5890,6 +5896,8 @@
+     rpcStatus = gmcapiCommand(pGpu, GMCAPI_CMD_GSP_SUSPEND,
+                               &suspendReq, (NvU32)sizeof(suspendReq),
+                               NULL, NULL);
++    if (rpcStatus != NV_OK)
++        return rpcStatus;
+ 
+     if (gpuIsCCFeatureEnabled(pGpu))
+     {
+@@ -5902,16 +5910,10 @@
+     (void)threadStateResetTimeout(pGpu);
+ #endif
+ 
+-    // Wait for GSP-RM processor to suspend
+-    NV_CHECK_OK(status, LEVEL_WARNING,
+-        kgspWaitForProcessorSuspend_HAL(pGpu, pKernelGsp, NV_TRUE));
+-
+-    //
+-    // Mark GSP-RM as unloaded before any further teardown so the periodic
+-    // health check stops touching the GSP mailboxes. Cleared again on
+-    // resume in kgspWaitForRmResumeDone_IMPL.
+-    //
+-    pKernelGsp->bGspRmUnloaded = NV_TRUE;
++    // A failed suspend is not proof that processor or DMA activity stopped.
++    status = kgspWaitForProcessorSuspend_HAL(pGpu, pKernelGsp, NV_TRUE);
++    if (status != NV_OK)
++        return status;
+ 
+     // Disable heartbeat checking for GSP-RM and Libos
+     _kgspHeartbeatDisable(pGpu, pKernelGsp);
+@@ -5935,8 +5937,13 @@
+     }
+ 
+ 
+-    // Teardown remaining GSP state
++    // Teardown remaining GSP state. Keep owned resources on a failed stage.
+     status = kgspTeardown_HAL(pGpu, pKernelGsp, unloadMode);
++    if (status != NV_OK)
++        return status;
++
++    // Cleared on resume. This bit now certifies both completed stages above.
++    pKernelGsp->bGspRmUnloaded = NV_TRUE;
+ 
+     //
+     // To fix boot issue after GPU reset on ESXi config:
+@@ -5951,12 +5958,7 @@
+         osDelay(250);
+     }
+ 
+-    if (rpcStatus != NV_OK)
+-    {
+-        return rpcStatus;
+-    }
+-
+-    return status;
++    return NV_OK;
+ }
+ 
+ /*!
+--- a/src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c
++++ b/src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c
+@@ -542,23 +542,22 @@
+ 
+         // Reset GSP so we can load FWSEC-SB
+         status = kflcnReset_HAL(pGpu, staticCast(pKernelGsp, KernelFalcon));
+-        NV_ASSERT((status == NV_OK) || (status == NV_ERR_GPU_IN_FULLCHIP_RESET));
++        if (status != NV_OK)
++            return status;
+ 
+         // Invoke FWSEC-SB to put back PreOsApps during driver unload
+         status = kgspPrepareForFwsecSb_HAL(pGpu, pKernelGsp, pKernelGsp->pFwsecUcode, &preparedCmd);
+         if (status != NV_OK)
+         {
+             NV_PRINTF(LEVEL_ERROR, "failed to prepare for FWSEC-SB for PreOsApps during driver unload: 0x%x\n", status);
+-            NV_ASSERT_FAILED("FWSEC-SB prep failed");
++            return status;
+         }
+-        else
++
++        status = kgspExecuteFwsec_HAL(pGpu, pKernelGsp, &preparedCmd);
++        if (status != NV_OK)
+         {
+-            status = kgspExecuteFwsec_HAL(pGpu, pKernelGsp, &preparedCmd);
+-            if ((status != NV_OK) && (status != NV_ERR_GPU_IN_FULLCHIP_RESET))
+-            {
+-                NV_PRINTF(LEVEL_ERROR, "failed to execute FWSEC-SB for PreOsApps during driver unload: 0x%x\n", status);
+-                NV_ASSERT_FAILED("FWSEC-SB failed");
+-            }
++            NV_PRINTF(LEVEL_ERROR, "failed to execute FWSEC-SB for PreOsApps during driver unload: 0x%x\n", status);
++            return status;
+         }
+     }
+ 
+--- a/src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_booter_tu102.c
++++ b/src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_booter_tu102.c
+@@ -151,7 +151,9 @@
+     NV_PRINTF(LEVEL_INFO, "executing Booter Unload\n");
+     NV_ASSERT_OR_RETURN(pKernelGsp->pBooterUnloadUcode != NULL, NV_ERR_INVALID_STATE);
+ 
+-    NV_ASSERT_OK(kflcnReset_HAL(pGpu, staticCast(pKernelSec2, KernelFalcon)));
++    status = kflcnReset_HAL(pGpu, staticCast(pKernelSec2, KernelFalcon));
++    if (status != NV_OK)
++        return status;
+ 
+     // SR code
+     if (sysmemAddrOfSuspendResumeData != 0)
+--- a/src/nvidia/src/kernel/gpu/gpu.c
++++ b/src/nvidia/src/kernel/gpu/gpu.c
+@@ -3742,9 +3742,8 @@
+         engstateLogStateTransitionPost(pEngstate, ENGSTATE_STATE_PRE_UNLOAD, &engTransitionData);
+ 
+         //
+-        // During unload, failure of a single engine may not be fatal.
+-        // ASSERT if there is a failure, but ignore the status and continue
+-        // unloading other engines to prevent (worse) memory leaks.
++        // Retain the first failed transition and the remaining owned state.
++        // Earlier engine stages may be partial; the checked caller quarantines.
+         //
+         if (rmStatus != NV_OK)
+         {
+@@ -3766,7 +3765,9 @@
+                     pEngDescriptorList,
+                     curEngDescIdx);
+             }
+-            rmStatus = NV_OK;
++            // Preserve the first failed stage and all remaining owned state.
++            // Earlier stages may already be partial; the caller must quarantine.
++            return rmStatus;
+         }
+ 
+         // Ensure that intr on other GPUs are serviced
+@@ -3801,6 +3802,7 @@
+     {
+         NV_PRINTF(LEVEL_ERROR,
+                   "failed to unload the device with error 0x%x\n", rmStatus);
++        return rmStatus;
+     }
+ 
+     if (IS_GSP_CLIENT(pGpu))
+@@ -3896,9 +3898,8 @@
+         NV_ASSERT(!gpumgrGetBcEnabledStatus(pGpu));
+ 
+         //
+-        // During unload, failure of a single engine may not be fatal.
+-        // ASSERT if there is a failure, but ignore the status and continue
+-        // unloading other engines to prevent (worse) memory leaks.
++        // Retain the first failed transition and the remaining owned state.
++        // Earlier engine stages may be partial; the checked caller quarantines.
+         //
+         if (rmStatus != NV_OK)
+         {
+@@ -3934,7 +3935,9 @@
+                     pEngDescriptorList,
+                     curEngDescIdx);
+             }
+-            rmStatus = NV_OK;
++            // Preserve the first failed stage and all remaining owned state.
++            // Earlier stages may already be partial; the caller must quarantine.
++            return rmStatus;
+         }
+         // Ensure that intr on other GPUs are serviced
+         gpuServiceInterruptsAllGpus(pGpu);
+@@ -3969,7 +3972,10 @@
+ 
+     // Call the gpuStatePostUnload routine
+     rmStatus = gpuStatePostUnload(pGpu, flags);
+-    NV_ASSERT_OK(rmStatus);
++    if (rmStatus != NV_OK)
++        return rmStatus;
++    if (fatalErrorStatus != NV_OK)
++        return fatalErrorStatus;
+ 
+     if (!(flags & GPU_STATE_FLAGS_PRESERVING))
+         gpuDestroyDefaultClientShare_HAL(pGpu);
+@@ -4055,9 +4061,8 @@
+         NV_ASSERT(!gpumgrGetBcEnabledStatus(pGpu));
+ 
+         //
+-        // During unload, failure of a single engine may not be fatal.
+-        // ASSERT if there is a failure, but ignore the status and continue
+-        // unloading other engines to prevent (worse) memory leaks.
++        // Retain the first failed transition and the remaining owned state.
++        // Earlier engine stages may be partial; the checked caller quarantines.
+         //
+         if (rmStatus != NV_OK)
+         {
+@@ -4079,7 +4084,9 @@
+                     pEngDescriptorList,
+                     curEngDescIdx);
+             }
+-            rmStatus = NV_OK;
++            // Preserve the first failed stage and all remaining owned state.
++            // Earlier stages may already be partial; the caller must quarantine.
++            return rmStatus;
+         }
+ 
+         // Ensure that intr on other GPUs are serviced
+@@ -4088,7 +4095,7 @@
+ 
+     if (IS_VGPU_GSP_PLUGIN_OFFLOAD_ENABLED(pGpu) && IS_GSP_CLIENT(pGpu))
+     {
+-        NV_ASSERT_OK(_gpuRemoveP2pCapsFromPeerGpus(pGpu));
++        NV_ASSERT_OK_OR_RETURN(_gpuRemoveP2pCapsFromPeerGpus(pGpu));
+     }
+ 
+     if (rmStatus != NV_OK)
+@@ -4158,23 +4165,22 @@
+ 
+     gpuStateInitStartedRetract_HAL(pGpu);
+ 
+-    // Clear the property indicating that the state initialization has been done
+-    if (rmStatus == NV_OK)
+-    {
+-        pGpu->setProperty(pGpu, PDB_PROP_GPU_STATE_INITIALIZED, NV_FALSE);
+-    }
+-
+     if (IS_GSP_CLIENT(pGpu))
+     {
+         KernelGsp *pKernelGsp = GPU_GET_KERNEL_GSP(pGpu);
+         rmStatus = kgspUnloadRm(pGpu, pKernelGsp,
+                                 KGSP_UNLOAD_MODE_NORMAL, NV2080_CTRL_GPU_SET_POWER_STATE_GPU_LEVEL_0);
++        if (rmStatus != NV_OK)
++            return rmStatus;
+     }
+ 
+     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     // TODO: Move the above code into appropriate ENGSTATE objects.
+     //       DO NOT ADD MORE SPECIAL CASES HERE!
+     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
++
++    // Commit the initialized-state transition only after GSP teardown succeeds.
++    pGpu->setProperty(pGpu, PDB_PROP_GPU_STATE_INITIALIZED, NV_FALSE);
+ 
+     _gpuFreeInternalObjects(pGpu);
+     gpuDestroyGenericKernelFalconList(pGpu);

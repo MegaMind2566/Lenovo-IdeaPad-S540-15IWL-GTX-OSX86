@@ -1,0 +1,20 @@
+--- a/src/nvidia/arch/nvalloc/unix/src/os.c
++++ b/src/nvidia/arch/nvalloc/unix/src/os.c
+@@ -5085,7 +5085,7 @@
+     OS_RM_CAPS   **ppOsRmCaps
+ )
+ {
+-    NvU32 minor = nv_get_dev_minor(pOsGpuInfo);
++    NvU32 minor;
+     char name[16];
+     NV_STATUS   status;
+     OS_RM_CAPS *pOsRmCaps;
+@@ -5097,6 +5097,8 @@
+     {
+         return NV_OK;
+     }
++
++    minor = nv_get_dev_minor(pOsGpuInfo);
+ 
+     if (*ppOsRmCaps != NULL)
+     {

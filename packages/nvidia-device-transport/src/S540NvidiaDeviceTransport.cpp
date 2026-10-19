@@ -44,11 +44,46 @@ NV_STATUS Detail::attestDirectRoute(const DirectRouteBackend &backend) {
     if (probe) backend.releaseBypassProbe(backend.context, probe);
     return status;
 }
+NV_STATUS Detail::readPciPdi(const PciDwordReader &reader, NvU64 &pdi) {
+    if (!reader.context || !reader.read) return NV_ERR_INVALID_ARGUMENT;
+    // kernel-open/common/inc/nv-pci.h and nv-pci.c:3054-3257, pinned 615.78.08.
+    constexpr NvU32 first = 0x100, end = 0x1000, iterations = (end - first) / 8;
+    constexpr NvU32 dvsecId = 0x23, vendor = 0x10de, designatedId = 3, minimumBytes = 0x14;
+    NvU32 offset = first;
+    for (NvU32 i = 0; i != iterations; ++i) {
+        if (offset < first || offset >= end || (offset & 3)) return NV_ERR_INVALID_OFFSET;
+        NvU32 header = 0;
+        if (reader.read(reader.context, offset, header) != NV_OK) return NV_ERR_INVALID_READ;
+        if ((header & 0xffff) == dvsecId) {
+            NvU32 header1 = 0, header2 = 0;
+            if (reader.read(reader.context, offset + 4, header1) != NV_OK ||
+                reader.read(reader.context, offset + 8, header2) != NV_OK)
+                return NV_ERR_INVALID_READ;
+            if ((header1 & 0xffff) == vendor && (header2 & 0xffff) == designatedId) {
+                const NvU32 length = (header1 >> 20) & 0xfff;
+                if (length < minimumBytes) return NV_ERR_INVALID_DATA;
+                if (offset > end - minimumBytes) return NV_ERR_INVALID_OFFSET;
+                NvU32 low = 0, high = 0;
+                if (reader.read(reader.context, offset + 0xc, low) != NV_OK ||
+                    reader.read(reader.context, offset + 0x10, high) != NV_OK)
+                    return NV_ERR_INVALID_READ;
+                const NvU64 captured = (NvU64(high) << 32) | low;
+                if (!captured || captured == ~NvU64(0)) return NV_ERR_NOT_SUPPORTED;
+                pdi = captured;
+                return NV_OK;
+            }
+        }
+        offset = (header >> 20) & 0xfff;
+        if (!offset) return NV_ERR_NOT_SUPPORTED;
+    }
+    return NV_ERR_CYCLE_DETECTED;
+}
 #if defined(KERNEL)
 void destroyDarwinBackend(void *);
 #endif
 Session::Session() : allocations_{}, backend_{}, snapshot_{}, interruptContract_{}, pciHandle_(nullptr), active_(false),
-    irqInstalled_(false), irqArmed_(false), irqArmAttempted_(false), platformOwned_(false), rmBound_(false) {}
+    irqInstalled_(false), irqArmed_(false), irqArmAttempted_(false), platformOwned_(false), rmBound_(false),
+    hardwareDmaHeld_(false), hardwareDmaState_(nullptr), hardwareDmaGeneration_(0) {}
 // Ordinary use always closes successfully. Failed quiescence deliberately
 // preserves kernel resources, rather than returning DMA storage to the VM.
 Session::~Session() { (void)stop(); }
@@ -260,7 +295,8 @@ NV_STATUS Session::mapDma(void *token, NvU64 *devicePages) {
         previous = address;
     }
     if (!valid) {
-        // A retained mapping can still be addressable by an undrained IRQ.
+        // A retained mapping can still be addressable by hardware DMA or an
+        // undrained IRQ, even after the original logical owner released it.
         // Failed revalidation must never tear down that old ownership.
         if (!retained && backend_.unmapDma(backend_.context, entry->resource) != NV_OK)
             entry->mapped = true;
@@ -275,7 +311,7 @@ NV_STATUS Session::mapDma(void *token, NvU64 *devicePages) {
 NV_STATUS Session::unmapDma(void *token, NvU64 *physicalPages) {
     if (!ordinary() || !active_) return NV_ERR_INVALID_STATE;
     if (!physicalPages) return NV_ERR_INVALID_ARGUMENT;
-    if (irqArmAttempted_) return NV_ERR_IN_USE;
+    if (irqArmAttempted_ || hardwareDmaHeld_) return NV_ERR_IN_USE;
     Allocation *entry = find(token);
     if (!entry) return NV_ERR_OBJECT_NOT_FOUND;
     if (!entry->mapped || entry->dmaRetired) return NV_ERR_INVALID_STATE;
@@ -292,7 +328,7 @@ NV_STATUS Session::unmapRmDma(void *token, NvU64 *physicalPages, bool &deferred)
     Allocation *entry = find(token);
     if (!entry) return NV_ERR_OBJECT_NOT_FOUND;
     if (!entry->mapped || entry->dmaRetired) return NV_ERR_INVALID_STATE;
-    if (!irqArmAttempted_) {
+    if (!irqArmAttempted_ && !hardwareDmaHeld_) {
         const NV_STATUS status = unmapDma(token, physicalPages);
         if (status == NV_OK) deferred = false;
         return status;
@@ -317,7 +353,7 @@ NV_STATUS Session::releaseRmAllocation(void *token, bool &deferred) {
     Allocation *entry = find(token);
     if (!entry) return NV_ERR_OBJECT_NOT_FOUND;
     if (entry->mapped && !entry->dmaRetired) return NV_ERR_IN_USE;
-    if (!irqArmAttempted_) {
+    if (!irqArmAttempted_ && !hardwareDmaHeld_) {
         const NV_STATUS status = releaseEntry(*entry);
         if (status == NV_OK) deferred = false;
         return status;
@@ -337,7 +373,7 @@ NV_STATUS Session::retainRmAllocation(void *token) {
 }
 NV_STATUS Session::reclaimRmRetirement(void *token) {
     if (!ordinary() || !active_ || !rmBound_) return NV_ERR_INVALID_STATE;
-    if (irqArmAttempted_) return NV_ERR_IN_USE;
+    if (irqArmAttempted_ || hardwareDmaHeld_) return NV_ERR_IN_USE;
     Allocation *entry = findOwned(token);
     if (!entry) return NV_ERR_OBJECT_NOT_FOUND;
     if (entry->retired) return releaseEntry(*entry);
@@ -347,6 +383,10 @@ NV_STATUS Session::reclaimRmRetirement(void *token) {
         entry->mapped = entry->dmaRetired = false;
     }
     return NV_OK;
+}
+NV_STATUS Session::checkRmRetirementDrain() const {
+    if (!ordinary() || !active_ || !rmBound_) return NV_ERR_INVALID_STATE;
+    return irqArmAttempted_ || hardwareDmaHeld_ ? NV_STATUS(NV_ERR_IN_USE) : NV_STATUS(NV_OK);
 }
 RetirementStatistics Session::retirementStatistics() const {
     RetirementStatistics out{};
@@ -396,6 +436,7 @@ NV_STATUS Session::hostRead(void *token, NvU64 offset, void *bytes, NvU64 length
     return NV_OK;
 }
 NV_STATUS Session::releaseEntry(Allocation &entry) {
+    if (irqArmAttempted_ || hardwareDmaHeld_) return NV_ERR_IN_USE;
     NV_STATUS status = NV_OK;
     if (entry.mapped) {
         status = backend_.unmapDma(backend_.context, entry.resource);
@@ -413,10 +454,9 @@ NV_STATUS Session::releaseEntry(Allocation &entry) {
 }
 NV_STATUS Session::release(void *token) {
     if (!ordinary() || !active_) return NV_ERR_INVALID_STATE;
-    // A newly registered controller is disabled. Original initialization can
-    // unwind host allocations before the first enable attempt. Once enable has
-    // been attempted, including a failed partial enable, require a full drain.
-    if (irqArmAttempted_) return NV_ERR_IN_USE;
+    // Generic release requires both the real controller drain and independent
+    // original hardware-DMA stop proof once that lifetime has begun.
+    if (irqArmAttempted_ || hardwareDmaHeld_) return NV_ERR_IN_USE;
     Allocation *entry = find(token);
     return entry ? releaseEntry(*entry) : NV_STATUS(NV_ERR_OBJECT_NOT_FOUND);
 }
@@ -462,16 +502,40 @@ NV_STATUS Session::setRmBinding(bool bound) {
     if (!ordinary() || !active_) return NV_ERR_INVALID_STATE;
     if (bound == rmBound_) return NV_ERR_INVALID_STATE;
     if (!bound) {
+        if (irqArmAttempted_ || hardwareDmaHeld_) return NV_ERR_IN_USE;
         const RetirementStatistics pending = retirementStatistics();
         if (pending.allocations || pending.dmaMappings) return NV_ERR_IN_USE;
     }
     rmBound_ = bound;
+    if (!bound) { hardwareDmaState_ = nullptr; hardwareDmaGeneration_ = 0; }
     return NV_OK;
 }
+NV_STATUS Session::beginHardwareDmaLifetime(const void *originalState) {
+    if (!ordinary() || !live() || !rmBound_) return NV_ERR_INVALID_STATE;
+    if (!originalState) return NV_ERR_INVALID_ARGUMENT;
+    if (hardwareDmaHeld_) return NV_ERR_STATE_IN_USE;
+    const NvU64 captured = generation();
+    if (!captured) return NV_ERR_INSUFFICIENT_RESOURCES;
+    hardwareDmaState_ = originalState;
+    hardwareDmaGeneration_ = captured;
+    hardwareDmaHeld_ = true;
+    return NV_OK;
+}
+NV_STATUS Session::confirmHardwareDmaStopped(const S540GspDmaStopReceipt *receipt) {
+    if (!ordinary() || !active_ || !rmBound_ || !hardwareDmaHeld_) return NV_ERR_INVALID_STATE;
+    if (!receipt) return NV_ERR_INVALID_ARGUMENT;
+    const NV_STATUS status = s540GspContextValidateDmaStopReceipt(
+        hardwareDmaState_, this, hardwareDmaGeneration_, receipt);
+    if (status != NV_OK) return status;
+    hardwareDmaHeld_ = false;
+    return NV_OK;
+}
+NvU64 Session::hardwareDmaGeneration() const { return hardwareDmaGeneration_; }
+bool Session::hardwareDmaLifetimeHeld() const { return hardwareDmaHeld_; }
 NV_STATUS Session::stop() {
     if (!active_) return NV_OK;
     if (!ordinary()) return NV_ERR_INVALID_STATE;
-    if (rmBound_) return NV_ERR_IN_USE;
+    if (rmBound_ || hardwareDmaHeld_) return NV_ERR_IN_USE;
     NV_STATUS status = stopInterrupt();
     if (status != NV_OK) return status;
     NV_STATUS first = NV_OK;

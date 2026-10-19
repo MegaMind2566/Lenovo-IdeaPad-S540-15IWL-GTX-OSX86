@@ -198,6 +198,12 @@ class CompileDiagnosticsTests(unittest.TestCase):
             with mock.patch.object(BUILDER, 'execute', side_effect=metadata_fixture), \
                  mock.patch.object(BUILDER, 'original_commands', return_value=[command]), \
                  mock.patch.object(BUILDER.subprocess, 'run', side_effect=compile_fixture), \
+                 mock.patch.object(BUILDER.stack_usage, 'verify_codegen',
+                                   return_value={'explicit_stack_fixture': True}), \
+                 mock.patch.object(BUILDER.stack_usage, 'capture_usage',
+                                   return_value={'explicit_stack_fixture': True}), \
+                 mock.patch.object(BUILDER.stack_usage, 'usage_manifest',
+                                   return_value={'explicit_stack_fixture': True}), \
                  mock.patch.object(BUILDER, 'audit_namespace', return_value={'fixture': True}), \
                  mock.patch.object(BUILDER, 'link_dependency_controls',
                                    side_effect=RuntimeError('ld: explicit failure fixture')):
@@ -212,6 +218,7 @@ class CompileDiagnosticsTests(unittest.TestCase):
             self.assertEqual(record['dependency_controls_status'], 'failed')
             self.assertTrue(record['namespace_applied'])
             self.assertFalse(record['global_rm_executed'])
+            self.assertEqual(record['stack_usage'], {'explicit_stack_fixture': True})
             self.assertNotIn('source_namespace_verified', record)
             self.assertNotIn('dependency_controls', record)
             self.assertEqual(len(record['object_sha256']), 1)

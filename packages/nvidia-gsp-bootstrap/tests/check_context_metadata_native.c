@@ -14,18 +14,7 @@ static void require(NvBool condition, const char *reason) {
     ++checks;
     if (!condition) { fprintf(stderr, "GSP metadata check failed: %s\n", reason); exit(1); }
 }
-// Functional memory helpers, not RM callback success fixtures.
-void *NV_API_CALL os_mem_set(void *out, NvU8 value, NvU32 bytes) {
-    volatile NvU8 *target = out;
-    while (bytes--) *target++ = value;
-    return out;
-}
-void *NV_API_CALL os_mem_copy(void *out, const void *in, NvU32 bytes) {
-    volatile NvU8 *target = out;
-    const volatile NvU8 *source = in;
-    while (bytes--) *target++ = *source++;
-    return out;
-}
+// Actual global Os.c memory helpers are linked by this control.
 // No original RM body is supposed to run in this host-context test. Fail
 // immediately if a fixture accidentally queues RM work or enters teardown.
 void NV_API_CALL rm_execute_work_item(nvidia_stack_t *stack, void *item) {

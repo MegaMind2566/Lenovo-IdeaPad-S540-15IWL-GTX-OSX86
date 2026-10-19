@@ -31,6 +31,8 @@ struct Snapshot {
     bool cleanupComplete, quarantined, nativeFixture;
     // Actual lease observations; these do not clear the PowerLifetime gate.
     bool workerActive, powerDomainJoined, powerOnCompleted, powerRevoked, powerAcknowledged;
+    bool cancellationBound, cancellationRevoked;
+    NvU64 powerRevokedAtNs, cancellationDeadlineNs;
     NvU64 workerThread;
 };
 

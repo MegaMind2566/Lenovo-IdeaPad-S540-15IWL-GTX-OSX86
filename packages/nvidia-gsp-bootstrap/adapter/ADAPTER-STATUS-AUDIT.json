@@ -1,0 +1,46 @@
+{
+  "format": 1,
+  "approved_profile": false,
+  "executable": false,
+  "upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "patch_sha256": "fa2e6c19194467026e9edb025af40c9e15ab393690b228829d01de104a84fc2d",
+  "sources": [
+    {
+      "path": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+      "upstream_sha256": "dda3b014833c2e94680e5adea152011ffce72c8067782aceeecaefc28b7394d3",
+      "prospective_sha256": "1eb093831a7b25d11478091f3665df3d01232dc94e562e7f07438bb0baf8880d"
+    },
+    {
+      "path": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+      "upstream_sha256": "e4336f0e3bb55122680e0d344f970c123664122c2415134b7a6b517c98fcbe75",
+      "prospective_sha256": "bd45381e93aa868e97360f94f768a0c39ed7391b527e75683ebdb9f2bf6a5ab3"
+    },
+    {
+      "path": "src/nvidia/arch/nvalloc/unix/include/osapi.h",
+      "upstream_sha256": "1c547039ccfa61deff34bc39bd0e733c0c33344cef6f2af5fc3775c80ee92cfd",
+      "prospective_sha256": "aa50f4d4effc81d4e57ecb05e08dc8802b190688adfb94646875c70d7c3c6b0d"
+    }
+  ],
+  "pending_device_ownership": {
+    "serialization_requirement": "Selected single-adapter init and shutdown under the original API lock.",
+    "record": "Exact nv_state owner, GPU instance and GPUMGR device instance between successful create and attach transfer.",
+    "failed_destroy": "Retain record and GPU lock; reject overwrite and checked shutdown; observer reports resources.",
+    "retry_after_partial_destructive_failure_allowed": false
+  },
+  "rmapi_allocation": {
+    "gpu_lock_failure_boolean": "NV_FALSE, never a nonzero NV_STATUS success conversion.",
+    "partial_handle_cleanup_owner": "Sole RmInitAdapter caller performs one checked shutdown; allocator performs no hidden Free."
+  },
+  "partial_gsp_attempt": {
+    "record_point": "Immediately before actual kgspInitRm; reject any existing attempt record.",
+    "incomplete_gpu_state": "Checked shutdown returns NOT_READY before freeing any RMAPI/core/GPU/DMA/register resources.",
+    "record_clear_requirement": "Complete checked shutdown success together with the separate required GSP status source profile.",
+    "adapter_patch_alone_admits_gsp_shutdown": false,
+    "failed_partial_attempt_retry_allowed": false
+  },
+  "limitations": [
+    "Partial destructive cleanup is quarantined, not retryable.",
+    "Original void engine destructors and DMA quiescence still require independent review.",
+    "This patch alone does not establish safe PM completion or target-kernel admission."
+  ]
+}

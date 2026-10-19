@@ -7,6 +7,7 @@
 #include "../timers/S540NvidiaGspTimers.h"
 #include "../../nvidia-global-rm/src/S540NvidiaGlobalRm.h"
 #include "../../nvidia-global-rm-crypto/src/S540NvidiaGlobalCrypto.h"
+#include "../../nvidia-device-transport/src/nv_unsupported_memory.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -17,24 +18,13 @@ static NvU32 detachMode, metadataReleases, stackFailures;
 static nv_state_t *expectedState;
 static nv_nano_timer_t *originalTimer;
 static NvBool cryptoRefusalOnInit;
+static NvBool originalInitFailure;
+static NvBool memoryRefusalOnInit;
 
 static void require(NvBool condition, const char *reason)
 {
     ++checks;
     if (!condition) { fprintf(stderr, "GSP context lifecycle failed: %s\n", reason); exit(1); }
-}
-void *NV_API_CALL os_mem_set(void *out, NvU8 value, NvU32 bytes)
-{
-    volatile NvU8 *target = out;
-    while (bytes--) *target++ = value;
-    return out;
-}
-void *NV_API_CALL os_mem_copy(void *out, const void *in, NvU32 bytes)
-{
-    volatile NvU8 *target = out;
-    const volatile NvU8 *source = in;
-    while (bytes--) *target++ = *source++;
-    return out;
 }
 static NvBool validStack(nvidia_stack_t *stack, nv_state_t *state)
 {
@@ -59,6 +49,15 @@ NvBool NV_API_CALL rm_init_private_state(nvidia_stack_t *stack, nv_state_t *stat
 }
 NvBool NV_API_CALL rm_init_adapter(nvidia_stack_t *stack, nv_state_t *state)
 {
+    if (originalInitFailure && validStack(stack, state)) return NV_FALSE;
+    if (memoryRefusalOnInit && validStack(stack, state)) {
+        NvU64 address = 0x1000;
+        void *output = (void *)(NvUPtr)0x1111;
+        if (nv_register_phys_pages(state, &address, 1, 0, &output) != NV_ERR_NOT_SUPPORTED ||
+            output != (void *)(NvUPtr)0x1111) abort();
+        s540DeviceMemoryResetStatistics();
+        return NV_TRUE;
+    }
     if (!cryptoRefusalOnInit || !validStack(stack, state)) abort();
     // Explicit apparent-success fixture. The genuine unsupported crypto
     // boundary must invalidate admission even though this body returns true.
@@ -134,6 +133,7 @@ static S540GspDeviceFacts deviceFacts(void)
     facts.format = 1; facts.vendor = 0x10de; facts.device = 0x1f91;
     facts.subsystemVendor = 0x17aa; facts.subsystemDevice = 0x3806;
     facts.configuration[0] = 0x1f9110de; facts.configuration[11] = 0x380617aa;
+    facts.configuration[2] = 0xa1;
     facts.segmentKnown = facts.pciConfigurationRead = facts.barsVerified = facts.poweredD0 = NV_TRUE;
     facts.intelConsoleVerified = facts.nvidiaConsoleExcluded = facts.noCoherentGpuMemoryProfile = NV_TRUE;
     facts.pciHandle = &checks;
@@ -165,19 +165,71 @@ static NvBool cryptoRefusedCase(NvU32 mode)
             expectedState = s540GspContextState(context);
             if (s540GspContextSetDetacher(context, &detacher) != NV_OK ||
                 s540GspContextPrepare(context) != NV_OK) _Exit(5);
-            cryptoRefusalOnInit = NV_TRUE;
-            if (s540GspContextInitializeAdapter(context) != NV_ERR_INVALID_STATE) _Exit(6);
+            cryptoRefusalOnInit = mode == 1;
+            originalInitFailure = mode == 2;
+            if (s540GspContextInitializeAdapter(context) !=
+                    (mode == 2 ? NV_ERR_NOT_READY : NV_ERR_INVALID_STATE)) _Exit(6);
             s540GspContextSnapshot(context, &contextState);
-            if (!contextState.adapterAttempted || !contextState.adapterInitialized ||
+            if (!contextState.adapterAttempted ||
+                contextState.adapterInitialized != (mode == 1) ||
+                (mode == 2 && (!contextState.quarantined ||
+                    s540GspContextReleaseOriginalState(context, NV_TRUE) != NV_ERR_INVALID_STATE)) ||
                 s540GspContextDestroy(context, NV_TRUE, NULL) != NV_ERR_INVALID_STATE) _Exit(7);
         }
         s540GlobalRmHostSnapshot(&hostState);
         s540Global_crypto_snapshot(&crypto);
+        if (mode == 2) {
+            _Exit(hostState.liveAllocations && !hostState.unavailableCalls &&
+                !hostState.invalidFrees && !crypto.unavailable_calls &&
+                !privateReleases && !eventReleases && !detachCalls ? 0 : 9);
+        }
         // The host itself stayed clean; a genuine high-mask crypto refusal is
         // the sole reason the apparent original success cannot be admitted.
         _Exit(!hostState.unavailableCalls && !hostState.invalidFrees &&
               crypto.unavailable_calls == 1 && crypto.unavailable_symbol_mask_high &&
               !crypto.counter_overflow ? 0 : 8);
+    }
+    return waitpid(child, &result, 0) == child && WIFEXITED(result) && WEXITSTATUS(result) == 0;
+}
+static NvBool memoryRefusedCase(NvU32 mode)
+{
+    pid_t child = fork();
+    int result = 0;
+    if (child < 0) return NV_FALSE;
+    if (!child) {
+        S540NvidiaGlobalRmPlatformFacts host = hostFacts();
+        S540GspDeviceFacts facts = deviceFacts();
+        S540GspContext *context = NULL;
+        S540GspContextSnapshot captured;
+        S540GspContextDetacher detacher = { &detachMode, detach };
+        NvU64 address = 0x1000;
+        void *output = (void *)(NvUPtr)0x1111;
+        if (s540GlobalRmHostInitialize(&host) != NV_OK) _Exit(2);
+        if (mode == 0) {
+            (void)nv_register_phys_pages(NULL, &address, 1, 0, &output);
+            s540DeviceMemoryResetStatistics();
+            _Exit(s540DeviceMemoryStatistics().unavailableOperationsEver == 1 &&
+                s540GspContextCreate(&facts, &context) == NV_ERR_NOT_SUPPORTED && !context ? 0 : 3);
+        }
+        if (s540GspContextCreate(&facts, &context) != NV_OK) _Exit(4);
+        expectedState = s540GspContextState(context);
+        if (s540GspContextSetDetacher(context, &detacher) != NV_OK ||
+            s540GspContextPrepare(context) != NV_OK) _Exit(5);
+        if (mode == 1) {
+            (void)nv_register_phys_pages(expectedState, &address, 1, 0, &output);
+            s540DeviceMemoryResetStatistics();
+        } else if (mode == 2) memoryRefusalOnInit = NV_TRUE;
+        else expectedState->pci_cfg_space[2] = 0xa2;
+        if (s540GspContextInitializeAdapter(context) !=
+            (mode == 3 ? NV_ERR_NOT_SUPPORTED : NV_ERR_INVALID_STATE)) _Exit(6);
+        s540GspContextSnapshot(context, &captured);
+        if (mode == 3) _Exit(!captured.adapterAttempted && !captured.adapterInitialized ? 0 : 7);
+        if (s540DeviceMemoryStatistics().unavailableOperationsEver != 1 ||
+            s540DeviceMemoryStatistics().unavailableOperations != 0) _Exit(8);
+        if (mode == 1) _Exit(!captured.adapterAttempted && !captured.adapterInitialized &&
+            s540GspContextDestroy(context, NV_TRUE, NULL) == NV_ERR_INVALID_STATE ? 0 : 9);
+        _Exit(captured.adapterAttempted && captured.adapterInitialized && captured.quarantined &&
+            s540GspContextDestroy(context, NV_TRUE, NULL) == NV_ERR_INVALID_STATE ? 0 : 10);
     }
     return waitpid(child, &result, 0) == child && WIFEXITED(result) && WEXITSTATUS(result) == 0;
 }
@@ -193,6 +245,11 @@ int main(void)
     unsigned i;
     require(cryptoRefusedCase(0), "earlier lifetime crypto refusal blocks a later context despite a clean host");
     require(cryptoRefusedCase(1), "crypto refusal during apparent adapter success invalidates admission and retains owner");
+    require(cryptoRefusedCase(2), "failed original Boolean cannot authorize private state or backing destruction");
+    require(memoryRefusedCase(0), "memory refusal survives native telemetry reset and blocks context creation");
+    require(memoryRefusedCase(1), "memory refusal before adapter entry survives reset and retains context");
+    require(memoryRefusedCase(2), "ignored memory refusal during apparent adapter success quarantines the context");
+    require(memoryRefusedCase(3), "actual feature preflight rejects changed captured revision before original entry");
     require(s540GlobalRmHostInitialize(&host) == NV_OK, "tracked host starts");
     require(s540GspContextCreate(&facts, &context) == NV_OK, "real context starts");
     expectedState = s540GspContextState(context);
@@ -201,6 +258,11 @@ int main(void)
     require(s540GspContextSetDetacher(context, &detacher) == NV_OK, "owner registers real detach operations");
     require(s540GspContextSetDetacher(context, &detacher) == NV_ERR_INVALID_STATE, "detacher cannot be replaced");
     require(s540GspContextPrepare(context) == NV_OK, "typed original fixtures acquire real resources");
+    require(s540GspContextValidateDmaStopReceipt(expectedState, context, 1, NULL) ==
+            NV_ERR_INVALID_ARGUMENT, "DMA stop proof cannot be omitted");
+    require(s540GspContextValidateDmaStopReceipt(expectedState, context, 1,
+            (const S540GspDmaStopReceipt *)(NvUPtr)1) == NV_ERR_NOT_SUPPORTED,
+            "unissued caller pointer cannot authorize hardware DMA retirement");
     require(s540GspTimersBind(expectedState) == NV_OK, "real timer binding owns original state");
     nv_create_nano_timer(expectedState, &checks, &originalTimer);
     require(originalTimer != NULL, "original timer handle acquired");

@@ -19,6 +19,11 @@ import struct
 import subprocess
 import sys
 
+# Diagnostic controls also import this builder via spec_from_file_location.
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+import nvidia_stack_usage as stack_usage
+
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE = ROOT / 'packages/nvidia-global-rm'
 COMMIT = '1a82fbfda8f321b056eb3568850f9316c5e465c5'
@@ -499,24 +504,35 @@ def compile_original(upstream: Path, output: Path, compiler: Path,
     (output / 'g_nvid_string.c').write_text(
         'const char NVRM_ID[] = "nvidia id: NVIDIA UNIX Open Kernel Module for x86_64 '
         '615.78.08 Release Build (build@ci)";\nconst char *const pNVRM_ID = NVRM_ID + 11;\n')
-    def one(entry: tuple[int, list[str]]) -> dict:
-        index, args = entry
-        source = args[args.index('-c') + 1]
-        args += ['-DNV_UNIX=1', '-D__NV_UNIX_VERSION_H__',
+    def extra_flags() -> list[str]:
+        extra = ['-DNV_UNIX=1', '-D__NV_UNIX_VERSION_H__',
                  '-DNV_VERSION_STRING="' + RELEASE + '"', '-Wframe-larger-than=4096',
                  '-Werror=frame-larger-than']
         if namespace is not None:
-            args += ['-include', str(namespace)]
+            extra += ['-include', str(namespace)]
         if cross_probe:
-            # Zig cross-target implementation requires PIC. Native Apple kernel
-            # compilation uses the original non-PIC flags and -mkernel instead.
-            args += ['-target', 'x86_64-macos-none', '-fPIC']
+            extra += ['-target', 'x86_64-macos-none', '-fPIC']
         else:
-            args += ['-mkernel', '-arch', 'x86_64', '-mmacosx-version-min=15.0']
+            extra += ['-mkernel', '-arch', 'x86_64', '-mmacosx-version-min=15.0']
+        return extra
+    # The actual compiler must support the reporting flag and preserve the
+    # emitted control object bytes before the complete source compilation.
+    stack_capability = stack_usage.verify_codegen(
+        [str(compiler)], commands[0][1:commands[0].index('-c')] + extra_flags(),
+        output / 'stack-usage-capability', cwd=source_root, native_apple=not cross_probe)
+    def one(entry: tuple[int, list[str]]) -> dict:
+        index, args = entry
+        source = args[args.index('-c') + 1]
+        args += [*extra_flags(), '-fstack-usage']
         result = subprocess.run(args, cwd=source_root, text=True, capture_output=True, timeout=180)
         (output / ('compile-%04d.log' % index)).write_text(result.stdout + result.stderr)
-        return {'source': source, 'status': result.returncode,
-                'object': args[args.index('-o') + 1], 'diagnostics': result.stderr}
+        record = {'source': source, 'status': result.returncode,
+                  'object': args[args.index('-o') + 1], 'diagnostics': result.stderr}
+        if result.returncode == 0:
+            record['stack_usage'] = stack_usage.capture_usage(
+                (source_root / source).resolve(strict=True), Path(record['object']), args,
+                cwd=source_root, native_apple=not cross_probe)
+        return record
     with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
         results = list(pool.map(one, enumerate(commands)))
     failures = [item for item in results if item['status']]
@@ -525,6 +541,8 @@ def compile_original(upstream: Path, output: Path, compiler: Path,
         raise ValueError('Original RM Darwin compilation failed: ' +
                          json.dumps(failures, sort_keys=True)[:12000])
     objects = [Path(item['object']) for item in results]
+    stack_manifest = stack_usage.usage_manifest(
+        [item['stack_usage'] for item in results], output / 'stack-usage-manifest.json')
     if len(objects) != len(set(objects)):
         raise ValueError('Original RM object paths collide.')
     contract = (audit_namespace(objects, namespace) if namespace is not None else
@@ -536,6 +554,8 @@ def compile_original(upstream: Path, output: Path, compiler: Path,
               'namespace_contract': contract, 'global_rm_executed': False,
               'adapter_initialized': False, 'firmware_loaded': False,
               'compiler_version': execute([str(compiler), '--version']).stdout.splitlines()[0],
+              'stack_usage_capability': stack_capability,
+              'stack_usage': stack_manifest,
               'object_sha256': {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
                                 for path in objects},
               'source_sha256': {

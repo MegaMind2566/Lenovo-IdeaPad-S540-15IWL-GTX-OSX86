@@ -24,6 +24,8 @@ EXTERNAL_CONTRACTS = ROOT / 'packages/nvidia-global-rm/EXTERNAL-CONTRACTS.json'
 CRYPTO_CONTRACTS = ROOT / 'packages/nvidia-global-rm-crypto/upstream/PROVENANCE.json'
 COORDINATOR_CONTRACTS = ROOT / 'packages/nvidia-global-rm/COORDINATOR-CONTRACTS.json'
 LIFECYCLE_SOURCE = ROOT / 'packages/nvidia-global-rm/src/S540NvidiaGlobalRmLifecycle.c'
+MEMORY_PROFILE_CONTRACTS = ROOT / 'packages/nvidia-device-transport/MEMORY-CONTRACTS.json'
+FEATURE_PROFILE_CONTRACTS = ROOT / 'packages/nvidia-global-rm/FEATURE-PROFILE-CONTRACTS.json'
 EXPECTED_ORIGINAL_OBJECTS = 1100
 GATED_LIFECYCLE_ROOTS = ('coreInitializeRm', 'RmShutdownRm')
 # The selected no-RM-ACPI-events backend supplies exact typed refusals for
@@ -114,6 +116,61 @@ def _reviewed_contracts() -> tuple[dict[str, dict], set[str], dict]:
         ('packages/nvidia-global-rm-crypto/upstream/PROVENANCE.json', CRYPTO_CONTRACTS),
         ('packages/nvidia-global-rm/upstream/adapted/SOURCE-CONTRACT.json', SOURCE_CONTRACT))}
     return reviewed, crypto_names, provenance
+
+
+def review_profile_contracts(reviewed: dict[str, dict], upstream: Path | None = None) -> tuple[dict, dict]:
+    """Keep typed refusals/tripwires distinct from working callback definitions.
+
+    The machine contracts classify source semantics, not runtime reachability.
+    The native full-tree audit also verifies every cited original source hash;
+    small classifier controls may use the manifest-only path explicitly.
+    """
+    categories = {
+        'unavailable-memory-operation': 'provided_unavailable_memory_operations',
+        'unavailable-lifetime-or-scalar-guard': 'provided_memory_lifetime_guards',
+        'expected-disabled-platform-branch': 'provided_disabled_profile_callbacks',
+        'official-empty-release': 'provided_disabled_profile_callbacks',
+        'provided_unavailable_operation': 'provided_unavailable_feature_operations',
+        'mixed_disabled_query_and_unavailable_operation': 'provided_partially_available_feature_operations',
+        'official_disabled_capability': 'provided_disabled_profile_callbacks',
+        'official_disabled_no_owned_resource': 'provided_disabled_profile_callbacks',
+        'selected_zero_soc_irq_state': 'provided_profile_state_queries',
+    }
+    rows, provenance = {}, {}
+    for path, count in ((MEMORY_PROFILE_CONTRACTS, 40), (FEATURE_PROFILE_CONTRACTS, 30)):
+        manifest = json.loads(path.read_text())
+        commit = manifest.get('commit', manifest.get('upstream_commit'))
+        callbacks = manifest.get('callbacks', [])
+        if manifest.get('format') != 1 or commit != original.COMMIT or len(callbacks) != count:
+            raise ValueError('The selected callback profile source identity or inventory changed: ' + str(path))
+        for callback in callbacks:
+            name = callback.get('namespace_symbol')
+            original_type = callback.get('original_type', callback.get('type'))
+            classification = callback.get('classification')
+            if (name != original.PREFIX + callback.get('symbol', '') or name in rows or
+                    name not in reviewed or original_type != reviewed[name].get('type') or
+                    classification not in categories):
+                raise ValueError('A source-classified profile callback has an invalid ABI/category: ' + str(name))
+            rows[name] = {'category': categories[classification],
+                          'source_classification': classification,
+                          'contract': path.relative_to(ROOT).as_posix(),
+                          'operational_service_proven': False,
+                          'unreachable_entry_proven': False}
+        hashes = manifest.get('source_sha256')
+        if not isinstance(hashes, dict) or not hashes:
+            raise ValueError('A selected callback profile lacks original source hashes: ' + str(path))
+        if upstream is not None:
+            for source, expected in hashes.items():
+                if hashlib.sha256((upstream / source).read_bytes()).hexdigest() != expected:
+                    raise ValueError('A selected callback profile original source hash changed: ' + source)
+        provenance[path.relative_to(ROOT).as_posix()] = {
+            'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+            'callback_count': count, 'original_source_hashes': len(hashes),
+            'original_source_hashes_verified': upstream is not None,
+            'runtime_reachability_proven': False}
+    if len(rows) != 70:
+        raise ValueError('The memory and feature callback profile inventories overlap.')
+    return rows, provenance
 
 
 def _control_symbols(image: Path, filetype: int):
@@ -231,17 +288,26 @@ def review_coordinator_contracts(upstream: Path | None) -> tuple[dict[str, dict]
 
 
 def _classify(retained: set[str], project_defined: set[str], original_external: set[str],
-              reviewed: dict[str, dict], crypto: set[str]) -> dict:
+              reviewed: dict[str, dict], crypto: set[str], profiles: dict | None = None) -> dict:
     unknown = retained - original_external
     compiler = retained & original.COMPILER_MEMORY_IMPORTS
     provided = retained & project_defined
     missing = retained - provided - compiler
     reviewed_missing = missing & reviewed.keys()
     abi_review = missing - reviewed.keys() - crypto
+    if profiles is None:
+        profiles, _ = review_profile_contracts(reviewed)
+    profile_groups = {category: sorted(name for name in provided & profiles.keys()
+                                      if profiles[name]['category'] == category)
+                      for category in (
+                          'provided_unavailable_memory_operations', 'provided_memory_lifetime_guards',
+                          'provided_unavailable_feature_operations', 'provided_partially_available_feature_operations',
+                          'provided_disabled_profile_callbacks', 'provided_profile_state_queries')}
     return {
-        'provided_project_callbacks': sorted(provided - crypto - compiler - UNAVAILABLE_ACPI),
+        'provided_project_callbacks': sorted(provided - crypto - compiler - UNAVAILABLE_ACPI - profiles.keys()),
         'provided_unavailable_crypto': sorted(provided & crypto),
         'provided_unavailable_acpi_methods': sorted(provided & UNAVAILABLE_ACPI),
+        **profile_groups,
         'compiler_memory_helpers': sorted(compiler),
         'unmet_reviewed_callbacks': [
             {'symbol': name, **{key: reviewed[name][key] for key in
@@ -257,6 +323,19 @@ def _classify(retained: set[str], project_defined: set[str], original_external: 
         'provided_without_selected_abi_contract': sorted(provided - reviewed.keys() - crypto - compiler),
         'unreviewed_retained_imports': sorted(unknown),
     }
+
+
+IMPLEMENTATION_BLOCKERS = (
+    'unmet_reviewed_callbacks', 'unmet_crypto_definitions', 'unmet_abi_review',
+    'provided_without_selected_abi_contract', 'provided_unavailable_acpi_methods',
+    'provided_unavailable_crypto', 'provided_unavailable_memory_operations',
+    'provided_memory_lifetime_guards', 'provided_unavailable_feature_operations',
+    'provided_partially_available_feature_operations', 'unreviewed_retained_imports')
+
+
+def implementation_complete(classified: dict) -> bool:
+    """An absent raw linker import is not evidence an operation is implemented."""
+    return not any(classified[key] for key in IMPLEMENTATION_BLOCKERS)
 
 
 def analyze_execution_closure(linked_project: Path, original_objects: list[Path],
@@ -296,6 +375,8 @@ def analyze_execution_closure(linked_project: Path, original_objects: list[Path]
         if reviewed.keys() & supplemental.keys():
             raise ValueError('The selected and supplemental coordinator ABI inventories overlap.')
         reviewed.update(supplemental)
+        profiles, profile_review = review_profile_contracts(reviewed, upstream)
+        record['selected_callback_profile_review'] = profile_review
         record['coordinator_contract_review'] = supplemental_review
         provenance['packages/nvidia-global-rm/COORDINATOR-CONTRACTS.json'] = supplemental_review['manifest_sha256']
         if metaclass_reference is not None:
@@ -355,7 +436,7 @@ def analyze_execution_closure(linked_project: Path, original_objects: list[Path]
         exported, retained, sections = _control_symbols(image, filetype)
         if exported != roots:
             raise ValueError('The coordinator control exports differ from the actual compiled RM roots.')
-        classified = _classify(retained, project_defined, original_external, reviewed, crypto)
+        classified = _classify(retained, project_defined, original_external, reviewed, crypto, profiles)
         record.update(classified, retained_original_external_count=len(retained),
                       retained_original_externals=sorted(retained), sections=sections,
                       image_sha256=hashlib.sha256(image.read_bytes()).hexdigest(),
@@ -390,13 +471,25 @@ def analyze_execution_closure(linked_project: Path, original_objects: list[Path]
             record['runtime_blockers'].append(
                 'The typed crypto boundaries implement no cryptographic operations. A complete '
                 'supported profile must independently prove zero requests throughout its actual lifecycle.')
+        for key in ('provided_unavailable_memory_operations', 'provided_memory_lifetime_guards',
+                    'provided_unavailable_feature_operations', 'provided_partially_available_feature_operations'):
+            if classified[key]:
+                record['runtime_blockers'].append(
+                    key + ': ' + str(len(classified[key])) +
+                    '; these definitions refuse operations or detect invalid lifetime/state. '
+                    'They are not operational implementations or a proved unreachable route.')
+        if classified['provided_disabled_profile_callbacks'] or classified['provided_profile_state_queries']:
+            record['runtime_blockers'].append(
+                'Source-backed disabled feature/query branches require the actual selected device/backend '
+                'preflight and sealed request entries. Native fixtures and lexical caller references '
+                'do not prove complete original init/interrupt/error/unwind reachability.')
+        record['runtime_blockers'].append(
+            'Darwin system address-space/stack services require actual target-kernel ABI/export '
+            'admission; public pinned XNU/SDK source agreement is development evidence only.')
         record.update(status='blocked', phase='complete', link_control_status='passed',
                       abi_inventory_status='blocked' if (classified['unmet_abi_review'] or
                           classified['provided_without_selected_abi_contract']) else 'reviewed',
-                      closure_implementation_complete=not (
-                          any(classified[key] for key in blocker_categories) or
-                          classified['provided_unavailable_acpi_methods'] or
-                          classified['provided_unavailable_crypto']))
+                      closure_implementation_complete=implementation_complete(classified))
         save()
         return record
     except Exception as error:

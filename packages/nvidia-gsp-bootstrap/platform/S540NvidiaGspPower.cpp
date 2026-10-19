@@ -17,6 +17,9 @@ bool Protocol::setState(bool on) {
     state_.acknowledgementPending = true;
     return true;
 }
+void Protocol::revocationObserved(NvU64 eventNs) {
+    if (state_.revoked && !state_.revokedAtNs) state_.revokedAtNs = eventNs;
+}
 void Protocol::completed() {
     if (lastOn_ && state_.onSet && !state_.revoked && !state_.stopped)
         state_.onCompleted = true;
@@ -105,6 +108,7 @@ IOReturn S540NvidiaGspPowerService::setPowerState(unsigned long ordinal, IOServi
         IOLockLock(guard);
         if (closing) { IOLockUnlock(guard); return kIOPMAckImplied; }
         const bool post = protocol.setState(ordinal == 1);
+        if (post) protocol.revocationObserved(s540Darwin_os_get_monotonic_time_ns());
         const bool pending = protocol.snapshot().acknowledgementPending;
         // This independent count protects the outer owner even if Apple's
         // PM driver-callout timeout expires. Capture the hook under the same
@@ -295,6 +299,7 @@ NV_STATUS Lease::revokeNativeForTest() {
     {
         std::lock_guard<std::mutex> lock(data->guard);
         if (!data->protocol.setState(false)) return NV_ERR_IN_USE;
+        data->protocol.revocationObserved(s540Darwin_os_get_monotonic_time_ns());
         action = data->revocation; ++data->revocationHooksInFlight;
     }
     const NV_STATUS status = action.requestStop(action.owner);
