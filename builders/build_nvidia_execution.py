@@ -266,6 +266,7 @@ def kernel_objects(upstream: Path, output: Path, assets: Path,
     save_partial()
     execution_closure = closure.analyze_execution_closure(
         linked, original_objects, compiled, output / 'original-rm-closure', upstream=upstream,
+        user_pin_source_tree=checked_source if checked_source is not None else upstream,
         metaclass_reference=metaclass_reference)
     record = {'format': 1, 'status': 'compiled', 'architecture': 'x86_64',
               'production_candidate_allowed': False,

@@ -12,6 +12,21 @@ Its exact evidence remains in
 It does not validate subsequent edits. The ten approved original-source
 overlays and their historical audits are preserved unchanged.
 
+The subsequent software checkpoint adds explicit central-policy and validated
+EFI RSDP lookup contracts, optional PCI identity outputs used by the originals,
+and source-backed memory/crypto refusal inventories. The isolated combined
+prospective profile compiles its 19 changed original C units and two real
+cancellation bridges; it remains separate from the approved ten overlays.
+Three further memory-unwind candidates pass their actual-body fault controls.
+None of these changes establishes original adapter or GSP runtime success.
+
+The first two follow-up native runs stopped in development instrumentation:
+canonical macOS path comparison, then missing compiler `.su` output for truly
+code-empty translation units. Both cases have explicit regression controls.
+The corrected collector cross-compiles all 1,100 baseline original objects and
+binds absent `.su` files only to unchanged objects with no executable bytes.
+A fresh native run is still required for this complete checkpoint.
+
 | Requirement | Current evidence and remaining work |
 |---|---|
 | Original callback contracts | [The complete 110-callback ledger](../nvidia-global-rm/CALLBACK-PROFILE-AUDIT.md) distinguishes implemented services, official disabled queries, unavailable operations and lifetime guards. Definitions alone do not close operational coverage. Remaining internal/error routes require implementation or independent exclusion. |

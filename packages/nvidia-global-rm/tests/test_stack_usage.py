@@ -7,6 +7,8 @@ import tempfile
 import unittest
 from unittest import mock
 import subprocess
+import shutil
+import struct
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / 'builders'))
@@ -144,6 +146,48 @@ class StackUsage(unittest.TestCase):
             fixture(obj)
             with self.assertRaisesRegex(ValueError, 'did not emit'):
                 stack.capture_usage(source, obj, ['clang', '-fstack-usage'])
+
+    def test_actual_empty_translation_unit_needs_no_manufactured_usage_file(self):
+        compiler = shutil.which('clang')
+        if not compiler:
+            self.skipTest('A real Clang compiler is unavailable.')
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source, obj = root / 'empty.c', root / 'empty.o'
+            source.write_text('typedef unsigned int CompiledOut;\n')
+            command = [compiler, '-target', 'x86_64-apple-darwin', '-fstack-usage',
+                       '-c', str(source), '-o', str(obj)]
+            subprocess.run(command, check=True, capture_output=True)
+            capture = stack.capture_usage(source, obj, command)
+            record = stack.load_capture(capture)
+            self.assertEqual(record['functions'], [])
+            self.assertEqual(stack.extract_graph(capture)['nodes'], [])
+            if record['usage_file'] is None:
+                self.assertEqual(record['usage_emission'],
+                    'not-emitted-for-object-without-executable-code')
+                self.assertFalse(obj.with_suffix('.su').exists())
+                obj.with_suffix('.su').write_text('invented\n')
+                with self.assertRaisesRegex(ValueError, 'empty-object proof'):
+                    stack.load_capture(capture)
+
+    def test_missing_symbols_cannot_hide_executable_code(self):
+        with tempfile.TemporaryDirectory() as directory:
+            obj = Path(directory) / 'fixture.o'
+            fixture(obj)
+            raw = bytearray(obj.read_bytes())
+            count = struct.unpack_from('<I', raw, 16)[0]
+            offset = 32
+            for _ in range(count):
+                command, size = struct.unpack_from('<II', raw, offset)
+                if command == 2:
+                    struct.pack_into('<I', raw, offset, 0x1b)
+                    break
+                offset += size
+            else:
+                self.fail('Fixture lost its actual symbol-table command.')
+            obj.write_bytes(raw)
+            with self.assertRaisesRegex(ValueError, 'Incomplete Mach-O'):
+                stack.macho.Object(obj, allow_empty_code_without_symbols=True)
 
     def test_compiler_function_must_exist_in_actual_object(self):
         with tempfile.TemporaryDirectory() as directory:

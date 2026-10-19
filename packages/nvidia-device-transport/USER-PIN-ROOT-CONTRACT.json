@@ -1,0 +1,133 @@
+{
+  "format": 1,
+  "repository": "NVIDIA/open-gpu-kernel-modules",
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "status": "source-caller-chain-excluded-only-under-required-final-link-conditions",
+  "callback": "os_unlock_user_pages",
+  "scope": "Unix escape pin/unpin path only; descriptor destructor excluded independently by never-successful user registration.",
+  "source_sha256": {
+    "src/nvidia/arch/nvalloc/unix/include/nv.h": "02ce4b371e0a8dd26f62a320e88c8382dcf31a21b727503a66abcaea9eecf09b",
+    "src/nvidia/arch/nvalloc/unix/include/os-interface.h": "bd281e48ff06b481033fc2fb29a891710a2b4d66fb009cc2b752ab6e90f2113b",
+    "src/nvidia/arch/nvalloc/unix/include/osapi.h": "1c547039ccfa61deff34bc39bd0e733c0c33344cef6f2af5fc3775c80ee92cfd",
+    "src/nvidia/arch/nvalloc/unix/src/escape.c": "43bf7520b5d161b8f6de82404d209fca34c2779bd290d6db748fc3a353c3c1ed",
+    "src/nvidia/arch/nvalloc/unix/src/osapi.c": "e4336f0e3bb55122680e0d344f970c123664122c2415134b7a6b517c98fcbe75"
+  },
+  "exact_identifier_occurrences_src_nvidia_C_H_excluding_comments": {
+    "RmCreateOsDescriptor": [
+      {
+        "source": "src/nvidia/arch/nvalloc/unix/src/escape.c",
+        "line": 134
+      },
+      {
+        "source": "src/nvidia/arch/nvalloc/unix/src/escape.c",
+        "line": 280
+      },
+      {
+        "source": "src/nvidia/arch/nvalloc/unix/src/escape.c",
+        "line": 548
+      }
+    ],
+    "RmAllocOsDescriptor": [
+      {
+        "source": "src/nvidia/arch/nvalloc/unix/src/escape.c",
+        "line": 209
+      },
+      {
+        "source": "src/nvidia/arch/nvalloc/unix/src/escape.c",
+        "line": 411
+      }
+    ],
+    "RmIoctl": [
+      {
+        "source": "src/nvidia/arch/nvalloc/unix/include/osapi.h",
+        "line": 122
+      },
+      {
+        "source": "src/nvidia/arch/nvalloc/unix/src/escape.c",
+        "line": 365
+      },
+      {
+        "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+        "line": 3069
+      }
+    ],
+    "rm_ioctl": [
+      {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "line": 1196
+      },
+      {
+        "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+        "line": 3003
+      }
+    ],
+    "os_lock_user_pages": [
+      {
+        "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+        "line": 172
+      },
+      {
+        "source": "src/nvidia/arch/nvalloc/unix/src/escape.c",
+        "line": 164
+      }
+    ]
+  },
+  "call_chain": [
+    {
+      "callee": "os_lock_user_pages",
+      "sole_direct_caller": "RmCreateOsDescriptor",
+      "source": "escape.c164",
+      "prior_non_ok": "RmCreateOsDescriptor requires statusNV_OK before choosing OS_PAGE_ARRAY; unlock195 follows only later import failure."
+    },
+    {
+      "callee": "RmCreateOsDescriptor",
+      "direct_callers": [
+        "RmAllocOsDescriptor",
+        "RmIoctl"
+      ],
+      "source": "escape.c280,548"
+    },
+    {
+      "callee": "RmAllocOsDescriptor",
+      "sole_direct_caller": "RmIoctl",
+      "source": "escape.c411"
+    },
+    {
+      "callee": "RmIoctl",
+      "sole_direct_caller": "rm_ioctl",
+      "source": "osapi.c3069"
+    },
+    {
+      "callee": "rm_ioctl",
+      "direct_callers_within_original_full_RM": "none; only declaration and definition, no callback-table/address occurrence",
+      "source": "osapi.c3003; nv.h1196"
+    }
+  ],
+  "required_final_link_conditions": {
+    "forbidden_original_roots": [
+      "s540Global_RmIoctl",
+      "s540Global_rm_ioctl"
+    ],
+    "forbidden_retained_original_externals": [
+      "s540Global_os_lock_user_pages",
+      "s540Global_os_lookup_user_io_memory"
+    ],
+    "project_production_must_not_reference": [
+      "rm_ioctl",
+      "RmIoctl",
+      "RmCreateOsDescriptor",
+      "RmAllocOsDescriptor",
+      "os_lock_user_pages"
+    ]
+  },
+  "reason": "The complete pinned identifier inventory permits neither another caller nor an address/table reference to bypass this chain. A final image with no imported/exported root for the chain and no retained pin acquisition cannot execute its ignored-unpin cleanup. This argument does not depend on absence of a UserClient or an observed zero call count.",
+  "invalidated_by": [
+    "Adding any escape entry or address reference to actual original/project source.",
+    "Admitting rm_ioctl/RmIoctl as a root or acquiring Linux/user pins through another service.",
+    "Changing source outside the pinned/checked hashes without repeating caller and final-link proof."
+  ],
+  "production_pin_service_implemented": false,
+  "kernel_execution": "not_tested",
+  "gpu_access": false,
+  "root_condition_scope": "Compare actual derived original_roots, not all definitions or local Mach-O symbols. The two static helpers are excluded by source internal linkage and exact no-address-use caller inventory; no assumption that dead stripping removes every local definition is required."
+}

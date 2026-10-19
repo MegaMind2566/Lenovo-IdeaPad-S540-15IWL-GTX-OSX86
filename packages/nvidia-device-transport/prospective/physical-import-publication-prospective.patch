@@ -1,0 +1,87 @@
+--- a/src/nvidia/arch/nvalloc/unix/src/osmemdesc.c
++++ b/src/nvidia/arch/nvalloc/unix/src/osmemdesc.c
+@@ -636,7 +636,8 @@
+ {
+     NV_STATUS rmStatus;
+     nv_state_t *nv = NV_GET_NV_STATE(pGpu);
+-    MEMORY_DESCRIPTOR *pMemDesc;
++    MEMORY_DESCRIPTOR *pMemDesc = NULL;
++    void *pPrivate = NULL;
+     NvU64 *pPteArray;
+     NvU64  base = 0;
+     NvU32  cache_type = NV_MEMORY_CACHED;
+@@ -677,7 +678,7 @@
+ 
+     NV_ASSERT_OR_RETURN(NV_IS_ALIGNED64(base, os_page_size), NV_ERR_INVALID_ARGUMENT);
+ 
+-    rmStatus = memdescCreate(ppMemDesc, pGpu, size, 0,
++    rmStatus = memdescCreate(&pMemDesc, pGpu, size, 0,
+                              NV_MEMORY_CONTIGUOUS, ADDR_SYSMEM,
+                              cache_type, memdescFlags);
+     if (rmStatus != NV_OK)
+@@ -688,8 +689,6 @@
+         return rmStatus;
+     }
+ 
+-    pMemDesc = *ppMemDesc;
+-
+     memdescSetMemData(pMemDesc, NULL, NULL);
+     memdescSetFlag(pMemDesc, MEMDESC_FLAGS_EXT_PAGE_ARRAY_MEM, NV_TRUE);
+ 
+@@ -699,17 +698,19 @@
+     num_os_pages = size >> os_page_shift;
+     pPhys_addrs  = portMemAllocNonPaged(sizeof(NvU64) * num_os_pages);
+     if (pPhys_addrs == NULL)
++    {
++        rmStatus = NV_ERR_NO_MEMORY;
+         goto cleanup_memdesc;
++    }
+ 
+     for (idx = 0; idx < num_os_pages; idx++) 
+     {
+         pPhys_addrs[idx] =  base + (idx * os_page_size); 
+     }
+ 
+-    *ppPrivate = NULL;
+     rmStatus = nv_register_phys_pages(nv, pPhys_addrs, num_os_pages,
+                                       memdescGetCpuCacheAttrib(pMemDesc),
+-                                      ppPrivate);
++                                      &pPrivate);
+     if (rmStatus != NV_OK)
+         goto cleanup_memdesc;
+ 
+@@ -733,7 +734,7 @@
+         // fails. So we only set up the priv-data cleanup callback once we're sure
+         // this call will succeed.
+         //
+-        memdescSetMemData(pMemDesc, *ppPrivate, NULL);
++        memdescSetMemData(pMemDesc, pPrivate, NULL);
+ 
+         rmStatus = memdescMapIommu(pMemDesc, pGpu->busInfo.iovaspaceId);
+         if (rmStatus != NV_OK)
+@@ -741,17 +742,21 @@
+     }
+ 
+     // All is well - wire up the cleanup callback now
+-    memdescSetMemData(pMemDesc, *ppPrivate,
++    memdescSetMemData(pMemDesc, pPrivate,
+         osDestroyOsDescriptorFromPhysAddr);
+ 
+     portMemFree(pPhys_addrs);
+ 
++    // Publish only the descriptor and backing that completed every stage.
++    *ppMemDesc = pMemDesc;
++    *ppPrivate = pPrivate;
++
+     return NV_OK;
+ 
+ cleanup_pages:
+-    if (*ppPrivate != NULL)
+-    {
+-        nv_unregister_phys_pages(NV_GET_NV_STATE(pGpu), *ppPrivate);
++    if (pPrivate != NULL)
++    {
++        nv_unregister_phys_pages(NV_GET_NV_STATE(pGpu), pPrivate);
+     }
+ 
+ cleanup_memdesc:

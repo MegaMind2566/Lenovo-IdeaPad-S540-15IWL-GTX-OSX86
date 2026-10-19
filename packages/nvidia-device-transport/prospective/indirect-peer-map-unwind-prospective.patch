@@ -1,0 +1,27 @@
+--- a/src/nvidia/src/kernel/mem_mgr/virtual_mem.c
++++ b/src/nvidia/src/kernel/mem_mgr/virtual_mem.c
+@@ -1209,6 +1209,7 @@
+     NvBool      bDmaMappingRegistered = NV_FALSE;
+     NvBool      bFlaMapping           = pParams->bFlaMapping;
+     NvBool      bIsIndirectPeer       = NV_FALSE;
++    NvBool      bIndirectPeerIommuMapped = NV_FALSE;
+     NvBool      bEncrypted;
+     NvBool      bIsSysmem             = NV_FALSE;
+     NvBool      bBar1P2P              = (p2p && kbusHasPcieBar1P2PMapping_HAL(pGpu,
+@@ -1415,6 +1416,7 @@
+                 NV_PRINTF(LEVEL_ERROR, "DMA map pages failed for requested GPU!\n");
+                 goto done;
+             }
++            bIndirectPeerIommuMapped = NV_TRUE;
+         }
+ 
+         // Monolithic CPU RM or SPLIT_VAS_MGMT
+@@ -1604,7 +1606,7 @@
+                 }
+             }
+ 
+-            if (pDmaMappingInfo->pMemDesc != NULL && bIsIndirectPeer)
++            if (pDmaMappingInfo->pMemDesc != NULL && bIndirectPeerIommuMapped)
+             {
+                 memdescUnmapIommu(pDmaMappingInfo->pMemDesc, pGpu->busInfo.iovaspaceId);
+             }

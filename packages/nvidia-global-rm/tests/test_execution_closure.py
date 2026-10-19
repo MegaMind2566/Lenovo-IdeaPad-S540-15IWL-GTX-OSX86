@@ -200,6 +200,58 @@ class CoordinatorClosureTests(unittest.TestCase):
         self.assertEqual(result['unreviewed_retained_imports'], [name])
         self.assertFalse(closure.implementation_complete(result))
 
+    def test_backend_capability_denial_does_not_hide_unavailable_central_operations(self):
+        query, operation, guard = (P + 'os_pci_remove_supported',
+                                   P + 'nv_indicate_idle', P + 'os_pci_remove')
+        reviewed, crypto, _ = closure._reviewed_contracts()
+        names = {query, operation, guard}
+        result = closure._classify(names, names, names, reviewed, crypto)
+        self.assertEqual(result['provided_profile_state_queries'], [query])
+        self.assertEqual(result['provided_unavailable_central_operations'], [operation])
+        self.assertEqual(result['provided_central_lifetime_guards'], [guard])
+        self.assertEqual(result['provided_project_callbacks'], [])
+        self.assertFalse(closure.implementation_complete(result))
+
+    def test_user_pin_escape_roots_are_refused(self):
+        with self.assertRaisesRegex(ValueError, 'roots admit'):
+            closure.review_user_pin_roots({P + 'rm_ioctl'}, set(), set())
+
+    def test_user_pin_acquisition_import_is_refused(self):
+        with self.assertRaisesRegex(ValueError, 'imports retain'):
+            closure.review_user_pin_roots(set(), {P + 'os_lock_user_pages'}, set())
+
+    def test_project_cannot_add_an_escape_reference(self):
+        with self.assertRaisesRegex(ValueError, 'compiled project references'):
+            closure.review_user_pin_roots(set(), set(), {P + 'RmIoctl'})
+
+    def test_fixture_root_conditions_do_not_claim_pinned_source_proof(self):
+        result = closure.review_user_pin_roots(self.all_roots, self.imports, set())
+        self.assertFalse(result['original_source_hashes_verified'])
+        self.assertFalse(result['pin_service_implemented'])
+        self.assertFalse(result['whole_bootstrap_reachability_proven'])
+
+    def test_pinned_user_pin_caller_inventory_and_current_project_sources(self):
+        if not UPSTREAM.exists():
+            self.skipTest('Pass --upstream for the complete caller-chain source proof.')
+        result = closure.review_user_pin_roots(self.all_roots, self.imports, set(), UPSTREAM)
+        self.assertTrue(result['complete_original_identifier_inventory_verified'])
+        self.assertTrue(result['compiled_project_symbols_checked'])
+        self.assertFalse(result['pin_service_implemented'])
+
+    def test_changed_composed_source_cannot_reuse_original_user_pin_proof(self):
+        if not UPSTREAM.exists():
+            self.skipTest('Pass --upstream for the composed-source review control.')
+        manifest = json.loads(closure.USER_PIN_ROOT_CONTRACT.read_text())
+        composed = self.directory / 'changed-composed-source'
+        for source in manifest['source_sha256']:
+            target = composed / source
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes((UPSTREAM / source).read_bytes())
+        escape = composed / 'src/nvidia/arch/nvalloc/unix/src/escape.c'
+        escape.write_text(escape.read_text() + '\n/* Explicit changed composed source. */\n')
+        with self.assertRaisesRegex(ValueError, 'composed user-pin caller-chain source'):
+            closure.review_user_pin_roots(self.all_roots, self.imports, set(), UPSTREAM, composed)
+
     def test_profile_review_rejects_changed_original_source(self):
         reviewed, _, _ = closure._reviewed_contracts()
         upstream = self.directory / 'changed-profile-upstream'

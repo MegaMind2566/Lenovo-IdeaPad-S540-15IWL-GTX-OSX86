@@ -471,6 +471,25 @@ void abiTests() {
     void *pci = s540Global_os_pci_init_handle(0,1,0,0,&vendor,&deviceId);
     expect(pci && pci == boundPciHandle() && vendor == 0x10de && deviceId == 0x1f91, "bound provider PCI identity");
     expect(!s540Global_os_pci_init_handle(1,1,0,0,&vendor,&deviceId) && !vendor && !deviceId, "foreign PCI segment cannot alias target");
+    expect(s540Global_os_pci_init_handle(0,1,0,0,nullptr,nullptr) == pci,
+           "original config callers may omit both optional identity outputs");
+    deviceId = 0xbeef;
+    expect(s540Global_os_pci_init_handle(0,1,0,0,nullptr,&deviceId) == pci && deviceId == 0x1f91,
+           "optional vendor output does not hide actual device identity");
+    vendor = 0xbeef;
+    expect(s540Global_os_pci_init_handle(0,1,0,0,&vendor,nullptr) == pci && vendor == 0x10de,
+           "optional device output does not hide actual vendor identity");
+    expect(!s540Global_os_pci_init_handle(1,1,0,0,nullptr,nullptr),
+           "omitted outputs cannot alias a foreign PCI segment");
+    expect(!s540Global_os_pci_init_handle(0,2,0,0,nullptr,nullptr),
+           "omitted outputs cannot alias a foreign PCI bus");
+    f.ordinary = false;
+    expect(!s540Global_os_pci_init_handle(0,1,0,0,nullptr,nullptr),
+           "omitted outputs still require ordinary backend access");
+    f.ordinary = true; f.active = false;
+    expect(!s540Global_os_pci_init_handle(0,1,0,0,nullptr,nullptr),
+           "omitted outputs cannot retain a departed provider");
+    f.active = true;
     NvU32 config = 0;
     expect(s540Global_os_pci_read_dword(pci,0x100,&config) == NV_OK && config == 0x12345678, "extended configuration ABI");
     NvU64 pdi = 0x1234;
@@ -527,6 +546,8 @@ void abiTests() {
            "real backend failure is distinguished from the configured transport bound");
     f.fault = Fault::None;
     expect(unbindRmDevice(&session) == NV_OK, "device ABI unbind");
+    expect(!s540Global_os_pci_init_handle(0,1,0,0,nullptr,nullptr),
+           "omitted outputs cannot resurrect an unbound PCI handle");
     expect(!abiStatistics().allocationAttempts && !abiStatistics().allocationFailures &&
            !abiStatistics().peakRegisteredBytes, "final unbind clears the completed binding diagnostics");
     expect(session.stop() == NV_OK, "ABI owner stop");

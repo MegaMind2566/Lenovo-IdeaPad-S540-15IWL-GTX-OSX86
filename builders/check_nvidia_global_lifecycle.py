@@ -280,6 +280,7 @@ def check(output: Path, upstream: Path, namespace: Path, *, host_control: bool =
         for source in (PACKAGE / 'src/S540NvidiaGlobalRmHost.cpp',
                        PACKAGE / 'src/S540NvidiaGlobalRmFormat.cpp',
                        PACKAGE / 'src/S540NvidiaGlobalRmSystemBackend.cpp',
+                       PACKAGE / 'src/S540NvidiaGlobalRmFirmwareTablesBackend.cpp',
                        DEVICE / 'src/S540NvidiaDeviceServices.cpp',
                        DEVICE / 'src/S540NvidiaDeviceTransport.cpp',
                        DEVICE / 'tests/dma_stop_receipt_fixture.cpp',

@@ -96,7 +96,7 @@ def _without_alignment_nops(code: bytearray, relocation_end: int) -> bytearray:
 
 
 class Object:
-    def __init__(self, path: Path):
+    def __init__(self, path: Path, *, allow_empty_code_without_symbols: bool = False):
         self.path, self.data = path, path.read_bytes()
         data = self.data
         if len(data) < 32:
@@ -135,8 +135,15 @@ class Object:
                     raise ValueError('Invalid symbol-table command.')
                 table = struct.unpack_from('<4I', data, position + 8)
             position += size
-        if position != 32 + command_bytes or table is None:
+        if position != 32 + command_bytes:
             raise ValueError('Incomplete Mach-O command/symbol tables.')
+        if table is None:
+            if (not allow_empty_code_without_symbols or
+                    any(section.size and (section.name == '__text' or section.flags & 0x80000400)
+                        for section in self.sections)):
+                raise ValueError('Incomplete Mach-O command/symbol tables.')
+            self.symbols = []
+            return
         symbol_offset, symbol_count, string_offset, string_bytes = table
         if symbol_offset + symbol_count * 16 > len(data) or string_offset + string_bytes > len(data):
             raise ValueError('Truncated Mach-O symbol table.')

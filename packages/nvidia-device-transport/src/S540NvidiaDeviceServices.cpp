@@ -342,12 +342,15 @@ extern "C" void *NV_API_CALL s540Global_os_pci_init_handle(NvU32 segment,
     NvU8 bus, NvU8 device, NvU8 function, NvU16 *vendor, NvU16 *deviceId) {
     if (vendor) *vendor = 0;
     if (deviceId) *deviceId = 0;
-    if (!ordinary() || !binding.session || !vendor || !deviceId) return nullptr;
+    // Original chipset config callers deliberately omit either or both ID
+    // outputs. Optional outputs cannot relax the exact bound-provider check.
+    if (!ordinary() || !binding.session) return nullptr;
     const Snapshot facts = binding.session->snapshot();
     if (!facts.segmentKnown || facts.segment != segment || facts.bus != bus ||
         facts.device != device || facts.function != function || !binding.session->accessible())
         return nullptr;
-    *vendor = 0x10de; *deviceId = 0x1f91;
+    if (vendor) *vendor = 0x10de;
+    if (deviceId) *deviceId = 0x1f91;
     return binding.pciHandle;
 }
 extern "C" NV_STATUS NV_API_CALL s540Global_os_pci_read_byte(void *handle, NvU32 offset, NvU8 *out) {

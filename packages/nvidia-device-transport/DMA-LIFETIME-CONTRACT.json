@@ -39,7 +39,7 @@
   "native_evidence": {
     "test": "tests/check_device_transport_native.cpp:hardwareDmaLifetimeTests",
     "new_assertions": 38,
-    "transport_total_assertions": 466,
+    "transport_total_assertions": 474,
     "authority_fixture": "tests/dma_stop_receipt_fixture.cpp",
     "fixture_scope": "Native-only sealed mock authority, rejected at compile time under KERNEL; absent/unissued receipts refuse. It never supplies a production receipt or executes original GPU teardown.",
     "coverage": [

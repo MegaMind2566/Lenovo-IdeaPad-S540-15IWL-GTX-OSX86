@@ -13,6 +13,8 @@ not an initialized GPU driver or a replacement for the released v9 package.
 - Configuration reads support aligned byte, word and dword accesses throughout
   the 4 KiB configuration space. Lookup needs the actual provider BDF and an
   independently verified PCI segment; no registry `domain-id` guess is used.
+  Original config callers may omit either or both identity outputs. This does
+  not admit foreign PCI providers or relax live identity checks.
 - `nv_pci_read_gpu_pdi_from_dvsec` traverses the real bound provider's extended
   configuration space with the pinned NVIDIA DVSEC3 rules and 480-iteration
   limit. It distinguishes absence from malformed offsets, short capabilities,
@@ -68,6 +70,22 @@ not an initialized GPU driver or a replacement for the released v9 package.
   lifetime-monotonic `unavailableOperationsEver` and `lifetimeViolationsEver`
   so an ignored refusal cannot become adapter success. Production has no reset
   API; native telemetry reset cannot clear either sticky error count.
+  [The caller audit](MEMORY-REACHABILITY.json) establishes source exclusions or
+  prior-success guards for 19 of the 32 unavailable callbacks, including all
+  nine lifetime/scalar guards. It does not prove that the other 13 status
+  operations are absent from every first-bootstrap path; their refusals remain
+  explicit and sticky rather than becoming successful operations.
+  [The status audit](MEMORY-FAILURE-CONTRACTS.json) follows all 19 direct original
+  call sites for those 13 operations and their adjacent output/unwind consumers.
+  It found real stale descriptor and absent-map cleanup failures. Three separate
+  [prospective patches](prospective/MEMORY-UNWIND-AUDIT.json) correct physical
+  import publication, indirect-peer acquired-map cleanup and borrowed peer BAR
+  descriptor ownership. They leave the frozen original profile unchanged.
+  The independent Unix escape pin/unpin ownership route has a
+  [source caller inventory and final image precondition](USER-PIN-ROOT-CONTRACT.json):
+  the admitted roots cannot include either escape entry and cannot retain a pin
+  acquisition import. This must hold for the final image; the pin service is
+  still unavailable.
 - `nv_requires_dma_remap(nv_state_t *)` has the exact original scalar ABI.
   In NVIDIA `nv.c:5412`, its result is the inverse of the device's SWIOTLB
   bounce policy, not an IOMMU-presence test. `NV_TRUE` selects physical PTEs
@@ -181,7 +199,7 @@ owner and must not be used for a failed operational adapter session.
 
 ## Validation
 
-The shared state-machine/ABI native harness currently passes 466 assertions and
+The shared state-machine/ABI native harness currently passes 474 assertions and
 128 complete allocation/map/unmap/cleanup cycles. It includes ownership refusal,
 constructor and completion quarantine, mapper admission, bounce/address-mask
 policy, CPU-map deferred free, contiguous output width, scoped PCI access and
@@ -219,6 +237,23 @@ valid values, original fallback conditions, malformed data, every read failure
 and bounded cycle detection. Forty new ABI comparisons use pinned original
 `nv.h` and `os-interface.h`; the transport ABI check also compares the PDI type.
 
+The prospective memory unwind control extracts three complete pinned original
+function bodies and their candidate replacements. Its 127 checks pass with plain
+and fatal address, undefined and function sanitizers; the same controls detect
+23 failures in the original bodies. Modeled dependencies inject errors and track
+ownership; no original engine, kernel or GPU runs. To reproduce it with Clang:
+
+```sh
+python packages/nvidia-device-transport/prospective/check_memory_unwind_bodies.py \
+  --upstream /path/to/pinned/open-gpu-kernel-modules \
+  --output /path/to/fresh/memory-unwind-control --cc clang
+```
+
+The three full candidate C translation units also cross-compile to x86_64 Darwin
+with the original make-declared profile, private namespace, warnings as errors
+and the 4 KiB frame bound. This is separate from approving a combined original
+source profile or running an Apple-native build.
+
 Local Linux execution passed plain and fatal AddressSanitizer/UndefinedBehaviorSanitizer
 runs. LeakSanitizer could not run in the local container because process/task
 inspection was unavailable. The earlier isolated component cross-probe matched its 32-operation SDK
@@ -226,7 +261,7 @@ reference. The earlier [native Apple build](https://github.com/MegaMind2566/Leno
 units and matched the complete reviewed platform-import set; the DMA-policy
 violation path reuses the already reviewed panic import. That baseline's 307
 checks passed with fatal sanitizers. The current transport changes pass
-466 local Linux checks, plus the memory63 and PCI40 cases, including address,
+474 local Linux checks, plus the memory63 and PCI40 cases, including address,
 undefined-behavior and function-type sanitizers. The callbacks compile against
 the pinned original NVIDIA headers. The four production C++ units and the new
 original-header C bridge also cross-compile to

@@ -108,11 +108,22 @@ def capture_usage(source: Path, obj: Path, command: list[str], *,
         raise ValueError('Stack capture requires the actual -fstack-usage compilation.')
     source, obj = source.resolve(strict=True), obj.resolve(strict=True)
     usage = obj.with_suffix('.su')
-    if not usage.is_file():
-        raise ValueError('The actual compiler did not emit stack usage: ' + str(usage))
-    functions = parse_usage(usage.read_text())
     # Parse the real object, independently of compiler-reported symbol names.
-    image = macho.Object(obj)
+    image = macho.Object(obj, allow_empty_code_without_symbols=True)
+    executable = any(section.size and
+        (section.name == '__text' or section.flags & 0x80000400)
+        for section in image.sections)
+    if usage.is_file():
+        functions = parse_usage(usage.read_text())
+        usage_emission = 'compiler-file'
+    elif not executable:
+        # Clang does not open a .su output for a completely compiled-out
+        # translation unit. Bind that absence to the actual empty machine
+        # object instead of manufacturing a compiler output or losing a TU.
+        functions = []
+        usage_emission = 'not-emitted-for-object-without-executable-code'
+    else:
+        raise ValueError('The actual compiler did not emit stack usage: ' + str(usage))
     definitions = {symbol.name for symbol in image.symbols if symbol.section and
                    image.sections[symbol.section - 1].name == '__text' and
                    symbol.kind & 0xe0 == 0 and symbol.kind & 0x0e == 0x0e}
@@ -123,7 +134,9 @@ def capture_usage(source: Path, obj: Path, command: list[str], *,
               'native_apple_compiler': native_apple,
               'source': str(source), 'source_sha256': sha(source),
               'object': str(obj), 'object_sha256': sha(obj),
-              'usage_file': str(usage), 'usage_sha256': sha(usage),
+              'usage_file': str(usage) if usage.is_file() else None,
+              'usage_sha256': sha(usage) if usage.is_file() else None,
+              'usage_emission': usage_emission,
               'command': command, 'cwd': str(cwd.resolve()) if cwd else None,
               'command_sha256': hashlib.sha256(json.dumps(command).encode()).hexdigest(),
               'functions': functions, 'kernel_execution': 'not_tested',
@@ -142,11 +155,22 @@ def load_capture(reference: dict) -> dict:
     record = json.loads(path.read_text())
     if record.get('format') != FORMAT or record.get('status') != 'compiler-stack-usage-captured':
         raise ValueError('Unsupported stack capture.')
-    for field in ('source', 'object', 'usage_file'):
+    for field in ('source', 'object'):
         if sha(Path(record[field])) != record[field.replace('_file', '') + '_sha256']:
             raise ValueError('Stack capture input changed: ' + field)
-    if record['functions'] != parse_usage(Path(record['usage_file']).read_text()):
-        raise ValueError('Parsed compiler stack records changed.')
+    if record['usage_file'] is not None:
+        if sha(Path(record['usage_file'])) != record['usage_sha256']:
+            raise ValueError('Stack capture input changed: usage_file')
+        if record['functions'] != parse_usage(Path(record['usage_file']).read_text()):
+            raise ValueError('Parsed compiler stack records changed.')
+    else:
+        image = macho.Object(Path(record['object']), allow_empty_code_without_symbols=True)
+        if (record.get('usage_emission') != 'not-emitted-for-object-without-executable-code'
+                or record['usage_sha256'] is not None or record['functions']
+                or any(section.size and (section.name == '__text' or section.flags & 0x80000400)
+                       for section in image.sections)
+                or Path(record['object']).with_suffix('.su').exists()):
+            raise ValueError('Absent compiler stack output lacks an unchanged empty-object proof.')
     return record
 
 def usage_manifest(references: list[dict], output: Path) -> dict:
@@ -213,12 +237,12 @@ def parse_disassembly(text: str) -> list[dict]:
 def extract_graph(reference: dict, *, decoder: list[str] | None = None) -> dict:
     unit = load_capture(reference)
     obj = Path(unit['object'])
-    image = macho.Object(obj)
+    image = macho.Object(obj, allow_empty_code_without_symbols=True)
     texts = [(index, section) for index, section in enumerate(image.sections, 1)
              if section.name == '__text']
     if len(texts) > 1:
         raise ValueError('Ambiguous executable text sections in stack graph.')
-    if not texts:
+    if not texts or not texts[0][1].size:
         return {'object': str(obj), 'object_sha256': unit['object_sha256'], 'nodes': []}
     section_index, section = texts[0]
     definitions = image._defined(section_index)

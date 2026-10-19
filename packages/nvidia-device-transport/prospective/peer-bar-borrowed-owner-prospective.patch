@@ -1,0 +1,27 @@
+--- a/src/nvidia/src/kernel/gpu/bus/kern_bus.c
++++ b/src/nvidia/src/kernel/gpu/bus/kern_bus.c
+@@ -295,6 +295,7 @@
+ {
+     NV_STATUS          status;
+     MEMORY_DESCRIPTOR *pMemDesc = *ppMemDesc;
++    NvBool bMemDescCreated = NV_FALSE;
+     IOVAMAPPING       *pIovaMapping;
+ 
+     NV_ASSERT_OR_RETURN(((base & RM_PAGE_MASK) == 0), ~0ULL);
+@@ -306,6 +307,7 @@
+                                MEMDESC_FLAGS_SKIP_RESOURCE_COMPUTE);
+         NV_ASSERT_OR_RETURN(status == NV_OK, ~0ULL);
+ 
++        bMemDescCreated = NV_TRUE;
+         memdescDescribe(pMemDesc, ADDR_SYSMEM, base, size);
+     }
+     else
+@@ -318,7 +320,7 @@
+     if (pLocalGpu != pRemoteGpu)
+     {
+         status = memdescMapIommu(pMemDesc, pRemoteGpu->busInfo.iovaspaceId);
+-        if (status != NV_OK)
++        if ((status != NV_OK) && bMemDescCreated)
+         {
+             memdescDestroy(pMemDesc);
+         }

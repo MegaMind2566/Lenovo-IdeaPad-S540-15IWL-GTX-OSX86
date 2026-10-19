@@ -68,10 +68,11 @@ jobs:
           python3 builders/compile_nvidia_global_rm.py
           --upstream build-src/nvidia-upstream --generate-namespace --checked-cleanup-overlays
           --output-dir build/nvidia-execution/original-rm
-      - name: Verify the feature source contracts against the pinned originals
-        run: >-
-          python3 packages/nvidia-global-rm/tests/test_feature_profile_contracts.py
-          --upstream build-src/nvidia-upstream
+      - name: Verify callback and refusal source contracts against the pinned originals
+        run: |
+          python3 packages/nvidia-global-rm/tests/test_feature_profile_contracts.py --upstream build-src/nvidia-upstream
+          python3 packages/nvidia-global-rm-crypto/tests/test_crypto_provenance.py --upstream build-src/nvidia-upstream
+          python3 packages/nvidia-device-transport/tests/test_memory_failure_provenance.py --upstream build-src/nvidia-upstream
       - name: Compile the isolated prospective statusful adapter without approving it
         run: >-
           python3 packages/nvidia-gsp-bootstrap/adapter/tests/check_unwind_compile.py
@@ -86,6 +87,14 @@ jobs:
           --checked-source build/nvidia-execution/original-rm/checked-source
           --cc /usr/bin/clang
           --output build/nvidia-execution/prospective-checks/adapter-bodies
+      - name: Compile the isolated combined prospective original-source profile
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective/check_combined_profile.py
+          --repo . --upstream build-src/nvidia-upstream
+          --checked-source build/nvidia-execution/original-rm/checked-source
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --cc /usr/bin/clang
+          --output build/nvidia-execution/prospective-checks/combined-profile
       - name: Exercise revocation of the actual original wait bodies in user space
         run: >-
           python3 packages/nvidia-gsp-bootstrap/cancellation/check_cancellation.py
@@ -108,6 +117,11 @@ jobs:
           python3 packages/nvidia-gsp-bootstrap/cancellation/check_original_status_edges.py
           --upstream build-src/nvidia-upstream --cxx /usr/bin/clang++
           --output build/nvidia-execution/prospective-checks/status-edges
+      - name: Exercise prospective memory ownership failures in actual original bodies
+        run: >-
+          python3 packages/nvidia-device-transport/prospective/check_memory_unwind_bodies.py
+          --upstream build-src/nvidia-upstream --cc /usr/bin/clang
+          --output build/nvidia-execution/prospective-checks/memory-unwind
       - name: Install the pinned bounded archive decoder in a private environment
         shell: bash
         run: |
@@ -143,6 +157,11 @@ jobs:
           --upstream build-src/nvidia-upstream
           --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
           --output-dir build/nvidia-execution/original-global-lifecycle
+      - name: Verify that the linked first-transaction roots exclude unavailable user pinning
+        run: >-
+          python3 packages/nvidia-device-transport/tests/test_memory_failure_provenance.py
+          --upstream build-src/nvidia-upstream
+          --link-report build/nvidia-execution/kernel-checks/execution-kernel-build.json
       - name: Verify one actual typed NVOC dispatch against native IR and machine code
         run: >-
           python3 builders/nvidia_nvoc_stack_dispatch.py

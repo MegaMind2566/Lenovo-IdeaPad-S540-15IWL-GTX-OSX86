@@ -1,0 +1,115 @@
+{
+  "format": 1,
+  "repository": "NVIDIA/open-gpu-kernel-modules",
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "status": "passed-prospective-source-controls; not-active-profile",
+  "approved_profile": false,
+  "active_ten_overlay_profile_modified": false,
+  "source_sha256": {
+    "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c": "c1cbd0b0bb814d5ca1d0a022d59a4b91ae90ca2663ee5d48621f7527d85cd897",
+    "src/nvidia/src/kernel/mem_mgr/virtual_mem.c": "7b9949bc423a29ba8cc16ee50590bb5e3eaaef394d6bdd8f531cbfc2fff0fb9a",
+    "src/nvidia/src/kernel/gpu/bus/kern_bus.c": "f1c120125c79dc97877462994a68372b53e43e00dfae04b6dd57dc0a18e0d1bf",
+    "src/nvidia/src/kernel/mem_mgr/gpu_vaspace.c": "091272a127f93c1beaa56adaf5aa66d42213c6a6ca5a9b569fef9d5d0e5a165f"
+  },
+  "patch_sha256": {
+    "physical-import-publication-prospective.patch": "74de77f90efbe6a3043de87f1accce4e007e54ca49fd84ab663edaa9c61ebb1c",
+    "indirect-peer-map-unwind-prospective.patch": "271ef6ec6389a66b29ab2926a379cc5e5525ad99dd9664a5fcfa52296b3865d8",
+    "peer-bar-borrowed-owner-prospective.patch": "69bf46ab391e8bf631d8ba4583317963e493bf1fd415b97124d2415720342764"
+  },
+  "patches": [
+    {
+      "path": "physical-import-publication-prospective.patch",
+      "original_failure": "osmemdesc.c680 publishes provisional descriptor to caller; registration failure714-717 destroys it758-762. gvaspaceExternalRootDirCommit2930-2935 jumps to catch3068 and destroys stale output again. Temporary physical-address allocation failure701 originally retains NV_OK and can report success after destruction.",
+      "change": "Build descriptor and physical-registration private state locally, return actual NO_MEMORY on temporary-array failure, publish both outputs only after every stage succeeds. Existing output values are preserved on failure.",
+      "all_three_dispatcher_callers": [
+        "os_desc_mem.c145-157 returns error immediately through NV_CHECK_OK_OR_RETURN.",
+        "syncpoint_mem.c68-82 returns error without using descriptor; input local pMemDesc startsNULL.",
+        "gpu_vaspace.c2930-2935 takes catch; with local-only publication its initiallyNULL pRootMemNew staysNULL."
+      ],
+      "ownership": "Only the new unpublished descriptor, temporary address array and actually acquired registration wrapper may be released. Borrowed input values are never destroyed or overwritten by failed construction."
+    },
+    {
+      "path": "indirect-peer-map-unwind-prospective.patch",
+      "original_failure": "virtmemMapTo failed map1412-1416 goes done then unconditionally unmaps1607-1609; memdescUnmapIommu4395-4400 only asserts mapping exists, iovaspaceFromMapping597-599 dereferences it. Pre-map error exits after setting bIsIndirectPeer can take the same invalid cleanup.",
+      "change": "Track bIndirectPeerIommuMapped from actual mapNV_OK. Pre-map/failed-map errors do not unmap; later failures unwind exactly the acquired mapping; success leaves ownership with ordinary virtual-memory unmap.",
+      "ownership": "Descriptor pointer is not replaced between map and done; dmaAllocMap/dmaFreeMap only consume descriptor and alter virtual mapping fields. Corresponding NV_IOVA_DOMAIN_NONE unmap is an existing early no-op."
+    },
+    {
+      "path": "peer-bar-borrowed-owner-prospective.patch",
+      "original_failure": "kbusSetupPeerBarAccess initializes pMemDesc from *ppMemDesc and destroys it on map failure even when borrowed from an earlier successful call. Caller pointer and other aliases remain dangling.",
+      "change": "Track only construction by this invocation. Failed map destroys only a newly created unpublished descriptor; a preexisting descriptor and its other mappings remain with original owner for retry/teardown.",
+      "partial_mapping_failure_review": [
+        "mem_desc.c4321-4325 returns immediately on iovaspaceAcquireMapping failure; it never publishes a fake successful map.",
+        "io_vaspace.c452-485 frees only new mapping data on osIovaMap error; post-TLB error first osIovaUnmap-s the newly successful map; memdescAddIommuMap is after both success checks.",
+        "io_vaspace.c498-505 existing mapping increments refcount and returnsNV_OK; creation failures do not alter other mappings on borrowed descriptor.",
+        "mem_desc.c4345-4376 addressability failure releases the acquisition made by this invocation before returning error. Existing independent references remain owned. Peer mailbox descriptors have no Allocated/EXT_PAGE_ARRAY/PEER_IO flags requiring this addressability validation."
+      ],
+      "original_failure_consumers": [
+        "kern_bus_gm200.c89,96,103 returns from mailbox setup when helper returns~0ULL. Future teardown still owns any preexisting caller descriptor, so destroying borrowed data on failure is invalid."
+      ]
+    }
+  ],
+  "native_fault_controls": {
+    "runner": "check_memory_unwind_bodies.py",
+    "fixture": "check_memory_unwind_bodies.c",
+    "generator": "generate_memory_unwind.py",
+    "generator_sha256": "8cf4cdb4f297d49da2578204776ef7c5ec4d2ef24be8b8393e8cf229945100d5",
+    "fixture_sha256": "c63d296e916dd8d3a7b21865299bf696a851e8fb22c2bd7c1affef9125f51cf7",
+    "complete_original_function_bodies": [
+      "static NV_STATUS\nosCreateOsDescriptorFromPhysAddr\n(",
+      "NV_STATUS\nvirtmemMapTo_IMPL\n(",
+      "RmPhysAddr\nkbusSetupPeerBarAccess_IMPL\n("
+    ],
+    "outer_original_external_root_catch_fragment": true,
+    "modeled_dependencies": true,
+    "candidate": {
+      "checks": 127,
+      "failures": 0,
+      "variants": [
+        "plain",
+        "fatal-ASan-UBSan-function"
+      ]
+    },
+    "pinned_baseline": {
+      "checks": 127,
+      "failures": 23,
+      "variants": [
+        "plain",
+        "fatal-ASan-UBSan-function"
+      ]
+    },
+    "scope": "Complete function bodies extracted byte-for-byte from the pinned source and generated candidates; model dependencies inject constructor/temp-array/registration/map/PTE setup and downstream DMA/kernel/RPC errors. Borrowed peer retry and later owner teardown are checked."
+  },
+  "darwin_cross_compile": {
+    "status": "passed",
+    "translation_units": [
+      {
+        "source": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c",
+        "status": 0,
+        "source_sha256": "64dab8af5bc9822078876b09fb3b204018d6218d78dafa3df3fa3dbfb1b21df5"
+      },
+      {
+        "source": "src/nvidia/src/kernel/mem_mgr/virtual_mem.c",
+        "status": 0,
+        "source_sha256": "24c35cf40321eea15bf22e43addabe09eda708ead2a67896fe55233d626076ee"
+      },
+      {
+        "source": "src/nvidia/src/kernel/gpu/bus/kern_bus.c",
+        "status": 0,
+        "source_sha256": "d94ca6de03ba8829b63fddc6dce3b7f9270e30ec1bdff8cd1786e0c5609dcc5c"
+      }
+    ],
+    "target": "x86_64-apple-darwin24",
+    "minimum_macos": "15.0",
+    "compiler": "Clang18.1.3 cross compiler; not native Apple compiler execution",
+    "flags": "Original make-declared C profile plus private original namespace, NV_UNIX=1, -mkernel, -Werror and4096-byte frame error limit.",
+    "diagnostics": "none"
+  },
+  "limits": [
+    "These patches do not provide alias/peer/import/page/SVA memory operations; callbacks still refuse and counters remain sticky.",
+    "Current active ten overlays are unchanged. Full combined checked-source integration and Apple-native compilation must follow independently.",
+    "The os_unlock_user_pages ignored/ASSERT-only callers remain a distinct pin-acquisition reachability/ownership requirement; these three patches do not implement user pins."
+  ],
+  "kernel_execution": "not_tested",
+  "gpu_access": false
+}

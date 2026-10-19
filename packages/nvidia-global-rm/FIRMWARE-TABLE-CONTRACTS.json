@@ -1,0 +1,154 @@
+{
+  "format": 1,
+  "component": "nvidia-firmware-table-discovery",
+  "upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "scope": "Real EFI configuration-table lookup and bounded physical RSDP validation behind the exact original 32-bit callback. Source/compile/parser controls do not prove actual target EFI publication or complete original downstream chipset table access.",
+  "callback": {
+    "symbol": "os_get_acpi_rsdp_from_uefi",
+    "namespace_symbol": "s540Global_os_get_acpi_rsdp_from_uefi",
+    "original_type": "NV_STATUS (NvU32 *)",
+    "original_declaration": "NV_STATUS NV_API_CALL os_get_acpi_rsdp_from_uefi (NvU32 *);",
+    "declaration_evidence": {
+      "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+      "lines": [
+        178,
+        178
+      ]
+    },
+    "source_evidence": [
+      {
+        "source": "kernel-open/nvidia/os-interface.c",
+        "lines": [
+          1749,
+          1782
+        ],
+        "meaning": "Exact output/error semantics."
+      },
+      {
+        "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+        "lines": [
+          4712,
+          4718
+        ],
+        "meaning": "OS forward."
+      },
+      {
+        "source": "src/nvidia/src/kernel/platform/chipset/chipset_pcie.c",
+        "lines": [
+          4225,
+          4272
+        ],
+        "meaning": "UEFI table lookup and failure path."
+      }
+    ],
+    "null_output_status": "NV_ERR_INVALID_STATE",
+    "valid_output_initialized_to_zero_before_lookup": true,
+    "success_output": "Actual validated physical address below4GiB; never truncate8-byte EFI property.",
+    "selected_backend": "Public IOKit IODeviceTree EFI GUID entry lookup; retained OSData; actual physical descriptor readBytes/prepare/complete result checked; no private efi_get_rsdp_physaddr import.",
+    "absent_supported_efi_publication_status": "NV_ERR_NOT_SUPPORTED",
+    "observed_efi_table_missing_acpi_status": "NV_ERR_OPERATING_SYSTEM",
+    "unreachable_entry_proven": false,
+    "actual_target_execution_proven": false
+  },
+  "efi_guids": {
+    "preferred_acpi20": "8868E871-E4F1-11D3-BC22-0080C73C8881",
+    "fallback_acpi10": "EB9D2D30-2D88-11D3-9A16-0090273FC14D"
+  },
+  "bounds": {
+    "pointer_property_bytes": [
+      4,
+      8
+    ],
+    "physical_pointer_alignment": 16,
+    "physical_end_exclusive": 4294967296,
+    "maximum_admitted_rsdp_bytes": 4096,
+    "maximum_read_chunk_bytes": 64
+  },
+  "payload_validation": [
+    "Exact RSD PTR signature; legacy20-byte checksum; revision1 rejected.",
+    "Legacy RSDT pointer or extended XSDT pointer must be nonzero.",
+    "Extended length at least36, at most4096; no physical range overflow; whole extended checksum verified from actual reads.",
+    "Output published only after all reads/checks succeed; errors preserve helper output and original facade leaves its initialized0."
+  ],
+  "primary_apple_sources": [
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "source": "osfmk/i386/AT386/model_dep.c",
+      "git_blob": "ab30d3ef11c511eff14327f106f356a3b025f8f3",
+      "sha256": "4495f562c4562a966b0b6f93120346b1826c767ff758525b2e23d1ed69fa9095",
+      "permalink": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/i386/AT386/model_dep.c",
+      "anchors": [
+        {
+          "lines": [
+            1834,
+            1906
+          ],
+          "meaning": "Actual EFI table selection prefers ACPI2 then ACPI1; helper is XNU private and is not called by this kext."
+        }
+      ]
+    },
+    {
+      "repository": "apple-oss-distributions/xnu",
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "source": "osfmk/i386/acpi.c",
+      "git_blob": "22c4ff15a8941f46a50e5f2bcfbf582262eba5c0",
+      "sha256": "de5d9306c1ab75fec518186cdc39372aae3aa9e494671211ca7e21e7f5ba9b0a",
+      "permalink": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/i386/acpi.c",
+      "anchors": [
+        {
+          "lines": [
+            643,
+            725
+          ],
+          "meaning": "Actual RSDP signature/checksum/revision/root validation."
+        }
+      ]
+    },
+    {
+      "repository": "apple-oss-distributions/AppleSMBIOS",
+      "commit": "9079d961c4dc99768745adc8208a24fda4678b4d",
+      "source": "AppleSMBIOS.cpp",
+      "git_blob": "e3144424e50d74e000d42539b3fc681601e4c284",
+      "sha256": "d72e2fc80c5c2e868dc817be200cb72e315c32e84b43710ead4d60c5989c0aa6",
+      "permalink": "https://github.com/apple-oss-distributions/AppleSMBIOS/blob/9079d961c4dc99768745adc8208a24fda4678b4d/AppleSMBIOS.cpp",
+      "anchors": [
+        {
+          "lines": [
+            332,
+            409
+          ],
+          "meaning": "Apple kext locates a named GUID EFI table entry, reads table OSData as a physical pointer and reads its actual payload through an IOMemoryDescriptor with kIOMemoryMapperNone."
+        }
+      ]
+    }
+  ],
+  "source_sha256": {
+    "kernel-open/nvidia/os-interface.c": "0c8fe2749ec4ee12f1dbbd884cfbc8f1c8a7750903de7453b01c2f6b92e0f6d6",
+    "src/nvidia/arch/nvalloc/unix/include/os-interface.h": "bd281e48ff06b481033fc2fb29a891710a2b4d66fb009cc2b752ab6e90f2113b",
+    "src/nvidia/arch/nvalloc/unix/src/os.c": "057b50fcb738be90a073b60f63e70559706864ddcec3bf703282563173e3dce4",
+    "src/nvidia/src/kernel/platform/chipset/chipset_pcie.c": "8cdef61abba6a4e8fa732cc666f1963db90508996f8c3adb5c7d629f109e9ef5"
+  },
+  "validation": {
+    "original_header_abi_assertions": 1,
+    "native_checks_per_variant": 54,
+    "native_variants": [
+      "plain",
+      "fatal-ASan-UBSan-function"
+    ],
+    "native_fixture_status": "passed-local-host-controls",
+    "physical_firmware_read_in_native_fixture": false,
+    "pinned_sdk_kernel_compile": "passed-local-MachO-cross-compile-control",
+    "actual_target_efi_publication_observed": false,
+    "actual_target_kernel_execution": false,
+    "gpu_access": false,
+    "production_admission": false
+  },
+  "remaining_requirements": [
+    "Exact target Darwin25.6/build25G241 IODeviceTree EFI table publication and IOKit import admission have not been independently observed. An older Apple source convention is development evidence.",
+    "Original downstream RSDP/RSDT/XSDT/MCFG reads still use os_map_kernel_space, whose current backend only admits selected NVIDIA register ranges; this callback does not close that separate mapping obligation.",
+    "Selected direct-PCIe-mapping policy and real foreign chipset/host-bridge PCI config discovery need reviewed source/backend closure; current bound-NVIDIA-BDF-only handle is insufficient.",
+    "Platform power, cancellation, actual stack, firmware execution and hardware-DMA retirement gates remain."
+  ],
+  "original_source_profile_modified": false
+}

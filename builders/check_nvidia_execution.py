@@ -162,6 +162,33 @@ def timer_case(output: Path, upstream: Path, namespace: Path, *, host_control: b
         host_control=host_control)
 
 
+def central_policy_case(output: Path, upstream: Path, namespace: Path, *, host_control: bool) -> dict:
+    return original_header_case(output, 'central-policy', upstream, namespace, [
+        GLOBAL / 'src/S540NvidiaGlobalRmCentralPolicy.c',
+        GLOBAL / 'src/S540NvidiaGlobalRmDiagnostics.c',
+        GLOBAL / 'tests/check_central_policy_native.c'], [
+        *(SERVICES / ('src/S540NvidiaDarwin' + name + '.cpp') for name in SERVICE_NAMES),
+        GLOBAL / 'src/S540NvidiaGlobalRmHost.cpp', GLOBAL / 'src/S540NvidiaGlobalRmFormat.cpp'],
+        {'component': 'nvidia-central-policy', 'checks': 16,
+         'unavailable_runtime_pm_operations': 2, 'hot_remove_tripwire': True,
+         'physical_feature_absence_inferred': False},
+        host_control=host_control, dead_strip=True,
+        extra_c_flags=['-std=gnu11', '-Werror', '-Wno-unused-parameter', '-I', str(GLOBAL / 'src')])
+
+
+def firmware_tables_case(output: Path, upstream: Path, namespace: Path, *, host_control: bool) -> dict:
+    return original_header_case(output, 'firmware-tables', upstream, namespace, [
+        GLOBAL / 'src/S540NvidiaGlobalRmFirmwareTables.c',
+        GLOBAL / 'tests/check_firmware_tables_abi_native.c'], [
+        GLOBAL / 'src/S540NvidiaGlobalRmFirmwareTablesBackend.cpp',
+        GLOBAL / 'tests/check_firmware_tables_native.cpp'],
+        {'component': 'nvidia-firmware-table-parser', 'checks': 54,
+         'maximum_table_bytes': 4096, 'physical_firmware_read': False},
+        host_control=host_control, dead_strip=True,
+        extra_c_flags=['-std=gnu11', '-Werror', '-Wno-unused-parameter', '-I', str(GLOBAL / 'src')],
+        extra_cpp_flags=['-I', str(GLOBAL / 'src')])
+
+
 def context_metadata_case(output: Path, upstream: Path, namespace: Path, *, host_control: bool) -> dict:
     return original_header_case(output, 'gsp-context-metadata', upstream, namespace, [
         ROOT / 'packages/nvidia-global-rm-crypto/src/S540NvidiaGlobalCrypto.c',
@@ -329,7 +356,7 @@ def check(output: Path, assets: Path, *, upstream: Path | None = None,
         ('DeviceTransport', 'DeviceServices', 'DeviceCheck')] + [
             DEVICE / 'tests/dma_stop_receipt_fixture.cpp'],
         DEVICE / 'tests/check_device_transport_native.cpp',
-        {'component': 'nvidia-device-transport', 'checks': 466,
+        {'component': 'nvidia-device-transport', 'checks': 474,
          'production_checks': 21, 'unavailable_mapper_checks': 19,
          'lifecycle_cycles': 128, 'device_dma_verified': False,
          'hardware_interrupt_delivery': False, 'gpu_initialized': False},
@@ -418,6 +445,10 @@ def check(output: Path, assets: Path, *, upstream: Path | None = None,
          'target_kernel_admission': False, 'nvidia_recycling_pool_bytes': 0},
         host_control=host_control, dead_strip=True,
         extra_c_flags=['-std=gnu11', '-Werror', '-Wno-unused-parameter']))
+    progress.component('central_policy', lambda: central_policy_case(
+        output, upstream, namespace, host_control=host_control))
+    progress.component('firmware_tables', lambda: firmware_tables_case(
+        output, upstream, namespace, host_control=host_control))
     progress.component('feature_profile', lambda: original_header_case(
         output, 'feature-profile', upstream, namespace, [
             GLOBAL / 'src/S540NvidiaGlobalRmFeatureProfile.c',

@@ -665,5 +665,7 @@
     "native_test": "tests/check_pci_pdi_native.cpp",
     "native_checks": 40,
     "kernel_or_hardware_execution": false
-  }
+  },
+  "reachability_audit": "MEMORY-REACHABILITY.json; all32 unavailable callbacks audited;19 source exclusions/prior-success guards,13 whole-bootstrap status-operation absences remain unproved; no operation relabeled implemented",
+  "status_failure_contracts": "MEMORY-FAILURE-CONTRACTS.json"
 }

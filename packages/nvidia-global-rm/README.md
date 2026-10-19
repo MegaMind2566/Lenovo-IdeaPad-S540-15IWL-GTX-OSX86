@@ -152,6 +152,16 @@ including [diagnostic](DIAGNOSTICS-CONTRACTS.json) and
 [profile](PROFILE-CONTRACTS.json) manifests. Unsupported RM ACPI method calls
 remain unavailable operations and invalidate admission if reached.
 
+The [central-policy contracts](CENTRAL-POLICY-CONTRACTS.json) distinguish the
+actual absence of selected backend services from physical device capability.
+Runtime-PM idle operations and PCI hot-remove remain detected unavailable
+operations. The [firmware-table backend](FIRMWARE-TABLE-CONTRACTS.json) performs
+public IOKit EFI lookup and validates the actual bounded RSDP payload; its
+54-check native parser control has no physical-read authority. Actual target
+publication and the separate downstream chipset table-mapping/PCI-discovery
+routes still require closure. The [110-callback audit](CALLBACK-PROFILE-AUDIT.md)
+keeps these obligations separate from missing linker definitions.
+
 The current native audit includes the source-gated global roots in the
 prospective global/coordinator closure. Its unresolved and defined-unavailable
 contracts remain runtime blockers; see the exact categories in the

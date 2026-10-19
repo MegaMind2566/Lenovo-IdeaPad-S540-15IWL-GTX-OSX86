@@ -1,0 +1,356 @@
+{
+  "format": 1,
+  "repository": "NVIDIA/open-gpu-kernel-modules",
+  "commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "status": "source-error-contracts; three-candidate-fixes-controlled; pin-exclusion-requires-final-link",
+  "scope": "All13 status callbacks previously not proved absent through first bootstrap; all19 direct call sites in pinned original C, plus relevant outer output/unwind consumers. No hardware execution.",
+  "counts": {
+    "callbacks": 13,
+    "direct_original_call_sites": 19
+  },
+  "source_sha256": {
+    "kernel-open/nvidia/nv-dma.c": "7912d6cf000450848b9c54b20b580958e7698f91fc6107c10b4e0fc502cd8942",
+    "kernel-open/nvidia/nv-dmabuf.c": "ce1f1a6d311be10b3d84818407ec0dd65b5fb4f564fcfb36f69fd536e2f59f5b",
+    "src/nvidia/arch/nvalloc/unix/src/escape.c": "43bf7520b5d161b8f6de82404d209fca34c2779bd290d6db748fc3a353c3c1ed",
+    "src/nvidia/arch/nvalloc/unix/src/os.c": "057b50fcb738be90a073b60f63e70559706864ddcec3bf703282563173e3dce4",
+    "src/nvidia/arch/nvalloc/unix/src/osapi.c": "e4336f0e3bb55122680e0d344f970c123664122c2415134b7a6b517c98fcbe75",
+    "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c": "c1cbd0b0bb814d5ca1d0a022d59a4b91ae90ca2663ee5d48621f7527d85cd897",
+    "src/nvidia/generated/g_vaspace_api_nvoc.c": "550900b862684a66f9a94e317bfd5cfebc919b1073603bc15e316da9bdff6394",
+    "src/nvidia/inc/libraries/utils/nvassert.h": "817c434764c12fcb3340aeb53e8c595a2d1818ef3b76473639bf15d303ac41fc",
+    "src/nvidia/src/kernel/gpu/bus/kern_bus.c": "f1c120125c79dc97877462994a68372b53e43e00dfae04b6dd57dc0a18e0d1bf",
+    "src/nvidia/src/kernel/gpu/mem_mgr/mem_desc.c": "ea2c53aafb5fcf1b6237a7ae46044cf0ed14a57da1eb3bc012dab2142b83d454",
+    "src/nvidia/src/kernel/gpu/mem_mgr/vaspace_api.c": "3e0d6b4525a18a5afeef79d955fd2e6581ea9cc0d7dca447fb9b9cd281c72cee",
+    "src/nvidia/src/kernel/mem_mgr/gpu_vaspace.c": "091272a127f93c1beaa56adaf5aa66d42213c6a6ca5a9b569fef9d5d0e5a165f",
+    "src/nvidia/src/kernel/mem_mgr/io_vaspace.c": "03a0d09ce474b3eb4d8be43a1a3d4bf25f4fc182954daaf5932cc1ad1200a60d",
+    "src/nvidia/src/kernel/mem_mgr/os_desc_mem.c": "664dcb2a16f97e5493d7b3edce40fe86c9af6998fa9bea31945311655d8ea171",
+    "src/nvidia/src/kernel/mem_mgr/syncpoint_mem.c": "14919ed5c317f069a27eea7b635c356a9c55f5974974d5d08546f4ea2adb7e67",
+    "src/nvidia/src/kernel/mem_mgr/system_mem.c": "795e761920f0928dcd5baf83d096eaf8ab5831023a2b7f8745360f4c6824a65f",
+    "src/nvidia/src/kernel/mem_mgr/virtual_mem.c": "7b9949bc423a29ba8cc16ee50590bb5e3eaaef394d6bdd8f531cbfc2fff0fb9a"
+  },
+  "macro_semantics": "NV_CHECK_OK_OR_GOTO and NV_ASSERT_OR_RETURN/GOTO contain actual unconditional status-dependent control flow even when assertion diagnostics are removed. Plain NV_ASSERT(status) or logging alone is not accepted as propagation.",
+  "callbacks": [
+    {
+      "symbol": "nv_alias_pages",
+      "direct_original_call_sites": [
+        "src/nvidia/arch/nvalloc/unix/src/os.c:1012"
+      ],
+      "non_ok_handling": [
+        "src/nvidia/arch/nvalloc/unix/src/os.c:983-1022 selects only actual carveout/guest descriptors;1085-1091 goto done on nonOK;1130 returns unchanged status.",
+        "src/nvidia/src/kernel/gpu/mem_mgr/mem_desc.c:857-861 _memdescAllocInternal checks osAllocPages result and goes done before Allocated=1 or IOMMU map;1097-1113 returns status."
+      ],
+      "output_initialization_and_use": [
+        "osAllocPagesInternal initializes pMemData=NULL and clears descriptor memdata before call (962,970). Failed callback does not change existing input PTE data; no pMemData publication happens before success1089-1091."
+      ],
+      "ownership_on_refusal": [
+        "Refusal creates no alias owner. Caller retains the descriptor/input physical-page array. osFreePages is not called for an unacquired alias in this immediate allocation layer.",
+        "Higher arbitrary memdescAlloc users are not a whole-program controlled-failure claim from this one callback proof."
+      ],
+      "verdict": "local-status-path-safe",
+      "blockers": [],
+      "operation_implemented": false,
+      "unexpected_refusal_blocks_adapter_success": true
+    },
+    {
+      "symbol": "nv_alloc_user_mapping",
+      "direct_original_call_sites": [
+        "src/nvidia/arch/nvalloc/unix/src/os.c:564"
+      ],
+      "non_ok_handling": [
+        "src/nvidia/arch/nvalloc/unix/src/os.c:567-577 branches on status and only assigns returned address/private in NV_OK branch;581 returns status.",
+        "src/nvidia/src/kernel/gpu/mem_mgr/mem_desc.c:1769-1775 memdescMap returns nonOK immediately."
+      ],
+      "output_initialization_and_use": [
+        "os.c:529-530 initializes *ppAddress and *ppPrivate to NULL before the call; pPrivate startsNULL507. userAddress is deliberately unread until NV_OK.",
+        "Coherent-FB setNumaPrivData failure occurs earlier and propagates before entering this callback; its failed physical registration is tracked separately."
+      ],
+      "ownership_on_refusal": [
+        "No user mapping/backing is published on refusal. The original allocation remains owned by its descriptor; no nv_free_user_mapping acquisition is fabricated."
+      ],
+      "verdict": "local-status-path-safe",
+      "blockers": [],
+      "operation_implemented": false,
+      "unexpected_refusal_blocks_adapter_success": true
+    },
+    {
+      "symbol": "nv_register_peer_io_mem",
+      "direct_original_call_sites": [
+        "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:586"
+      ],
+      "non_ok_handling": [
+        "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:586-594 returns immediately after destroying the newly created empty descriptor on nonOK.",
+        "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:58-172 dispatcher directly returns helper status; os_desc_mem.c:145-157 uses NV_CHECK_OK_OR_RETURN before any imported ownership."
+      ],
+      "output_initialization_and_use": [
+        "*ppPrivate=NULL at567 before registration; descriptor memdata=NULL550. Callback refusal preserves both private and input PTE array.",
+        "The helper leaves *ppMemDesc pointing at its destroyed provisional descriptor; its sole dispatcher path returns status and sole OS-descriptor constructor stops before using it. This is not a reusable failed-output contract for new callers."
+      ],
+      "ownership_on_refusal": [
+        "Input IO descriptor is only os_free_mem-ed on success622; on failure its original caller retains it. No peer wrapper was acquired; no unregister callback was published."
+      ],
+      "verdict": "local-status-path-safe",
+      "blockers": [],
+      "operation_implemented": false,
+      "unexpected_refusal_blocks_adapter_success": true
+    },
+    {
+      "symbol": "nv_register_phys_pages",
+      "direct_original_call_sites": [
+        "src/nvidia/arch/nvalloc/unix/src/os.c:439",
+        "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:710"
+      ],
+      "non_ok_handling": [
+        "src/nvidia/arch/nvalloc/unix/src/os.c:440-452 goto errors, free addrArray, return same status;522-525 osMapSystemMemory immediately returns setNumaPrivData error.",
+        "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:714-717 failure jumps cleanup_memdesc;758-762 destroys provisional descriptor and frees temporary addresses."
+      ],
+      "output_initialization_and_use": [
+        "setNumaPrivData initializes pAllocPrivate=NULL350; memdescSetMemData occurs only after registrationNV_OK445.",
+        "Pinned physical-import helper publishes *ppMemDesc via memdescCreate before failure; gvaspaceExternalRootDirCommit2930-2935 then catch3068 destroys that same stale output. Temporary-address allocation failure701 also leaves rmStatusNV_OK.",
+        "Candidate physical-import-publication-prospective.patch uses local descriptor/private; both caller outputs publish only after all stagesNV_OK; TEMP_ALLOC returns NO_MEMORY. Existing borrowed outputs are preserved on every failure."
+      ],
+      "ownership_on_refusal": [
+        "No OS phys wrapper is acquired on callback refusal. Candidate releases only new provisional descriptor/temporary address array. Prior successful register unwind occurs only after that success."
+      ],
+      "verdict": "requires-prospective-physical-publication-patch",
+      "blockers": [
+        "physical-import-dangling-output-and-false-success"
+      ],
+      "operation_implemented": false,
+      "unexpected_refusal_blocks_adapter_success": true
+    },
+    {
+      "symbol": "nv_register_user_pages",
+      "direct_original_call_sites": [
+        "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:240"
+      ],
+      "non_ok_handling": [
+        "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:244-248 destroys provisional empty descriptor and returns registration error immediately;360-365 parent returns same error.",
+        "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:58-172 dispatcher returns status; os_desc_mem.c:145-157 returns before taking descriptor ownership."
+      ],
+      "output_initialization_and_use": [
+        "Parent initializes *ppPrivate from the actual caller-supplied descriptor333; no page metadata is invented. Callback refusal leaves it unchanged.",
+        "Like peer helper, ppMemDesc provisional output is destroyed; actual sole parent returns error without further use. No teardown callback is installed before success370."
+      ],
+      "ownership_on_refusal": [
+        "Actual user pins, if acquired by some other service, remain with the original importer. Failed registration does not unpin input; independent Unix escape cleanup must handle them, and its ignored unlock status is a separate blocker."
+      ],
+      "verdict": "local-status-path-safe",
+      "blockers": [],
+      "operation_implemented": false,
+      "unexpected_refusal_blocks_adapter_success": true
+    },
+    {
+      "symbol": "nv_get_phys_pages",
+      "direct_original_call_sites": [
+        "src/nvidia/arch/nvalloc/unix/src/os.c:487"
+      ],
+      "non_ok_handling": [
+        "src/nvidia/arch/nvalloc/unix/src/os.c:478-487 rejects missing memdata then directly returns callback status.",
+        "src/nvidia/src/kernel/mem_mgr/system_mem.c:687-698 only logs nonOK and returns it without consuming pages."
+      ],
+      "output_initialization_and_use": [
+        "pPages and count are caller request fields. Refusal preserves them. The actual sole surface control does not read a synthesized struct-page array after error."
+      ],
+      "ownership_on_refusal": [
+        "Descriptor allocation remains owned; this query acquires no page references or output arrays."
+      ],
+      "verdict": "local-status-path-safe",
+      "blockers": [],
+      "operation_implemented": false,
+      "unexpected_refusal_blocks_adapter_success": true
+    },
+    {
+      "symbol": "nv_dma_map_peer",
+      "direct_original_call_sites": [
+        "src/nvidia/arch/nvalloc/unix/src/os.c:3989",
+        "src/nvidia/arch/nvalloc/unix/src/osapi.c:4756",
+        "kernel-open/nvidia/nv-dmabuf.c:967"
+      ],
+      "non_ok_handling": [
+        "src/nvidia/arch/nvalloc/unix/src/os.c:3989-4005 returns peer error before output publication.",
+        "src/nvidia/arch/nvalloc/unix/src/osapi.c:4719 initializes *ppPriv=NULL;4754-4770 returns error after only j<i previously successful mappings are unwound.",
+        "kernel-open/nvidia/nv-dmabuf.c:967-1009 tests status, returns ERR_PTR(-EIO), and unwinds only mapped_nents incremented after successful maps.",
+        "src/nvidia/src/kernel/mem_mgr/io_vaspace.c:456-485 goes error/free before memdescAddIommuMap on osIovaMap failure. Direct post-map TLB unwind is after mapNV_OK.",
+        "src/nvidia/src/kernel/mem_mgr/virtual_mem.c:1412-1416 failed indirect map goes done;1607-1609 originally unmaps even if acquisition failed. Candidate ownership flag fixes every pre-map and post-map goto exit."
+      ],
+      "output_initialization_and_use": [
+        "OS mapping pOsData is not published until statusNV_OK. Peer physical-address inputs remain unchanged on refusal.",
+        "rm_p2p first refused map at i=0 has no prior mapping to unwind. Linux DMA-BUF mapped_nents starts0 and increments only on success."
+      ],
+      "ownership_on_refusal": [
+        "No peer/MMIO mapping is acquired by the refused callback. Candidate indirect-peer cleanup uses the new map-success ownership flag.",
+        "Candidate peer-bar-borrowed-owner-prospective.patch preserves borrowed *ppMemDesc and every prior mapping on error; only a newly created unpublished descriptor is destroyed. Source partial-map cleanup reviewed in prospective/MEMORY-UNWIND-AUDIT.json."
+      ],
+      "verdict": "requires-prospective-indirect-peer-and-borrowed-owner-patches",
+      "blockers": [
+        "indirect-peer-unmap-without-acquisition",
+        "peer-bar-borrowed-descriptor-dangling"
+      ],
+      "operation_implemented": false,
+      "unexpected_refusal_blocks_adapter_success": true
+    },
+    {
+      "symbol": "nv_dma_map_mmio",
+      "direct_original_call_sites": [
+        "src/nvidia/arch/nvalloc/unix/src/os.c:3896",
+        "kernel-open/nvidia/nv-dma.c:811"
+      ],
+      "non_ok_handling": [
+        "src/nvidia/arch/nvalloc/unix/src/os.c:3894-3908 returns error immediately before OS-map publication.",
+        "kernel-open/nvidia/nv-dma.c:811,818-825 returns actual MMIO result when Linux fallback chooses that callback; no subsequent va use on nonOK.",
+        "src/nvidia/src/kernel/mem_mgr/io_vaspace.c:456-485 goes error/free before memdescAddIommuMap on osIovaMap failure. Direct post-map TLB unwind is after mapNV_OK.",
+        "src/nvidia/src/kernel/mem_mgr/virtual_mem.c:1412-1416 failed indirect map goes done;1607-1609 originally unmaps even if acquisition failed. Candidate ownership flag fixes every pre-map and post-map goto exit."
+      ],
+      "output_initialization_and_use": [
+        "Input MMIO address remains unchanged. No owned IOVA/pOsData is published on refusal."
+      ],
+      "ownership_on_refusal": [
+        "No peer/MMIO mapping is acquired by the refused callback. Candidate indirect-peer cleanup uses the new map-success ownership flag.",
+        "Candidate peer-bar-borrowed-owner-prospective.patch preserves borrowed *ppMemDesc and every prior mapping on error; only a newly created unpublished descriptor is destroyed. Source partial-map cleanup reviewed in prospective/MEMORY-UNWIND-AUDIT.json."
+      ],
+      "verdict": "requires-prospective-indirect-peer-and-borrowed-owner-patches",
+      "blockers": [
+        "indirect-peer-unmap-without-acquisition",
+        "peer-bar-borrowed-descriptor-dangling"
+      ],
+      "operation_implemented": false,
+      "unexpected_refusal_blocks_adapter_success": true
+    },
+    {
+      "symbol": "nv_dma_import_sgt",
+      "direct_original_call_sites": [
+        "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:1091"
+      ],
+      "non_ok_handling": [
+        "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:1092-1098 returns error before _createMemdescFromSgt1101 and nv_register_sgt866.",
+        "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:58-172 dispatcher returns status; os_desc_mem.c145-157 returns before descriptor ownership."
+      ],
+      "output_initialization_and_use": [
+        "SGT/GEM are preexisting caller inputs, not output metadata; refusal never changes them or acquires their module/object references."
+      ],
+      "ownership_on_refusal": [
+        "No imported SG owner exists; no nv_dma_release_sgt or unregister can be reached from this failed creation."
+      ],
+      "verdict": "local-status-path-safe",
+      "blockers": [],
+      "operation_implemented": false,
+      "unexpected_refusal_blocks_adapter_success": true
+    },
+    {
+      "symbol": "nv_dma_import_dma_buf",
+      "direct_original_call_sites": [
+        "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:1135",
+        "kernel-open/nvidia/nv-dmabuf.c:1991"
+      ],
+      "non_ok_handling": [
+        "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:1137-1143 returns error before descriptor helper1146.",
+        "kernel-open/nvidia/nv-dmabuf.c:1991-1998 original Linux from_fd forwards actual status after balancing its acquired dma_buf_get reference with dma_buf_put; CONFIG-disabled branch returns NOT_SUPPORTED.",
+        "Current port replaces both fd and dma_buf callbacks: neither invokes Linux get/attach/map APIs or acquires such references."
+      ],
+      "output_initialization_and_use": [
+        "Original OS helper initializes size=0,pImportPriv=NULL,pImportSgt=NULL1117-1119. All remain unpublished after refusal."
+      ],
+      "ownership_on_refusal": [
+        "No imported mapping/reference is acquired by port callback. Input DMA-BUF pointer stays owned by original caller; paired release is success-gated."
+      ],
+      "verdict": "local-status-path-safe",
+      "blockers": [],
+      "operation_implemented": false,
+      "unexpected_refusal_blocks_adapter_success": true
+    },
+    {
+      "symbol": "nv_dma_import_from_fd",
+      "direct_original_call_sites": [
+        "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:1056"
+      ],
+      "non_ok_handling": [
+        "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:1058-1065 returns actual error before _createMemdescFromDmaBuf1068.",
+        "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:58-172 dispatcher returns status; os_desc_mem.c145-157 returns before descriptor ownership."
+      ],
+      "output_initialization_and_use": [
+        "Original size=0,private=NULL,SGT=NULL1031-1033; callback preserves all outputs."
+      ],
+      "ownership_on_refusal": [
+        "Input fd remains caller-owned; port refusal never duplicates fd or acquires Linux DMA-BUF reference."
+      ],
+      "verdict": "local-status-path-safe",
+      "blockers": [],
+      "operation_implemented": false,
+      "unexpected_refusal_blocks_adapter_success": true
+    },
+    {
+      "symbol": "os_unlock_user_pages",
+      "direct_original_call_sites": [
+        "src/nvidia/arch/nvalloc/unix/src/escape.c:195",
+        "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:1242"
+      ],
+      "non_ok_handling": [
+        "src/nvidia/arch/nvalloc/unix/src/escape.c:164-196 calls only after actual os_lock_user_pagesNV_OK and subsequent import failure, but ignores unlock return entirely.",
+        "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:1242-1243 only NV_ASSERT(status==NV_OK); assertion is NOT an error-propagation proof.",
+        "Page-array destructor is excluded because registration never succeeds and no callback is published (MEMORY-REACHABILITY user-registration-release)."
+      ],
+      "output_initialization_and_use": [
+        "No returned page metadata or status-success output is read; the risk is losing previously acquired pin ownership while status is ignored."
+      ],
+      "ownership_on_refusal": [
+        "Port does not implement Linux page pins. Descriptor destructor is excluded by never-successful registration; separate escape pin acquisition is excluded by the complete source caller-chain inventory and required final-root/external conditions in USER-PIN-ROOT-CONTRACT.json.",
+        "The ignored escape return is not treated as checked cleanup. Admitting an escape/pin entry invalidates this exclusion and requires a real pin service plus retained failed-unpin ownership."
+      ],
+      "verdict": "excluded-by-actual-source-caller-chain-under-final-link-root-conditions",
+      "blockers": [
+        "escape-unlock-return-ignored"
+      ],
+      "operation_implemented": false,
+      "unexpected_refusal_blocks_adapter_success": true,
+      "source_exclusion_contract": "USER-PIN-ROOT-CONTRACT.json"
+    },
+    {
+      "symbol": "os_iommu_sva_bind",
+      "direct_original_call_sites": [
+        "src/nvidia/src/kernel/gpu/mem_mgr/vaspace_api.c:223"
+      ],
+      "non_ok_handling": [
+        "src/nvidia/src/kernel/gpu/mem_mgr/vaspace_api.c:214-226 requires explicit NVLINK_ATS_TEST plus actual SYS_ENABLE_RM_TEST_ONLY_CODE; NV_CHECK_OK_OR_GOTO sends nonOK to done before PASID use227.",
+        "src/nvidia/src/kernel/gpu/mem_mgr/vaspace_api.c:426-441 releases reserved levels/lock and returns unchanged error.",
+        "src/nvidia/generated/g_vaspace_api_nvoc.c:629 zeros object including sva_handle;646-647 failed constructor is not published. Base constructor unwind does not invoke VaSpace destructor."
+      ],
+      "output_initialization_and_use": [
+        "sva_handle is actuallyNULL from object zero-init; PASID is read only after bindNV_OK. Refusal preserves both."
+      ],
+      "ownership_on_refusal": [
+        "No PASID binding was acquired; ordinary unbind554-556 requires a nonnull actual handle."
+      ],
+      "verdict": "local-status-path-safe",
+      "blockers": [],
+      "operation_implemented": false,
+      "unexpected_refusal_blocks_adapter_success": true
+    }
+  ],
+  "prospective_fault_controls": {
+    "runner": "prospective/check_memory_unwind_bodies.py",
+    "fixture": "prospective/check_memory_unwind_bodies.c",
+    "candidate_checks": 127,
+    "candidate_failures": 0,
+    "baseline_failures_same_checks": 23,
+    "variants": [
+      "plain",
+      "fatal-ASan-UBSan-function"
+    ],
+    "complete_original_function_bodies": [
+      "osCreateOsDescriptorFromPhysAddr",
+      "virtmemMapTo_IMPL",
+      "kbusSetupPeerBarAccess_IMPL"
+    ],
+    "explicit_modeled_dependencies": true,
+    "active_profile_changed": false,
+    "audit": "prospective/MEMORY-UNWIND-AUDIT.json"
+  },
+  "remaining_requirements": [
+    "Integrate and compile all three prospective memory ownership/unwind patches in an isolated combined checked profile, not the active frozen ten overlays.",
+    "Enforce USER-PIN-ROOT-CONTRACT.json against the final admitted image: source caller inventory unchanged, no escape roots/project references and no retained os_lock_user_pages/os_lookup_user_io_memory imports.",
+    "Sticky unavailableOperationsEver must reject apparent adapter success if an original caller ignores an operation refusal. Such a counter cannot prevent a crash before returning: unsafe output/unwind paths require actual source fixes.",
+    "This is callback-level and relevant adjacent-unwind proof, not an assertion that every arbitrary engine caller of generic memdescAlloc/memdescMap propagates every possible failure.",
+    "Unavailable operation symbols remain typed refusals, not implemented memory services."
+  ],
+  "kernel_execution": "not_tested",
+  "gpu_access": false
+}

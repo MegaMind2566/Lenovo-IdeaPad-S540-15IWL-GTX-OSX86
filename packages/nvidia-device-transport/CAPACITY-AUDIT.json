@@ -107,7 +107,7 @@
     "first_hardware_attempt_precondition": "Status-preserving original initialization failure and complete real adapter/GSP/IRQ/DMA teardown, or explicit persistent quarantine owner. The active ten-overlay original profile has no DMA stop receipt issuer and remains gated. This audit alone does not authorize hardware execution."
   },
   "native_evidence": {
-    "transport_assertions": 466,
+    "transport_assertions": 474,
     "tests": "tests/check_device_transport_native.cpp; budget-refusal/backend-failure/retired-record peak observations and retry-safe ownership",
     "hardware_allocation_high_water": "not_observed",
     "kernel_execution": "not_tested"

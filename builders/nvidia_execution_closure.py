@@ -26,6 +26,8 @@ COORDINATOR_CONTRACTS = ROOT / 'packages/nvidia-global-rm/COORDINATOR-CONTRACTS.
 LIFECYCLE_SOURCE = ROOT / 'packages/nvidia-global-rm/src/S540NvidiaGlobalRmLifecycle.c'
 MEMORY_PROFILE_CONTRACTS = ROOT / 'packages/nvidia-device-transport/MEMORY-CONTRACTS.json'
 FEATURE_PROFILE_CONTRACTS = ROOT / 'packages/nvidia-global-rm/FEATURE-PROFILE-CONTRACTS.json'
+CENTRAL_POLICY_CONTRACTS = ROOT / 'packages/nvidia-global-rm/CENTRAL-POLICY-CONTRACTS.json'
+USER_PIN_ROOT_CONTRACT = ROOT / 'packages/nvidia-device-transport/USER-PIN-ROOT-CONTRACT.json'
 EXPECTED_ORIGINAL_OBJECTS = 1100
 GATED_LIFECYCLE_ROOTS = ('coreInitializeRm', 'RmShutdownRm')
 # The selected no-RM-ACPI-events backend supplies exact typed refusals for
@@ -36,6 +38,93 @@ UNAVAILABLE_ACPI = {original.PREFIX + name for name in (
     'nv_acpi_dod_method', 'nv_acpi_dsm_method', 'nv_acpi_get_powersource',
     'nv_acpi_mux_method')}
 IDENTIFIER = re.compile(r'[A-Za-z_][A-Za-z0-9_]*')
+COMMENTS = re.compile(r'/\*.*?\*/|//[^\n]*', re.S)
+
+
+def _without_comments(text: str) -> str:
+    return COMMENTS.sub(lambda match: ''.join('\n' if value == '\n' else ' '
+                                              for value in match[0]), text)
+
+
+def review_user_pin_roots(roots: set[str], retained: set[str], project_symbols: set[str],
+                         upstream: Path | None = None, source_tree: Path | None = None) -> dict:
+    """Check this image's exact escape-chain exclusion, never a pin backend.
+
+    Static helper exclusion is established by the complete pinned identifier
+    inventory. Image conditions use derived public roots and actual retained
+    externals, rather than assuming dead stripping removes every local symbol.
+    """
+    manifest = json.loads(USER_PIN_ROOT_CONTRACT.read_text())
+    conditions = manifest.get('required_final_link_conditions', {})
+    expected = {
+        'forbidden_original_roots': [original.PREFIX + name for name in ('RmIoctl', 'rm_ioctl')],
+        'forbidden_retained_original_externals': [original.PREFIX + name for name in
+                                                ('os_lock_user_pages', 'os_lookup_user_io_memory')],
+        'project_production_must_not_reference': ['rm_ioctl', 'RmIoctl', 'RmCreateOsDescriptor',
+                                                 'RmAllocOsDescriptor', 'os_lock_user_pages']}
+    expected_sources = {'src/nvidia/arch/nvalloc/unix/' + path for path in
+        ('include/nv.h', 'include/os-interface.h', 'include/osapi.h', 'src/escape.c', 'src/osapi.c')}
+    if (manifest.get('format') != 1 or manifest.get('commit') != original.COMMIT or
+            conditions != expected or manifest.get('production_pin_service_implemented') is not False or
+            set(manifest.get('source_sha256', {})) != expected_sources or
+            set(manifest.get('exact_identifier_occurrences_src_nvidia_C_H_excluding_comments', {})) !=
+            set(expected['project_production_must_not_reference'])):
+        raise ValueError('The reviewed user-pin root/source contract changed.')
+    if roots & set(expected['forbidden_original_roots']):
+        raise ValueError('The final original roots admit the excluded user-pin escape chain.')
+    if retained & set(expected['forbidden_retained_original_externals']):
+        raise ValueError('The final original imports retain an excluded user-pin acquisition.')
+    names = expected['project_production_must_not_reference']
+    if project_symbols & {prefix + name for name in names for prefix in ('', original.PREFIX)}:
+        raise ValueError('The compiled project references the excluded user-pin escape chain.')
+    # Check production source/header directories as well as actual compiled
+    # symbols. Extra GSP directories are explicit; isolated prospective body
+    # controls and tests are not runtime source. Avoid importing the builder
+    # here: source review must not load firmware acquisition/network helpers.
+    directories = [path / 'src' for path in (ROOT / 'packages').iterdir()]
+    gsp = ROOT / 'packages/nvidia-gsp-bootstrap'
+    directories += [gsp / name for name in ('platform', 'evidence', 'timers')]
+    selected = {path for directory in directories for extension in ('*.c', '*.cpp', '*.h', '*.hpp')
+                for path in directory.glob(extension)}
+    selected.update(gsp / ('cancellation/S540NvidiaGspCancellation.' + extension)
+                    for extension in ('c', 'h'))
+    pattern = re.compile(r'\b(?:' + '|'.join(re.escape(prefix + name)
+        for name in names for prefix in ('', original.PREFIX)) + r')\b')
+    for source in selected:
+        if pattern.search(_without_comments(source.read_text())):
+            raise ValueError('A selected project source references the excluded user-pin escape chain: ' +
+                             source.relative_to(ROOT).as_posix())
+    if upstream is not None:
+        actual_source = source_tree if source_tree is not None else upstream
+        for source, expected_hash in manifest.get('source_sha256', {}).items():
+            if hashlib.sha256((upstream / source).read_bytes()).hexdigest() != expected_hash:
+                raise ValueError('A user-pin caller-chain source hash changed: ' + source)
+            if hashlib.sha256((actual_source / source).read_bytes()).hexdigest() != expected_hash:
+                raise ValueError('The actual composed user-pin caller-chain source needs a new review: ' + source)
+        inventory = manifest['exact_identifier_occurrences_src_nvidia_C_H_excluding_comments']
+        observed = {name: [] for name in inventory}
+        pattern = re.compile(r'\b(?:' + '|'.join(map(re.escape, inventory)) + r')\b')
+        for source in sorted((actual_source / 'src/nvidia').rglob('*')):
+            if source.suffix not in ('.c', '.h'):
+                continue
+            text = _without_comments(source.read_text())
+            for match in pattern.finditer(text):
+                observed[match[0]].append({'source': source.relative_to(actual_source).as_posix(),
+                                         'line': text.count('\n', 0, match.start()) + 1})
+        if observed != inventory:
+            raise ValueError('The complete pinned user-pin identifier caller inventory changed.')
+    return {'contract': USER_PIN_ROOT_CONTRACT.relative_to(ROOT).as_posix(),
+            'sha256': hashlib.sha256(USER_PIN_ROOT_CONTRACT.read_bytes()).hexdigest(),
+            'status': 'verified-current-image-and-pinned-source' if upstream is not None else
+                      'fixture-image-conditions-only; pinned-source-not-verified',
+            'original_source_hashes_verified': upstream is not None,
+            'complete_original_identifier_inventory_verified': upstream is not None,
+            'actual_composed_source_inventory_verified': upstream is not None and source_tree is not None,
+            'project_source_sha256': {path.relative_to(ROOT).as_posix():
+                hashlib.sha256(path.read_bytes()).hexdigest() for path in sorted(selected)},
+            'derived_original_roots_checked': True, 'retained_original_externals_checked': True,
+            'compiled_project_symbols_checked': True, 'pin_service_implemented': False,
+            'whole_bootstrap_reachability_proven': False, 'kernel_execution': 'not_tested'}
 
 
 def _symbols(value, description: str) -> set[str]:
@@ -135,9 +224,13 @@ def review_profile_contracts(reviewed: dict[str, dict], upstream: Path | None = 
         'official_disabled_capability': 'provided_disabled_profile_callbacks',
         'official_disabled_no_owned_resource': 'provided_disabled_profile_callbacks',
         'selected_zero_soc_irq_state': 'provided_profile_state_queries',
+        'selected_backend_capability': 'provided_profile_state_queries',
+        'unavailable_runtime_pm_operation': 'provided_unavailable_central_operations',
+        'unavailable_hot_remove_lifetime_guard': 'provided_central_lifetime_guards',
     }
     rows, provenance = {}, {}
-    for path, count in ((MEMORY_PROFILE_CONTRACTS, 40), (FEATURE_PROFILE_CONTRACTS, 30)):
+    for path, count in ((MEMORY_PROFILE_CONTRACTS, 40), (FEATURE_PROFILE_CONTRACTS, 30),
+                        (CENTRAL_POLICY_CONTRACTS, 8)):
         manifest = json.loads(path.read_text())
         commit = manifest.get('commit', manifest.get('upstream_commit'))
         callbacks = manifest.get('callbacks', [])
@@ -168,8 +261,8 @@ def review_profile_contracts(reviewed: dict[str, dict], upstream: Path | None = 
             'callback_count': count, 'original_source_hashes': len(hashes),
             'original_source_hashes_verified': upstream is not None,
             'runtime_reachability_proven': False}
-    if len(rows) != 70:
-        raise ValueError('The memory and feature callback profile inventories overlap.')
+    if len(rows) != 78:
+        raise ValueError('The selected callback profile inventories overlap.')
     return rows, provenance
 
 
@@ -302,6 +395,7 @@ def _classify(retained: set[str], project_defined: set[str], original_external: 
                       for category in (
                           'provided_unavailable_memory_operations', 'provided_memory_lifetime_guards',
                           'provided_unavailable_feature_operations', 'provided_partially_available_feature_operations',
+                          'provided_unavailable_central_operations', 'provided_central_lifetime_guards',
                           'provided_disabled_profile_callbacks', 'provided_profile_state_queries')}
     return {
         'provided_project_callbacks': sorted(provided - crypto - compiler - UNAVAILABLE_ACPI - profiles.keys()),
@@ -330,7 +424,8 @@ IMPLEMENTATION_BLOCKERS = (
     'provided_without_selected_abi_contract', 'provided_unavailable_acpi_methods',
     'provided_unavailable_crypto', 'provided_unavailable_memory_operations',
     'provided_memory_lifetime_guards', 'provided_unavailable_feature_operations',
-    'provided_partially_available_feature_operations', 'unreviewed_retained_imports')
+    'provided_partially_available_feature_operations', 'provided_unavailable_central_operations',
+    'provided_central_lifetime_guards', 'unreviewed_retained_imports')
 
 
 def implementation_complete(classified: dict) -> bool:
@@ -343,6 +438,7 @@ def analyze_execution_closure(linked_project: Path, original_objects: list[Path]
                               linker: list[str] | None = None,
                               cross_probe: bool = False,
                               upstream: Path | None = None,
+                              user_pin_source_tree: Path | None = None,
                               metaclass_reference: Path | None = None) -> dict:
     """Write execution-closure.json, returning blocked link evidence or raising.
 
@@ -436,6 +532,8 @@ def analyze_execution_closure(linked_project: Path, original_objects: list[Path]
         exported, retained, sections = _control_symbols(image, filetype)
         if exported != roots:
             raise ValueError('The coordinator control exports differ from the actual compiled RM roots.')
+        record['user_pin_escape_root_review'] = review_user_pin_roots(
+            roots, retained, project_defined | project_undefined, upstream, user_pin_source_tree)
         classified = _classify(retained, project_defined, original_external, reviewed, crypto, profiles)
         record.update(classified, retained_original_external_count=len(retained),
                       retained_original_externals=sorted(retained), sections=sections,
@@ -472,7 +570,8 @@ def analyze_execution_closure(linked_project: Path, original_objects: list[Path]
                 'The typed crypto boundaries implement no cryptographic operations. A complete '
                 'supported profile must independently prove zero requests throughout its actual lifecycle.')
         for key in ('provided_unavailable_memory_operations', 'provided_memory_lifetime_guards',
-                    'provided_unavailable_feature_operations', 'provided_partially_available_feature_operations'):
+                    'provided_unavailable_feature_operations', 'provided_partially_available_feature_operations',
+                    'provided_unavailable_central_operations', 'provided_central_lifetime_guards'):
             if classified[key]:
                 record['runtime_blockers'].append(
                     key + ': ' + str(len(classified[key])) +

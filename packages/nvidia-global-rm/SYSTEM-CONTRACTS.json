@@ -154,7 +154,7 @@
   "production_candidate_allowed": false,
   "ownership_backend_source_sha256": {
     "packages/nvidia-global-rm/src/S540NvidiaGlobalRmHost.cpp": "a9202786c8a66cb1b89bdc6d2513edeb0e893330a560071035f8707615cbb377",
-    "packages/nvidia-device-transport/src/S540NvidiaDeviceTransport.cpp": "1b0084053398fbc5a15008280359954ccca52e9763ba28cb0d0ae7079a1bb62e",
+    "packages/nvidia-device-transport/src/S540NvidiaDeviceTransport.cpp": "edcdb89fb766848c118af188c0426bf1edb9d520e6ec5995373d65e5c349e34d",
     "packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp": "57a3805c1308a0c96ac5cd1e224273825bf018fb158b3c001f0618fcdf82d4b2"
   }
 }

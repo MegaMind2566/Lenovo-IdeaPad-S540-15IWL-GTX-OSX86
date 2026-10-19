@@ -1,0 +1,56 @@
+{
+  "actual_compiler_dependency_files": 730,
+  "additional_patch_sha256": "7e12a976150b0cf14f5aa41b14db1d019dab3d989e408d4e859ebfa327fb131a",
+  "all_combined_patch_sha256": "d765f7c8f7c5ab3b61b2ee008b28ba1e2e98616e3ea08883c20a725e0ad0cf75",
+  "approved_profile": false,
+  "authoritative_native_apple": false,
+  "baseline_namespace_unchanged": true,
+  "changed_source_header_files": 23,
+  "combined_tree_sha256": "b29998f4f3cf8f23888ea7c9a09cb44440c20b59a09bd642077fa95973c78988",
+  "compiler": {
+    "sha256": "8ef402d453d1ba4902e4ee0f0f847f6cfa01400c95aa43c24e97818b9c0e3f45",
+    "version": "Ubuntu clang version 18.1.3 (1ubuntu1)"
+  },
+  "complete_isolated_tree_files": 4005,
+  "composition_controls": [
+    "Every standalone patch exact-replayed against its hashed raw sources.",
+    "Disjoint edits composed in raw-source coordinates with explicit final line offsets.",
+    "Both reconstructed combined patches exact-replayed with no offset or fuzz application.",
+    "Full4005-file output tree and actual compiler dependency hashes verified after compilation.",
+    "Overlapping edits and duplicate raw insertion points refused."
+  ],
+  "cross_compile_probe": true,
+  "format": 1,
+  "gpu_access": false,
+  "helper_sha256": "894b362b5f27f635ed4dfc050be117feb09a9b9819b470129a35c0b33c1825fa",
+  "kernel_execution": "not_tested",
+  "limitations": [
+    "Only19 changed original C units and two cancellation project C bridges are compiled together.",
+    "The shared original header changes have not been rebuilt through all1100 original translation units in this profile.",
+    "The4096-byte individual frame check is not a complete call-chain stack proof.",
+    "No kernel execution, target KXLD closure, PM acknowledgement, DMA quiescence or successful GSP initialization is established."
+  ],
+  "native_apple_compiler": false,
+  "original_changed_units_compiled": 19,
+  "production_candidate_allowed": false,
+  "profile": "isolated-prospective-combined-v1",
+  "project_bridge_backend_imports": [
+    "s540Darwin_os_delay",
+    "s540Darwin_os_get_current_thread",
+    "s540Darwin_os_get_monotonic_time_ns",
+    "s540Darwin_os_semaphore_may_sleep"
+  ],
+  "project_bridge_units_compiled": 2,
+  "raw_runtime_audit": "combined-profile-audit.json (regenerated in the caller-selected output directory)",
+  "raw_upstream_headers_used": 0,
+  "required_unique_project_bridge_exports": [
+    "s540GspCancellationBeginCleanupState",
+    "s540GspCancellationCheckCurrent",
+    "s540GspCancellationCheckGpu",
+    "s540GspCancellationCurrentScopeActive",
+    "s540GspCancellationPauseCurrent"
+  ],
+  "source_contract": "PROSPECTIVE-SOURCE-PROFILE.json",
+  "source_contract_sha256": "061f027f1eb6a1e2ea9c36a0ce8cd75b4d599026e8421a60e7dc2b78c2078894",
+  "status": "passed"
+}

@@ -1,0 +1,448 @@
+{
+  "format": 1,
+  "upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "component": "nvidia-global-central-policy",
+  "scope": "Eight exact original callbacks implementing explicit selected backend capabilities and official disabled branches. Three unavailable operations remain admission blockers; this is not whole-program route exclusion or kernel/hardware execution proof.",
+  "selected_backend_version": 1,
+  "immutable_backend_choices": {
+    "linux_runtime_pm": false,
+    "linux_kernel_suspend_notifier_registration": false,
+    "pci_bus_device_hot_remove": false,
+    "pci_requester_atomic_enable_service": false,
+    "cxl_cache_service": false
+  },
+  "forbidden_enabled_macros": [
+    "NV_PM_RUNTIME_AVAILABLE",
+    "NV_PCI_ENABLE_ATOMIC_OPS_TO_ROOT_PRESENT",
+    "PCI_DVSEC_CXL_DEVCAP_CACHE_CAPABLE"
+  ],
+  "classification_counts": {
+    "official_disabled_capability": 1,
+    "official_disabled_no_owned_resource": 2,
+    "selected_backend_capability": 2,
+    "unavailable_hot_remove_lifetime_guard": 1,
+    "unavailable_runtime_pm_operation": 2
+  },
+  "source_sha256": {
+    "kernel-open/nvidia/nv-pci.c": "6a5e39f37d86bd6d09cc5867647ecbc8e240298bc138bf651ad7d9346bc1b1c8",
+    "kernel-open/nvidia/nv.c": "ce04946d288cf0251668a2d847acceb2a39af9dac2f13bb005f53759c774dbf7",
+    "kernel-open/nvidia/os-interface.c": "0c8fe2749ec4ee12f1dbbd884cfbc8f1c8a7750903de7453b01c2f6b92e0f6d6",
+    "kernel-open/nvidia/os-pci.c": "f56ac88a97977d5320d4b31abe78171c3257324b58da0536040c6c07074fa78a",
+    "src/nvidia/arch/nvalloc/unix/include/nv-reg.h": "a8bff18c6dbeb7f19f5a5e5bbdd9a211329c7a989bb058ee1573395ffe36264f",
+    "src/nvidia/arch/nvalloc/unix/include/nv.h": "02ce4b371e0a8dd26f62a320e88c8382dcf31a21b727503a66abcaea9eecf09b",
+    "src/nvidia/arch/nvalloc/unix/include/os-interface.h": "bd281e48ff06b481033fc2fb29a891710a2b4d66fb009cc2b752ab6e90f2113b",
+    "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c": "a0b6639b517612e3e0c5b4c76abf317378bf0a91409ca27e5bb172e3395053fa",
+    "src/nvidia/arch/nvalloc/unix/src/os.c": "057b50fcb738be90a073b60f63e70559706864ddcec3bf703282563173e3dce4",
+    "src/nvidia/arch/nvalloc/unix/src/osinit.c": "dda3b014833c2e94680e5adea152011ffce72c8067782aceeecaefc28b7394d3",
+    "src/nvidia/src/kernel/gpu/bif/arch/hopper/kernel_bif_gh100.c": "c1dd061c19f133145607e1576e9664ecfbab095640c63a596cfc7ad0e3c4b15f",
+    "src/nvidia/src/kernel/gpu/mem_sys/arch/rubin/kern_mem_sys_gr100.c": "844bd4ab528ba7613c0e9fe761f625604330413570456bdb1ba8f6ae2a976547",
+    "src/nvidia/src/kernel/gpu_mgr/gpu_mgr.c": "0be12d9dac84d995c618d9a6d467a593c5f82ecd14458f90d5dad836549563d5"
+  },
+  "callbacks": [
+    {
+      "symbol": "nv_audio_dynamic_power",
+      "namespace_symbol": "s540Global_nv_audio_dynamic_power",
+      "original_type": "void (nv_state_t *)",
+      "original_declaration": "void NV_API_CALL nv_audio_dynamic_power (nv_state_t *);",
+      "classification": "official_disabled_no_owned_resource",
+      "semantics": "Use original empty branch without NV_PM_RUNTIME_AVAILABLE. No HDA audio device or runtime-PM wake reference is owned; no audio power or wake operation is claimed.",
+      "unavailable_observer": "none",
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "lines": [
+          1063,
+          1063
+        ]
+      },
+      "source_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv.c",
+          "lines": [
+            5911,
+            5930
+          ],
+          "meaning": "Documented conditional empty backend."
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "lines": [
+            590,
+            615
+          ],
+          "meaning": "Unix audio method invokes it then returns success."
+        }
+      ],
+      "remaining_route_requirement": "Make selected build/backend absence explicit; keep public audio control entry outside bootstrap admission and do not claim physical HDA absence from this callback."
+    },
+    {
+      "symbol": "nv_indicate_idle",
+      "namespace_symbol": "s540Global_nv_indicate_idle",
+      "original_type": "NV_STATUS (nv_state_t *)",
+      "original_declaration": "NV_STATUS NV_API_CALL nv_indicate_idle (nv_state_t *);",
+      "classification": "unavailable_runtime_pm_operation",
+      "semantics": "Return exact original NOT_SUPPORTED branch without Linux runtime PM. Record sticky unavailable because no actual pm_runtime_put_noidle or config-file read took place. An ignored refusal still blocks adapter success.",
+      "unavailable_observer": "increment-and-refuse",
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "lines": [
+          1058,
+          1058
+        ]
+      },
+      "source_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv.c",
+          "lines": [
+            5687,
+            5750
+          ],
+          "meaning": "Exact enabled and disabled implementations."
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "lines": [
+            1080,
+            1088
+          ],
+          "meaning": "Normal engagement conditional on mode."
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "lines": [
+            1029,
+            1038
+          ],
+          "meaning": "Cleanup can call not-idle if state was entered."
+        }
+      ],
+      "remaining_route_requirement": "Document explicit backend capability and prove no enabled runtime-D3 transition enters this path; platform PM lease and cancellation are independent requirements."
+    },
+    {
+      "symbol": "nv_indicate_not_idle",
+      "namespace_symbol": "s540Global_nv_indicate_not_idle",
+      "original_type": "NV_STATUS (nv_state_t *)",
+      "original_declaration": "NV_STATUS NV_API_CALL nv_indicate_not_idle (nv_state_t *);",
+      "classification": "unavailable_runtime_pm_operation",
+      "semantics": "Return exact original NOT_SUPPORTED branch without Linux runtime PM. Record sticky unavailable because no pm_runtime_get_noresume or PCI shutdown took place.",
+      "unavailable_observer": "increment-and-refuse",
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "lines": [
+          1059,
+          1059
+        ]
+      },
+      "source_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv.c",
+          "lines": [
+            5687,
+            5750
+          ],
+          "meaning": "Exact enabled and disabled implementations."
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "lines": [
+            1080,
+            1088
+          ],
+          "meaning": "Normal engagement conditional on mode."
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+          "lines": [
+            1029,
+            1038
+          ],
+          "meaning": "Cleanup can call not-idle if state was entered."
+        }
+      ],
+      "remaining_route_requirement": "Document explicit backend capability and prove no enabled runtime-D3 transition enters this path; platform PM lease and cancellation are independent requirements."
+    },
+    {
+      "symbol": "nv_pci_cxl_set_caching",
+      "namespace_symbol": "s540Global_nv_pci_cxl_set_caching",
+      "original_type": "void (nv_state_t *, NvBool)",
+      "original_declaration": "void NV_API_CALL nv_pci_cxl_set_caching(nv_state_t *, NvBool);",
+      "classification": "official_disabled_no_owned_resource",
+      "semantics": "Use original empty branch when PCI_DVSEC_CXL_DEVCAP_CACHE_CAPABLE is absent; no CXL cache backend or owned CXL device is admitted. No cache writeback/invalidation completion is claimed.",
+      "unavailable_observer": "none",
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+        "lines": [
+          1172,
+          1172
+        ]
+      },
+      "source_evidence": [
+        {
+          "source": "kernel-open/nvidia/nv-pci.c",
+          "lines": [
+            3273,
+            3355
+          ],
+          "meaning": "Macro-gated CXL caching operation."
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            6573,
+            6583
+          ],
+          "meaning": "Unguarded OS forward."
+        },
+        {
+          "source": "src/nvidia/src/kernel/gpu/mem_sys/arch/rubin/kern_mem_sys_gr100.c",
+          "lines": [
+            526,
+            546
+          ],
+          "meaning": "Architecture-specific caller."
+        }
+      ],
+      "remaining_route_requirement": "Prove selected HAL dispatch and is_cxl_dev false from actual endpoint capability evidence, or implement actual CXL service. A selected no-CXL backend empty branch must not claim cache-flush completion."
+    },
+    {
+      "symbol": "os_enable_pci_req_atomics",
+      "namespace_symbol": "s540Global_os_enable_pci_req_atomics",
+      "original_type": "NV_STATUS (void *, enum os_pci_req_atomics_type)",
+      "original_declaration": "NV_STATUS NV_API_CALL os_enable_pci_req_atomics (void *, enum os_pci_req_atomics_type);",
+      "classification": "official_disabled_capability",
+      "semantics": "Return original NV_ERR_NOT_SUPPORTED when NV_PCI_ENABLE_ATOMIC_OPS_TO_ROOT_PRESENT is absent. Do not modify PCI config. osGetPcieReqAtomicsCaps initializes the mask to zero and only ORs a bit on NV_OK.",
+      "unavailable_observer": "none",
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+        "lines": [
+          220,
+          220
+        ]
+      },
+      "source_evidence": [
+        {
+          "source": "kernel-open/nvidia/os-pci.c",
+          "lines": [
+            151,
+            192
+          ],
+          "meaning": "Exact configured/disabled branch and readback."
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            6300,
+            6329
+          ],
+          "meaning": "Aggregate capability probing preserves unsupported."
+        },
+        {
+          "source": "src/nvidia/src/kernel/gpu/bif/arch/hopper/kernel_bif_gh100.c",
+          "lines": [
+            628,
+            649
+          ],
+          "meaning": "Hopper-specific feature usage."
+        }
+      ],
+      "remaining_route_requirement": "Select explicit no-atomics service and retain honest NOT_SUPPORTED, or implement checked actual hierarchy operation. Prove TU117 dispatch does not require Hopper requester atomics."
+    },
+    {
+      "symbol": "os_pci_remove",
+      "namespace_symbol": "s540Global_os_pci_remove",
+      "original_type": "void (void *)",
+      "original_declaration": "void NV_API_CALL os_pci_remove (void *);",
+      "classification": "unavailable_hot_remove_lifetime_guard",
+      "semantics": "Record sticky Host unavailable and fail-stop if an operation enters despite the denied capability. No silent void success, detach, PCI handle destruction or hardware removal is performed.",
+      "unavailable_observer": "increment-and-fail-stop",
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+        "lines": [
+          110,
+          110
+        ]
+      },
+      "source_evidence": [
+        {
+          "source": "kernel-open/nvidia/os-pci.c",
+          "lines": [
+            138,
+            148
+          ],
+          "meaning": "Real capability and hot-remove action."
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            4384,
+            4390
+          ],
+          "meaning": "Capability forward."
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+          "lines": [
+            2729,
+            2742
+          ],
+          "meaning": "Operation resolves actual PCI handle."
+        },
+        {
+          "source": "src/nvidia/src/kernel/gpu_mgr/gpu_mgr.c",
+          "lines": [
+            3317,
+            3324
+          ],
+          "meaning": "Public remove capability guard."
+        },
+        {
+          "source": "src/nvidia/src/kernel/gpu_mgr/gpu_mgr.c",
+          "lines": [
+            3358,
+            3367
+          ],
+          "meaning": "Actual removal after selected request."
+        }
+      ],
+      "remaining_route_requirement": "Explicit selected backend may truthfully report no hot-removal service; seal all operation callers and retain a detected/fatal invalid call, or implement actual IOKit detach ownership. No silent void success."
+    },
+    {
+      "symbol": "os_pci_remove_supported",
+      "namespace_symbol": "s540Global_os_pci_remove_supported",
+      "original_type": "NvBool (void)",
+      "original_declaration": "NvBool NV_API_CALL os_pci_remove_supported (void);",
+      "classification": "selected_backend_capability",
+      "semantics": "Return false because the selected backend has no bus-device hot-remove service. Do not infer physical PCI hotplug absence or claim detach completion. Linux original returns true with its actual remove service.",
+      "unavailable_observer": "none",
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+        "lines": [
+          109,
+          109
+        ]
+      },
+      "source_evidence": [
+        {
+          "source": "kernel-open/nvidia/os-pci.c",
+          "lines": [
+            138,
+            148
+          ],
+          "meaning": "Real capability and hot-remove action."
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+          "lines": [
+            4384,
+            4390
+          ],
+          "meaning": "Capability forward."
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+          "lines": [
+            2729,
+            2742
+          ],
+          "meaning": "Operation resolves actual PCI handle."
+        },
+        {
+          "source": "src/nvidia/src/kernel/gpu_mgr/gpu_mgr.c",
+          "lines": [
+            3317,
+            3324
+          ],
+          "meaning": "Public remove capability guard."
+        },
+        {
+          "source": "src/nvidia/src/kernel/gpu_mgr/gpu_mgr.c",
+          "lines": [
+            3358,
+            3367
+          ],
+          "meaning": "Actual removal after selected request."
+        }
+      ],
+      "remaining_route_requirement": "Explicit selected backend may truthfully report no hot-removal service; seal all operation callers and retain a detected/fatal invalid call, or implement actual IOKit detach ownership. No silent void success."
+    },
+    {
+      "symbol": "os_supports_kernel_suspend_notifiers",
+      "namespace_symbol": "s540Global_os_supports_kernel_suspend_notifiers",
+      "original_type": "NvBool (void)",
+      "original_declaration": "NvBool NV_API_CALL os_supports_kernel_suspend_notifiers(void);",
+      "classification": "selected_backend_capability",
+      "semantics": "Return false because this backend registers no Linux kernel suspend notifier. The independent IOKit PM child revokes and quiesces the owner; it does not forward RM S-state or hibernate operations. This is an explicit backend choice, not an upstream Linux false branch.",
+      "unavailable_observer": "none",
+      "operational_service_proven": false,
+      "unreachable_entry_proven": false,
+      "declaration_evidence": {
+        "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+        "lines": [
+          233,
+          233
+        ]
+      },
+      "source_evidence": [
+        {
+          "source": "kernel-open/nvidia/os-interface.c",
+          "lines": [
+            2975,
+            2978
+          ],
+          "meaning": "Exact selected flag."
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+          "lines": [
+            944,
+            961
+          ],
+          "meaning": "Preservation AUTO capability query."
+        },
+        {
+          "source": "src/nvidia/arch/nvalloc/unix/include/nv-reg.h",
+          "lines": [
+            576,
+            614
+          ],
+          "meaning": "Preserve and suspend-notifier semantics."
+        }
+      ],
+      "remaining_route_requirement": "Declare real backend absence of kernel suspend-notifier support and verify preservation mode; do not claim any PM deadline or device power guarantee from false."
+    }
+  ],
+  "required_admission_conditions": [
+    "The actual owner and global lifecycle must reject sticky Host unavailable observations even when original callers ignore NOT_SUPPORTED.",
+    "The IOKit PM child must not call RM S-state, hibernate or runtime-D3 entry points. Its actual stop/cancellation deadline remains independently gated.",
+    "The denied hot-remove operation must remain blocked on every original route; the fail-stop guard is not a detach implementation.",
+    "Disabled capability/empty branches do not prove physical feature absence or absence of all original dispatch/error/unwind callers."
+  ],
+  "validation": {
+    "original_header_abi_assertions": 8,
+    "native_fixture_checks_per_variant": 16,
+    "native_variants": [
+      "plain",
+      "fatal-ASan-UBSan-function"
+    ],
+    "native_fixture_status": "passed-local-host-controls",
+    "native_kernel_execution": false,
+    "gpu_access": false,
+    "production_admission": false,
+    "pinned_sdk_kernel_compile": "passed-local-MachO-cross-compile-control",
+    "forbidden_enabled_profile_negative_compiles": 3
+  },
+  "original_source_profile_modified": false
+}

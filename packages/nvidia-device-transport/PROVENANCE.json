@@ -84,7 +84,23 @@
     "typed_memory_boundaries": "MEMORY-CONTRACTS.json; unavailable operations do not become implementation-complete by symbol definition",
     "capacity_audit": "CAPACITY-AUDIT.json; finite enforced budget, no global initialization peak proof",
     "pci_dvsec_pdi": "Real bound Session configuration reads; original bounded traversal, fallback/status distinction and exact ABI",
-    "independent_hardware_dma_lifetime": "DMA-LIFETIME-CONTRACT.json; requires matching opaque original stop receipt in addition to actual IRQ drain; active profile has no issuer"
+    "independent_hardware_dma_lifetime": "DMA-LIFETIME-CONTRACT.json; requires matching opaque original stop receipt in addition to actual IRQ drain; active profile has no issuer",
+    "pci_optional_identity_outputs": {
+      "semantics": "Either or both vendor/device output pointers may be NULL, as required by original chipset configuration callers. Every lookup still requires ordinary access, a live Session, exact captured segment/BDF and fresh bound provider identity. No foreign PCI handle is fabricated.",
+      "original_source": "src/nvidia/src/kernel/platform/chipset/chipset_pcie.c",
+      "original_lines": [
+        3564,
+        3607,
+        3651,
+        3695,
+        4834,
+        4904,
+        5942
+      ],
+      "original_source_sha256": "8cdef61abba6a4e8fa732cc666f1963db90508996f8c3adb5c7d629f109e9ef5",
+      "native_controls": 8,
+      "foreign_pci_lookup_implemented": false
+    }
   },
   "retirement": {
     "scope": "Exact bound-RM allocation records only; generic Session release/unmap retain their IRQ guards.",
@@ -138,7 +154,7 @@
     "initial_interrupt_mask": "xnu/iokit/Kernel/IOInterruptController.cpp and IOPCIFamily/IOPCIMessagedInterruptController.cpp"
   },
   "local_evidence": {
-    "native_assertions": 466,
+    "native_assertions": 474,
     "memory_boundary_native_assertions": 63,
     "memory_boundary_guard_subprocesses": 9,
     "memory_boundary_original_abi_comparisons": 40,
@@ -182,5 +198,21 @@
     "complete_integration_platform_imports": 392,
     "reviewed_sdk_import_audit": "matched",
     "actual_kernel_or_device_execution": false
+  },
+  "unavailable_memory_source_audits": {
+    "reachability": "MEMORY-REACHABILITY.json",
+    "status_failure_contracts": "MEMORY-FAILURE-CONTRACTS.json",
+    "user_pin_admitted_root_condition": "USER-PIN-ROOT-CONTRACT.json",
+    "status_callbacks_reviewed": 13,
+    "direct_original_call_sites": 19,
+    "unavailable_callback_source_exclusions": 19,
+    "fatal_guard_source_exclusions": 9,
+    "provenance_tests": 6,
+    "prospective_unwind": "prospective/MEMORY-UNWIND-AUDIT.json",
+    "prospective_native_body_checks": 127,
+    "prospective_baseline_failures": 23,
+    "prospective_original_C_crosscompiled_TUs": 3,
+    "active_original_profile_changed": false,
+    "memory_operations_implemented": false
   }
 }

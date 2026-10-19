@@ -31,8 +31,6 @@
     "production_admission": false
   },
   "classification_counts": {
-    "architecture_and_build_guard_review_required": 1,
-    "capability_query_and_unimplemented_hot_remove_operation": 2,
     "expected-disabled-platform-branch": 4,
     "filesystem_operations_require_route_exclusion_or_real_backend": 4,
     "firmware_table_service_not_acpi_event_exclusion": 1,
@@ -40,8 +38,8 @@
     "non_console_guard_requires_provider_evidence": 2,
     "non_primary_vga_guard_review_required": 7,
     "official-empty-release": 4,
-    "official_disabled_capability": 12,
-    "official_disabled_no_owned_resource": 4,
+    "official_disabled_capability": 13,
+    "official_disabled_no_owned_resource": 6,
     "original_header_backend_abi_mismatch": 2,
     "provided_unavailable_operation": 11,
     "required_capability_observation_not_hardware_default": 1,
@@ -50,14 +48,13 @@
     "required_init_observation_backend_identity": 1,
     "required_init_operation_pci_capability_probe": 1,
     "selected_allocator_state_observation": 1,
-    "selected_suspend_backend_capability_observation": 1,
+    "selected_backend_capability": 2,
     "selected_zero_soc_irq_state": 2,
     "stateful_service_profile_guard_review_required": 5,
     "unavailable-lifetime-or-scalar-guard": 9,
     "unavailable-memory-operation": 23,
-    "upstream_pci_atomics_disabled_status_branch": 1,
-    "upstream_runtime_pm_disabled_status_branch": 2,
-    "upstream_runtime_pm_disabled_void_branch": 1,
+    "unavailable_hot_remove_lifetime_guard": 1,
+    "unavailable_runtime_pm_operation": 2,
     "upstream_uvm_disabled_status_branch": 1,
     "userspace_event_interface_requires_sealed_entries": 2,
     "userspace_fd_interface_requires_sealed_entries": 2
@@ -358,6 +355,12 @@
         "source": "kernel-open/nvidia/nv.c:3453-3518",
         "semantics": "Create a guest/carveout nv_alloc_t with supplied physical addresses; no new owned storage is allocated.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/os.c:983-1022; only memdescIsCarveoutMemory or MEMDESC_FLAGS_GUEST_ALLOCATED."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": false,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -401,6 +404,12 @@
         "source": "kernel-open/nvidia/nv-usermap.c:131-160",
         "semantics": "Allocation returns a physical address for later Linux userspace mmap; free callback is literally empty. No Darwin userspace map is admitted.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/os.c:501-615; Kernel false branch only."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": false,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -408,7 +417,7 @@
       "original_type": "void (nv_state_t *)",
       "baseline_namespace_symbol": "s540Global_nv_audio_dynamic_power",
       "baseline_unavailable_policy": "entry-must-be-blocked-before-call",
-      "category": "upstream_runtime_pm_disabled_void_branch",
+      "category": "official_disabled_no_owned_resource",
       "original_semantics": "Official implementation is empty unless both HDA PCI-class and runtime-PM support are compiled. Enabled behavior wakes the actual GPU HDA codec/controller.",
       "selected_route": "Exposed only through subdevice Unix-audio control method; a no-runtime-PM/no-HDA-service backend may select the original empty branch, without claiming HDA power or audio functionality.",
       "remaining_proof_or_work": "Make selected build/backend absence explicit; keep public audio control entry outside bootstrap admission and do not claim physical HDA absence from this callback.",
@@ -442,7 +451,49 @@
           "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
           "line": 613
         }
-      ]
+      ],
+      "source_semantics_implemented": true,
+      "implementation_contract": "CENTRAL-POLICY-CONTRACTS.json",
+      "implementation_semantics": "Use original empty branch without NV_PM_RUNTIME_AVAILABLE. No HDA audio device or runtime-PM wake reference is owned; no audio power or wake operation is claimed.",
+      "subcontract_callback": {
+        "symbol": "nv_audio_dynamic_power",
+        "namespace_symbol": "s540Global_nv_audio_dynamic_power",
+        "original_type": "void (nv_state_t *)",
+        "original_declaration": "void NV_API_CALL nv_audio_dynamic_power (nv_state_t *);",
+        "classification": "official_disabled_no_owned_resource",
+        "semantics": "Use original empty branch without NV_PM_RUNTIME_AVAILABLE. No HDA audio device or runtime-PM wake reference is owned; no audio power or wake operation is claimed.",
+        "unavailable_observer": "none",
+        "operational_service_proven": false,
+        "unreachable_entry_proven": false,
+        "declaration_evidence": {
+          "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+          "lines": [
+            1063,
+            1063
+          ]
+        },
+        "source_evidence": [
+          {
+            "source": "kernel-open/nvidia/nv.c",
+            "lines": [
+              5911,
+              5930
+            ],
+            "meaning": "Documented conditional empty backend."
+          },
+          {
+            "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+            "lines": [
+              590,
+              615
+            ],
+            "meaning": "Unix audio method invokes it then returns success."
+          }
+        ],
+        "remaining_route_requirement": "Make selected build/backend absence explicit; keep public audio control entry outside bootstrap admission and do not claim physical HDA absence from this callback."
+      },
+      "implementation_status": "source-implemented selected backend/disabled branch",
+      "kernel_or_hardware_execution": false
     },
     {
       "symbol": "nv_control_soc_irqs",
@@ -689,6 +740,12 @@
         "source": "kernel-open/nvidia/nv-dma.c:1191-1278",
         "semantics": "Discover/map a real whole CPU NUMA system-memory range for fabric access; no such owned window is created by this transport.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/os.c:6485-6511; fabric sysmem window service."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": true,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -736,6 +793,12 @@
         "source": "kernel-open/nvidia/nv-dmabuf.c:1884-2027",
         "semantics": "CONFIG_DMA_SHARED_BUFFER branch attaches/maps actual Linux DMA-BUF; disabled branch returns NOT_SUPPORTED and release is empty. os_dma_buf_enabled is NV_FALSE in the original-header bridge.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c; externally requested DMA-BUF import/destruction."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": false,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -779,6 +842,12 @@
         "source": "kernel-open/nvidia/nv-dmabuf.c:1884-2027",
         "semantics": "CONFIG_DMA_SHARED_BUFFER branch attaches/maps actual Linux DMA-BUF; disabled branch returns NOT_SUPPORTED and release is empty. os_dma_buf_enabled is NV_FALSE in the original-header bridge.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c; externally requested DMA-BUF import/destruction."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": false,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -826,6 +895,12 @@
         "source": "kernel-open/nvidia/nv-dma.c:981-1051",
         "semantics": "CONFIG_DRM branch holds real exporter module/GEM references; disabled branch returns NOT_SUPPORTED and release is empty. No DRM/GEM exporter exists in this profile.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c; external Linux SGT import/destruction."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": false,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -869,6 +944,12 @@
         "source": "kernel-open/nvidia/nv-dma.c:1191-1278",
         "semantics": "Discover/map a real whole CPU NUMA system-memory range for fabric access; no such owned window is created by this transport.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/os.c:6485-6511; fabric sysmem window service."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": true,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -916,6 +997,12 @@
         "source": "kernel-open/nvidia/nv-dma.c:840-889",
         "semantics": "Map/unmap anonymous device MMIO with DMA resource APIs or actual addressable-range translation. CPU physical equality alone is insufficient.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/os.c:osIovaMap; external MMIO mapping branch."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": false,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -967,6 +1054,12 @@
         "source": "kernel-open/nvidia/nv-dma.c:768-839",
         "semantics": "Validate a second PCI device BAR resource and map it or obtain its actual PCI bus address. Single provider Session storage cannot attest a peer.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/os.c:osIovaMap; peer IO mapping branch, distinct from owned nv_dma_map_alloc."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": false,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -1112,6 +1205,12 @@
         "source": "kernel-open/nvidia/nv-dma.c:840-889",
         "semantics": "Map/unmap anonymous device MMIO with DMA resource APIs or actual addressable-range translation. CPU physical equality alone is insufficient.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/os.c:osIovaMap; external MMIO mapping branch."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": true,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -1167,6 +1266,12 @@
         "source": "kernel-open/nvidia/nv-dma.c:768-839",
         "semantics": "Validate a second PCI device BAR resource and map it or obtain its actual PCI bus address. Single provider Session storage cannot attest a peer.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/os.c:osIovaMap; peer IO mapping branch, distinct from owned nv_dma_map_alloc."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": true,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -1961,6 +2066,12 @@
         "source": "kernel-open/nvidia/nv.c:3891-3914",
         "semantics": "Output is struct page** using NV_GET_PAGE_STRUCT, not physical addresses; copying tracked physical integers would violate ABI semantics.",
         "callers": "src/nvidia/src/kernel/mem_mgr/system_mem.c:673-698; sysmemCtrlCmdGetSurfacePhysPages client control."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": false,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -2513,7 +2624,7 @@
       "original_type": "NV_STATUS (nv_state_t *)",
       "baseline_namespace_symbol": "s540Global_nv_indicate_idle",
       "baseline_unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
-      "category": "upstream_runtime_pm_disabled_status_branch",
+      "category": "unavailable_runtime_pm_operation",
       "original_semantics": "Under absent Linux runtime-PM support, both return NV_ERR_NOT_SUPPORTED; otherwise they change real device runtime-PM references, with idle also requiring filesystem access.",
       "selected_route": "Checked DynamicPowerManagement=0 chooses NEVER; idle callbacks are not normal bootstrap operations. The status-returning no-runtime-PM branch is legitimate selected capability absence but does not power the device.",
       "remaining_proof_or_work": "Document explicit backend capability and prove no enabled runtime-D3 transition enters this path; platform PM lease and cancellation are independent requirements.",
@@ -2571,14 +2682,64 @@
           "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
           "line": 2694
         }
-      ]
+      ],
+      "source_semantics_implemented": false,
+      "implementation_contract": "CENTRAL-POLICY-CONTRACTS.json",
+      "implementation_semantics": "Return exact original NOT_SUPPORTED branch without Linux runtime PM. Record sticky unavailable because no actual pm_runtime_put_noidle or config-file read took place. An ignored refusal still blocks adapter success.",
+      "subcontract_callback": {
+        "symbol": "nv_indicate_idle",
+        "namespace_symbol": "s540Global_nv_indicate_idle",
+        "original_type": "NV_STATUS (nv_state_t *)",
+        "original_declaration": "NV_STATUS NV_API_CALL nv_indicate_idle (nv_state_t *);",
+        "classification": "unavailable_runtime_pm_operation",
+        "semantics": "Return exact original NOT_SUPPORTED branch without Linux runtime PM. Record sticky unavailable because no actual pm_runtime_put_noidle or config-file read took place. An ignored refusal still blocks adapter success.",
+        "unavailable_observer": "increment-and-refuse",
+        "operational_service_proven": false,
+        "unreachable_entry_proven": false,
+        "declaration_evidence": {
+          "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+          "lines": [
+            1058,
+            1058
+          ]
+        },
+        "source_evidence": [
+          {
+            "source": "kernel-open/nvidia/nv.c",
+            "lines": [
+              5687,
+              5750
+            ],
+            "meaning": "Exact enabled and disabled implementations."
+          },
+          {
+            "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+            "lines": [
+              1080,
+              1088
+            ],
+            "meaning": "Normal engagement conditional on mode."
+          },
+          {
+            "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+            "lines": [
+              1029,
+              1038
+            ],
+            "meaning": "Cleanup can call not-idle if state was entered."
+          }
+        ],
+        "remaining_route_requirement": "Document explicit backend capability and prove no enabled runtime-D3 transition enters this path; platform PM lease and cancellation are independent requirements."
+      },
+      "implementation_status": "provided-unavailable operation; sticky observer or fatal lifetime guard",
+      "kernel_or_hardware_execution": false
     },
     {
       "symbol": "nv_indicate_not_idle",
       "original_type": "NV_STATUS (nv_state_t *)",
       "baseline_namespace_symbol": "s540Global_nv_indicate_not_idle",
       "baseline_unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
-      "category": "upstream_runtime_pm_disabled_status_branch",
+      "category": "unavailable_runtime_pm_operation",
       "original_semantics": "Under absent Linux runtime-PM support, both return NV_ERR_NOT_SUPPORTED; otherwise they change real device runtime-PM references, with idle also requiring filesystem access.",
       "selected_route": "Checked DynamicPowerManagement=0 chooses NEVER; idle callbacks are not normal bootstrap operations. The status-returning no-runtime-PM branch is legitimate selected capability absence but does not power the device.",
       "remaining_proof_or_work": "Document explicit backend capability and prove no enabled runtime-D3 transition enters this path; platform PM lease and cancellation are independent requirements.",
@@ -2628,14 +2789,64 @@
           "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
           "line": 1163
         }
-      ]
+      ],
+      "source_semantics_implemented": false,
+      "implementation_contract": "CENTRAL-POLICY-CONTRACTS.json",
+      "implementation_semantics": "Return exact original NOT_SUPPORTED branch without Linux runtime PM. Record sticky unavailable because no pm_runtime_get_noresume or PCI shutdown took place.",
+      "subcontract_callback": {
+        "symbol": "nv_indicate_not_idle",
+        "namespace_symbol": "s540Global_nv_indicate_not_idle",
+        "original_type": "NV_STATUS (nv_state_t *)",
+        "original_declaration": "NV_STATUS NV_API_CALL nv_indicate_not_idle (nv_state_t *);",
+        "classification": "unavailable_runtime_pm_operation",
+        "semantics": "Return exact original NOT_SUPPORTED branch without Linux runtime PM. Record sticky unavailable because no pm_runtime_get_noresume or PCI shutdown took place.",
+        "unavailable_observer": "increment-and-refuse",
+        "operational_service_proven": false,
+        "unreachable_entry_proven": false,
+        "declaration_evidence": {
+          "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+          "lines": [
+            1059,
+            1059
+          ]
+        },
+        "source_evidence": [
+          {
+            "source": "kernel-open/nvidia/nv.c",
+            "lines": [
+              5687,
+              5750
+            ],
+            "meaning": "Exact enabled and disabled implementations."
+          },
+          {
+            "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+            "lines": [
+              1080,
+              1088
+            ],
+            "meaning": "Normal engagement conditional on mode."
+          },
+          {
+            "source": "src/nvidia/arch/nvalloc/unix/src/dynamic-power.c",
+            "lines": [
+              1029,
+              1038
+            ],
+            "meaning": "Cleanup can call not-idle if state was entered."
+          }
+        ],
+        "remaining_route_requirement": "Document explicit backend capability and prove no enabled runtime-D3 transition enters this path; platform PM lease and cancellation are independent requirements."
+      },
+      "implementation_status": "provided-unavailable operation; sticky observer or fatal lifetime guard",
+      "kernel_or_hardware_execution": false
     },
     {
       "symbol": "nv_pci_cxl_set_caching",
       "original_type": "void (nv_state_t *, NvBool)",
       "baseline_namespace_symbol": "s540Global_nv_pci_cxl_set_caching",
       "baseline_unavailable_policy": "entry-must-be-blocked-before-call",
-      "category": "architecture_and_build_guard_review_required",
+      "category": "official_disabled_no_owned_resource",
       "original_semantics": "Official backend is empty without CXL-cache capability macro; enabled code modifies real CXL DVSEC cache bits and polls writeback/invalidate completion.",
       "selected_route": "Direct OS wrapper is unguarded; identified hardware caller is Rubin kernel-memory-system HAL and checks osIsCxlDevice. TU117 identity alone does not erase link references.",
       "remaining_proof_or_work": "Prove selected HAL dispatch and is_cxl_dev false from actual endpoint capability evidence, or implement actual CXL service. A selected no-CXL backend empty branch must not claim cache-flush completion.",
@@ -2677,7 +2888,57 @@
           "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
           "line": 6582
         }
-      ]
+      ],
+      "source_semantics_implemented": true,
+      "implementation_contract": "CENTRAL-POLICY-CONTRACTS.json",
+      "implementation_semantics": "Use original empty branch when PCI_DVSEC_CXL_DEVCAP_CACHE_CAPABLE is absent; no CXL cache backend or owned CXL device is admitted. No cache writeback/invalidation completion is claimed.",
+      "subcontract_callback": {
+        "symbol": "nv_pci_cxl_set_caching",
+        "namespace_symbol": "s540Global_nv_pci_cxl_set_caching",
+        "original_type": "void (nv_state_t *, NvBool)",
+        "original_declaration": "void NV_API_CALL nv_pci_cxl_set_caching(nv_state_t *, NvBool);",
+        "classification": "official_disabled_no_owned_resource",
+        "semantics": "Use original empty branch when PCI_DVSEC_CXL_DEVCAP_CACHE_CAPABLE is absent; no CXL cache backend or owned CXL device is admitted. No cache writeback/invalidation completion is claimed.",
+        "unavailable_observer": "none",
+        "operational_service_proven": false,
+        "unreachable_entry_proven": false,
+        "declaration_evidence": {
+          "source": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+          "lines": [
+            1172,
+            1172
+          ]
+        },
+        "source_evidence": [
+          {
+            "source": "kernel-open/nvidia/nv-pci.c",
+            "lines": [
+              3273,
+              3355
+            ],
+            "meaning": "Macro-gated CXL caching operation."
+          },
+          {
+            "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+            "lines": [
+              6573,
+              6583
+            ],
+            "meaning": "Unguarded OS forward."
+          },
+          {
+            "source": "src/nvidia/src/kernel/gpu/mem_sys/arch/rubin/kern_mem_sys_gr100.c",
+            "lines": [
+              526,
+              546
+            ],
+            "meaning": "Architecture-specific caller."
+          }
+        ],
+        "remaining_route_requirement": "Prove selected HAL dispatch and is_cxl_dev false from actual endpoint capability evidence, or implement actual CXL service. A selected no-CXL backend empty branch must not claim cache-flush completion."
+      },
+      "implementation_status": "source-implemented selected backend/disabled branch",
+      "kernel_or_hardware_execution": false
     },
     {
       "symbol": "nv_pci_read_gpu_pdi_from_dvsec",
@@ -2960,6 +3221,12 @@
         "source": "kernel-open/nvidia/nv.c:3525-3582",
         "semantics": "Create/free a peer IO metadata wrapper with no struct page array; needs verified foreign MMIO range and mapping ownership.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:530-612; client peer IO descriptor, register only if bAllowMmap."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": false,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -3007,6 +3274,12 @@
         "source": "kernel-open/nvidia/nv.c:3685-3725,3864-3873",
         "semantics": "Wrap external physical pages without owning their backing. It cannot reuse an ordinary Session allocation token or free that allocation as an alias.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:650-754; external kernel memory import. os.c:439,613 coherent CPU FB mapping path only."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": false,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -3050,6 +3323,12 @@
         "source": "kernel-open/nvidia/nv.c:3727-3862",
         "semantics": "Traverse real Linux scatterlist entries, retain original SGT/import metadata, and restore them on unregister.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:785-937; imported SGT or DMA-BUF descriptor."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": true,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -3093,6 +3372,12 @@
         "source": "kernel-open/nvidia/nv.c:3588-3682; kernel-open/nvidia/os-mlock.c:311-335",
         "semantics": "Input is actual Linux struct page** pins; register converts page_to_phys and unregister restores page/import arrays; unlock dirties/unpins pages. No pointer reinterpretation to physical integers is valid.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:180-312; externally imported user allocation."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": false,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -4028,6 +4313,12 @@
         "source": "kernel-open/nvidia/nv.c:3525-3582",
         "semantics": "Create/free a peer IO metadata wrapper with no struct page array; needs verified foreign MMIO range and mapping ownership.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:530-612; client peer IO descriptor, register only if bAllowMmap."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": true,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -4079,6 +4370,12 @@
         "source": "kernel-open/nvidia/nv.c:3685-3725,3864-3873",
         "semantics": "Wrap external physical pages without owning their backing. It cannot reuse an ordinary Session allocation token or free that allocation as an alias.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:650-754; external kernel memory import. os.c:439,613 coherent CPU FB mapping path only."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": true,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -4130,6 +4427,12 @@
         "source": "kernel-open/nvidia/nv.c:3727-3862",
         "semantics": "Traverse real Linux scatterlist entries, retain original SGT/import metadata, and restore them on unregister.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:785-937; imported SGT or DMA-BUF descriptor."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": true,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -4177,6 +4480,12 @@
         "source": "kernel-open/nvidia/nv.c:3588-3682; kernel-open/nvidia/os-mlock.c:311-335",
         "semantics": "Input is actual Linux struct page** pins; register converts page_to_phys and unregister restores page/import arrays; unlock dirties/unpins pages. No pointer reinterpretation to physical integers is valid.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:180-312; externally imported user allocation."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": true,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -4302,6 +4611,12 @@
         "source": "kernel-open/nvidia/os-interface.c:1799-1918",
         "semantics": "Requires Linux NUMA high-user movable/compound allocator and node identity; missing required GFP support explicitly returns NOT_SUPPORTED.",
         "callers": "src/nvidia/src/kernel/gpu/mem_mgr/phys_mem_allocator/numa.c:245-277; page refs are acquired only after allocation succeeds."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": true,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -4685,6 +5000,12 @@
         "source": "kernel-open/nvidia/os-interface.c:1920-1953",
         "semantics": "Uses Linux get_page/put_page, real VM reference count and compound_order; logical Session ownership counts cannot substitute for UVM/GUP pin references.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/os.c:4838-4891; PMA NUMA services. phys_mem_allocator_util.c:356-385 compares external pin references before reuse."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": true,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -5102,7 +5423,7 @@
       "original_type": "NV_STATUS (void *, enum os_pci_req_atomics_type)",
       "baseline_namespace_symbol": "s540Global_os_enable_pci_req_atomics",
       "baseline_unavailable_policy": "output-preserving-NV_ERR_NOT_SUPPORTED",
-      "category": "upstream_pci_atomics_disabled_status_branch",
+      "category": "official_disabled_capability",
       "original_semantics": "Enables actual request atomic ops to root, reads back PCIe control enable bit, returns NV_OK only on success; absent support returns NV_ERR_NOT_SUPPORTED.",
       "selected_route": "Known original caller is Hopper kernel-BIF HAL. OS aggregate checks each 32/64/128 callback and returns NOT_SUPPORTED when no atomics are enabled.",
       "remaining_proof_or_work": "Select explicit no-atomics service and retain honest NOT_SUPPORTED, or implement checked actual hierarchy operation. Prove TU117 dispatch does not require Hopper requester atomics.",
@@ -5152,7 +5473,57 @@
           "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
           "line": 6317
         }
-      ]
+      ],
+      "source_semantics_implemented": true,
+      "implementation_contract": "CENTRAL-POLICY-CONTRACTS.json",
+      "implementation_semantics": "Return original NV_ERR_NOT_SUPPORTED when NV_PCI_ENABLE_ATOMIC_OPS_TO_ROOT_PRESENT is absent. Do not modify PCI config. osGetPcieReqAtomicsCaps initializes the mask to zero and only ORs a bit on NV_OK.",
+      "subcontract_callback": {
+        "symbol": "os_enable_pci_req_atomics",
+        "namespace_symbol": "s540Global_os_enable_pci_req_atomics",
+        "original_type": "NV_STATUS (void *, enum os_pci_req_atomics_type)",
+        "original_declaration": "NV_STATUS NV_API_CALL os_enable_pci_req_atomics (void *, enum os_pci_req_atomics_type);",
+        "classification": "official_disabled_capability",
+        "semantics": "Return original NV_ERR_NOT_SUPPORTED when NV_PCI_ENABLE_ATOMIC_OPS_TO_ROOT_PRESENT is absent. Do not modify PCI config. osGetPcieReqAtomicsCaps initializes the mask to zero and only ORs a bit on NV_OK.",
+        "unavailable_observer": "none",
+        "operational_service_proven": false,
+        "unreachable_entry_proven": false,
+        "declaration_evidence": {
+          "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+          "lines": [
+            220,
+            220
+          ]
+        },
+        "source_evidence": [
+          {
+            "source": "kernel-open/nvidia/os-pci.c",
+            "lines": [
+              151,
+              192
+            ],
+            "meaning": "Exact configured/disabled branch and readback."
+          },
+          {
+            "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+            "lines": [
+              6300,
+              6329
+            ],
+            "meaning": "Aggregate capability probing preserves unsupported."
+          },
+          {
+            "source": "src/nvidia/src/kernel/gpu/bif/arch/hopper/kernel_bif_gh100.c",
+            "lines": [
+              628,
+              649
+            ],
+            "meaning": "Hopper-specific feature usage."
+          }
+        ],
+        "remaining_route_requirement": "Select explicit no-atomics service and retain honest NOT_SUPPORTED, or implement checked actual hierarchy operation. Prove TU117 dispatch does not require Hopper requester atomics."
+      },
+      "implementation_status": "source-implemented selected backend/disabled branch",
+      "kernel_or_hardware_execution": false
     },
     {
       "symbol": "os_flush_cpu_cache_all",
@@ -5256,7 +5627,7 @@
       "category": "firmware_table_service_not_acpi_event_exclusion",
       "original_semantics": "Validates output, initializes it to zero, obtains real ACPI2/ACPI EFI table address; without CONFIG_EFI returns NOT_SUPPORTED. This differs from the separate no-RM-ACPI-events methods backend.",
       "selected_route": "x86 Unix UEFI chipset-table discovery calls it, and returns early on failure before attempting other searches in this branch.",
-      "remaining_proof_or_work": "Implement supported actual EFI table lookup or prove selected chipset discovery never enters this original route. Do not use ACPI events disabled as proof of no firmware-table requirement.",
+      "remaining_proof_or_work": "Actual target EFI publication/import admission and separate original downstream physical table mapping/foreign chipset PCI handles remain unresolved; no full chipset discovery closure is claimed.",
       "evidence": [
         {
           "source": "kernel-open/nvidia/os-interface.c",
@@ -5295,7 +5666,13 @@
           "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
           "line": 4717
         }
-      ]
+      ],
+      "implementation_status": "source-implemented real IOKit EFI lookup and actual bounded physical RSDP validation; native byte-parser and SDK compile controls passed",
+      "source_semantics_implemented": true,
+      "implementation_contract": "FIRMWARE-TABLE-CONTRACTS.json",
+      "implementation_semantics": "Public IOKit IODeviceTree EFI GUID entry lookup; retained OSData; actual physical descriptor readBytes/prepare/complete result checked; no private efi_get_rsdp_physaddr import.",
+      "native_control_checks_per_variant": 54,
+      "kernel_or_hardware_execution": false
     },
     {
       "symbol": "os_get_max_user_va",
@@ -5400,6 +5777,12 @@
         "source": "kernel-open/nvidia/os-interface.c:1965-1982,2486-2520,2569-2755,2824-2931",
         "semantics": "Requires actual Linux NUMA node/zone memory and hotplug/offline services. No fabricated node or host memory report is provided.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/os.c NUMA services; no NUMA allocation succeeds in this profile."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": true,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -5443,6 +5826,12 @@
         "source": "kernel-open/nvidia/os-interface.c:1920-1953",
         "semantics": "Uses Linux get_page/put_page, real VM reference count and compound_order; logical Session ownership counts cannot substitute for UVM/GUP pin references.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/os.c:4838-4891; PMA NUMA services. phys_mem_allocator_util.c:356-385 compares external pin references before reuse."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": true,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -5486,6 +5875,12 @@
         "source": "kernel-open/nvidia/os-interface.c:1920-1953",
         "semantics": "Uses Linux get_page/put_page, real VM reference count and compound_order; logical Session ownership counts cannot substitute for UVM/GUP pin references.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/os.c:4838-4891; PMA NUMA services. phys_mem_allocator_util.c:356-385 compares external pin references before reuse."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": true,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -6413,6 +6808,12 @@
         "source": "kernel-open/nvidia/os-interface.c:782-824",
         "semantics": "Real SVA binds a current userspace mm and publishes actual PASID/handle; disabled original bind returns INVALID_STATE, release is empty. This port refuses bind with reviewed NOT_SUPPORTED preserving outputs and has no admitted handle.",
         "callers": "User VA/process SVA service; no userspace client mm or PASID is synthesized."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": false,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -6556,6 +6957,12 @@
         "source": "kernel-open/nvidia/os-interface.c:1965-1982,2486-2520,2569-2755,2824-2931",
         "semantics": "Requires actual Linux NUMA node/zone memory and hotplug/offline services. No fabricated node or host memory report is provided.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/os.c NUMA services; no NUMA allocation succeeds in this profile."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": true,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -6607,6 +7014,12 @@
         "source": "kernel-open/nvidia/os-interface.c:1965-1982,2486-2520,2569-2755,2824-2931",
         "semantics": "Requires actual Linux NUMA node/zone memory and hotplug/offline services. No fabricated node or host memory report is provided.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/os.c NUMA services; no NUMA allocation succeeds in this profile."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": true,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -6650,6 +7063,12 @@
         "source": "kernel-open/nvidia/os-interface.c:1965-1982,2486-2520,2569-2755,2824-2931",
         "semantics": "Requires actual Linux NUMA node/zone memory and hotplug/offline services. No fabricated node or host memory report is provided.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/os.c NUMA services; no NUMA allocation succeeds in this profile."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": true,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -7375,6 +7794,12 @@
         "source": "kernel-open/nvidia/os-interface.c:1965-1982,2486-2520,2569-2755,2824-2931",
         "semantics": "Requires actual Linux NUMA node/zone memory and hotplug/offline services. No fabricated node or host memory report is provided.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/os.c NUMA services; no NUMA allocation succeeds in this profile."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": true,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -7382,7 +7807,7 @@
       "original_type": "void (void *)",
       "baseline_namespace_symbol": "s540Global_os_pci_remove",
       "baseline_unavailable_policy": "entry-must-be-blocked-before-call",
-      "category": "capability_query_and_unimplemented_hot_remove_operation",
+      "category": "unavailable_hot_remove_lifetime_guard",
       "original_semantics": "Linux capability returns true and operation stops/removes actual PCI bus device.",
       "selected_route": "GPU manager reject-remove branch tests capability before removing, but operation is also exported through osRemoveGpu and must not be treated as successfully completed merely by returning.",
       "remaining_proof_or_work": "Explicit selected backend may truthfully report no hot-removal service; seal all operation callers and retain a detected/fatal invalid call, or implement actual IOKit detach ownership. No silent void success.",
@@ -7440,14 +7865,80 @@
           "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
           "line": 2740
         }
-      ]
+      ],
+      "source_semantics_implemented": false,
+      "implementation_contract": "CENTRAL-POLICY-CONTRACTS.json",
+      "implementation_semantics": "Record sticky Host unavailable and fail-stop if an operation enters despite the denied capability. No silent void success, detach, PCI handle destruction or hardware removal is performed.",
+      "subcontract_callback": {
+        "symbol": "os_pci_remove",
+        "namespace_symbol": "s540Global_os_pci_remove",
+        "original_type": "void (void *)",
+        "original_declaration": "void NV_API_CALL os_pci_remove (void *);",
+        "classification": "unavailable_hot_remove_lifetime_guard",
+        "semantics": "Record sticky Host unavailable and fail-stop if an operation enters despite the denied capability. No silent void success, detach, PCI handle destruction or hardware removal is performed.",
+        "unavailable_observer": "increment-and-fail-stop",
+        "operational_service_proven": false,
+        "unreachable_entry_proven": false,
+        "declaration_evidence": {
+          "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+          "lines": [
+            110,
+            110
+          ]
+        },
+        "source_evidence": [
+          {
+            "source": "kernel-open/nvidia/os-pci.c",
+            "lines": [
+              138,
+              148
+            ],
+            "meaning": "Real capability and hot-remove action."
+          },
+          {
+            "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+            "lines": [
+              4384,
+              4390
+            ],
+            "meaning": "Capability forward."
+          },
+          {
+            "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+            "lines": [
+              2729,
+              2742
+            ],
+            "meaning": "Operation resolves actual PCI handle."
+          },
+          {
+            "source": "src/nvidia/src/kernel/gpu_mgr/gpu_mgr.c",
+            "lines": [
+              3317,
+              3324
+            ],
+            "meaning": "Public remove capability guard."
+          },
+          {
+            "source": "src/nvidia/src/kernel/gpu_mgr/gpu_mgr.c",
+            "lines": [
+              3358,
+              3367
+            ],
+            "meaning": "Actual removal after selected request."
+          }
+        ],
+        "remaining_route_requirement": "Explicit selected backend may truthfully report no hot-removal service; seal all operation callers and retain a detected/fatal invalid call, or implement actual IOKit detach ownership. No silent void success."
+      },
+      "implementation_status": "provided-unavailable operation; sticky observer or fatal lifetime guard",
+      "kernel_or_hardware_execution": false
     },
     {
       "symbol": "os_pci_remove_supported",
       "original_type": "NvBool (void)",
       "baseline_namespace_symbol": "s540Global_os_pci_remove_supported",
       "baseline_unavailable_policy": "entry-must-be-blocked-before-call",
-      "category": "capability_query_and_unimplemented_hot_remove_operation",
+      "category": "selected_backend_capability",
       "original_semantics": "Linux capability returns true and operation stops/removes actual PCI bus device.",
       "selected_route": "GPU manager reject-remove branch tests capability before removing, but operation is also exported through osRemoveGpu and must not be treated as successfully completed merely by returning.",
       "remaining_proof_or_work": "Explicit selected backend may truthfully report no hot-removal service; seal all operation callers and retain a detected/fatal invalid call, or implement actual IOKit detach ownership. No silent void success.",
@@ -7505,7 +7996,73 @@
           "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
           "line": 4389
         }
-      ]
+      ],
+      "source_semantics_implemented": true,
+      "implementation_contract": "CENTRAL-POLICY-CONTRACTS.json",
+      "implementation_semantics": "Return false because the selected backend has no bus-device hot-remove service. Do not infer physical PCI hotplug absence or claim detach completion. Linux original returns true with its actual remove service.",
+      "subcontract_callback": {
+        "symbol": "os_pci_remove_supported",
+        "namespace_symbol": "s540Global_os_pci_remove_supported",
+        "original_type": "NvBool (void)",
+        "original_declaration": "NvBool NV_API_CALL os_pci_remove_supported (void);",
+        "classification": "selected_backend_capability",
+        "semantics": "Return false because the selected backend has no bus-device hot-remove service. Do not infer physical PCI hotplug absence or claim detach completion. Linux original returns true with its actual remove service.",
+        "unavailable_observer": "none",
+        "operational_service_proven": false,
+        "unreachable_entry_proven": false,
+        "declaration_evidence": {
+          "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+          "lines": [
+            109,
+            109
+          ]
+        },
+        "source_evidence": [
+          {
+            "source": "kernel-open/nvidia/os-pci.c",
+            "lines": [
+              138,
+              148
+            ],
+            "meaning": "Real capability and hot-remove action."
+          },
+          {
+            "source": "src/nvidia/arch/nvalloc/unix/src/os.c",
+            "lines": [
+              4384,
+              4390
+            ],
+            "meaning": "Capability forward."
+          },
+          {
+            "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+            "lines": [
+              2729,
+              2742
+            ],
+            "meaning": "Operation resolves actual PCI handle."
+          },
+          {
+            "source": "src/nvidia/src/kernel/gpu_mgr/gpu_mgr.c",
+            "lines": [
+              3317,
+              3324
+            ],
+            "meaning": "Public remove capability guard."
+          },
+          {
+            "source": "src/nvidia/src/kernel/gpu_mgr/gpu_mgr.c",
+            "lines": [
+              3358,
+              3367
+            ],
+            "meaning": "Actual removal after selected request."
+          }
+        ],
+        "remaining_route_requirement": "Explicit selected backend may truthfully report no hot-removal service; seal all operation callers and retain a detected/fatal invalid call, or implement actual IOKit detach ownership. No silent void success."
+      },
+      "implementation_status": "source-implemented selected backend/disabled branch",
+      "kernel_or_hardware_execution": false
     },
     {
       "symbol": "os_put_page",
@@ -7548,6 +8105,12 @@
         "source": "kernel-open/nvidia/os-interface.c:1920-1953",
         "semantics": "Uses Linux get_page/put_page, real VM reference count and compound_order; logical Session ownership counts cannot substitute for UVM/GUP pin references.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/os.c:4838-4891; PMA NUMA services. phys_mem_allocator_util.c:356-385 compares external pin references before reuse."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": true,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -7616,7 +8179,7 @@
       "original_type": "NvBool (void)",
       "baseline_namespace_symbol": "s540Global_os_supports_kernel_suspend_notifiers",
       "baseline_unavailable_policy": "entry-must-be-blocked-before-call",
-      "category": "selected_suspend_backend_capability_observation",
+      "category": "selected_backend_capability",
       "original_semantics": "Returns whether chosen NVreg_UseKernelSuspendNotifiers equals1, not physical ACPI or power-domain presence.",
       "selected_route": "Only PreserveVideoMemoryAllocations AUTO asks the flag before enabling preservation. Initial sleep cancellation/quiescence is a separate platform-owner contract.",
       "remaining_proof_or_work": "Declare real backend absence of kernel suspend-notifier support and verify preservation mode; do not claim any PM deadline or device power guarantee from false.",
@@ -7658,7 +8221,57 @@
           "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
           "line": 957
         }
-      ]
+      ],
+      "source_semantics_implemented": true,
+      "implementation_contract": "CENTRAL-POLICY-CONTRACTS.json",
+      "implementation_semantics": "Return false because this backend registers no Linux kernel suspend notifier. The independent IOKit PM child revokes and quiesces the owner; it does not forward RM S-state or hibernate operations. This is an explicit backend choice, not an upstream Linux false branch.",
+      "subcontract_callback": {
+        "symbol": "os_supports_kernel_suspend_notifiers",
+        "namespace_symbol": "s540Global_os_supports_kernel_suspend_notifiers",
+        "original_type": "NvBool (void)",
+        "original_declaration": "NvBool NV_API_CALL os_supports_kernel_suspend_notifiers(void);",
+        "classification": "selected_backend_capability",
+        "semantics": "Return false because this backend registers no Linux kernel suspend notifier. The independent IOKit PM child revokes and quiesces the owner; it does not forward RM S-state or hibernate operations. This is an explicit backend choice, not an upstream Linux false branch.",
+        "unavailable_observer": "none",
+        "operational_service_proven": false,
+        "unreachable_entry_proven": false,
+        "declaration_evidence": {
+          "source": "src/nvidia/arch/nvalloc/unix/include/os-interface.h",
+          "lines": [
+            233,
+            233
+          ]
+        },
+        "source_evidence": [
+          {
+            "source": "kernel-open/nvidia/os-interface.c",
+            "lines": [
+              2975,
+              2978
+            ],
+            "meaning": "Exact selected flag."
+          },
+          {
+            "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+            "lines": [
+              944,
+              961
+            ],
+            "meaning": "Preservation AUTO capability query."
+          },
+          {
+            "source": "src/nvidia/arch/nvalloc/unix/include/nv-reg.h",
+            "lines": [
+              576,
+              614
+            ],
+            "meaning": "Preserve and suspend-notifier semantics."
+          }
+        ],
+        "remaining_route_requirement": "Declare real backend absence of kernel suspend-notifier support and verify preservation mode; do not claim any PM deadline or device power guarantee from false."
+      },
+      "implementation_status": "source-implemented selected backend/disabled branch",
+      "kernel_or_hardware_execution": false
     },
     {
       "symbol": "os_tegra_igpu_perf_boost",
@@ -7789,6 +8402,12 @@
         "source": "kernel-open/nvidia/nv.c:3588-3682; kernel-open/nvidia/os-mlock.c:311-335",
         "semantics": "Input is actual Linux struct page** pins; register converts page_to_phys and unregister restores page/import arrays; unlock dirties/unpins pages. No pointer reinterpretation to physical integers is valid.",
         "callers": "src/nvidia/arch/nvalloc/unix/src/osmemdesc.c:180-312; externally imported user allocation."
+      },
+      "selected_source_reachability_audit": {
+        "contract": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+        "fixed_profile_unreachable_or_creation_excluded": false,
+        "whole_first_bootstrap_reachability_proved": false,
+        "operation_implemented": false
       }
     },
     {
@@ -7852,12 +8471,16 @@
   "implementation_contracts": {
     "system": "SYSTEM-CONTRACTS.json",
     "memory": "../nvidia-device-transport/MEMORY-CONTRACTS.json",
-    "feature": "FEATURE-PROFILE-CONTRACTS.json"
+    "feature": "FEATURE-PROFILE-CONTRACTS.json",
+    "central_policy": "CENTRAL-POLICY-CONTRACTS.json",
+    "firmware_tables": "FIRMWARE-TABLE-CONTRACTS.json"
   },
   "implementation_contract_sha256": {
-    "packages/nvidia-device-transport/MEMORY-CONTRACTS.json": "af260876961a54a50d9a1ada7c2da606977a91ed521fb8855e96f03e10b980d5",
-    "packages/nvidia-global-rm/SYSTEM-CONTRACTS.json": "eac33148ab0b7241ac54ac3e5a88953a556ca35e47af0ccf5a14db1f763d86b1",
-    "packages/nvidia-global-rm/FEATURE-PROFILE-CONTRACTS.json": "44cf48732dd92778a0c95d0114417aca0647b7cfb15161a64005e9c0645e3f46"
+    "packages/nvidia-device-transport/MEMORY-CONTRACTS.json": "f6812b05a7b34aaf3f67b0aa90c28bb248f0066e8c1a5ac61dc8d6362fc572d1",
+    "packages/nvidia-global-rm/SYSTEM-CONTRACTS.json": "187c516ad80714920e73f02fc2f7ae701fafae38abe2b0366c69963608dcdf2b",
+    "packages/nvidia-global-rm/FEATURE-PROFILE-CONTRACTS.json": "44cf48732dd92778a0c95d0114417aca0647b7cfb15161a64005e9c0645e3f46",
+    "packages/nvidia-global-rm/CENTRAL-POLICY-CONTRACTS.json": "eb58eb83189f363725a5e7ac1c2302aa3b9638fff3f3f61a81c4f505202fe91a",
+    "packages/nvidia-global-rm/FIRMWARE-TABLE-CONTRACTS.json": "b393b864853b00f57a5b4160cc1aa8d4ea8f741c7f4b2a1e8ae5932d39008a5a"
   },
   "identified_minimum_real_services": [
     {
@@ -7905,5 +8528,42 @@
     ],
     "is_whole_original_dispatch_reachability_proof": false,
     "does_not_exclude_shared_internal_or_error_paths": true
+  },
+  "supporting_reachability_audits": {
+    "memory": {
+      "path": "../nvidia-device-transport/MEMORY-REACHABILITY.json",
+      "sha256": "959d3b9515fa23d08d5ed4c0c9af30153381a0f3381d74b87ea62f14f4edff98",
+      "reviewed_operations_and_guards": 32,
+      "fixed_source_guards_or_creation_exclusions": 19,
+      "status_operations_still_unproved": 13,
+      "whole_bootstrap_exclusion_proven": false
+    },
+    "memory_failure": {
+      "path": "../nvidia-device-transport/MEMORY-FAILURE-CONTRACTS.json",
+      "sha256": "03de02af0fda95779f57289addd4d3b7ffcc3469492bb5bf04c3e423c65a14cd",
+      "whole_bootstrap_exclusion_proven": false,
+      "operation_implemented": false
+    },
+    "user_pin_root": {
+      "path": "../nvidia-device-transport/USER-PIN-ROOT-CONTRACT.json",
+      "sha256": "dca2ce43ee7ddb5581cfc76026de2f4da7deaedec31dcc21f195fd03c6837554",
+      "whole_bootstrap_exclusion_proven": false,
+      "operation_implemented": false
+    },
+    "crypto": {
+      "path": "../nvidia-global-rm-crypto/CRYPTO-REACHABILITY.json",
+      "sha256": "aa2774c564917d468a15c5319b4452852349e61218d6fa13502ab6e2da3c355c",
+      "whole_bootstrap_exclusion_proven": false,
+      "operation_implemented": false
+    }
+  },
+  "current_central_source_status": {
+    "baseline_callbacks": 40,
+    "system_and_pci_source_implementations": 4,
+    "new_firmware_lookup_source_implementation": 1,
+    "new_selected_backend_queries_or_disabled_branches": 5,
+    "new_provided_unavailable_operations_or_lifetime_guards": 3,
+    "central_callbacks_without_new_definitions": 27,
+    "is_runtime_readiness_count": false
   }
 }
