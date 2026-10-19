@@ -15,6 +15,7 @@ import re
 import subprocess
 
 import nvidia_metaclass_initializers as macho
+import nvidia_nvoc_ast as typed_ast
 import nvidia_stack_usage as stack
 
 IDENTIFIER = r'[A-Za-z_][A-Za-z_0-9]*'
@@ -94,20 +95,27 @@ def function_ir(text: str, function: str) -> str:
     return body
 
 
+def _indirect_load(text: str, function: str) -> tuple[str, str, str, str]:
+    body = function_ir(text, function)
+    calls = re.findall(r'^.*\bcall\b[^\n]*?\s(' + SSA + r')\(.*$', body, re.M)
+    if len(calls) != 1:
+        raise ValueError('Expected exactly one actual indirect LLVM call.')
+    load = re.findall(r'^\s*' + re.escape(calls[0]) + r'\s*=\s*load ptr, ptr\s+(' + SSA + r'),.*$', body, re.M)
+    if len(load) != 1:
+        raise ValueError('Indirect LLVM callee is not one direct member load.')
+    load_line = re.findall(r'^\s*' + re.escape(calls[0]) + r'\s*=.*$', body, re.M)[0]
+    call_line = re.findall(r'^.*\bcall\b[^\n]*?\s' + re.escape(calls[0]) + r'\(.*$', body, re.M)[0]
+    return body, load[0], load_line, call_line
+
+
 def indirect_gep(text: str, function: str) -> dict:
     """Require one actual indirect IR call loaded from one constant struct GEP.
 
     SSA spelling is not interpreted as a member name. The independent probe
     below maps the actual C member to this type/index with the same compiler.
     """
-    body = function_ir(text, function)
-    calls = re.findall(r'\bcall\b[^\n]*?\s(' + SSA + r')\(', body)
-    if len(calls) != 1:
-        raise ValueError('Expected exactly one actual indirect LLVM call.')
-    load = re.findall(r'^\s*' + re.escape(calls[0]) + r'\s*=\s*load ptr, ptr\s+(' + SSA + r'),', body, re.M)
-    if len(load) != 1:
-        raise ValueError('Indirect LLVM callee is not one direct member load.')
-    return gep_definition(body, load[0])
+    body, slot, _, _ = _indirect_load(text, function)
+    return gep_definition(body, slot)
 
 
 def gep_definition(body: str, value: str) -> dict:
@@ -122,7 +130,7 @@ def gep_definition(body: str, value: str) -> dict:
     return {'llvm_struct': match[1], 'llvm_member_index': int(match[3]), 'receiver': match[2]}
 
 
-def probe_gep(text: str) -> dict:
+def _probe_load(text: str) -> tuple[str, str]:
     body = function_ir(text, 's540StackLoadTarget')
     returned = re.findall(r'^\s*ret ptr (' + SSA + r')' + METADATA + r'\s*$', body, re.M)
     if len(returned) != 1:
@@ -131,7 +139,27 @@ def probe_gep(text: str) -> dict:
                       r'\s*=\s*load ptr, ptr (' + SSA + r'),', body, re.M)
     if len(load) != 1:
         raise ValueError('Typed load probe has no unique member load.')
-    return gep_definition(body, load[0])
+    return body, load[0]
+
+
+def probe_gep(text: str) -> dict:
+    body, slot = _probe_load(text)
+    return gep_definition(body, slot)
+
+
+def member_address(body: str, slot: str) -> dict:
+    """Describe a byte address without assigning it any language-level type.
+
+    Only prove() can establish its member identity, using independent actual
+    frontend AST and optimized source-location evidence. Existing strict GEP
+    entry points intentionally continue to refuse an untyped byte offset.
+    """
+    byte = list(re.finditer(r'^\s*' + re.escape(slot) + r'\s*=\s*getelementptr' +
+        GEP_FLAGS + r'\s+i8,\s*ptr\s+(' + SSA + r'),\s*i64 (\d+)' + METADATA + r'\s*$', body, re.M))
+    if len(byte) == 1:
+        return {'address_form': 'untyped-byte-gep', 'receiver': byte[0][1],
+                'byte_offset': int(byte[0][2]), 'c_member_identity': 'requires-independent-typed-source-proof'}
+    return {'address_form': 'typed-struct-gep', **gep_definition(body, slot)}
 
 
 def probe_source(include: str, owner: str, field: str, targets: list[str]) -> str:
@@ -201,7 +229,7 @@ def probe_object(obj: Path, targets: list[str], *, namespace: str = '') -> dict:
 
 
 def _command(unit: dict, source: Path, output: Path, *, ir: bool = False,
-             named: bool = False) -> list[str]:
+             named: bool = False, ast: bool = False) -> list[str]:
     command, result, index = unit['command'], [], 0
     source_spelling = str(source)
     while index < len(command):
@@ -225,11 +253,13 @@ def _command(unit: dict, source: Path, output: Path, *, ir: bool = False,
         index += 1
     if named:
         result.append('-fno-discard-value-names')
-    if ir:
+    if ast:
+        result.extend(['-fsyntax-only', '-Xclang', '-ast-dump=json'])
+    elif ir:
         result.extend(['-emit-llvm', '-S'])
     else:
         result.append('-c')
-    return [*result, source_spelling, '-o', str(output)]
+    return [*result, source_spelling, *([] if ast else ['-o', str(output)])]
 
 
 def prove(reference: dict, source_root: Path, *, owner: str, field: str,
@@ -258,11 +288,47 @@ def prove(reference: dict, source_root: Path, *, owner: str, field: str,
         commands.append(command)
     if named.read_bytes() != Path(unit['object']).read_bytes():
         raise ValueError('LLVM value-name reporting changed the measured object bytes.')
-    actual_gep = indirect_gep(original_ir.read_text(), namespace + function)
-    expected_gep = probe_gep(probe_ir.read_text())
-    if any(actual_gep[key] != expected_gep[key] for key in ('llvm_struct', 'llvm_member_index')):
-        raise ValueError('Actual indirect callee does not load the compiled C member.')
+    original_text, probe_text = original_ir.read_text(), probe_ir.read_text()
+    body, slot, load_line, call_line = _indirect_load(original_text, namespace + function)
+    probe_body, probe_slot = _probe_load(probe_text)
+    actual_gep = member_address(body, slot)
+    expected_gep = member_address(probe_body, probe_slot)
     abi = probe_object(obj, catalog_record['targets'], namespace=namespace)
+    typed_source = None
+    ast_path = output / 'original.ast.json'
+    if any(value['address_form'] == 'untyped-byte-gep' for value in (actual_gep, expected_gep)):
+        command = _command(unit, Path(unit['source']), ast_path, ast=True)
+        with ast_path.open('w') as stdout:
+            run = subprocess.run(command, cwd=unit['cwd'], text=True, stdout=stdout,
+                                 stderr=subprocess.PIPE, timeout=180)
+        ast_path.with_suffix('.log').write_text(run.stderr)
+        if run.returncode:
+            raise ValueError('Actual typed NVOC AST compile failed: ' + run.stderr[-4000:])
+        commands.append(command)
+        dispatch = [value for value in catalog_record['references']
+                    if value['kind'] == 'generated-dispatch-call']
+        if len(dispatch) != 1:
+            raise ValueError('Lowered NVOC requires one catalogued generated dispatch call.')
+        # Ask the compiler location for the wrapper name; the AST must then
+        # independently establish its FieldDecl relationship. No SSA-name or
+        # byte-offset-to-type lookup is used.
+        location = re.findall(r'!dbg !(\d+)\b', load_line)
+        metadata = dict(re.findall(r'^!(\d+) = (.+)$', original_text, re.M))
+        if len(location) != 1:
+            raise ValueError('Lowered NVOC load lacks unique compiler source provenance.')
+        scope = typed_ast._ref(metadata.get(location[0], ''), 'scope')
+        wrapper = typed_ast._string(metadata.get(scope, ''), 'name')
+        binding = typed_ast.member_binding(json.loads(ast_path.read_text()), owner=owner,
+            field=field, wrapper=wrapper, header=header, dispatch_line=dispatch[0]['line'])
+        typed_source = typed_ast.debug_member_binding(original_text, function=namespace + function,
+            load=load_line, call=call_line, header=header, source=Path(unit['source']),
+            cwd=Path(unit['cwd']), binding=binding)
+        for value in (actual_gep, expected_gep):
+            if value['address_form'] == 'untyped-byte-gep' and value['byte_offset'] != abi['field_offset_bytes']:
+                raise ValueError('Lowered member byte address differs from the actual compiled offsetof.')
+    if all(value['address_form'] == 'typed-struct-gep' for value in (actual_gep, expected_gep)):
+        if any(actual_gep[key] != expected_gep[key] for key in ('llvm_struct', 'llvm_member_index')):
+            raise ValueError('Actual indirect callee does not load the compiled C member.')
     graph = stack.extract_graph(reference, decoder=decoder)
     nodes = [value for value in graph['nodes'] if '_' + namespace + function in value['symbols']]
     if len(nodes) != 1:
@@ -283,9 +349,10 @@ def prove(reference: dict, source_root: Path, *, owner: str, field: str,
               'function': function, 'machine_site': site,
               'machine_offset_in_function': site['address'] - node['start'],
               'compiler_gep': actual_gep, 'typed_probe_gep': expected_gep, 'typed_probe_abi': abi,
+              'lowered_member_typed_source': typed_source,
               'object_identity_with_value_names': True, 'commands': commands,
               'evidence_sha256': {str(path): stack.sha(path)
-                  for path in (source, obj, probe_ir, original_ir, named)},
+                  for path in (source, obj, probe_ir, original_ir, named, *([ast_path] if typed_source else []))},
               'target_definition_binding': 'pending; local targets require their actual defining object',
               'callee_stack_bounds': 'not_established', 'aggregate_stack_proven': False,
               'kernel_execution': 'not_tested', 'production_candidate_allowed': False}

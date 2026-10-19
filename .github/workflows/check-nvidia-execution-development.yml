@@ -19,6 +19,7 @@ on:
       - 'builders/nvidia_metaclass_initializers.py'
       - 'builders/nvidia_stack_usage.py'
       - 'builders/nvidia_nvoc_stack_dispatch.py'
+      - 'builders/nvidia_nvoc_ast.py'
       - 'builders/build_nvidia_execution.py'
       - '.github/workflows/check-nvidia-execution-development.yml'
   workflow_dispatch:
