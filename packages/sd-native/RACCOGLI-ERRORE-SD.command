@@ -15,7 +15,7 @@ predicate='senderImagePath CONTAINS[c] "AppleSDXC" OR (process == "kernel" AND (
 # Each shell below owns exactly one background job. Address that job, never a
 # possibly recycled numeric PID. Capture subshells have their own job table.
 job_active() {
-    [ -n "$(jobs -pr %1 2>/dev/null)$(jobs -ps %1 2>/dev/null)" ]
+    [ -n "$(jobs -pr 2>/dev/null)$(jobs -ps 2>/dev/null)" ]
 }
 
 finish_job() {

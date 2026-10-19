@@ -1,0 +1,29 @@
+name: Check hardware diagnostic tools
+
+on:
+  push:
+    branches: ['hardware/**']
+    paths:
+      - 'packages/sd-native/RACCOGLI-ERRORE-SD.command'
+      - 'packages/sd-native/tests/check_collector_bash.sh'
+      - '.github/workflows/check-hardware-tools.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-bash:
+    runs-on: macos-15-intel
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Show the system Bash version
+        run: /bin/bash --version
+      - name: Check collector syntax and behavior with the system Bash
+        run: |
+          /bin/bash -n packages/sd-native/RACCOGLI-ERRORE-SD.command
+          /bin/bash -n packages/sd-native/tests/check_collector_bash.sh
+          /bin/bash packages/sd-native/tests/check_collector_bash.sh
