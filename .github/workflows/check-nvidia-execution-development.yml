@@ -136,6 +136,28 @@ jobs:
           --upstream build-src/nvidia-upstream
           --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
           --sdk build-src/MacKernelSDK
+      - name: Verify the isolated explicitly disabled UVM backend
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-uvm-disabled/check_uvm_disabled.py
+          --output build/nvidia-execution/prospective-checks/disabled-uvm
+          --upstream build-src/nvidia-upstream
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+      - name: Verify isolated first-transaction retention and actual service boundaries
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-first-transaction/check_first_transaction.py
+          --upstream build-src/nvidia-upstream
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --output build/nvidia-execution/prospective-checks/first-transaction
+          --cc /usr/bin/clang --cxx /usr/bin/clang++
+          --sdk build-src/MacKernelSDK
+          --v3-root build/nvidia-execution/prospective-checks/combined-profile-v3
+      - name: Exercise isolated unavailable OS-event feature guards
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-os-event-policy/check_event_policy.py
+          --output build/nvidia-execution/prospective-checks/os-event-policy
+          --upstream build-src/nvidia-upstream
+          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --v3-output build/nvidia-execution/prospective-checks/combined-profile-v3
       - name: Exercise revocation of the actual original wait bodies in user space
         run: >-
           python3 packages/nvidia-gsp-bootstrap/cancellation/check_cancellation.py
@@ -270,6 +292,8 @@ jobs:
             build/nvidia-execution/kernel-checks/nvoc-reset-stack-proof/*.c
             build/nvidia-execution/prospective-checks/**/*.json
             build/nvidia-execution/prospective-checks/**/*.log
+            build/nvidia-execution/prospective-checks/**/*.o
+            build/nvidia-execution/prospective-checks/**/*.su
             build/nvidia-execution/prospective-checks/adapter-compile/*.o
             build/nvidia-execution/original-global-lifecycle/**/*.json
             build/nvidia-execution/original-global-lifecycle/**/*.log

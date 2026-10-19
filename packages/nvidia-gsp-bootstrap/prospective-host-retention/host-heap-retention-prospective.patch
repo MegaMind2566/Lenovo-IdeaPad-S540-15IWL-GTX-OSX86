@@ -1,0 +1,565 @@
+--- a/packages/nvidia-device-transport/src/S540NvidiaUnsupportedMemory.c
++++ b/packages/nvidia-device-transport/src/S540NvidiaUnsupportedMemory.c
+@@ -6,6 +6,7 @@
+ #include "nv.h"
+ #include "os-interface.h"
+ #include "nv_unsupported_memory.h"
++#include "S540NvidiaGspFirstTransaction.h"
+ 
+ _Static_assert(__atomic_always_lock_free(sizeof(NvU32), 0),
+                "Memory callback counters must not add a runtime lock");
+@@ -39,8 +40,10 @@
+ #endif
+ static NV_STATUS unavailable(void)
+ {
++    s540FirstTxnObserveServiceRefusal(3, 0, NV_ERR_NOT_SUPPORTED);
+     bump(&statistics.unavailableOperations);
+     bump(&statistics.unavailableOperationsEver);
++    s540FirstTxnObserveServiceRefusal(3, 0, NV_ERR_NOT_SUPPORTED);
+     return NV_ERR_NOT_SUPPORTED;
+ }
+ static NV_STATUS disabledFeature(void)
+@@ -54,8 +57,10 @@
+ }
+ static __attribute__((noreturn)) void lifetimeUnavailable(const char *message)
+ {
++    s540FirstTxnObserveServiceRefusal(3, 1, NV_ERR_INVALID_STATE);
+     bump(&statistics.lifetimeViolations);
+     bump(&statistics.lifetimeViolationsEver);
++    s540FirstTxnObserveServiceRefusal(3, 1, NV_ERR_INVALID_STATE);
+     s540DeviceMemoryContractViolation(message);
+ }
+ 
+--- a/packages/nvidia-global-rm-crypto/src/S540NvidiaGlobalCrypto.c
++++ b/packages/nvidia-global-rm-crypto/src/S540NvidiaGlobalCrypto.c
+@@ -1,5 +1,6 @@
+ /* SPDX-License-Identifier: MIT */
+ #include "S540NvidiaGlobalCrypto.h"
++#include "S540NvidiaGspFirstTransaction.h"
+ 
+ _Static_assert(__atomic_always_lock_free(sizeof(uint32_t), 0),
+                "Refusal counters require lock-free 32-bit atomics");
+@@ -11,6 +12,7 @@
+ 
+ static void refuse(uint32_t symbol)
+ {
++    s540FirstTxnObserveServiceRefusal(2, symbol, NV_ERR_NOT_SUPPORTED);
+     uint32_t previous;
+     __atomic_fetch_or(symbol < 32U ? &unavailable_symbol_mask :
+                       &unavailable_symbol_mask_high,
+@@ -19,11 +21,14 @@
+     for (;;) {
+         if (previous == UINT32_MAX) {
+             __atomic_store_n(&counter_overflow, 1U, __ATOMIC_RELAXED);
++            s540FirstTxnObserveServiceRefusal(2, symbol, NV_ERR_NOT_SUPPORTED);
+             return;
+         }
+         if (__atomic_compare_exchange_n(&unavailable_calls, &previous,
+-                previous + 1U, false, __ATOMIC_RELAXED, __ATOMIC_RELAXED))
++                previous + 1U, false, __ATOMIC_RELAXED, __ATOMIC_RELAXED)) {
++            s540FirstTxnObserveServiceRefusal(2, symbol, NV_ERR_NOT_SUPPORTED);
+             return;
++        }
+     }
+ }
+ 
+--- a/packages/nvidia-global-rm/src/S540NvidiaGlobalRmHost.cpp
++++ b/packages/nvidia-global-rm/src/S540NvidiaGlobalRmHost.cpp
+@@ -1,5 +1,8 @@
+ // SPDX-License-Identifier: MIT
+ #include "S540NvidiaGlobalRm.h"
++#include "S540NvidiaGlobalRmHostRetention.h"
++#include "S540NvidiaGlobalCrypto.h"
++#include "nv_unsupported_memory.h"
+ #include "../../nvidia-darwin-services/src/S540NvidiaDarwinServices.h"
+ 
+ #ifdef KERNEL
+@@ -17,7 +20,37 @@
+ constexpr NvU32 kCapacity = 8192;
+ constexpr NvU64 kSingleLimit = 256ULL * 1024 * 1024;
+ constexpr NvU64 kTotalLimit = 512ULL * 1024 * 1024;
+-struct Allocation { void *pointer; NvU64 bytes; bool original; };
++struct Allocation {
++    void *pointer; NvU64 bytes; bool original;
++    S540FirstTxnHostIdentity identity;
++    NvU64 serial;
++    bool pending, retired, released;
++};
++NvU64 nextAllocationSerial = 0;
++S540GlobalRmHostRetentionSnapshot retention = {};
++// A lease is acquired before any dynamic guard access. A transition closes
++// admission only from exactly zero leases; refusal never waits for callers.
++constexpr NvU64 kHostClosed = 1ULL << 63;
++constexpr NvU64 kHostTransition = 1ULL << 62;
++constexpr NvU64 kHostUsers = kHostTransition - 1;
++NvU64 hostLifetime = kHostClosed;
++class HostUse {
++    bool held_ = false;
++public:
++    HostUse() {
++        NvU64 value = __atomic_load_n(&hostLifetime, __ATOMIC_ACQUIRE);
++        for (;;) {
++            if ((value & kHostClosed) || (value & kHostUsers) == kHostUsers) return;
++            if (__atomic_compare_exchange_n(&hostLifetime, &value, value + 1,
++                false, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE)) { held_ = true; return; }
++        }
++    }
++    ~HostUse() { if (held_) __atomic_fetch_sub(&hostLifetime, 1ULL, __ATOMIC_RELEASE); }
++    explicit operator bool() const { return held_; }
++    HostUse(const HostUse &) = delete;
++    HostUse &operator=(const HostUse &) = delete;
++};
++
+ Allocation records[kCapacity] = {};
+ S540NvidiaGlobalRmPlatformFacts platformFacts = {};
+ S540NvidiaGlobalRmHostSnapshot counters = {};
+@@ -39,7 +72,13 @@
+ void lock() { guard->lock(); }
+ void unlock() { guard->unlock(); }
+ void *allocate(NvU64 n) { return std::malloc(static_cast<size_t>(n)); }
+-void release(void *p, NvU64) { std::free(p); }
++void (*freeObserver)(NvU32, const void *, NvU64, const S540FirstTxnHostIdentity *, S540FirstTxnHostFreePermit) = nullptr;
++void release(void *p, NvU64 bytes) {
++    auto observer = __atomic_load_n(&freeObserver, __ATOMIC_ACQUIRE);
++    if (observer) observer(1, p, bytes, nullptr, 0);
++    std::free(p);
++    if (observer) observer(2, p, bytes, nullptr, 0);
++}
+ #endif
+ }
+ 
+@@ -48,100 +87,167 @@
+     if (!s540Darwin_os_semaphore_may_sleep()) return NV_ERR_INVALID_STATE;
+     if (!facts || facts->format != 1 || facts->known != S540_GLOBAL_FACT_ALL ||
+         !facts->cpuCount || !facts->cpuFrequencyHz || !facts->osMajor ||
+-        !facts->osVersion || !facts->osDate)
+-        return NV_ERR_NOT_SUPPORTED;
+-    if (guard || counters.initialized || counters.liveAllocations)
+-        return NV_ERR_STATE_IN_USE;
++        !facts->osVersion || !facts->osDate) return NV_ERR_NOT_SUPPORTED;
++    NvU64 expected = kHostClosed;
++    if (!__atomic_compare_exchange_n(&hostLifetime, &expected, kHostClosed | kHostTransition,
++        false, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE)) return NV_ERR_STATE_IN_USE;
+ #ifdef KERNEL
+     guard = IOLockAlloc();
+ #else
+     guard = new (std::nothrow) std::mutex;
+ #endif
+-    if (!guard) return NV_ERR_NO_MEMORY;
+-    const NvU32 unavailable = counters.unavailableCalls;
+-    const NvU32 invalidFrees = counters.invalidFrees;
+-    counters = {};
+-    counters.unavailableCalls = unavailable;
+-    counters.invalidFrees = invalidFrees;
+-    serviceMask = 0;
++    if (!guard) {
++        __atomic_store_n(&hostLifetime, kHostClosed, __ATOMIC_RELEASE);
++        return NV_ERR_NO_MEMORY;
++    }
++    // The two producer counters are lifetime-monotonic atomic streams. Do not
++    // overwrite them while an IRQ/foreign refusal can concurrently publish.
++    counters.liveBytes = counters.peakBytes = counters.largestAllocation = 0;
++    counters.allocations = counters.frees = 0;
++    counters.liveAllocations = counters.peakAllocations = counters.allocationFailures = 0;
++    counters.originalLiveBytes = counters.externalLiveBytes = 0;
++    counters.originalLiveAllocations = counters.externalLiveAllocations = 0;
++    __atomic_store_n(&serviceMask, 0ULL, __ATOMIC_RELEASE);
+ #if !defined(KERNEL)
+     allocationOrdinal = 0;
+ #endif
+     platformFacts = *facts;
+     counters.initialized = NV_TRUE;
++    __atomic_store_n(&hostLifetime, 0ULL, __ATOMIC_RELEASE);
+     return NV_OK;
+ }
+ 
+ extern "C" NvBool s540GlobalRmHostShutdown(void)
+ {
+-    if (!s540Darwin_os_semaphore_may_sleep()) {
+-        s540GlobalRmRecordUnavailable(0);
+-        return NV_FALSE;
+-    }
+-    if (!guard) return counters.initialized ? NV_FALSE : NV_TRUE;
+-    lock();
+-    const bool cold = counters.liveAllocations == 0 && counters.liveBytes == 0;
++    if (!s540Darwin_os_semaphore_may_sleep()) { s540GlobalRmRecordUnavailable(0); return NV_FALSE; }
++    NvU64 expected = 0;
++    if (!__atomic_compare_exchange_n(&hostLifetime, &expected, kHostClosed | kHostTransition,
++        false, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE))
++        return expected == kHostClosed ? NV_TRUE : NV_FALSE;
++    // Open state guarantees a published guard. No new user can acquire one
++    // until this exclusive transition either reopens or completes deletion.
++    lock();
++    const bool cold = counters.liveAllocations == 0 && counters.liveBytes == 0 &&
++        !retention.pendingAllocations && !retention.pendingFrees &&
++        !retention.retiredAllocations && !retention.firstStatus;
+     if (cold) counters.initialized = NV_FALSE;
+     unlock();
+-    if (!cold) return NV_FALSE;
++    if (!cold) { __atomic_store_n(&hostLifetime, 0ULL, __ATOMIC_RELEASE); return NV_FALSE; }
+ #ifdef KERNEL
+     IOLockFree(guard);
+ #else
+     delete guard;
+ #endif
+     guard = nullptr;
+-    platformFacts = {};
++    // Borrowed platform facts are static storage. Their consumers still need
++    // the outer epoch lease across a later reinitialization; never clear the
++    // old epoch while an already returned pointer can still be inspected.
++    __atomic_store_n(&hostLifetime, kHostClosed, __ATOMIC_RELEASE);
+     return NV_TRUE;
+ }
+ 
++static void noteInvalidFree(void)
++{
++    s540FirstTxnObserveServiceRefusal(1, 1, NV_ERR_INVALID_ARGUMENT);
++    NvU32 value = __atomic_load_n(&counters.invalidFrees, __ATOMIC_RELAXED);
++    while (value != ~0U && !__atomic_compare_exchange_n(&counters.invalidFrees,
++        &value, value + 1U, false, __ATOMIC_RELAXED, __ATOMIC_RELAXED)) {}
++    s540FirstTxnObserveServiceRefusal(1, 1, NV_ERR_INVALID_ARGUMENT);
++}
++
++static void *allocationFailure(NV_STATUS status, NvU32 site)
++{
++    // Source failure publication precedes NULL and any caller's inner cleanup.
++    // The strong record observes RESERVING/bound attempts; UNBOUND is a no-op.
++    // This is allocation evidence, never an unavailable-operation counter.
++    s540FirstTxnObserveServiceRefusal(4, site, status);
++    return nullptr;
++}
++
+ static void *allocateTracked(NvU64 bytes, bool original)
+ {
+     if (!s540Darwin_os_semaphore_may_sleep()) {
++        allocationFailure(NV_ERR_INVALID_STATE, 1);
+         s540GlobalRmRecordUnavailable(0);
+         return nullptr;
+     }
+-    if (!guard || !bytes || bytes > kSingleLimit || bytes > static_cast<NvU64>(~static_cast<size_t>(0)))
+-        return nullptr;
++    if (!bytes) return allocationFailure(NV_ERR_INVALID_STATE, 2);
++    if (bytes > kSingleLimit || bytes > static_cast<NvU64>(~static_cast<size_t>(0)))
++        return allocationFailure(NV_ERR_NO_MEMORY, 3);
++    HostUse use;
++    if (!use) return allocationFailure(NV_ERR_INVALID_STATE, 4);
++    S540FirstTxnHostIdentity identity = {};
++    const NV_STATUS captured = s540FirstTxnHostCaptureAllocation(&identity);
++    const bool unassociated = captured == NV_ERR_OBJECT_NOT_FOUND && !identity.owner && !identity.generation;
++    if (captured != NV_OK && !unassociated) return allocationFailure(captured, 5);
++    if (captured == NV_OK && (!identity.owner || !identity.generation)) return allocationFailure(NV_ERR_INVALID_STATE, 6);
++#if !defined(KERNEL)
++    auto allocationObserver = __atomic_load_n(&freeObserver, __ATOMIC_ACQUIRE);
++    if (allocationObserver) allocationObserver(0, nullptr, bytes, &identity, 0);
++#endif
+     lock();
+ #if !defined(KERNEL)
+     if (++allocationOrdinal == failureOrdinal) {
+         failureOrdinal = 0;
+         ++counters.allocationFailures;
+         unlock();
+-        return nullptr;
++        return allocationFailure(NV_ERR_NO_MEMORY, 7);
+     }
+ #endif
+     NvU32 slot = 0;
+     while (slot != kCapacity && records[slot].pointer) ++slot;
+-    if (!counters.initialized || slot == kCapacity || bytes > kTotalLimit - counters.liveBytes) {
++    if (!counters.initialized || slot == kCapacity || nextAllocationSerial == ~(NvU64)0 ||
++        bytes > kTotalLimit - counters.liveBytes) {
++        ++counters.allocationFailures;
++        const NV_STATUS failure = counters.initialized ? NV_ERR_NO_MEMORY : NV_ERR_INVALID_STATE;
++        unlock();
++        return allocationFailure(failure, 8);
++    }
++    records[slot] = {reinterpret_cast<void *>(static_cast<NvUPtr>(1)), bytes, original,
++                     identity, ++nextAllocationSerial, false, false, false};
++    counters.liveBytes += bytes;
++    ++counters.liveAllocations;
++    ++retention.pendingAllocations;
++    if (original) { counters.originalLiveBytes += bytes; ++counters.originalLiveAllocations; }
++    unlock();
++#if !defined(KERNEL)
++    if (allocationObserver) allocationObserver(4, nullptr, bytes, &identity, 0);
++#endif
++    // Recheck outside the allocator guard after publishing the reservation,
++    // before allocating backing. An intervening BeginOwner cannot adopt a
++    // legacy reservation; BeginOwner's preflight sees its original-live count.
++    S540FirstTxnHostIdentity confirmed = {};
++    const NV_STATUS checked = s540FirstTxnHostCaptureAllocation(&confirmed);
++    const bool same = confirmed.owner == identity.owner && confirmed.generation == identity.generation &&
++        ((captured == NV_OK && checked == NV_OK) ||
++         (unassociated && checked == NV_ERR_OBJECT_NOT_FOUND));
++    if (!same) {
++        lock();
++        records[slot] = {};
++        --retention.pendingAllocations;
++        counters.liveBytes -= bytes;
++        --counters.liveAllocations;
++        if (original) { counters.originalLiveBytes -= bytes; --counters.originalLiveAllocations; }
+         ++counters.allocationFailures;
+         unlock();
+-        return nullptr;
+-    }
+-    // Reserve ownership before sleeping in IOMalloc. Other callers cannot use
+-    // this slot and the total byte ceiling includes in-progress allocations.
+-    records[slot] = {reinterpret_cast<void *>(static_cast<NvUPtr>(1)), bytes, original};
+-    counters.liveBytes += bytes;
+-    ++counters.liveAllocations;
+-    if (original) {
+-        counters.originalLiveBytes += bytes;
+-        ++counters.originalLiveAllocations;
+-    }
+-    unlock();
++        return allocationFailure(checked != NV_OK && checked != NV_ERR_OBJECT_NOT_FOUND ? checked : NV_ERR_INVALID_STATE, 9);
++    }
+     void *pointer = allocate(bytes);
+-    lock();
++    if (!pointer) allocationFailure(NV_ERR_NO_MEMORY, 10);
++    lock();
++    --retention.pendingAllocations;
+     if (!pointer) {
+         records[slot] = {};
+         counters.liveBytes -= bytes;
+         --counters.liveAllocations;
+-        if (original) {
+-            counters.originalLiveBytes -= bytes;
+-            --counters.originalLiveAllocations;
+-        }
++        if (original) { counters.originalLiveBytes -= bytes; --counters.originalLiveAllocations; }
+         ++counters.allocationFailures;
+     } else {
+         records[slot].pointer = pointer;
+         ++counters.allocations;
++        if (identity.owner) {
++            if (retention.taggedAllocations != ~(NvU64)0) ++retention.taggedAllocations;
++        } else if (retention.unassociatedAllocations != ~(NvU64)0) ++retention.unassociatedAllocations;
+         if (counters.liveBytes > counters.peakBytes) counters.peakBytes = counters.liveBytes;
+         if (counters.liveAllocations > counters.peakAllocations) counters.peakAllocations = counters.liveAllocations;
+         if (bytes > counters.largestAllocation) counters.largestAllocation = bytes;
+@@ -154,36 +260,88 @@
+ {
+     if (!pointer) return;
+     if (!s540Darwin_os_semaphore_may_sleep()) {
+-        // Keep ownership recorded so ordinary-thread teardown can release it.
+         s540GlobalRmRecordUnavailable(0);
+         return;
+     }
+-    if (!guard) { ++counters.invalidFrees; return; }
++    HostUse use;
++    if (!use) { noteInvalidFree(); return; }
+     lock();
+     NvU32 slot = 0;
+     while (slot != kCapacity && records[slot].pointer != pointer) ++slot;
+     if (slot == kCapacity || pointer == reinterpret_cast<void *>(static_cast<NvUPtr>(1)) ||
+-        records[slot].original != original) {
+-        ++counters.invalidFrees;
++        records[slot].original != original || records[slot].pending || records[slot].retired) {
+         unlock();
++        noteInvalidFree();
+         return;
+     }
+-    const NvU64 bytes = records[slot].bytes;
+-    // Retain the reservation while IOFree runs, so host shutdown cannot race a
+-    // pending release. Duplicate free finds no matching published pointer.
++    const Allocation saved = records[slot];
++    records[slot].pending = true;
++    ++retention.pendingFrees;
++    unlock();
++    // No FirstTransaction API runs while the allocator guard is held. A real
++    // permit and first refusal share one atomic record word: physical frees
++    // already admitted before refusal complete; later requests retain bytes.
++    S540FirstTxnHostFreePermit permit = 0;
++    const NV_STATUS status = s540FirstTxnHostAcquireFree(&saved.identity, &permit);
++    const bool unassociated = !saved.identity.owner && !saved.identity.generation &&
++        status == NV_ERR_OBJECT_NOT_FOUND && !permit;
++    const bool admitted = (status == NV_OK && saved.identity.owner && saved.identity.generation && permit) || unassociated;
++    lock();
++    // The pending marker excludes duplicate frees and the immutable serial
++    // excludes ABA reuse. This slot remains reserved through physical release.
++    if (records[slot].pointer != pointer || records[slot].serial != saved.serial || !records[slot].pending) {
++        unlock();
++        noteInvalidFree();
++        // The physical release did not happen. Keep any admitted permit
++        // outstanding; never present an unperformed IOFree as completion.
++        return;
++    }
++    if (!admitted) {
++        records[slot].pending = false;
++        records[slot].retired = true;
++        --retention.pendingFrees;
++        ++retention.retiredAllocations;
++        retention.retiredBytes += saved.bytes;
++        if (retention.acquireFailures != ~0U) ++retention.acquireFailures;
++        if (!retention.firstStatus) retention.firstStatus = status == NV_OK ? NV_ERR_INVALID_STATE : status;
++        unlock();
++        s540GlobalRmRecordUnavailable(0);
++        return;
++    }
+     records[slot].pointer = reinterpret_cast<void *>(static_cast<NvUPtr>(1));
+     unlock();
+-    release(pointer, bytes);
+-    lock();
+-    records[slot] = {};
+-    counters.liveBytes -= bytes;
++    release(pointer, saved.bytes);
++    lock();
++    // Keep this metadata slot reserved until real permit completion. The
++    // physical backing has gone: live-byte counters must no longer claim it.
++    records[slot].bytes = 0;
++    records[slot].released = true;
++    ++retention.releasedPendingCompletions;
++    counters.liveBytes -= saved.bytes;
+     --counters.liveAllocations;
+-    if (original) {
+-        counters.originalLiveBytes -= bytes;
+-        --counters.originalLiveAllocations;
+-    }
++    if (original) { counters.originalLiveBytes -= saved.bytes; --counters.originalLiveAllocations; }
+     ++counters.frees;
+     unlock();
++    // Completion is outside the allocator guard and after IOFree. The record
++    // cannot issue retirement while an earlier committed free is outstanding.
++#if !defined(KERNEL)
++    auto observer = __atomic_load_n(&freeObserver, __ATOMIC_ACQUIRE);
++    if (observer) observer(3, pointer, saved.bytes, &saved.identity, permit);
++#endif
++    const NV_STATUS completed = permit ? s540FirstTxnHostCompleteFree(&saved.identity, permit) : NV_OK;
++    lock();
++    if (completed == NV_OK) {
++        records[slot] = {};
++        --retention.pendingFrees;
++        --retention.releasedPendingCompletions;
++    } else {
++        // No retry of IOFree: the reserved zero-byte node records only the
++        // outstanding completion. This is not retained physical memory.
++        if (retention.completionFailures != ~0U) ++retention.completionFailures;
++        if (!retention.firstStatus) retention.firstStatus = completed;
++    }
++    unlock();
++    if (completed != NV_OK) s540GlobalRmRecordUnavailable(0);
+ }
+ 
+ extern "C" void *s540GlobalRmHostAllocate(NvU64 bytes) { return allocateTracked(bytes, false); }
+@@ -200,7 +358,10 @@
+         out->unavailableCalls = __atomic_load_n(&counters.unavailableCalls, __ATOMIC_ACQUIRE);
+         return;
+     }
+-    if (guard) lock();
++    HostUse use;
++    if (!use) { *out = {}; out->unavailableCalls = __atomic_load_n(&counters.unavailableCalls, __ATOMIC_ACQUIRE);
++        out->invalidFrees = __atomic_load_n(&counters.invalidFrees, __ATOMIC_ACQUIRE); return; }
++    lock();
+     out->liveBytes = counters.liveBytes;
+     out->peakBytes = counters.peakBytes;
+     out->largestAllocation = counters.largestAllocation;
+@@ -209,23 +370,25 @@
+     out->liveAllocations = counters.liveAllocations;
+     out->peakAllocations = counters.peakAllocations;
+     out->allocationFailures = counters.allocationFailures;
+-    out->invalidFrees = counters.invalidFrees;
++    out->invalidFrees = __atomic_load_n(&counters.invalidFrees, __ATOMIC_ACQUIRE);
+     out->unavailableCalls = __atomic_load_n(&counters.unavailableCalls, __ATOMIC_ACQUIRE);
+     out->initialized = counters.initialized;
+     out->originalLiveBytes = counters.originalLiveBytes;
+     out->originalLiveAllocations = counters.originalLiveAllocations;
+     out->externalLiveBytes = counters.liveBytes - counters.originalLiveBytes;
+     out->externalLiveAllocations = counters.liveAllocations - counters.originalLiveAllocations;
+-    if (guard) unlock();
+-}
+-
+-extern "C" void s540GlobalRmRecordUnavailable(NvU32)
+-{
++    unlock();
++}
++
++extern "C" void s540GlobalRmRecordUnavailable(NvU32 service)
++{
++    s540FirstTxnObserveServiceRefusal(1, service, NV_ERR_NOT_SUPPORTED);
+     NvU32 current = __atomic_load_n(&counters.unavailableCalls, __ATOMIC_RELAXED);
+     while (current != ~0U &&
+            !__atomic_compare_exchange_n(&counters.unavailableCalls, &current,
+                                          current + 1U, false,
+                                          __ATOMIC_RELAXED, __ATOMIC_RELAXED)) {}
++    s540FirstTxnObserveServiceRefusal(1, service, NV_ERR_NOT_SUPPORTED);
+ }
+ 
+ extern "C" void s540GlobalRmRecordService(NvU32 service)
+@@ -288,12 +451,73 @@
+ 
+ extern "C" const S540NvidiaGlobalRmPlatformFacts *s540GlobalRmPlatformFacts(void)
+ {
+-    return counters.initialized ? &platformFacts : nullptr;
++    HostUse use;
++    return use && counters.initialized ? &platformFacts : nullptr;
+ }
+ 
+ #if !defined(KERNEL)
+ void S540NvidiaGlobalRmNative::failAllocationAt(NvU64 ordinal)
+ {
+-    failureOrdinal = ordinal;
+-}
+-#endif
++    HostUse use;
++    if (!use) return;
++    lock(); failureOrdinal = ordinal; unlock();
++}
++#endif
++
++extern "C" NV_STATUS s540GlobalRmHostRetentionPreflight(void)
++{
++    if (!s540Darwin_os_semaphore_may_sleep()) return NV_ERR_INVALID_STATE;
++    HostUse use;
++    if (!use) return NV_ERR_INVALID_STATE;
++    lock();
++    retention.preexistingOriginalAllocations = counters.originalLiveAllocations;
++    S540NvidiaGlobalCryptoSnapshot crypto = {};
++    s540Global_crypto_snapshot(&crypto);
++    const S540DeviceMemoryStatistics memory = s540DeviceMemoryStatistics();
++    const bool cold = counters.initialized && !counters.originalLiveAllocations &&
++        !retention.retiredAllocations && !retention.pendingAllocations && !retention.pendingFrees && !retention.firstStatus &&
++        !__atomic_load_n(&counters.invalidFrees, __ATOMIC_ACQUIRE) && !__atomic_load_n(&counters.unavailableCalls, __ATOMIC_ACQUIRE) &&
++        !crypto.unavailable_calls && !crypto.counter_overflow && !crypto.unavailable_symbol_mask && !crypto.unavailable_symbol_mask_high &&
++        !memory.unavailableOperationsEver && !memory.lifetimeViolationsEver;
++    unlock();
++#if !defined(KERNEL)
++    auto observer = __atomic_load_n(&freeObserver, __ATOMIC_ACQUIRE);
++    if (observer) observer(6, nullptr, 0, nullptr, 0);
++#endif
++    return cold ? NV_OK : NV_ERR_STATE_IN_USE;
++}
++extern "C" void s540GlobalRmHostRetentionSnapshot(S540GlobalRmHostRetentionSnapshot *out)
++{
++    if (!out) return;
++    *out = {};
++    if (!s540Darwin_os_semaphore_may_sleep()) return;
++    HostUse use;
++    if (!use) return;
++    lock(); *out = retention; out->format = 1; unlock();
++}
++extern "C" NV_STATUS s540GlobalRmHostRetentionInspect(const void *pointer,
++    S540GlobalRmHostAllocationSnapshot *out)
++{
++    if (!pointer || !out || !s540Darwin_os_semaphore_may_sleep())
++        return NV_ERR_INVALID_ARGUMENT;
++    HostUse use;
++    if (!use) return NV_ERR_INVALID_STATE;
++    lock();
++    NvU32 slot = 0;
++    while (slot != kCapacity && records[slot].pointer != pointer) ++slot;
++    if (slot == kCapacity) { unlock(); return NV_ERR_OBJECT_NOT_FOUND; }
++    const Allocation &record = records[slot];
++    *out = {record.identity, record.serial, record.bytes, record.original ? NV_TRUE : NV_FALSE,
++            record.retired ? NV_TRUE : NV_FALSE, record.pending ? NV_TRUE : NV_FALSE};
++    unlock();
++    return NV_OK;
++}
++#if !defined(KERNEL)
++void S540HostRetentionNative::observePhysicalFree(void (*observer)(NvU32, const void *, NvU64,
++    const S540FirstTxnHostIdentity *, S540FirstTxnHostFreePermit))
++{
++    HostUse use;
++    if (!use) return;
++    __atomic_store_n(&freeObserver, observer, __ATOMIC_RELEASE);
++}
++#endif

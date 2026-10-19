@@ -1,0 +1,102 @@
+{
+  "format": 1,
+  "status": "passed",
+  "results": {
+    "plain": {
+      "format": 1,
+      "status": "passed",
+      "checks": 20,
+      "failures": 0,
+      "actual_original_bodies": 12,
+      "actual_strong_record": true,
+      "actual_queues_and_timers": true,
+      "descriptor_policy": "explicit-test-only-typed-rows",
+      "kernel_execution": "not_tested",
+      "gpu_access": false,
+      "hardware_admission": false
+    },
+    "fatal-sanitizers": {
+      "format": 1,
+      "status": "passed",
+      "checks": 20,
+      "failures": 0,
+      "actual_original_bodies": 12,
+      "actual_strong_record": true,
+      "actual_queues_and_timers": true,
+      "descriptor_policy": "explicit-test-only-typed-rows",
+      "kernel_execution": "not_tested",
+      "gpu_access": false,
+      "hardware_admission": false
+    }
+  },
+  "sdk_compile_units": 2,
+  "host_control": true,
+  "native_apple_execution": false,
+  "kernel_execution": "not_tested",
+  "hardware_admission": false,
+  "sanitizer_environment": {
+    "explicit_host_control": "ASAN_OPTIONS=detect_leaks=0",
+    "authoritative_default": "inherited ASAN_OPTIONS preserved; native Apple execution not tested here"
+  },
+  "runner_sha256": "eef84155b3fa22e60f0a164c8ff91fde0ebe7aaaced51d9496e02085edfbbf9f",
+  "upstream_source_sha256": {
+    "src/nvidia/src/kernel/gpu/timed_semaphore.c": "39729273dfe4e6396f06527433c46c760acab603753bdee36336eb724e6efe55",
+    "src/nvidia/src/kernel/gpu/timer/timer.c": "6bd867db774d01b96976968598f5cfad01e343e745d8b08fe84e1f6a9c4b5c18",
+    "src/nvidia/src/kernel/gpu/timer/timer_ostimer.c": "9710b89d0725d433b993ba803983bde1262096e7f62b81d39d0bc8f816ff5bb3",
+    "src/nvidia/arch/nvalloc/unix/src/os.c": "057b50fcb738be90a073b60f63e70559706864ddcec3bf703282563173e3dce4",
+    "src/nvidia/arch/nvalloc/unix/src/osapi.c": "e4336f0e3bb55122680e0d344f970c123664122c2415134b7a6b517c98fcbe75"
+  },
+  "actual_metadata_reader_sha256": "b8e3c04e934e594d2442c78e2a234d90525d4558d20fa13e71cc48e8f5329aa2",
+  "input_sha256": {
+    "external-control-output/host-retention-lifetime-controls-r2/overlay/packages/nvidia-global-rm-crypto/src/S540NvidiaGlobalCrypto.c": "bb862943b85b6a5672f217a56033aa92ee734cd8e52558a602fe1cfbd00c59e4",
+    "external-control-output/host-retention-lifetime-controls-r2/overlay/packages/nvidia-device-transport/src/S540NvidiaUnsupportedMemory.c": "0b7ed2f522d9b4fab7d2d2cc3b6328c1832c26994ae8799f5ff84647c35448ff",
+    "repository/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c": "556f17711c0e444ff186400a548baf1609e2dc220783199ca6cd97d575283f7c",
+    "repository/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/S540NvidiaGspCancellation.c": "56c64fdb995d2bf03e6d5b0cfec1b733aefdca0bfbe912cc3afa67c41099c174",
+    "repository/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/check_actual_original.c": "e280042bc0d6230fe8c5e216402d2954f8ff74ef9a2e08b9c348dc03878b8b1b",
+    "external-control-output/first-transaction-record-promoted-controls/services/overlay/S540NvidiaGspTimersOriginal.c": "123b617e9c45057c43cdf0f4af735e004f8308621d21eb56d78ee4f76463f4ad",
+    "external-control-output/host-retention-lifetime-controls-r2/overlay/packages/nvidia-global-rm/src/S540NvidiaGlobalRmHost.cpp": "0ae6bc86bfc5f73e3c931753a2fe36aba3643628f86b0232d2a93ea6b12a7094",
+    "external-control-output/first-transaction-record-promoted-controls/services/overlay/S540NvidiaDarwinWork.cpp": "52cbf99a8f65d9c3322983d410b85ec8942af0238a107815789b9df6edb87d09",
+    "external-control-output/first-transaction-record-promoted-controls/services/overlay/S540NvidiaDarwinTimer.cpp": "afd9bf2bf8ed2d1633b45746d558d42427f52fc3b6dff6bf08b49e303483cf3d",
+    "repository/packages/nvidia-gsp-bootstrap/prospective-first-transaction/services/S540NvidiaFirstTxnServices.cpp": "195ae1199cdf46b7cc3042ebf5d7c2eeb9572942682b4044922460da215d4007",
+    "repository/packages/nvidia-darwin-services/src/S540NvidiaDarwinRuntime.cpp": "946bd3ac525b5f9c5cb520abb2ca21ed27eed6b744ae9c984babfe97c1b11abd",
+    "repository/packages/nvidia-darwin-services/src/S540NvidiaDarwinSync.cpp": "a57a4397ac8064e2dd2c0702be1b761e8640d0d6edffdcc80cbb1f2d27b791f6",
+    "repository/packages/nvidia-darwin-services/src/S540NvidiaDarwinProcess.cpp": "1285616e6cb9459c3dd1df596f700cb206a2d65d40a496ee808ef238fe348156",
+    "repository/packages/nvidia-darwin-services/src/S540NvidiaDarwinUserCopy.cpp": "ae48eb76217c8f6d0264b92bc2761076293f592e706f725ff7c4246464f0dbdb",
+    "repository/packages/nvidia-darwin-services/src/S540NvidiaDarwinPlatform.cpp": "e1d25f901d22b1471830da3ec58a44a73c926cd3ad3764d18e1ce67d91e3878b",
+    "repository/packages/nvidia-darwin-services/src/S540NvidiaDarwinCheck.cpp": "e107e33b951d9f3014add741f1e1c46b8cd18410512e3c16fe855a5768e87549",
+    "repository/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.h": "eb7f9b38fd7bb3b6df88b14dfc382ee5a5d426a22ef246b51f657b010ca6ed2c",
+    "external-control-output/local-checks/S540GlobalRmNamespace.h": "cb79f788baddb7f046e870b1e2e09bfde310b4b12417ec8c737fad1ef440f7a1",
+    "repository/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/Participants.h": "7ffc4eadcb6e3b9c8e7cfe524f8eaaaa64ac25642632d728eda0382165140f38",
+    "repository/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.h": "02f6c5af5e5fab29be2172d30ffd1cea47dd740d98fa74d710c426ba4535421b",
+    "repository/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/nvidia-darwin-services/src/S540NvidiaDarwinServices.h": "b2e71cc940a78e52b304345cdc7f54b955272df3f5683c51842121ff0761672b",
+    "repository/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/nvidia-os-adapter/upstream/include/nvtypes.h": "da23dbc28805c390d62338dba5603eb12b2e94c8aaf873c1c42c1a5f10f26b79",
+    "repository/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/nvidia-os-adapter/upstream/include/nvstatuscodes.h": "4a9a39b51862d21cfa446414135386616a4a4914dd34dc83f98099295fea7b56",
+    "repository/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/nvidia-os-adapter/upstream/include/cpuopsys.h": "329ab764372bace3e1445315bb7a3766d4f60aacb8523ac3e3c760c79358f4fb",
+    "repository/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/nvidia-os-adapter/upstream/include/nv-kernel-interface-api.h": "1cf34c1dcd1abf535fb27387145374972a43ec9cd6f6c9ef927777431bda3cc4",
+    "repository/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/nvidia-os-adapter/upstream/include/nvstatus.h": "e8267172a1f7a56420d612c6734b3554b9ff6a3d33fdda21b1371ff4ce4b8675",
+    "external-control-output/first-transaction-record-exit-ready-fixed/record/actual-original-bodies.inc": "e207ae3210c4e27a8fdc13f4e799bba66238345c57cc25a03b1e0fc139e0cdd5",
+    "external-control-output/first-transaction-record-exit-ready-fixed/record/actual-original-metadata.inc": "84c71a1baad56696687076e7e0c1f2832e1e824b44fbc51535f6e650b79ccfe2",
+    "external-control-output/first-transaction-record-promoted-controls/services/overlay/S540NvidiaGspTimers.h": "7d76a6f947ca7071ec66bf35bf9f2eb151665741e430a204cbaa776259eb1cc0"
+  },
+  "full_report": "Generated by check_actual_original.run(config) in explicit output/results.json; this compact report retains source identity and results only.",
+  "exit_ready_regression_baseline": {
+    "record_c_sha256": "71756a44ba053df28aa25350d2aa4396993e2f86ed1a390a769b163f528e8a56",
+    "plain_result": {
+      "format": 1,
+      "status": "failed",
+      "checks": 20,
+      "failures": 2,
+      "actual_original_bodies": 12,
+      "actual_strong_record": true,
+      "actual_queues_and_timers": true,
+      "descriptor_policy": "explicit-test-only-typed-rows",
+      "kernel_execution": "not_tested",
+      "gpu_access": false,
+      "hardware_admission": false
+    },
+    "failing_assertions": 1,
+    "failed_child_exit": 1,
+    "failure": "successful original return cannot erase earlier sticky failure after actual unlock proof",
+    "baseline_log_sha256": "e7dc27243b093cde7b91a9a3a275f55e929c91a8f2bc3cec425621ce3b3f2e07"
+  }
+}

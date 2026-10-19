@@ -1,0 +1,29 @@
+{
+  "format": 1,
+  "scope": "new prospective-first-transaction/record only",
+  "record_c_sha256": "556f17711c0e444ff186400a548baf1609e2dc220783199ca6cd97d575283f7c",
+  "record_header_sha256": "eb7f9b38fd7bb3b6df88b14dfc382ee5a5d426a22ef246b51f657b010ca6ed2c",
+  "files": {
+    "HISTORICAL-ACTUAL-BODY-CONTROLS.json": "355cf5a5ce9287fa876840944355574fe7ef760ad17b69c2efedac5858edfc51",
+    "PORTABLE-CONTROL-VALIDATION.json": "4d72bd15c4a30ace9abca469293a20b375327256ae0f1bb2d52a2d778c969b61",
+    "PROVENANCE.json": "ae2d1ee2b3cc8e85e42b0399a0f01a813e086e118d506299273f64733a85a1fb",
+    "README.md": "82785a35c8fbae1c59314f35c86c6d73b7a28da1fe80c9899bf1861bd0cfcc27",
+    "S540NvidiaGspFirstTransaction.c": "556f17711c0e444ff186400a548baf1609e2dc220783199ca6cd97d575283f7c",
+    "S540NvidiaGspFirstTransaction.h": "eb7f9b38fd7bb3b6df88b14dfc382ee5a5d426a22ef246b51f657b010ca6ed2c",
+    "check_actual_original.c": "e280042bc0d6230fe8c5e216402d2954f8ff74ef9a2e08b9c348dc03878b8b1b",
+    "check_actual_original.py": "eef84155b3fa22e60f0a164c8ff91fde0ebe7aaaced51d9496e02085edfbbf9f",
+    "deps/PROVENANCE.json": "d49bb00d6fd16dfee2da9c8696dd46c5bccd7fb359c904838057c73873924573",
+    "deps/Participants.h": "7ffc4eadcb6e3b9c8e7cfe524f8eaaaa64ac25642632d728eda0382165140f38",
+    "deps/S540NvidiaGspCancellation.c": "56c64fdb995d2bf03e6d5b0cfec1b733aefdca0bfbe912cc3afa67c41099c174",
+    "deps/nvidia-darwin-services/src/S540NvidiaDarwinServices.h": "b2e71cc940a78e52b304345cdc7f54b955272df3f5683c51842121ff0761672b",
+    "deps/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.h": "02f6c5af5e5fab29be2172d30ffd1cea47dd740d98fa74d710c426ba4535421b",
+    "deps/nvidia-os-adapter/upstream/include/cpuopsys.h": "329ab764372bace3e1445315bb7a3766d4f60aacb8523ac3e3c760c79358f4fb",
+    "deps/nvidia-os-adapter/upstream/include/nv-kernel-interface-api.h": "1cf34c1dcd1abf535fb27387145374972a43ec9cd6f6c9ef927777431bda3cc4",
+    "deps/nvidia-os-adapter/upstream/include/nvstatus.h": "e8267172a1f7a56420d612c6734b3554b9ff6a3d33fdda21b1371ff4ce4b8675",
+    "deps/nvidia-os-adapter/upstream/include/nvstatuscodes.h": "4a9a39b51862d21cfa446414135386616a4a4914dd34dc83f98099295fea7b56",
+    "deps/nvidia-os-adapter/upstream/include/nvtypes.h": "da23dbc28805c390d62338dba5603eb12b2e94c8aaf873c1c42c1a5f10f26b79",
+    "prepare_actual_original.py": "a166022a2f22dbca243a10a91bf850e1bae25e12cba8039c80d2218573adfb71"
+  },
+  "hardware_admission": false,
+  "native_apple_execution": false
+}

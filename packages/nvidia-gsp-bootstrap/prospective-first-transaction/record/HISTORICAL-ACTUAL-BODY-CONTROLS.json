@@ -1,0 +1,118 @@
+{
+  "format": 1,
+  "source": {
+    "format": 1,
+    "actual_original_bodies": 12,
+    "original_functions": [
+      [
+        "src/nvidia/src/kernel/gpu/timed_semaphore.c",
+        "_class9074TimerCallback"
+      ],
+      [
+        "src/nvidia/src/kernel/gpu/timer/timer.c",
+        "tmrIsOSTimer"
+      ],
+      [
+        "src/nvidia/src/kernel/gpu/timer/timer.c",
+        "tmrEventOnList_IMPL"
+      ],
+      [
+        "src/nvidia/src/kernel/gpu/timer/timer.c",
+        "_tmrScanCallbackOSTimer"
+      ],
+      [
+        "src/nvidia/src/kernel/gpu/timer/timer_ostimer.c",
+        "tmrEventServiceOSTimerCallback_OSTIMER"
+      ],
+      [
+        "src/nvidia/src/kernel/gpu/timer/timer.c",
+        "tmrEventServiceTimer_IMPL"
+      ],
+      [
+        "src/nvidia/arch/nvalloc/unix/src/os.c",
+        "osQueueWorkItem"
+      ],
+      [
+        "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+        "_tmrEventServiceTimerWorkItem"
+      ],
+      [
+        "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+        "RmRunNanoTimerCallback"
+      ],
+      [
+        "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+        "rm_run_nano_timer_callback"
+      ],
+      [
+        "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+        "RmExecuteWorkItem"
+      ],
+      [
+        "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+        "rm_execute_work_item"
+      ]
+    ],
+    "source_sha256": {
+      "src/nvidia/src/kernel/gpu/timed_semaphore.c": "39729273dfe4e6396f06527433c46c760acab603753bdee36336eb724e6efe55",
+      "src/nvidia/src/kernel/gpu/timer/timer.c": "6bd867db774d01b96976968598f5cfad01e343e745d8b08fe84e1f6a9c4b5c18",
+      "src/nvidia/src/kernel/gpu/timer/timer_ostimer.c": "9710b89d0725d433b993ba803983bde1262096e7f62b81d39d0bc8f816ff5bb3",
+      "src/nvidia/arch/nvalloc/unix/src/os.c": "057b50fcb738be90a073b60f63e70559706864ddcec3bf703282563173e3dce4",
+      "src/nvidia/arch/nvalloc/unix/src/osapi.c": "e4336f0e3bb55122680e0d344f970c123664122c2415134b7a6b517c98fcbe75"
+    },
+    "actual_metadata_reader_source": "historical-scratch/cancellation-first-transaction-implementation/original/S540NvidiaGspFirstTransactionOriginal.c",
+    "metadata_sha256": "5fd031fc4734219fe8c6d37bafd0d590bbd9af85379340404e1a3c2451ad00b9",
+    "policy": "TEST-ONLY typed TimedSemaSwObject empty-list control rows. Production descriptor table remains nano WORK-only.",
+    "full_nv_h_abi": true,
+    "hardware_admission": false
+  },
+  "results": {
+    "plain": {
+      "format": 1,
+      "status": "passed",
+      "checks": 17,
+      "failures": 0,
+      "actual_original_bodies": 12,
+      "actual_strong_record": true,
+      "actual_queues_and_timers": true,
+      "descriptor_policy": "explicit-test-only-typed-rows",
+      "kernel_execution": "not_tested",
+      "gpu_access": false,
+      "hardware_admission": false
+    },
+    "fatal-sanitizers": {
+      "format": 1,
+      "status": "passed",
+      "checks": 17,
+      "failures": 0,
+      "actual_original_bodies": 12,
+      "actual_strong_record": true,
+      "actual_queues_and_timers": true,
+      "descriptor_policy": "explicit-test-only-typed-rows",
+      "kernel_execution": "not_tested",
+      "gpu_access": false,
+      "hardware_admission": false
+    }
+  },
+  "input_sha256": {
+    "historical-scratch/cancellation-first-transaction-implementation/record/S540NvidiaGspFirstTransaction.c": "71756a44ba053df28aa25350d2aa4396993e2f86ed1a390a769b163f528e8a56",
+    "historical-scratch/cancellation-first-transaction-implementation/record/S540NvidiaGspFirstTransaction.h": "eb7f9b38fd7bb3b6df88b14dfc382ee5a5d426a22ef246b51f657b010ca6ed2c",
+    "historical-scratch/cancellation-first-transaction-implementation/record/deps/S540NvidiaGspCancellation.c": "56c64fdb995d2bf03e6d5b0cfec1b733aefdca0bfbe912cc3afa67c41099c174",
+    "historical-scratch/cancellation-first-transaction-implementation/record/check_actual_original.c": "3f06b2b9bf7ebb4862c0eac33fe9930f0c985b2a4a3d3706ac0cd68836c8e5c7",
+    "historical-scratch/cancellation-first-transaction-implementation/services/overlay/S540NvidiaGspTimersOriginal.c": "123b617e9c45057c43cdf0f4af735e004f8308621d21eb56d78ee4f76463f4ad",
+    "historical-scratch/host-retention-prospective/controls-final/overlay/packages/nvidia-global-rm/src/S540NvidiaGlobalRmHost.cpp": "64769f392685eb4f0894f92fca8e37998891fb8b2bda5898f74af7338fa4e4d3",
+    "historical-scratch/cancellation-first-transaction-implementation/services/overlay/S540NvidiaDarwinWork.cpp": "52cbf99a8f65d9c3322983d410b85ec8942af0238a107815789b9df6edb87d09",
+    "historical-scratch/cancellation-first-transaction-implementation/services/overlay/S540NvidiaDarwinTimer.cpp": "afd9bf2bf8ed2d1633b45746d558d42427f52fc3b6dff6bf08b49e303483cf3d",
+    "historical-scratch/cancellation-first-transaction-implementation/services/S540NvidiaFirstTxnServices.cpp": "195ae1199cdf46b7cc3042ebf5d7c2eeb9572942682b4044922460da215d4007",
+    "repository/packages/nvidia-darwin-services/src/S540NvidiaDarwinRuntime.cpp": "946bd3ac525b5f9c5cb520abb2ca21ed27eed6b744ae9c984babfe97c1b11abd",
+    "repository/packages/nvidia-darwin-services/src/S540NvidiaDarwinSync.cpp": "a57a4397ac8064e2dd2c0702be1b761e8640d0d6edffdcc80cbb1f2d27b791f6",
+    "repository/packages/nvidia-darwin-services/src/S540NvidiaDarwinProcess.cpp": "1285616e6cb9459c3dd1df596f700cb206a2d65d40a496ee808ef238fe348156",
+    "repository/packages/nvidia-darwin-services/src/S540NvidiaDarwinUserCopy.cpp": "ae48eb76217c8f6d0264b92bc2761076293f592e706f725ff7c4246464f0dbdb",
+    "repository/packages/nvidia-darwin-services/src/S540NvidiaDarwinPlatform.cpp": "e1d25f901d22b1471830da3ec58a44a73c926cd3ad3764d18e1ce67d91e3878b",
+    "repository/packages/nvidia-darwin-services/src/S540NvidiaDarwinCheck.cpp": "e107e33b951d9f3014add741f1e1c46b8cd18410512e3c16fe855a5768e87549"
+  },
+  "production_modified": false,
+  "hardware_admission": false,
+  "execution_environment": "historical Linux userspace control, not native Apple execution",
+  "historical_only": true
+}

@@ -1,0 +1,148 @@
+{
+  "compile_scope": "20 compile actions, including repeated record compilation; eight original translation units and one typed original bridge. Pure original C units do not consume IOKit declarations. Backend C++ compiles use the real pinned SDK.",
+  "execution": "Linux x86_64 explicit host control; Ubuntu clang18.1.3",
+  "format": 1,
+  "freeze_order": "After this complete run, only this compact evidence file and the final top manifest were added/refreshed. No tested implementation, helper, original patch, companion or project dependency changed. Independent native Apple replay remains required.",
+  "gpu_access": false,
+  "hardware_admission": false,
+  "host_companion_freeze_sha256": "b954a450026bf64f82aa25d0992a9364f30dcb3affa9a7aca1bc2741a22ee936",
+  "invocation": {
+    "host_control": true,
+    "output_argument": "build/first-transaction-owner-final",
+    "sdk_archive": "explicit pinned MacKernelSDK.tar.gz",
+    "v3_input": "explicit exact materialized prospective-v3",
+    "working_directory": "${REPO}"
+  },
+  "kernel_execution": "not_tested",
+  "native_apple_execution": false,
+  "original_entry_admission": false,
+  "preflight_negative_controls": {
+    "freeze_refusals": [
+      "additional unlisted file",
+      "changed listed file",
+      "symlink input"
+    ],
+    "host_sdk_canonical_path_controls": 4,
+    "original_canonical_path_controls": 8,
+    "scope": "Separate orchestration controls; not added to the429 per-variant body/control total.",
+    "top_cli_no_output_created": [
+      "package directory",
+      "upstream directory",
+      "supplied V3 directory",
+      "SDK directory"
+    ]
+  },
+  "production_gate_mask": 15,
+  "production_modified": false,
+  "project_dependency_count": 159,
+  "remaining_gates": "See README.md and PROVENANCE.json; generic OriginalLocksReleased remains NV_ERR_NOT_SUPPORTED, no GSP/DMA-stop receipt or final owner/text release issuer.",
+  "reports_beneath_output": {
+    "actual_original_bodies": {
+      "path": "record/results.json",
+      "sha256": "4c5d218aa3050cc3bbdae2e97ecd8fd48726e0ee3430329b1e1953c3443b600a"
+    },
+    "host": {
+      "path": "host/heap-retention-controls.json",
+      "sha256": "0339c8afe814ee581d7b9cd2ece069f64e1ba4aced62b8a6abc7975e8cd1c077"
+    },
+    "host_sdk": {
+      "path": "host-sdk/sdk-compile.json",
+      "sha256": "3fad8461bde90e0fd04ee294f36ffb5f823d19d2e0ea46542a9fa33a7fafad78"
+    },
+    "joint": {
+      "path": "joint/results.json",
+      "sha256": "de16d28aed6a308f27095b4f4b82fcc581b519110de08789e8a7d4a1a864f1ea"
+    },
+    "original_boundaries": {
+      "path": "original/wrapper-results.json",
+      "sha256": "84e9ecae26b59fe0b65dc5bfb57ff81f5a19c9807da7b64108ad8740906d7649"
+    },
+    "original_compilation": {
+      "path": "original/full-tu-compilation.json",
+      "sha256": "a73dd2b0a34ef94c80d59da15664292b962f52f7cc1e0a8b57c03afcac44a554"
+    },
+    "pipeline": {
+      "path": "first-transaction-validation.json",
+      "sha256": "96fbe8a55e4afa94576ef59fef53ab86fb77b01c815e3e424680285c63550d1c"
+    },
+    "services": {
+      "path": "services/controls/results.json",
+      "sha256": "7b7b0964a21a21e5773ef562686431d615a69105c0dd02bba6ec21e624bace10"
+    }
+  },
+  "sdk_archive_exact_file_count": 1232,
+  "sdk_archive_sha256": "8931e622b6d16a7052cb2c2dabe16be06963a34b747f19e6cda2bbe8bc7e2557",
+  "sdk_reference_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+  "source_sha256": {
+    "check_first_transaction.py": "eb804f1445057d584017e7f5e6fc88c8ad29e2671dee98553ef9bae658dc3aea",
+    "original/S540NvidiaGspFirstTransactionOriginal.c": "b8e3c04e934e594d2442c78e2a234d90525d4558d20fa13e71cc48e8f5329aa2",
+    "original/S540NvidiaGspFirstTransactionOriginal.h": "3f172ad217780282f34638c038b2e21e63221367e691d082c11b6e1c83478b98",
+    "original/check.py": "23c22ebabc8c8b6699f8a11b6f6d3bbc54bfefe9f1f7e52be5fdf4b7ee9b1226",
+    "original/check_native.cpp": "b8c117c5799add77025ed0f4d4cc72974ce4e3a2956e4fadfa41f1bf18de4003",
+    "original/check_nvoc_bodies.c": "31da9c4c4498eb0c8adca41bb7258f703570a6b3aa5f1dbc97a9bf806850b7a2",
+    "original/check_wrapper_bodies.c": "1cf5a340b38966a2923a288dadb74593201a5e1dd3940bd34f12713cd17530da",
+    "original/common.py": "4f1696dc182fc12058aacc4ee97c0e70de2cbb9c746562a92b5ce90b323644a4",
+    "original/compile_full.py": "fc73f7bde7edc3432786b37ac338ff6a451334db5513d6ed00151eab52df3249",
+    "original/control_types.h": "8e9a6e531843740eb8b7d77554cff0ca97a3b34ca63d43bd0977cb41c0211abb",
+    "original/deferred-init-and-destruction-guards.patch": "f61c9d381738fa1905da18da40eac0149ae6fd13b74be6e97689912de16787e8",
+    "original/prepare.py": "316494e2850da12ecb4cfce39b4d464126dbe80f0317078676c5f19884236d26",
+    "original/prepare_controls.py": "c68b661502830b9c7c500100c57dffef11fd709cf4f5481edcf84e61dc321317",
+    "record/S540NvidiaGspFirstTransaction.c": "556f17711c0e444ff186400a548baf1609e2dc220783199ca6cd97d575283f7c",
+    "record/S540NvidiaGspFirstTransaction.h": "eb7f9b38fd7bb3b6df88b14dfc382ee5a5d426a22ef246b51f657b010ca6ed2c",
+    "record/check_actual_original.c": "e280042bc0d6230fe8c5e216402d2954f8ff74ef9a2e08b9c348dc03878b8b1b",
+    "record/check_actual_original.py": "eef84155b3fa22e60f0a164c8ff91fde0ebe7aaaced51d9496e02085edfbbf9f",
+    "record/deps/Participants.h": "7ffc4eadcb6e3b9c8e7cfe524f8eaaaa64ac25642632d728eda0382165140f38",
+    "record/deps/S540NvidiaGspCancellation.c": "56c64fdb995d2bf03e6d5b0cfec1b733aefdca0bfbe912cc3afa67c41099c174",
+    "record/deps/nvidia-darwin-services/src/S540NvidiaDarwinServices.h": "b2e71cc940a78e52b304345cdc7f54b955272df3f5683c51842121ff0761672b",
+    "record/deps/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.h": "02f6c5af5e5fab29be2172d30ffd1cea47dd740d98fa74d710c426ba4535421b",
+    "record/deps/nvidia-os-adapter/upstream/include/cpuopsys.h": "329ab764372bace3e1445315bb7a3766d4f60aacb8523ac3e3c760c79358f4fb",
+    "record/deps/nvidia-os-adapter/upstream/include/nv-kernel-interface-api.h": "1cf34c1dcd1abf535fb27387145374972a43ec9cd6f6c9ef927777431bda3cc4",
+    "record/deps/nvidia-os-adapter/upstream/include/nvstatus.h": "e8267172a1f7a56420d612c6734b3554b9ff6a3d33fdda21b1371ff4ce4b8675",
+    "record/deps/nvidia-os-adapter/upstream/include/nvstatuscodes.h": "4a9a39b51862d21cfa446414135386616a4a4914dd34dc83f98099295fea7b56",
+    "record/deps/nvidia-os-adapter/upstream/include/nvtypes.h": "da23dbc28805c390d62338dba5603eb12b2e94c8aaf873c1c42c1a5f10f26b79",
+    "record/prepare_actual_original.py": "a166022a2f22dbca243a10a91bf850e1bae25e12cba8039c80d2218573adfb71",
+    "services/S540NvidiaFirstTxnContext.h": "39f821128dfdfc403400dd2411e561a80db21b3d97d82f424c9ba0c2988dc0f4",
+    "services/S540NvidiaFirstTxnServices.cpp": "195ae1199cdf46b7cc3042ebf5d7c2eeb9572942682b4044922460da215d4007",
+    "services/S540NvidiaFirstTxnServices.h": "30f99e428e4d7b53e60672eb17b113b315de31914e8b59262a210c739ff72cd3",
+    "services/check_joint.py": "9fd5bc541422c647c8a94ab7fc66bff7b3f6e474bf9ee4d77f1733c391a7c6fd",
+    "services/check_queue_hooks.cpp": "86bb19fa3aa528b92be8d79abebc2eeb551c9481fe134b1a9e7b1d0338b199f0",
+    "services/check_services.py": "a5b908746f6a5c122dc05b55fc167609ae83492ada1bbb3d939c86877fdbe8fe",
+    "services/check_strong_joint.c": "bd25a32b4a1ae5ed2596a439b10623554596a1144e711628d437ae5ba6f862b1",
+    "services/check_timer_hooks.c": "50018eba0f06fbed1946322da3c38b4e472cec97ecce5566d7df306234813776",
+    "services/prepare_context.py": "96abf306126dc24a76db76d1b3ce9a1fc16c56a294198e8144b56ab5bf8c8d33",
+    "services/prepare_services.py": "7843ec64720489524442fec2dfbf00b35dbe860e1762829991916a9b5c0fa58b",
+    "services/prepare_timers.py": "bd38b618f44acca27c38d3a1e5536b698f0d27c4f539e253f818adad81aad34e"
+  },
+  "status": "passed-host-controls-and-cross-compilation",
+  "summary": {
+    "controls_per_variant": {
+      "fatal-sanitized": {
+        "actual_original_bodies": 20,
+        "host": 267,
+        "joint": 24,
+        "original_boundaries": 74,
+        "queue": 20,
+        "timer": 24,
+        "total": 429
+      },
+      "plain": {
+        "actual_original_bodies": 20,
+        "host": 267,
+        "joint": 24,
+        "original_boundaries": 74,
+        "queue": 20,
+        "timer": 24,
+        "total": 429
+      }
+    },
+    "kernel_target_compile_actions": {
+      "host_and_producers": 4,
+      "original_and_typed_probe": 9,
+      "services_and_context": 5,
+      "strong_record_and_participants": 2,
+      "total": 20
+    }
+  },
+  "tested_package_freeze_sha256": "d715120a01e3eb4a0463cf636f2d57aca046d02d15f20b70d677a13d5142c1f3",
+  "v3_verified_source_files": 4005
+}

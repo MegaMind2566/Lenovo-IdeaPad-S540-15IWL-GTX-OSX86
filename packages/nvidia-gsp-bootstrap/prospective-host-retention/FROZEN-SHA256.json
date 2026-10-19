@@ -1,0 +1,27 @@
+{
+  "files": {
+    "CPU-CONTROL-AUDIT.json": "202456b4c01d9d1fda7c7d8af3e00c025bb3586a50824547cd16a4b8fb399a20",
+    "README.md": "32dfb1503c8a2269a21ad94ab4c5d4f5baf4ddb33966786a4cfb396b51542021",
+    "S540NvidiaGlobalRmHostRetention.h": "299fe35d5ebbc6976937fdf209c44de2d303d72024796cc4c2387817aa80efb7",
+    "SDK-COMPILE-AUDIT.json": "8ac5d5821da573115033410ae65fa04c217967a3f809ffc2f7f5fe1bad6d4117",
+    "SOURCE-CONTRACT.json": "0e7bb78b5243b78af8b361dffc73a89b70dcf0fbd3857884bc6ee6c41c78510a",
+    "check_allocation_failure.cpp": "20bd9920d8cf4d945638db735d6d8549b4576e5eb7d66569a2763a2b7abfe49e",
+    "check_heap_retention.py": "9e3b37ffb6773d0819c650d47eab4d645fcde5ed9465bd406789e3b635e1bd15",
+    "check_host_retention.cpp": "82a2fba7a25d4b10fcc5693cbaab226d4fbe3c4d6c445bfd7bdc3bdd0bb43440",
+    "check_refusal_producers.cpp": "b8ae93019955183a091a9a1beab2b0051992a4631b0de53f90f4f8f81548ad2d",
+    "check_sdk.py": "d11a77f7262f209985cb0a40cb101e1f3cbe7a89467135569dd23823075f2db0",
+    "check_startup_refusals.cpp": "fec174715b8f0ad4636a07d1ac03f36c88560dee500d7207ac138a6ff7db8429",
+    "host-heap-retention-prospective.patch": "530ab7646f11a72e8a9ee82baec900fc2873cca7973e8a3aae0d125a0de78d21",
+    "host-lifetime.inc": "55d0ed3ea749635bb426a595d29bec8827a7f7143cfa37616b01f9f8f575c2c1",
+    "initialize-shutdown.inc": "ddadf375ec0377195558371da7f3bc717bc486970e26867c6dfa03c2384f2160",
+    "prepare_heap_retention.py": "de04a2ac0ed7bf826d723ab01bf8d794aac12248ba56e28a4c30d8bafeb44792",
+    "prior-0ae6/CPU-CONTROL-AUDIT.json": "bc8f23705d14f6bc49aa3e79bfbe7e3be315de936ccd85d9f724d8146fd44437",
+    "prior-0ae6/SDK-COMPILE-AUDIT.json": "e33d9f1dc0769c6b18dba1e2b41e8200d850dc6bb7177802ae51d873c4174d85",
+    "prior-0ae6/SOURCE-CONTRACT.json": "603b6b0cff69d11c5bff45809ce38eeb423fd076850e97ee1c1113abda852c73",
+    "prior-0ae6/host-heap-retention-prospective.patch": "4139d7a6cf6d0dd647ca1aa7b85a0b0f9f21f0cc83a2140fe11ef7484c3f50ed",
+    "retention-observers.inc": "300fec7ed4899a8df910fef27e7a0468b37e08bf60a64d18391955e290ef64a9",
+    "tracked-allocation-body.inc": "d028542a4381a4ead15da796a009eb71a86136cdf10fb6d67a4d9c40132911d3"
+  },
+  "format": 1,
+  "status": "isolated-source-candidate-not-admitted"
+}

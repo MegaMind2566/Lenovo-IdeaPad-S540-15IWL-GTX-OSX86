@@ -1,0 +1,96 @@
+{
+  "callback": "os_is_bif_reset_supported",
+  "callback_design": {
+    "foreign_unbound_stale_wrong_phase": "Record a sticky lifetime violation and fail-stop before returning an invented Boolean. A scalar failure value cannot safely encode an unknown policy.",
+    "no_physical_reset_implementation_claim": true,
+    "no_unconditional_false": true,
+    "no_user_supplied_ready_boolean": true,
+    "valid_bound_selected_context": "Return inverse of the actual bound immutable eager-initialization policy, matching the original software-policy semantics."
+  },
+  "format": 1,
+  "gpu_access": false,
+  "kernel_execution": "not_tested",
+  "original_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "original_evidence": [
+    {
+      "lines": [
+        1499,
+        1506
+      ],
+      "meaning": "Callback directly returns inverse of software init_on_probe.",
+      "source": "kernel-open/nvidia/os-interface.c"
+    },
+    {
+      "lines": [
+        1447,
+        1515
+      ],
+      "meaning": "FORCE_ON selects policy unconditionally; AUTO uses platform policy criteria.",
+      "source": "kernel-open/nvidia/nv.c"
+    },
+    {
+      "lines": [
+        2548,
+        2570
+      ],
+      "meaning": "Policy starts original device during probe rather than first file open.",
+      "source": "kernel-open/nvidia/nv-pci.c"
+    },
+    {
+      "lines": [
+        1830,
+        1843
+      ],
+      "meaning": "Failed eager initialization prevents later file-open retry.",
+      "source": "kernel-open/nvidia/nv.c"
+    },
+    {
+      "lines": [
+        911,
+        916
+      ],
+      "meaning": "osIsInitOnProbeEnabled is the inverse of osIsBifResetSupported.",
+      "source": "src/nvidia/generated/g_os_nvoc.h"
+    }
+  ],
+  "original_semantics": "Return !nvl->init_on_probe. Generated osIsInitOnProbeEnabled inverts that value. init_on_probe is explicit initialization scheduling policy, not a physical BIF-reset capability observation.",
+  "original_source_sha256": {
+    "kernel-open/nvidia/nv-pci.c": "6a5e39f37d86bd6d09cc5867647ecbc8e240298bc138bf651ad7d9346bc1b1c8",
+    "kernel-open/nvidia/nv.c": "ce04946d288cf0251668a2d847acceb2a39af9dac2f13bb005f53759c774dbf7",
+    "kernel-open/nvidia/os-interface.c": "0c8fe2749ec4ee12f1dbbd884cfbc8f1c8a7750903de7453b01c2f6b92e0f6d6",
+    "src/nvidia/generated/g_os_nvoc.h": "3444dbac90e159e4a0bb1434738e595bc6fa5b77ecf5b55544de6a6eb96fc107"
+  },
+  "original_type": "NvBool (void *)",
+  "production_candidate_allowed": false,
+  "production_source_modified": false,
+  "required_controls_before_implementation_admission": [
+    "Exact original-header callback ABI and real Context positive readback.",
+    "Foreign nv pointer, unbound pointer, stale epoch, reused address, wrong owner thread and revoked phase all refuse without returning false.",
+    "Mutation/rebinding or policy mismatch before/after original entry quarantines the owner.",
+    "Failed original initialization cannot reattempt in the same epoch; no callback result erases unavailable or ownership failures.",
+    "Actual final roots/project source inventory meets the entry assumptions."
+  ],
+  "required_real_binding": [
+    "ContextCreate must establish an explicit immutable policy enum, not infer it from zero-initialized state or absent reset implementation.",
+    "Actual metadata binding must assign a nonzero monotonically issued owner epoch under the existing serialized guard; external callers cannot select policy, identity or epoch. Epoch wrap must be refused.",
+    "The query must validate exact nv_state_t address, actual live metadata Context, owner epoch, ordinary owner-thread context and permitted lifetime phase. An allocation address reused in a later epoch cannot satisfy an earlier binding.",
+    "Before first original adapter entry, a readback from that actual binding must confirm selected policy, private-state ownership, firmware-request true, monolithic fallback false and adapterAttempted false.",
+    "Immediately before original entry, set adapterAttempted once. Failure must quarantine the same epoch; a Boolean failure does not certify cleanup or permit retry.",
+    "After successful entry, repeat actual binding/policy readback and require unchanged identity/epoch/policy. Release binding only after all original producers and cleanup ownership end."
+  ],
+  "required_source_and_final_image_assumptions": [
+    "Final original roots do not admit Linux file-open initialization, rm_ioctl, RmIoctl or an unreviewed persistent/recovery initialization path.",
+    "Project dispatch exposes no first-open adapter initialization or policy setter. A prospective root-only loader control is not an original RM dispatcher.",
+    "The initialization owner permits one original adapter attempt per real epoch and uses a fresh verified binding for any later independent owner.",
+    "Every policy getter/callback reference uses the same real Context binding; no typed fixture may replace it in production.",
+    "The hardware reset, IRQ/DMA cessation, firmware, power/deadline, callback, stack and target-loader gates remain independently required."
+  ],
+  "selected_policy_design": {
+    "callback_may_be_implemented_now": false,
+    "current_context_binding_implements_policy_query": false,
+    "meaning": "A single serialized kernel owner explicitly attempts adapter initialization independently of any original character-device file open; a failed attempt is quarantined and cannot be retried in that owner epoch.",
+    "name": "eager-owner-initialization-without-first-open-retry",
+    "physical_primary_or_reset_absence_inferred": false
+  },
+  "status": "design-only-no-callback-implementation"
+}

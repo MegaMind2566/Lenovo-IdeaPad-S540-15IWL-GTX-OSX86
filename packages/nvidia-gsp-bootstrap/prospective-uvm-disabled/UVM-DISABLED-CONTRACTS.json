@@ -1,0 +1,109 @@
+{
+  "automatic_production_inclusion": false,
+  "callbacks": [
+    {
+      "classification": "official-disabled-UVM-empty-branch",
+      "effect": "No UVM ISR scheduled. No argument reads/writes or return success scalar.",
+      "original_declaration": "void NV_API_CALL nv_schedule_uvm_isr(nv_state_t *);",
+      "original_lines": [
+        1421,
+        1427
+      ],
+      "return_type": "void",
+      "symbol": "nv_schedule_uvm_isr"
+    },
+    {
+      "classification": "official-disabled-UVM-capability-result",
+      "effect": "NV_ERR_NOT_SUPPORTED, preserving UUID bytes. No actual drain performed.",
+      "original_declaration": "NV_STATUS NV_API_CALL nv_schedule_uvm_drain_p2p(NvU8 *);",
+      "original_lines": [
+        1429,
+        1437
+      ],
+      "return_type": "NV_STATUS",
+      "symbol": "nv_schedule_uvm_drain_p2p"
+    },
+    {
+      "classification": "official-disabled-UVM-empty-branch",
+      "effect": "No UVM work resumed. No argument reads/writes or return success scalar.",
+      "original_declaration": "void NV_API_CALL nv_schedule_uvm_resume_p2p(NvU8 *);",
+      "original_lines": [
+        1439,
+        1445
+      ],
+      "return_type": "void",
+      "symbol": "nv_schedule_uvm_resume_p2p"
+    }
+  ],
+  "caller_evidence": [
+    {
+      "lines": [
+        877,
+        901
+      ],
+      "meaning": "MMU notification/drain/resume wrappers call exact selected callbacks.",
+      "source": "src/nvidia/arch/nvalloc/unix/src/os.c"
+    },
+    {
+      "lines": [
+        1167,
+        1183
+      ],
+      "meaning": "Real GSP notification forwards to UVM ISR hook; no false claim this path is unreachable.",
+      "source": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c"
+    },
+    {
+      "lines": [
+        2506,
+        2532
+      ],
+      "meaning": "NV_ERR_NOT_SUPPORTED is explicitly accepted as UVM never installed this callback; NV_OK is a distinct successful suspended-channel case.",
+      "source": "src/nvidia/src/kernel/gpu/nvlink/kernel_nvlink.c"
+    }
+  ],
+  "configuration": {
+    "actual_selected_backend": "No UVM registration/imported driver callback, UVM queue or UVM handle acquisition exists in this candidate. Any enabled integration requires a different implementation.",
+    "production_configuration_modified": false,
+    "reject_NV_UVM_ENABLE_even_if_zero": true,
+    "required": "S540_NVIDIA_NO_UVM_BACKEND=1"
+  },
+  "format": 1,
+  "gpu_access": false,
+  "kernel_execution": "not_tested",
+  "original_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "original_source_sha256": {
+    "kernel-open/nvidia/nv.c": "ce04946d288cf0251668a2d847acceb2a39af9dac2f13bb005f53759c774dbf7",
+    "src/nvidia/arch/nvalloc/unix/include/nv.h": "02ce4b371e0a8dd26f62a320e88c8382dcf31a21b727503a66abcaea9eecf09b",
+    "src/nvidia/arch/nvalloc/unix/src/os.c": "057b50fcb738be90a073b60f63e70559706864ddcec3bf703282563173e3dce4",
+    "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c": "ed6d7020a8a1772bc44608178aa13a77a72b8bf0eabe3293c12bc9d2b122c6c9",
+    "src/nvidia/src/kernel/gpu/nvlink/kernel_nvlink.c": "89145e654dd6fd337120a08e367791f61aabb63e81de86e61a38e25407b31fd7"
+  },
+  "p2p_drain_implemented": false,
+  "production_candidate_allowed": false,
+  "production_default_changed": false,
+  "scope": "Exact official no-UVM OS-backend configuration. Neither physical hardware absence nor UVM/drain operation implementation.",
+  "source_only": true,
+  "source_sha256": {
+    "S540ProspectiveUvmDisabled.c": "3ef048057f1cab4b9098f4a24d622105719694f7906b9bcda505ed5fb58aa42b",
+    "check_uvm_disabled.py": "f8f076a7cad32ad75005d2208a040a1544c7bd78c90e79ea6685c3db0d811fe0",
+    "prepare_original_controls.py": "b4246589c60575fc15451af48c40aef2b69dbca20f8ea35d2d146a6e45f517c7",
+    "tests/check_uvm_disabled_native.c": "c075f5a5c7570cf53deed6ed3dfda25ef0b42d24cdaac08a37bde6b5a84f6940",
+    "tests/test_uvm_contracts.py": "6f545d4aa277427da3eeb161eb56cb5a4609ef6bae3fe2763d69c882d2a25b19"
+  },
+  "status": "isolated-source-candidate-no-default-promotion",
+  "uvm_integration_implemented": false,
+  "validation": {
+    "actual_kernel_permission_or_driver_execution": "not_tested",
+    "actual_original_disabled_bodies": 3,
+    "actual_original_forwarding_bodies": 4,
+    "exact_original_header_ABI_assertions": 3,
+    "genuine_MachO_kernel_compile": true,
+    "implicit_initializers": false,
+    "invalid_configuration_compiles": 5,
+    "kernel_definitions": 3,
+    "kernel_imports": 0,
+    "native_apple_result": "pending-independent-CI",
+    "source_contract_checks": 5,
+    "state_checks_per_variant": 15
+  }
+}

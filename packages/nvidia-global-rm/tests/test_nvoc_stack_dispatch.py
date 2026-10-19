@@ -80,6 +80,13 @@ class NvocStackDispatch(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'Unreviewed'):
                 nvoc.catalog(root, header, generated, '__dispatch__')
 
+    def test_inline_source_fragment_cannot_hide_a_member_store(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root, header, generated = self.source_tree(directory)
+            (root / 'external.inc').write_text('p->__dispatch__ = &target;\n')
+            with self.assertRaisesRegex(ValueError, 'Unreviewed'):
+                nvoc.catalog(root, header, generated, '__dispatch__')
+
     def test_new_source_changes_inventory_even_without_current_field_uses(self):
         with tempfile.TemporaryDirectory() as directory:
             root, header, generated = self.source_tree(directory)
@@ -237,6 +244,11 @@ class ActualMachOProbe(unittest.TestCase):
             self.assertEqual(Path(result['path']).parent, base / 'proof')
             self.assertTrue((base / 'proof/original-with-names.o').is_file())
             self.assertFalse((root / 'proof').exists())
+            with self.assertRaisesRegex(ValueError, 'must not modify'):
+                nvoc.prove(capture, root, owner='Device', field='__dispatch__',
+                    header=header, generated=generated, include='device.h', function='entry',
+                    output=root / 'forbidden-output', decoder=decoder)
+            self.assertFalse((root / 'forbidden-output').exists())
 
     def test_lowered_byte_gep_requires_actual_ast_and_matching_compiler_provenance(self):
         """Exercise the Apple lowering with real source AST/IR/object evidence.
@@ -316,6 +328,17 @@ class ActualMachOProbe(unittest.TestCase):
             wrapper['storageClass'] = 'extern'
             with self.assertRaisesRegex(ValueError, 'static inline'):
                 bind(bad)
+            bad = copy.deepcopy(document)
+            wrong_wrapper = next(node for node in bad['inner'] if node.get('name') == 'dispatch')
+            wrong_wrapper['loc']['file'] = str(root / 'different-device.h')
+            with self.assertRaisesRegex(ValueError, 'source file'):
+                bind(bad)
+            bad = copy.deepcopy(document)
+            # The include parent is not the token's source file and never
+            # supplies the state elided from following source locations.
+            first = next(node for node in bad['inner'] if node.get('name') == 'Device')
+            first['loc']['includedFrom'] = {'file': str(root / 'different-includer.c')}
+            self.assertEqual(bind(bad)['field_type'], binding['field_type'])
 
             def debug(text=original, load_text=load, call_text=call, source_path=source, ast_binding=binding):
                 return nvoc.typed_ast.debug_member_binding(text, function='entry', load=load_text,

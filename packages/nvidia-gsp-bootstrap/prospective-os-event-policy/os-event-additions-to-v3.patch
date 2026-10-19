@@ -1,0 +1,86 @@
+--- a/src/nvidia/src/kernel/rmapi/event_api.c
++++ b/src/nvidia/src/kernel/rmapi/event_api.c
+@@ -20,6 +20,11 @@
+  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+  * DEALINGS IN THE SOFTWARE.
+  */
++/* Explicit selected backend: OS event handles are not registered. */
++#if !defined(S540_NVIDIA_NO_OS_EVENT_BACKEND) || S540_NVIDIA_NO_OS_EVENT_BACKEND != 1
++#error "This isolated profile requires explicit S540_NVIDIA_NO_OS_EVENT_BACKEND=1"
++#endif
++
+ #include "core/core.h"
+ #include "os/os.h"
+ #include "rmapi/event_api.h"
+@@ -60,6 +65,10 @@
+     RS_PRIV_LEVEL privLevel = pParams->pSecInfo->privLevel;
+     NvBool bUserOsEventHandle = NV_FALSE;
+     NvHandle hParentClient = pNv0050AllocParams->hParentClient;
++
++    // This backend has no OS-event handle registry. Keep real kernel callbacks.
++    if (pResourceRef->externalClassId == NV01_EVENT_OS_EVENT)
++        return NV_ERR_NOT_SUPPORTED;
+ 
+     //
+     // Allow hParentClient being zero to imply the allocating client should be
+--- a/src/nvidia/src/kernel/rmapi/event_buffer.c
++++ b/src/nvidia/src/kernel/rmapi/event_buffer.c
+@@ -20,6 +20,11 @@
+  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+  * DEALINGS IN THE SOFTWARE.
+  */
++/* Explicit selected backend: OS event handles are not registered. */
++#if !defined(S540_NVIDIA_NO_OS_EVENT_BACKEND) || S540_NVIDIA_NO_OS_EVENT_BACKEND != 1
++#error "This isolated profile requires explicit S540_NVIDIA_NO_OS_EVENT_BACKEND=1"
++#endif
++
+ #include "rmapi/event_buffer.h"
+ #include "diagnostics/op_event_log.h"  // opEventLog singleton + opevtlogTrySetKeepNewest
+ #include "os/os.h"
+@@ -89,6 +94,10 @@
+     RsResourceRef                    *pVardataRef    = NULL;
+     NvHandle                          hMapperClient  = 0;
+     NvHandle                          hMapperDevice  = 0;
++
++    // Public OS notifications are unavailable; zero preserves bClientRM producers.
++    if (pAllocParams->notificationHandle != 0)
++        return NV_ERR_NOT_SUPPORTED;
+ 
+     pRmClient = dynamicCast(pCallContext->pClient, RmClient);
+     NV_ASSERT_OR_RETURN(pRmClient != NULL, NV_ERR_INVALID_CLIENT);
+--- a/src/nvidia/src/kernel/gpu/mem_mgr/sem_surf.c
++++ b/src/nvidia/src/kernel/gpu/mem_mgr/sem_surf.c
+@@ -20,6 +20,11 @@
+  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+  * DEALINGS IN THE SOFTWARE.
+  */
++
++/* Explicit selected backend: OS event handles are not registered. */
++#if !defined(S540_NVIDIA_NO_OS_EVENT_BACKEND) || S540_NVIDIA_NO_OS_EVENT_BACKEND != 1
++#error "This isolated profile requires explicit S540_NVIDIA_NO_OS_EVENT_BACKEND=1"
++#endif
+ 
+ #include "gpu/mem_mgr/sem_surf.h"
+ #include "os/os.h" // NV_MEMORY_NONCONTIGUOUS, osEventNotification
+@@ -1694,6 +1699,10 @@
+                        _semsurfValidateIndex(pSemSurf->pShared, pParams->index),
+                        NV_ERR_INVALID_INDEX);
+ 
++    // No user OS-event registration exists in this immutable backend.
++    if (!bKernel && pParams->notificationHandle != 0)
++        return NV_ERR_NOT_SUPPORTED;
++
+     if (pParams->notificationHandle)
+     {
+         if (bKernel)
+@@ -1852,6 +1861,10 @@
+                        _semsurfValidateIndex(pSemSurf->pShared, pParams->index),
+                        NV_ERR_INVALID_INDEX);
+ 
++    // No user OS-event registration exists in this immutable backend.
++    if (!bKernel && pParams->notificationHandle != 0)
++        return NV_ERR_NOT_SUPPORTED;
++
+     if (pParams->notificationHandle)
+     {
+         if (bKernel)

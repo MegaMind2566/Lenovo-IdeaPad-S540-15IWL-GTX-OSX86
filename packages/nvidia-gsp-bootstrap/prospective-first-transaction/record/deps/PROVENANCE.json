@@ -1,0 +1,75 @@
+{
+  "format": 1,
+  "purpose": "Portable isolated participant66 dependency. Historical inputs unchanged. Include spelling only adapted in local C/Participants.h. Production default not changed.",
+  "inputs": [
+    {
+      "source": "historical-scratch/cancellation-participant-prospective/Participants.h",
+      "source_sha256": "3aec8918fbcd7fe328c80c5da6396005f62ddb608811abb1210335ace698bbed",
+      "local": "Participants.h",
+      "local_sha256": "7ffc4eadcb6e3b9c8e7cfe524f8eaaaa64ac25642632d728eda0382165140f38",
+      "include_rewrites": {
+        "repository/packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.h": "nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.h"
+      }
+    },
+    {
+      "source": "historical-scratch/cancellation-participant-prospective/S540NvidiaGspCancellation.c",
+      "source_sha256": "7dae7c573e165656444c4087d678e57ac40b04bddcc9f8c2388d5c1590d6d40f",
+      "local": "S540NvidiaGspCancellation.c",
+      "local_sha256": "56c64fdb995d2bf03e6d5b0cfec1b733aefdca0bfbe912cc3afa67c41099c174",
+      "include_rewrites": {
+        "repository/packages/nvidia-darwin-services/src/S540NvidiaDarwinServices.h": "nvidia-darwin-services/src/S540NvidiaDarwinServices.h"
+      }
+    },
+    {
+      "source": "repository/packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.h",
+      "source_sha256": "02f6c5af5e5fab29be2172d30ffd1cea47dd740d98fa74d710c426ba4535421b",
+      "local": "nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.h",
+      "local_sha256": "02f6c5af5e5fab29be2172d30ffd1cea47dd740d98fa74d710c426ba4535421b",
+      "include_rewrites": {}
+    },
+    {
+      "source": "repository/packages/nvidia-darwin-services/src/S540NvidiaDarwinServices.h",
+      "source_sha256": "b2e71cc940a78e52b304345cdc7f54b955272df3f5683c51842121ff0761672b",
+      "local": "nvidia-darwin-services/src/S540NvidiaDarwinServices.h",
+      "local_sha256": "b2e71cc940a78e52b304345cdc7f54b955272df3f5683c51842121ff0761672b",
+      "include_rewrites": {}
+    },
+    {
+      "source": "repository/packages/nvidia-os-adapter/upstream/include/nvtypes.h",
+      "source_sha256": "da23dbc28805c390d62338dba5603eb12b2e94c8aaf873c1c42c1a5f10f26b79",
+      "local": "nvidia-os-adapter/upstream/include/nvtypes.h",
+      "local_sha256": "da23dbc28805c390d62338dba5603eb12b2e94c8aaf873c1c42c1a5f10f26b79",
+      "include_rewrites": {}
+    },
+    {
+      "source": "repository/packages/nvidia-os-adapter/upstream/include/nvstatus.h",
+      "source_sha256": "e8267172a1f7a56420d612c6734b3554b9ff6a3d33fdda21b1371ff4ce4b8675",
+      "local": "nvidia-os-adapter/upstream/include/nvstatus.h",
+      "local_sha256": "e8267172a1f7a56420d612c6734b3554b9ff6a3d33fdda21b1371ff4ce4b8675",
+      "include_rewrites": {}
+    },
+    {
+      "source": "repository/packages/nvidia-os-adapter/upstream/include/nvstatuscodes.h",
+      "source_sha256": "4a9a39b51862d21cfa446414135386616a4a4914dd34dc83f98099295fea7b56",
+      "local": "nvidia-os-adapter/upstream/include/nvstatuscodes.h",
+      "local_sha256": "4a9a39b51862d21cfa446414135386616a4a4914dd34dc83f98099295fea7b56",
+      "include_rewrites": {}
+    },
+    {
+      "source": "repository/packages/nvidia-os-adapter/upstream/include/nv-kernel-interface-api.h",
+      "source_sha256": "1cf34c1dcd1abf535fb27387145374972a43ec9cd6f6c9ef927777431bda3cc4",
+      "local": "nvidia-os-adapter/upstream/include/nv-kernel-interface-api.h",
+      "local_sha256": "1cf34c1dcd1abf535fb27387145374972a43ec9cd6f6c9ef927777431bda3cc4",
+      "include_rewrites": {}
+    },
+    {
+      "source": "repository/packages/nvidia-os-adapter/upstream/include/cpuopsys.h",
+      "source_sha256": "329ab764372bace3e1445315bb7a3766d4f60aacb8523ac3e3c760c79358f4fb",
+      "local": "nvidia-os-adapter/upstream/include/cpuopsys.h",
+      "local_sha256": "329ab764372bace3e1445315bb7a3766d4f60aacb8523ac3e3c760c79358f4fb",
+      "include_rewrites": {}
+    }
+  ],
+  "master_publication_fix_production_c_sha256": "7220c072b5a32e81bfee39f2966aaeefcd59308cf688dd6c47e03bb17f675a42",
+  "optional_query_provenance": "Frozen participant66 implementation includes generation+actual participant thread raw-revocation SkipOptionalCurrent; derived cancellation-log-prospective v3, not production policy or admission."
+}

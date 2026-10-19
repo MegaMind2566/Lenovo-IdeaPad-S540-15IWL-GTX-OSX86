@@ -1,0 +1,40 @@
+{
+  "authority": {
+    "default": "Intel macOS with actual Apple compiler and clean pinned SDK checkout",
+    "host_control": "Explicit Linux x86_64 CPU controls and pinned SDK Mach-O cross compilation; not native Apple or kernel execution"
+  },
+  "components": {
+    "host_companion": "Separate prospective-host-retention package; actual allocation storage and metadata retire after first refusal, including transaction-bound allocation failure before NULL.",
+    "original": "Exact additional V3 overlay for deferred adapter failure cleanup, reviewed first GSP failure and pre-destruction guards; eight full original translation units plus typed bridge.",
+    "record": "Strong owner reservation, immutable generation, exact nv attachment, sticky refusal/free-permit order, genuine work/timer leases and distinct original/action returns.",
+    "services": "Generated exact overlays of real Work, DarwinTimer, typed original timer port and Context. No readiness callback table."
+  },
+  "format": 1,
+  "gpu_access": false,
+  "hardware_admission": false,
+  "kernel_execution": "not_tested",
+  "original_entry_admission": false,
+  "production_gate_mask": 15,
+  "production_modified": false,
+  "profile_base": "exact frozen prospective-v3; original patch is an additional strict overlay",
+  "remaining_admission_gates": [
+    "Actual RM semaphore exclusion remains unproven; generic OriginalLocksReleased returns NV_ERR_NOT_SUPPORTED.",
+    "Complete first-error/transitive/scalar/fatal cleanup ownership is not yet proven.",
+    "Production EVENT/OWNER/RC/rearm policies, exact work GPU instance association, direct IRQ participation and causal descendant admission remain incomplete.",
+    "No final context/service/text-owner release or authentic GSP/DMA-stop receipt issuer exists.",
+    "PM cancellation deadline, aggregate kernel/IRQ stack and full adapter capacity remain unproven."
+  ],
+  "source_identity": {
+    "original/SOURCE-CONTRACT.json": "ed4da324212df92ea630b65421e4cb20a49287e9f618035702145ff3de31920b",
+    "original/deferred-init-and-destruction-guards.patch": "f61c9d381738fa1905da18da40eac0149ae6fd13b74be6e97689912de16787e8",
+    "record/S540NvidiaGspFirstTransaction.c": "556f17711c0e444ff186400a548baf1609e2dc220783199ca6cd97d575283f7c",
+    "record/S540NvidiaGspFirstTransaction.h": "eb7f9b38fd7bb3b6df88b14dfc382ee5a5d426a22ef246b51f657b010ca6ed2c",
+    "record/deps/S540NvidiaGspCancellation.c": "56c64fdb995d2bf03e6d5b0cfec1b733aefdca0bfbe912cc3afa67c41099c174",
+    "services/S540NvidiaFirstTxnServices.cpp": "195ae1199cdf46b7cc3042ebf5d7c2eeb9572942682b4044922460da215d4007",
+    "services/S540NvidiaFirstTxnServices.h": "30f99e428e4d7b53e60672eb17b113b315de31914e8b59262a210c739ff72cd3"
+  },
+  "status": "isolated-first-transaction-source-candidate",
+  "upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "validation_entry": "check_first_transaction.py",
+  "validation_reports": "Every run creates first-transaction-validation.json and component reports below its explicit resolved output; prior compact reports are historical evidence only."
+}

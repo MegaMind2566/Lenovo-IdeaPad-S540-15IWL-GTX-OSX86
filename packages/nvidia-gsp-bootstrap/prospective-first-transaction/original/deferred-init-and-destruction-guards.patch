@@ -1,0 +1,645 @@
+--- a/src/nvidia/arch/nvalloc/unix/src/osinit.c
++++ b/src/nvidia/arch/nvalloc/unix/src/osinit.c
+@@ -1,3 +1,4 @@
++#include "S540NvidiaGspFirstTransactionOriginal.h"
+ /*
+  * SPDX-FileCopyrightText: Copyright (c) 1999-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  * SPDX-License-Identifier: MIT
+@@ -2028,6 +2029,22 @@
+     }
+ }
+ 
++static void
++_s540RmRetainInitFailure
++(
++    nv_state_t *nv,
++    NV_STATUS status,
++    const void *firmware,
++    const void *firmwareLog,
++    const void *ucodes
++)
++{
++    if (status == NV_OK) status = NV_ERR_NOT_READY;
++    // Record only. No cleanup phase, destructor, lock wait or owner free here.
++    (void)s540FirstTxnRequestDeferredCleanup(nv, status);
++    (void)s540FirstTxnRetainInitFirmware(nv, firmware, firmwareLog, ucodes);
++}
++
+ NvBool RmInitAdapter(
+     nv_state_t *nv
+ )
+@@ -2036,6 +2053,7 @@
+     UNIX_STATUS     status = INIT_UNIX_STATUS;
+     nv_priv_t      *nvp;
+     NvBool          retVal = NV_FALSE;
++    NvBool          expandedVisibilityOwned = NV_FALSE;
+     OBJSYS         *pSys;
+     OBJGPU         *pGpu = NULL;
+     OBJOS          *pOS;
+@@ -2104,6 +2122,8 @@
+     }
+ 
+ 
++    expandedVisibilityOwned = NV_TRUE;
++
+     // initialize the RM device register mapping
+     osInitNvMapping(nv, &devicereference, &status);
+     if (! RM_INIT_SUCCESS(status.initStatus) )
+@@ -2266,6 +2286,7 @@
+     // GPU is initialized.
+     //
+     gpumgrThreadDisableExpandedGpuVisibility();
++    expandedVisibilityOwned = NV_FALSE;
+ 
+     // LOCK: acquire GPUs lock
+     status.rmStatus = rmGpuLocksAcquire(GPUS_LOCK_FLAGS_NONE,
+@@ -2425,21 +2446,31 @@
+  shutdown:
+     nv->flags &= ~NV_FLAG_IN_RECOVERY;
+ 
+-    gpumgrThreadDisableExpandedGpuVisibility();
+-
+-    // call ShutdownAdapter to undo anything we've done above
+-    // Preserve partial GPU/DMA/register ownership when cleanup fails.
+-    if (s540GspCancellationBeginCleanupState(nv) != NV_OK) goto failed;
+-    (void)RmShutdownAdapterChecked(nv);
++    if (expandedVisibilityOwned)
++    {
++        gpumgrThreadDisableExpandedGpuVisibility();
++        expandedVisibilityOwned = NV_FALSE;
++    }
++
++    // Hidden shutdown under the caller's API lock is forbidden.
++    // The failed outcome below retains original GPU/DMA/register owners.
+ 
+  failed:
+     NV_DEV_PRINTF(NV_DBG_ERRORS, nv, "RmInitAdapter failed! (0x%x:0x%x:%d)\n",
+         status.initStatus, status.rmStatus, status.line);
+ 
+ done:
+-    nv_put_firmware(gspFwHandle);
+-    nv_put_firmware(gspFwLogHandle);
+-    nv_put_firmware(gspUcodesHandle);
++    if (!retVal)
++    {
++        _s540RmRetainInitFailure(nv, status.rmStatus,
++            gspFwHandle, gspFwLogHandle, gspUcodesHandle);
++    }
++    else
++    {
++        nv_put_firmware(gspFwHandle);
++        nv_put_firmware(gspFwLogHandle);
++        nv_put_firmware(gspUcodesHandle);
++    }
+ 
+     gpumgrSetCurrentGpuInstance(NV_U32_MAX);
+ 
+@@ -2454,6 +2485,9 @@
+     OBJGPU *pGpu = NV_GET_NV_PRIV_PGPU(nv);
+     NV_STATUS rmStatus = NV_OK;
+     NvBool gpuDetached = NV_FALSE;
++
++    rmStatus = s540FirstTxnCheckBeforeDestroy(nv);
++    if (rmStatus != NV_OK) return rmStatus;
+ 
+     if (s540RmPendingDevice.owner == nv) return NV_ERR_INVALID_STATE;
+     if (s540RmGspAttemptOwner == nv && !(nvp->flags & NV_INIT_FLAG_GPU_STATE))
+@@ -2477,6 +2511,8 @@
+         rmStatus = RmUnixFreeRmApiChecked(nv);
+         if (rmStatus != NV_OK) goto visibility_done;
+ 
++        rmStatus = s540FirstTxnCheckBeforeDestroy(nv);
++        if (rmStatus != NV_OK) goto visibility_done;
+         nv->ud.cpu_address = 0;
+         nv->ud.size = 0;
+ 
+@@ -2494,6 +2530,8 @@
+             rmStatus = rmGpuLocksAcquire(GPUS_LOCK_FLAGS_NONE, RM_LOCK_MODULES_DESTROY);
+             if (rmStatus == NV_OK)
+             {
++                rmStatus = s540FirstTxnCheckBeforeDestroy(nv);
++                if (rmStatus != NV_OK) goto gpu_unlock;
+                 RmDestroyPowerManagement(nv);
+ 
+                 freeNbsiTable(pGpu);
+@@ -2648,6 +2686,9 @@
+     NvU32      gpuMask;
+     nv_priv_t *nvp  = NV_GET_NV_PRIV(nv);
+ 
++    rmStatus = s540FirstTxnCheckBeforeDestroy(nv);
++    if (rmStatus != NV_OK) return rmStatus;
++
+     if (s540RmGspAttemptOwner == nv && !(nvp->flags & NV_INIT_FLAG_GPU_STATE))
+         return NV_ERR_NOT_READY;
+ 
+--- a/src/nvidia/arch/nvalloc/unix/src/osapi.c
++++ b/src/nvidia/arch/nvalloc/unix/src/osapi.c
+@@ -1,3 +1,4 @@
++#include "S540NvidiaGspFirstTransactionOriginal.h"
+ /*
+  * SPDX-FileCopyrightText: Copyright (c) 1999-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  * SPDX-License-Identifier: MIT
+@@ -1832,6 +1833,7 @@
+     NvBool     retval = NV_FALSE;
+     void      *fp;
+     NvBool     bEnabled;
++    NV_STATUS status = NV_ERR_NOT_READY;
+ 
+     NV_ENTER_RM_RUNTIME(sp,fp);
+     threadStateInit(&threadState, THREAD_STATE_FLAGS_DEVICE_INIT);
+@@ -1852,7 +1854,8 @@
+     }
+ 
+     // LOCK: acquire API lock
+-    if (rmapiLockAcquire(API_LOCK_FLAGS_NONE, RM_LOCK_MODULES_INIT) == NV_OK)
++    status = rmapiLockAcquire(API_LOCK_FLAGS_NONE, RM_LOCK_MODULES_INIT);
++    if (status == NV_OK)
+     {
+         if (!((gpumgrQueryGpuDrainState(pNv->gpu_id, &bEnabled, NULL) == NV_OK)
+               && bEnabled))
+@@ -1867,8 +1870,15 @@
+             }
+         }
+ 
+-        // UNLOCK: release API lock
+-        rmapiLockRelease();
++        // A relaxed boot may have released this token and failed to reacquire.
++        if (rmapiLockIsOwner())
++            rmapiLockRelease();
++        else
++        {
++            status = NV_ERR_INVALID_LOCK_STATE;
++            (void)s540FirstTxnRequestDeferredCleanup(pNv, status);
++            retval = NV_FALSE;
++        }
+     }
+ 
+     if (pNv->client_managed_console && !pNv->sysmem_mapped_console)
+@@ -1879,6 +1889,10 @@
+     threadStateFree(&threadState, THREAD_STATE_FLAGS_NONE);
+     NV_EXIT_RM_RUNTIME(sp,fp);
+ 
++    // This is exit-ready, not proof that the C wrapper has returned.
++    status = s540FirstTxnOriginalExitReady(pNv,
++        retval ? NV_OK : (status == NV_OK ? NV_ERR_NOT_READY : status));
++    if (status != NV_OK) retval = NV_FALSE;
+     return retval;
+ }
+ 
+@@ -1893,6 +1907,8 @@
+ 
+     NV_ENTER_RM_RUNTIME(sp,fp);
+     threadStateInit(&threadState, THREAD_STATE_FLAGS_NONE);
++    status = s540FirstTxnCheckBeforeDestroy(pNv);
++    if (status != NV_OK) goto runtime_done;
+     status = s540GspCancellationBeginCleanupState(pNv);
+     if (status != NV_OK) goto runtime_done;
+ 
+@@ -1944,6 +1960,8 @@
+ 
+     NV_ENTER_RM_RUNTIME(sp,fp);
+     threadStateInit(&threadState, THREAD_STATE_FLAGS_NONE);
++    status = s540FirstTxnCheckBeforeDestroy(pNv);
++    if (status != NV_OK) goto runtime_done;
+     status = s540GspCancellationBeginCleanupState(pNv);
+     if (status != NV_OK) goto runtime_done;
+ 
+@@ -3557,6 +3575,17 @@
+     if (status != NV_OK)
+         NV_PRINTF(LEVEL_ERROR, "Timer event failed from OS timer callback workitem with status :0x%x\n", status);
+ }
++
++const S540FirstTxnOriginalDescriptor s540FirstTxnOriginalDescriptors[] = {
++    { S540_FIRST_DESC_WORK, S540_FIRST_ESSENTIAL_RUN_OR_RETAIN,
++      S540_FIRST_WORK_ALL_KNOWN,
++      S540_FIRST_WORK_DONT_FREE | S540_FIRST_WORK_REQUIRES_GPU |
++          S540_FIRST_WORK_GROUP_DEVICE,
++      (NvUPtr)&_tmrEventServiceTimerWorkItem, 0, NV_TRUE }
++};
++const NvU32 s540FirstTxnOriginalDescriptorCount =
++    sizeof(s540FirstTxnOriginalDescriptors) / sizeof(s540FirstTxnOriginalDescriptors[0]);
++
+ 
+ static NV_STATUS RmRunNanoTimerCallback(
+     OBJGPU *pGpu,
+--- a/src/nvidia/src/kernel/gpu/gpu.c
++++ b/src/nvidia/src/kernel/gpu/gpu.c
+@@ -1,3 +1,4 @@
++#include "S540NvidiaGspFirstTransactionOriginal.h"
+ /*
+  * SPDX-FileCopyrightText: Copyright (c) 1993-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  * SPDX-License-Identifier: MIT
+@@ -1475,8 +1476,9 @@
+ gpuCreateObject_exit:
+     if (status != NV_OK)
+     {
+-        objDelete(pConcreteChild);
+-        *ppChildPtr    = NULL;
++        (void)s540FirstTxnRequestDeferredCleanupGpu(pGpu, status);
++        // Retain the published child slot and its parent ownership.
++        return status;
+     }
+ 
+     //
+@@ -3832,6 +3834,9 @@
+ 
+     NV_ASSERT(!gpumgrGetBcEnabledStatus(pGpu));
+ 
++    rmStatus = s540FirstTxnCheckBeforeDestroyGpu(pGpu);
++    if (rmStatus != NV_OK) return rmStatus;
++
+     // Set indicator that state is currently unloading.
+     pGpu->bStateUnloading = NV_TRUE;
+ 
+@@ -3842,6 +3847,9 @@
+     //
+     if (IS_GSP_CLIENT(pGpu))
+         gpuOpEventImportDestruct(pGpu);
++
++    rmStatus = s540FirstTxnCheckBeforeDestroyGpu(pGpu);
++    if (rmStatus != NV_OK) return rmStatus;
+ 
+     // stop RUSD polling before unload
+     gpuStopRusdPollingOnUnload(pGpu);
+@@ -3887,6 +3895,8 @@
+             continue;
+         }
+ 
++        rmStatus = s540FirstTxnCheckBeforeDestroyGpu(pGpu);
++        if (rmStatus != NV_OK) return rmStatus;
+         engstateLogStateTransitionPre(pEngstate, ENGSTATE_STATE_UNLOAD, &engTransitionData);
+         rmStatus = engstateStateUnload(pGpu, pEngstate, flags);
+         engstateLogStateTransitionPost(pEngstate, ENGSTATE_STATE_UNLOAD, &engTransitionData);
+@@ -4114,6 +4124,9 @@
+ {
+     NV_STATUS      rmStatus = NV_OK;
+ 
++    rmStatus = s540FirstTxnCheckBeforeDestroyGpu(pGpu);
++    if (rmStatus != NV_OK) return rmStatus;
++
+     rmapiControlCacheFreeAllCacheForGpu(pGpu->gpuInstance);
+ 
+     // remove all video event bind points before destroying gsp engine state below
+@@ -4135,9 +4148,13 @@
+             continue;
+         }
+ 
++        rmStatus = s540FirstTxnCheckBeforeDestroyGpu(pGpu);
++        if (rmStatus != NV_OK) return rmStatus;
+         engstateLogStateTransitionPre(pEngstate, ENGSTATE_STATE_DESTROY, &engTransitionData);
+         engstateStateDestroy(pGpu, pEngstate);
+         engstateLogStateTransitionPost(pEngstate, ENGSTATE_STATE_DESTROY, &engTransitionData);
++        rmStatus = s540FirstTxnCheckBeforeDestroyGpu(pGpu);
++        if (rmStatus != NV_OK) return rmStatus;
+     }
+ 
+     if (gpuIsClassSupported(pGpu, KERNEL_WATCHDOG))
+--- a/src/nvidia/src/libraries/nvoc/src/runtime.c
++++ b/src/nvidia/src/libraries/nvoc/src/runtime.c
+@@ -1,3 +1,4 @@
++#include "S540NvidiaGspFirstTransactionOriginal.h"
+ /*
+  * SPDX-FileCopyrightText: Copyright (c) 2015-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  * SPDX-License-Identifier: MIT
+@@ -153,23 +154,29 @@
+ }
+ 
+ //! Internal backing method for objDelete.
+-void __nvoc_objDelete(Dynamic *pDynamic)
++NV_STATUS
++s540FirstTxnObjDeleteChecked(Dynamic *pDynamic)
+ {
+     Dynamic *pDerivedObj;
+     Object *pObj, *pChild;
++    NV_STATUS status;
+ 
+     if (pDynamic == NULL)
+     {
+-        return;
++        return NV_OK;
+     }
+     // objCreate might be skipped for NVOC_OBJ_CREATE_FLAGS_IN_PLACE_CONSTRUCT objects.
+     // In result, objDelete will be called on zeroed objects, skip their destruction.
+     if (pDynamic->__nvoc_rtti == NULL)
+     {
+-        return;
+-    }
+-
++        return NV_OK;
++    }
++
++    status = s540FirstTxnCheckBeforeDeleteObject(pDynamic);
++    if (status != NV_OK) return status;
+     __nvoc_destructFromBase(pDynamic);
++    status = s540FirstTxnCheckBeforeDeleteObject(pDynamic);
++    if (status != NV_OK) return status;
+ 
+     pObj = dynamicCast(pDynamic, Object);
+     if (pObj->pParent != NULL)
+@@ -191,6 +198,12 @@
+     pDerivedObj = __nvoc_fullyDerive(pDynamic);
+     if (!(pObj->createFlags & NVOC_OBJ_CREATE_FLAGS_IN_PLACE_CONSTRUCT))
+         portMemFree(pDerivedObj);
++    return NV_OK;
++}
++
++void __nvoc_objDelete(Dynamic *pDynamic)
++{
++    (void)s540FirstTxnObjDeleteChecked(pDynamic);
+ }
+ 
+ //! Fill out an object's RTTI pointers from a class definition.
+--- a/src/nvidia/generated/g_objtmr_nvoc.c
++++ b/src/nvidia/generated/g_objtmr_nvoc.c
+@@ -1,3 +1,4 @@
++#include "S540NvidiaGspFirstTransactionOriginal.h"
+ #define NVOC_OBJTMR_H_PRIVATE_ACCESS_ALLOWED
+ 
+ // Version of generated metadata structures
+@@ -360,6 +361,10 @@
+ 
+     // Unwind on error.
+ __nvoc_ctor_OBJTMR_fail_IntrService:
++    {
++        NV_STATUS refusal = s540FirstTxnCheckBeforeDeleteObject(pThis);
++        if (refusal != NV_OK) return refusal;
++    }
+     __nvoc_dtor_OBJENGSTATE((Dynamic *)&pThis->__nvoc_base_OBJENGSTATE);
+ __nvoc_ctor_OBJTMR_fail_OBJENGSTATE:
+ __nvoc_ctor_OBJTMR_exit:
+@@ -744,6 +749,10 @@
+ 
+     // Do not call destructors here since the constructor already called them.
+ __nvoc_objCreate_OBJTMR_cleanup:
++    {
++        NV_STATUS refusal = s540FirstTxnCheckBeforeDeleteObject(__nvoc_pThis);
++        if (refusal != NV_OK) return refusal;
++    }
+ 
+     // Unlink the child from the parent if it was linked above.
+     if (__nvoc_pParentObj != NULL)
+--- a/src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c
++++ b/src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c
+@@ -1,3 +1,4 @@
++#include "S540NvidiaGspFirstTransactionOriginal.h"
+ /*
+  * SPDX-FileCopyrightText: Copyright (c) 2019-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  * SPDX-License-Identifier: MIT
+@@ -3515,7 +3516,7 @@
+ done:
+     if (nvStatus != NV_OK)
+     {
+-        _kgspFreeRpcInfrastructure(pGpu, pKernelGsp);
++        (void)s540FirstTxnRequestDeferredCleanupGpu(pGpu, nvStatus);
+     }
+ 
+     return nvStatus;
+@@ -4171,7 +4172,7 @@
+ 
+ exit:
+     if (nvStatus != NV_OK)
+-        _kgspFreeLibosLoggingStructures(pGpu, pKernelGsp);
++        (void)s540FirstTxnRequestDeferredCleanupGpu(pGpu, nvStatus);
+ 
+     return nvStatus;
+ }
+@@ -4377,19 +4378,8 @@
+ done:
+     if (status != NV_OK)
+     {
+-        if (pBuffer != NULL)
+-        {
+-            memdescUnmap(pMemDesc,
+-                         NV_TRUE,
+-                         pBuffer,
+-                         pMemDescPriv);
+-        }
+-
+-        if (pMemDesc != NULL)
+-        {
+-            memdescFree(pMemDesc);
+-            memdescDestroy(pMemDesc);
+-        }
++        (void)s540FirstTxnRequestDeferredCleanupGpu(pGpu, status);
++        (void)s540FirstTxnRetainOriginalAllocationGpu(pGpu, pMemDesc, pBuffer, pMemDescPriv);
+     }
+ 
+ #endif // KERNEL_GSP_TRACING_RATS_ENABLED
+@@ -4458,7 +4448,7 @@
+ 
+ done:
+     if (status != NV_OK)
+-        kgspFreeRmStateMonitorBuffer(pGpu, pKernelGsp);
++        (void)s540FirstTxnRequestDeferredCleanupGpu(pGpu, status);
+ 
+     return status;
+ }
+@@ -4651,7 +4641,7 @@
+ 
+ error_cleanup:
+     if (nvStatus != NV_OK)
+-        _kgspFreeNotifyOpSharedSurface(pGpu, pKernelGsp);
++        (void)s540FirstTxnRequestDeferredCleanupGpu(pGpu, nvStatus);
+ 
+     return nvStatus;
+ }
+@@ -4844,10 +4834,7 @@
+ done:
+     if (nvStatus != NV_OK)
+     {
+-        _kgspFreeSimAccessBuffer(pGpu, pKernelGsp);
+-        kgspFreeBootArgs_HAL(pGpu, pKernelGsp);
+-        _kgspFreeLibosLoggingStructures(pGpu, pKernelGsp);
+-        _kgspFreeRpcInfrastructure(pGpu, pKernelGsp);
++        (void)s540FirstTxnRequestDeferredCleanupGpu(pGpu, nvStatus);
+     }
+ 
+     return nvStatus;
+@@ -5258,9 +5245,7 @@
+     if (status != NV_OK)
+     {
+         NV_PRINTF(LEVEL_ERROR, "Failed to encode system info: 0x%x\n", status);
+-        portMemFree(pKernelGsp->pEncodedSystemInfo);
+-        pKernelGsp->pEncodedSystemInfo = NULL;
+-        pKernelGsp->encodedSystemInfoCount = 0;
++        (void)s540FirstTxnRequestDeferredCleanupGpu(pGpu, status);
+         return status;
+     }
+ 
+@@ -5298,8 +5283,7 @@
+     status = osPackageRegistry(pGpu, pKernelGsp->pRegTable, &pKernelGsp->regTableSize);
+     if (status != NV_OK)
+     {
+-        portMemFree(pKernelGsp->pRegTable);
+-        pKernelGsp->pRegTable = NULL;
++        (void)s540FirstTxnRequestDeferredCleanupGpu(pGpu, status);
+         return status;
+     }
+ 
+@@ -5362,6 +5346,12 @@
+     }
+ 
+ done:
++    if (status != NV_OK)
++    {
++        (void)s540FirstTxnRequestDeferredCleanupGpu(pGpu, status);
++        (void)s540FirstTxnRetainOriginalAllocationGpu(pGpu, pKVStaticInfoData, NULL, NULL);
++        return status;
++    }
+     portMemFree(pKVStaticInfoData);
+     return status;
+ }
+@@ -5402,6 +5392,8 @@
+ static NV_STATUS
+ _kgspBootReacquireLocks(OBJGPU *pGpu, KernelGsp *pKernelGsp, GPU_MASK *pGpusLockedMask)
+ {
++    NV_STATUS status;
++
+     //
+     // To follow lock order constraints, GPU lock needs to be released before acquiring API lock
+     // As this path doesn't go through resource server, no client locks should be held at this point.
+@@ -5415,7 +5407,12 @@
+     // Failure to acquire the API lock means the cleanup sequence will skipped since it is
+     // unsafe without the lock.
+     //
+-    NV_ASSERT_OK_OR_RETURN(rmapiLockAcquire(API_LOCK_FLAGS_NONE, RM_LOCK_MODULES_INIT));
++    status = rmapiLockAcquire(API_LOCK_FLAGS_NONE, RM_LOCK_MODULES_INIT);
++    if (status != NV_OK)
++    {
++        (void)s540FirstTxnRequestDeferredCleanupGpu(pGpu, status);
++        return status;
++    }
+ 
+     //
+     // This should never fail on Linux due to locks in the Unix layer.
+@@ -5424,9 +5421,13 @@
+     NV_ASSERT_OR_RETURN(gpumgrIsGpuPointerAttached(pGpu), NV_ERR_INVALID_DEVICE);
+ 
+     // Reqcquire the GPU lock released above.
+-    NV_ASSERT_OK_OR_RETURN(rmGpuGroupLockAcquire(pGpu->gpuInstance, GPU_LOCK_GRP_SUBDEVICE,
+-                                                 GPUS_LOCK_FLAGS_NONE, RM_LOCK_MODULES_INIT,
+-                                                 pGpusLockedMask));
++    status = rmGpuGroupLockAcquire(pGpu->gpuInstance, GPU_LOCK_GRP_SUBDEVICE,
++        GPUS_LOCK_FLAGS_NONE, RM_LOCK_MODULES_INIT, pGpusLockedMask);
++    if (status != NV_OK)
++    {
++        (void)s540FirstTxnRequestDeferredCleanupGpu(pGpu, status);
++        return status;
++    }
+ 
+     return NV_OK;
+ }
+@@ -5815,6 +5816,11 @@
+     }
+ 
+ done:
++    if (status != NV_OK)
++    {
++        (void)s540FirstTxnRequestDeferredCleanupGpu(pGpu, status);
++        goto s540_release_owned_gpu_locks;
++    }
+     // We don't need to tie up this memory after init is complete, so free it now.
+     portMemFree(pKernelGsp->pEncodedSystemInfo);
+     pKernelGsp->pEncodedSystemInfo = NULL;
+@@ -5845,6 +5851,7 @@
+         }
+     }
+ 
++s540_release_owned_gpu_locks:
+     if (gpusLockedMask != 0)
+     {
+         rmGpuGroupLockRelease(gpusLockedMask, GPUS_LOCK_FLAGS_NONE);
+@@ -6326,7 +6333,7 @@
+     return status;
+ 
+ fail:
+-    _kgspFreeBootBinaryImage(pGpu, pKernelGsp);
++    (void)s540FirstTxnRequestDeferredCleanupGpu(pGpu, status);
+     return status;
+ }
+ 
+@@ -6400,11 +6407,8 @@
+     return status;
+ 
+ fail_alloc:
+-    memdescFree(pKernelGsp->pSignatureMemdesc);
+-
+ fail_create:
+-    memdescDestroy(pKernelGsp->pSignatureMemdesc);
+-    pKernelGsp->pSignatureMemdesc = NULL;
++    (void)s540FirstTxnRequestDeferredCleanupGpu(pGpu, status);
+ 
+     return status;
+ }
+@@ -6781,12 +6785,7 @@
+     return status;
+ 
+ error_ret:
+-    if (*ppMemdescRadix3 != NULL)
+-    {
+-        memdescFree(*ppMemdescRadix3);
+-        memdescDestroy(*ppMemdescRadix3);
+-        *ppMemdescRadix3 = NULL;
+-    }
++    (void)s540FirstTxnRequestDeferredCleanupGpu(pGpu, status);
+ 
+     return status;
+ }
+@@ -6992,7 +6991,7 @@
+     return nvStatus;
+ 
+ exit_cleanup:
+-    kgspFreeBootArgsCommon(pGpu, pKernelGsp);
++    (void)s540FirstTxnRequestDeferredCleanupGpu(pGpu, nvStatus);
+     return nvStatus;
+ }
+ 
+--- a/src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c
++++ b/src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c
+@@ -1,3 +1,4 @@
++#include "S540NvidiaGspFirstTransactionOriginal.h"
+ /*
+  * SPDX-FileCopyrightText: Copyright (c) 2017-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  * SPDX-License-Identifier: MIT
+@@ -157,7 +158,8 @@
+     return nvStatus;
+ 
+ _kgspAllocBootArgs_exit_cleanup:
+-    kgspFreeBootArgs_HAL(pGpu, pKernelGsp);
++    (void)s540FirstTxnRequestDeferredCleanupGpu(pGpu, nvStatus);
++    // Preserve published member descriptors/mappings for the outer owner.
+     return nvStatus;
+ }
+ 
+--- a/src/nvidia/src/kernel/gpu/gsp/kernel_gsp_fwsec.c
++++ b/src/nvidia/src/kernel/gpu/gsp/kernel_gsp_fwsec.c
+@@ -1,3 +1,4 @@
++#include "S540NvidiaGspFirstTransactionOriginal.h"
+ /*
+  * SPDX-FileCopyrightText: Copyright (c) 2021-2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  * SPDX-License-Identifier: MIT
+@@ -1073,12 +1074,14 @@
+     }
+     else
+     {
+-        NV_ASSERT(0);
++        (void)s540FirstTxnRequestDeferredCleanupGpu(pGpu, NV_ERR_INVALID_STATE);
++        kgspFreeFlcnUcode(pFlcnUcode);
+         return NV_ERR_INVALID_STATE;
+     }
+ 
+     if (status != NV_OK)
+     {
++        (void)s540FirstTxnRequestDeferredCleanupGpu(pGpu, status);
+         NV_PRINTF(LEVEL_ERROR,
+                   "failed to parse/prepare Falcon ucode (desc: version 0x%x, offset 0x%x, size 0x%x): 0x%x\n",
+                   pFlcnUcodeDescFromBit->descVersion,
+@@ -1091,7 +1094,7 @@
+     }
+ 
+     *ppFlcnUcode = pFlcnUcode;
+-    return NV_OK;
++    return status;
+ }
+ 
+ /*!

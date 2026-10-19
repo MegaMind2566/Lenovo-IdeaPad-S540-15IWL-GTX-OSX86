@@ -1,0 +1,109 @@
+{
+  "component": "nvidia-prospective-disabled-uvm",
+  "format": 1,
+  "gpu_access": false,
+  "kernel_compile": {
+    "configuration_negative_controls": [
+      {
+        "explicit_configuration_refused": true,
+        "flags": []
+      },
+      {
+        "explicit_configuration_refused": true,
+        "flags": [
+          "-DS540_NVIDIA_NO_UVM_BACKEND=0"
+        ]
+      },
+      {
+        "explicit_configuration_refused": true,
+        "flags": [
+          "-DS540_NVIDIA_NO_UVM_BACKEND=2"
+        ]
+      },
+      {
+        "explicit_configuration_refused": true,
+        "flags": [
+          "-DS540_NVIDIA_NO_UVM_BACKEND=1",
+          "-DNV_UVM_ENABLE=1"
+        ]
+      },
+      {
+        "explicit_configuration_refused": true,
+        "flags": [
+          "-DS540_NVIDIA_NO_UVM_BACKEND=1",
+          "-DNV_UVM_ENABLE=0"
+        ]
+      }
+    ],
+    "definitions": [
+      "s540Global_nv_schedule_uvm_drain_p2p",
+      "s540Global_nv_schedule_uvm_isr",
+      "s540Global_nv_schedule_uvm_resume_p2p"
+    ],
+    "implicit_initializers": false,
+    "imports": [],
+    "native_apple_compiler": false,
+    "object_sha256": "92fec105179325c4dd4cbb2b51fe39be8701c421cb5751c27f8bdd5d6fe4a93f"
+  },
+  "kernel_execution": "not_tested",
+  "native_controls": {
+    "native": {
+      "actual_original_disabled_bodies": 3,
+      "actual_original_forwarding_bodies": 4,
+      "checks": 15,
+      "component": "nvidia-prospective-disabled-uvm",
+      "execution": "native-user-space",
+      "failures": 0,
+      "format": 1,
+      "gpu_access": false,
+      "kernel_execution": "not_tested",
+      "original_entry_admission": false,
+      "p2p_drain_implemented": false,
+      "status": "passed",
+      "uvm_interrupt_delivered": false
+    },
+    "sanitized": {
+      "actual_original_disabled_bodies": 3,
+      "actual_original_forwarding_bodies": 4,
+      "checks": 15,
+      "component": "nvidia-prospective-disabled-uvm",
+      "execution": "native-user-space",
+      "failures": 0,
+      "format": 1,
+      "gpu_access": false,
+      "kernel_execution": "not_tested",
+      "original_entry_admission": false,
+      "p2p_drain_implemented": false,
+      "status": "passed",
+      "uvm_interrupt_delivered": false
+    }
+  },
+  "p2p_drain_implemented": false,
+  "production_candidate_allowed": false,
+  "production_default_changed": false,
+  "reference": {
+    "exact_disabled_bodies": 3,
+    "exact_forwarding_bodies": 4,
+    "fixture_sha256": "39366499bc50cdaaf254982635b5713dd0a8886e87377087b7b6f10601e01358",
+    "hardware_rpc_executed": false,
+    "only_function_name_prefixes_changed": true,
+    "original_full_tu_executed": false,
+    "source_sha256": {
+      "kernel-open/nvidia/nv.c": "ce04946d288cf0251668a2d847acceb2a39af9dac2f13bb005f53759c774dbf7",
+      "src/nvidia/arch/nvalloc/unix/include/nv.h": "02ce4b371e0a8dd26f62a320e88c8382dcf31a21b727503a66abcaea9eecf09b",
+      "src/nvidia/arch/nvalloc/unix/src/os.c": "057b50fcb738be90a073b60f63e70559706864ddcec3bf703282563173e3dce4",
+      "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c": "ed6d7020a8a1772bc44608178aa13a77a72b8bf0eabe3293c12bc9d2b122c6c9",
+      "src/nvidia/src/kernel/gpu/nvlink/kernel_nvlink.c": "89145e654dd6fd337120a08e367791f61aabb63e81de86e61a38e25407b31fd7"
+    }
+  },
+  "source_only": true,
+  "source_sha256": {
+    "S540ProspectiveUvmDisabled.c": "3ef048057f1cab4b9098f4a24d622105719694f7906b9bcda505ed5fb58aa42b",
+    "check_uvm_disabled.py": "f8f076a7cad32ad75005d2208a040a1544c7bd78c90e79ea6685c3db0d811fe0",
+    "prepare_original_controls.py": "b4246589c60575fc15451af48c40aef2b69dbca20f8ea35d2d146a6e45f517c7",
+    "tests/check_uvm_disabled_native.c": "c075f5a5c7570cf53deed6ed3dfda25ef0b42d24cdaac08a37bde6b5a84f6940",
+    "tests/test_uvm_contracts.py": "6f545d4aa277427da3eeb161eb56cb5a4609ef6bae3fe2763d69c882d2a25b19"
+  },
+  "status": "passed-isolated-source-candidate-controls",
+  "uvm_integration_implemented": false
+}

@@ -45,7 +45,8 @@ def catalog(source_root: Path, header: Path, generated: Path, field: str) -> dic
     header, generated = header.resolve(strict=True), generated.resolve(strict=True)
     inventory, references, targets = [], [], set()
     for path in sorted(source_root.rglob('*')):
-        if not path.is_file() or path.suffix not in ('.c', '.h', '.cpp', '.hpp'):
+        if not path.is_file() or path.suffix not in ('.c', '.h', '.cpp', '.hpp', '.inc',
+                '.inl', '.cc', '.cxx', '.hxx', '.cu', '.cuh'):
             continue
         relative = str(path.relative_to(source_root))
         inventory.append([relative, stack.sha(path)])
@@ -270,6 +271,11 @@ def prove(reference: dict, source_root: Path, *, owner: str, field: str,
     # Compile commands run from the original source directory. Bind every
     # generated output to this invocation's actual destination first.
     output = output.resolve()
+    if output == source_root.resolve() or source_root.resolve() in output.parents:
+        raise ValueError('NVOC proof outputs must not modify the reviewed source tree.')
+    if Path(unit['object']).resolve() in {output / name for name in
+            ('original-with-names.o', 'typed-nvoc-probe.o')}:
+        raise ValueError('NVOC proof outputs must not overwrite the measured object.')
     output.mkdir(parents=True, exist_ok=True)
     source = output / 'typed-nvoc-probe.c'
     source.write_text(probe_source(include, owner, field, catalog_record['targets']))
@@ -319,7 +325,8 @@ def prove(reference: dict, source_root: Path, *, owner: str, field: str,
         scope = typed_ast._ref(metadata.get(location[0], ''), 'scope')
         wrapper = typed_ast._string(metadata.get(scope, ''), 'name')
         binding = typed_ast.member_binding(json.loads(ast_path.read_text()), owner=owner,
-            field=field, wrapper=wrapper, header=header, dispatch_line=dispatch[0]['line'])
+            field=field, wrapper=wrapper, header=header, dispatch_line=dispatch[0]['line'],
+            cwd=Path(unit['cwd']))
         typed_source = typed_ast.debug_member_binding(original_text, function=namespace + function,
             load=load_line, call=call_line, header=header, source=Path(unit['source']),
             cwd=Path(unit['cwd']), binding=binding)
@@ -354,6 +361,8 @@ def prove(reference: dict, source_root: Path, *, owner: str, field: str,
               'evidence_sha256': {str(path): stack.sha(path)
                   for path in (source, obj, probe_ir, original_ir, named, *([ast_path] if typed_source else []))},
               'target_definition_binding': 'pending; local targets require their actual defining object',
+              'receiver_ownership_and_initialization':
+                  'not_established; object construction, lifetime and alias/external-project writes require separate review',
               'callee_stack_bounds': 'not_established', 'aggregate_stack_proven': False,
               'kernel_execution': 'not_tested', 'production_candidate_allowed': False}
     path = output / 'typed-nvoc-dispatch.json'

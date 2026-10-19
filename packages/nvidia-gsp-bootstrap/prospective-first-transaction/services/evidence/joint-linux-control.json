@@ -1,0 +1,43 @@
+{
+  "format": 1,
+  "production_modified": false,
+  "hardware_admission": false,
+  "variants": {
+    "plain": {
+      "checks": 24,
+      "failures": 0,
+      "component": "strong-record-real-services-joint",
+      "actual_strong_record": true,
+      "actual_host_crypto_memory": true,
+      "actual_queue_timer_backends": true,
+      "original_metadata_and_callback_policy": "explicit-typed-test-controls",
+      "production_policy_admitted": false,
+      "hardware_admission": false
+    },
+    "fatal-sanitized": {
+      "checks": 24,
+      "failures": 0,
+      "component": "strong-record-real-services-joint",
+      "actual_strong_record": true,
+      "actual_host_crypto_memory": true,
+      "actual_queue_timer_backends": true,
+      "original_metadata_and_callback_policy": "explicit-typed-test-controls",
+      "production_policy_admitted": false,
+      "hardware_admission": false
+    }
+  },
+  "source_sha256": {
+    "/workspace/scratch/4915cee8ab26/cancellation-first-transaction-implementation/record/S540NvidiaGspFirstTransaction.c": "71756a44ba053df28aa25350d2aa4396993e2f86ed1a390a769b163f528e8a56",
+    "/workspace/scratch/4915cee8ab26/cancellation-first-transaction-implementation/record/deps/S540NvidiaGspCancellation.c": "56c64fdb995d2bf03e6d5b0cfec1b733aefdca0bfbe912cc3afa67c41099c174",
+    "/workspace/scratch/4915cee8ab26/cancellation-first-transaction-implementation/services/overlay/S540NvidiaGspTimersOriginal.c": "123b617e9c45057c43cdf0f4af735e004f8308621d21eb56d78ee4f76463f4ad",
+    "/workspace/scratch/4915cee8ab26/host-retention-promoted-controls/overlay/packages/nvidia-global-rm-crypto/src/S540NvidiaGlobalCrypto.c": "4f3f604db9c8d8ed46e345ab40a2ec3030eeeaab73fa9577dbc61cfca27b8273",
+    "/workspace/scratch/4915cee8ab26/host-retention-promoted-controls/overlay/packages/nvidia-device-transport/src/S540NvidiaUnsupportedMemory.c": "9cc847c7ec5f758d9ca6db32e8ac7f8770da9661c7b4bdf6073b9b896810466a",
+    "/workspace/scratch/4915cee8ab26/cancellation-first-transaction-implementation/services/check_strong_joint.c": "bd25a32b4a1ae5ed2596a439b10623554596a1144e711628d437ae5ba6f862b1",
+    "/workspace/scratch/4915cee8ab26/host-retention-promoted-controls/overlay/packages/nvidia-global-rm/src/S540NvidiaGlobalRmHost.cpp": "64769f392685eb4f0894f92fca8e37998891fb8b2bda5898f74af7338fa4e4d3",
+    "/workspace/scratch/4915cee8ab26/cancellation-first-transaction-implementation/services/S540NvidiaFirstTxnServices.cpp": "195ae1199cdf46b7cc3042ebf5d7c2eeb9572942682b4044922460da215d4007",
+    "/workspace/scratch/4915cee8ab26/cancellation-first-transaction-implementation/services/overlay/S540NvidiaDarwinWork.cpp": "52cbf99a8f65d9c3322983d410b85ec8942af0238a107815789b9df6edb87d09",
+    "/workspace/scratch/4915cee8ab26/cancellation-first-transaction-implementation/services/overlay/S540NvidiaDarwinTimer.cpp": "afd9bf2bf8ed2d1633b45746d558d42427f52fc3b6dff6bf08b49e303483cf3d",
+    "/workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/packages/nvidia-darwin-services/src/S540NvidiaDarwinPlatform.cpp": "e1d25f901d22b1471830da3ec58a44a73c926cd3ad3764d18e1ce67d91e3878b",
+    "/workspace/scratch/4915cee8ab26/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/packages/nvidia-darwin-services/src/S540NvidiaDarwinSync.cpp": "a57a4397ac8064e2dd2c0702be1b761e8640d0d6edffdcc80cbb1f2d27b791f6"
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "actual_repo_input_sha256": {
+    "packages/nvidia-darwin-services/src/S540NvidiaDarwinCheck.cpp": "e107e33b951d9f3014add741f1e1c46b8cd18410512e3c16fe855a5768e87549",
+    "packages/nvidia-darwin-services/src/S540NvidiaDarwinInternal.hpp": "ec5152aa448c5ef8433fa251b8516190c9ab5c0caa69e6c84741f6276e3a3412",
+    "packages/nvidia-darwin-services/src/S540NvidiaDarwinPlatform.cpp": "e1d25f901d22b1471830da3ec58a44a73c926cd3ad3764d18e1ce67d91e3878b",
+    "packages/nvidia-darwin-services/src/S540NvidiaDarwinProcess.cpp": "1285616e6cb9459c3dd1df596f700cb206a2d65d40a496ee808ef238fe348156",
+    "packages/nvidia-darwin-services/src/S540NvidiaDarwinRuntime.cpp": "946bd3ac525b5f9c5cb520abb2ca21ed27eed6b744ae9c984babfe97c1b11abd",
+    "packages/nvidia-darwin-services/src/S540NvidiaDarwinServices.h": "b2e71cc940a78e52b304345cdc7f54b955272df3f5683c51842121ff0761672b",
+    "packages/nvidia-darwin-services/src/S540NvidiaDarwinSync.cpp": "a57a4397ac8064e2dd2c0702be1b761e8640d0d6edffdcc80cbb1f2d27b791f6",
+    "packages/nvidia-darwin-services/src/S540NvidiaDarwinTimer.cpp": "3c3960367042379f94cf53b2edd9eb24f09aea3b97391e51264fa394e65de19a",
+    "packages/nvidia-darwin-services/src/S540NvidiaDarwinUserCopy.cpp": "ae48eb76217c8f6d0264b92bc2761076293f592e706f725ff7c4246464f0dbdb",
+    "packages/nvidia-darwin-services/src/S540NvidiaDarwinWork.cpp": "a7ca18cb6f9073d9a10d4ea0e04789c8f9009be820c1859ac66ad4e84c70e832",
+    "packages/nvidia-device-transport/src/S540NvidiaDeviceTransport.hpp": "03536aa006278612ae37db652def8af0b45050c4799b6fc604ff3059f17ee27d",
+    "packages/nvidia-device-transport/src/nv_device_services.h": "3a40ac7c798c8d636edafbb34eb2341ac295f25c47a1df860cc5ad377afc8e56",
+    "packages/nvidia-device-transport/src/nv_unsupported_memory.h": "57ca8c1de67df76ce25425fdf5e796d97665e81fb2b18f483692c6d28cda0d8f",
+    "packages/nvidia-global-rm-crypto/src/S540NvidiaGlobalCrypto.h": "97d1ce42f980492f7115b5e571aadb6f011c96d74e0854ccadd95f70cdad3eba",
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRm.h": "8ca8e0eac4a52b0d755c7693a2adda6e938bd057db77037b827a835df3133be2",
+    "packages/nvidia-global-rm/tests/check_host_domains_native.cpp": "7bac93b2cf17109255d88429cf9a94030793f5a3fbb1082cc0a45b5c2b7e0812",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c": "71756a44ba053df28aa25350d2aa4396993e2f86ed1a390a769b163f528e8a56",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.h": "eb7f9b38fd7bb3b6df88b14dfc382ee5a5d426a22ef246b51f657b010ca6ed2c",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/Participants.h": "7ffc4eadcb6e3b9c8e7cfe524f8eaaaa64ac25642632d728eda0382165140f38",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/S540NvidiaGspCancellation.c": "56c64fdb995d2bf03e6d5b0cfec1b733aefdca0bfbe912cc3afa67c41099c174",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/nvidia-darwin-services/src/S540NvidiaDarwinServices.h": "b2e71cc940a78e52b304345cdc7f54b955272df3f5683c51842121ff0761672b",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.h": "02f6c5af5e5fab29be2172d30ffd1cea47dd740d98fa74d710c426ba4535421b",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/nvidia-os-adapter/upstream/include/cpuopsys.h": "329ab764372bace3e1445315bb7a3766d4f60aacb8523ac3e3c760c79358f4fb",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/nvidia-os-adapter/upstream/include/nv-kernel-interface-api.h": "1cf34c1dcd1abf535fb27387145374972a43ec9cd6f6c9ef927777431bda3cc4",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/nvidia-os-adapter/upstream/include/nvstatus.h": "e8267172a1f7a56420d612c6734b3554b9ff6a3d33fdda21b1371ff4ce4b8675",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/nvidia-os-adapter/upstream/include/nvstatuscodes.h": "4a9a39b51862d21cfa446414135386616a4a4914dd34dc83f98099295fea7b56",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/nvidia-os-adapter/upstream/include/nvtypes.h": "da23dbc28805c390d62338dba5603eb12b2e94c8aaf873c1c42c1a5f10f26b79",
+    "packages/nvidia-gsp-bootstrap/prospective-host-retention/S540NvidiaGlobalRmHostRetention.h": "299fe35d5ebbc6976937fdf209c44de2d303d72024796cc4c2387817aa80efb7",
+    "packages/nvidia-gsp-bootstrap/prospective-host-retention/check_heap_retention.py": "c64889656734cad0d65aa3fc9a94ccda4e3dedd85e13789c0ca8cde94a963080",
+    "packages/nvidia-gsp-bootstrap/prospective-host-retention/check_host_retention.cpp": "82a2fba7a25d4b10fcc5693cbaab226d4fbe3c4d6c445bfd7bdc3bdd0bb43440",
+    "packages/nvidia-gsp-bootstrap/prospective-host-retention/check_refusal_producers.cpp": "b8ae93019955183a091a9a1beab2b0051992a4631b0de53f90f4f8f81548ad2d",
+    "packages/nvidia-gsp-bootstrap/prospective-host-retention/check_startup_refusals.cpp": "fec174715b8f0ad4636a07d1ac03f36c88560dee500d7207ac138a6ff7db8429",
+    "packages/nvidia-gsp-bootstrap/prospective-host-retention/host-lifetime.inc": "55d0ed3ea749635bb426a595d29bec8827a7f7143cfa37616b01f9f8f575c2c1",
+    "packages/nvidia-gsp-bootstrap/prospective-host-retention/initialize-shutdown.inc": "ddadf375ec0377195558371da7f3bc717bc486970e26867c6dfa03c2384f2160",
+    "packages/nvidia-gsp-bootstrap/prospective-host-retention/prepare_heap_retention.py": "de04a2ac0ed7bf826d723ab01bf8d794aac12248ba56e28a4c30d8bafeb44792",
+    "packages/nvidia-gsp-bootstrap/prospective-host-retention/retention-observers.inc": "300fec7ed4899a8df910fef27e7a0468b37e08bf60a64d18391955e290ef64a9",
+    "packages/nvidia-gsp-bootstrap/prospective-host-retention/tracked-allocation-body.inc": "59c75a5c08ded92a97d75e3898293aa8a77c6e12854ac1710c648742f5c16bd3",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspDmaStop.h": "d0cefcdcf8e951b303441b974d8f7f32e0ecbac1fd9ec6f934544c46bd024df9",
+    "packages/nvidia-os-adapter/upstream/include/cpuopsys.h": "329ab764372bace3e1445315bb7a3766d4f60aacb8523ac3e3c760c79358f4fb",
+    "packages/nvidia-os-adapter/upstream/include/nv-kernel-interface-api.h": "1cf34c1dcd1abf535fb27387145374972a43ec9cd6f6c9ef927777431bda3cc4",
+    "packages/nvidia-os-adapter/upstream/include/nvstatus.h": "e8267172a1f7a56420d612c6734b3554b9ff6a3d33fdda21b1371ff4ce4b8675",
+    "packages/nvidia-os-adapter/upstream/include/nvstatuscodes.h": "4a9a39b51862d21cfa446414135386616a4a4914dd34dc83f98099295fea7b56",
+    "packages/nvidia-os-adapter/upstream/include/nvtypes.h": "da23dbc28805c390d62338dba5603eb12b2e94c8aaf873c1c42c1a5f10f26b79"
+  },
+  "cpu_checks_per_variant": {
+    "fatal-sanitizers": 228,
+    "plain": 228
+  },
+  "evidence_sha256": {
+    "CPU-CONTROL-AUDIT.json": "bc8f23705d14f6bc49aa3e79bfbe7e3be315de936ccd85d9f724d8146fd44437",
+    "SDK-COMPILE-AUDIT.json": "e33d9f1dc0769c6b18dba1e2b41e8200d850dc6bb7177802ae51d873c4174d85"
+  },
+  "format": 1,
+  "invariants": [
+    "Actual retained owner begins before original global allocations; exact nv attaches once without retagging.",
+    "Allocation capture occurs before reservation and is rechecked before physical backing publication.",
+    "Atomic free permit orders before or after first refusal; committed frees complete without allocator guard.",
+    "Released pending-completion reservations claim zero backing bytes and cannot match the released old pointer.",
+    "Lifetime call lease precedes every dynamic guard access; Shutdown closes only from zero call leases.",
+    "Static ever counters are never copied/reset by Initialize; true refusal source hooks occur before and after increments.",
+    "Historical Host/crypto/memory failure evidence and unowned pending/original allocations refuse BeginOwner."
+  ],
+  "kernel_execution": "not_tested",
+  "namespace_header_sha256": "cb79f788baddb7f046e870b1e2e09bfde310b4b12417ec8c737fad1ef440f7a1",
+  "native_apple_execution": false,
+  "open_gaps": [
+    "Ordinary Host allocation NULL is not automatically a first-transaction sticky failure in this version; first-attempt NO_MEMORY policy pending parent integration.",
+    "Heap retention does not restore already logically destroyed original objects or prove all error producers.",
+    "Call leases do not prove completion of borrowed platform facts or code-image/module lifetime.",
+    "Cold HostShutdown is not a first-transaction retirement receipt, unload approval or GPU/DMA-stop proof.",
+    "No real Lenovo, kernel execution, complete callback producer closure or aggregate call-chain stack bound."
+  ],
+  "original_entry_admission": false,
+  "production_modified": false,
+  "profile": "isolated Host physical heap retention; not admitted",
+  "sdk_complete_units": 4,
+  "sdk_host_dependency_files": 233,
+  "source_sha256": {
+    "capacity_records": 8192,
+    "format": 1,
+    "kernel_execution": "not_tested",
+    "original_entry_admission": false,
+    "original_sha256": {
+      "packages/nvidia-device-transport/src/S540NvidiaUnsupportedMemory.c": "81cff7c5c893dc924bc6d6de23cb0f5b90f73782e4bcb9574a43f394f13eadd8",
+      "packages/nvidia-global-rm-crypto/src/S540NvidiaGlobalCrypto.c": "90cca5923e8dfa56f694aaaad402b7d75f0eb89c1fe2af3f9c599828863f1a67",
+      "packages/nvidia-global-rm/src/S540NvidiaGlobalRmHost.cpp": "a9202786c8a66cb1b89bdc6d2513edeb0e893330a560071035f8707615cbb377"
+    },
+    "patch_sha256": "4139d7a6cf6d0dd647ca1aa7b85a0b0f9f21f0cc83a2140fe11ef7484c3f50ed",
+    "pre_bind_retagging": false,
+    "production_modified": false,
+    "profile": "isolated-host-heap-retention-not-admitted",
+    "prospective_sha256": {
+      "packages/nvidia-device-transport/src/S540NvidiaUnsupportedMemory.c": "0b7ed2f522d9b4fab7d2d2cc3b6328c1832c26994ae8799f5ff84647c35448ff",
+      "packages/nvidia-global-rm-crypto/src/S540NvidiaGlobalCrypto.c": "bb862943b85b6a5672f217a56033aa92ee734cd8e52558a602fe1cfbd00c59e4",
+      "packages/nvidia-global-rm/src/S540NvidiaGlobalRmHost.cpp": "0ae6bc86bfc5f73e3c931753a2fe36aba3643628f86b0232d2a93ea6b12a7094"
+    },
+    "record_api": "strong exact owner/generation and atomic free permits",
+    "single_limit_bytes": 268435456,
+    "total_limit_bytes": 536870912
+  },
+  "strict_patch_application": {
+    "files": 3,
+    "final_file_hashes_verified": true,
+    "fuzz": 0,
+    "offsets": 0,
+    "status": "passed"
+  },
+  "strong_companion_inputs_sha256": {
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c": "71756a44ba053df28aa25350d2aa4396993e2f86ed1a390a769b163f528e8a56",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.h": "eb7f9b38fd7bb3b6df88b14dfc382ee5a5d426a22ef246b51f657b010ca6ed2c",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/Participants.h": "7ffc4eadcb6e3b9c8e7cfe524f8eaaaa64ac25642632d728eda0382165140f38",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/S540NvidiaGspCancellation.c": "56c64fdb995d2bf03e6d5b0cfec1b733aefdca0bfbe912cc3afa67c41099c174"
+  }
+}

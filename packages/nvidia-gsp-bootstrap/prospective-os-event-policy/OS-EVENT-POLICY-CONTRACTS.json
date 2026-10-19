@@ -1,0 +1,102 @@
+{
+  "additions_patch_sha256": "6c2a8addfa0635ca51d9d8b48c5350c562ee0ac470a6759b9d9eea17e232ae59",
+  "automatic_production_inclusion": false,
+  "base_file_count": 4005,
+  "base_sources_sha256": {
+    "src/nvidia/src/kernel/gpu/mem_mgr/sem_surf.c": "3734a2566643a186b3b497e2c63532a1d3ec73dfea63165ef3421046130fd463",
+    "src/nvidia/src/kernel/rmapi/event_api.c": "3b6eafb223337f534e22afba9adabd4332beda1d868a79fc403061b03720b922",
+    "src/nvidia/src/kernel/rmapi/event_buffer.c": "7e0134eea585feace5fcbe0912ea849f5ffd15c965291501db2ef2d4a17c512a"
+  },
+  "base_v3_tree_sha256": "fa8498c3958a559a3466ef6dd4e541bfcea9f55d8809d0a422c784cacd703029",
+  "composed_tree_sha256": "8d557f211c5b1f800f16d7ad86fd475294bbfd3d5476fe498d253bf3d431c6f7",
+  "constructor_guard_prevents_outer_nvoc_object_allocation": false,
+  "format": 1,
+  "generated_factory_cleanup_native_execution_verified": false,
+  "gpu_access": false,
+  "gpu_op_event_import_source_changed": false,
+  "guards": [
+    {
+      "before": "lookup, notification-share initialization, OS conversion and registration",
+      "function": "eventapiConstruct_IMPL",
+      "predicate": "externalClassId == NV01_EVENT_OS_EVENT",
+      "preserved": "Actual KERNEL_CALLBACK/KERNEL_CALLBACK_EX allocation and original privilege check.",
+      "status": "NV_ERR_NOT_SUPPORTED"
+    },
+    {
+      "before": "casts, privilege query, output clearing, backing allocation/mapping and conversion",
+      "function": "eventbufferConstruct_IMPL",
+      "predicate": "notificationHandle != 0",
+      "preserved": "Zero public-handle buffer, including physicalGSP bClientRM producer.",
+      "status": "NV_ERR_NOT_SUPPORTED"
+    },
+    {
+      "before": "OS conversion and waiter mutation",
+      "function": "semsurfCtrlCmdRegisterWaiter_IMPL",
+      "predicate": "!bKernel && notificationHandle != 0",
+      "preserved": "Original index validation, kernel callback waiter and zero-handle waiter.",
+      "status": "NV_ERR_NOT_SUPPORTED"
+    },
+    {
+      "before": "OS conversion and waiter mutation/release",
+      "function": "semsurfCtrlCmdUnregisterWaiter_IMPL",
+      "predicate": "!bKernel && notificationHandle != 0",
+      "preserved": "Original index validation, kernel callback waiter and zero-handle waiter.",
+      "status": "NV_ERR_NOT_SUPPORTED"
+    }
+  ],
+  "kernel_execution": "not_tested",
+  "lifetime_scope": "Immutable no-OS-event registry backend. No migration from a previously admitted user event/notification; no caller-owned reference is consumed on selected feature rejection. Generic NVOC object/base construction precedes leaf constructor and uses original failure cleanup.",
+  "original_callbacks_implemented": false,
+  "original_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "production_candidate_allowed": false,
+  "production_default_changed": false,
+  "proposed_source_sha256": {
+    "src/nvidia/src/kernel/gpu/mem_mgr/sem_surf.c": "aefcd0a4afcd21ac23ed405b8b9315ff3e80de23903057e80d9a5be9d30bb8bb",
+    "src/nvidia/src/kernel/rmapi/event_api.c": "92a4eb0703a1999e81a8e33b31d111fb4fa2d7730edfca2c887c0bf311e384ec",
+    "src/nvidia/src/kernel/rmapi/event_buffer.c": "2fe02121a3a3a4d0053ded6b7e28bdf4db7fb67f8672d7861294ccb0760071aa"
+  },
+  "remaining_seals": [
+    "Actual selected original roots and all NVOC/control/notification type/data writers.",
+    "ctl_state, file-private and event delivery callback operational closure.",
+    "Actual generic factory/resource ownership and aggregate stack/deadline/DMA/power proof.",
+    "Final target loader and same-image imported interface/metaclass admission."
+  ],
+  "required_configuration": "S540_NVIDIA_NO_OS_EVENT_BACKEND=1",
+  "source_only": true,
+  "source_sha256": {
+    "check_event_policy.py": "1e506605d84b483f741243ffda60397daf464aba9873c5adc4e90e8d55157102",
+    "prepare_event_policy.py": "f8c6b81d145356d391eb4cfdc7caa881b7096509c972bbc1d81f8d4cf56975e1",
+    "tests/check_eventapi_policy_bodies.c": "d93dd99e7ec68497a6e8abd518f0e1b913f34f1ef78e006a2e7d6807cdc0aa72",
+    "tests/check_eventbuffer_policy_bodies.c": "0b41a8802f2dfe797893ef40568a482707b4fb750a78a1630893886543e39145",
+    "tests/check_semsurf_policy_bodies.c": "f03ad79c7fa9a6389bc82b7540b5f0260eb1f3e62f0960049e38ff4c0b881b0c",
+    "tests/test_event_policy_contracts.py": "a62ad26188fd12f21c390d6eaa24c9f7de1701b619a8ac47ec2aa699a7a744a2"
+  },
+  "status": "isolated-selected-unavailable-feature-guards-not-admitted",
+  "supporting_original_source_sha256": {
+    "src/common/sdk/nvidia/inc/class/cl90cd.h": "6899d744ba30e024571d4c9e61b56380264f24a666ead38a2d31e1506778d69e",
+    "src/common/sdk/nvidia/inc/ctrl/ctrl00da.h": "b479cf258d95acdd374bffbd1a1cb15d377dc64d5f6e5d1482dd80729559252a",
+    "src/nvidia/generated/g_event_api_nvoc.c": "d4a8bd220290f618556113992f7cf4151f27007b98ffd0f579d985e1ff3687fe",
+    "src/nvidia/generated/g_event_buffer_nvoc.c": "36149e22e36b0825b5eddee5581bb95452f6ba881c74b65f704c8f420d2b142c",
+    "src/nvidia/src/kernel/gpu/gpu_op_event_import.c": "c1e23d2f96c62eb6f87822f4f090f7e4176ff6b5a6965a3359230cd14c2310a7",
+    "src/nvidia/src/kernel/gpu/mem_mgr/sem_surf.c": "3734a2566643a186b3b497e2c63532a1d3ec73dfea63165ef3421046130fd463",
+    "src/nvidia/src/kernel/rmapi/event_api.c": "3b6eafb223337f534e22afba9adabd4332beda1d868a79fc403061b03720b922",
+    "src/nvidia/src/kernel/rmapi/event_buffer.c": "7e0134eea585feace5fcbe0912ea849f5ffd15c965291501db2ef2d4a17c512a",
+    "src/nvidia/src/libraries/eventbuffer/eventbufferproducer.c": "c1321f5196f61d1b27235988b80f99b12252a51d63841cc0150eaf03fe47d313"
+  },
+  "validation": {
+    "actual_private_header_namespace_compile": true,
+    "baseline_counterexamples": true,
+    "complete_original_bodies": 8,
+    "configuration_negative_compiles": 3,
+    "eventapi": 31,
+    "eventbuffer": 212,
+    "full_original_translation_units_compiled": 6,
+    "hardware_or_kernel_execution": "not_tested",
+    "native_apple_result": "pending-independent-CI",
+    "native_controls_per_variant": 271,
+    "private_types_and_resource_helpers": "explicit-cpu-fixtures; original eventbufferproducer helper is real",
+    "semsurf": 28,
+    "source_contract_tests": 8
+  },
+  "whole_bootstrap_exclusion_proven": false
+}

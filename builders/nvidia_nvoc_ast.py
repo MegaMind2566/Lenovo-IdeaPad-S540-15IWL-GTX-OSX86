@@ -23,11 +23,45 @@ def _unwrap(node, cast):
     return _one(node.get('inner', []), 'Ambiguous NVOC AST conversion.')
 
 
-def _position(location, text):
+def _source_files(document, locations, cwd):
+    """Resolve Clang's stateful source-file elision in serialization order.
+
+    JSONNodeDumper::writeBareSourceLocation emits file only when it differs
+    from LastLocFilename. includedFrom is an independent include-stack record
+    and must not change that state. Keep only the few locations being proved.
+    https://clang.llvm.org/doxygen/JSONNodeDumper_8cpp_source.html
+    """
+    wanted = {id(value) for value in locations}
+    result, current = {}, None
+    exhausted = object()
+    pending = [iter([document])]
+    while pending:
+        value = next(pending[-1], exhausted)
+        if value is exhausted:
+            pending.pop()
+            continue
+        if isinstance(value, dict):
+            if all(key in value for key in ('offset', 'col', 'tokLen')):
+                if 'file' in value:
+                    filename = Path(value['file'])
+                    current = (filename if filename.is_absolute() else cwd / filename).resolve()
+                if id(value) in wanted:
+                    result[id(value)] = current
+            pending.append(iter(child for key, child in value.items() if key != 'includedFrom'))
+        elif isinstance(value, list):
+            pending.append(iter(value))
+    return result
+
+
+def _position(location, text, header, files):
     # Macro spelling/expansion needs a separate proof. This generated wrapper
     # and its field declaration contain neither; do not select one location.
     if 'spellingLoc' in location or 'expansionLoc' in location:
         raise ValueError('Macro-expanded NVOC AST location requires separate review.')
+    if files.get(id(location)) != header.resolve():
+        raise ValueError('NVOC AST source file differs from the actual generated header.')
+    if 'presumedFile' in location or 'presumedLine' in location:
+        raise ValueError('Remapped NVOC AST source location requires separate review.')
     offset, size = location.get('offset'), location.get('tokLen')
     if not isinstance(offset, int) or not isinstance(size, int) or offset < 0 or size < 1:
         raise ValueError('NVOC AST lacks a bounded source token location.')
@@ -37,10 +71,11 @@ def _position(location, text):
     column = offset - text.rfind('\n', 0, offset)
     if location.get('line', line) != line or location.get('col', column) != column:
         raise ValueError('NVOC AST line/column differs from the actual source bytes.')
-    return {'line': line, 'column': column, 'token': text[offset:offset + size]}
+    return {'source': str(header.resolve()), 'line': line, 'column': column,
+            'token': text[offset:offset + size]}
 
 
-def member_binding(document, *, owner, field, wrapper, header, dispatch_line):
+def member_binding(document, *, owner, field, wrapper, header, dispatch_line, cwd=None):
     """Require actual FieldDecl identity, a typed parameter, and one return call.
 
     The whole AST comes from one compiler invocation so declaration IDs are
@@ -89,11 +124,12 @@ def member_binding(document, *, owner, field, wrapper, header, dispatch_line):
     # Clang offsets count source bytes. Refuse an encoding whose character
     # offsets would differ rather than silently comparing the wrong token.
     text = header.read_bytes().decode('ascii')
-    declaration = _position(member.get('loc', {}), text)
-    function_position = _position(function.get('loc', {}), text)
-    member_position = _position(callee.get('range', {}).get('end', {}), text)
-    callee_position = _position(callee.get('range', {}).get('begin', {}), text)
-    call_position = _position(call.get('range', {}).get('begin', {}), text)
+    locations = [member.get('loc', {}), function.get('loc', {}),
+                 callee.get('range', {}).get('end', {}), callee.get('range', {}).get('begin', {}),
+                 call.get('range', {}).get('begin', {})]
+    files = _source_files(document, locations, cwd or header.parent)
+    declaration, function_position, member_position, callee_position, call_position = (
+        _position(location, text, header, files) for location in locations)
     if (declaration['token'] != field or member_position['token'] != field
             or function_position['token'] != wrapper
             or member_position['line'] != dispatch_line or call_position['line'] != dispatch_line):

@@ -1,0 +1,109 @@
+{
+  "adapter_initialized": false,
+  "artifact": {
+    "downloaded_and_digest_verified": true,
+    "files": 12706,
+    "id": 12168978908,
+    "size_in_bytes": 50792796,
+    "zip_sha256": "616ea1f890bfe280badc0e92f6bc7a98a49ee43b9ecd4936fbbe3b503ecd0290"
+  },
+  "evidence_sha256": {
+    "kernel-checks/execution-kernel-build.json": "898d9da278c07b81642c32b882f645217abb754b1afd34309035f93ed56ee8b1",
+    "kernel-checks/nvoc-reset-stack-proof/typed-nvoc-dispatch.json": "0d733f44dff370e4bdff2610f4bc528d45d19200596dcc304867bf0b407e1a57",
+    "native-checks/execution-checks.json": "1133d08967d42c85c09697592b583628278080471eed3635ddd20b4bbd88ace2",
+    "original-global-lifecycle/global-lifecycle-checks.json": "dc4e1f7fd24f18b6d620536a1c4ba81174e191b86c5cfdba32c13e0735b6acc6",
+    "original-rm/checked-source-manifest.json": "fa3bba8ac628728a34da6dcbd552436f3a2210b7b72543ac08a83c49cd1a54c7",
+    "prospective-checks/combined-profile-v2/combined-profile-audit.json": "12f1a89318d5bf1cb61141256cb513fee577a4ba77f0b30775c1956673f1f9b9",
+    "prospective-checks/combined-profile-v3/combined-profile-audit.json": "521b1f322b1b02057b63f4cc9ce2849b2526bef33a70a219132109a2d2df29fc",
+    "prospective-checks/combined-profile/combined-profile-audit.json": "85ba0b189582a6c43678fee6d3d41d12c1dbdde0bf7661fe6055a084d0318108",
+    "prospective-checks/loader/prospective-loader-checks.json": "e122d866b3af5ddb34354b31b9042513c159e4bf2c7ec58de3ad33fe3a8f77eb"
+  },
+  "format": 1,
+  "gpu_access": false,
+  "gsp_initialized": false,
+  "idle_loader": {
+    "native_apple_compiler": true,
+    "original_rm_called": false,
+    "sdk_git_identity_verified": true,
+    "state_checks_per_variant": 46,
+    "target_loader_admission_proven": false
+  },
+  "installable_candidate_generated": false,
+  "kernel_execution": "not_tested",
+  "kernel_link": {
+    "authoritative_darwin_link": true,
+    "executable": false,
+    "image_sha256": "a066acb8525e15a691588cb3d6c4ff24acd56a858e975de4ec30ca852bd77dc7",
+    "link_control_status": "passed",
+    "linked_project_sha256": "9be1c07e96346eccd4e2d470e7f4059bc4509a4fdbf6a02217225b40d8d9b258",
+    "original_root_count": 25
+  },
+  "native_component_checks_per_variant": {
+    "native": 2398,
+    "sanitized": 2398
+  },
+  "not_covered_by_this_run": [
+    "The subsequent explicit AST source-file elision/foreign-file checks and output-location guards.",
+    "The new prospective-first-transaction and companion Host-retention packages.",
+    "The new explicitly disabled UVM and unavailable OS-event policy packages."
+  ],
+  "original_global_allocation_failure_cases_per_variant": {
+    "native": 156,
+    "sanitized": 156
+  },
+  "original_kernel_objects_per_profile": 1100,
+  "production_candidate_allowed": false,
+  "production_default_changed": false,
+  "prospective_source_compilations": {
+    "combined-profile": {
+      "original_translation_units": 19,
+      "production_candidate_allowed": false,
+      "project_bridge_translation_units": 2,
+      "sdk_backend_translation_units": 0,
+      "status": "changed-original-units-compiled",
+      "tree_sha256": "b29998f4f3cf8f23888ea7c9a09cb44440c20b59a09bd642077fa95973c78988"
+    },
+    "combined-profile-v2": {
+      "original_translation_units": 25,
+      "production_candidate_allowed": false,
+      "project_bridge_translation_units": 2,
+      "sdk_backend_translation_units": 0,
+      "status": "changed-original-units-compiled",
+      "tree_sha256": "ada09ea95aa4296d533034616835aa43ac99c95b1ff7af51f76de349dd0f7a00"
+    },
+    "combined-profile-v3": {
+      "original_translation_units": 25,
+      "production_candidate_allowed": false,
+      "project_bridge_translation_units": 3,
+      "sdk_backend_translation_units": 1,
+      "status": "changed-original-units-compiled",
+      "tree_sha256": "fa8498c3958a559a3466ef6dd4e541bfcea9f55d8809d0a422c784cacd703029"
+    }
+  },
+  "remaining_gates": [
+    "Actual RM-semaphore ownership/exclusion and complete first-transaction producer/owner policies.",
+    "Transitive error/constructor cleanup, scalar/fatal failure coverage and bounded power-management/IRQ cancellation.",
+    "Whole-image callback/root/type seals and aggregate kernel/IRQ stack bounds, including recursive memory-descriptor lifetime.",
+    "Authentic GSP/Falcon/hardware-DMA stop evidence; no stop receipt issuer exists.",
+    "Actual target kernel load/start, complete-image activation admission and final callback/context/text-owner release."
+  ],
+  "scope": "Frozen checked ten-patch baseline, isolated V1/V2/V3 source compositions and idle-loader development controls at the exact workflow commit.",
+  "status": "passed-native-development-checkpoint",
+  "typed_nvoc_dispatch": {
+    "aggregate_stack_proven": false,
+    "member_byte_offset": 264,
+    "member_identity_method": "actual-field-declaration-and-compiler-inline-source-tokens",
+    "named_object_byte_identity": true,
+    "receiver_ownership_and_initialization": "not_established",
+    "status": "one-typed-nvoc-dispatch-target-set-established",
+    "target_definition_binding": "pending"
+  },
+  "workflow": {
+    "conclusion": "success",
+    "head_sha": "9c238972f6e49ff53e14e29d5147d6e19d980b40",
+    "job_id": 117932880255,
+    "run_id": 39213796174,
+    "tree_sha": "a2e7b4d8ec41e6362b793ca61ceb21c285011cea",
+    "url": "https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39213796174"
+  }
+}

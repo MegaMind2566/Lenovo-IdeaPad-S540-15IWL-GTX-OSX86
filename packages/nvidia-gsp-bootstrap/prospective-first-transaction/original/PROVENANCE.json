@@ -1,0 +1,42 @@
+{
+  "adaptations": [
+    "Frozen original source patch bytes unchanged.",
+    "Bridge and control C/C++ includes use package-relative project paths; exact before/after hashes are in SOURCE-CONTRACT.json.",
+    "New runners use explicit source, namespace, output, compiler and optional SDK paths and locate the repository from __file__.",
+    "Generated sources, bodies, logs and objects are output-only; canonical repository build descendants and outside output are permitted, other repository paths/upstream overlap/symlinks refuse. Ordinary output can be reused.",
+    "Compiler executables retain their lexical absolute path so clang++ driver selection is preserved.",
+    "Default authoritative execution requires Intel macOS and Apple clang; explicit Linux host controls remain nonauthoritative."
+  ],
+  "external_record_dependencies_sha256": {
+    "../record/S540NvidiaGspFirstTransaction.c": "556f17711c0e444ff186400a548baf1609e2dc220783199ca6cd97d575283f7c",
+    "../record/S540NvidiaGspFirstTransaction.h": "eb7f9b38fd7bb3b6df88b14dfc382ee5a5d426a22ef246b51f657b010ca6ed2c",
+    "../record/deps/Participants.h": "7ffc4eadcb6e3b9c8e7cfe524f8eaaaa64ac25642632d728eda0382165140f38",
+    "../record/deps/S540NvidiaGspCancellation.c": "56c64fdb995d2bf03e6d5b0cfec1b733aefdca0bfbe912cc3afa67c41099c174"
+  },
+  "files_sha256": {
+    "PORTABLE-CONTROL-VALIDATION.json": "eb4416a00cd0e1a999cb46927cc6f7be357273901aabe9c25547fc372985e675",
+    "README.md": "e87fbc6cf30b9d129a52fbe932e27d7426ba88314c82a884c240e703f624e812",
+    "S540NvidiaGspFirstTransactionOriginal.c": "b8e3c04e934e594d2442c78e2a234d90525d4558d20fa13e71cc48e8f5329aa2",
+    "S540NvidiaGspFirstTransactionOriginal.h": "3f172ad217780282f34638c038b2e21e63221367e691d082c11b6e1c83478b98",
+    "SOURCE-CONTRACT.json": "ed4da324212df92ea630b65421e4cb20a49287e9f618035702145ff3de31920b",
+    "check.py": "23c22ebabc8c8b6699f8a11b6f6d3bbc54bfefe9f1f7e52be5fdf4b7ee9b1226",
+    "check_native.cpp": "b8c117c5799add77025ed0f4d4cc72974ce4e3a2956e4fadfa41f1bf18de4003",
+    "check_nvoc_bodies.c": "31da9c4c4498eb0c8adca41bb7258f703570a6b3aa5f1dbc97a9bf806850b7a2",
+    "check_wrapper_bodies.c": "1cf5a340b38966a2923a288dadb74593201a5e1dd3940bd34f12713cd17530da",
+    "common.py": "4f1696dc182fc12058aacc4ee97c0e70de2cbb9c746562a92b5ce90b323644a4",
+    "compile_full.py": "fc73f7bde7edc3432786b37ac338ff6a451334db5513d6ed00151eab52df3249",
+    "control_types.h": "8e9a6e531843740eb8b7d77554cff0ca97a3b34ca63d43bd0977cb41c0211abb",
+    "deferred-init-and-destruction-guards.patch": "f61c9d381738fa1905da18da40eac0149ae6fd13b74be6e97689912de16787e8",
+    "prepare.py": "316494e2850da12ecb4cfce39b4d464126dbe80f0317078676c5f19884236d26",
+    "prepare_controls.py": "c68b661502830b9c7c500100c57dffef11fd709cf4f5481edcf84e61dc321317"
+  },
+  "format": 1,
+  "hardware_admission": false,
+  "historical_scratch_changed": false,
+  "original_entry_admission": false,
+  "production_candidate_allowed": false,
+  "profile": "isolated-prospective-first-transaction-original-not-approved",
+  "source_contract_sha256": "ed4da324212df92ea630b65421e4cb20a49287e9f618035702145ff3de31920b",
+  "source_patch_sha256": "f61c9d381738fa1905da18da40eac0149ae6fd13b74be6e97689912de16787e8",
+  "source_semantics_changed_by_promotion": false
+}

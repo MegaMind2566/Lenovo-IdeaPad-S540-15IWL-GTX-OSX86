@@ -1,0 +1,174 @@
+{
+  "authoritative_darwin_execution": false,
+  "body_controls": {
+    "native": {
+      "actual_nvoc_bodies": 4,
+      "actual_original_api_lock_bodies": 4,
+      "actual_original_wrapper": true,
+      "actual_service_counter_probes": true,
+      "actual_timer_ctor_body": true,
+      "checks": 74,
+      "component": "nvidia-first-transaction-original-bodies",
+      "execution": "native-user-space",
+      "failures": 0,
+      "first_transaction_record_endpoint_fixture": true,
+      "format": 1,
+      "full_lock_capability_refused": true,
+      "gpu_access": false,
+      "kernel_execution": "not_tested",
+      "original_entry_admission": false,
+      "original_gpu_init_endpoint_fixture": true,
+      "real_native_lock_tokens": true,
+      "status": "passed"
+    },
+    "sanitized": {
+      "actual_nvoc_bodies": 4,
+      "actual_original_api_lock_bodies": 4,
+      "actual_original_wrapper": true,
+      "actual_service_counter_probes": true,
+      "actual_timer_ctor_body": true,
+      "checks": 74,
+      "component": "nvidia-first-transaction-original-bodies",
+      "execution": "native-user-space",
+      "failures": 0,
+      "first_transaction_record_endpoint_fixture": true,
+      "format": 1,
+      "full_lock_capability_refused": true,
+      "gpu_access": false,
+      "kernel_execution": "not_tested",
+      "original_entry_admission": false,
+      "original_gpu_init_endpoint_fixture": true,
+      "real_native_lock_tokens": true,
+      "status": "passed"
+    }
+  },
+  "build_output_path_controls": {
+    "build_root_refused": true,
+    "build_symlink_to_package_refused": true,
+    "build_symlink_to_upstream_refused": true,
+    "canonical_build_output_allowed": true,
+    "nested_output_symlink_refused": true,
+    "repository_ancestor_refused": true,
+    "repository_packages_refused": true,
+    "upstream_output_refused": true
+  },
+  "canonical_repo_build_output_validated": true,
+  "check_then_compile_same_output_passed": true,
+  "compilers": {
+    "cc": {
+      "driver": "clang-18",
+      "version": "Ubuntu clang version 18.1.3 (1ubuntu1)"
+    },
+    "cxx": {
+      "driver": "clang++-18",
+      "version": "Ubuntu clang version 18.1.3 (1ubuntu1)"
+    }
+  },
+  "complete_extracted_bodies": 11,
+  "exact_v3_file_count": 4005,
+  "exact_v3_full_inventory_verified": true,
+  "format": 1,
+  "full_tu_probe": {
+    "cross_compile_only": true,
+    "objects": [
+      {
+        "object_sha256": "a4cde9ea4fb5f727de50c2e22b9be1cd61eed819fc9ff3d3ce0ac73d2833936a",
+        "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+        "source_sha256": "a050e452c5a7d26c006c08e637ac4e1ce5b95ca32143d419b344211ac19eb937",
+        "status": 0
+      },
+      {
+        "object_sha256": "4b8e82b062906769a3e1fd892ab33829d5b2f0ad8402b6944fe2bf814ed22e43",
+        "source": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+        "source_sha256": "ecaa6aaddbc27cce8037e0d182660e40b09a367060b087b00f4c8b62efe4c8ee",
+        "status": 0
+      },
+      {
+        "object_sha256": "685fed9382d1c2a18a6c73544a204f46b3c82f14c5cd380514ace8266d854a93",
+        "source": "src/nvidia/src/kernel/gpu/gpu.c",
+        "source_sha256": "4e5d5f438acf9ca591f35d793009265afac0c21fc4818eabeff52271019ddc31",
+        "status": 0
+      },
+      {
+        "object_sha256": "26aa33f3df5fb554db40258e7f1ae4cc31f5722f40f8f74746a749719c774101",
+        "source": "src/nvidia/src/libraries/nvoc/src/runtime.c",
+        "source_sha256": "538a93d0894877493d59a28c037396a720b6450baff3a5f03d55cc2619caa025",
+        "status": 0
+      },
+      {
+        "object_sha256": "b56efa2f8c12d54864e07e05d0e8a8a958c9339b2f5f3bd9654ac669eaeb7169",
+        "source": "src/nvidia/generated/g_objtmr_nvoc.c",
+        "source_sha256": "be24a89a6fac421744497eb614e12569747c89f01308191ff967a233c845db0f",
+        "status": 0
+      },
+      {
+        "object_sha256": "81a5b857260b05355efc68756d011f8ea88b7587d7c6a6462ab79b021bda982a",
+        "source": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+        "source_sha256": "2d026d3f55bc10b972c072ad6d02a79117ac3338d24e3bf548eb4cd806b88a81",
+        "status": 0
+      },
+      {
+        "object_sha256": "aabd257da69458d44d5564e8f5721db737c8407c3e1a36e972d039405e1cc934",
+        "source": "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c",
+        "source_sha256": "5dad9e3f5aaedfc4f8aee59fa4ce7f30ed3d7051f110d2201cebcd44fa632ae0",
+        "status": 0
+      },
+      {
+        "object_sha256": "fc57876e85dde93000de6fe38196d2e04f95053889d2b50cd66ef225154721d8",
+        "source": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp_fwsec.c",
+        "source_sha256": "27c4de0a584ddd36e5a468b5207858c65c82ba33e5a09a9b792d54705eec5537",
+        "status": 0
+      },
+      {
+        "object_sha256": "d478ff379209d1fb83a7968b02fe6be73f251fd4949ce45d032daf7b64050ec3",
+        "source": "S540NvidiaGspFirstTransactionOriginal.c",
+        "source_sha256": "b8e3c04e934e594d2442c78e2a234d90525d4558d20fa13e71cc48e8f5329aa2",
+        "status": 0
+      }
+    ],
+    "original_translation_units": 8,
+    "typed_probe_translation_units": 1
+  },
+  "gpu_access": false,
+  "host_control": true,
+  "kernel_execution": "not_tested",
+  "limitations": [
+    "RM-semaphore ownership is unproved; generic lock capability returns NV_ERR_NOT_SUPPORTED.",
+    "Record admission, GPU init, GPU lock, and thread/runtime endpoints are isolated fixtures in the 74-check suite.",
+    "No transitive inner-cleanup closure, all-constructor rollback closure, owner/callback admission, hardware stop, or kernel execution is claimed."
+  ],
+  "namespace_sha256": "cb79f788baddb7f046e870b1e2e09bfde310b4b12417ec8c737fad1ef440f7a1",
+  "negative_controls": {
+    "cxx_lexical_driver_preserved": true,
+    "dirty_sdk_inventory_refused": true,
+    "linux_default_refused": true,
+    "output_inside_repository_refused": true,
+    "repository_inside_output_refused": true,
+    "symlink_output_refused": true
+  },
+  "new_source_resident_helpers": 2,
+  "original_entry_admission": false,
+  "original_functions_and_wrappers": 9,
+  "production_candidate_allowed": false,
+  "raw_generated_report_sha256": {
+    "full-tu-compilation.json": "bad1597ffce3362f63448a539074ac28dab06d6c9a1380783aa185b77dc2e282",
+    "source-manifest.json": "356cf323dd2c9de6bf644dd47dc07ff4996761da34636106904496e140cf2701",
+    "wrapper-results.json": "84e9ecae26b59fe0b65dc5bfb57ff81f5a19c9807da7b64108ad8740906d7649"
+  },
+  "read_only_review": {
+    "exact_v3_full_tu_header_selection": true,
+    "mocked_git_sdk_dirty_status_and_changed_blob_refused": true
+  },
+  "sdk": {
+    "archive_sha256": "8931e622b6d16a7052cb2c2dabe16be06963a34b747f19e6cda2bbe8bc7e2557",
+    "file_count": 1232,
+    "provided": true,
+    "reference_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+    "source": "exact pinned archive and full file inventory",
+    "tree_sha256": "50d4e3689ba17a2865ad707dc6ba70f4273a6b12fe8faa1ea15bb02f92ce0fc8",
+    "used_by_original_c_tus": false
+  },
+  "source_contract_sha256": "ed4da324212df92ea630b65421e4cb20a49287e9f618035702145ff3de31920b",
+  "source_replay_without_v3_root": true,
+  "status": "passed-relocated-linux-controls"
+}

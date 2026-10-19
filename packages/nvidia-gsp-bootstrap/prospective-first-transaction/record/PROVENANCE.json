@@ -1,0 +1,17 @@
+{
+  "format": 1,
+  "historical_scratch_changed": false,
+  "source_record_c_sha256": "71756a44ba053df28aa25350d2aa4396993e2f86ed1a390a769b163f528e8a56",
+  "source_record_h_sha256": "eb7f9b38fd7bb3b6df88b14dfc382ee5a5d426a22ef246b51f657b010ca6ed2c",
+  "adaptations": [
+    "Strong header and participant C/header bytes match the portable scratch freeze. Strong C started at the recorded scratch hash; its later scoped exit-status fix is documented below.",
+    "Dependency provenance paths are historical relative labels.",
+    "New helpers use explicit upstream/namespace/output/compiler/companion-overlay arguments and repository-relative discovery. No production profile or policy table is changed.",
+    "Promoted actual-body control reads real companion Host/Crypto/Memory counters, replacing historical explicit zero-use controls for unused domains; original callback bodies and strong record bytes unchanged.",
+    "Runner sanitizer environment override is scoped to explicit host_control only; authoritative default macOS execution preserves inherited ASAN_OPTIONS. No C/header/dependency semantics changed.",
+    "OriginalExitReady preserves genuine unlocked exit-ready observation but returns first sticky failure instead of a later successful original outcome; earlier frozen scratch C remains unchanged. Regression adds three actual-service-flow checks: sticky NV_OK exit, retained exit-ready marker, and later genuine outer return."
+  ],
+  "hardware_admission": false,
+  "native_apple_execution": false,
+  "promoted_record_c_sha256": "556f17711c0e444ff186400a548baf1609e2dc220783199ca6cd97d575283f7c"
+}

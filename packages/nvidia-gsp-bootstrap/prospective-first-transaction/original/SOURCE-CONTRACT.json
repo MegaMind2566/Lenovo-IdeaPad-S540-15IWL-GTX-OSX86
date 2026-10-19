@@ -1,0 +1,107 @@
+{
+  "all_inner_cleanup_closed": false,
+  "all_producers_closed": false,
+  "all_selected_constructor_rollbacks_covered": false,
+  "base_profile": "packages/nvidia-gsp-bootstrap/prospective-v3/PROSPECTIVE-SOURCE-PROFILE.json",
+  "base_profile_sha256": "f23d62032f9c0ac9dc41dd2344fadf2500f3dff35296d157ddb4401a56592ecd",
+  "format": 1,
+  "full_lock_capability_refused": true,
+  "historical_controls": {
+    "authoritative_darwin_execution": false,
+    "checks_per_variant": 74,
+    "complete_original_tus_compiled": 8,
+    "failures_per_variant": 0,
+    "source_bodies_with_explicit_endpoints": true,
+    "typed_bridge_compiled": true,
+    "variants": [
+      "native",
+      "fatal-sanitizers"
+    ]
+  },
+  "original_entry_admission": false,
+  "patch": "deferred-init-and-destruction-guards.patch",
+  "patch_sha256": "f61c9d381738fa1905da18da40eac0149ae6fd13b74be6e97689912de16787e8",
+  "positive_hardware_stop_receipt": false,
+  "production_candidate_allowed": false,
+  "profile": "isolated-prospective-first-transaction-original-not-approved",
+  "project_include_relocations": [
+    {
+      "before_sha256": "5fd031fc4734219fe8c6d37bafd0d590bbd9af85379340404e1a3c2451ad00b9",
+      "file": "S540NvidiaGspFirstTransactionOriginal.c",
+      "kind": "package-relative include prefix only",
+      "promoted_sha256": "b8e3c04e934e594d2442c78e2a234d90525d4558d20fa13e71cc48e8f5329aa2"
+    },
+    {
+      "before_sha256": "8deb51332c3c860556f58709a150e1aeeb9fb74d40ee36148ad230a1880d5188",
+      "file": "check_wrapper_bodies.c",
+      "kind": "package-relative include prefix only",
+      "promoted_sha256": "1cf5a340b38966a2923a288dadb74593201a5e1dd3940bd34f12713cd17530da"
+    },
+    {
+      "before_sha256": "bb08776b34e74f26a9db618baeb450e512b27c08147cadfd2a1159ab224b8fe9",
+      "file": "check_native.cpp",
+      "kind": "package-relative include prefix only",
+      "promoted_sha256": "b8c117c5799add77025ed0f4d4cc72974ce4e3a2956e4fadfa41f1bf18de4003"
+    }
+  ],
+  "rm_semaphore_ownership_proven": false,
+  "sources": [
+    {
+      "candidate_sha256": "a050e452c5a7d26c006c08e637ac4e1ce5b95ca32143d419b344211ac19eb937",
+      "exact_v2_sha256": "71cc56d73625b91d762712d5cdb146222e2a177dc85fa45511cf2b0a67f9981a",
+      "exact_v3_sha256": "71cc56d73625b91d762712d5cdb146222e2a177dc85fa45511cf2b0a67f9981a",
+      "path": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+      "upstream_sha256": "dda3b014833c2e94680e5adea152011ffce72c8067782aceeecaefc28b7394d3"
+    },
+    {
+      "candidate_sha256": "ecaa6aaddbc27cce8037e0d182660e40b09a367060b087b00f4c8b62efe4c8ee",
+      "exact_v2_sha256": "bd45381e93aa868e97360f94f768a0c39ed7391b527e75683ebdb9f2bf6a5ab3",
+      "exact_v3_sha256": "bd45381e93aa868e97360f94f768a0c39ed7391b527e75683ebdb9f2bf6a5ab3",
+      "path": "src/nvidia/arch/nvalloc/unix/src/osapi.c",
+      "upstream_sha256": "e4336f0e3bb55122680e0d344f970c123664122c2415134b7a6b517c98fcbe75"
+    },
+    {
+      "candidate_sha256": "4e5d5f438acf9ca591f35d793009265afac0c21fc4818eabeff52271019ddc31",
+      "exact_v2_sha256": "981e1db33e9902c19798046cf4909604096ddc881fb895b0792b3131e91acdd0",
+      "exact_v3_sha256": "981e1db33e9902c19798046cf4909604096ddc881fb895b0792b3131e91acdd0",
+      "path": "src/nvidia/src/kernel/gpu/gpu.c",
+      "upstream_sha256": "287b204497d90139836f15b1d05a5abca50a67cd2c235e0351194c00153a2257"
+    },
+    {
+      "candidate_sha256": "538a93d0894877493d59a28c037396a720b6450baff3a5f03d55cc2619caa025",
+      "exact_v2_sha256": "d1eb84ef953c81cbc8fdd8ddfea5298a93401992c98e41adae6dfe18b14db80d",
+      "exact_v3_sha256": "d1eb84ef953c81cbc8fdd8ddfea5298a93401992c98e41adae6dfe18b14db80d",
+      "path": "src/nvidia/src/libraries/nvoc/src/runtime.c",
+      "upstream_sha256": "d1eb84ef953c81cbc8fdd8ddfea5298a93401992c98e41adae6dfe18b14db80d"
+    },
+    {
+      "candidate_sha256": "be24a89a6fac421744497eb614e12569747c89f01308191ff967a233c845db0f",
+      "exact_v2_sha256": "6e13a917de51771145d29b5f8c91f0d5bd3939d9f05f530005ee326ba450e824",
+      "exact_v3_sha256": "6e13a917de51771145d29b5f8c91f0d5bd3939d9f05f530005ee326ba450e824",
+      "path": "src/nvidia/generated/g_objtmr_nvoc.c",
+      "upstream_sha256": "6e13a917de51771145d29b5f8c91f0d5bd3939d9f05f530005ee326ba450e824"
+    },
+    {
+      "candidate_sha256": "2d026d3f55bc10b972c072ad6d02a79117ac3338d24e3bf548eb4cd806b88a81",
+      "exact_v2_sha256": "e4d612fb7bbf28b55a388b05766f654dd60ff53106da0829256999a6380c8c78",
+      "exact_v3_sha256": "e4d612fb7bbf28b55a388b05766f654dd60ff53106da0829256999a6380c8c78",
+      "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+      "upstream_sha256": "ed6d7020a8a1772bc44608178aa13a77a72b8bf0eabe3293c12bc9d2b122c6c9"
+    },
+    {
+      "candidate_sha256": "5dad9e3f5aaedfc4f8aee59fa4ce7f30ed3d7051f110d2201cebcd44fa632ae0",
+      "exact_v2_sha256": "7f1d2a6356f98f0975a3130449522b7f8d7569cd85ddb2255f6cce1ccf06bd1a",
+      "exact_v3_sha256": "7f1d2a6356f98f0975a3130449522b7f8d7569cd85ddb2255f6cce1ccf06bd1a",
+      "path": "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c",
+      "upstream_sha256": "df312262254d712e8340c2d428bb5869354756f41b7a5758aac2f1825fdf2550"
+    },
+    {
+      "candidate_sha256": "27c4de0a584ddd36e5a468b5207858c65c82ba33e5a09a9b792d54705eec5537",
+      "exact_v2_sha256": "67ef9df6a3653644899f69df5e135b1f64d365b22b1cd1676991d7ebc606fed5",
+      "exact_v3_sha256": "67ef9df6a3653644899f69df5e135b1f64d365b22b1cd1676991d7ebc606fed5",
+      "path": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp_fwsec.c",
+      "upstream_sha256": "67ef9df6a3653644899f69df5e135b1f64d365b22b1cd1676991d7ebc606fed5"
+    }
+  ],
+  "upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5"
+}
