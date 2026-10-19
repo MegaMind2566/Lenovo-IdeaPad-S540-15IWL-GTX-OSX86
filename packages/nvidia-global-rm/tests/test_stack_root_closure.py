@@ -125,6 +125,7 @@ class ActualObjects(unittest.TestCase):
             raise unittest.SkipTest('Actual Mach-O disassembler required.')
 
     def actual(self, root, text):
+        root = root.resolve()
         source = root/'fixture.c'; obj = root/'fixture.o'; source.write_text(text)
         command = [self.cc, '-target', 'x86_64-apple-macos15', '-O2', '-ffreestanding', '-fstack-usage',
                    '-c', str(source), '-o', str(obj)]
