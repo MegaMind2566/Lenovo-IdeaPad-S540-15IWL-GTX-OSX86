@@ -181,7 +181,7 @@ class StackUsage(unittest.TestCase):
             result = stack.audit([None], output, expected_objects=[obj])
             record = __import__('json').loads(output.read_text())
             self.assertEqual(result['missing_usage_manifests'], 1)
-            self.assertEqual(record['missing_object_measurements'], [str(obj)])
+            self.assertEqual(record['missing_object_measurements'], [str(obj.resolve())])
             self.assertFalse(record['aggregate_stack_proven'])
             self.assertTrue(all(value['compiled_graph_upper_bound_bytes'] is None
                                 for value in record['roots'].values()))

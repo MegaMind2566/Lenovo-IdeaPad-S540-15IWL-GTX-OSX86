@@ -98,6 +98,16 @@ jobs:
           --upstream build-src/nvidia-upstream
           --cxx /usr/bin/clang++
           --output build/nvidia-execution/prospective-checks/gsp-teardown
+      - name: Exercise conditional RM lock cancellation with real Darwin service controls
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/cancellation/check_rm_lock_cancellation.py
+          --upstream build-src/nvidia-upstream --cc /usr/bin/clang --cxx /usr/bin/clang++
+          --output build/nvidia-execution/prospective-checks/rm-locks
+      - name: Exercise original Falcon reset and optional capability status edges
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/cancellation/check_original_status_edges.py
+          --upstream build-src/nvidia-upstream --cxx /usr/bin/clang++
+          --output build/nvidia-execution/prospective-checks/status-edges
       - name: Install the pinned bounded archive decoder in a private environment
         shell: bash
         run: |
@@ -194,6 +204,9 @@ jobs:
             build/nvidia-execution/kernel-checks/**/*.su
             build/nvidia-execution/kernel-checks/**/*.stack.json
             build/nvidia-execution/kernel-checks/**/*.stack-graph.json
+            build/nvidia-execution/kernel-checks/nvoc-reset-stack-proof/*.o
+            build/nvidia-execution/kernel-checks/nvoc-reset-stack-proof/*.ll
+            build/nvidia-execution/kernel-checks/nvoc-reset-stack-proof/*.c
             build/nvidia-execution/prospective-checks/**/*.json
             build/nvidia-execution/prospective-checks/**/*.log
             build/nvidia-execution/prospective-checks/adapter-compile/*.o
