@@ -10,7 +10,7 @@ if [ ! -d "$desktop_dir" ]; then
 fi
 report_dir=$(/usr/bin/mktemp -d "$desktop_dir/S540-SD-XXXXXX") || exit 1
 stream_pid=""
-predicate='senderImagePath CONTAINS[c] "AppleSDXC" OR (process == "kernel" AND (eventMessage CONTAINS[c] "SDXC" OR eventMessage CONTAINS[c] "SDHCI" OR eventMessage CONTAINS[c] "O2Micro"))'
+predicate='senderImagePath CONTAINS[c] "AppleSDXC" OR senderImagePath CONTAINS[c] "BgSurSDXC" OR senderImagePath CONTAINS[c] "BigSurSDXC" OR senderImagePath CONTAINS[c] "CtlnaSDXC" OR (process == "kernel" AND (eventMessage CONTAINS[c] "SDXC" OR eventMessage CONTAINS[c] "SDHCI" OR eventMessage CONTAINS[c] "O2Micro"))'
 
 # Each shell below owns exactly one background job. Address that job, never a
 # possibly recycled numeric PID. Capture subshells have their own job table.
@@ -93,6 +93,8 @@ echo "Rimuovi la scheda SD e premi Invio."
 IFS= read -r risposta || exit 1
 
 capture prima-ioreg.txt 20 /usr/sbin/ioreg -r -c AppleSDXC -l -w 0
+capture prima-ioreg-BgSurSDXC.txt 20 /usr/sbin/ioreg -r -c BgSurSDXC -l -w 0
+capture prima-ioreg-CtlnaSDXC.txt 20 /usr/sbin/ioreg -r -c CtlnaSDXC -l -w 0
 capture macos.txt 15 /usr/bin/sw_vers -productVersion
 capture kernel.txt 15 /usr/bin/uname -r
 capture inizio-utc.txt 15 /bin/date -u '+%Y-%m-%dT%H:%M:%SZ'
@@ -107,6 +109,8 @@ echo "Attendo 8 secondi per registrare il tentativo di lettura..."
 /bin/sleep 8
 
 capture dopo-ioreg.txt 20 /usr/sbin/ioreg -r -c AppleSDXC -l -w 0
+capture dopo-ioreg-BgSurSDXC.txt 20 /usr/sbin/ioreg -r -c BgSurSDXC -l -w 0
+capture dopo-ioreg-CtlnaSDXC.txt 20 /usr/sbin/ioreg -r -c CtlnaSDXC -l -w 0
 capture lettore.spx 20 /usr/sbin/system_profiler SPCardReaderDataType -xml -detailLevel full
 capture dischi.plist 20 /usr/sbin/diskutil list -plist
 capture debug-SDXC.txt 15 /usr/sbin/sysctl debug.SDXC
@@ -116,8 +120,9 @@ capture fine-utc.txt 15 /bin/date -u '+%Y-%m-%dT%H:%M:%SZ'
 stop_stream
 
 /bin/cat > "$report_dir/LEGGIMI.txt" <<'TEXT'
-Raccolta mirata SD: stato prima/dopo inserimento, log filtrati, elenco dischi
-e Info.plist del driver AppleSDXC installato. Ogni comando ha un codice di uscita
+Raccolta mirata SD: stato AppleSDXC, BgSurSDXC e CtlnaSDXC prima/dopo
+inserimento, log filtrati, elenco dischi e Info.plist del driver AppleSDXC
+installato. Ogni comando ha un codice di uscita
 in comandi.tsv. Log vuoti possono indicare che il driver non ha emesso messaggi
 disponibili: questa raccolta non abilita nuovi flag di debug del driver.
 I lettori hanno limiti di 15 o 20 secondi, esclusa una breve fase di arresto.

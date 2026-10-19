@@ -49,11 +49,10 @@ CMD0, so it does not establish that no command was issued. These observations do
 not identify a particular O2 initialization quirk or justify an undocumented
 property, register write or driver replacement.
 
-The next useful baseline is whether this **same SD card** reads successfully in
-Windows on this laptop or through another known-working reader. The existing
-capture cannot distinguish a card fault from a controller/driver fault. Another
-identical export or capture is not requested. Native card access,
-eject/reinsertion and resume remain unverified.
+The user has now confirmed that this same SD card reads successfully in Windows.
+This supports investigating the macOS driver path next. Another identical export
+or native-driver capture is not requested. Native card access, eject/reinsertion
+and resume remain unverified.
 
 ## Source and delivery scope
 
@@ -99,12 +98,14 @@ private config passes OpenCore 1.0.8 ocvalidate. Recovery uses the preceding SD
 trial config, including its former NVMe block and Auto memory status.
 
 [RACCOGLI-ERRORE-SD.command](RACCOGLI-ERRORE-SD.command) performs one focused
-read-only capture around card removal/reinsertion. It collects the SD subtree
-before/after, filtered unified logs, card-reader output, disk list and installed
-AppleSDXC Info.plist. It reads debug.SDXC if available and does not alter it.
+read-only capture around card removal/reinsertion. It collects AppleSDXC,
+BgSurSDXC and CtlnaSDXC subtrees before/after, filtered unified logs, card-reader
+output, disk list and installed AppleSDXC Info.plist. It reads debug.SDXC if
+available and does not alter it.
 Logging may contain no driver messages even with --debug/--level debug; those
-options do not enable an undocumented driver debug mask. No new functional SD
-patch or old driver is included. Personal diagnostic output remains private.
+options do not enable an undocumented driver debug mask. Hardware v2 includes
+no new functional SD patch or old driver. Personal diagnostic output remains
+private.
 
 The original collector's job-status filter was incompatible with macOS Bash
 3.2 and produced false timeout messages in the command-status files. That filter
@@ -117,6 +118,41 @@ The focused process-helper regression check passes on macOS with the system
 Bash 3.2.57, including completed commands, nonzero exit status, timeouts and
 independent cleanup of the log stream. This verifies the collector fix, not SD
 hardware access.
+
+## Historical S540 driver: isolated compatibility test
+
+The [mandresve S540 project](https://github.com/mandresve/Lenovo-IdeaPad-S540-Hackintosh)
+and its [original card-reader issue](https://github.com/lietxia/XiaoXinAir14IML_2019_hackintosh/issues/29)
+provide a more specific precedent. The original IORegistry screenshot shows
+`vendor-id = 1217`, `device-id = 8621` and attached CtlnaSDXC storage services,
+with the real vendor/device IDs retained. The subsystem and PCI path differ
+from this S540, so its complete EFI must not be copied. The author reports
+successful CtlnaSDXC testing on two S540 machines and BigSurSDXC on Ventura 13.5.
+These are historical reports, not proof of Tahoe support.
+
+The reference CtlnaSDXC 1.9.0 executable is byte-for-byte identical to the
+[official OCLP BigSurSDXC payload](https://github.com/dortania/OpenCore-Legacy-Patcher/blob/f1d67923c827be2deebb1172333e7f0afb340583/payloads/Kexts/Misc/BigSurSDXC-v1.0.0.zip)
+after replacing only the same-length class-name text `CtlnaSDXC` with
+`BgSurSDXC`. This is a repackaged Apple Big Sur 11.6.1 driver with renamed
+classes, not a new open-source O2 driver or a Catalina source port. The test
+uses the official BigSurSDXC payload unchanged.
+
+Its personality has `IOProbeScore = 6000`, compared with `0` on the attached
+native driver in the user's capture. This gives a concrete basis for trying
+the older driver through matching priority, without adding an AppleSDXC block.
+It does not establish that VT-d caused the native failure or prove Darwin 25
+ABI compatibility.
+
+The [legacy trial profile](../../config/profiles/sd-legacy-trial.json) limits
+the experiment to x86_64/Darwin 25 and the external 240 GB test EFI. Relative to
+hardware v2, the private config adds exactly one Kernel/Add entry and preserves
+all other settings, including the existing compatible property, native Wi-Fi,
+labels, memory description and NVMe unblock. Recovery contains the exact
+hardware v2 config. The package includes the kext, config and collector; there
+is no system-volume installation. A successful test requires actual file
+reading, not merely a new System Information entry. If reading works, another
+diagnostic capture is unnecessary; if it fails, the updated collector can
+distinguish the BgSurSDXC and native driver subtrees.
 
 Generic controller/API labels, the CPU speed field and the misleading NVIDIA
 profiler Metal field are not changed through speculative capability injections.

@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "status": "experimental-runtime-unverified",
+  "target": "Lenovo IdeaPad S540-15IWL GTX 81SW",
+  "boot_scope": "external 240 GB test EFI",
+  "baseline": "hardware-v2",
+  "card_baseline": "User confirms same SD card reads successfully in Windows",
+  "physical_reader": {
+    "vendor_id": "1217",
+    "device_id": "8621",
+    "subsystem_vendor_id": "17AA",
+    "subsystem_device_id": "3803",
+    "pci_path": "PciRoot(0x0)/Pci(0x1C,0x0)/Pci(0x0,0x0)"
+  },
+  "changes": {
+    "single_kernel_add": {
+      "Arch": "x86_64",
+      "BundlePath": "BigSurSDXC.kext",
+      "Enabled": true,
+      "ExecutablePath": "Contents/MacOS/BigSurSDXC",
+      "MinKernel": "25.0.0",
+      "MaxKernel": "25.99.99",
+      "PlistPath": "Contents/Info.plist"
+    },
+    "native_AppleSDXC_block_added": false,
+    "other_config_edits": false,
+    "existing_compatible_preserved": true,
+    "system_volume_modifications": false
+  },
+  "driver": {
+    "bundle_identifier": "com.apple.driver.BigSurSDXC",
+    "version": "1.9.0",
+    "origin": "Apple Big Sur 11.6.1, repackaged by OCLP with renamed classes",
+    "source_port": false,
+    "executable_sha256": "dfb316e5e4ce745da6dbbb7470af1720e6719741e2a900aff3b3114e35060bd7",
+    "upstream_archive_git_blob": "9c2fb4ef46e68eaf72becf95790b9f89b66d70b1",
+    "upstream_archive_sha256": "cae42ad863f5d4ae8a622ce1a9632f7268952fdeeb43306fe7f0d2be7275d3f8",
+    "driver_classes": ["BgSurSDXC", "BgSurSDXCSlot", "BgSurSDXCBlockStorageDevice"],
+    "probe_score": 6000,
+    "observed_native_probe_score": 0
+  },
+  "validation_scope": {
+    "historical_same_device_id": true,
+    "historical_same_subsystem": false,
+    "darwin_25_load_verified": false,
+    "card_reading_verified_on_target": false,
+    "eject_reinsert_resume_verified": false
+  },
+  "recovery": "Exact hardware-v2 config; remove the added BigSurSDXC.kext",
+  "sources": [
+    "https://github.com/mandresve/Lenovo-IdeaPad-S540-Hackintosh",
+    "https://github.com/lietxia/XiaoXinAir14IML_2019_hackintosh/issues/29",
+    "https://github.com/dortania/OpenCore-Legacy-Patcher/blob/f1d67923c827be2deebb1172333e7f0afb340583/payloads/Kexts/Misc/BigSurSDXC-v1.0.0.zip"
+  ]
+}
