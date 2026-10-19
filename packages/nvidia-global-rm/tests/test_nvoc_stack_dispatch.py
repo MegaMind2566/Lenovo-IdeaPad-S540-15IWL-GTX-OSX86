@@ -275,6 +275,12 @@ class ActualMachOProbe(unittest.TestCase):
                     text = destination.read_text()
                     text = re.sub(r'getelementptr inbounds %struct.Device, ptr (%[-A-Za-z$._0-9]+), i64 0, i32 1',
                                   r'getelementptr inbounds i8, ptr \1, i64 8', text)
+                    if destination.name == 'original.ll':
+                        # Apple also assigns the actual callee expression's
+                        # beginning to the load, rather than its field token.
+                        body, _, load, call = nvoc._indirect_load(text, 'entry')
+                        call_dbg = re.search(r'!dbg !(\d+)', call)[1]
+                        text = text.replace(load, re.sub(r'!dbg !\d+', '!dbg !' + call_dbg, load))
                     destination.write_text(text)
                 return result
 
@@ -311,19 +317,21 @@ class ActualMachOProbe(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'static inline'):
                 bind(bad)
 
-            def debug(text=original, load_text=load, call_text=call, source_path=source):
+            def debug(text=original, load_text=load, call_text=call, source_path=source, ast_binding=binding):
                 return nvoc.typed_ast.debug_member_binding(text, function='entry', load=load_text,
-                    call=call_text, header=header, source=source_path, cwd=root, binding=binding)
+                    call=call_text, header=header, source=source_path, cwd=root, binding=ast_binding)
 
             self.assertEqual(debug()['ast']['field_type'], binding['field_type'])
             with self.assertRaisesRegex(ValueError, 'debug location'):
                 debug(load_text=re.sub(r', !dbg !\d+', '', load))
             with self.assertRaisesRegex(ValueError, 'actual AST'):
-                debug(original.replace('line: 8, column: 15', 'line: 8, column: 14'))
+                debug(original.replace('line: 8, column: 12', 'line: 8, column: 11'))
             with self.assertRaisesRegex(ValueError, 'measured root'):
                 debug(source_path=root / 'different.c')
+            wrong_binding = copy.deepcopy(binding)
+            wrong_binding['call_expression']['column'] += 1
             with self.assertRaisesRegex(ValueError, 'actual AST'):
-                debug(call_text=load)
+                debug(ast_binding=wrong_binding)
             # A matching numeric byte offset never substitutes for missing
             # compiler provenance, even with genuine typed candidate pointers.
             with mock.patch.object(nvoc.subprocess, 'run', side_effect=lowered_run), \

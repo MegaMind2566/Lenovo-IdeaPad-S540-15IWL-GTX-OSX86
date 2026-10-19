@@ -92,6 +92,7 @@ def member_binding(document, *, owner, field, wrapper, header, dispatch_line):
     declaration = _position(member.get('loc', {}), text)
     function_position = _position(function.get('loc', {}), text)
     member_position = _position(callee.get('range', {}).get('end', {}), text)
+    callee_position = _position(callee.get('range', {}).get('begin', {}), text)
     call_position = _position(call.get('range', {}).get('begin', {}), text)
     if (declaration['token'] != field or member_position['token'] != field
             or function_position['token'] != wrapper
@@ -99,7 +100,8 @@ def member_binding(document, *, owner, field, wrapper, header, dispatch_line):
         raise ValueError('NVOC AST tokens differ from the catalogued generated source.')
     return {'owner': owner, 'field': field, 'wrapper': wrapper,
             'field_declaration': declaration, 'wrapper_declaration': function_position,
-            'member_expression': member_position, 'call_expression': call_position,
+            'member_expression': member_position, 'callee_expression': callee_position,
+            'call_expression': call_position,
             'field_type': member['type'], 'receiver_type': parameter['type'],
             'same_translation_unit_field_identity': True}
 
@@ -155,8 +157,8 @@ def debug_member_binding(text, *, function, load, call, header, source, cwd, bin
         line = re.search(r'\bline: (\d+)\b', value)
         column = re.search(r'\bcolumn: (\d+)\b', value)
         scope = subprogram_of(value)
-        if (not line or not column or int(line[1]) != expected['line']
-                or int(column[1]) != expected['column']
+        if (not line or not column or not any(int(line[1]) == point['line']
+                and int(column[1]) == point['column'] for point in expected)
                 or _string(scope, 'name') != binding['wrapper'] or file_of(scope) != header.resolve()):
             raise ValueError('Lowered NVOC instruction does not bind the actual AST member/call token.')
         origin = number
@@ -175,8 +177,11 @@ def debug_member_binding(text, *, function, load, call, header, source, cwd, bin
             number = parent[1]
         raise ValueError('Cyclic LLVM inline provenance.')
 
-    loaded = location(load, binding['member_expression'])
-    called = location(call, binding['call_expression'])
+    # Apple Clang 17 locates the load at the beginning of the full callee
+    # expression; Clang 18 uses its final field token. Both positions come
+    # from this actual AST. Other columns on the same line are not accepted.
+    loaded = location(load, [binding['member_expression'], binding['callee_expression']])
+    called = location(call, [binding['call_expression']])
     if loaded['inline_chain'] != called['inline_chain']:
         raise ValueError('NVOC load and call have different source inline provenance.')
     # Same functions alone do not identify the same inline call instance.
