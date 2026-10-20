@@ -7,6 +7,7 @@ checks run in GitHub. Builders and regression checks are kept separately.
 
 | Package | Purpose | Guide |
 | --- | --- | --- |
+| [wifi-native](wifi-native) | Pinned AirportItlwm Tahoe build for AC9560 `8086:9DF0`; native basic operation, reboot reconnection and Wi-Fi recovery after sleep user-confirmed. Manual config/kext delivery worked; optional automatic staging remains unconfirmed. | [Native AC9560 Wi-Fi](wifi-native/README.md) |
 | [nvidia-global-rm](nvidia-global-rm) | Development: isolated complete original global RM, tracked host allocation and explicit platform facts; allocation-failure and operational callback closure remain gates. | [Global RM](nvidia-global-rm/README.md) |
 | [nvidia-darwin-services](nvidia-darwin-services) | Development: real Darwin synchronization, queues, timers, clocks, process and credential services for the complete RM profile. | [Darwin services](nvidia-darwin-services/README.md) |
 | [nvidia-device-transport](nvidia-device-transport) | Development: retained PCI, bounded MMIO, device-DMA ownership and real interrupt callback contracts. Physical adapter execution remains unconfirmed. | [Device transport](nvidia-device-transport/README.md) |

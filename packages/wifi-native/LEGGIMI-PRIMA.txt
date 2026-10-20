@@ -1,0 +1,59 @@
+S540 - Wi-Fi nativo Tahoe - prova v1
+
+Per Lenovo IdeaPad S540-15IWL GTX, Intel Wireless-AC 9560 8086:9DF0,
+macOS Tahoe 26 e OpenCore 1.0.8. Serve Python 3.10 o successivo.
+Il driver è compilato e verificato. Il funzionamento sul Lenovo è da provare.
+
+1. PREPARA LA COPIA DELLA EFI
+
+Estrai tutto lo ZIP. Mantieni insieme file e sottocartelle.
+Monta la partizione EFI attualmente usata dal Lenovo.
+Apri PREPARA-WIFI-NATIVO.command e scegli la sua cartella EFI.
+Puoi scegliere anche la partizione che la contiene: il comando cerca
+la cartella EFI al suo interno.
+
+Il programma controlla il pacchetto e la configurazione di OpenCore.
+Sulla Scrivania crea S540-WiFi-Nativo-TEST-data-ora/EFI.
+Solo nella copia disattiva itlwm e aggiunge AirportItlwm per Tahoe.
+La cartella originale e gli altri componenti vengono conservati.
+
+Se macOS blocca il comando, usa tasto destro > Apri. Se il file ha perso
+il permesso di esecuzione durante l'estrazione, dal Terminale nella
+cartella del pacchetto esegui:
+chmod +x PREPARA-WIFI-NATIVO.command RACCOGLI-WIFI-NATIVO.command tools/ocvalidate
+
+2. AVVIA LA COPIA DI PROVA
+
+Usa una chiavetta USB con una partizione EFI già preparata.
+Copia lì la cartella EFI generata, senza annidarla in un'altra EFI.
+Il risultato deve contenere EFI/BOOT e EFI/OC.
+Il pacchetto non formatta né prepara la chiavetta.
+
+Riavvia scegliendo OpenCore dalla chiavetta. Mantieni collegato il disco
+Samsung che contiene macOS e scegli la normale installazione Tahoe.
+Per tornare alla situazione precedente, avvia dalla EFI originale.
+
+3. ESEGUI UNA SOLA SESSIONE DI PROVA
+
+Usa il menu Wi-Fi di macOS per cercare le reti e collegarti.
+Prova disconnessione, riconnessione e cambio rete, se ne hai due disponibili.
+HeliPort non gestisce il nuovo driver: la rete va scelta dal menu di macOS.
+Per il primo test usa una rete WPA2-Personal, oppure WPA2/WPA3 mista
+con PMF facoltativo. WPA3-only e PMF obbligatorio non sono supportati.
+AirDrop non è supportato da questa versione del driver.
+
+4. RACCOGLI IL REPORT
+
+Dopo le prove apri RACCOGLI-WIFI-NATIVO.command.
+Sulla Scrivania viene creato S540-wifi-native-report-data-ora.json.
+Invia quel file e indica se ricerca, connessione e riconnessione funzionano.
+Se il test fallisce, raccogli il report prima di tornare alla EFI originale,
+quando possibile.
+
+Il report esclude nomi delle reti, password, indirizzi MAC e IP.
+La EFI di prova contiene invece i tuoi dati: tienila privata e non inviarla.
+
+Driver basato su laobamac/itlwm, derivato da OpenIntelWireless/OpenBSD,
+commit 738d4c61b5a64433b27c1ab09dba94916ab77d8d.
+La cartella source contiene i sorgenti corrispondenti e lo script di build.
+Licenze complete nella cartella licenses. Dettagli tecnici nel README.md.

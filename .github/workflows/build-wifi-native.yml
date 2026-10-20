@@ -1,0 +1,53 @@
+name: Build AC9560 native Wi-Fi for Tahoe
+
+on:
+  push:
+    branches: [main, 'wifi/**']
+    paths:
+      - 'packages/wifi-native/**'
+      - 'builders/build_wifi_native.py'
+      - 'config/profiles/wifi-native.lock.json'
+      - '.github/workflows/build-wifi-native.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-wifi-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  native-tahoe:
+    runs-on: macos-15-intel
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Compile, sign and verify the pinned native Tahoe driver
+        run: python3 builders/build_wifi_native.py --output-dir build/wifi-native
+      - name: Check EFI isolation, validation failures and filtered runtime reporting
+        run: >-
+          python3 packages/wifi-native/tests/test_wifi_native.py
+          --ocvalidate build/wifi-native/S540-wifi-native-v1/tools/ocvalidate
+      - name: Validate repository structure and documentation
+        run: python3 tests/validate_repository.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: S540-wifi-native-v1
+          path: |
+            build/wifi-native/S540-wifi-native-v1.zip
+            build/wifi-native/package-result.json
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: S540-wifi-native-build-evidence
+          path: |
+            build/wifi-native/source-audit.json
+            build/wifi-native/AirportItlwm-Tahoe.log
+            build/wifi-native/S540-wifi-native-v1/manifest.json
+          if-no-files-found: warn
+          retention-days: 30

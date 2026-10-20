@@ -13,7 +13,7 @@ Report received on 12 October 2026. Only data relevant to the project is include
 | dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91; subsystem 17AA:3806; revision A1 | Probe attachment, fixed PCI configuration/resource reads, two identification reads and local TU117 variant-41 table match confirmed; no HAL instance, initialized GPU or acceleration |
 | Display | BOE NV156FHM-N61, 1920×1080 | Internal panel and Intel Metal remain active. Brightness works with the non-NVIDIA EFI; adjustment is unavailable with a disabled slider in the NVIDIA-test EFI. Cause not isolated; work deferred |
 | NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Problematic PM981a family; compatibility is not assumed |
-| Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | itlwm 2.3.0 loaded and HeliPort reported working; Ethernet presentation is expected with this driver; disconnection, reconnection and network switching confirmed; Internet baseline 15.751 Mb/s down / 63.036 Mb/s up with Low loaded responsiveness; cause unresolved |
+| Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | Native AirportItlwm basic operation user-confirmed on October 19 using the external 240 GB test EFI: menu/settings, network visibility, joining and browsing, reboot reconnection and Wi-Fi recovery after sleep. Previous itlwm/HeliPort measurements remain historical; native performance is unmeasured |
 | Bluetooth | Intel, USB 8087:0AAA | Headphone playback, microphone, disconnection and reconnection confirmed; firmware loaded, correct NVRAM and IntelBTPatcher excluded |
 | Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Speaker/headphone output, automatic switching, wired-headset input and F1–F3 confirmed; S540 microphone fix v2 retained; quiet-volume correction confirmed during YouTube playback; equalisation and resume checks deferred |
 | Keyboard | PS/2 | VoodooPS2; direct F1–F3 and F6 working. Brightness works with the non-NVIDIA EFI; the NVIDIA-test EFI adjustment regression and remaining icon work are deferred |
@@ -107,6 +107,9 @@ The test using only `-igfxblr` eliminated the boot blackout in the reported resu
 Bluetooth status is On, FirmwareLoaded is Yes and the transport is connected; BlueToolFixup 2.7.2 and IntelBluetoothFirmware 2.4 are loaded, while IntelBTPatcher is absent. The two required NVRAM variables are present with the correct values: one zero byte and fourteen zero bytes. The stack starts scanning and receives BLE devices. On 14 October 2026, operation with Bluetooth headphones was reported, together with HeliPort operation for Wi-Fi network management. The current drivers and NVRAM are retained. The Bluetooth headset microphone was subsequently confirmed working on 14 October 2026. Playback and headset voice capture are therefore established as working. Disconnection and reconnection of both Wi-Fi and Bluetooth, together with Wi-Fi network switching, were also confirmed. Wired headphone output, automatic speaker switching and wired-headset microphone input were subsequently confirmed. Sleep recovery belongs to the deferred wake checks.
 
 ## Internet connection baseline: October 14, 2026
+
+These measurements used the former itlwm/HeliPort connection. They do not measure
+the native AirportItlwm driver subsequently confirmed on October 19.
 
 The built-in `networkQuality` summary reports **15.751 Mb/s downlink**, **63.036 Mb/s uplink**, **Low responsiveness at 1.023 seconds / 58 RPM**, and **idle latency 41.376 ms / 1450 RPM**. This is the default concurrent upload/download test on the current connection. The connection remains functional; the observed low loaded responsiveness does not by itself identify a Wi-Fi driver fault.
 
@@ -315,3 +318,41 @@ The v9 [verified build record](../../README.md#documentation-and-downloads) reco
 ## Deferred brightness regression after the v9 checkpoint
 
 Brightness works normally when booting the non-NVIDIA EFI. The NVIDIA-test EFI has unavailable adjustment and a disabled system slider. In that configuration, Intel UHD 620 (`3EA5`) still exposes Metal 3 and the internal Full HD main display is online. Lilu 1.7.2, WhateverGreen 1.7.1 and BrightnessKeys 1.0.3 are loaded, `-igfxblr` is present and AppleBacklightDisplay is active. This establishes a difference between EFI configurations; the responsible setting or probe behavior has not been isolated. The working non-NVIDIA EFI is retained. Investigation is deferred by request, with no additional tests, packages or patches.
+
+
+## System Information audit: 19 October 2026
+
+The private System Information export includes IORegistry. The user identifies
+the active boot route as the external **240 GB test EFI**; the APFS macOS system
+is on the separate USB Samsung 960 EVO. This audit does not validate the 960 EVO's
+own EFI with the native Wi-Fi change. Raw reports and private config identifiers
+are excluded from the repository.
+
+| Component | Evidence and remaining boundary |
+|---|---|
+| Intel UHD Graphics 620 | IntelAccelerator and CFL framebuffer attached; Metal 3 reported. The compatibility device ID 3EA5 is intentional. |
+| Memory | 8 GB SK Hynix + 4 GB Samsung DDR4-2400, both reported OK; not a RAM stress test. |
+| Native Wi-Fi | AirportItlwm 2.4.0 loaded with the selected firmware and scanned networks. IORegistry exposes both Skywalk and the driver's Ethernet bridge; Network's Ethernet classification is compatible with this native fork. No standalone itlwm is shown loaded. |
+| Bluetooth | IntelBluetoothFirmware 2.4.0 and BlueToolFixup 2.7.2 loaded, controller On; no connected peripheral in this snapshot. Earlier user functional checks remain separate evidence. |
+| Audio | VoodooHDA 3.6.10 exposes internal speakers and microphone at 48 kHz; quality and resume are not newly tested. |
+| Webcam | Integrated UVC camera present; not a new recording test. |
+| USB | USBToolBox/UTBMap loaded, nine mapped HS/SS ports; both attached storage bridges negotiate 5 Gb/s. |
+| Battery | Good, 296 cycles, 100%, no permanent failure reported. Firmware capacity values are not a calibrated health or runtime measurement. |
+| Internal PM981a | IONVMeController attached and Windows volumes readable. The configured IONVMeFamily block does not prevent attachment in this boot. SMART Verified and TRIM Yes do not establish macOS reliability. |
+| SD reader | O2Micro 1217:8621 is present on PCIe without a specific child driver; Card Reader section empty. |
+| Fingerprint | Goodix 27C6:55B4 on HS02 has generic USB services; no biometric integration shown. |
+
+The next non-NVIDIA work is internal-NVMe handling/reliability, full lid/sleep/wake
+and peripheral recovery, measured runtime, SD support and fingerprint feasibility.
+Existing keyboard-icon and audio refinements remain deferred. Empty Thunderbolt
+information alone is not evidence of a missing supported controller.
+
+A private label-only config trial was prepared for the same test EFI. It names the
+CPU through the already loaded RestrictEvents 1.1.6, supplies the verified NVIDIA
+model and slot text, and corrects the panel EDID name descriptor from FE to FC with
+its checksum updated. The EDID differs in exactly two bytes; timing and IDs are
+preserved. CPU ProcessorType 0601 is required by RestrictEvents' four-core string
+patch. MacBookPro16,2 and all other platform identifiers are preserved. Both
+baseline and trial pass OpenCore 1.0.8 ocvalidate, and reversing the explicit edits
+reproduces the baseline. Displayed names remain **pending a laptop reboot**;
+no NVIDIA acceleration or new peripheral support is added by these labels.

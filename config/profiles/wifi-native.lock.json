@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "target": {
+    "model": "Lenovo IdeaPad S540-15IWL GTX 81SW",
+    "adapter": "Intel Wireless-AC 9560",
+    "pci_id": "8086:9df0",
+    "macos": "Tahoe 26",
+    "min_kernel": "25.0.0",
+    "max_kernel": "25.99.99",
+    "architecture": "x86_64",
+    "scheme": "AirportItlwm-Tahoe",
+    "bundle_identifier": "com.zxystd.AirportItlwm"
+  },
+  "assets": {
+    "itlwm": {
+      "repository": "laobamac/itlwm",
+      "commit": "738d4c61b5a64433b27c1ab09dba94916ab77d8d",
+      "url": "https://codeload.github.com/laobamac/itlwm/tar.gz/738d4c61b5a64433b27c1ab09dba94916ab77d8d",
+      "size": 15727231,
+      "sha256": "a0f036eb462e13d7995781569acf266d1683f5a3c55f916a1c3d2d49895d4c73"
+    },
+    "MacKernelSDK": {
+      "repository": "acidanthera/MacKernelSDK",
+      "commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+      "url": "https://codeload.github.com/acidanthera/MacKernelSDK/tar.gz/3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+      "size": 2679518,
+      "sha256": "8931e622b6d16a7052cb2c2dabe16be06963a34b747f19e6cda2bbe8bc7e2557"
+    },
+    "OpenCore": {
+      "repository": "acidanthera/OpenCorePkg",
+      "version": "1.0.8",
+      "url": "https://github.com/acidanthera/OpenCorePkg/releases/download/1.0.8/OpenCore-1.0.8-DEBUG.zip",
+      "size": 11931199,
+      "sha256": "3f5f42b85703cf2c08e8dcd9245a52fb4326c9f4ef335c75b49f516cbbe131c6"
+    }
+  }
+}
