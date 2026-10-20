@@ -72,7 +72,19 @@
     "storage_io_started": false,
     "collector_capture_commands_succeeded": true,
     "stream_exit_status": 143,
-    "reported_card_insertion_timing_at_boot": "not_known",
-    "functional_result": "No readable card media; replacing the driver alone did not resolve access"
+    "reported_card_insertion_timing_at_boot": "User confirms hot insertion and subsequent powered-off startup with SD already inserted both fail",
+    "functional_result": "No readable card media; replacing the driver alone did not resolve access",
+    "additional_user_report": {
+      "date": "2026-10-20",
+      "hot_insertion_reading_works": false,
+      "powered_off_startup_with_card_present_reading_works": false,
+      "new_capture_for_powered_off_startup_received": false
+    }
+  },
+  "next_hardware_check": {
+    "action": "Read the same SD in Windows, then restart directly to macOS through the same external 240 GB test EFI with the card left inserted",
+    "purpose": "Test whether residual controller initialization from Windows changes card access",
+    "interpretation": "A positive result supports a controller-state dependency; a negative result does not rule it out because firmware or the driver may reset the controller",
+    "efi_changes_required": false
   }
 }

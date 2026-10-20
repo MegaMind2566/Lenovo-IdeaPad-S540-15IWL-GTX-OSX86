@@ -188,3 +188,32 @@ or inserted only after macOS started. A controlled startup with the card present
 or a direct Windows-to-macOS reboot if needed, can distinguish startup and
 hot-insertion behavior. Both remain hypotheses for the next hardware check.
 Personal reports, serial numbers and volume identifiers are excluded.
+
+## Startup with SD already inserted also fails
+
+The user clarified that the captured legacy-driver test used insertion after
+macOS started, then tested a full power-off/startup with the SD already inserted.
+Card access still failed. The latter is a user-reported functional result;
+no additional registry or command trace was provided for that startup.
+This makes an exclusively hot-insertion failure less likely, but does not
+identify the failing initialization step or prove an interrupt/power fault.
+
+Inspection of the legacy binary confirms that its `IONameMatched` compatibility
+branch is already selected on this machine. No consumer was identified for
+the cosmetic properties or Apple subvendor injection that differ in a working
+reference config. These differences do not justify another property-only test.
+
+The Linux [SEABIRD1 fix](https://github.com/torvalds/linux/commit/cdd2b769789ae1a030e1a26f6c37c5833cabcb34)
+and [O2 PLL/card-detection fix](https://github.com/torvalds/linux/commit/69d91ed1469b49b4d3b5a9ac40e4abc453698dc2)
+show controller-specific clock/card-detection handling for this family.
+This motivates an initialization investigation; it does not establish that
+the same condition causes this macOS failure. The 8620 revision-1 delay and
+FUJIN2/8520 register sequences must not be copied onto 8621 without evidence.
+
+The next controlled check retains the same EFI and SD: read the card in
+Windows, then restart directly into macOS without removing the card or powering
+off. If this changes the outcome, an inherited controller state becomes a
+useful lead. Failure would remain inconclusive because firmware/driver reset
+can erase that state. Before implementing O2 register initialization, targeted
+read-only PCI/MMIO observations and the relevant OEM ACPI would be preferable
+to speculative register writes or another renamed copy of the same driver.
