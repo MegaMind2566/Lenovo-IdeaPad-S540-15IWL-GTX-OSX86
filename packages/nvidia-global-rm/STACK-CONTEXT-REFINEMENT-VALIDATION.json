@@ -1,0 +1,181 @@
+{
+  "format": 1,
+  "status": "fresh-recovery-source-recipe-and-actual-single-tu-controls-passed",
+  "date_utc": "2026-10-20",
+  "new_source_sha256": {
+    "builders/nvidia_stack_context_refinement.py": "e42ca8a09f6bbc67e22cb0a8f32ed7b9cb33a89d019b7e969df3be2eebe44c2c",
+    "packages/nvidia-global-rm/tests/test_stack_context_refinement.py": "512da8fa59fcbe9b6a1c5b9f0dfa5b186b679236e8be513f5c2f3dacad7ae121",
+    "packages/nvidia-global-rm/tests/check_stack_context_source.py": "856a7376adb2970a49f6a1da92558783d47aa5c317bf806a9836a516c856d4c9",
+    "packages/nvidia-global-rm/STACK-CONTEXT-COMPILER-RECIPES.json": "c03f5fe87ea1eb5ed2320483f3b42e19cafeea1b0a3cc9782722309cc0c350d9",
+    "packages/nvidia-global-rm/STACK-CONTEXT-REFINEMENT.md": "7d36a41613bc3f4d21185dfa12488852f8fabcf2386a246b4a96531abe0b5fe2"
+  },
+  "unchanged_predecessor_sha256": {
+    "builders/nvidia_stack_usage.py": "79a14393d69452d01ad42067b9933ccc842abc98fc50ee443051a96b601d8abd",
+    "builders/nvidia_stack_root_closure.py": "4abc2acc4d9b85a95e76fe574191a55b304e48d46aafddbdddb9baad07a74050",
+    "builders/nvidia_nvoc_definitions.py": "8bc5a377ff27be9b848ece1d16b044eb22044ef5ed27e1f2f43417a4e7196b00"
+  },
+  "tests": {
+    "context_controls": {
+      "passed": 20,
+      "skipped": 0,
+      "upstream_source_supplied": true,
+      "actual_macho_predicate_controls": true,
+      "trusted_compiler_injection_refused_before_execution": true
+    },
+    "existing_selected_root_closure_controls": {
+      "passed": 17,
+      "skipped": 0,
+      "actual_macho_decode_controls": true
+    },
+    "generic_discovery_without_optional_inputs": {
+      "successful": true,
+      "explicit_skips": 4
+    },
+    "python_compile": {
+      "passed": true
+    }
+  },
+  "actual_source_control_report_sha256": "de0794d6e75dcee167848b16fe825d31c191284f6643c0d2b4edbed64e1e1170",
+  "actual_source_control_report_path": "/workspace/scratch/4915cee8ab26/stack-context-reconstructed-controls-2/stack-context-source-controls.json",
+  "trusted_compiler": {
+    "path": "/workspace/scratch/4915cee8ab26/toolchain-restored/root/usr/lib/llvm-18/bin/clang",
+    "sha256": "8ef402d453d1ba4902e4ee0f0f847f6cfa01400c95aa43c24e97818b9c0e3f45",
+    "version": "Ubuntu clang version 18.1.3 (1ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /workspace/scratch/4915cee8ab26/toolchain-restored/root/usr/lib/llvm-18/bin\n"
+  },
+  "actual_disassembler_sha256": "4f98b86448d23bd1f858c50e93fbfc799f1c3640961a95e3b6c89d229a1b91bb",
+  "fresh_source_controls": [
+    {
+      "profile": "copied-source-predecessor",
+      "input_composition_sha256": "d8c61adba73be179e8ca34122f33b51bcf7d1e72d518c451dbe7fe25b4ae31ea",
+      "actual_compiled_translation_units": 1,
+      "actual_object_sha256": "a7444016f073c6d6521e20d78c3c6733554ab33e814fbc46134238d0aaf20fed",
+      "actual_object_replay_byte_equal": true,
+      "compiler_recipe_sha256": "62008dc4bdf9aaed8d5b901137bc2c79c3505344e79ed6c97f38edbd120d3b58",
+      "expanded_semantics_sha256": {
+        "dsmOrderOfPrecedenceList": "bf5b52737cbe4144700d7dc07aeed303cf23786f58c89b5589a30093d0f9514f",
+        "s540Global_remapDsmFunctionAndSubFunction": "6414c54c8b0ac079a94efdec347c1d21dfa332bb7bfe166f94eed550a901c227",
+        "s540Global_testIfDsmSubFunctionEnabled": "8d070d217c57e9004e0f94a17dc8af546d149dd98a190cf1cedaf17f40463ed7"
+      },
+      "actual_compiler_generic_predicates": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "actual_named_function_count_before_after": [
+        8,
+        10
+      ],
+      "roots": {
+        "remap": {
+          "recursive_components_before_after": [
+            1,
+            0
+          ],
+          "remaining_barrier_reason_counts": {
+            "external-stack-bound-unavailable": 10
+          },
+          "compiled_subgraph_upper_bound_bytes": null
+        },
+        "test": {
+          "recursive_components_before_after": [
+            1,
+            0
+          ],
+          "remaining_barrier_reason_counts": {
+            "external-stack-bound-unavailable": 12
+          },
+          "compiled_subgraph_upper_bound_bytes": null
+        }
+      },
+      "general_entry_edge_deleted": false,
+      "full_profile_compilation": false,
+      "aggregate_stack_proven": false
+    },
+    {
+      "profile": "isolated-fatal-assert-control",
+      "input_composition_sha256": "d8c61adba73be179e8ca34122f33b51bcf7d1e72d518c451dbe7fe25b4ae31ea",
+      "actual_compiled_translation_units": 1,
+      "actual_object_sha256": "2231464de53624f44196e24837325719956239b04712ddc25e1d4daebe75d37a",
+      "actual_object_replay_byte_equal": true,
+      "compiler_recipe_sha256": "42adecd15de52600cff5f86f1fc1131ff7adee2cd106fead508384e26866bdc5",
+      "expanded_semantics_sha256": {
+        "dsmOrderOfPrecedenceList": "bf5b52737cbe4144700d7dc07aeed303cf23786f58c89b5589a30093d0f9514f",
+        "s540Global_remapDsmFunctionAndSubFunction": "337db6a444c57d3f6a6e732b9ef1fe2c1b13836d18501581a690e22330ea9d14",
+        "s540Global_testIfDsmSubFunctionEnabled": "3128495428981fe488e15f1640ce89bd2945c30125926cd835aa7cf73b58c634"
+      },
+      "actual_compiler_generic_predicates": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "actual_named_function_count_before_after": [
+        8,
+        10
+      ],
+      "roots": {
+        "remap": {
+          "recursive_components_before_after": [
+            1,
+            0
+          ],
+          "remaining_barrier_reason_counts": {
+            "external-stack-bound-unavailable": 15
+          },
+          "compiled_subgraph_upper_bound_bytes": null
+        },
+        "test": {
+          "recursive_components_before_after": [
+            1,
+            0
+          ],
+          "remaining_barrier_reason_counts": {
+            "external-stack-bound-unavailable": 18
+          },
+          "compiled_subgraph_upper_bound_bytes": null
+        }
+      },
+      "general_entry_edge_deleted": false,
+      "full_profile_compilation": false,
+      "aggregate_stack_proven": false
+    }
+  ],
+  "reviewed_reconstruction_corrections": [
+    "The authored used data atom has exact N_NO_DEAD_STRIP descriptor0x20; weak/local/aliased/relocated/code atoms remain refused.",
+    "Preprocessing retains the actual recorded relative source spelling, reproducing original __FILE__ semantics and exact historical raw expanded-code seals.",
+    "The first fresh full argv was refused by historical recipe pins. Two complete recovery recipes were reviewed and added explicitly; old normalized hashes were not represented as regenerated."
+  ],
+  "full_current_original_1100_context_replay": "pending; no retained current full-profile object inventory supplied",
+  "lost_object_graph_evidence_reused": false,
+  "native_apple_execution": false,
+  "aggregate_stack_proven": false,
+  "kernel_stack_budget_established": false,
+  "framework_entry_headroom_established": false,
+  "original_entry_admission": false,
+  "kernel_execution": "not_tested",
+  "gpu_access": false,
+  "production_candidate_allowed": false,
+  "limitations": [
+    "Only two independently compiled ACPI TUs were used, one per control profile; no mixed object union was admitted.",
+    "Single-TU contextual cycle removal does not close the remaining original graph, indirect callbacks, recursion or external stack costs.",
+    "Fatal assertion policy is a terminal diagnostic policy, not evidence of sufficient stack or successful OOM unwind.",
+    "The optional fatal control modified only its private copied source pair, not the production composition."
+  ]
+}
