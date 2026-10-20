@@ -109,8 +109,8 @@ static int snapshot(void)
     size_t size = sizeof(s);
     kern_return_t result = IOConnectCallStructMethod(connection, S540_PROSPECTIVE_SELECTOR_SNAPSHOT,
                                                     NULL, 0, &s, &size);
-    IOServiceClose(connection);
-    if (result != KERN_SUCCESS || size != sizeof(s)) return 1;
+    kern_return_t closed = IOServiceClose(connection);
+    if (result != KERN_SUCCESS || closed != KERN_SUCCESS || size != sizeof(s)) return 1;
     printf("{\"format\":%u,\"bytes\":%u,\"phase\":%u,\"last_status\":%u,"
            "\"generation\":%llu,\"module_entry_accepted\":%u,\"control_service_started\":%u,"
            "\"one_shot_consumed\":%u,\"requests_accepted\":%u,\"entry_policy_closed\":%u,"
