@@ -4,6 +4,20 @@ This reference records selected findings from the original S540-15IWL GTX OEM ta
 
 The DSDT and twelve SSDTs were recovered from the previously supplied hardware bundle. All twenty supplied ACPI tables match the bundle manifest, declared lengths and ACPI checksums. The DSDT SHA-256 is `5139a06fd931e15c7655046d79e67a36d63cdd626fdea3393e3482a59ca70f56`. Private disassembly used ACPICA 20230628; the known external `GFX0.CLID` resolution warning does not prevent inspection of the local methods below.
 
+## Current verification boundary
+
+Status reviewed **October 20, 2026**. The icon assignments remain those documented in the [function-key guide](../guides/function-keys.md); no new physical-key mapping is inferred from the firmware objects below.
+
+| Input or action | Established result | Remaining boundary |
+|---|---|---|
+| Direct F1–F3 audio controls | Reconfirmed working on the official EFI | No repeat audio-key diagnostic required |
+| Direct F6 touchpad toggle | Earlier working user confirmation retained as history | Included in the user's current open F4–F10 completion scope; no new F6 test requested in this update |
+| Slider and direct F11/F12 brightness | Working on the official non-NVIDIA EFI | The separate NVIDIA-test regression is deferred |
+| Ordinary Fn+F1–F12 | Expected press/release identities recorded | Application behavior after refreshing the four disabled macOS shortcut bindings remains to be confirmed |
+| Current F4–F10 icon-action range | Latest user report identifies this entire range as still open; existing event identities and the earlier F6 result are retained | Distinct triggers and verified state changes are required where unresolved; F10 also needs a working external display |
+
+The latest confirmed working ranges are F1–F3 and F11/F12 on the non-NVIDIA EFI; current function-row completion concerns F4–F10. This status alignment requests no new F6 test and does not establish that its previously working toggle has failed. It does not justify a new BIOS setting, keyboard map, ACPI notification assignment or kext. Neither an empty diagnostic window nor a generic VPC notification proves a missing physical-key event.
+
 ## Verified objects
 
 | Object | OEM behavior |
@@ -37,3 +51,4 @@ The current keyboard binary matches the official VoodooPS2 2.3.7 RELEASE payload
 In the [pinned driver source](https://github.com/acidanthera/VoodooPS2/blob/bdbf80639936701337f4574bae8c3ea25bb8dd3d/VoodooPS2Keyboard/VoodooPS2Keyboard.cpp), a numeric `LogScanCodes` value of 2 enables down/up trace messages at runtime through the keyboard command gate. The trace includes original and remapped scan codes plus the ADB result before the final dead-key suppression. Earlier special handling, macro inversion and repeat filtering can still bypass that trace. An empty trace therefore cannot establish that no PS/2 input occurred.
 
 These `IOLog` messages enter the system log. Any collector must enable the setting only during prompted windows, restore the original value, limit the stream to the exact keyboard message grammar, and keep password entry outside those windows. No persistent boot argument or keyboard map change is required.
+

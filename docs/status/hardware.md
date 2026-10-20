@@ -1,197 +1,50 @@
-# Hardware verified from the lenovo.HTM report
+# Verified hardware and official EFI status
 
-Report received on 12 October 2026. Only data relevant to the project is included.
+Updated on **20 October 2026**. The working official EFI boots independently from the external Samsung 960 EVO. Native Wi-Fi and the hardware-name corrections are installed and user-confirmed. The separate 240 GB test EFI is not the installed official configuration.
 
-| Item | Reported data | macOS status |
+## Current results
+
+| Component | Verified result | Limit or remaining scope |
 |---|---|---|
-| Model | Lenovo IdeaPad S540-15IWL GTX, 81SW family | Tahoe boots independently from the external 960 EVO |
-| Motherboard | Lenovo LNVNB161216 | DSDT and 12 SSDTs analysed |
-| BIOS | BWCN19WW, 26 May 2021 | UEFI present; Secure Boot disabled in the report |
-| CPU | Intel Core i7-8565U, Whiskey Lake-U, 4 cores / 8 threads | X86PlatformPlugin active; frequency/power response confirmed; idle temperatures 45–48 °C; activity session retains 57–82 °C with no missing readings and final 57 °C |
-| RAM | 12 GB DDR4-2400, 8 and 4 GB modules | Sufficient for the first test |
-| iGPU | Intel UHD 620, PCI 8086:3EA0 | IntelAccelerator detected and Metal 3 exposed; sustained load still to be tested |
-| dGPU | NVIDIA GTX 1650 Max-Q 4 GB, PCI 10DE:1F91; subsystem 17AA:3806; revision A1 | Probe attachment, fixed PCI configuration/resource reads, two identification reads and local TU117 variant-41 table match confirmed; no HAL instance, initialized GPU or acceleration |
-| Display | BOE NV156FHM-N61, 1920×1080 | Internal panel and Intel Metal remain active. Brightness works with the non-NVIDIA EFI; adjustment is unavailable with a disabled slider in the NVIDIA-test EFI. Cause not isolated; work deferred |
-| NVMe | Samsung MZVLB512HBJQ-000L2, 512 GB, firmware 3L1QEXF7 | Problematic PM981a family; compatibility is not assumed |
-| Wi-Fi | Intel Wireless-AC 9560, PCI 8086:9DF0 | itlwm 2.3.0 loaded and HeliPort reported working; Ethernet presentation is expected with this driver; disconnection, reconnection and network switching confirmed; Internet baseline 15.751 Mb/s down / 63.036 Mb/s up with Low loaded responsiveness; cause unresolved |
-| Bluetooth | Intel, USB 8087:0AAA | Headphone playback, microphone, disconnection and reconnection confirmed; firmware loaded, correct NVRAM and IntelBTPatcher excluded |
-| Audio | Intel cAVS 8086:9DC8; Realtek ALC257, 10EC:0257 | Speaker/headphone output, automatic switching, wired-headset input and F1–F3 confirmed; S540 microphone fix v2 retained; quiet-volume correction confirmed during YouTube playback; equalisation and resume checks deferred |
-| Keyboard | PS/2 | VoodooPS2; direct F1–F3 and F6 working. Brightness works with the non-NVIDIA EFI; the NVIDIA-test EFI adjustment regression and remaining icon work are deferred |
-| Touchpad | ELAN0662, I2C HID; Intel 8086:9DE8 controller | Confirmed path: `_SB.PCI0.I2C0.TPD0`; F6 toggle and touchpad gestures confirmed working |
-| SD reader | O2Micro SD Host Controller | Support still to be verified; different from the reader in the lucatek project |
-| Webcam | TwinHan Integrated Camera USB | Working; image capture confirmed alongside the internal microphone |
+| Platform | Lenovo IdeaPad S540-15IWL GTX, 81SW family; Intel Core i7-8565U, 4 cores / 8 threads | Private SMBIOS identity is preserved and excluded from the repository |
+| Board and firmware provenance | Original hardware report: Lenovo LNVNB161216, BIOS BWCN19WW dated 26 May 2021; OEM DSDT and 12 SSDTs analysed | Historical inventory, not a new firmware check |
+| CPU and power management | Correct CPU name; X86PlatformPlugin active; frequency and estimated package power respond to activity | Historical thermal measurements and their limits are in [CPU and thermal observations](cpu-thermal.md) |
+| RAM | 12 GB DDR4-2400: 8 GB and 4 GB modules, both reported OK; upgradeable shown as Yes | The model has soldered memory and one SO-DIMM slot |
+| Internal display and Intel graphics | BOE NV156FHM-N61 at 1920×1080; panel name corrected; IntelAccelerator and Metal 3 detected; brightness and F11/F12 work in the official EFI | Sustained graphics performance is not measured by the hardware report |
+| Native Wi-Fi | Intel Wireless-AC 9560; AirportItlwm 2.4.0 from laobamac source `738d4c6`; native macOS menu and Wi-Fi service working; itlwm disabled | User-confirmed reconnection and recovery after restart/sleep; AirDrop and Continuity are not claimed |
+| Bluetooth | Intel USB `8087:0AAA`; IntelBluetoothFirmware 2.4.0 and BlueToolFixup 2.7.2 loaded; headphones, headset microphone and reconnect tested by the user | IntelBTPatcher remains intentionally disabled |
+| Audio | Realtek ALC257 through VoodooHDA 3.6.10; speakers, internal microphone, wired headphone output and microphone, automatic jack switching and F1–F3 tested | AppleALC remains disabled; equalisation is a separate refinement |
+| Webcam | Integrated UVC camera `13D3:56B2`; video recording with the internal microphone confirmed by the user | Enumeration alone is not the basis of the working result |
+| Keyboard and touchpad | PS/2 keyboard; ELAN0662 I2C touchpad and gestures work; F1–F3 and F11/F12 work with the non-NVIDIA EFI | The user's latest open group is F4–F10, including F6; its earlier successful toggle is historical. See [Function keys](../guides/function-keys.md) |
+| USB | USBToolBox 1.2.0 and the 9-port map are active; internal Bluetooth, webcam and fingerprint-device ports are type 255 | Both USB-A connectors and USB-C in both orientations previously negotiated 5 Gb/s; USB-A file access was confirmed with the tested devices/cables |
+| Internal NVMe | 512 GB detected; SMART Verified, TRIM Yes; IONVMeFamily 2.1.0 loaded in the 20 October report | This is detection/status evidence, not a sustained storage benchmark |
+| Battery and lid | Battery reporting and discharge confirmed; report shows Good health and 296 cycles; closing the lid sleeps and opening it resumes, confirmed by the user on 20 October | Long-stop drain, measured battery runtime and hibernation remain unmeasured |
+| SD reader | O2Micro PCI `1217:8621`; attempted native-driver trials did not expose readable media | **Paused**; no SD trial is integrated into the official EFI |
+| NVIDIA and HDMI | NVIDIA model naming is correct; prior development results are retained below | **Paused**; no NVIDIA acceleration is claimed. The earlier HDMI no-image result remains unresolved |
 
-The Windows integrated graphics driver name reports UHD 610, but the chip and PCI ID in the report identify UHD 620. The configuration will be based on the actual chip.
+## Installed configuration and delivered cleanup
 
-## Data collected after the report
+| State | Result |
+|---|---|
+| Installed and confirmed | Native AirportItlwm Wi-Fi, CPU/GPU/panel names and RAM upgradeability on the official Samsung EFI |
+| Prepared and delivered | Removal of the residual `Kernel.Block` entry for `com.apple.iokit.IONVMeFamily`, with the remaining configuration preserved |
+| Confirmation still pending | The user has not yet explicitly confirmed rebooting with that latest cleanup config |
 
-- One DSDT, 12 SSDTs and 7 other relevant tables: all checked for length, checksum and SHA-256.
-- Realtek ALC257 audio on Intel SST, `INTELAUDIO\\FUNC_01&VEN_10EC&DEV_0257`.
-- ELAN0662 touchpad at `_SB.PCI0.I2C0.TPD0`.
-- dGPU: `_SB.PCI0.RP05.PXSX`; native `_OFF` method present in SSDT9.
-- Internal NVMe: PCI `PciRoot(0x0)/Pci(0x1D,0x0)/Pci(0x0,0x0)`, consistent with `_SB.PCI0.RP09.PXSX`.
-- Samsung 960 EVO for the macOS test: external USB-C connection confirmed; capacity not stated in the received documentation.
+The internal NVMe already appears in the runtime report. Removing the residual block is configuration consolidation; it is not evidence that storage was absent or newly repaired. No SD, NVIDIA, extra kext, framebuffer, device-ID or boot-argument changes are part of that cleanup.
 
-## External boot-disk layout: October 14, 2026
+## Evidence and limits
 
-The disk listing reports a 240.1 GB external GUID HDD with a single Microsoft Basic Data partition named 240 GB, and a separate 250.1 GB external GUID SSD with a 209.7 MB EFI system partition and a 249.8 GB APFS partition. These correspond to the current HDD source and Samsung 960 EVO system disk. The current private EFI was then copied manually to the SSD's EFI system partition. Independent boot from the Samsung is confirmed after the HDD-disconnected procedure. The HDD copy remains a recovery route. The [transfer helper](../guides/ssd-boot.md) had stopped at its initial mounted-target guard before backup or copy; its failed condition remains unidentified, and no filesystem cause is inferred.
+The current status combines the user's functional confirmations with the 20 October hardware report, loaded-driver list and USB IORegistry capture. The report's 17 reader commands completed successfully. Raw reports, complete configurations, serials, network identifiers and volume names stay private.
 
-## Current USB SSD link: October 14, 2026
+The applied USB map contains **six HS and three SS entries**. Its `port-count` value of 15 is the highest hardware port index, not fifteen enabled entries. The connected Intel Bluetooth, webcam and fingerprint device are on internal type-255 ports. Current enumeration does not prove every empty port; the separate 14 October USB-A and reversed-USB-C observations provide the external connector coverage.
 
-The macOS USB host report identifies the external ULT-Best enclosure as Realtek RTL9210, USB `0BDA:9210`, with a device **Link Speed of 5 Gb/s** under AppleIntelCNLUSBXHCI (`8086:9DED`). The subsequent report explicitly identifies the laptop-side USB-C connector as reversed and again reports 5 Gb/s. Together with the preceding connection, this confirms USB-C SuperSpeed in both orientations with the current Samsung, RTL9210 enclosure and cable. That USB-C result does not cover USB-A; the subsequent two-port result is recorded below. Other cables are not covered. The USB serial is excluded.
+Historical USB results cover the tested enclosures and cables: the Samsung/Realtek RTL9210 system disk negotiated 5 Gb/s over USB-C in both orientations; an Initio enclosure negotiated 5 Gb/s on each USB-A connector, with file access confirmed. Link speed and USB power allocation are not storage throughput or measured laptop power. Fingerprint-device enumeration does not establish macOS fingerprint authentication.
 
-The reported 4.48 W is USB power allocation, not measured SSD or total laptop consumption. The link speed does not measure storage throughput or establish sustained reliability. Internal Bluetooth and camera enumeration do not extend this result to other external ports. The same report enumerates a Goodix fingerprint device, USB `27C6:55B4`; functional macOS fingerprint support remains unverified.
+The original Windows hardware report and OEM ACPI collection identify the board, BIOS, codec and device paths. They remain provenance for the hardware inventory; they do not replace macOS runtime evidence. The [boot/network record](../guides/boot-network.md), [battery/sleep record](battery-sleep.md) and [CPU record](cpu-thermal.md) distinguish current results from older measurements. The [exact Lenovo model specification](https://psref.lenovo.com/syspool/Sys/PDF/IdeaPad/ideapad_S540_15IWL_GTX/ideapad_S540_15IWL_GTX_Spec.pdf) does not declare DisplayPort Alt Mode; working USB-C data is not proof of USB-C video.
 
-## USB-A SuperSpeed result: October 14, 2026
+## Historical NVIDIA checkpoints — work paused
 
-Two USB host reports supplied for the requested two-connector check identify the same Initio 3639S enclosure, USB `13FD:5910`, at **5 Gb/s**. Its Location ID changes from `0x14700000` to `0x14800000`. This confirms SuperSpeed negotiation on both tested USB-A connectors with the current device and cable. Left/right connector labels and logical map entries are not assigned from these snapshots. The serial is excluded.
-
-The Samsung/RTL9210 system disk remains enumerated at 5 Gb/s in both reports. File access was subsequently confirmed working on both USB-A connectors. The snapshots and successful reads do not establish uninterrupted operation between reports, measured transfer speed, sustained reliability or the USB 2 companion paths. No EFI change is required by these results.
-
-## HDMI no-image report: October 14, 2026
-
-The HDMI connection does not produce an image with the current Tahoe configuration. The subsequent `system_profiler SPDisplaysDataType` report lists only Intel UHD Graphics 620 (`0x3ea5`, Metal 3, up to 1536 MB shared memory) and the online internal 1920×1080 panel. No external display is enumerated. This does not identify whether the cause is connector configuration, GPU routing, cable or monitor input. The next routing check is the external display's connected GPU in Windows with the same monitor and cable.
-
-The supplied OEM SSDT9 places `_DOD = {0x80087330}` under NVIDIA `RP05.PXSX`; its ACPI display type is External Digital Monitor. Intel's `_DOD` reads runtime OpRegion values, which are absent from the supplied tables. These declarations suggest a possible NVIDIA path but do not identify the tested physical HDMI port conclusively. The EFI reviewed for that HDMI check contained `-wegnoegpu`, the working Intel memory patches and no connector remapping. No graphics or ACPI change is made from the no-image report alone.
-
-USB-C video cannot currently be tested. [Lenovo's exact GTX model specification](https://psref.lenovo.com/syspool/Sys/PDF/IdeaPad/ideapad_S540_15IWL_GTX/ideapad_S540_15IWL_GTX_Spec.pdf) lists a USB 3.1 Type-C Gen 1 port and external digital display support through HDMI, without declaring DisplayPort Alt Mode. Hardware video capability is therefore unverified; the working 5 Gb/s USB data connection is not evidence of video support. The HDMI failure is not extended to USB-C.
-
-## Data still needed
-
-- External USB 2 device coverage and sustained SSD reliability. The 9-port map is verified; both tested USB-A connectors and USB-C in both orientations negotiate 5 Gb/s with the respective tested device/cable combinations.
-- Component test results in the [roadmap](roadmap.md).
-
-Tahoe reached the desktop on the external Samsung 960 EVO after the framebuffer memory fix. IntelAccelerator and exposed Metal 3 support are confirmed; sustained graphics load, battery runtime, sleep and HDMI remain to be verified. No overall compatibility rating is assigned before testing.
-
-## Desktop and Intel graphics: 13 October 2026
-
-The graphics report from the installed system exposes UHD 620 with device-id `0x3ea5`, Metal 3 and dynamic shared graphics memory up to 1536 MB. The internal panel is online at 1920×1080. The powermetrics sample detects IntelAccelerator and boot-args without `-igfxvesa` or `-x`. The fix and the limits of the checks are documented in [Intel framebuffer memory](../../archive/first-boot/docs/intel-memory-test.md) and [Intel graphics](../guides/intel-graphics.md).
-
-A sample lasting approximately one second reports a CPU temperature of 50 °C and estimated Intel package power of 0,98 W. This is an instantaneous measurement: it does not verify NVIDIA status, fan operation or battery runtime. Electrical power-off of the dGPU remains unresolved.
-
-## CPU power management and idle samples: 13 October 2026
-
-IORegistry shows X86PlatformPlugin as registered, matched and active. After the request to leave the laptop idle, two powermetrics samples were provided, each covering a five-second interval:
-
-| Item | First sample | Second sample |
-|---|---|---|
-| Estimated Intel package power, CPU + iGPU + system agent | 0,95 W | 0,80 W |
-| CPU temperature reported at the end of the interval | 46 °C | 45 °C |
-| Reported average system frequency | 947,43 MHz | 965,75 MHz |
-| Reported active iGPU frequency | 300 MHz | 300 MHz |
-
-The CPU power management driver is therefore active, and the samples show low estimated Intel power consumption at idle. The temperatures are instantaneous readings at the end of each interval. The GPU figure of 100% is relative to the stated nominal frequency of 300 MHz; it is not a measurement of 100% GPU utilisation.
-
-The report still contains Invalid key detected and does not report fan RPM: SMC telemetry remains incomplete. It was subsequently reported that the fan had been quiet for some time, so the idle behaviour is also supported by observation of the laptop. These data do not verify temperatures under load, NVIDIA power consumption or electrical power-off, battery operation or sleep. The plugin's LastSleepType fields do not constitute evidence of successful sleep.
-
-## CPU response and thermal reading: 14 October 2026
-
-The [grouped CPU report](cpu-thermal.md) confirms four cores/eight logical processors and an active X86PlatformPlugin. Idle samples report 54 °C and an estimated Intel package power of 1.89–2.17 W. A brief workload reaches 3.62 GHz and 43.83 W; it ends after three seconds because the CPU temperature reading is unavailable. Recovery reports 57 → 56 → 55 °C and power returning to approximately 2 W. The load peak and sustained cooling remain unmeasured. Fifteen unavailable SMC keys persist, and fan RPM is absent; sensor-read reliability remains open.
-
-## Passive CPU sensors: 14 October 2026
-
-A single thirty-second reader session retained fifteen valid CPU temperatures with no missing, rejected or duplicate values: 45–48 °C. Estimated Intel package power has a median of 1.05 W, and thermal pressure is Nominal in every sample. kmutil confirms VirtualSMC, SMCProcessor and SMCBatteryManager 1.3.8, together with Lilu 1.7.2. Invalid-key warning markers remain and do not prevent temperature readings; fan RPM is not reported.
-
-The service-header filter's incomplete SMCProcessor state match is not evidence that the loaded driver is inactive. This result supports normal idle behavior during the observation, not sustained cooling or an explanation of the previous load gap. Details and measurement limits are recorded in [CPU and thermal observations](cpu-thermal.md). The working configuration is retained. Independent external SSD boot and external SuperSpeed links were subsequently confirmed; USB 2 device coverage and storage reliability remain open.
-
-## CPU sensors during desktop activity: October 14, 2026
-
-The next continuous thirty-second report, collected after requesting normal browser activity, retains fifteen valid CPU temperatures with no missing, rejected or duplicate values. Recorded temperatures span **57–82 °C** (median 59 °C). Sample 4 contains the highest retained temperature, **82 °C**, alongside the highest estimated Intel package power, **35.62 W**, and average system frequency, **3436.41 MHz**. The next sample is 59 °C, and the final sample is 57 °C. Activity timing is not separately logged, so these are observed samples rather than a timed browser-workload profile.
-
-Thermal pressure is Nominal in all samples. The same VirtualSMC, SMCProcessor and SMCBatteryManager 1.3.8 and Lilu 1.7.2 are loaded. Warning markers persist, with no fan RPM. The previous missing temperature does not recur during this activity/power rise. This supports working continuous temperature telemetry beyond idle; it does not establish the true inter-sample peak, sustained-load cooling, absence of throttling, NVIDIA power-off or total system power. No sensor, EFI or power-limit change follows from this result. The [CPU record](cpu-thermal.md) preserves the measurement limits.
-
-## Panel fix and Bluetooth status: 13 October 2026
-
-The test using only `-igfxblr` eliminated the boot blackout in the reported result: from approximately two minutes to zero. The configuration is retained, preserving Intel memory settings, audio and SIP. The report preceding the test shows the same framebuffer UUID and Loginwindow ready approximately 31,3 seconds after the kernel. The [diagnosis](../guides/boot-network.md) distinguishes the panel delay from the system boot time.
-
-Bluetooth status is On, FirmwareLoaded is Yes and the transport is connected; BlueToolFixup 2.7.2 and IntelBluetoothFirmware 2.4 are loaded, while IntelBTPatcher is absent. The two required NVRAM variables are present with the correct values: one zero byte and fourteen zero bytes. The stack starts scanning and receives BLE devices. On 14 October 2026, operation with Bluetooth headphones was reported, together with HeliPort operation for Wi-Fi network management. The current drivers and NVRAM are retained. The Bluetooth headset microphone was subsequently confirmed working on 14 October 2026. Playback and headset voice capture are therefore established as working. Disconnection and reconnection of both Wi-Fi and Bluetooth, together with Wi-Fi network switching, were also confirmed. Wired headphone output, automatic speaker switching and wired-headset microphone input were subsequently confirmed. Sleep recovery belongs to the deferred wake checks.
-
-## Internet connection baseline: October 14, 2026
-
-The built-in `networkQuality` summary reports **15.751 Mb/s downlink**, **63.036 Mb/s uplink**, **Low responsiveness at 1.023 seconds / 58 RPM**, and **idle latency 41.376 ms / 1450 RPM**. This is the default concurrent upload/download test on the current connection. The connection remains functional; the observed low loaded responsiveness does not by itself identify a Wi-Fi driver fault.
-
-The result covers the whole path through the laptop, radio, router, Internet service and test endpoint. It is neither isolated Wi-Fi/LAN throughput nor a known comparison against the subscribed line rate. The subsequent sequential result is 78.762 Mb/s downlink and 81.610 Mb/s uplink, with uplink responsiveness Low (684.383 ms / 87 RPM), downlink responsiveness Medium (144.830 ms / 414 RPM) and idle latency 33.658 ms / 1782 RPM. This trial is faster than the concurrent baseline, with the larger loaded delay in the uplink; the observation still does not locate the bottleneck. No itlwm, HeliPort, EFI or router setting is changed from this single baseline. Details are in [Boot and network](../guides/boot-network.md#connection-performance-baseline).
-
-## Webcam and voice capture: 13 October 2026
-
-In the suggested Photo Booth test, it was reported that the image was visible and voice was recorded. Microphone gain was too high: subsequent adjustment abruptly changed it from too high to too low. The selected input and mixer controls need to be checked before making a change. The webcam works and is no longer an open hardware item. The audio input gain issue in that earlier check was subsequently addressed by the microphone fix below.
-
-## Microphone fix: 14 October 2026
-
-On 14 October 2026, after installing the **S540-microfono-fix-v2** package and rebooting, microphone operation was reported working. This version is retained together with the backup of the previous driver. Internal, Bluetooth and wired-headset microphone operation have now been confirmed; further gain or tonal refinement is deferred.
-
-The [test](../guides/microphone-fix.md) uses VoodooHDA 3.6.9, S540 variant: the input slider controls the ADC's 64 levels, microphone boost remains at 0 dB and the speaker PCM volume retains the v3 fix. The v2 package removes the installer's dependency on Xcode tools. CI checks for format, integrity, signature and restoration passed; the initial usage report is not extended to the jack or recovery after sleep.
-
-## Analog audio jack: October 14, 2026
-
-The physical jack check confirms audio through wired headphones, muting of the internal speakers while connected, and automatic return to speakers after unplugging. Microphone input through the 3.5 mm jack was subsequently confirmed working. The existing VoodooHDA configuration is retained. Equalisation and audio recovery after sleep remain deferred.
-
-## Quiet output range: October 14, 2026
-
-The reported issue was output that remained too loud near the minimum, with coarse low-volume steps. The previously collected codec graph identifies DAC NID 2, output capability `0x00025757`, mute=0, step=87, size=2 and offset=87. Speaker/headphone pins provide mute separately. The upstream PCM volume-fix interpolation restricts the DAC to its upper half; the exposed −21.5 dB is a master-mixer fallback, not the actual DAC minimum.
-
-A separate opt-in output patch restores the full −65.25/0 dB DAC range and matching metadata only for the verified S540 analog topology. Maximum gain and the microphone correction remain unchanged in code. The guarded 3.6.10 upgrade retains an exact private 3.6.9 rollback copy; the [volume guide](../guides/volume-control.md) records installation and verification. On October 15, 2026, the correction was reported working during YouTube playback, resolving the quiet-volume complaint. Raw mixer diagnostics remain private.
-
-## Battery and sleep counters: 13 October 2026
-
-The pmset sample shows an internal battery present, 100%, charged and AC Power supply. The system counters are Sleep Count 1, User Wake Count 1 and Dark Wake Count 0. Settings and limitations are retained in [Battery and sleep](battery-sleep.md). This earlier AC sample did not establish battery operation, runtime or full peripheral recovery. The subsequent battery-power result is recorded below; sleep work remains deferred.
-
-## Battery power: October 14, 2026
-
-After the AC-removal check, `pmset -g batt` reports **Battery Power**, internal battery present, **100%** and **discharging**, with **2:21 remaining**. Switching to battery and discharge reporting are therefore established. The remaining time is the operating system's current estimate, not measured autonomy or proof of battery health/capacity. This result does not establish sustained SSD reliability or sleep recovery. The [battery record](battery-sleep.md) preserves the reading without the instance ID.
-
-## Panel and brightness keys: 13 October 2026
-
-The macOS slider actually adjusts panel brightness. F11/F12 do not work in the reported test; the result with Fn has not yet been specified. Backlight control therefore works, and no new PNLF or framebuffer patches are added solely for the key issue.
-
-The original DSDT contains H_EC._Q8E and _Q8F methods that send ACPI notifications 0x86 and 0x87 to the GFX0.DD1F panel, with firmware conditions that may suppress some events. At the user's request, work on F11/F12 has been deferred to a single batch with the other function keys. That stage will check Fn behaviour and the generated events, then assess BrightnessKeys as a targeted candidate; it has not been applied. Working F1–F3 and the brightness slider are preserved. The _Q methods are not renamed in advance.
-
-## Touchpad gestures: 14 October 2026
-
-Touchpad gestures are confirmed working in normal use. The existing ELAN configuration and F6 toggle are retained. Gesture support is removed from the open hardware backlog; recovery after sleep remains unverified.
-
-## Function-row mapping: 14 October 2026
-
-The keyboard image and reported actions establish the complete target in [Function keys](../guides/function-keys.md). Direct F1 mute, F2/F3 volume, F6 touchpad toggle and F11/F12 brightness are working. F4 microphone mute, F5 page reload, F7 airplane mode, F8 camera disable, F9 lock screen and F10 display selection remain pending.
-
-Fn+F1–F12 must deliver ordinary function keys to applications. macOS Desktop or Mission Control activation is not the desired Fn behavior. Distinct direct/Fn input events and relevant macOS shortcut assignments will be recorded before changing mappings. The BrightnessKeys companion fix is retained; EFI v0.1.0 remains the earlier published snapshot without this driver.
-
-The complete event report records all twelve ordinary Fn function keys. The subsequent targeted report confirms that the four plain F9–F12 macOS bindings are disabled and the private journal is applied; modified shortcuts and F14/F15 brightness bindings remain enabled. Application behavior after normal session refresh still requires confirmation. The seven new capture windows have no interruptions. Direct and Fn F5 have identical keycodes and numeric flags; direct F9 sends Command-L and direct F10 sends Command-P. Direct F4/F7/F8 have no retained session event. The input device exposes a writable master mute control for a future F4 action. The driver collector subsequently stopped after three empty windows with trace visibility unconfirmed and logging restoration verified. Driver-level evidence is still needed before replacing any global key or chord; this investigation is deferred while core hardware work proceeds.
-
-## Audio from the desktop: 13 October 2026
-
-`system_profiler SPAudioDataType` exposes no devices. Of the searched kexts, only Lilu 1.7.2 is loaded: AppleALC and AppleHDA are absent from the list. The configuration excludes AppleALC beyond Darwin 24; Tahoe removed AppleHDA. A [reversible VoodooHDA 3.6.8 test](../guides/tahoe-audio.md) was prepared in Library/Extensions, with layout 11 included for ALC257. After correcting the SIP check, audio playback and F1–F3 operation were reported. The initial volume defect, with a noticeable change only at zero/mute, was resolved after the v3 test with VoodooHDAEnableVolumeChangeFix=true. A positive result was reported for playback and gradual adjustment. Equalisation is recorded for later refinement; jack, microphone and resume behaviour remain to be documented. Restoring AppleHDA to the system volume remains a later strategy.
-
-The following sections describe attempts made before reaching the desktop.
-
-## Result of the first Recovery test
-
-On 13 October 2026, reaching the language selection screen and operation of the mouse, keyboard and Wi-Fi in Recovery were reported. It was not specified whether the reported mouse was the touchpad or a USB device: the ELAN touchpad still needs separate verification.
-
-The result was reported after the proposed `-igfxvesa` test. The actual boot-args were not collected, so the result cannot yet be attributed to that parameter with certainty. Reaching Recovery does not demonstrate Metal acceleration or full compatibility of the installed system. The [Intel checks](../guides/intel-graphics.md) start from these data after installation.
-
-## External drive detection and preference for the internal drive
-
-The 960 EVO did not appear because the M.2 module had come loose inside its enclosure. After it was reseated, drive detection was reported. This result resolves the observed detection issue; it does not yet confirm SuperSpeed operation or both USB-C connector orientations.
-
-The internal drive was reported visible in Recovery: exclusion through the NVMe driver block was not verified in this test. The user requested that the Windows drive remain in place and that work proceed on the external 960 EVO. No initialisation or partition changes were performed on the internal drive. Subsequent tests will assess any stability issues.
-
-## OpenCore log from 02:45
-
-The log from 13 October 2026 confirms selection of the external USB volume, named **Machintosh SSD**, and the presence of `-igfxvesa` and `-x`. OpenCore reports successful injection of Lilu 1.7.2 and WhateverGreen 1.7.1 and the application of Intel properties. The log does not confirm driver initialisation in the kernel or Metal support. The desktop had not yet been reached in that attempt.
-
-The [log analysis](../../archive/first-boot/docs/boot-log-analysis.md) also records the Apple path with a BaseSystem image, the absence of the MAT table and the limitations of the NVMe block. The original file and SMBIOS identifiers are not added to the repository.
-
-## Subsequent USB/Bluetooth panic
-
-The photograph received afterwards shows an actual panic with the `bluetoothd` process, IOUSBHostFamily and IntelBTPatcher 2.4 extensions in the backtrace, Darwin 25.6.0 and macOS build 25G241. The visible boot-args do not include `-x`, while `-igfxvesa` remains. The panic header is outside the frame, so the precise cause still needs confirmation.
-
-The [Bluetooth test](../guides/bluetooth.md) excludes only IntelBTPatcher from the current EFI. Version 2.4 predates the official USB memory descriptor handling fix for Sequoia and later; the builder excludes it from new EFIs. Intel firmware, BlueToolFixup and itlwm remain present. The laptop test passed the panic and reached a black screen with the pointer. Drive activity was reported, without any windows appearing. The log from this attempt was received: it confirms that `-igfxvesa` is active and `-x` is absent. It contains no IntelBTPatcher injection; Intel firmware and BlueToolFixup are still injected. Lilu/WhateverGreen injection succeeds, but does not demonstrate graphics initialisation in the kernel. Two subsequent logs, `103339` and `103615`, confirm removal of VESA and safe boot while keeping IntelBTPatcher excluded. A new photograph shows the text stalled with service, code signature and DriverKit errors, without a panic line. Loading Lilu/WhateverGreen does not prove Metal support. The subsequent [collection of system reports from Recovery](../../archive/first-boot/docs/gui-diagnostics.md) preceded diagnosis of the Intel panic and the memory fix. Comparison with an updated patcher build and Bluetooth functions remain to be verified.
-
-## First collection of reports in Recovery
-
-Recovery opened the interface and Terminal and read Machintosh SSD - Data. The APFS report shows a 249.8 GB container on the external drive, the System volume sealed and Data mounted without FileVault. The collection contains an old Bluetooth panic and installation logs that reach the Hello welcome screen; initial setup had not yet been completed in that collection. This is not verification of Metal support or Bluetooth operation.
-
+The sections below retain the earlier development record unchanged. They concern the separate NVIDIA test configurations, not the installed official EFI. References to later implementation stages are historical plans; no new NVIDIA work, laptop test or acceleration result is requested or implied by this status update.
 
 ## NVIDIA PCI visibility: October 15, 2026
 
@@ -315,3 +168,4 @@ The v9 [verified build record](../../README.md#documentation-and-downloads) reco
 ## Deferred brightness regression after the v9 checkpoint
 
 Brightness works normally when booting the non-NVIDIA EFI. The NVIDIA-test EFI has unavailable adjustment and a disabled system slider. In that configuration, Intel UHD 620 (`3EA5`) still exposes Metal 3 and the internal Full HD main display is online. Lilu 1.7.2, WhateverGreen 1.7.1 and BrightnessKeys 1.0.3 are loaded, `-igfxblr` is present and AppleBacklightDisplay is active. This establishes a difference between EFI configurations; the responsible setting or probe behavior has not been isolated. The working non-NVIDIA EFI is retained. Investigation is deferred by request, with no additional tests, packages or patches.
+

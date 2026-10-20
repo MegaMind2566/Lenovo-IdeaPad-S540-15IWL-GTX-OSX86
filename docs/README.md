@@ -8,7 +8,8 @@ Start with the [project README](../README.md) for the current state and scope. D
 |---|---|
 | [Hardware](status/hardware.md) | Hardware IDs and results observed on the laptop |
 | [Roadmap](status/roadmap.md) | Open work, priorities and acceptance criteria |
-| [Battery and sleep](status/battery-sleep.md) | Recorded samples and deferred checks |
+| [NVIDIA validation](status/nvidia-validation.md) | Grouped checkpoints, separate native/target evidence and one future integrated target checkpoint |
+| [Battery and sleep](status/battery-sleep.md) | Battery evidence and confirmed lid-close stop/open-lid resume; long-duration coverage remains separate |
 | [CPU and thermals](status/cpu-thermal.md) | CPU response, incomplete load-temperature measurement and sensor follow-up |
 
 ## Current guides
@@ -30,7 +31,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 | [NVIDIA PCI transport](../packages/nvidia-transport/README.md) | Combined package delivery/reporting: v9 confirmed at 486 kernel startup checks; 485 native checks remain separate build evidence |
 | [NVIDIA PCI inventory](../packages/nvidia-pci/README.md) | Native read-only inventory; active target PCI visibility is confirmed |
 | [Intel graphics](guides/intel-graphics.md) | Acceleration and stability checks |
-| [Boot and networking](guides/boot-network.md) | Backlight boot fix, HeliPort and Bluetooth |
+| [Boot and networking](guides/boot-network.md) | Backlight boot fix, native-menu AirportItlwm and Bluetooth; HeliPort retained as historical fallback |
 | [Tahoe audio](guides/tahoe-audio.md) | Initial audio setup, volume fix and recovery |
 | [Microphone v2](guides/microphone-fix.md) | S540 driver variant, verification and rollback |
 | [Fine output volume](guides/volume-control.md) | Full analog DAC range with the working microphone correction retained |
@@ -59,6 +60,8 @@ Graphics experiments, Intel traces and Recovery log collectors are preserved in 
 
 ## Current EFI and next hardware task
 
+- The official Samsung EFI has confirmed native-menu Wi-Fi, corrected hardware names, working video/audio capture, Bluetooth headset audio/microphone, wired headset audio/microphone and basic lid sleep/wake. F1–F3 work; F4–F10 are the current keyboard task; F11–F12 work in the non-NVIDIA EFI. SD-reader and operational NVIDIA development are paused.
+- The consolidated private config removes the residual NVMe block; the report already showed the internal SSD available. The exact final-config reboot is not yet explicitly confirmed. The published release and its manifest are historical snapshots, not a new full EFI release.
 - [EFI release v0.1.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.1.0): compatibility, package and checksum.
 - [EFI setup](../packages/efi/README.md): personalization and dependencies outside the EFI.
 - [Function-key diagnosis](../packages/function-keys/README.md): read-only device snapshots and F11/F12 observations for the function-key batch.

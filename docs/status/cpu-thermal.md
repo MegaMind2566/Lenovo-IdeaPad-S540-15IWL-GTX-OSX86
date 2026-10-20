@@ -1,6 +1,14 @@
 # CPU and thermal observations
 
-October 14, 2026, macOS 26.7.1 build 25G241, Intel Core i7-8565U, AC power.
+## Current status: 20 October 2026
+
+The official Samsung EFI displays the correct Intel Core i7-8565U name. The current report retains four cores/eight logical processors and an active X86PlatformPlugin. The naming correction does not change CPU frequency, voltage or power limits. VirtualSMC, SMCProcessor and SMCBatteryManager remain in the working configuration.
+
+The measurements below are historical observations from 14 October, not new thermal tests of the later naming or NVMe-cleanup config. They show a power-management response and readable continuous temperature telemetry. Fan RPM, sustained-load cooling and measured battery runtime remain outside those results. No new stress test, sensor patch or collector is requested. SD and NVIDIA development are paused.
+
+## Historical measurement session: 14 October 2026
+
+Reported system: macOS 26.7.1 build 25G241, Intel Core i7-8565U, AC power.
 
 ## Observed response
 
@@ -18,7 +26,7 @@ The load ended after three seconds because a valid temperature reading was unava
 
 Thermal pressure was reported as Nominal throughout the collected samples. Fifteen unavailable SMC keys were reported in every sample, including those with valid temperatures. Fan RPM was not available. These observations do not establish sustained-load cooling, the absence of throttling, battery autonomy or NVIDIA electrical power-off.
 
-The collector retained no valid CPU temperature line in the load sample. The original unfiltered stream was not saved, so a missing source reading and a rejected format cannot be distinguished retrospectively. Further immediate stress is not required; sensor-read reliability remains the next diagnostic issue.
+The collector retained no valid CPU temperature line in the load sample. The original unfiltered stream was not saved, so a missing source reading and a rejected format cannot be distinguished retrospectively. The historical gap remains unexplained; the later continuous-reader results below did retain valid temperatures. No immediate stress test is requested.
 
 ## Existing configuration review
 

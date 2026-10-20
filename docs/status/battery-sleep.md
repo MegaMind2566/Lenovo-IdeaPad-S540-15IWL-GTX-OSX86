@@ -1,60 +1,31 @@
-# Battery and sleep counters
+# Battery and sleep status
 
-Results received from the Tahoe desktop on October 13–14, 2026. Tahoe and OpenCore now boot independently from the external USB Samsung 960 EVO after manual EFI transfer. This page retains the observations without changing settings.
+Updated on **20 October 2026** for the working official EFI on the external Samsung 960 EVO. This page records observations; it does not change power settings.
 
-## Battery reading
+## Verified results
 
-On October 13, `pmset -g batt` reported **AC Power**, an internal battery present, **100%** and **charged**, with `0:00 remaining`.
+| Area | Result | Evidence and limit |
+|---|---|---|
+| Battery reporting | Internal battery detected; switching from AC to Battery Power and discharging confirmed | User check on 14 October; the displayed 2 h 21 min was an OS estimate, not measured runtime |
+| Battery health | Good, 296 cycles | 20 October system report; no design-capacity comparison is used to calculate wear |
+| Full charge | 100%, fully charged; not charging; 60 W adapter connected | These readings are consistent with a full battery |
+| Lid sleep and wake | Closing the lid sleeps; opening it resumes | User-confirmed ordinary use on 20 October |
+| Native Wi-Fi recovery | Working after restart/sleep | User confirmation; the current native driver is recorded in [Boot and network](../guides/boot-network.md) |
 
-On October 14, after removing AC power, it reports:
+The lid result closes the ordinary close/open check. No extra lid collector, power patch or repeat cycle is requested. It does not establish overnight drain, prolonged sleep reliability, measured battery autonomy or hibernation. Full peripheral recovery is claimed only where separately confirmed by the user.
 
-| Item | Observed value |
-|---|---|
-| Power source | **Battery Power** |
-| Internal battery | Present |
-| Charge indicator | 100% |
-| Status | **Discharging** |
-| OS remaining-time estimate | 2 hours 21 minutes |
+## Earlier counters and measurements
 
-Basic battery operation and discharge reporting are confirmed. The displayed remaining time is an estimate at that moment, not measured runtime. The reading does not determine battery health, usable capacity, extended SSD stability or sleep recovery. Battery instance IDs are excluded.
+The 13 October report recorded Sleep Count 1, User Wake Count 1 and Dark Wake Count 0. Those counters cover that earlier boot and do not identify a controlled cycle. The 20 October hardware collection preceded the user's later direct lid confirmation; absence of a new cycle in that collection does not contradict the subsequent result.
 
-## System counters
+The earlier battery reading on AC was 100% and charged. After removing AC on 14 October, `pmset -g batt` reported Battery Power, discharging and an estimated 2:21 remaining. This establishes battery operation without turning the estimate into a runtime measurement.
 
-| Counter from pmset -g stats | Value |
-|---|---|
-| Sleep Count | 1 |
-| Dark Wake Count | 0 |
-| User Wake Count | 1 |
+## Configuration retained
 
-These counters cover the boot associated with the original October 13 report. They document one sleep event and one user wake event recorded by the system; they do not identify the test time or, by themselves, certify recovery of the panel, USB drives, networking and audio. Hibernation and extended sleep remain to be verified.
+The collected settings include `hibernatemode=3`, a one-minute system sleep timer and different display-sleep timers on AC and battery. These settings are observations, not recommended replacements. No power preference, NVRAM value, EFI argument or driver was changed for the lid confirmation. The USB boot disk remains part of the working setup.
 
-## Reported settings
-
-These settings were collected on October 13 and were not reread with the new battery sample.
-
-| Setting | Battery Power | AC Power |
-|---|---:|---:|
-| standbydelayhigh | 86400 | 86400 |
-| standbydelaylow | 10800 | 10800 |
-| standby | 1 | 1 |
-| lowpowermode | 0 | 0 |
-| proximitywake | 0 | 1 |
-| hibernatemode | 3 | 3 |
-| powernap | 0 | 1 |
-| gpuswitch | 2 | 2 |
-| ttyskeepawake | 1 | 1 |
-| highstandbythreshold | 50 | 50 |
-| displaysleep | 2 | 10 |
-| sleep | 1 | 1 |
-| lessbright | 1 | not reported |
-| halfdim | 1 | 1 |
-| tcpkeepalive | 1 | 1 |
-| disksleep | 10 | 10 |
-| womp | not reported | 1 |
-| networkoversleep | not reported | 0 |
-
-`hibernatefile` is `/var/vm/sleepimage` for both power sources. No settings are changed by this record. Sleep work remains deferred while remaining peripheral checks, storage reliability and power/thermal measurements take priority. The former panel delay, wireless reconnection and network switching are already resolved.
+SD and NVIDIA development are paused. The separate delivered removal of the residual NVMe block still awaits an explicit reboot confirmation and adds no battery or sleep claim. See [Hardware status](hardware.md).
 
 ## Reference
 
-- [Apple pmset manual](https://keith.github.io/xcode-man-pages/pmset.1.html): meanings of readings, counters and settings.
+- [Apple pmset manual source](https://github.com/apple-oss-distributions/PowerManagement/blob/main/pmset/pmset.1): readings, counters and power-setting meanings.
