@@ -1,0 +1,28 @@
+{
+  "component": "reconstructed-retained-failed-global-construction",
+  "files": {
+    "README.md": "e2b037b545dddef1727459cbc9fdfa8e9c4a857c4c034ad4d672163b5e8a6435",
+    "SOURCE-CONTRACT.json": "6606e257d863e3415b9ce30fafee63f6724f1a8a4e1fa03e338cb8a42646f5ea",
+    "STATUS.json": "3356bf6ada9edb23d05b5f73656253e99595dfb174a3140f45e800b4250b609c",
+    "check.py": "f25ab76164f9fd5a9227af5072a82d5978cc61568039113e20b132706e0c8997",
+    "check_epoch.cpp": "562215a2da5205ac11850be1c89555573617d8b8610d42e5b29f1b7bc62cd887",
+    "check_kernel_types.py": "7970dcd7c9ff7089595d71b593e9418a6588f52672f2e877545faf2457ab4d3e",
+    "check_original.c": "7e647b4228ab1386adbcb3d4e9f5b1ccf5fe1048a74eace6ed5c2b80f05e0627",
+    "evidence/cpu-controls-linux-elf.json": "b258b7d3208856b78490e455c04fbcc5b054cc0c64b9b804ea312b1a19a2a05b",
+    "evidence/first-fresh-plain-original-compilation.json.gz": "a463a401b06fbd16747212fd114ac8990b6c128717becc0d4e39226acc3f5326",
+    "evidence/initial-cpu-run-failed.json": "f5ccc9d3bae9660d4ff099e4ebc166c3efd16c7b9fd5126d62d979e98349b610",
+    "evidence/kernel-types-cross.json": "56c8e43639bb3f7d868494a32295b9d2822e7b5f3c6ce8beea1fc61863b6ebe5",
+    "evidence/plain-original-compilation.json.gz": "bb42724cfc4ac6b195019f490d768f57c056814712293344e1786736d4067140",
+    "evidence/plain-project-compilation.json.gz": "9533f0ce857e97cf3e8de4ea77780346fb994ff949b366283904abec1ab15344",
+    "evidence/sanitized-original-compilation.json.gz": "d028c5462ef87e05edf6bc1087bf83938cbe021db0ac3a0b56cc35f54fb02e18",
+    "evidence/sanitized-project-compilation.json.gz": "81392dab3d327417e83447ef58f464c745de41e844b7ede3d38125ffb0fcf366",
+    "prepare.py": "02e8416c65032e8a87daf9cdb5af61a0153d44d6614747e828a8ddf59bae23b4",
+    "record-api.c.inc": "34baffa5dba25f07ce98c058adc2d977cbc3d9da2a303fd5df9562c1e8859f45",
+    "record-api.h.inc": "dd35ab9a93f1229415cad2dd3b43d80c0fbb2fb61a54c2f99ef42f08a5ce888d",
+    "replay_v3_project.py": "01de5237cef2207fb23d2e3acf9d9dfd7c6fa5520f8bafcec03679792eebe03e"
+  },
+  "format": 2,
+  "historical_uncommitted_evidence_reused": false,
+  "original_entry_admission": false,
+  "revision_origin": "new-source-and-fresh-validation-after-2026-10-20-scratch-loss"
+}

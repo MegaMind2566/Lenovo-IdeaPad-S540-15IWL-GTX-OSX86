@@ -1,0 +1,33 @@
+{
+  "cpu_assertions_each_variant": 207,
+  "cpu_returned_scenarios_each_variant": 13,
+  "cross_complete_C_translation_units": 3,
+  "format": 2,
+  "fresh_v3_project_identity_verified": true,
+  "fresh_v3_source_identity_verified": true,
+  "full_retained_allocation_failure_matrix_complete": false,
+  "gpu_access_tested": false,
+  "historical_uncommitted_evidence_reused": false,
+  "initial_run_failure": {
+    "cause": "executable unexpectedly replaced with zero-byte non-executable file; external cause unresolved",
+    "clean_rerun_executable_integrity_checks_passed": true,
+    "initial_failure_reclassified_as_pass": false,
+    "retained_in": "evidence/initial-cpu-run-failed.json",
+    "runner_basename_collision_found": false
+  },
+  "kernel_execution_tested": false,
+  "kernel_global_gate_preserved": true,
+  "native_apple_execution_tested": false,
+  "new_cpu_control_platform": "Linux x86_64 ELF, explicit host-control",
+  "new_cpu_controls_passed": true,
+  "new_cross_compilation_passed": true,
+  "new_cross_compilation_platform": "non-Apple x86_64 Mach-O cross probe",
+  "original_changed_input_negative_controls": 2,
+  "original_entry_admission": false,
+  "plain_generated_identification_units_freshly_recompiled": 1,
+  "plain_original_objects_reused_from_first_fresh_run_after_exact_proof": 1099,
+  "production_candidate_allowed": false,
+  "project_units_rebuilt_each_variant": 52,
+  "sanitized_original_objects_freshly_compiled": 1100,
+  "status": "reconstructed-source-fresh-cpu-and-cross-controls-passed"
+}

@@ -1,0 +1,73 @@
+{
+  "actual_original_failure_preserved": true,
+  "additional_compile_definitions": {},
+  "additional_translation_units": [],
+  "component": "retained-failed-original-global-construction",
+  "evidence_sha256": {
+    "cpu-controls-linux-elf.json": "b258b7d3208856b78490e455c04fbcc5b054cc0c64b9b804ea312b1a19a2a05b",
+    "first-fresh-plain-original-compilation.json.gz": "a463a401b06fbd16747212fd114ac8990b6c128717becc0d4e39226acc3f5326",
+    "initial-cpu-run-failed.json": "f5ccc9d3bae9660d4ff099e4ebc166c3efd16c7b9fd5126d62d979e98349b610",
+    "kernel-types-cross.json": "56c8e43639bb3f7d868494a32295b9d2822e7b5f3c6ce8beea1fc61863b6ebe5",
+    "plain-original-compilation.json.gz": "bb42724cfc4ac6b195019f490d768f57c056814712293344e1786736d4067140",
+    "plain-project-compilation.json.gz": "9533f0ce857e97cf3e8de4ea77780346fb994ff949b366283904abec1ab15344",
+    "sanitized-original-compilation.json.gz": "d028c5462ef87e05edf6bc1087bf83938cbe021db0ac3a0b56cc35f54fb02e18",
+    "sanitized-project-compilation.json.gz": "81392dab3d327417e83447ef58f464c745de41e844b7ede3d38125ffb0fcf366"
+  },
+  "format": 2,
+  "full_allocation_failure_matrix_complete": false,
+  "global_epoch_freeze_sha256": "0a2a9fb028ba057b2f4d4e0bd7acd8988aaac5fd2dbe07a49a31ebb0367ee82b",
+  "heap_failure_output_stays_null": true,
+  "historical_uncommitted_evidence_reused": false,
+  "immutable_kernel_type_cross_probe_project_export_strength": {
+    "s540FirstTxnGlobalFailedSystemRetained": "strong",
+    "s540FirstTxnGlobalGetConstructionRetention": "strong",
+    "s540FirstTxnGlobalOriginalSystemFailure": "strong",
+    "s540FirstTxnGlobalRetainFailedSystem": "strong"
+  },
+  "kernel_global_gate_preserved": true,
+  "new_cpu_validation": "passed-Linux-ELF-only-10-epoch-and-3-allocation-returned-controls-each-plain-sanitized",
+  "new_kernel_cross_compilation": "passed-three-complete-C-TUs-non-Apple-Mach-O-cross-only",
+  "original_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5",
+  "original_entry_admission": false,
+  "original_project_exports": {
+    "s540FirstTxnGlobalOriginalSystemFailure": "src/nvidia/src/kernel/core/system.c"
+  },
+  "original_source_input_profile": "freshly replayed and fully verified tracked V3 source",
+  "original_source_input_sha256": {
+    "src/nvidia/generated/g_system_nvoc.c": "87437834753ac772b0a4a96a0fc276d13bae18561eecfccb2534737d06896316",
+    "src/nvidia/src/kernel/core/system.c": "3dc0e6682078cd1ac2179b04e7161a13a6b44fcf1ea5f8961af7a386173f0a33"
+  },
+  "original_source_output_sha256": {
+    "src/nvidia/generated/g_system_nvoc.c": "f51d3e6e7fdd2391dfde22e03226891c5123465e7bd589a11286a7f18b2012ba",
+    "src/nvidia/src/kernel/core/system.c": "66041879a992d430d7e29fa5eb84e39e6bff419715a8d7aaaf39027c7a04c95a"
+  },
+  "physical_reclamation_authorized": false,
+  "production_candidate_allowed": false,
+  "project_exports": [
+    "s540FirstTxnGlobalRetainFailedSystem",
+    "s540FirstTxnGlobalFailedSystemRetained",
+    "s540FirstTxnGlobalGetConstructionRetention"
+  ],
+  "reconstructed_from_context": true,
+  "required_predecessors": [
+    "retained-diagnostic",
+    "retained-backends",
+    "global-epoch"
+  ],
+  "restored_repository_head": "f4df65fb93f24b3a88056f4dc0ec7a48805fc16f",
+  "retention_boundaries": [
+    "sysConstruct_IMPL failed before cache/server/lock/child cleanup",
+    "__nvoc_ctor_OBJSYS_fail__init before ancestor destructors",
+    "__nvoc_objCreate_OBJSYS_cleanup before unlink/zero/free"
+  ],
+  "revision_origin": "reconstructed-after-2026-10-20-scratch-loss",
+  "tested_predecessor_composition_sha256": "d8c61adba73be179e8ca34122f33b51bcf7d1e72d518c451dbe7fe25b4ae31ea",
+  "tested_project_source_input_sha256": {
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c": "84959a911b9aa8be9cee319d377d97ed4385287329339788004a5913aabac56f",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.h": "b7b731b777541cbe87bb0676a8c176f5c016e4f721b427ecdd0d0e5502bc0e48"
+  },
+  "tested_project_source_output_sha256": {
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c": "151f91ccd4b670176eedcc9c83af81d2212d7805e10e1c963a6eb321f10d2477",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.h": "c17297ac12249c18051fab5d8020247202aae43d8c896dd3749ec59002a889f4"
+  }
+}
