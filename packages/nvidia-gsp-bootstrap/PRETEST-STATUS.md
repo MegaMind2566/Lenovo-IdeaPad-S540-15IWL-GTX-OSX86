@@ -1,11 +1,12 @@
 # Single Lenovo test: prerequisite status
 
-The next target milestone is an idle complete-image loader ABI check on the
-S540 TU117, before any original RM/GSP initialization. No new ZIP has yet passed
-its complete native packaging run. The confirmed Lenovo checkpoint remains v9. Brightness, external displays and electrical
-NVIDIA power-off work remain deferred.
+The current test package is an idle complete-image loader ABI check for the
+S540 TU117, before any original RM/GSP initialization. Native linking and
+packaging are recorded below; loading and unloading this image on the Lenovo
+remain unobserved. The confirmed hardware checkpoint remains v9. Brightness,
+external displays and electrical NVIDIA power-off work remain deferred.
 
-## Exact completed native checkpoint
+## Earlier extended native checkpoint
 
 Intel macOS Actions run
 [39218234557](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39218234557)
@@ -33,8 +34,8 @@ are explicit Linux Mach-O cross-compilation, not a new Apple/kernel execution.
 
 The fixed retained-diagnostic, RC-participant, shutdown-protocol and seven-callback
 platform source options compose together. All 56 resulting project units and
-the changed original `osapi.c` compile locally. The final complete native source profile
-still needs its own 1,100-unit rebuild and actual same-image link.
+the changed original `osapi.c` compile locally. The final complete native source profile is covered by the newer compilation
+and same-image link checkpoint below.
 
 The subsequent fixed live-ABI profile composes 60 project units, retained
 direct-service backends and the serialized global-epoch record. Its 60 project
@@ -73,6 +74,57 @@ current production teardown path and does not attest universal DMA cessation.
 
 ## Latest native result and idle test packaging
 
+Intel macOS continuation run
+[39455599294](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39455599294)
+passed native linking, independent verification, ad-hoc signing and packaging
+at source `2ceed80972a989b5521b8f253b3bff7a92786797`.
+The preceding Linux gate passed exact source reconstruction, 77 linker
+controls, 13 composition tests, 61 package controls and both 18-case actual
+loader-state decoder variants.
+
+The 1,100 original and 60 project units were compiled natively in run
+[39447802669](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39447802669)
+at `4939252f7c5ab2ee72a26e626f8db2b7b5922c8e`. That run failed later;
+its failed report remains immutable. The successful continuation independently
+reconstructed exact sources and revalidated compiler commands, dependency
+hashes, the pinned SDK and every cached object. It truthfully reports reused
+compilation, not a new 1,160-unit compilation.
+
+The sole changed input is regenerated firmware-object metadata: clearing only
+`MH_SUBSECTIONS_VIA_SYMBOLS` reproduces the original object SHA256. Both
+firmware payloads remain exact, and all other 1,162 input hashes are unchanged.
+The complete Apple `ld -r` preserves private externals, all 17,813 input
+external definitions and scatterable symbol boundaries. The final actual
+`MH_KEXT_BUNDLE` has zero unresolved private imports, 390 imports within
+independent SDK references, and only the strong `kmod_info` public export.
+All three metaclasses, 25 actual original-root pointers, four distinct
+initializer/finalizer entries, both firmware assets and closed character/event
+ingress are verified independently. Input root-retention directives are checked
+on the relocatable image; final pointer bytes are checked after linking and
+again after signing.
+
+The downloaded package's 42-file inventory, signatures' recorded invariance,
+signed-image roots, initializer/finalizer pointers and firmware hashes were
+verified. The package decoder passed its actual 18 controls on macOS.
+[S540-idle-complete-image-ABI-test](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39455599294/artifacts/12281401498)
+contains `S540IdleCompleteImageABI.zip` and the independently published digests.
+[NATIVE-PACKAGE-VALIDATION.json](prospective-complete-image-package/NATIVE-PACKAGE-VALIDATION.json)
+records exact identities.
+
+- ZIP SHA256: `efb8e2b7bb569980c14880dfd52b93b6b806aaa4c1afd4ab390dab7b56e68f39`.
+- Packaging attestation SHA256: `c304279b33cfec8fa63d0e3c7de675b43ceebf8e1abffa0e9a6b770a311c8f49`.
+
+Target kernel loading and unloading remain unobserved. Original RM entry,
+GSP initialization, GPU access and acceleration admission remain closed.
+The ZIP is ready only for the specified Lenovo idle load/snapshot/unload test.
+
+The extended native workflow is manual. Intermediate/documentation commits
+skip CI; only the selected idle workflow runs automatically, and superseded
+same-workflow runs are cancelled. The completed one-time continuation workflow
+is removed to avoid accidental repeats.
+
+### Historical failed attempts
+
 Native development retry attempt 2 of run
 [39433807874](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39433807874)
 passed the dedicated lock provenance, typed shutdown and firmware controls, then
@@ -94,8 +146,8 @@ native object retains all five expected exports and all eight required private
 imports; disassembly shows three 192-byte stack-zeroing calls to that helper.
 The mapping composition and independent kernel checker now admit only that
 optional helper and continue to require exact private callbacks. No final image
-was linked and no test package was produced by this attempt. The native build
-must validate the correction before any ZIP is considered ready.
+was linked and no test package was produced by this attempt. The newer native
+checkpoint above validates the mapping correction in the complete image.
 
 At source `49808c86f4d99dc2821c6887c0156841cd40564f`, native run
 [39413559517](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39413559517)
@@ -172,7 +224,7 @@ original global or adapter entry executes during that test.
 
 | Requirement | Remaining work |
 |---|---|
-| Complete final image | Native full-profile compile, actual dead-stripped kext link, exact original/private closure, three metaclasses, firmware and retained typed roots in the same image. Full-input unresolved symbols are not automatically live selected-root requirements. |
+| Target loader ABI | Native full-profile compilation, dead-stripped kext linking and packaging are complete for the recorded exact image. Run the closed idle load/snapshot/unload check on the specified Lenovo target; public SDK validation does not prove target kernel export/vtable compatibility. |
 | Original locks/lifetime | Validate the serialized global/context epoch and close the retained late-OOM construction failure before kernel entry, with ISR/DPC exclusion. A zero current-thread lock mask is not all-thread quiescence. |
 | Callback producers | Compose genuine RC behavior and hard-IRQ/coalesced-BH participation, including master-thread pending drains and a non-destructive persistent hardware-mask phase. Do not invent EVENT/OWNER policy rows for plain 1Hz callbacks. |
 | Allocation ownership | Acquire the real session hardware-DMA hold before any original attempt. Preserve CPU objects, direct service backends, DMA backing/mappings, context and module text after the retained diagnostic. |
