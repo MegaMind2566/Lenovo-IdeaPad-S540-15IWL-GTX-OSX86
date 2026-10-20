@@ -217,3 +217,26 @@ useful lead. Failure would remain inconclusive because firmware/driver reset
 can erase that state. Before implementing O2 register initialization, targeted
 read-only PCI/MMIO observations and the relevant OEM ACPI would be preferable
 to speculative register writes or another renamed copy of the same driver.
+
+## Bounded register observer prepared
+
+The user also reports no improvement after reading the SD in Windows and
+restarting directly into the same macOS test EFI with the card inserted.
+The startup/insertion comparisons have therefore not produced working access.
+
+The [read-only observer](../sd-observer/README.md) and
+[diagnostic profile](../../config/profiles/sd-observer-trial.json) provide the next
+instrumentation step. The observer attaches to IOResources, leaving the SD
+driver bound to the controller. It is restricted to x86_64/Darwin 25 and the
+unique real 1217:8621/17AA:3803/class080501 device. Four startup snapshots read
+whitelisted PCI registers and guarded existing-BAR SDHCI/O2 memory registers.
+No register writes, power requests, card commands or payload reads are made.
+Concurrent driver power changes remain a limit of any unowned snapshot.
+
+Source commit `e91c8bef0a5abc38db2ce640783e6b3484f12d67` passed the Intel macOS build,
+bundle checks and native Bash collector regression. The private config adds
+exactly one Kernel/Add to the last legacy-driver trial, reverses to that
+baseline, and passes OpenCore 1.0.8 ocvalidate. Exact recovery is included.
+The resulting private package is `S540-SD-REGISTRI-240GB.zip`. These checks
+verify preparation, not loading or SD functionality on the Lenovo. This is
+diagnostic instrumentation; a functional reader correction remains pending.

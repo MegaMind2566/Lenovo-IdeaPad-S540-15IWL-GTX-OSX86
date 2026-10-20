@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "diagnostic-hardware-runtime-pending",
+  "status": "diagnostic-package-build-and-config-validated-hardware-pending",
   "target": "Lenovo IdeaPad S540-15IWL GTX 81SW",
   "boot_scope": "external 240 GB test EFI",
   "baseline": "sd-legacy-trial",
@@ -52,6 +52,16 @@
   },
   "delivery": {
     "purpose": "Capture targeted PCI/SDHCI register evidence; not a functional card-reader fix",
-    "recovery": "Exact previous SD legacy-trial config"
+    "recovery": "Exact previous SD legacy-trial config",
+    "filename": "S540-SD-REGISTRI-240GB.zip"
+  },
+  "build_verification": {
+    "source_commit": "e91c8bef0a5abc38db2ce640783e6b3484f12d67",
+    "workflow_run_id": 39467584805,
+    "workflow_run_url": "https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39467584805",
+    "native_ci_success": true,
+    "config_ocvalidate": "OpenCore 1.0.8 success",
+    "private_config_single_add_reverse_verified": true,
+    "artifact_digest": "sha256:8a0a17025df7dfb0383c2f73f51ee86335c99eb06cbc7ef55cebc44611706edf"
   }
 }
