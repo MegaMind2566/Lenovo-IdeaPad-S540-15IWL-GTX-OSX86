@@ -67,6 +67,7 @@ jobs:
           python3 packages/nvidia-global-rm/tests/test_first_transaction_composition.py
           python3 packages/nvidia-global-rm/tests/test_stack_root_closure.py
           python3 builders/link_nvidia_first_transaction.py --self-test
+          python3 packages/nvidia-gsp-bootstrap/prospective-complete-image-package/check.py --cc /usr/bin/clang --output build/nvidia-execution/tooling-controls/complete-image-package
       - name: Check native Darwin services before full RM compilation
         run: >-
           python3 builders/check_nvidia_execution.py --services-preflight
@@ -254,6 +255,12 @@ jobs:
           python3 builders/check_nvidia_firmware_assets.py --download
           --assets-dir build/nvidia-execution/firmware
           --build-dir build/nvidia-execution/firmware-checks
+      - name: Verify packaging against the actual acquired firmware notice
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-complete-image-package/check.py
+          --cc /usr/bin/clang
+          --assets-dir build/nvidia-execution/firmware
+          --output build/nvidia-execution/tooling-controls/complete-image-package-actual-assets
       - name: Check production CPU services and explicit native backend fixtures
         run: >-
           python3 builders/check_nvidia_execution.py
@@ -379,6 +386,43 @@ jobs:
           --output build/nvidia-execution/first-transaction-image
           --retained-diagnostic --rc-participant --shutdown-protocol --platform-closure
           --retained-backends --global-epoch --live-abi-closure
+      - name: Package the closed complete-image loader ABI check
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PYCODE'
+          import hashlib
+          import json
+          from pathlib import Path
+          import subprocess
+          import sys
+          import zipfile
+          report = Path('build/nvidia-execution/first-transaction-image/first-transaction-image.json')
+          digest = hashlib.sha256(report.read_bytes()).hexdigest()
+          output = Path('build/nvidia-execution/idle-complete-image-package')
+          subprocess.run([sys.executable,
+              'packages/nvidia-gsp-bootstrap/prospective-complete-image-package/package.py',
+              '--report', str(report), '--report-sha256', digest,
+              '--kernel-sdk', 'build-src/MacKernelSDK', '--assets-dir', 'build/nvidia-execution/firmware',
+              '--output', str(output), '--cc', '/usr/bin/clang', '--cxx', '/usr/bin/clang++'], check=True)
+          artifacts = Path('build/nvidia-execution/package-artifacts')
+          artifacts.mkdir()
+          archive = artifacts/'S540IdleCompleteImageABI.zip'
+          with zipfile.ZipFile(archive, 'x', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as bundle:
+              for path in sorted(output.rglob('*')):
+                  if path.is_symlink():
+                      raise ValueError('Package symlinks are not admitted')
+                  if path.is_file():
+                      bundle.write(path, 'S540IdleCompleteImageABI/'+str(path.relative_to(output)))
+          attestation = output/'packaging-attestation.json'
+          record = {'archive': archive.name,
+              'archive_sha256': hashlib.sha256(archive.read_bytes()).hexdigest(),
+              'packaging_attestation_sha256': hashlib.sha256(attestation.read_bytes()).hexdigest(),
+              'strict_native_report_sha256': digest, 'test_scope': 'idle complete-image target-loader ABI only',
+              'original_entry_admission': False, 'gpu_initialization_attempted': False}
+          (artifacts/'package-digests.json').write_text(json.dumps(record, indent=2, sort_keys=True)+'\n')
+          print(json.dumps(record, indent=2, sort_keys=True))
+          PYCODE
       - name: Record the unresolved production milestone explicitly
         shell: bash
         run: |
@@ -394,8 +438,14 @@ jobs:
           assert record['execution_closure']['link_control_status'] == 'passed'
           assert record['execution_closure']['executable'] is False
           print('Development validation only: full adapter/GSP runtime closure remains unresolved.')
-          print('No candidate ZIP, firmware upload, GPU initialization, or kernel runtime success is produced by this workflow.')
+          print('The ZIP checks idle complete-image loading only. Original RM/GSP entry remains closed; no GPU initialization is attempted.')
           PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: S540-idle-complete-image-ABI-test
+          path: build/nvidia-execution/package-artifacts/*
+          if-no-files-found: error
+          retention-days: 30
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
@@ -452,6 +502,8 @@ jobs:
             build/nvidia-execution/first-transaction-image/**/*.stack.json
             build/nvidia-execution/first-transaction-image/**/*.bin
             build/nvidia-execution/first-transaction-image/**/*.macho
+            build/nvidia-execution/idle-complete-image-package/**/*.json
+            build/nvidia-execution/idle-complete-image-package/**/*.log
             build/nvidia-execution/original-global-lifecycle/**/*.json
             build/nvidia-execution/original-global-lifecycle/**/*.log
           if-no-files-found: warn

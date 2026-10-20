@@ -49,7 +49,10 @@ def check(args):
         extra_c_flags=['-std=gnu11','-Werror','-Wno-unused-parameter',
             '-DS540_NVIDIA_NO_LEGACY_RM_SEMAPHORE=1','-I',str(HERE),'-I',str(output/'source')])
     cc,_=execution.crypto.compiler_pair(args.host_control)
-    cc=Path(cc[0])
+    # Native compiler_pair includes the xcrun launcher. Resolve its clang tool
+    # before passing a single compiler path to original_commands.
+    cc=Path(cc[0] if args.host_control else execution.commands.run(
+        '/usr/bin/xcrun','--find','clang').stdout.strip()).resolve(strict=True)
     commands=original.original_commands(upstream,output/'full-objects',cc)
     units=[]
     for relative in ['src/nvidia/src/kernel/core/locks.c','src/nvidia/src/kernel/rmapi/rmapi.c',

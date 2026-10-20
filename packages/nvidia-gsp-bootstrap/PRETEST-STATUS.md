@@ -1,8 +1,8 @@
 # Single Lenovo test: prerequisite status
 
-The next hardware milestone is one controlled original RM/GSP initialization
-attempt on the S540 TU117. **No installable candidate is ready.** The confirmed
-Lenovo checkpoint remains v9. Brightness, external displays and electrical
+The next target milestone is an idle complete-image loader ABI check on the
+S540 TU117, before any original RM/GSP initialization. No new ZIP has yet passed
+its complete native packaging run. The confirmed Lenovo checkpoint remains v9. Brightness, external displays and electrical
 NVIDIA power-off work remain deferred.
 
 ## Exact completed native checkpoint
@@ -70,6 +70,30 @@ The typed one-shot shutdown bridge calls the exact original
 `gpuStateDestroy`. Its 191 controls per variant and two complete TU compilations
 are software evidence with declared hardware/token fixtures. It is not the
 current production teardown path and does not attest universal DMA cessation.
+
+## Latest native result and idle test packaging
+
+Native Actions run
+[39230673074](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39230673074)
+at source `0f73640865cb9c2d0dbaf351b4ac27305c5de3c8` passed the early source,
+compiler, original-profile and first-transaction controls, then stopped in the
+original lock-observer compilation script: it passed the `xcrun` launcher as
+if it were a compiler executable. No target module was loaded. The script now
+resolves the actual Xcode clang path, with its candidate source contract updated;
+this correction awaits the fresh native run.
+
+The separate idle packager requires the exact successful fresh native report,
+its intact complete original/project objects, pinned SDK and firmware. It checks
+the three metaclasses, imports, roots, loader pointers and firmware again, signs
+the bundle/controller, and verifies the existing image bytes are unchanged apart
+from permitted signature metadata. The target scripts issue only the idle
+snapshot request and attempt normal unload after the load test. All original
+RM/GSP entry gates stay closed. An idle-loader result does not establish GPU
+initialization, firmware execution or acceleration.
+
+Later IRQ, assertion and construction-retention successors remain separate
+source work. They are not prerequisites for the idle-only package because no
+original global or adapter entry executes during that test.
 
 ## Remaining integrated admission
 
