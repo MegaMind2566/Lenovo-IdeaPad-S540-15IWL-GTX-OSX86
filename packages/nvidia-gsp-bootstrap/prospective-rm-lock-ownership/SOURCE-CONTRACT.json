@@ -2,13 +2,13 @@
   "candidate_sources": {
     "S540ProspectiveRmLockOwnership.c": "c585314473a465550aeeb1922dfc43c17d4f3be1fa52026044b1a8005fe157d5",
     "S540ProspectiveRmLockOwnership.h": "f78536e385d6f1382ef726189140c9d6f26d886cc64f64e572056f6d836d9856",
-    "check_lock_ownership.py": "b3e9ebcda7c6598de3b755ce545d7e0548b783835696905a25a8dfaa700a510a",
+    "check_lock_ownership.py": "1bf3af788cdeb89d37d9584a5d371790f4c1d84705327d5135b93c421494d766",
     "original-api-query.inc": "1a4d6401c273322fdc9eea23f677c462750adbaa671a5b3c0afe3b99085600e8",
     "original-gpu-query.inc": "7f303496b937ccf2119f283f7010328fffb3ebbf757e819e7c6c02790e1bb961",
     "prepare.py": "4e42c7a6c11a4f3bc990310ac9be07cc31123bf998b8224b8309e0a5a3fde17a",
     "tests/check_lock_ownership.c": "10e45606e2d06713dc7c12ae9dbf8f5ab646ee8f3b5ea2a8cebdce5909647343",
-    "tests/context_control.cpp": "fbb58476701ee8bd95327dc4503a2ef872cfc1b2f9cb3efd84605cbf08711f20",
-    "tests/test_source_contracts.py": "dd3c1bea46d88a503b23c46fecdd820648ec78b61622a30330985679bf2562a3"
+    "tests/check_source_contracts.py": "dd3c1bea46d88a503b23c46fecdd820648ec78b61622a30330985679bf2562a3",
+    "tests/context_control.cpp": "fbb58476701ee8bd95327dc4503a2ef872cfc1b2f9cb3efd84605cbf08711f20"
   },
   "final_image_definition_binding": "not_proved",
   "format": 1,

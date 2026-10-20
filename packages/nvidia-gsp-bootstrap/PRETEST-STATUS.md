@@ -73,6 +73,17 @@ current production teardown path and does not attest universal DMA cessation.
 
 ## Latest native result and idle test packaging
 
+Native development retry attempt 2 of run
+[39433807874](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39433807874)
+passed the dedicated lock provenance, typed shutdown and firmware controls, then
+stopped because the generic test collector invoked the context-bound lock
+source checker without its required `--upstream` and `--v3-root` arguments.
+The checker is renamed to `tests/check_source_contracts.py` so only its existing
+dedicated wrapper invokes it, with both exact source trees. Its seven test
+bodies are unchanged and remain part of that required native workflow step.
+The updated wrapper and candidate inventory are hash-bound again; a complete
+successful development run remains required.
+
 Retry attempt 2 of native idle-package run
 [39433807988](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39433807988)
 at `e6a7444ed27ac3b7a729033b334fa41039ca0b94` started on its macOS runner.

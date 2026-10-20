@@ -38,7 +38,8 @@ def check(args):
     sdk=validate_sdk(sdk_path,args.sdk_archive,args.host_control)
     output.mkdir(parents=True)
     prepared=prepare(upstream,v3,output/'source')
-    execution.commands.run(sys.executable,str(HERE/'tests/test_source_contracts.py'),
+    # This CLI requires concrete source trees; it is not a standalone test_* entry.
+    execution.commands.run(sys.executable,str(HERE/'tests/check_source_contracts.py'),
         '--upstream',str(upstream),'--v3-root',str(v3),diagnostic_log=output/'provenance.log')
     native=execution.original_header_case(output,'lock-ownership',upstream,namespace,
         [HERE/'S540ProspectiveRmLockOwnership.c',HERE/'tests/check_lock_ownership.c'],
