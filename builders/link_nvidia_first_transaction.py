@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Build one complete first-transaction development image; never install/load it.
 
-Default execution requires Intel macOS and the Apple compiler/linker. Linux may
+Default execution requires a fresh Intel macOS compile with the Apple compiler/linker.
+The explicitly pinned continuation revalidates a completed native compilation before
+rerunning both links; it never claims compilation occurred in the continuation. Linux may
 validate an exact source/SDK/firmware plan with --plan-only; it never receives a
 linked-image success. The output has no .kext directory, Info.plist or package.
 All runtime admission gates remain closed in every successful report.
@@ -578,6 +580,72 @@ def sdk_import_references(output: Path, composed: Path, cxx: Path,
     return approved, rows, power_ref, loader_ref
 
 
+# This continuation admits one completed native compilation, never a partial cache.
+RESUME_REPORT_SHA256 = '3875dfb142cf040882d58e94f52cf260f493ebb0d06c07e80f810f5898f2f5aa'
+RESUME_LINKER_SHA256 = '671f6f9c847b2b94f8cd39cd4df2f7e8ec3511479519ead4a59c9c35c8215bb5'
+RESUME_PROVENANCE = {'workflow_run_id': 39447802669, 'artifact_id': 12278871334,
+    'source_commit': '4939252f7c5ab2ee72a26e626f8db2b7b5922c8e'}
+
+
+def validate_resume_record(previous: dict, builder_hashes: dict) -> None:
+    expected = {'format': 1, 'status': 'failed',
+        'phase': 'link-same-complete-relocatable-image', 'failure_type': 'ValueError',
+        'failure': 'The non-dead-stripping combined image lost or gained an external definition',
+        'host_system': 'Darwin', 'host_control': False, 'native_darwin_compilation': True,
+        'original_compilation_performed': True, 'project_compilation_performed': True,
+        'actual_link_performed': False, 'final_link_attempted': False, **GATES}
+    for name, value in expected.items():
+        if type(previous.get(name)) is not type(value) or previous[name] != value:
+            raise ValueError('Only the reviewed complete native compilation may resume: ' + name)
+    old_builders = dict(builder_hashes)
+    old_builders[str(Path(__file__).resolve())] = RESUME_LINKER_SHA256
+    if previous.get('builder_source_sha256') != old_builders:
+        raise ValueError('Cached compilation does not bind the unchanged seven compilation helpers')
+    if previous.get('compilation_reports') != {
+            'original_objects': 1100, 'project_objects': 60,
+            'original_sha256': 'abbf1a685d962de9d9ed8189a96e0f2906ad69a16a57f723a288ada64e2a62b9',
+            'project_sha256': '2813776a8a8e8c83007d50862c42de575ab1cb3356afc771bbb3a591d86d6347'}:
+        raise ValueError('Cached native compilation reports are incomplete or changed')
+    if len(previous.get('input_object_sha256', {})) != 1163 or \
+            previous.get('source_plan', {}).get('total_expected_link_objects') != 1163 or \
+            previous['source_plan'].get('canonical_project_translation_units') != 60 or \
+            previous['source_plan'].get('complete_original_translation_units') != 1100:
+        raise ValueError('Cached native input inventory is incomplete')
+
+
+def read_resume_report(path: Path, expected_sha256: str, output: Path,
+                       builder_hashes: dict) -> dict:
+    if expected_sha256 != RESUME_REPORT_SHA256 or path.is_symlink() or not path.is_file() or \
+            path.resolve(strict=True) != output / 'cached-native-compilation-report.json' or \
+            sha(path) != expected_sha256:
+        raise ValueError('Resume requires the immutable independently pinned native failure report')
+    previous = json.loads(path.read_text())
+    validate_resume_record(previous, builder_hashes)
+    if previous['composition_directory'] != str(output / 'composition'):
+        raise ValueError('Resume must retain the original absolute native composition paths')
+    return previous
+
+
+def verify_resumed_compilation(report: dict, home: Path) -> dict:
+    cache = report.get('compilation_cache', {})
+    expected = {**RESUME_PROVENANCE,
+        'report_path': str(home / 'cached-native-compilation-report.json'),
+        'report_sha256': RESUME_REPORT_SHA256, 'complete_native_compilation_verified': True}
+    if cache != expected or report.get('native_compilation_reused') is not True or \
+            report.get('original_compilation_performed') is not False or \
+            report.get('project_compilation_performed') is not False:
+        raise ValueError('Native continuation lacks exact verified cache provenance')
+    previous = read_resume_report(Path(cache['report_path']), cache['report_sha256'], home,
+                                  report['builder_source_sha256'])
+    for name in ('composition_directory', 'composition_sha256', 'source_plan', 'compilation_reports',
+                 'input_object_sha256', 'input_symbol_audit', 'compilers', 'sdk',
+                 'firmware_asset_inventory', 'pinned_module_runtime', 'apple_linker',
+                 'closed_loader_policy', 'fixed_source_profiles'):
+        if report.get(name) != previous.get(name):
+            raise ValueError('Native continuation changed cached compilation identity: ' + name)
+    return previous
+
+
 def build(args) -> dict:
     inputs = [args.upstream, args.v3_root, args.namespace, args.kernel_sdk,
               args.assets_dir, ROOT / 'packages']
@@ -586,8 +654,19 @@ def build(args) -> dict:
     for manifest in [args.successor_manifest, args.project_successor_manifest]:
         if manifest is not None:
             inputs.append(manifest.parent)
-    output = composition.new_output(args.output, inputs)
-    output.mkdir(parents=True)
+    resume_path = getattr(args, 'resume_compiled_report', None)
+    resume_sha = getattr(args, 'resume_report_sha256', None)
+    if (resume_path is None) != (resume_sha is None):
+        raise ValueError('Both --resume-compiled-report and --resume-report-sha256 are required')
+    if resume_path is not None:
+        if args.plan_only or args.composition_dir is not None or args.successor_manifest or args.project_successor_manifest:
+            raise ValueError('Native continuation cannot alter composition or run as a source-only plan')
+        output = args.output.resolve(strict=True)
+        if args.output.is_symlink() or not output.is_dir():
+            raise ValueError('Native continuation requires the restored original ordinary output directory')
+    else:
+        output = composition.new_output(args.output, inputs)
+        output.mkdir(parents=True)
     report = {'format': 1, 'status': 'running', 'phase': 'validate-inputs',
               'actual_link_performed': False, 'final_link_attempted': False, **GATES}
     builders = [Path(__file__).resolve(), ROOT / 'builders/compose_nvidia_first_transaction.py',
@@ -596,6 +675,8 @@ def build(args) -> dict:
         ROOT / 'builders/nvidia_metaclass_initializers.py', ROOT / 'builders/embed_nvidia_firmware.py']
     builder_hashes = {str(path): sha(path) for path in builders}
     report['builder_source_sha256'] = builder_hashes
+    previous = (read_resume_report(resume_path, resume_sha, output, builder_hashes)
+                if resume_path is not None else None)
     destination = output / 'first-transaction-image.json'
     write_json(destination, report)
     commands = []
@@ -621,6 +702,9 @@ def build(args) -> dict:
         identity = common.execution_identity(cc, cxx, not native)
         identity['native_darwin_compilation'] = identity.pop('authoritative_darwin_execution')
         report.update(identity)
+        if previous is not None and any(identity.get(name) != previous.get(name) for name in
+                ('host_system', 'host_control', 'native_darwin_compilation', 'compilers')):
+            raise ValueError('Native continuation requires the original Apple compiler identity')
         if args.sdk_archive is not None and not args.plan_only:
             raise ValueError('Native final image validation requires the clean pinned SDK Git checkout')
         sdk = args.kernel_sdk.resolve(strict=True)
@@ -628,7 +712,10 @@ def build(args) -> dict:
         assets = args.assets_dir.resolve(strict=True)
         firmware_assets = firmware.ACQUIRE.verify_assets(assets)
         report.update(sdk=sdk_record, firmware_asset_inventory=firmware_assets)
-        if args.composition_dir is None:
+        if previous is not None:
+            composed = output / 'composition'
+            value = composition.verify_composition(composed)
+        elif args.composition_dir is None:
             composed = output / 'composition'
             value = composition.materialize(args.upstream, args.v3_root, args.namespace, composed,
                 successor_manifest=args.successor_manifest,
@@ -698,16 +785,33 @@ def build(args) -> dict:
                           actual_link_performed=False, original_compilation_performed=False,
                           project_compilation_performed=False, final_image=None)
             return report
-        report['phase'] = 'compile-complete-source-composition'
+        report['phase'] = ('verify-complete-native-compilation-cache' if previous is not None
+                           else 'compile-complete-source-composition')
         write_json(destination, report)
         original_report_path = composed / 'full-original-compilation.json'
         project_report_path = composed / 'project-compilation.json'
-        if original_report_path.exists() or project_report_path.exists():
-            raise ValueError('Fresh native image builds must not reuse any preexisting compilation report')
-        originals = composition.compile_original_objects(args.upstream, composed, cc, host_control=False)
-        projects = composition.compile_project_objects(args.upstream, composed, cc, cxx, flags, cpp, host_control=False)
-        report['original_compilation_performed'] = True
-        report['project_compilation_performed'] = True
+        if previous is None:
+            if original_report_path.exists() or project_report_path.exists():
+                raise ValueError('Fresh native image builds must not reuse any preexisting compilation report')
+            originals = composition.compile_original_objects(args.upstream, composed, cc, host_control=False)
+            projects = composition.compile_project_objects(args.upstream, composed, cc, cxx, flags, cpp, host_control=False)
+        else:
+            for name in ('composition_directory', 'composition_sha256', 'source_plan', 'compilers',
+                         'sdk', 'firmware_asset_inventory', 'closed_loader_policy', 'fixed_source_profiles'):
+                if report.get(name) != previous.get(name):
+                    raise ValueError('Cached native build input changed: ' + name)
+            for kind, path in (('original', original_report_path), ('project', project_report_path)):
+                if path.is_symlink() or sha(path) != previous['compilation_reports'][kind + '_sha256']:
+                    raise ValueError('Cached native compilation report bytes changed: ' + kind)
+            for name, digest in previous['input_object_sha256'].items():
+                path = Path(name)
+                if path.is_symlink() or sha(path) != digest:
+                    raise ValueError('Cached native object changed: ' + name)
+            originals = json.loads(original_report_path.read_text())
+            projects = json.loads(project_report_path.read_text())
+        report['original_compilation_performed'] = previous is None
+        report['project_compilation_performed'] = previous is None
+        report['native_compilation_reused'] = previous is not None
         original_objects = compilation_inputs(composed, originals, original_units=True,
                                                planned_original_sources=original_sources)
         project_objects = compilation_inputs(composed, projects, original_units=False,
@@ -752,6 +856,13 @@ def build(args) -> dict:
         input_audit = audit_symbols(input_symbols, require_private_closure=False)
         report['input_symbol_audit'] = input_audit
         report['input_object_sha256'] = before
+        if previous is not None:
+            if before != previous['input_object_sha256'] or input_audit != previous['input_symbol_audit'] or \
+                    report['pinned_module_runtime'] != previous['pinned_module_runtime']:
+                raise ValueError('Regenerated complete link inputs differ from the pinned native compilation')
+            report['compilation_cache'] = {**RESUME_PROVENANCE,
+                'report_path': str(resume_path.resolve(strict=True)), 'report_sha256': resume_sha,
+                'complete_native_compilation_verified': True}
         report['phase'] = 'link-same-complete-relocatable-image'
         write_json(destination, report)
         apple_ld = Path(execute(['/usr/bin/xcrun', '--find', 'ld'], 'find-apple-linker').stdout.strip()).resolve(strict=True)
@@ -759,8 +870,10 @@ def build(args) -> dict:
         if ld != apple_ld:
             raise ValueError('The final development image requires the actual selected Apple linker')
         report['apple_linker'] = {'path': str(ld), 'sha256': sha(ld)}
+        if previous is not None:
+            verify_resumed_compilation(report, output)
         image = output / 'S540FirstTransactionDevelopment.o'
-        execute([ld, '-r', '-arch', 'x86_64', *objects, '-o', image], 'complete-relocatable-link', timeout=900)
+        execute([ld, '-r', '-keep_private_externs', '-arch', 'x86_64', *objects, '-o', image], 'complete-relocatable-link', timeout=900)
         linked_symbols = Image(image, 1).externals()
         linked_audit = audit_symbols({image.name: linked_symbols}, approved,
             require_private_closure=False, require_reviewed_public=False)
@@ -830,6 +943,8 @@ def build(args) -> dict:
         if sha(ld) != report['apple_linker']['sha256'] or \
                 any(sha(Path(path)) != digest for path, digest in builder_hashes.items()):
             raise ValueError('A development linker/helper input changed during compilation/linking')
+        if previous is not None:
+            verify_resumed_compilation(report, output)
         report.update(status='linked-native-development-image', phase='done', actual_link_performed=True,
             native_compilation_reports_verified=True,
             final_image={'path': final.name, 'sha256': sha(final), 'bytes': final.stat().st_size,
@@ -1083,6 +1198,41 @@ def self_test() -> dict:
             checks += 1
         else:
             raise AssertionError('A different source composition entered native link reuse')
+    # A continuation can never turn a partial, host-control or runtime-admitted
+    # result into native provenance, even when its source inventory looks complete.
+    binding = {str(Path(__file__).resolve()): 'new-linker'}
+    resume_fixture = {'format': 1, 'status': 'failed',
+        'phase': 'link-same-complete-relocatable-image', 'failure_type': 'ValueError',
+        'failure': 'The non-dead-stripping combined image lost or gained an external definition',
+        'host_system': 'Darwin', 'host_control': False, 'native_darwin_compilation': True,
+        'original_compilation_performed': True, 'project_compilation_performed': True,
+        'actual_link_performed': False, 'final_link_attempted': False, **GATES,
+        'builder_source_sha256': {str(Path(__file__).resolve()): RESUME_LINKER_SHA256},
+        'compilation_reports': {'original_objects': 1100, 'project_objects': 60,
+            'original_sha256': 'abbf1a685d962de9d9ed8189a96e0f2906ad69a16a57f723a288ada64e2a62b9',
+            'project_sha256': '2813776a8a8e8c83007d50862c42de575ab1cb3356afc771bbb3a591d86d6347'},
+        'input_object_sha256': {str(index): 'synthetic' for index in range(1163)},
+        'source_plan': {'total_expected_link_objects': 1163,
+            'canonical_project_translation_units': 60, 'complete_original_translation_units': 1100}}
+    validate_resume_record(resume_fixture, binding)
+    checks += 1
+    mutations = [('status', 'linked-native-development-image'), ('phase', 'compile-complete-source-composition'),
+        ('host_system', 'Linux'), ('host_control', True), ('native_darwin_compilation', 1),
+        ('original_compilation_performed', False), ('project_compilation_performed', False),
+        ('actual_link_performed', True), ('final_link_attempted', True), ('failure_type', 'RuntimeError'),
+        ('failure', 'unrelated failure'), ('module_loaded', True), ('gpu_access', True),
+        ('hardware_admission', True), ('original_entry_admission', True),
+        ('production_candidate_allowed', True), ('kernel_execution', 'passed'),
+        ('builder_source_sha256', {}), ('compilation_reports', {}), ('input_object_sha256', {}),
+        ('source_plan', {'total_expected_link_objects': 1162})]
+    for name, value in mutations:
+        changed = {**resume_fixture, name: value}
+        try:
+            validate_resume_record(changed, binding)
+        except ValueError:
+            checks += 1
+        else:
+            raise AssertionError('Invalid cached native provenance accepted: ' + name)
     return {'format': 1, 'status': 'passed-source-plan-controls', 'checks': checks,
             'synthetic_root_pointer_fixtures': True, 'duplicate_local_finalizer_controls': True,
             'native_link_performed': False, **GATES}
@@ -1097,8 +1247,11 @@ def main() -> int:
     parser.add_argument('--cxx', type=Path, default=Path('/usr/bin/clang++'))
     parser.add_argument('--ld', type=Path)
     parser.add_argument('--sdk-archive', type=Path)
+    parser.add_argument('--resume-compiled-report', type=Path,
+                        help='Continue only the independently pinned complete native compilation; rerun both native links.')
+    parser.add_argument('--resume-report-sha256')
     parser.add_argument('--composition-dir', type=Path,
-                        help='Inspect an existing exact source inventory in --plan-only mode; native builds always compile fresh.')
+                        help='Inspect an existing exact source inventory in --plan-only mode; native builds compile fresh except for the explicitly pinned continuation.')
     parser.add_argument('--successor-manifest', type=Path)
     parser.add_argument('--project-successor-manifest', type=Path)
     parser.add_argument('--retained-diagnostic', action='store_true')

@@ -111,8 +111,7 @@ def validate_report_contract(report):
     expected = {'format': 1, 'status': 'linked-native-development-image', 'phase': 'done',
         'host_system': 'Darwin', 'host_control': False, 'native_darwin_compilation': True,
         'actual_link_performed': True, 'relocatable_link_performed': True,
-        'final_link_attempted': True, 'original_compilation_performed': True,
-        'project_compilation_performed': True, 'native_compilation_reports_verified': True,
+        'final_link_attempted': True, 'native_compilation_reports_verified': True,
         'module_loaded': False, 'installable_bundle_created': False,
         'target_kernel_admission_proven': False, 'kernel_execution': 'not_tested',
         'gpu_access': False, 'hardware_admission': False,
@@ -120,6 +119,16 @@ def validate_report_contract(report):
     for name, value in expected.items():
         require(type(report.get(name)) is type(value) and report[name] == value,
                 'Strict native report contract refused: ' + name)
+    reused = report.get('native_compilation_reused', False)
+    require(type(reused) is bool, 'Native compilation reuse mode must be an exact Boolean')
+    for name in ('original_compilation_performed', 'project_compilation_performed'):
+        require(type(report.get(name)) is bool and report[name] is (not reused),
+                'Native compilation provenance differs from execution mode: ' + name)
+    if reused:
+        require(report.get('compilation_cache', {}).get('complete_native_compilation_verified') is True,
+                'Native continuation lacks verified complete compilation provenance')
+    else:
+        require('compilation_cache' not in report, 'Fresh native build must not claim cache provenance')
     final = report['final_image']
     require(final['filetype'] == 'MH_KEXT_BUNDLE' and final['installable_bundle'] is False and
             re.fullmatch('[0-9a-f]{64}', final['sha256']), 'Strict final image identity is incomplete')
@@ -171,6 +180,8 @@ def verify_build(args, execute, scratch):
     validate_report_contract(report)
     verifiers = verifier_bindings(report['builder_source_sha256'])
     home = report_path.parent
+    if report.get('native_compilation_reused') is True:
+        link.verify_resumed_compilation(report, home)
     composed = home / 'composition'
     require(str(composed.resolve(strict=True)) == report['composition_directory'] and
             sha(composed / 'composition.json') == report['composition_sha256'],
@@ -228,7 +239,7 @@ def verify_build(args, execute, scratch):
             'Final image imports or typed roots differ from native proof')
     for observed, recorded in (('roots', 'final_original_roots'), ('loader_pointers', 'final_loader_pointers'),
                                ('firmware', 'final_embedded_firmware')):
-        require(proof[observed] == report[recorded], 'Final image proof changed: ' + observed)
+        require(json.loads(json.dumps(proof[observed])) == report[recorded], 'Final image proof changed: ' + observed)
     frontend = link.verify_closed_character_frontend(link.Image(image, 11), value)
     require(frontend == report['final_character_frontend'], 'Closed character frontend changed')
     prototype = link.LOADER / 'Info.prototype.plist'
@@ -299,6 +310,9 @@ def package(args):
              (references / 'sdk-power-metaclass-reference.o', 'sdk-power-metaclass-reference.o'),
              (references / 'sdk-loader-metaclass-reference.o', 'sdk-loader-metaclass-reference.o')):
             shutil.copyfile(source, evidence / name)
+        if verified['report'].get('native_compilation_reused') is True:
+            cached = Path(verified['report']['compilation_cache']['report_path'])
+            shutil.copyfile(cached, evidence / 'cached-native-compilation-report.json')
         controller = staged / 's540-idle-image-ctl'
         sdk_path = execute(['/usr/bin/xcrun', '--sdk', 'macosx', '--show-sdk-path'], 'controller-sdk').stdout.strip()
         require(Path(sdk_path).is_dir(), 'Native user-space SDK is absent')
@@ -343,6 +357,8 @@ def package(args):
                 verified['executing_verifier_source_sha256'], 'Executing verifier source changed')
         require(sha(verified['report_path']) == args.report_sha256 and
                 sha(verified['image']) == invariant['presign_sha256'], 'Strict native input changed during packaging')
+        if verified['report'].get('native_compilation_reused') is True:
+            link.verify_resumed_compilation(verified['report'], verified['report_path'].parent)
         compose.verify_composition(verified['composed'])
         require(link.verify_closed_loader_policy(verified['composed']) == verified['report']['closed_loader_policy'],
                 'Closed loader source changed during packaging')
@@ -361,6 +377,8 @@ def package(args):
         attestation = {'format': 1, 'status': 'packaged-idle-complete-image-abi-check',
             'target': TARGET, 'bundle_identifier': BUNDLE_ID, 'bundle_path': BUNDLE, 'executable': EXECUTABLE,
             'strict_native_report_sha256': args.report_sha256,
+            'native_compilation_reused': verified['report'].get('native_compilation_reused', False),
+            'compilation_cache': verified['report'].get('compilation_cache'),
             'strict_presign_image_sha256': invariant['presign_sha256'],
             'signed_image': {'sha256': sha(image), 'bytes': image.stat().st_size, 'uuid': invariant['uuid']},
             'signature_invariance': invariant, 'postsign_roots': post['roots'],
