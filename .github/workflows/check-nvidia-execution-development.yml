@@ -1,33 +1,11 @@
 name: Check NVIDIA global RM and GSP development sources
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'packages/nvidia-global-rm/**'
-      - 'packages/nvidia-global-rm-crypto/**'
-      - 'packages/nvidia-darwin-services/**'
-      - 'packages/nvidia-device-transport/**'
-      - 'packages/nvidia-gsp-bootstrap/**'
-      - 'builders/compile_nvidia_global_rm.py'
-      - 'builders/embed_nvidia_firmware.py'
-      - 'builders/check_nvidia_global_crypto.py'
-      - 'builders/check_nvidia_execution.py'
-      - 'builders/check_nvidia_global_lifecycle.py'
-      - 'builders/nvidia_execution_commands.py'
-      - 'builders/nvidia_execution_closure.py'
-      - 'builders/nvidia_metaclass_initializers.py'
-      - 'builders/nvidia_stack_usage.py'
-      - 'builders/nvidia_nvoc_stack_dispatch.py'
-      - 'builders/nvidia_nvoc_ast.py'
-      - 'builders/nvidia_nvoc_definitions.py'
-      - 'builders/nvidia_combined_metaclasses.py'
-      - 'builders/compose_nvidia_first_transaction.py'
-      - 'builders/link_nvidia_first_transaction.py'
-      - 'builders/nvidia_stack_root_closure.py'
-      - 'builders/build_nvidia_execution.py'
-      - '.github/workflows/check-nvidia-execution-development.yml'
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
