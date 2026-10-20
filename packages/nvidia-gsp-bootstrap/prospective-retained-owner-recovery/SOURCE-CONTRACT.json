@@ -1,0 +1,54 @@
+{
+  "additional_project_exports": {
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c": [
+      "s540GspContextStopRetainedServices",
+      "s540GspContextRunRetainedShutdownProtocol",
+      "s540GspContextReadRetainedShutdown"
+    ]
+  },
+  "blocking_dependency": "The genuine IRQ participant successor is absent after reset; source preparation refuses until it is rebuilt.",
+  "component": "reconstructed-retained-owner-source",
+  "final_release_issued": false,
+  "format": 1,
+  "hardware_admission": false,
+  "new_compile_definitions": {},
+  "new_recovery": true,
+  "new_translation_units": [],
+  "original_entry_admission": false,
+  "physical_release_authorized": false,
+  "private_header": "packages/nvidia-gsp-bootstrap/prospective-retained-owner-recovery/S540NvidiaRetainedOwner.h",
+  "required_actual_profiles": [
+    "retained_diagnostic",
+    "retained_backends",
+    "global_epoch",
+    "control_state",
+    "shutdown_protocol",
+    "irq_participant"
+  ],
+  "restored_git_head": "f4df65fb93f24b3a88056f4dc0ec7a48805fc16f",
+  "source_inputs": [
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.hpp",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c"
+  ],
+  "source_sha256": {
+    "README.md": "263939f69efd685e00aff6de873dc779340812a883dd002b4f2453e235c7e47f",
+    "S540NvidiaRetainedOwner.h": "7e3cd95cae6198b3a97f5492c5fe6950eb77b9df277934abffd185983149ad49",
+    "check_source.py": "ddf06c59e7a1112fdab5bdb0c48f82c0990ae9cff1194063589329ed1baee0be",
+    "context-retention.c.inc": "d33e4c7de6e1e7dc173183f40d18840e804a626dee11cea4851277aa39b9dc84",
+    "evidence/source-controls.json": "a8d2a417eb910f32cdf0fbf9398d99340203068ec258185f98d710382f36e490",
+    "owner-initialize.cpp.inc": "963651f0e6bc13eb43473b46618d9e96db7160e99801a232407907abb45cc0f1",
+    "owner-retention.cpp.inc": "4323c1eedde050ce59cc2fcbf72d2de38f7be9c82fafbb03f50c97d792bbb24d",
+    "prepare.py": "28d3f1d1721ae4f6259d5a70919b3bbd15ea25d8e74b0279d2c9c1cc1734df03"
+  },
+  "stop_receipt_issued": false,
+  "validation": {
+    "complete_driver_link": "not_run",
+    "kernel_translation_unit_compilation": "not_run_after_recovery",
+    "native_actual_owner_execution": "not_run_after_recovery",
+    "runtime": "not_run",
+    "source_controls": "fresh 21 structural controls passed",
+    "source_evidence": "packages/nvidia-gsp-bootstrap/prospective-retained-owner-recovery/evidence/source-controls.json",
+    "source_evidence_sha256": "a8d2a417eb910f32cdf0fbf9398d99340203068ec258185f98d710382f36e490"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "checks": [
+    "Host, permanent owner, unbound control state precede Context allocation",
+    "Cancellation operation and immediate actual DMA hold precede firmware allocation",
+    "Global validation, single Context binding, private, IRQ and immutable adapter gate are ordered",
+    "Owner never separately duplicates the strong bind owned by Context",
+    "Replacement preserves one return type",
+    "Existing immutable blocked gate declaration is unchanged",
+    "failed dispatches retained attempts before legacy cleanup",
+    "stop dispatches retained attempts before legacy cleanup",
+    "Actual interrupt stop and source seal precede retained shutdown protocol",
+    "Retained stop contains no legacy physical cleanup",
+    "Actual Context waits for unbound validated epoch then owns both bindings",
+    "Context binding requires exact retained generation and pristine private state",
+    "Context allocation captures genuine retained owner generation",
+    "s540GspContextReleaseOriginalState refuses retained original state",
+    "s540GspContextDestroy refuses retained original state",
+    "Partial Context construction publishes its retained pointer instead of destroying backing",
+    "Shutdown takes actual drained IRQ evidence, no caller readiness value",
+    "Duplicate successor application fails closed",
+    "Missing concrete predecessor profiles fail closed",
+    "Profile Booleans cannot substitute for absent actual dependency APIs",
+    "Restored source inputs remain unchanged"
+  ],
+  "format": 1,
+  "hardware_admission": false,
+  "kernel_compilation": "not_run",
+  "kind": "fresh-structural-source-controls-only",
+  "native_execution": "not_run",
+  "original_entry_admission": false,
+  "physical_release_authorized": false,
+  "restored_source_sha256": {
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp": "1c4cd89bc61665fbeb56d8efdacd356414c1c7c5de0134363f8859bf624365f5",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.hpp": "383e980f9f1af4057395151914d1b8b1db369e989102c29aab3e2fb3fb4d914d",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c": "9f8fee42cd2e9ffb2c86a0de368d259fa8879b70398becf7c508887dd941181f"
+  },
+  "source_rows": [
+    {
+      "input_sha256": "1c4cd89bc61665fbeb56d8efdacd356414c1c7c5de0134363f8859bf624365f5",
+      "output_sha256": "7663368836e4290136f56ecb509b598b2979ce9ddc4f077b5cf3aab869f73f11",
+      "source": "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp"
+    },
+    {
+      "input_sha256": "383e980f9f1af4057395151914d1b8b1db369e989102c29aab3e2fb3fb4d914d",
+      "output_sha256": "1cac48e588223453142b14592abcc3899abebf70f0f620447dbbfeb9cb269911",
+      "source": "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.hpp"
+    },
+    {
+      "input_sha256": "c9050b5c482e8fe62f495971302b7a23b0ac3bb7ddc7dbfbdce2b7aa73091718",
+      "output_sha256": "d5579edd4ac69c61cc8b806240e871f53a71b577e2661fe61ee701b4a54f7166",
+      "source": "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c"
+    }
+  ],
+  "status": "passed",
+  "stop_receipt_issued": false
+}

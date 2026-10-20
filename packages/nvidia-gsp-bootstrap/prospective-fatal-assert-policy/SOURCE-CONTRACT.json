@@ -1,0 +1,43 @@
+{
+  "changed_assertion_helpers": [
+    "nvAssertFailed",
+    "nvAssertOkFailed",
+    "nvAssertFailedNoLog",
+    "nvAssertOkFailedNoLog"
+  ],
+  "changed_header_macros": [
+    "NV_ASSERT_FAILED",
+    "NV_ASSERT_OK_FAILED",
+    "NV_ASSERT_FAILED_FUNC",
+    "NV_ASSERT_OK_FAILED_FUNC"
+  ],
+  "format": 1,
+  "original_source_sha256": {
+    "src/nvidia/inc/libraries/utils/nvassert.h": "817c434764c12fcb3340aeb53e8c595a2d1818ef3b76473639bf15d303ac41fc",
+    "src/nvidia/src/libraries/utils/nvassert.c": "9f6f44bddd1490b7ae75e86e517ed62abc6bd11c4f7635ae7ecacb022834c6ad"
+  },
+  "production_candidate_allowed": false,
+  "repository_dependency_sha256": {
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRmDiagnostics.c": "9ad9ce13a99b1332d7e9645fe3a1f767793084625670e0b7f4ee6d50f4418778",
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRmDiagnostics.h": "b272e4ea42f71bac1fc40f89cd83e2275be3737df5c712698124d9a905f1d543",
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRmFormat.cpp": "af9c218dd148fe4cfcaf2481910653324632588083fb74fda65cbadff4b97d36"
+  },
+  "required_compile_definitions": {
+    "S540_NVIDIA_FATAL_ASSERT_POLICY": "1"
+  },
+  "scope": "explicit fatal invariant diagnostic policy; no successful recovery, no stack certificate",
+  "semantics": "First executed invariant assertion is terminal before helper-side logging/journaling/backtrace; recoverable NV_CHECK remains upstream.",
+  "stack_safety_claim": false,
+  "successful_oom_unwind_claim": false,
+  "successor_source_sha256": {
+    "src/nvidia/inc/libraries/utils/nvassert.h": "ddda6d8ab5f0e9fd734ae141e7172e5027bed7f1d9e9d0aabc71b5dc8fda3d8c",
+    "src/nvidia/src/libraries/utils/nvassert.c": "99553d796aa7be05b7280cbde33e39a7af7e0f051bd2c604c2a5692ebb3e763b"
+  },
+  "unchanged_check_helpers": [
+    "nvCheckFailed",
+    "nvCheckOkFailed",
+    "nvCheckFailedNoLog",
+    "nvCheckOkFailedNoLog"
+  ],
+  "upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5"
+}

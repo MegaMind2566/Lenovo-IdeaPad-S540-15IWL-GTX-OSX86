@@ -1,0 +1,21 @@
+{
+  "aggregate_stack_proven": false,
+  "files": {
+    "LOCAL-CONTROL-VALIDATION.json": "b7de18722e3f17a3edf2b8995cf8730d5a1f61867dbb85e598422b727e1bc019",
+    "README.md": "859b4ff600b7cf495d6929b03707ef8216e060e2f3768094d06677d61cfad1f2",
+    "SOURCE-CONTRACT.json": "b31bed1875544e90c447b27308091f0dc043d88a6e9fb59476aa8c9f84b0d9c8",
+    "check.py": "a130cf1da9132aa1c86cafbf00e08e8f8fa7bd4de42cc16a455bb43aa88b662a",
+    "prepare.py": "c6ae60d18c716dba39b002ea2aef7bc804b8b5bb5820ad3eadbc2a64a34c6bd7",
+    "tests/check_fatal_assert.c": "fe9f40042050bcd1d6bbfd8db2678546d8c5165056a9266f885f9b499938b179",
+    "tests/test_source_contracts.py": "c3f9b8b3a48651eecb1595c65f1848a996e327c6b7d0a5acc4713de0dc7f1e05"
+  },
+  "format": 1,
+  "integration_api": "prepare.overlay({prepare.HEADER:header_text,prepare.SOURCE:source_text}) returns the exact same two keys with sealed replacements",
+  "ordinary_nv_check_preserved": true,
+  "original_header_affects_all_including_units": true,
+  "production_candidate_allowed": false,
+  "profile": "optional-fatal-rm-invariant-policy",
+  "required_compile_definitions": {
+    "S540_NVIDIA_FATAL_ASSERT_POLICY": "1"
+  }
+}
