@@ -73,6 +73,19 @@ current production teardown path and does not attest universal DMA cessation.
 
 ## Latest native result and idle test packaging
 
+Retry attempt 2 of native idle-package run
+[39433807988](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39433807988)
+at `e6a7444ed27ac3b7a729033b334fa41039ca0b94` started on its macOS runner.
+The original source composition compiled and the corrected live-platform unit
+passed its symbol audit. After 47 project units passed, the mapping unit was
+rejected solely for Apple's additional public `__bzero` import. Its actual
+native object retains all five expected exports and all eight required private
+imports; disassembly shows three 192-byte stack-zeroing calls to that helper.
+The mapping composition and independent kernel checker now admit only that
+optional helper and continue to require exact private callbacks. No final image
+was linked and no test package was produced by this attempt. The native build
+must validate the correction before any ZIP is considered ready.
+
 At source `49808c86f4d99dc2821c6887c0156841cd40564f`, native run
 [39413559517](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39413559517)
 stopped when Darwin's fortified `memset` macro expanded the shutdown fixture's

@@ -1,5 +1,10 @@
 # Retained image user-mapping state
 
+The kernel symbol audit requires all five exact callback exports and all eight
+private service imports. Apple Clang can also emit `__bzero` to initialize its
+192-byte stack snapshots. That optional public compiler helper is recorded
+separately; missing callbacks and other unexpected symbols remain errors.
+
 This isolated source candidate supplies the five exact NVIDIA mmap callbacks
 used by `dynamic-power.c`. It has a real Darwin mutex, immutable exact-nv /
 owner / transaction-generation binding, real OS thread ownership, and actual

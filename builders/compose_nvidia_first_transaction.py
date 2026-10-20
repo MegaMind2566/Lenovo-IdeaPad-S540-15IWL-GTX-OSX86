@@ -360,6 +360,7 @@ def fixed_profile_overlays(source: Path, project: Path, output: Path, *,
                 if module_contract['callbacks'] != callbacks:
                     raise ValueError('Mapping profile changed its exact original callbacks')
                 row_requirements[unit]['expected_imports'] = sorted(module_contract['expected_imports'])
+                row_requirements[unit]['allowed_compiler_memory_imports'] = module_contract['allowed_compiler_memory_imports']
             elif name == 'prospective-live-platform-closure':
                 if module_contract['callbacks'] != callbacks:
                     raise ValueError('Live platform profile changed its exact original callbacks')

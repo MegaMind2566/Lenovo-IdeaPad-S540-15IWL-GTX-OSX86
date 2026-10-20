@@ -98,7 +98,10 @@ def run(args):
  approved={'s540Darwin_os_acquire_mutex','s540Darwin_os_alloc_mutex','s540Darwin_os_get_current_thread',
   's540Darwin_os_release_mutex','s540Darwin_os_semaphore_may_sleep','s540FirstTxnGetSnapshot',
   's540FirstTxnHostCaptureAllocation','s540FirstTxnObserveServiceRefusal'}
- if undefined!=approved:raise ValueError('Unexpected mapping imports: '+str(undefined))
+ # Apple Clang emits a public zeroing helper for the 192-byte stack snapshot.
+ # Required callbacks remain exact, including when the helper is present.
+ compiler_memory_imports=undefined&{'__bzero'}
+ if undefined-compiler_memory_imports!=approved:raise ValueError('Unexpected mapping imports: '+str(undefined))
  import nvidia_metaclass_initializers as metaclass
  metaclass.verify_no_initializers(obj)
  compile_commands=original.original_commands(upstream,output/'original-commands',cc)
@@ -128,6 +131,7 @@ def run(args):
   'parent_gpu_controls':baseline['results'],'original_source':SOURCE,'original_source_sha256':sha(upstream/SOURCE),
   'candidate_source_sha256':sha(HERE/'S540NvidiaMappingClosure.c'),'actual_dependency_sha256':deps,
   'kernel_target_compile_actions':2,'kernel_definitions':sorted(defined),'kernel_imports':sorted(undefined),
+  'kernel_compiler_memory_imports':sorted(compiler_memory_imports),
   'configuration_negatives':negatives,'commands':commands,'implicit_initializers':False,'production_modified':False,
   'original_entry_admission':False,'gpu_access':False,'kernel_execution':'not_tested','dma_stop_receipt':False,
   'user_mapping_ingress':False,'mapping_mutex_permanently_retained':True}

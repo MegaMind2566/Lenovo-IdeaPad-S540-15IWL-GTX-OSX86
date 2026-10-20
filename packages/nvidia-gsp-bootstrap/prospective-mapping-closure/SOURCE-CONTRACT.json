@@ -1,4 +1,7 @@
 {
+  "allowed_compiler_memory_imports": [
+    "__bzero"
+  ],
   "apple_reference": {
     "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
     "mapClientMemory64_requires": [
@@ -43,9 +46,9 @@
   "mapping_registration_api": false,
   "required_source_profile": "S540_NVIDIA_NO_USER_MAPPINGS=1",
   "source_sha256": {
-    "README.md": "b121bc04d1f7dcaf8d163212a0cfcfde0f83715f838da7d76d17e31945748342",
+    "README.md": "887c59e0f578fb020b4e4b14a4e09d4f7919cc4f33050f4940f6d443315de74e",
     "S540NvidiaMappingClosure.c": "bcd15fb0400d6d7ca1a2fe116d796e722523412a64bddd3c67111474bf02ff75",
-    "check.py": "d6b4ca35aa0ee6605155ef73a7e3b8ae6f3c8814acf2b0c55f07bcc9afb9e266",
+    "check.py": "2b0243c9d5d541b9a7cc0480d4e7e4febf3c81e5a6d6c40b90da707b215315b6",
     "check_controls.c": "3ba5677221d303caa4894b01f8f2394ef844b302ade5c116d0ae10de978201b1",
     "failure_fixture.cpp": "6967cdbf45100983ea588ec5a86887994b352eaac016e5ff43c5330b89aad8a6",
     "profile_guard.py": "7cb8ad9946153e3cadf8d0c766b1f773cc2c0ba7ee6cd1810623c405ae0a3bdf"
