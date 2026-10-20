@@ -1,0 +1,47 @@
+name: Export exact development source checkpoint
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/export-development-source.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-checkpoint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: NVIDIA/open-gpu-kernel-modules
+          ref: 1a82fbfda8f321b056eb3568850f9316c5e465c5
+          path: source-inputs/nvidia-upstream
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: acidanthera/MacKernelSDK
+          ref: 3f750085caa17ec3a7880f11c11bf4f48cd6a164
+          path: source-inputs/MacKernelSDK
+          persist-credentials: false
+      - name: Archive the exact source trees without running driver code
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir "$RUNNER_TEMP/s540-source"
+          tar --exclude=./source-inputs -czf "$RUNNER_TEMP/s540-source/project-source.tar.gz" .
+          tar -czf "$RUNNER_TEMP/s540-source/upstream-source.tar.gz" -C source-inputs/nvidia-upstream .
+          tar -czf "$RUNNER_TEMP/s540-source/kernel-sdk.tar.gz" -C source-inputs/MacKernelSDK .
+          cd "$RUNNER_TEMP/s540-source"
+          sha256sum *.tar.gz > SHA256SUMS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: exact-development-source-checkpoint
+          path: ${{ runner.temp }}/s540-source/*
+          retention-days: 30
+          if-no-files-found: error
