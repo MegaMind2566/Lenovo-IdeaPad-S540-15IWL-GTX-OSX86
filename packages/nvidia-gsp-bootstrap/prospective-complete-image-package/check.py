@@ -53,7 +53,10 @@ def report_fixture():
         'target_kernel_admission_proven': False, 'kernel_execution': 'not_tested',
         'gpu_access': False, 'hardware_admission': False, 'original_entry_admission': False,
         'production_candidate_allowed': False,
-        'final_image': {'filetype': 'MH_KEXT_BUNDLE', 'installable_bundle': False, 'sha256': 'a' * 64},
+        'final_image': {'filetype': 'MH_KEXT_BUNDLE', 'installable_bundle': False,
+                        'sha256': 'a' * 64, 'imports': ['thread_call_cancel']},
+        'final_public_kpi_export_audit': candidate.public_kpi.audit_imports(
+            ['thread_call_cancel'], candidate.LIBRARIES),
         'final_link_policy': {'dead_strip': True,
             'undefined_policy': 'Apple x86_64 kext dynamic_lookup',
             'undefined_closure_enforcement': 'independent exact final Mach-O private/public symbol audit',
@@ -199,7 +202,8 @@ def run(args):
     report = report_fixture()
     candidate.validate_report_contract(report); checks.append('schema-only-success-fixture')
     modules = (candidate.link, candidate.compose, candidate.combined, candidate.firmware,
-               candidate.link.execution, candidate.link.transport, candidate.link.original, candidate.link.metaclass)
+               candidate.link.execution, candidate.link.transport, candidate.link.original,
+               candidate.link.metaclass, candidate.public_kpi, candidate.link.selective_cache)
     bindings = {str(Path(module.__file__).resolve()): candidate.sha(module.__file__) for module in modules}
     candidate.verifier_bindings(bindings); checks.append('exact-executing-verifier-bindings')
     def refuse_binding(value, name):
@@ -218,6 +222,15 @@ def run(args):
         except (ValueError, KeyError, TypeError):
             checks.append(name); return
         raise ValueError('Non-native report was accepted: ' + name)
+    bad = copy.deepcopy(report)
+    bad['final_image']['imports'] = ['thread_call_cancel_wait']
+    refuse_report(bad, 'reject-header-declared-private-live-import')
+    bad = copy.deepcopy(report)
+    bad.pop('final_public_kpi_export_audit')
+    refuse_report(bad, 'reject-missing-final-public-export-proof')
+    bad = copy.deepcopy(report)
+    bad['final_public_kpi_export_audit']['exact_target_export_proof'] = True
+    refuse_report(bad, 'reject-source-snapshot-as-exact-target-proof')
     for key, value in (('host_control', True), ('native_darwin_compilation', False),
         ('actual_link_performed', False), ('status', 'validated-source-plan-only'),
         ('original_compilation_performed', False), ('project_compilation_performed', False),

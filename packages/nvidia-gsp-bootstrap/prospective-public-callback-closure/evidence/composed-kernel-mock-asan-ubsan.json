@@ -1,0 +1,46 @@
+{
+  "checks": 105,
+  "kernel_path": true,
+  "hardware_test": false,
+  "profile": "public-callback-closure",
+  "compiler": "/usr/bin/g++",
+  "sanitizers": true,
+  "leak_sanitizer": false,
+  "leak_sanitizer_limitation": "Managed host denies /proc task inventory; owner counts checked explicitly",
+  "source_contract": {
+    "format": 1,
+    "profile": "public-callback-closure",
+    "production_modified": false,
+    "hardware_admission": false,
+    "original_entry_admission": false,
+    "sources": {
+      "packages/nvidia-darwin-services/src/S540NvidiaDarwinWork.cpp": {
+        "input_sha256": "8ab3c8066fe5b0b086188e7bc3bb01c2def1c36e137042a881aeecb1d056a0da",
+        "output_sha256": "1edc6a9612445bc991a29381bddc34d6d48019fab947f555b99a8914329de63b"
+      },
+      "packages/nvidia-darwin-services/src/S540NvidiaDarwinTimer.cpp": {
+        "input_sha256": "fa18d2002029fb9ad79f43220951a61fbe607b7ac8a58fa8bea5f10bac39ea60",
+        "output_sha256": "01e4ab7446e4f9de10b948e8427fea6abc2de3751e08587f93404bab93572ec3"
+      }
+    },
+    "header_sha256": "495e53a888f86ceedbdfdf68a99f2812a422201e76f0073a68ce4c500651b962"
+  },
+  "real_iokit_execution": false,
+  "kernel_loading": false,
+  "composed_sources": true,
+  "transaction_record_execution": false,
+  "retained_backend_policy": "explicit test fixture",
+  "composition_negative_controls": 4,
+  "fixture_sha256": {
+    "check.py": "3465f28603c8e44fef4c724ea291b4967d92fd107f687d886da33eb1ac20e1c2",
+    "tests/check_kernel.cpp": "6d226f2918bd9b0806592491d8a792b5239b76c2f1c0b75c02798f6e2ccaae11",
+    "tests/mock/IOKit/IOTimerEventSource.h": "f29e66e47e1e17daec47123ae9b39d2eea131bbf15c2b1ecb30417c9a0534cfe",
+    "tests/mock/IOKit/IOWorkLoop.h": "f29e66e47e1e17daec47123ae9b39d2eea131bbf15c2b1ecb30417c9a0534cfe",
+    "tests/mock/MockIOKit.hpp": "4fe259d8204e7eb81d3fa257b630ad74ace4ec5e9f3dca8800d38e7cf7bbac97",
+    "tests/mock/S540NvidiaDarwinInternal.hpp": "93aa81f8e5b54cf1f8485fc71fd8d70e9651aaab2ae7faf60e36f5425ddc18f8",
+    "tests/mock/S540NvidiaFirstTxnServices.h": "367222423fd804763ed3b581ac65f8fdfead847c16167740c2cc9588bbb32e2e",
+    "tests/mock/S540NvidiaGspFirstTransaction.h": "125439969a54f8c6bcc43855dcb0edb226773d144744d38cb13a04c377d5167d",
+    "tests/mock/libkern/c++/OSData.h": "f29e66e47e1e17daec47123ae9b39d2eea131bbf15c2b1ecb30417c9a0534cfe",
+    "tests/sdk_import_reference.cpp": "fd875a2d1b971b69679206fc14786dc799f0bfb1d8aee767314c6719872f233c"
+  }
+}

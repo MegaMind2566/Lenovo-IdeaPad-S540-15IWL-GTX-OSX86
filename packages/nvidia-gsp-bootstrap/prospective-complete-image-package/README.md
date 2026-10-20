@@ -53,3 +53,23 @@ entry request, install no system files and modify no security settings. All
 admission and initialization fields remain closed. Synthetic Mach-O controls
 and the actual loader-state decoder validate packaging logic only; they cannot
 manufacture a native image pass, usable bundle or target result.
+
+## Target export refusal
+
+The historical signed package reached the target collection linker after the
+ownership repair, then failed to resolve `_thread_call_cancel_wait`. Its
+[reported result](TARGET-EXPORT-REFUSAL-20261020.json) is a failed target load,
+with normal rollback and no original/hardware entry. Header declarations alone
+had not established third-party export availability.
+
+The opt-in [public callback successor](../prospective-public-callback-closure/README.md)
+uses public workloop-priority IOKit event sources and retains synchronous
+callback retirement. Every final live import must also match a pinned Apple
+public export owned by a declared bundle dependency. The source inventory is
+preflight evidence; target kernel loading remains a separate milestone.
+
+Selective compilation records verified original/project reuse separately from
+actual new compiler executions. It reuses only the pinned complete native cache
+with identical compiler/SDK, commands, source and every recorded header
+dependency, and keeps the historical failed report immutable. Signing and
+packaging independently repeat the current image and cache provenance checks.

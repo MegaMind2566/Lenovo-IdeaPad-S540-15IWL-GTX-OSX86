@@ -167,6 +167,7 @@ def fixed_profile_overlays(source: Path, project: Path, output: Path, *,
                            shutdown_protocol: bool, platform_closure: bool = False,
                            retained_backends: bool = False, global_epoch: bool = False,
                            live_abi_closure: bool = False,
+                           public_callback_closure: bool = False,
                            upstream: Path | None = None) -> tuple[dict, dict]:
     """Compose selected real source successors; these flags grant no admission."""
     additions, edits, helpers, exports = {}, [], {}, {}
@@ -387,10 +388,37 @@ def fixed_profile_overlays(source: Path, project: Path, output: Path, *,
                 'final_dead_strip_dispatcher_absence_requires_independent_link_check': True},
             'user_mapping_ingress': False, 'file_descriptor_registration': False,
             'os_event_delivery': False, 'runtime_pm_implemented': False}
+    public_callbacks = None
+    if public_callback_closure:
+        if not live_abi_closure:
+            raise ValueError('Public callback closure requires the complete live ABI source profile')
+        directory = GSP / 'prospective-public-callback-closure'
+        contract_path = directory / 'SOURCE-CONTRACT.json'
+        contract = checked_contract(contract_path, {
+            'source_sha256': directory, 'composed_input_sha256': project})
+        path = directory / 'prepare.py'
+        helpers[path.relative_to(ROOT).as_posix()] = sha(path)
+        helper = load('s540_composition_public_callbacks', path)
+        before = {name: (project / name).read_text() for name in helper.INPUTS}
+        changed = helper.transforms(before)
+        if set(changed) != set(contract['composed_output_sha256']):
+            raise ValueError('Public callback successor changed its exact source inventory')
+        for name, text in sorted(changed.items()):
+            if hashlib.sha256(text.encode()).hexdigest() != contract['composed_output_sha256'][name]:
+                raise ValueError('Public callback successor output differs: ' + name)
+            replace_file('project', name, text, 'public-callback-closure')
+        header = directory / 'S540NvidiaPublicCallout.hpp'
+        replace_file('project', helper.HEADER, header.read_text(), 'public-callback-closure')
+        helpers[header.relative_to(ROOT).as_posix()] = sha(header)
+        public_callbacks = {'source_contract_sha256': sha(contract_path),
+            'header_sha256': sha(header), 'source_inputs': contract['composed_input_sha256'],
+            'source_outputs': contract['composed_output_sha256'],
+            'direct_thread_call_imports': False, 'new_metaclasses': False,
+            'physical_execution_tested': False}
     for name, digest in helpers.items():
         if sha(ROOT / name) != digest:
             raise ValueError('A fixed source-profile helper changed during composition: ' + name)
-    return additions, {'retained_diagnostic': retained_diagnostic, 'rc_participant': rc_participant,
+    profiles = {'retained_diagnostic': retained_diagnostic, 'rc_participant': rc_participant,
         'shutdown_protocol': shutdown_protocol, 'platform_closure': platform_closure,
         'retained_backends': retained_backends, 'global_epoch': global_epoch,
         'live_abi_closure': live_abi_closure,
@@ -406,6 +434,9 @@ def fixed_profile_overlays(source: Path, project: Path, output: Path, *,
         'required_compile_definitions': {'S540_NVIDIA_NO_LEGACY_RM_SEMAPHORE': '1'},
         'original_entry_admission': False, 'hardware_admission': False,
         'final_release_issued': False, 'stop_receipt_issued': False}
+    if public_callback_closure:
+        profiles.update(public_callback_closure=True, public_callback_source_profile=public_callbacks)
+    return additions, profiles
 
 
 def materialize(upstream: Path, v3_root: Path, namespace: Path, output: Path,
@@ -414,7 +445,10 @@ def materialize(upstream: Path, v3_root: Path, namespace: Path, output: Path,
                 retained_diagnostic: bool = False, rc_participant: bool = False,
                 shutdown_protocol: bool = False, platform_closure: bool = False,
                 retained_backends: bool = False, global_epoch: bool = False,
-                live_abi_closure: bool = False) -> dict:
+                live_abi_closure: bool = False,
+                public_callback_closure: bool = False) -> dict:
+    if public_callback_closure and not live_abi_closure:
+        raise ValueError('Public callback closure requires the complete live ABI source profile')
     if retained_backends and not retained_diagnostic:
         raise ValueError('Retained backends require the exact retained diagnostic Host')
     if global_epoch and not (retained_diagnostic and retained_backends):
@@ -431,7 +465,7 @@ def materialize(upstream: Path, v3_root: Path, namespace: Path, output: Path,
         inputs.append(successor_manifest.parent)
     if project_successor_manifest:
         if any([retained_diagnostic, rc_participant, shutdown_protocol, platform_closure,
-                retained_backends, global_epoch, live_abi_closure]):
+                retained_backends, global_epoch, live_abi_closure, public_callback_closure]):
             raise ValueError('Fixed source profiles and an arbitrary project successor require separate compositions')
         project_successor_manifest = project_successor_manifest.resolve(strict=True)
         inputs.append(project_successor_manifest.parent)
@@ -540,7 +574,8 @@ def materialize(upstream: Path, v3_root: Path, namespace: Path, output: Path,
         retained_diagnostic=retained_diagnostic, rc_participant=rc_participant,
         shutdown_protocol=shutdown_protocol, platform_closure=platform_closure,
         retained_backends=retained_backends, global_epoch=global_epoch,
-        live_abi_closure=live_abi_closure, upstream=upstream)
+        live_abi_closure=live_abi_closure, public_callback_closure=public_callback_closure,
+        upstream=upstream)
     profiles['os_event_source_profile'] = event_profile
     if live_abi_closure:
         profiles['live_abi_source_profile']['control_event_ingress'].update({
@@ -743,7 +778,7 @@ def verify_fixed_project_symbols(row: dict, defined: set[str], imports: set[str]
 
 def compile_project_objects(upstream: Path, output: Path, cc: Path, cxx: Path,
                             kernel_flags: list[str], cpp_flags: list[str],
-                            *, host_control: bool) -> dict:
+                            *, host_control: bool, native_cache=None) -> dict:
     """Compile the actual composed bridge/source inventory; no link or fixtures.
 
     The caller supplies its independently verified SDK kernel flags and records
@@ -803,6 +838,20 @@ def compile_project_objects(upstream: Path, output: Path, cc: Path, cxx: Path,
             command = [str(compiler), *flags, '-Wframe-larger-than=4096',
                 '-Werror=frame-larger-than', '-fstack-usage', '-MD', '-MF', str(dep),
                 '-c', str(source), '-o', str(obj)]
+            if native_cache is not None:
+                if host_control:
+                    raise ValueError('Host-control compilation cannot reuse native objects')
+                reused = native_cache.reuse(kind='project', source=source, command=command,
+                    cwd=output / 'project', obj=obj, plan_row=row, current_identity=identity)
+                if reused is not None:
+                    allowed = row['source'] in {
+                        'packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.cpp',
+                        'packages/nvidia-gsp-bootstrap/prospective-loader/S540ProspectiveLoaderKernel.cpp'}
+                    defined, imports, _ = original.macho_symbols(obj, reviewed_project_initializers=allowed)
+                    verify_fixed_project_symbols(row, defined, imports)
+                    rows.append(reused)
+                    write_json(path, report)
+                    continue
             original.execute(command, cwd=output / 'project', timeout=300,
                              diagnostic_log=obj.with_suffix('.log'))
             allowed = row['source'] in {
@@ -825,6 +874,8 @@ def compile_project_objects(upstream: Path, output: Path, cc: Path, cxx: Path,
                 'dependency_sha256': dependencies,
                 'stack_usage': stack.capture_usage(source, obj, command,
                     cwd=output / 'project', native_apple=not host_control)})
+            if native_cache is not None:
+                native_cache.record_compiled(kind='project', source=row['source'])
             write_json(path, report)
         verify_composition(output)
         verify_compiled_rows(rows, objects)
@@ -967,7 +1018,8 @@ def compile_original_subset(upstream: Path, output: Path, compiler: Path,
     return report
 
 
-def compile_original_objects(upstream: Path, output: Path, compiler: Path, *, host_control: bool) -> dict:
+def compile_original_objects(upstream: Path, output: Path, compiler: Path, *,
+                             host_control: bool, native_cache=None) -> dict:
     """Compile every make-declared source against composed headers, no reuse.
 
     The baseline compiler's relative source/include paths resolve within the
@@ -1012,6 +1064,13 @@ def compile_original_objects(upstream: Path, output: Path, compiler: Path, *, ho
         obj = Path(row[row.index('-o') + 1])
         dep = obj.with_suffix('.d')
         command += ['-MD', '-MF', str(dep)]
+        if native_cache is not None:
+            if host_control:
+                raise ValueError('Host-control compilation cannot reuse native objects')
+            reused = native_cache.reuse(kind='original', source=source.resolve(strict=True),
+                command=command, cwd=source_root, obj=obj, current_identity=identity)
+            if reused is not None:
+                return reused
         original.execute(command, cwd=source_root, timeout=300,
                          diagnostic_log=objects / ('compile-%04d.log' % index))
         defined, undefined, _ = original.macho_symbols(obj)
@@ -1025,13 +1084,16 @@ def compile_original_objects(upstream: Path, output: Path, compiler: Path, *, ho
             if dependency.is_relative_to(upstream):
                 raise ValueError('Raw upstream dependency escaped composed tree: ' + str(dependency))
             dependencies[str(dependency)] = sha(dependency)
-        return {'source': relative, 'source_sha256': sha(source), 'object': obj.name,
+        result = {'source': relative, 'source_sha256': sha(source), 'object': obj.name,
             'compile_definitions': value.get('fixed_source_profiles', {}).get(
                 'per_original_source_compile_definitions', {}).get(relative, {}),
             'object_sha256': sha(obj), 'definitions': sorted(defined), 'imports': sorted(undefined),
             'dependency_sha256': dependencies, 'command': command, 'cwd': str(source_root),
             'stack_usage': stack.capture_usage(source.resolve(strict=True), obj, command,
                                                 cwd=source_root, native_apple=not host_control)}
+        if native_cache is not None:
+            native_cache.record_compiled(kind='original', source=relative)
+        return result
     rows, failures = [], []
     report = {'format': 1, 'status': 'running', **identity, 'original_entry_admission': False,
         'hardware_admission': False, 'production_candidate_allowed': False,
@@ -1068,6 +1130,7 @@ def main() -> int:
     parser.add_argument('--retained-backends', action='store_true')
     parser.add_argument('--global-epoch', action='store_true')
     parser.add_argument('--live-abi-closure', action='store_true')
+    parser.add_argument('--public-callback-closure', action='store_true')
     parser.add_argument('--compile-original', action='store_true')
     parser.add_argument('--cc', type=Path, default=Path('/usr/bin/clang'))
     parser.add_argument('--host-control', action='store_true')
@@ -1081,7 +1144,8 @@ def main() -> int:
                         platform_closure=args.platform_closure,
                         retained_backends=args.retained_backends,
                         global_epoch=args.global_epoch,
-                        live_abi_closure=args.live_abi_closure)
+                        live_abi_closure=args.live_abi_closure,
+                        public_callback_closure=args.public_callback_closure)
     if args.compile_original:
         value = compile_original_objects(args.upstream, args.output, args.cc, host_control=args.host_control)
     print(json.dumps({'status': value['status'], 'original_entry_admission': False,

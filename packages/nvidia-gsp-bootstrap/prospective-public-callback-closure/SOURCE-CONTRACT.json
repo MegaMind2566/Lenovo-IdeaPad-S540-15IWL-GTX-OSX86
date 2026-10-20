@@ -1,0 +1,19 @@
+{
+  "format": 1,
+  "profile": "public-callback-closure",
+  "source_sha256": {
+    "prepare.py": "67d0d52d32bcab2f4cc8486e32f05d82b963baecfb6a2ae7028109ba2e34ba7b",
+    "S540NvidiaPublicCallout.hpp": "495e53a888f86ceedbdfdf68a99f2812a422201e76f0073a68ce4c500651b962",
+    "tests/sdk_import_reference.cpp": "fd875a2d1b971b69679206fc14786dc799f0bfb1d8aee767314c6719872f233c"
+  },
+  "composed_input_sha256": {
+    "packages/nvidia-darwin-services/src/S540NvidiaDarwinWork.cpp": "8ab3c8066fe5b0b086188e7bc3bb01c2def1c36e137042a881aeecb1d056a0da",
+    "packages/nvidia-darwin-services/src/S540NvidiaDarwinTimer.cpp": "fa18d2002029fb9ad79f43220951a61fbe607b7ac8a58fa8bea5f10bac39ea60"
+  },
+  "composed_output_sha256": {
+    "packages/nvidia-darwin-services/src/S540NvidiaDarwinWork.cpp": "1edc6a9612445bc991a29381bddc34d6d48019fab947f555b99a8914329de63b",
+    "packages/nvidia-darwin-services/src/S540NvidiaDarwinTimer.cpp": "01e4ab7446e4f9de10b948e8427fea6abc2de3751e08587f93404bab93572ec3"
+  },
+  "hardware_admission": false,
+  "original_entry_admission": false
+}

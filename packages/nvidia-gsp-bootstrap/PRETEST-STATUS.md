@@ -2,10 +2,41 @@
 
 The current test package is an idle complete-image loader ABI check for the
 S540 TU117, before any original RM/GSP initialization. Native linking and
-packaging are recorded below. The first Lenovo load attempt was refused at
-filesystem ownership validation; successful loading and unloading remain
-unobserved. The confirmed hardware checkpoint remains v9. Brightness,
+packaging are recorded below for the historical image. The first Lenovo load
+attempt was refused at filesystem ownership validation. After correcting the
+report ownership, the second attempt reached kernel collection linking and
+failed to resolve the private `_thread_call_cancel_wait` import (status31,
+rollback0). Successful loading and unloading remain unobserved. The confirmed hardware checkpoint remains v9. Brightness,
 external displays and electrical NVIDIA power-off work remain deferred.
+
+## Target private-export refusal and public callback successor
+
+The [second target report](prospective-complete-image-package/TARGET-EXPORT-REFUSAL-20261020.json)
+reached kernel collection linking on build25G241/Darwin25.6.0, then failed on
+`_thread_call_cancel_wait`; rollback returned0. All original, hardware and GPU
+entry gates remained closed. The prior ZIP is retained as historical evidence,
+not a passing target image.
+
+The SDK header/reference check had accepted this declaration without checking
+public exports. The independent pinned Apple source export inventory now checks
+every final live import and its declared owning dependency. It finds389 public
+matches among390 imports in the historical image; the sole rejection is the
+private cancellation function. This published source profile is preflight
+evidence, not proof of the exact target kernel binary.
+
+The opt-in [public callback successor](prospective-public-callback-closure/README.md)
+preserves the frozen source baseline and changes only the composed Timer/Work
+bodies plus one companion header. It uses public IOKit workloop-priority timer
+event sources, gates cancellation after releasing the service Guard, and keeps
+real callback-return synchronization. It introduces no new metaclass, kernel
+entry permission or hardware action. The exact source/SDK cross-compilation and
+concurrent mock-KERNEL controls are distinct from the pending native final link
+and eventual physical target test.
+
+A selective native rebuild may reuse only the independently pinned complete
+cache when compiler identity, SDK, source, full command/cwd and every recorded
+header dependency remain identical. The historical report stays failed and
+immutable; new reports record actual compiled/reused counts separately.
 
 ## Earlier extended native checkpoint
 
@@ -234,7 +265,7 @@ original global or adapter entry executes during that test.
 
 | Requirement | Remaining work |
 |---|---|
-| Target loader ABI | Native full-profile compilation, dead-stripped kext linking and packaging are complete for the recorded exact image. Run the closed idle load/snapshot/unload check on the specified Lenovo target; public SDK validation does not prove target kernel export/vtable compatibility. |
+| Target loader ABI | The historical packaged image is refused by the target linker because `_thread_call_cancel_wait` is not exported to the declared third-party KPIs. The public callback successor and final live-import export preflight require a new native link/package and then the closed idle load/snapshot/unload check. |
 | Original locks/lifetime | Validate the serialized global/context epoch and close the retained late-OOM construction failure before kernel entry, with ISR/DPC exclusion. A zero current-thread lock mask is not all-thread quiescence. |
 | Callback producers | Compose genuine RC behavior and hard-IRQ/coalesced-BH participation, including master-thread pending drains and a non-destructive persistent hardware-mask phase. Do not invent EVENT/OWNER policy rows for plain 1Hz callbacks. |
 | Allocation ownership | Acquire the real session hardware-DMA hold before any original attempt. Preserve CPU objects, direct service backends, DMA backing/mappings, context and module text after the retained diagnostic. |

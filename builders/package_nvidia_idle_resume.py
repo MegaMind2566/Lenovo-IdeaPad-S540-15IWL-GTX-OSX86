@@ -17,9 +17,22 @@ def main():
     assert record['source_plan']['canonical_project_translation_units'] == 60
     assert record['source_plan']['total_expected_link_objects'] == 1163
     assert len(record['input_object_sha256']) == 1163
-    assert record['native_compilation_reused'] is True
-    assert record['original_compilation_performed'] is False
-    assert record['project_compilation_performed'] is False
+    selective = record.get('native_compilation_selectively_reused', False)
+    if selective:
+        assert selective is True and record['native_compilation_reused'] is False
+        cache = record['selective_native_compilation_cache']
+        assert cache['complete'] is True
+        assert cache['original']['reused_objects'] == 1100
+        assert cache['original']['compiled_this_run'] == 0
+        assert cache['project']['reused_objects'] == 58
+        assert cache['project']['compiled_this_run'] == 2
+        assert record['original_compilation_performed'] is False
+        assert record['project_compilation_performed'] is True
+    else:
+        assert record['native_compilation_reused'] is True
+        assert record['original_compilation_performed'] is False
+        assert record['project_compilation_performed'] is False
+        cache = record['compilation_cache']
     digest = hashlib.sha256(report.read_bytes()).hexdigest()
     output = home / 'idle-complete-image-package'
     subprocess.run([sys.executable,
@@ -41,8 +54,9 @@ def main():
         'archive_sha256': hashlib.sha256(archive.read_bytes()).hexdigest(),
         'packaging_attestation_sha256': hashlib.sha256(attestation.read_bytes()).hexdigest(),
         'strict_native_report_sha256': digest, 'expected_native_link_inputs': 1163,
-        'native_compilation_reused': True,
-        'cached_compilation_workflow_run_id': record['compilation_cache']['workflow_run_id'],
+        'native_compilation_reused': record['native_compilation_reused'],
+        'native_compilation_selectively_reused': selective,
+        'cached_compilation_workflow_run_id': cache['workflow_run_id'],
         'test_scope': 'idle complete-image target-loader ABI only',
         'original_entry_admission': False, 'gpu_initialization_attempted': False}
     (artifacts / 'package-digests.json').write_text(json.dumps(digests, indent=2, sort_keys=True) + '\n')

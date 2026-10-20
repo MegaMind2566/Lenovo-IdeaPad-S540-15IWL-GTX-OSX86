@@ -23,13 +23,12 @@ import link_nvidia_first_transaction as link
 import compose_nvidia_first_transaction as compose
 import nvidia_combined_metaclasses as combined
 import embed_nvidia_firmware as firmware
+import nvidia_public_kpi_exports as public_kpi
 
 BUNDLE_ID = 'org.osx86.S540ProspectiveLoader'
 BUNDLE = 'S540IdleCompleteImage.kext'
 EXECUTABLE = 'S540IdleCompleteImage'
-LIBRARIES = {**{'com.apple.kpi.' + key: '8.0.0' for key in
-              ('bsd', 'iokit', 'libkern', 'mach', 'unsupported')},
-             'com.apple.iokit.IOPCIFamily': '2.9.0'}
+LIBRARIES = public_kpi.IDLE_LIBRARIES
 TARGET = {'label': 'Lenovo IdeaPad S540-15IWL GTX idle complete-image ABI check',
           'architecture': 'x86_64', 'product_version': '26.7.1', 'build': '25G241',
           'darwin_release': '25.6.0', 'gpu_registry_identity': {
@@ -67,7 +66,7 @@ def file_in(root, name):
 
 def verifier_bindings(recorded):
     modules = (link, compose, combined, firmware, link.execution, link.transport,
-               link.original, link.metaclass)
+               link.original, link.metaclass, public_kpi, link.selective_cache)
     actual = {}
     for module in modules:
         path = Path(module.__file__)
@@ -121,15 +120,33 @@ def validate_report_contract(report):
                 'Strict native report contract refused: ' + name)
     reused = report.get('native_compilation_reused', False)
     require(type(reused) is bool, 'Native compilation reuse mode must be an exact Boolean')
+    selective = report.get('native_compilation_selectively_reused', False)
+    require(type(selective) is bool and not (selective and reused),
+            'Selective and complete native compilation reuse modes must be distinct Booleans')
     for name in ('original_compilation_performed', 'project_compilation_performed'):
-        require(type(report.get(name)) is bool and report[name] is (not reused),
+        kind = name.split('_', 1)[0]
+        expected = (report['selective_native_compilation_cache'][kind]['compiled_this_run'] > 0
+                    if selective else not reused)
+        require(type(report.get(name)) is bool and report[name] is expected,
                 'Native compilation provenance differs from execution mode: ' + name)
+    if selective:
+        proof = report['selective_native_compilation_cache']
+        require(proof.get('complete') is True and
+                proof.get('historical_report_sha256') == link.selective_cache.REPORT_SHA256 and
+                proof.get('current_composition_sha256') == report.get('composition_sha256'),
+                'Selective native compilation lacks the complete pinned source/dependency proof')
+    else:
+        require('selective_native_compilation_cache' not in report,
+                'Nonselective native build must not claim selective cache provenance')
     if reused:
         require(report.get('compilation_cache', {}).get('complete_native_compilation_verified') is True,
                 'Native continuation lacks verified complete compilation provenance')
     else:
         require('compilation_cache' not in report, 'Fresh native build must not claim cache provenance')
     final = report['final_image']
+    require(report.get('final_public_kpi_export_audit') ==
+            public_kpi.audit_imports(final['imports'], LIBRARIES),
+            'Strict report lacks the independent final public KPI export preflight')
     require(final['filetype'] == 'MH_KEXT_BUNDLE' and final['installable_bundle'] is False and
             re.fullmatch('[0-9a-f]{64}', final['sha256']), 'Strict final image identity is incomplete')
     policy = report['final_link_policy']
@@ -168,6 +185,7 @@ def native_identity(cc, cxx):
 def verify_image(path, approved, entries):
     parsed = link.Image(path, 11)
     audit = link.audit_symbols({path.name: parsed.externals()}, approved)
+    public_kpi.audit_imports(audit['public_imports'], LIBRARIES)
     link.verify_final_exports(parsed)
     for symbol in ('__start', '__stop'):
         parsed.code(symbol)
@@ -216,6 +234,9 @@ def verify_build(args, execute, scratch):
     for name, expected in report['input_object_sha256'].items():
         path = Path(name)
         require(not path.is_symlink() and sha(path) == expected, 'Native image input bytes changed: ' + name)
+    if report.get('native_compilation_selectively_reused') is True:
+        link.selective_cache.verify_compilation_result(
+            report['selective_native_compilation_cache'], composed, originals, projects)
     require(link.verify_scatterable_objects([Path(name) for name in report['input_object_sha256']]) ==
             report['scatterable_input_objects'], 'Complete native input atomization changed')
     common, _ = native_identity(args.cc, args.cxx)
@@ -329,6 +350,12 @@ def package(args):
         if verified['report'].get('native_compilation_reused') is True:
             cached = Path(verified['report']['compilation_cache']['report_path'])
             shutil.copyfile(cached, evidence / 'cached-native-compilation-report.json')
+        if verified['report'].get('native_compilation_selectively_reused') is True:
+            cached = (Path(verified['report']['selective_native_compilation_cache']['artifact_root']) /
+                      'first-transaction-image/first-transaction-image.json')
+            require(sha(cached) == link.selective_cache.REPORT_SHA256,
+                    'Selective cache historical report changed before redistribution')
+            shutil.copyfile(cached, evidence / 'cached-native-compilation-report.json')
         controller = staged / 's540-idle-image-ctl'
         sdk_path = execute(['/usr/bin/xcrun', '--sdk', 'macosx', '--show-sdk-path'], 'controller-sdk').stdout.strip()
         require(Path(sdk_path).is_dir(), 'Native user-space SDK is absent')
@@ -375,6 +402,11 @@ def package(args):
                 sha(verified['image']) == invariant['presign_sha256'], 'Strict native input changed during packaging')
         if verified['report'].get('native_compilation_reused') is True:
             link.verify_resumed_compilation(verified['report'], verified['report_path'].parent)
+        if verified['report'].get('native_compilation_selectively_reused') is True:
+            link.selective_cache.verify_compilation_result(
+                verified['report']['selective_native_compilation_cache'], verified['composed'],
+                json.loads((verified['composed'] / 'full-original-compilation.json').read_text()),
+                json.loads((verified['composed'] / 'project-compilation.json').read_text()))
         compose.verify_composition(verified['composed'])
         require(link.verify_closed_loader_policy(verified['composed']) == verified['report']['closed_loader_policy'],
                 'Closed loader source changed during packaging')

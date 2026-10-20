@@ -1,0 +1,49 @@
+{
+  "format": 1,
+  "repository": "https://github.com/apple-oss-distributions/xnu",
+  "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+  "version": "xnu-12377.1.9",
+  "exact_target_source": false,
+  "sources": {
+    "config/Mach.exports": {
+      "git_blob_sha": "af102a0a37c5f3ed11e908f17e58b7c72272171d",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/config/Mach.exports"
+    },
+    "config/Private.exports": {
+      "git_blob_sha": "dfe4e76f9252adba8886df883f43c4ec3ff15c94",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/config/Private.exports"
+    },
+    "config/IOKit.exports": {
+      "git_blob_sha": "03822d86c54a5affe32259444d53a4e68d8f044f",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/config/IOKit.exports"
+    },
+    "config/Libkern.exports": {
+      "git_blob_sha": "366d2e4984b3afe2f2eb6a46487f8fb69b83dfb8",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/config/Libkern.exports"
+    },
+    "osfmk/kern/thread_call.h": {
+      "git_blob_sha": "aa7060af0f2ac6216d0f254aea37e6d1e8f7e3c2",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/kern/thread_call.h"
+    },
+    "osfmk/kern/thread_call.c": {
+      "git_blob_sha": "c65772c7b4b7dd1d9920dd919911cf8f604e28d8",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/kern/thread_call.c"
+    },
+    "iokit/Kernel/IOTimerEventSource.cpp": {
+      "git_blob_sha": "0ee1fe90653d0babb85e71c84d35ad8db8160fdf",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/iokit/Kernel/IOTimerEventSource.cpp"
+    },
+    "iokit/IOKit/IOTimerEventSource.h": {
+      "git_blob_sha": "4b907bb86afd0be35285bfdd64afd466b3d3a80e",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/iokit/IOKit/IOTimerEventSource.h"
+    },
+    "iokit/Kernel/IOWorkLoop.cpp": {
+      "git_blob_sha": "1d93f463c39d7bb688d7311ef411ed5ef916a147",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/iokit/Kernel/IOWorkLoop.cpp"
+    },
+    "iokit/Kernel/IOEventSource.cpp": {
+      "git_blob_sha": "8323ce3120ac913e6b35dade31472653cf61af77",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/iokit/Kernel/IOEventSource.cpp"
+    }
+  }
+}

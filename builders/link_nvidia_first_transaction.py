@@ -31,6 +31,8 @@ import compose_nvidia_first_transaction as composition
 import embed_nvidia_firmware as firmware
 import nvidia_combined_metaclasses as combined_metaclasses
 import nvidia_metaclass_initializers as metaclass
+import nvidia_public_kpi_exports as public_kpi
+import nvidia_selective_native_cache as selective_cache
 
 ROOT = Path(__file__).resolve().parents[1]
 GSP = ROOT / 'packages/nvidia-gsp-bootstrap'
@@ -372,6 +374,10 @@ def project_unit_count(value: dict) -> int:
     for name in selections:
         if name in profiles and type(profiles[name]) is not bool:
             raise ValueError('A fixed source-profile selection must be a real Boolean')
+    if 'public_callback_closure' in profiles and type(profiles['public_callback_closure']) is not bool:
+        raise ValueError('Public callback closure selection must be a real Boolean')
+    if profiles.get('public_callback_closure') and profiles.get('live_abi_closure') is not True:
+        raise ValueError('Public callback closure requires the complete live ABI source profile')
     expected = (53 + int(profiles.get('rc_participant', False)) +
                 int(profiles.get('shutdown_protocol', False)) + int(profiles.get('platform_closure', False)) +
                 4*int(profiles.get('live_abi_closure', False)))
@@ -532,6 +538,11 @@ def sdk_import_references(output: Path, composed: Path, cxx: Path,
     rows = {}
     include = composition.include_flags(composed)
     declared_sources = [(relative, ROOT / relative) for relative in references]
+    manifest = composition.verify_composition(composed)
+    if manifest.get('fixed_source_profiles', {}).get('public_callback_closure') is True:
+        relative = ('packages/nvidia-gsp-bootstrap/prospective-public-callback-closure/'
+                    'tests/sdk_import_reference.cpp')
+        declared_sources.append((relative, ROOT / relative))
     for label, text in [('hardware-transport', transport.HARDWARE_IMPORT_REFERENCE),
                         ('rm-services', transport.SERVICES_IMPORT_REFERENCE),
                         ('closed-loader-operations', LOADER_OPERATION_REFERENCE)]:
@@ -699,6 +710,11 @@ def build(args) -> dict:
             inputs.append(manifest.parent)
     resume_path = getattr(args, 'resume_compiled_report', None)
     resume_sha = getattr(args, 'resume_report_sha256', None)
+    object_cache = getattr(args, 'native_object_cache', None)
+    if object_cache is not None and not args.public_callback_closure:
+        raise ValueError('This bounded native object reuse requires the exact public callback source profile')
+    if object_cache is not None and resume_path is not None:
+        raise ValueError('Selective object reuse and historical link continuation are separate modes')
     if (resume_path is None) != (resume_sha is None):
         raise ValueError('Both --resume-compiled-report and --resume-report-sha256 are required')
     if resume_path is not None:
@@ -715,7 +731,9 @@ def build(args) -> dict:
     builders = [Path(__file__).resolve(), ROOT / 'builders/compose_nvidia_first_transaction.py',
         ROOT / 'builders/build_nvidia_execution.py', ROOT / 'builders/build_nvidia_transport.py',
         ROOT / 'builders/compile_nvidia_global_rm.py', ROOT / 'builders/nvidia_combined_metaclasses.py',
-        ROOT / 'builders/nvidia_metaclass_initializers.py', ROOT / 'builders/embed_nvidia_firmware.py']
+        ROOT / 'builders/nvidia_metaclass_initializers.py', ROOT / 'builders/embed_nvidia_firmware.py',
+        ROOT / 'builders/nvidia_public_kpi_exports.py',
+        ROOT / 'builders/nvidia_selective_native_cache.py']
     builder_hashes = {str(path): sha(path) for path in builders}
     report['builder_source_sha256'] = builder_hashes
     previous = (read_resume_report(resume_path, resume_sha, output, builder_hashes)
@@ -766,14 +784,15 @@ def build(args) -> dict:
                 retained_diagnostic=args.retained_diagnostic, rc_participant=args.rc_participant,
                 shutdown_protocol=args.shutdown_protocol, platform_closure=args.platform_closure,
                 retained_backends=args.retained_backends, global_epoch=args.global_epoch,
-                live_abi_closure=args.live_abi_closure)
+                live_abi_closure=args.live_abi_closure,
+                public_callback_closure=args.public_callback_closure)
         else:
             composed = args.composition_dir.resolve(strict=True)
             value = composition.verify_composition(composed)
             if args.successor_manifest or args.project_successor_manifest:
                 raise ValueError('Successor manifests cannot alter a reused composition')
             for name in ('retained_diagnostic', 'rc_participant', 'shutdown_protocol', 'platform_closure',
-                         'retained_backends', 'global_epoch', 'live_abi_closure'):
+                         'retained_backends', 'global_epoch', 'live_abi_closure', 'public_callback_closure'):
                 if getattr(args, name) and value.get('fixed_source_profiles', {}).get(name) is not True:
                     raise ValueError('Requested fixed source profile is absent from reused composition: ' + name)
         report.update(composition_directory=str(composed), composition_sha256=sha(composed / 'composition.json'))
@@ -833,11 +852,18 @@ def build(args) -> dict:
         write_json(destination, report)
         original_report_path = composed / 'full-original-compilation.json'
         project_report_path = composed / 'project-compilation.json'
+        native_cache = (selective_cache.SelectiveNativeCache(object_cache,
+            composition=composed, current_identity=identity, sdk=sdk_record,
+            allowed_rebuilds={('project', 'packages/nvidia-darwin-services/src/S540NvidiaDarwinWork.cpp'),
+                              ('project', 'packages/nvidia-darwin-services/src/S540NvidiaDarwinTimer.cpp')})
+            if object_cache is not None else None)
         if previous is None:
             if original_report_path.exists() or project_report_path.exists():
                 raise ValueError('Fresh native image builds must not reuse any preexisting compilation report')
-            originals = composition.compile_original_objects(args.upstream, composed, cc, host_control=False)
-            projects = composition.compile_project_objects(args.upstream, composed, cc, cxx, flags, cpp, host_control=False)
+            originals = composition.compile_original_objects(args.upstream, composed, cc,
+                host_control=False, native_cache=native_cache)
+            projects = composition.compile_project_objects(args.upstream, composed, cc, cxx,
+                flags, cpp, host_control=False, native_cache=native_cache)
         else:
             for name in ('composition_directory', 'composition_sha256', 'source_plan', 'compilers',
                          'sdk', 'firmware_asset_inventory', 'closed_loader_policy', 'fixed_source_profiles'):
@@ -855,6 +881,13 @@ def build(args) -> dict:
         report['original_compilation_performed'] = previous is None
         report['project_compilation_performed'] = previous is None
         report['native_compilation_reused'] = previous is not None
+        if native_cache is not None:
+            proof = {'artifact_root': str(object_cache.resolve(strict=True)),
+                     **native_cache.report(require_complete=True)}
+            report['native_compilation_selectively_reused'] = True
+            report['selective_native_compilation_cache'] = proof
+            report['original_compilation_performed'] = proof['original']['compiled_this_run'] > 0
+            report['project_compilation_performed'] = proof['project']['compiled_this_run'] > 0
         original_objects = compilation_inputs(composed, originals, original_units=True,
                                                planned_original_sources=original_sources)
         project_objects = compilation_inputs(composed, projects, original_units=False,
@@ -924,6 +957,9 @@ def build(args) -> dict:
         report['apple_linker'] = {'path': str(ld), 'sha256': sha(ld)}
         if previous is not None:
             verify_resumed_compilation(report, output)
+        if native_cache is not None:
+            selective_cache.verify_compilation_result(report['selective_native_compilation_cache'],
+                composed, originals, projects)
         image = output / 'S540FirstTransactionDevelopment.o'
         execute([ld, '-r', '-keep_private_externs', '-arch', 'x86_64', *objects, '-o', image], 'complete-relocatable-link', timeout=900)
         verify_scatterable_objects([image])
@@ -974,6 +1010,12 @@ def build(args) -> dict:
         final_image = Image(final, 11)
         final_symbols = final_image.externals()
         final_audit = audit_symbols({final.name: final_symbols}, approved)
+        # SDK declarations establish ABI provenance; only exported live symbols
+        # can be supplied by the bundle's declared public KPI dependencies.
+        report['final_public_kpi_export_audit'] = public_kpi.inspect_imports(
+            final_audit['public_imports'], public_kpi.IDLE_LIBRARIES)
+        write_json(destination, report)
+        public_kpi.audit_imports(final_audit['public_imports'], public_kpi.IDLE_LIBRARIES)
         report['final_exported_symbols'] = verify_final_exports(final_image)
         if set(final_audit['public_imports']) - set(linked_audit['public_imports']):
             raise ValueError('Final kernel image gained an import absent from the complete ld-r image')
@@ -1381,6 +1423,8 @@ def main() -> int:
     parser.add_argument('--resume-compiled-report', type=Path,
                         help='Continue only the independently pinned complete native compilation; rerun both native links.')
     parser.add_argument('--resume-report-sha256')
+    parser.add_argument('--native-object-cache', type=Path,
+                        help='Reuse only exact native compiler inputs from the independently pinned full artifact.')
     parser.add_argument('--composition-dir', type=Path,
                         help='Inspect an existing exact source inventory in --plan-only mode; native builds compile fresh except for the explicitly pinned continuation.')
     parser.add_argument('--successor-manifest', type=Path)
@@ -1392,6 +1436,7 @@ def main() -> int:
     parser.add_argument('--retained-backends', action='store_true')
     parser.add_argument('--global-epoch', action='store_true')
     parser.add_argument('--live-abi-closure', action='store_true')
+    parser.add_argument('--public-callback-closure', action='store_true')
     parser.add_argument('--plan-only', action='store_true')
     args = parser.parse_args()
     if args.self_test:

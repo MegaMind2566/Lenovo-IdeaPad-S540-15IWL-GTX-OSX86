@@ -22,15 +22,23 @@ concurrency:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
-  native-idle-image:
-    runs-on: macos-15-intel
-    timeout-minutes: 75
+  source-cache-preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
+      - name: Refuse overlapping native workflows and fetch the pinned cache
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python3 builders/prepare_nvidia_public_callback_rebuild.py
+          --download-cache
+          --artifact-root "$RUNNER_TEMP/nvidia-idle-4939252-native"
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: NVIDIA/open-gpu-kernel-modules
@@ -43,43 +51,109 @@ jobs:
           ref: 3f750085caa17ec3a7880f11c11bf4f48cd6a164
           path: build-src/MacKernelSDK
           persist-credentials: false
-      - name: Verify source replay and strict link tooling controls
-        run: |
-          python3 builders/prepare_nvidia_idle_image_inputs.py --self-test
-          python3 packages/nvidia-global-rm/tests/test_first_transaction_composition.py
-          python3 packages/nvidia-global-rm/tests/test_combined_metaclasses.py
-          python3 builders/link_nvidia_first_transaction.py --self-test
-      - name: Install the pinned bounded archive decoder
+      - name: Run source, selective-cache, export and strict-link controls
         shell: bash
         run: |
           set -euo pipefail
-          NVIDIA_IDLE_VENV="$RUNNER_TEMP/nvidia-idle-image-python"
-          python3 -m venv "$NVIDIA_IDLE_VENV"
-          "$NVIDIA_IDLE_VENV/bin/python3" -m pip install --disable-pip-version-check -r packages/nvidia-firmware-assets/requirements-build.txt
-          printf '%s\n' "$NVIDIA_IDLE_VENV/bin" >> "$GITHUB_PATH"
-      - name: Acquire and verify the actual firmware pair and complete notice
+          python3 builders/prepare_nvidia_idle_image_inputs.py --self-test
+          python3 packages/nvidia-global-rm/tests/test_first_transaction_composition.py
+          python3 packages/nvidia-global-rm/tests/test_combined_metaclasses.py
+          python3 packages/nvidia-global-rm/tests/test_selective_native_cache.py
+          python3 packages/nvidia-global-rm/tests/test_public_callback_rebuild_inputs.py
+          python3 builders/test_nvidia_public_kpi_exports.py
+          python3 builders/link_nvidia_first_transaction.py --self-test
+          python3 packages/nvidia-darwin-services/tests/test_provenance.py
+      - name: Replay the verified namespace and both exact source profiles without compiling originals
         run: >-
-          python3 builders/check_nvidia_firmware_assets.py --download
-          --assets-dir build/nvidia-idle-image/firmware
-          --build-dir build/nvidia-idle-image/firmware-checks
-      - name: Verify packaging with actual acquired assets and native decoder controls
-        run: >-
-          python3 packages/nvidia-gsp-bootstrap/prospective-complete-image-package/check.py
-          --cc /usr/bin/clang
-          --assets-dir build/nvidia-idle-image/firmware
-          --output build/nvidia-idle-image/package-controls
-      - name: Compile raw originals for the namespace and replay exact source-only V3 inputs
-        run: >-
-          python3 builders/prepare_nvidia_idle_image_inputs.py
-          --upstream build-src/nvidia-upstream --compiler /usr/bin/clang
+          python3 builders/prepare_nvidia_public_callback_rebuild.py
+          --artifact-root "$RUNNER_TEMP/nvidia-idle-4939252-native"
+          --upstream build-src/nvidia-upstream
           --output build/nvidia-idle-image/inputs
-      - name: Verify the exact relocated V3 namespace with the actual compiler
+          --compose-check
+      - name: Exercise base and actual composed KERNEL callback paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 packages/nvidia-gsp-bootstrap/prospective-public-callback-closure/check.py
+          python3 packages/nvidia-gsp-bootstrap/prospective-public-callback-closure/check.py --sanitize
+          python3 packages/nvidia-gsp-bootstrap/prospective-public-callback-closure/check.py \
+          --source-root build/nvidia-idle-image/inputs/compose-check-baseline/project \
+          --output build/nvidia-idle-image/callback-composed-plain.json
+          python3 packages/nvidia-gsp-bootstrap/prospective-public-callback-closure/check.py \
+          --source-root build/nvidia-idle-image/inputs/compose-check-baseline/project --sanitize \
+          --output build/nvidia-idle-image/callback-composed-sanitized.json
+      - name: Verify cached firmware, complete notice and package decoder controls with Clang
+        shell: bash
+        env:
+          CC: clang
+          CXX: clang++
+        run: |
+          set -euo pipefail
+          cp -R "$RUNNER_TEMP/nvidia-idle-4939252-native/firmware" build/nvidia-idle-image/firmware
+          python3 builders/check_nvidia_firmware_assets.py \
+          --assets-dir build/nvidia-idle-image/firmware \
+          --build-dir build/nvidia-idle-image/firmware-checks
+          python3 packages/nvidia-gsp-bootstrap/prospective-complete-image-package/check.py \
+          --cc "$(command -v clang)" --assets-dir build/nvidia-idle-image/firmware \
+          --output build/nvidia-idle-image/package-controls
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: NVIDIA-public-callback-source-preflight
+          path: |
+            build/nvidia-idle-image/**/*.json
+            build/nvidia-idle-image/**/*.log
+          if-no-files-found: warn
+          retention-days: 7
+
+  native-link-and-package:
+    needs: source-cache-preflight
+    runs-on: macos-15-intel
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Recheck no-overlap guard and fetch the independently pinned native cache
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: >-
-          python3 packages/nvidia-gsp-bootstrap/prospective-work-gpu-binding/check_namespace_guard.py
-          --baseline build/nvidia-idle-image/inputs/baseline/contract/S540GlobalRmNamespace.h
-          --cc /usr/bin/clang
-          --output build/nvidia-idle-image/namespace-controls
-      - name: Compile and strictly link fresh 1100 original plus 60 project plus 3 runtime inputs
+          python3 builders/prepare_nvidia_public_callback_rebuild.py
+          --download-cache
+          --artifact-root "$RUNNER_TEMP/nvidia-idle-4939252-native"
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: NVIDIA/open-gpu-kernel-modules
+          ref: 1a82fbfda8f321b056eb3568850f9316c5e465c5
+          path: build-src/nvidia-upstream
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: acidanthera/MacKernelSDK
+          ref: 3f750085caa17ec3a7880f11c11bf4f48cd6a164
+          path: build-src/MacKernelSDK
+          persist-credentials: false
+      - name: Replay frozen V3 sources and the verified cached namespace without baseline recompilation
+        run: >-
+          python3 builders/prepare_nvidia_public_callback_rebuild.py
+          --artifact-root "$RUNNER_TEMP/nvidia-idle-4939252-native"
+          --upstream build-src/nvidia-upstream
+          --output build/nvidia-idle-image/inputs
+      - name: Reverify actual cached firmware and native package decoder controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp -R "$RUNNER_TEMP/nvidia-idle-4939252-native/firmware" build/nvidia-idle-image/firmware
+          python3 builders/check_nvidia_firmware_assets.py \
+          --assets-dir build/nvidia-idle-image/firmware \
+          --build-dir build/nvidia-idle-image/firmware-checks
+          python3 packages/nvidia-gsp-bootstrap/prospective-complete-image-package/check.py \
+          --cc /usr/bin/clang --assets-dir build/nvidia-idle-image/firmware \
+          --output build/nvidia-idle-image/package-controls
+          python3 packages/nvidia-gsp-bootstrap/prospective-work-gpu-binding/check_namespace_guard.py \
+          --baseline build/nvidia-idle-image/inputs/baseline/contract/S540GlobalRmNamespace.h \
+          --cc /usr/bin/clang --output build/nvidia-idle-image/namespace-controls
+      - name: Rebuild only Work and Timer; revalidate 1100 original and 58 unchanged project objects and both links
         run: >-
           python3 builders/link_nvidia_first_transaction.py
           --upstream build-src/nvidia-upstream
@@ -88,54 +162,34 @@ jobs:
           --kernel-sdk build-src/MacKernelSDK
           --assets-dir build/nvidia-idle-image/firmware
           --output build/nvidia-idle-image/first-transaction-image
+          --native-object-cache "$RUNNER_TEMP/nvidia-idle-4939252-native"
           --retained-diagnostic --rc-participant --shutdown-protocol --platform-closure
-          --retained-backends --global-epoch --live-abi-closure
-      - name: Independently verify, sign and package the idle complete image
+          --retained-backends --global-epoch --live-abi-closure --public-callback-closure
+      - name: Require the exact selective rebuild and independent public export proof
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PYCODE'
-          import hashlib
           import json
           from pathlib import Path
-          import subprocess
-          import sys
-          import zipfile
-          home = Path('build/nvidia-idle-image')
-          report = home/'first-transaction-image/first-transaction-image.json'
-          record = json.loads(report.read_bytes())
-          assert record['source_plan']['complete_original_translation_units'] == 1100
-          assert record['source_plan']['canonical_project_translation_units'] == 60
-          assert record['source_plan']['total_expected_link_objects'] == 1163
-          assert len(record['input_object_sha256']) == 1163
-          assert record['original_compilation_performed'] is True
-          assert record['project_compilation_performed'] is True
-          digest = hashlib.sha256(report.read_bytes()).hexdigest()
-          output = home/'idle-complete-image-package'
-          subprocess.run([sys.executable,
-              'packages/nvidia-gsp-bootstrap/prospective-complete-image-package/package.py',
-              '--report', str(report), '--report-sha256', digest,
-              '--kernel-sdk', 'build-src/MacKernelSDK', '--assets-dir', str(home/'firmware'),
-              '--output', str(output), '--cc', '/usr/bin/clang', '--cxx', '/usr/bin/clang++'], check=True)
-          artifacts = home/'package-artifacts'
-          artifacts.mkdir()
-          archive = artifacts/'S540IdleCompleteImageABI.zip'
-          with zipfile.ZipFile(archive, 'x', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as bundle:
-              for path in sorted(output.rglob('*')):
-                  if path.is_symlink():
-                      raise ValueError('Package symlinks are not admitted')
-                  if path.is_file():
-                      bundle.write(path, 'S540IdleCompleteImageABI/'+str(path.relative_to(output)))
-          attestation = output/'packaging-attestation.json'
-          digests = {'archive': archive.name,
-              'archive_sha256': hashlib.sha256(archive.read_bytes()).hexdigest(),
-              'packaging_attestation_sha256': hashlib.sha256(attestation.read_bytes()).hexdigest(),
-              'strict_native_report_sha256': digest, 'expected_native_link_inputs': 1163,
-              'test_scope': 'idle complete-image target-loader ABI only',
-              'original_entry_admission': False, 'gpu_initialization_attempted': False}
-          (artifacts/'package-digests.json').write_text(json.dumps(digests, indent=2, sort_keys=True)+'\n')
-          print(json.dumps(digests, indent=2, sort_keys=True))
+          record = json.loads(Path('build/nvidia-idle-image/first-transaction-image/first-transaction-image.json').read_bytes())
+          assert record['native_compilation_selectively_reused'] is True
+          cache = record['selective_native_compilation_cache']
+          assert cache['complete'] is True
+          assert cache['original']['reused_objects'] == 1100
+          assert cache['original']['compiled_this_run'] == 0
+          assert cache['project']['reused_objects'] == 58
+          assert cache['project']['compiled_this_run'] == 2
+          changed = {name for name, row in cache['project']['sources'].items() if row['compiled_this_run']}
+          assert changed == {
+              'packages/nvidia-darwin-services/src/S540NvidiaDarwinTimer.cpp',
+              'packages/nvidia-darwin-services/src/S540NvidiaDarwinWork.cpp'}
+          assert record['fixed_source_profiles']['public_callback_closure'] is True
+          assert record['final_public_kpi_export_audit']['status'] == 'passed'
+          assert record['final_public_kpi_export_audit']['exact_target_export_proof'] is False
           PYCODE
+      - name: Independently reverify, sign and package the complete idle image
+        run: python3 builders/package_nvidia_idle_resume.py
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: S540-idle-complete-image-ABI-test
