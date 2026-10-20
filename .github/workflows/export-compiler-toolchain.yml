@@ -1,0 +1,179 @@
+name: Export Ubuntu 24 LLVM 18 development toolchain
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/export-compiler-toolchain.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export-toolchain:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Reuse installed LLVM 18 or install only missing tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          packages=()
+          command -v clang-18 >/dev/null || packages+=(clang-18)
+          command -v clang++-18 >/dev/null || packages+=(clang-18)
+          command -v llvm-objdump-18 >/dev/null || packages+=(llvm-18)
+          command -v ld64.lld-18 >/dev/null || packages+=(lld-18)
+          if command -v clang-18 >/dev/null; then
+            resource=$(clang-18 -print-resource-dir)
+            test -f "$resource/lib/linux/libclang_rt.asan-x86_64.a" || packages+=(libclang-rt-18-dev)
+          else
+            packages+=(libclang-rt-18-dev)
+          fi
+          if ((${#packages[@]})); then
+            sudo apt-get update
+            sudo apt-get install --no-install-recommends -y "${packages[@]}"
+          fi
+          clang-18 --version
+          clang++-18 --version
+          llvm-objdump-18 --version
+
+      - name: Export exact compiler resources and recursive shared dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          export S540_TOOLCHAIN_OUTPUT="$RUNNER_TEMP/s540-llvm18"
+          mkdir "$S540_TOOLCHAIN_OUTPUT"
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, json, os, re, shutil, subprocess
+
+          output = Path(os.environ['S540_TOOLCHAIN_OUTPUT'])
+          root = output / 'root'
+          root.mkdir()
+          copied, dependencies, tools, library_directories = set(), {}, {}, set()
+
+          def digest(path):
+              return hashlib.sha256(path.read_bytes()).hexdigest()
+
+          def copy_file(source):
+              source = Path(source)
+              if source in copied:
+                  return
+              copied.add(source)
+              destination = root / source.relative_to('/')
+              destination.parent.mkdir(parents=True, exist_ok=True)
+              if source.is_symlink():
+                  target = source.resolve(strict=True)
+                  copy_file(target)
+                  destination.symlink_to(os.path.relpath(root / target.relative_to('/'), destination.parent))
+              elif source.is_dir():
+                  destination.mkdir(exist_ok=True)
+                  for child in sorted(source.iterdir()):
+                      copy_file(child)
+              else:
+                  shutil.copy2(source, destination)
+
+          def copy_elf(source):
+              source = Path(source)
+              copy_file(source)
+              real = source.resolve(strict=True)
+              if str(real) in dependencies:
+                  return
+              result = subprocess.run(['ldd', str(real)], text=True, capture_output=True)
+              if result.returncode:
+                  raise RuntimeError('ELF dependency inspection failed: ' + str(real) + ': ' + result.stderr)
+              if 'not found' in result.stdout:
+                  raise RuntimeError('An installed compiler dependency is absent: ' + result.stdout)
+              dependencies[str(real)] = result.stdout
+              for line in result.stdout.splitlines():
+                  found = re.search(r'(?:=>\s+)?(/[^\s]+)', line)
+                  if found:
+                      dependency = Path(found[1])
+                      library_directories.add(str(dependency.parent.relative_to('/')))
+                      library_directories.add(str(dependency.resolve().parent.relative_to('/')))
+                      copy_elf(dependency)
+
+          for name in ('clang-18', 'clang++-18', 'llvm-objdump-18', 'ld64.lld-18'):
+              selected = Path(shutil.which(name) or '')
+              if not selected.is_absolute():
+                  raise RuntimeError('Required tool missing: ' + name)
+              copy_elf(selected)
+              entry = root / 'usr/bin' / name
+              if not entry.exists():
+                  entry.parent.mkdir(parents=True, exist_ok=True)
+                  entry.symlink_to(os.path.relpath(root / selected.relative_to('/'), entry.parent))
+              tools[name] = {'path': str(selected), 'resolved': str(selected.resolve()),
+                             'sha256': digest(selected.resolve()),
+                             'version': subprocess.check_output([str(selected), '--version'], text=True)}
+
+          resource = Path(subprocess.check_output(['clang-18', '-print-resource-dir'], text=True).strip())
+          for source in sorted(resource.rglob('*')):
+              if source.is_file() or source.is_symlink():
+                  copy_file(source)
+          # Resource runtimes can themselves depend on shared C++ support.
+          for source in sorted(resource.rglob('*.so')):
+              copy_elf(source)
+
+          files = {str(path.relative_to(root)): digest(path)
+                   for path in sorted(root.rglob('*')) if path.is_file() and not path.is_symlink()}
+          links = {str(path.relative_to(root)): os.readlink(path)
+                   for path in sorted(root.rglob('*')) if path.is_symlink()}
+          manifest = {'format': 1, 'status': 'exported-installed-ubuntu24-llvm18',
+              'tools': tools, 'resource_directory': str(resource), 'files_sha256': files,
+              'symlinks': links, 'elf_dependency_inspection': dependencies,
+              'runner_os_release': Path('/etc/os-release').read_text(),
+              'runner_image_version': os.environ.get('ImageVersion'),
+              'host_requirement': 'Ubuntu 24.04 x86_64; host libc development headers, GCC13 C++ headers and linker',
+              'credentials_exported': False, 'driver_code_executed': False}
+          (output / 'toolchain-manifest.json').write_text(json.dumps(manifest, sort_keys=True, indent=2) + '\n')
+          (output / 'library-directories.json').write_text(json.dumps(sorted(library_directories)) + '\n')
+          PY
+
+      - name: Verify exported tools on ordinary sanitizer and Mach-O probes
+        shell: bash
+        run: |
+          set -euo pipefail
+          export S540_TOOLCHAIN_OUTPUT="$RUNNER_TEMP/s540-llvm18"
+          LD_LIBRARY_PATH=$(python3 -c 'import json,os; from pathlib import Path; p=Path(os.environ["S540_TOOLCHAIN_OUTPUT"]); print(":".join(str(p/"root"/v) for v in json.loads((p/"library-directories.json").read_text())))')
+          export LD_LIBRARY_PATH
+          cc="$S540_TOOLCHAIN_OUTPUT/root/usr/bin/clang-18"
+          cxx="$S540_TOOLCHAIN_OUTPUT/root/usr/bin/clang++-18"
+          objdump="$S540_TOOLCHAIN_OUTPUT/root/usr/bin/llvm-objdump-18"
+          "$cc" --version
+          "$cxx" --version
+          mkdir "$S540_TOOLCHAIN_OUTPUT/probes"
+          cd "$S540_TOOLCHAIN_OUTPUT/probes"
+          cat > check.c <<'C'
+          #include <stdio.h>
+          int main(void) { volatile int value = 18; return printf("llvm%d\n", value) < 0; }
+          C
+          cat > check.cpp <<'CPP'
+          #include <string>
+          #include <iostream>
+          int main() { std::string value = "llvm18"; std::cout << value << '\n'; return value.size() != 6; }
+          CPP
+          "$cc" -O1 -g -fsanitize=address,undefined,function -fno-sanitize-recover=all check.c -o check-c
+          "$cxx" -O1 -g -fsanitize=address,undefined,function -fno-sanitize-recover=all check.cpp -o check-cpp
+          ./check-c
+          ./check-cpp
+          printf 'int s540CompilerProbe(int value) { return value + 18; }\n' > macho.c
+          "$cc" -target x86_64-apple-macos15 -ffreestanding -mkernel -fstack-usage -c macho.c -o macho.o
+          "$objdump" --macho --disassemble macho.o > macho.disassembly
+          test -s macho.su
+          grep -q s540CompilerProbe macho.disassembly
+          printf '{"status":"passed","sanitized_c":true,"sanitized_cpp":true,"macho_compile_and_disassembly":true,"driver_code_executed":false}\n' > probe-results.json
+
+      - name: Archive verified toolchain without credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/s540-llvm18"
+          tar -czf compiler-root.tar.gz root
+          rm -rf root
+          sha256sum compiler-root.tar.gz toolchain-manifest.json library-directories.json probes/probe-results.json > SHA256SUMS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ubuntu24-llvm18-development-toolchain
+          path: ${{ runner.temp }}/s540-llvm18
+          retention-days: 30
+          if-no-files-found: error
