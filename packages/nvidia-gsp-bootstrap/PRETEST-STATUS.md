@@ -106,6 +106,16 @@ current production teardown path and does not attest universal DMA cessation.
 
 ## Latest native result and idle test packaging
 
+The public callback successor at `d145d9e01f8470a31d499313957e82b47580358b`
+passed native idle-package run 39488036361, including both links, independent
+pre/post-signature verification and strict signature checks. Exactly Work and
+Timer were compiled; 1,100 original and 58 project objects were reused after
+verification. All 388 final imports match public source exports. The new ZIP
+SHA256 is `8e0247dfe5ef66613f8df7f0dc8afd0ae8463f98b9d4489025cb0e7239aa6ba4`;
+the new attestation pin is `3156302ddf0b41d0ec5b70bb47bcbfc7c5c5e5822381c0a9c607d98df2bb5d34`.
+Target loading remains untested for this new package. Earlier package and target
+results below are historical; all hardware/original-entry gates remain closed.
+
 Intel macOS continuation run
 [39455599294](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39455599294)
 passed native linking, independent verification, ad-hoc signing and packaging
@@ -265,7 +275,7 @@ original global or adapter entry executes during that test.
 
 | Requirement | Remaining work |
 |---|---|
-| Target loader ABI | The historical packaged image is refused because `_thread_call_cancel_wait` is not exported to third-party KPIs. The public callback successor passed both native links and its 388 live imports passed the public source-export audit in run 39483421884. Packaging timed out; a new verified ZIP and then the closed idle load/snapshot/unload check remain required. |
+| Target loader ABI | The historical package was refused because `_thread_call_cancel_wait` is not exported to third-party KPIs. The public callback successor passed both native links, the 388-import public source-export audit, signing and packaging in run 39488036361. The new ZIP requires the closed idle load/snapshot/unload check on the target. |
 | Original locks/lifetime | Validate the serialized global/context epoch and close the retained late-OOM construction failure before kernel entry, with ISR/DPC exclusion. A zero current-thread lock mask is not all-thread quiescence. |
 | Callback producers | Compose genuine RC behavior and hard-IRQ/coalesced-BH participation, including master-thread pending drains and a non-destructive persistent hardware-mask phase. Do not invent EVENT/OWNER policy rows for plain 1Hz callbacks. |
 | Allocation ownership | Acquire the real session hardware-DMA hold before any original attempt. Preserve CPU objects, direct service backends, DMA backing/mappings, context and module text after the retained diagnostic. |

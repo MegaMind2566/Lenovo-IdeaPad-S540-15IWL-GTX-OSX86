@@ -130,7 +130,7 @@
     "source_successor": "../prospective-public-callback-closure/SOURCE-CONTRACT.json",
     "remedy": "Replace direct thread-call scheduling/drain in the composed Timer/Work services with public workloop-priority IOTimerEventSource scheduling and synchronous gated cancellation; reject final imports without a declared public source export.",
     "new_native_link_observed": true,
-    "new_package_observed": false,
+    "new_package_observed": true,
     "target_success_observed": false
   },
   "public_callback_native_attempt": {
@@ -165,7 +165,51 @@
       "unique_input_verification_per_phase": true,
       "end_phase_independent_stat_hash_recheck": true,
       "independent_post_signature_phase_preserved": true,
-      "native_validation_of_performance_remedy": "pending"
+      "native_validation_of_performance_remedy": "passed-in-run-39488036361"
     }
+  },
+  "public_callback_successful_package": {
+    "format": 1,
+    "status": "packaged-public-callback-idle-loader-abi-check",
+    "source_commit": "d145d9e01f8470a31d499313957e82b47580358b",
+    "workflow_run_id": 39488036361,
+    "workflow_conclusion": "success",
+    "package_artifact_id": 12294829211,
+    "package_artifact_sha256": "fdfef5d26c991f0c2d23a6f8e78a15a3702fede23a097fd5f9549e3e4f8579ca",
+    "native_validation_artifact_id": 12294584576,
+    "native_validation_artifact_sha256": "26af44c7faec40181ab02a9cb2059e24f91a583b25ac54cd0563064870320f43",
+    "archive": "S540IdleCompleteImageABI-PublicCallbacks.zip",
+    "archive_bytes": 56336253,
+    "archive_sha256": "8e0247dfe5ef66613f8df7f0dc8afd0ae8463f98b9d4489025cb0e7239aa6ba4",
+    "packaging_attestation_sha256": "3156302ddf0b41d0ec5b70bb47bcbfc7c5c5e5822381c0a9c607d98df2bb5d34",
+    "strict_native_report_sha256": "844126f76edcd7c65e7ca8f23b15212ead6957a745ea6107e15f1b40e8a3a6dc",
+    "strict_presign_image_sha256": "a51f0f9638d2020b71aba028636da1fbb368ab3cc709f93cd4daa59184f1a7f3",
+    "signed_image": {
+      "bytes": 47589904,
+      "sha256": "6731a1995b4919ac23ea8d59ad8e3d712f831a8b0ae4a0b93d4147e04f08c07c",
+      "uuid": "D2F08C40-A570-3F3D-A1F1-25D08C9BEC59"
+    },
+    "native_link_step_seconds": 583,
+    "native_packaging_step_seconds": 266,
+    "original_objects_reused": 1100,
+    "project_objects_reused": 58,
+    "project_units_compiled_this_run": 2,
+    "all_link_input_objects": 1163,
+    "public_export_audit": "passed",
+    "final_live_imports": 388,
+    "private_thread_call_imports": 0,
+    "exact_target_export_proof": false,
+    "root_pointers_retained": 25,
+    "loader_pointers_compared": 4,
+    "metaclasses_verified": 3,
+    "native_codesign_strict_verification": "passed",
+    "signature_invariance": "passed",
+    "target_loader_abi_observed": false,
+    "hardware_admission": false,
+    "original_entry_admission": false,
+    "rm_initialization_test": false,
+    "gsp_initialization_test": false,
+    "acceleration_test": false,
+    "system_security_changed": false
   }
 }

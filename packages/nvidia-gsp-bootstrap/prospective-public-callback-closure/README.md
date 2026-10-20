@@ -9,10 +9,13 @@ The idle target attempt on Darwin 25.6.0 was refused while binding
 Native run 39483421884 passed both links with only Work and Timer recompiled,
 1,100 original and 58 unchanged project objects reused, and all 388 final live
 imports matched to declared public source exports. The 20-minute job expired
-during independent packaging; it produced no deliverable ZIP. Cache report
-checkpoints and phase-local input verification are being corrected before a
-new grouped native validation. Final matrices and fresh post-signature checks
-remain mandatory.
+during independent packaging; it produced no deliverable ZIP. After correcting
+cache report checkpoints and phase-local input verification, run 39488036361
+at `d145d9e01f8470a31d499313957e82b47580358b` passed both native links,
+independent verification, strict ad-hoc signature checks and packaging.
+The link phase took 583 seconds and packaging took 266 seconds. Final matrices
+and fresh post-signature checks remained complete. The new ZIP still requires
+the closed target idle load/snapshot/unload check.
 
 ## Export and lifetime evidence
 

@@ -73,3 +73,11 @@ actual new compiler executions. It reuses only the pinned complete native cache
 with identical compiler/SDK, commands, source and every recorded header
 dependency, and keeps the historical failed report immutable. Signing and
 packaging independently repeat the current image and cache provenance checks.
+
+The public callback package from native run 39488036361 is now available.
+Both links, independent verification and strict native signature checks passed;
+the new attestation pin is
+`3156302ddf0b41d0ec5b70bb47bcbfc7c5c5e5822381c0a9c607d98df2bb5d34`.
+Its target idle loader check remains outstanding. Exact archive, report and
+signed-image hashes are recorded in `NATIVE-PACKAGE-VALIDATION.json` under
+`public_callback_successful_package`; older fields retain the historical ZIP.
