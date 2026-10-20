@@ -232,6 +232,7 @@ class S540O2MicroReadOnlyProbe : public IOService {
     void takeSnapshot();
     void releaseResources();
     static void timeout(OSObject *owner, IOTimerEventSource *sender);
+    static IOReturn markStopping(OSObject *owner, void *, void *, void *, void *);
 public:
     bool start(IOService *provider) override;
     void stop(IOService *provider) override;
@@ -323,12 +324,15 @@ void S540O2MicroReadOnlyProbe::timeout(OSObject *owner, IOTimerEventSource *send
             self->setProperty("S540SDObserverTimerStatus", "schedule-failed");
     }
 }
+IOReturn S540O2MicroReadOnlyProbe::markStopping(OSObject *owner, void *, void *, void *, void *) {
+    static_cast<S540O2MicroReadOnlyProbe *>(owner)->stopping_ = true;
+    return kIOReturnSuccess;
+}
 void S540O2MicroReadOnlyProbe::releaseResources() {
     // Serialize the stop flag with a running timer action. Cancel outside the
     // gate: active timer implementations may wait for a pending callout.
-    if (loop_) loop_->closeGate();
-    stopping_ = true;
-    if (loop_) loop_->openGate();
+    if (loop_) loop_->runAction(markStopping, this);
+    else stopping_ = true;
     if (timer_) {
         timer_->cancelTimeout();
         timer_->disable();
