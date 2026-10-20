@@ -366,6 +366,10 @@ def fixed_profile_overlays(source: Path, project: Path, output: Path, *,
                 row_requirements[unit]['expected_imports'] = sorted([
                     's540FirstTxnGetSnapshot', 's540GlobalRmRecordServiceName',
                     's540GlobalRmRecordUnavailable', original.PREFIX + 'os_bug_check'])
+                # Apple Clang lowers the original zero-initialized snapshot to
+                # __bzero; LLVM's cross target can inline those same stores.
+                # This is a public memory helper, never a private RM callback.
+                row_requirements[unit]['allowed_compiler_memory_imports'] = ['__bzero']
             contracts[name] = sha(contract_path)
         row_requirements[CONTROL_UNIT]['original_include_directories'] = ['src/nvidia/src/libraries']
         live = {'source_contract_sha256': contracts,
@@ -716,6 +720,26 @@ def composed_bridge_flags(upstream: Path, output: Path, compiler: Path) -> list[
         *include_flags(output)]
 
 
+def verify_fixed_project_symbols(row: dict, defined: set[str], imports: set[str]) -> set[str]:
+    allowed = set(row.get('allowed_compiler_memory_imports', []))
+    if not allowed <= original.COMPILER_MEMORY_IMPORTS:
+        raise ValueError('Unreviewed compiler memory import allowance: ' + row['source'])
+    compiler_imports = imports & allowed
+    expected_definitions = set(row.get('expected_definitions', defined))
+    expected_imports = set(row.get('expected_imports', imports - compiler_imports))
+    unexpected_definitions = defined - expected_definitions
+    missing_definitions = expected_definitions - defined
+    unexpected_imports = imports - compiler_imports - expected_imports
+    missing_imports = expected_imports - imports
+    if unexpected_definitions or missing_definitions or unexpected_imports or missing_imports:
+        raise ValueError('A fixed source profile changed its exact compiled exports/imports: ' +
+            row['source'] + '; missing definitions=' + str(sorted(missing_definitions)) +
+            '; unexpected definitions=' + str(sorted(unexpected_definitions)) +
+            '; missing imports=' + str(sorted(missing_imports)) +
+            '; unexpected imports=' + str(sorted(unexpected_imports)))
+    return compiler_imports
+
+
 def compile_project_objects(upstream: Path, output: Path, cc: Path, cxx: Path,
                             kernel_flags: list[str], cpp_flags: list[str],
                             *, host_control: bool) -> dict:
@@ -784,9 +808,7 @@ def compile_project_objects(upstream: Path, output: Path, cc: Path, cxx: Path,
                 'packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.cpp',
                 'packages/nvidia-gsp-bootstrap/prospective-loader/S540ProspectiveLoaderKernel.cpp'}
             defined, imports, sections = original.macho_symbols(obj, reviewed_project_initializers=allowed)
-            if ('expected_definitions' in row and defined != set(row['expected_definitions'])) or (
-                    'expected_imports' in row and imports != set(row['expected_imports'])):
-                raise ValueError('A fixed source profile changed its exact compiled exports/imports')
+            compiler_imports = verify_fixed_project_symbols(row, defined, imports)
             dependencies = {}
             for name in shlex.split(dep.read_text().replace('\\\n', ' ').split(':', 1)[1]):
                 dependency = Path(name)
@@ -797,6 +819,7 @@ def compile_project_objects(upstream: Path, output: Path, cc: Path, cxx: Path,
                 dependencies[str(dependency)] = sha(dependency)
             rows.append({**row, 'object': obj.name, 'object_sha256': sha(obj),
                 'definitions': sorted(defined), 'imports': sorted(imports), 'sections': sections,
+                'compiler_memory_imports': sorted(compiler_imports),
                 'command': command, 'cwd': str(output / 'project'),
                 'dependency_sha256': dependencies,
                 'stack_usage': stack.capture_usage(source, obj, command,

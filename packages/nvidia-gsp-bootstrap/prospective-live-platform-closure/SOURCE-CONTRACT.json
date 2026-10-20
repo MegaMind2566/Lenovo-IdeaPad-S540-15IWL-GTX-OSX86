@@ -39,7 +39,7 @@
   },
   "source_sha256": {
     "S540ProspectiveLivePlatformClosure.c": "4472d6f2db83b199e8c45d9cb203fce41c80d3607c7bf130c2cc0421eb788aa9",
-    "check_live_platform.py": "b92e3ecbb4f851dc9b556cd8bc7406741abecf3500dc28ebde8b39e6ab076247",
+    "check_live_platform.py": "ddf4e9156b098899c9cd52c9477a105ff0e5e28dc7007966b01ac47ad0f10440",
     "prepare_original_controls.py": "b9c0918902531cab645ce88f1c2c824b733a9cb121ebac4aae558948faede941",
     "tests/check_live_platform.c": "325ff910592776deba9e585835da00c72fe812c6d2303132df1278794e6c24f1",
     "tests/test_source_contracts.py": "3dc6975c95967e2044d25f0c184dfe8550e0c6bf60dbf9b6852cbefc9ff23e80"

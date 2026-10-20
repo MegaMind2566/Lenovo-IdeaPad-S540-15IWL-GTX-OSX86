@@ -27,6 +27,9 @@ static unsigned apiAcquired, apiReleased, gpuAcquired, gpuReleased, unloaded, su
 static NvU64 generation = 71;
 static NV_STATUS sticky;
 static int actualOwner, replacementOwner;
+/* Darwin's fortified string header wraps memset in a function-like macro.
+ * Keep this fixture's freestanding implementation a real function definition. */
+#undef memset
 void *memset(void *address, int value, size_t bytes)
 { NvU8 *p = address; while (bytes--) *p++ = (NvU8)value; return address; }
 

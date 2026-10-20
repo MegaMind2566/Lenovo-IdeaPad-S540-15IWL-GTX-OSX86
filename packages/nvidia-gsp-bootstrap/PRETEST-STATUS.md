@@ -73,6 +73,24 @@ current production teardown path and does not attest universal DMA cessation.
 
 ## Latest native result and idle test packaging
 
+At source `49808c86f4d99dc2821c6887c0156841cd40564f`, native run
+[39413559517](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39413559517)
+stopped when Darwin's fortified `memset` macro expanded the shutdown fixture's
+function definition. Idle-package run
+[39413559453](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39413559453)
+compiled all original inputs and the first 42 project units, then rejected the
+live-platform unit's extra `__bzero` import. Inspection of that actual Apple
+object confirms its seven expected exports and four private imports are intact;
+the sole extra symbol is the compiler's public snapshot-zeroing helper.
+
+The fixture now undefines only the fortified function-like macro before its
+existing freestanding implementation. The live-platform symbol contracts now
+permit only `__bzero` as an optional compiler memory helper and still reject
+missing callbacks, unexpected private imports and changed exports. Actual helper
+imports remain recorded and subject to the final SDK import audit. A new native
+run is required to establish compilation, linking, signing and packaging; no
+target execution or successful ZIP is inferred from these corrections.
+
 Native Actions run
 [39230673074](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39230673074)
 at source `0f73640865cb9c2d0dbaf351b4ac27305c5de3c8` passed the early source,

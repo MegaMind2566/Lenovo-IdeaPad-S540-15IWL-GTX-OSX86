@@ -69,7 +69,11 @@ def check(args):
     defined, imported, _ = original.macho_symbols(obj)
     expected_imports = {'s540GlobalRmRecordServiceName', 's540GlobalRmRecordUnavailable',
                         's540FirstTxnGetSnapshot', original.PREFIX+'os_bug_check'}
-    require(defined == {original.PREFIX+name for name in CALLBACKS} and imported == expected_imports,
+    # Native Apple Clang can emit this public zeroing helper for the snapshot;
+    # the cross compiler can inline the stores. All private imports stay exact.
+    compiler_memory_imports = imported & {'__bzero'}
+    require(defined == {original.PREFIX+name for name in CALLBACKS} and
+            imported - compiler_memory_imports == expected_imports,
             'Candidate gained unreviewed symbols.')
     metaclass.verify_no_initializers(obj)
     negatives = []
@@ -90,7 +94,8 @@ def check(args):
         'native_controls': native, 'original_reference': reference, 'native_apple_execution': not args.host_control,
         'compiler_identity': compiler_identity,
         'kernel_target_compile': {'source': str(source), 'source_sha256': sha(source), 'object': str(obj),
-            'object_sha256': sha(obj), 'command': command, 'definitions': sorted(defined), 'imports': sorted(imported)},
+            'object_sha256': sha(obj), 'command': command, 'definitions': sorted(defined),
+            'imports': sorted(imported), 'compiler_memory_imports': sorted(compiler_memory_imports)},
         'configuration_negative_controls': negatives, 'file_operations_implemented': False,
         'console_backend_implemented': False, 'bif_hardware_reset_safety_proved': False,
         'manual_start_policy_is_not_hardware_admission': True, 'transaction_identity_endpoint_fixture': True,

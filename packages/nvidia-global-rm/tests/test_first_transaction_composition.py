@@ -141,6 +141,26 @@ class CompositionIntegrity(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Global epoch requires'):
             compose.materialize(absent, absent, absent, absent, global_epoch=True)
 
+    def test_native_zeroing_helper_preserves_exact_private_imports(self):
+        row = {'source': 'live-platform.c', 'expected_definitions': ['callback'],
+               'expected_imports': ['private_callback'],
+               'allowed_compiler_memory_imports': ['__bzero']}
+        self.assertEqual(compose.verify_fixed_project_symbols(
+            row, {'callback'}, {'private_callback', '__bzero'}), {'__bzero'})
+        self.assertEqual(compose.verify_fixed_project_symbols(
+            row, {'callback'}, {'private_callback'}), set())
+        for imports in ({'__bzero'}, {'private_callback', 'foreign_callback'},
+                        {'private_callback', 'memcpy'}):
+            with self.subTest(imports=imports), self.assertRaisesRegex(ValueError, 'live-platform.c'):
+                compose.verify_fixed_project_symbols(row, {'callback'}, imports)
+        with self.assertRaisesRegex(ValueError, 'missing definitions'):
+            compose.verify_fixed_project_symbols(row, set(), {'private_callback'})
+        with self.assertRaisesRegex(ValueError, 'unexpected definitions'):
+            compose.verify_fixed_project_symbols(row, {'callback', 'foreign'}, {'private_callback'})
+        row['allowed_compiler_memory_imports'] = ['foreign_callback']
+        with self.assertRaisesRegex(ValueError, 'Unreviewed compiler'):
+            compose.verify_fixed_project_symbols(row, {'callback'}, {'private_callback', 'foreign_callback'})
+
 
 if __name__ == '__main__':
     unittest.main()
