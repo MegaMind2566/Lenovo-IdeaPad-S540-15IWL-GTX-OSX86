@@ -53,8 +53,13 @@ endpoint controls.
 
 `check.py` replays the frozen Host retention overlay itself. An optional
 `--host-overlay` is accepted only if its complete inventory matches that fresh
-replay. The V3 private namespace is checked against its frozen compiler
-dependency contract. All actual compiler dependencies are recorded and checked
+replay. The V3 private namespace requires the generated
+`combined-profile-v3/prospective-private-namespace.h` wrapper. Its absolute
+baseline include must name an ordinary canonical file with independently
+pinned baseline bytes. The wrapper is reconstructed byte for byte from the
+frozen V2 alias contract, so different native checkout paths do not require the
+same raw wrapper hash. Extra directives, changed aliases and symlinks are
+refused. All actual compiler dependencies are recorded and checked
 again after both variants finish. `compile_full.py` applies the same namespace
 check and compiles the complete changed `osinit.c`, `osapi.c`, `gpu_mgr.c`, typed
 bridge, strong record, context and real queue/timer/services backends.

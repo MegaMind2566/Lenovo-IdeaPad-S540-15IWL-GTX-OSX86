@@ -10,6 +10,8 @@ import difflib
 import hashlib
 import importlib.util
 import json
+import re
+import stat
 import sys
 
 HERE=Path(__file__).resolve().parent
@@ -19,6 +21,8 @@ PARENT_FREEZE='7084ff0cf9c795a3f1dc5f4cc24fb53652b46462c336978e33d072bc4fcb2366'
 OSINIT='src/nvidia/arch/nvalloc/unix/src/osinit.c'
 OSAPI='src/nvidia/arch/nvalloc/unix/src/osapi.c'
 GPUMGR='src/nvidia/src/kernel/gpu_mgr/gpu_mgr.c'
+V2_NAMESPACE_CONTRACT_SHA='ce3fe72438c0548098d94fc0147b7ad036307378578e0b9c418a74aae96b938e'
+BASELINE_NAMESPACE_CONTRACT_SHA='7cee49f7c2032ce844fdd6b15b62311ac62a73ac8448a0c8c0604db983ad2100'
 
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 def digest(data):return hashlib.sha256(data).hexdigest()
@@ -28,12 +32,41 @@ def once(source,old,new):
 def load(name,path):
     spec=importlib.util.spec_from_file_location(name,path)
     module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module);return module
+def _ordinary_canonical(path):
+    path=Path(path).absolute()
+    if path != path.resolve(strict=True) or any(p.is_symlink() for p in (path,*path.parents)) or \
+            not stat.S_ISREG(path.lstat().st_mode):
+        raise ValueError('The V3 namespace requires ordinary canonical files without symlinks')
+    return path
 def namespace_guard(path):
-    path=Path(path).resolve(strict=True)
-    contract=json.loads((REPO/'packages/nvidia-gsp-bootstrap/prospective-v3/COMPILE-DEPENDENCIES.json').read_text())
-    expected=contract['actual_dependency_sha256']['output/prospective-private-namespace.h']
-    if path.is_symlink() or sha(path)!=expected:
-        raise ValueError('The verified V3 private namespace changed')
+    # V3 deliberately writes an absolute baseline include. Pin the independent
+    # baseline and alias contract, then reconstruct every wrapper byte; a raw
+    # wrapper hash from another native checkout cannot identify this input.
+    path=_ordinary_canonical(path)
+    baseline_contract=_ordinary_canonical(REPO/'packages/nvidia-global-rm/upstream/adapted/SOURCE-CONTRACT.json')
+    v2_contract=_ordinary_canonical(REPO/'packages/nvidia-gsp-bootstrap/prospective-v2/PROSPECTIVE-SOURCE-PROFILE.json')
+    if sha(baseline_contract)!=BASELINE_NAMESPACE_CONTRACT_SHA or sha(v2_contract)!=V2_NAMESPACE_CONTRACT_SHA:
+        raise ValueError('The independent namespace source contracts changed')
+    raw=path.read_bytes()
+    match=re.fullmatch(rb'/\* V3 original private aliases; project bridges remain strong\. \*/\n'
+                       rb'#include "([^"\r\n]+)"\n(.*)',raw,re.DOTALL)
+    if match is None:
+        raise ValueError('The verified V3 private namespace wrapper changed')
+    include=Path(match.group(1).decode('utf-8'))
+    if not include.is_absolute():
+        raise ValueError('The V3 baseline namespace include is not absolute')
+    baseline=_ordinary_canonical(include)
+    expected_baseline=json.loads(baseline_contract.read_text())['namespace_sha256']
+    if sha(baseline)!=expected_baseline:
+        raise ValueError('The independently pinned baseline private namespace changed')
+    aliases=json.loads(v2_contract.read_text())['new_original_private_names']
+    # The frozen V2 report is JSON written with sort_keys=True; V3 consumes its
+    # alias dictionary in that exact order.
+    expected=('/* V3 original private aliases; project bridges remain strong. */\n#include "'+
+              str(baseline)+'"\n'+''.join('#define '+key+' '+value+'\n'
+              for key,value in sorted(aliases.items()))).encode('utf-8')
+    if raw!=expected:
+        raise ValueError('The verified V3 private namespace aliases or directives changed')
     return path
 def parent_guard():
     if sha(PARENT/'FROZEN-SHA256.json')!=PARENT_FREEZE:

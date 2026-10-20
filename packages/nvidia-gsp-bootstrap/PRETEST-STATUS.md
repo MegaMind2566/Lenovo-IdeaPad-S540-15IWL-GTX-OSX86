@@ -80,7 +80,17 @@ compiler, original-profile and first-transaction controls, then stopped in the
 original lock-observer compilation script: it passed the `xcrun` launcher as
 if it were a compiler executable. No target module was loaded. The script now
 resolves the actual Xcode clang path, with its candidate source contract updated;
-this correction awaits the fresh native run.
+this correction passed in native run
+[39408242488](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39408242488)
+at `d647e524ab6965b278af4858e0178853f4d02e1a`. That run then stopped at the GPU
+checker namespace input. The GPU and mapping checks require the V3 additive
+wrapper; the workflow supplied the baseline header. The old wrapper guard also
+compared a historical raw hash containing a Linux absolute include path. The
+corrective guard pins the independent baseline/alias contracts and reconstructs
+every wrapper byte for the actual canonical baseline path. The three workflow
+arguments are corrected, with new positive and refusal controls across separate
+absolute paths. The next native run must validate those corrections and the
+remaining complete image/package stages.
 
 The separate idle packager requires the exact successful fresh native report,
 its intact complete original/project objects, pinned SDK and firmware. It checks

@@ -1,0 +1,69 @@
+{
+  "actual_gpu_body_controls": {
+    "actual_original_bodies": 15,
+    "fatal_sanitizers": 39,
+    "ordinary": 39
+  },
+  "actual_mapping_controls": {
+    "actual_original_callers": 2,
+    "fatal_sanitizers": 30,
+    "kernel_target_compile_actions": 2,
+    "ordinary": 30
+  },
+  "baseline_contract_sha256": "7cee49f7c2032ce844fdd6b15b62311ac62a73ac8448a0c8c0604db983ad2100",
+  "baseline_namespace_sha256": "cb79f788baddb7f046e870b1e2e09bfde310b4b12417ec8c737fad1ef440f7a1",
+  "changed_source_sha256": {
+    "README.md": "2d00409b90e0c1b6dca03b6d82eb7788140620d2a3689ef88bf033a28de2b431",
+    "check_namespace_guard.py": "3fbae25c8f0feaa25d44303cbdd64c276388408cceeff71ea1f3a83222a03745",
+    "prepare.py": "b3f9c7dcb5e3507f53fa3fc075009e93977e8a414ba4fea8c0cb7415503cd2da"
+  },
+  "complete_original_translation_units": 3,
+  "date_utc": "2026-10-20",
+  "fix": "The V3 wrapper contains a canonical absolute baseline include; require exact independent baseline bytes and frozen V2 aliases rather than the historical path-dependent raw wrapper digest.",
+  "format": 1,
+  "gpu_access": false,
+  "hardware_admission": false,
+  "historical_LOCAL_CONTROL_VALIDATION_scope": "Historical implementation evidence preserved separately; this record binds current namespace-guard correction and fresh local regression runs.",
+  "host_control": true,
+  "kernel_execution": "not_tested",
+  "kernel_target_compile_actions": 9,
+  "module_loaded": false,
+  "namespace_provenance_controls": 24,
+  "native_apple_execution": false,
+  "original_entry_admission": false,
+  "production_candidate_allowed": false,
+  "reports": {
+    "actual_body_controls": {
+      "path": "/workspace/scratch/4915cee8ab26/work-gpu-namespace-reviewed/control-results.json",
+      "sha256": "998e8bc5c177a358a6a6e32356015b6ed1bff18bc9c0cacdce514441494a7b90",
+      "status": "passed"
+    },
+    "full_kernel_target_compile": {
+      "path": "/workspace/scratch/4915cee8ab26/work-gpu-namespace-full-reviewed/full-tu-compilation.json",
+      "sha256": "0107b68ab3dc91431c4e4adb7d7bdedc7a93d681d251b1cb0150201aa99f1312",
+      "status": "passed-kernel-target-compilation"
+    },
+    "mapping_integration": {
+      "path": "/workspace/scratch/4915cee8ab26/mapping-namespace-reviewed/mapping-controls.json",
+      "sha256": "daabc05c6d58ebfc645f20ae483c42eb5196f25dc742d41b56d50298c896cc9e",
+      "status": "passed-isolated-mapping-controls"
+    },
+    "namespace_guard": {
+      "path": "/workspace/scratch/4915cee8ab26/v3-namespace-guard-controls/namespace-guard-controls.json",
+      "sha256": "88dde1b2e45ec983379dbfa8ea57051bfda7b15a7481e7f2721df0fd2db02640",
+      "status": "passed"
+    }
+  },
+  "runtime_source_transforms_unchanged": true,
+  "status": "passed-local-path-independent-namespace-and-actual-source-controls",
+  "unchanged_existing_helper_functions": [
+    "sha",
+    "digest",
+    "once",
+    "load",
+    "parent_guard",
+    "prepare",
+    "main"
+  ],
+  "v2_alias_contract_sha256": "ce3fe72438c0548098d94fc0147b7ad036307378578e0b9c418a74aae96b938e"
+}

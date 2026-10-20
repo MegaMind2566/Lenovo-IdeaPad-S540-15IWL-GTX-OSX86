@@ -82,6 +82,12 @@ jobs:
           python3 builders/compile_nvidia_global_rm.py
           --upstream build-src/nvidia-upstream --generate-namespace --checked-cleanup-overlays
           --output-dir build/nvidia-execution/original-rm
+      - name: Verify the exact V3 namespace across independent build paths
+        run: >-
+          python3 packages/nvidia-gsp-bootstrap/prospective-work-gpu-binding/check_namespace_guard.py
+          --baseline build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --cc /usr/bin/clang
+          --output build/nvidia-execution/tooling-controls/v3-namespace-guard
       - name: Verify callback and refusal source contracts against the pinned originals
         run: |
           python3 packages/nvidia-global-rm/tests/test_feature_profile_contracts.py --upstream build-src/nvidia-upstream
@@ -175,7 +181,7 @@ jobs:
           python3 packages/nvidia-gsp-bootstrap/prospective-work-gpu-binding/check.py
           --upstream build-src/nvidia-upstream
           --v3-root build/nvidia-execution/prospective-checks/combined-profile-v3
-          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --namespace build/nvidia-execution/prospective-checks/combined-profile-v3/prospective-private-namespace.h
           --output build/nvidia-execution/prospective-checks/work-gpu-binding
           --cc /usr/bin/clang --cxx /usr/bin/clang++
       - name: Compile complete GPU-binding original units and actual kernel backends
@@ -183,7 +189,7 @@ jobs:
           python3 packages/nvidia-gsp-bootstrap/prospective-work-gpu-binding/compile_full.py
           --upstream build-src/nvidia-upstream
           --v3-root build/nvidia-execution/prospective-checks/combined-profile-v3
-          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --namespace build/nvidia-execution/prospective-checks/combined-profile-v3/prospective-private-namespace.h
           --output build/nvidia-execution/prospective-checks/work-gpu-kernel
           --cc /usr/bin/clang --cxx /usr/bin/clang++ --sdk build-src/MacKernelSDK
       - name: Verify real RC timer participants without invented event-owner rows
@@ -360,7 +366,7 @@ jobs:
           --upstream build-src/nvidia-upstream
           --v3-root build/nvidia-execution/prospective-checks/combined-profile-v3
           --host-overlay build/nvidia-execution/prospective-checks/first-transaction/host/overlay
-          --namespace build/nvidia-execution/original-rm/original/contract/S540GlobalRmNamespace.h
+          --namespace build/nvidia-execution/prospective-checks/combined-profile-v3/prospective-private-namespace.h
           --output build/nvidia-execution/prospective-checks/mapping-closure
           --cc /usr/bin/clang --cxx /usr/bin/clang++
       - name: Verify exact manual initialization and unavailable file and console routes
