@@ -91,6 +91,27 @@ imports remain recorded and subject to the final SDK import audit. A new native
 run is required to establish compilation, linking, signing and packaging; no
 target execution or successful ZIP is inferred from these corrections.
 
+The follow-up local validation passed all 13 composition-integrity tests,
+191 shutdown checks in each ordinary/fatal-sanitized variant, a separate
+191-check run with a simulated Darwin fortified function macro, 31 live-platform
+checks per variant, 49 packager source controls and 18 actual loader-decoder
+checks per variant. All 60 integrated project units also compile freshly to
+Mach-O against the pinned SDK. The modified shutdown fixture's frozen inventory
+is updated and checked in full. These are Linux CPU/cross-compilation controls;
+the acquired firmware pair was not rechecked in this local follow-up, and no
+native final link, signature or bundle was produced. The source-bound
+[local validation record](prospective-complete-image-package/NATIVE-FIX-LOCAL-VALIDATION.json)
+retains those distinctions.
+
+Native idle-package run
+[39432077042](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39432077042)
+at `91130ef72328f91f5d784de085b92444668c6521` failed before any job script
+started, including its second attempt. Repository validation and the full native
+development job also failed with no steps. Available API results expose no
+startup reason and no job log; inspect the job annotations before attributing
+this to billing, runner capacity or a code failure. The native package build
+must run again at the latest source after the startup block is resolved.
+
 Native Actions run
 [39230673074](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39230673074)
 at source `0f73640865cb9c2d0dbaf351b4ac27305c5de3c8` passed the early source,
