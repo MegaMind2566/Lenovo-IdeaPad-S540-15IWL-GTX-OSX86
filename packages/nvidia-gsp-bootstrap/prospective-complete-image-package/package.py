@@ -133,8 +133,15 @@ def validate_report_contract(report):
     require(final['filetype'] == 'MH_KEXT_BUNDLE' and final['installable_bundle'] is False and
             re.fullmatch('[0-9a-f]{64}', final['sha256']), 'Strict final image identity is incomplete')
     policy = report['final_link_policy']
-    require(policy['dead_strip'] is True and policy['undefined_policy'] == 'error' and
+    require(policy['dead_strip'] is True and
+            policy['undefined_policy'] == 'Apple x86_64 kext dynamic_lookup' and
+            policy['undefined_closure_enforcement'] == 'independent exact final Mach-O private/public symbol audit' and
+            policy['exported_symbols'] == ['_kmod_info'] and
             policy['unresolved_private_imports_permitted'] is False, 'Strict final link policy changed')
+    require(report.get('final_exported_symbols') == ['kmod_info'] and
+            report.get('scatterable_input_objects') == report['source_plan']['total_expected_link_objects'] and
+            report.get('relocatable_image', {}).get('subsections_via_symbols') is True,
+            'Strict final image lost export or subsection boundaries')
     require(type(report['source_plan']['complete_original_translation_units']) is int and
             report['source_plan']['complete_original_translation_units'] == 1100,
             'Strict report lacks all 1100 original translation units')
@@ -161,6 +168,7 @@ def native_identity(cc, cxx):
 def verify_image(path, approved, entries):
     parsed = link.Image(path, 11)
     audit = link.audit_symbols({path.name: parsed.externals()}, approved)
+    link.verify_final_exports(parsed)
     for symbol in ('__start', '__stop'):
         parsed.code(symbol)
     for symbol in ('_kmod_info', '__realmain', '__antimain'):
@@ -208,6 +216,8 @@ def verify_build(args, execute, scratch):
     for name, expected in report['input_object_sha256'].items():
         path = Path(name)
         require(not path.is_symlink() and sha(path) == expected, 'Native image input bytes changed: ' + name)
+    require(link.verify_scatterable_objects([Path(name) for name in report['input_object_sha256']]) ==
+            report['scatterable_input_objects'], 'Complete native input atomization changed')
     common, _ = native_identity(args.cc, args.cxx)
     sdk = common.validate_sdk(args.kernel_sdk.resolve(strict=True), None, False)
     require(sdk == report['sdk'], 'Pinned clean native SDK differs from strict report')
@@ -226,6 +236,11 @@ def verify_build(args, execute, scratch):
             'Strict presign image bytes changed')
     reloc = file_in(home, report['relocatable_image']['path'])
     require(sha(reloc) == report['relocatable_image']['sha256'], 'Strict complete relocatable image changed')
+    link.verify_scatterable_objects([reloc])
+    reloc_roots = link.verify_roots(reloc, expected_type=1)
+    require(reloc_roots['n_no_dead_strip'] is True and
+            json.loads(json.dumps(reloc_roots)) == report['relocatable_original_roots'],
+            'Independent complete-image root retention differs from native proof')
     flags, cpp = link.kernel_flags(args.kernel_sdk)
     approved, references, power, loader = link.sdk_import_references(
         scratch, composed, args.cxx, flags, cpp, projects['results'], execute)
@@ -235,7 +250,8 @@ def verify_build(args, execute, scratch):
             'Independent three-metaclass graph differs from native proof')
     entries = link.loader_pointer_names(reloc)
     proof = verify_image(image, approved, entries)
-    require(proof['imports'] == report['final_image']['imports'] and proof['roots']['n_no_dead_strip'] is True,
+    require(proof['imports'] == report['final_image']['imports'] and
+            proof['roots']['root_count'] == 25 and reloc_roots['n_no_dead_strip'] is True,
             'Final image imports or typed roots differ from native proof')
     for observed, recorded in (('roots', 'final_original_roots'), ('loader_pointers', 'final_loader_pointers'),
                                ('firmware', 'final_embedded_firmware')):

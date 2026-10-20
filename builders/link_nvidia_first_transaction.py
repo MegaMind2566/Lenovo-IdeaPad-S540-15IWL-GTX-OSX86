@@ -626,6 +626,48 @@ def read_resume_report(path: Path, expected_sha256: str, output: Path,
     return previous
 
 
+def verify_scatterable_objects(objects: list[Path]) -> int:
+    for path in objects:
+        image = Image(path, 1)
+        if not struct.unpack_from('<I', image.data, 24)[0] & 0x2000:
+            raise ValueError('Every complete-link input must preserve subsections via symbols: ' + str(path))
+    return len(objects)
+
+
+def verify_runtime_atomization(path: Path, original_sha256: str) -> dict:
+    image = Image(path, 1)
+    flags = struct.unpack_from('<I', image.data, 24)[0]
+    if flags != 0x2000:
+        raise ValueError('Regenerated firmware object must add only MH_SUBSECTIONS_VIA_SYMBOLS')
+    before = bytearray(image.data)
+    struct.pack_into('<I', before, 24, 0)
+    if hashlib.sha256(before).hexdigest() != original_sha256:
+        raise ValueError('Firmware atomization changed bytes other than the reviewed Mach-O header bit')
+    return {'object_path': str(path), 'original_sha256': original_sha256,
+        'regenerated_sha256': sha(path), 'original_header_flags': 0,
+        'regenerated_header_flags': 0x2000, 'changed_bit': 'MH_SUBSECTIONS_VIA_SYMBOLS',
+        'all_other_bytes_unchanged': True}
+
+
+def verify_resumed_input_inventory(report: dict, previous: dict, home: Path) -> dict:
+    runtime = home / 'firmware-bytes.o'
+    proof = verify_runtime_atomization(runtime, previous['input_object_sha256'][str(runtime)])
+    expected_inputs = {**previous['input_object_sha256'], str(runtime): sha(runtime)}
+    if report.get('input_object_sha256') != expected_inputs or report.get('runtime_atomization') != proof:
+        raise ValueError('Native continuation changed an input beyond the reviewed firmware header bit')
+    return proof
+
+
+def verify_final_exports(image: Image) -> list[str]:
+    image.externals()  # Retain the strict spelling/common/N_SECT validation.
+    public = [symbol for symbol in image.symbols if symbol['kind'] & 1 and
+              not symbol['kind'] & 0x10 and symbol['kind'] & 0x0e == 0x0e]
+    exported = sorted(symbol['name'][1:] for symbol in public)
+    if exported != ['kmod_info'] or any(symbol['descriptor'] & 0x80 for symbol in public):
+        raise ValueError('Final idle image must export only the strong module metadata symbol')
+    return exported
+
+
 def verify_resumed_compilation(report: dict, home: Path) -> dict:
     cache = report.get('compilation_cache', {})
     expected = {**RESUME_PROVENANCE,
@@ -637,8 +679,9 @@ def verify_resumed_compilation(report: dict, home: Path) -> dict:
         raise ValueError('Native continuation lacks exact verified cache provenance')
     previous = read_resume_report(Path(cache['report_path']), cache['report_sha256'], home,
                                   report['builder_source_sha256'])
+    verify_resumed_input_inventory(report, previous, home)
     for name in ('composition_directory', 'composition_sha256', 'source_plan', 'compilation_reports',
-                 'input_object_sha256', 'input_symbol_audit', 'compilers', 'sdk',
+                 'input_symbol_audit', 'compilers', 'sdk',
                  'firmware_asset_inventory', 'pinned_module_runtime', 'apple_linker',
                  'closed_loader_policy', 'fixed_source_profiles'):
         if report.get(name) != previous.get(name):
@@ -828,6 +871,11 @@ def build(args) -> dict:
         report['phase'] = 'embed-exact-firmware-and-module-wrappers'
         write_json(destination, report)
         assembly, embedding = firmware.emit_assembly(assets, output)
+        # One non-scatterable assembly input would make ld -r merge every C/C++
+        # atom into indivisible sections and defeat the final dead-strip proof.
+        assembly.write_text(assembly.read_text() + '.subsections_via_symbols\n')
+        report['firmware_assembly_policy'] = {'subsections_via_symbols': True,
+            'firmware_payload_modified': False}
         firmware_object = output / 'firmware-bytes.o'
         execute([cc, '-arch', 'x86_64', '-mmacosx-version-min=15.0', '-c', assembly,
                  '-o', firmware_object], 'firmware-assemble', cwd=assets)
@@ -851,13 +899,17 @@ def build(args) -> dict:
         objects = [*original_objects, *project_objects, firmware_object, *wrapper_objects]
         if len(objects) != 1100 + project_units + 3 or len(objects) != len(set(objects)):
             raise ValueError('The complete native link input inventory changed')
+        report['scatterable_input_objects'] = verify_scatterable_objects(objects)
         before = {str(path): sha(path) for path in objects}
         input_symbols = {str(path): Image(path, 1).externals() for path in objects}
         input_audit = audit_symbols(input_symbols, require_private_closure=False)
         report['input_symbol_audit'] = input_audit
         report['input_object_sha256'] = before
         if previous is not None:
-            if before != previous['input_object_sha256'] or input_audit != previous['input_symbol_audit'] or \
+            report['runtime_atomization'] = verify_runtime_atomization(
+                firmware_object, previous['input_object_sha256'][str(firmware_object)])
+            verify_resumed_input_inventory(report, previous, output)
+            if input_audit != previous['input_symbol_audit'] or \
                     report['pinned_module_runtime'] != previous['pinned_module_runtime']:
                 raise ValueError('Regenerated complete link inputs differ from the pinned native compilation')
             report['compilation_cache'] = {**RESUME_PROVENANCE,
@@ -874,6 +926,7 @@ def build(args) -> dict:
             verify_resumed_compilation(report, output)
         image = output / 'S540FirstTransactionDevelopment.o'
         execute([ld, '-r', '-keep_private_externs', '-arch', 'x86_64', *objects, '-o', image], 'complete-relocatable-link', timeout=900)
+        verify_scatterable_objects([image])
         linked_symbols = Image(image, 1).externals()
         linked_audit = audit_symbols({image.name: linked_symbols}, approved,
             require_private_closure=False, require_reviewed_public=False)
@@ -886,7 +939,7 @@ def build(args) -> dict:
             'bytes': image.stat().st_size, 'imports': linked_audit['public_imports'],
             'unresolved_original_private': linked_audit['unresolved_original_private'],
             'unreviewed_public_imports': linked_audit['unreviewed_public_imports'],
-            'defined_external_count': len(all_input_definitions)}
+            'defined_external_count': len(all_input_definitions), 'subsections_via_symbols': True}
         report['actual_link_performed'] = True
         report['relocatable_link_performed'] = True
         report['combined_metaclasses'] = combined_metaclasses.verify(image, power_ref, loader_ref)
@@ -897,29 +950,31 @@ def build(args) -> dict:
             'establish selected final-image requirements. Native final dead-strip link determines live closure.')
         report['phase'] = 'link-raw-development-kext-image'
         write_json(destination, report)
-        hidden = output / 'private-original-symbols.txt'
-        hidden.write_text(''.join('_' + symbol + '\n' for symbol in sorted(all_input_definitions)
-                                  if symbol.startswith(original.PREFIX)))
+        exports = output / 'idle-exported-symbols.txt'
+        exports.write_text('_kmod_info\n')
         final = output / 'S540FirstTransactionDevelopment.macho'
         retained = ['__start', '__stop', '_kmod_info', '_s540ProspectiveRetainedRootsPresent',
                     '_s540_gsp_begin', '_s540_gsp_end', '_s540_ucodes_begin', '_s540_ucodes_end']
-        report['final_link_policy'] = {'dead_strip': True, 'undefined_policy': 'error',
+        report['final_link_policy'] = {'dead_strip': True,
+            'undefined_policy': 'Apple x86_64 kext dynamic_lookup',
+            'undefined_closure_enforcement': 'independent exact final Mach-O private/public symbol audit',
             'allowed_undefined_public_symbols': sorted('_' + name for name in approved),
+            'exported_symbols': ['_kmod_info'],
             'additional_retained_root_symbols': retained,
             'typed25_root_table_retention': 'actual N_NO_DEAD_STRIP and final pointer-byte verification',
-            'original_definition_visibility': 'hidden; not implicitly exported roots',
+            'original_definition_visibility': 'local; only module metadata exported',
             'unresolved_private_imports_permitted': False}
         report['final_link_attempted'] = True
         write_json(destination, report)
         execute([cxx, '-fuse-ld=' + str(ld), '-arch', 'x86_64', '-mmacosx-version-min=15.0', '-mkernel', '-nostdlib',
-            '-Wl,-kext', '-Wl,-no_source_version', '-Wl,-dead_strip', '-Wl,-undefined,error',
-            '-Wl,-unexported_symbols_list,' + str(hidden),
-            *[flag for name in sorted(approved) for flag in ['-Xlinker', '-U', '-Xlinker', '_' + name]],
+            '-Wl,-kext', '-Wl,-no_source_version', '-Wl,-dead_strip',
+            '-Wl,-exported_symbols_list,' + str(exports),
             *[flag for name in retained for flag in ['-Xlinker', '-u', '-Xlinker', name]],
             image, '-o', final], 'raw-development-kext-link', timeout=900)
         final_image = Image(final, 11)
         final_symbols = final_image.externals()
         final_audit = audit_symbols({final.name: final_symbols}, approved)
+        report['final_exported_symbols'] = verify_final_exports(final_image)
         if set(final_audit['public_imports']) - set(linked_audit['public_imports']):
             raise ValueError('Final kernel image gained an import absent from the complete ld-r image')
         for symbol in ('__start', '__stop'):
@@ -1233,6 +1288,82 @@ def self_test() -> dict:
             checks += 1
         else:
             raise AssertionError('Invalid cached native provenance accepted: ' + name)
+    with tempfile.TemporaryDirectory(prefix='s540-runtime-atomization-') as temporary:
+        folder = Path(temporary)
+        runtime = folder / 'firmware-bytes.o'
+        original_bytes = bytes(root_fixture(1))
+        original_digest = hashlib.sha256(original_bytes).hexdigest()
+        scatterable = bytearray(original_bytes)
+        struct.pack_into('<I', scatterable, 24, 0x2000)
+        runtime.write_bytes(scatterable)
+        proof = verify_runtime_atomization(runtime, original_digest)
+        assert proof['all_other_bytes_unchanged'] and verify_scatterable_objects([runtime]) == 1
+        checks += 1
+        previous = {'input_object_sha256': {str(runtime): original_digest, 'unchanged-compiled-object': 'pinned'}}
+        resumed = {'input_object_sha256': {str(runtime): sha(runtime), 'unchanged-compiled-object': 'pinned'},
+                   'runtime_atomization': proof}
+        verify_resumed_input_inventory(resumed, previous, folder)
+        checks += 1
+        for label, mutate in [
+                ('missing-scatter-bit', lambda data: struct.pack_into('<I', data, 24, 0)),
+                ('extra-header-bit', lambda data: struct.pack_into('<I', data, 24, 0x2001)),
+                ('changed-text-byte', lambda data: data.__setitem__(root_fixture(1).find(b'\xc3'), 0x90))]:
+            changed = bytearray(scatterable)
+            mutate(changed)
+            runtime.write_bytes(changed)
+            try:
+                verify_runtime_atomization(runtime, original_digest)
+            except ValueError:
+                checks += 1
+            else:
+                raise AssertionError('Invalid runtime atomization accepted: ' + label)
+        runtime.write_bytes(original_bytes)
+        try:
+            verify_scatterable_objects([runtime])
+        except ValueError:
+            checks += 1
+        else:
+            raise AssertionError('A non-scatterable link input was accepted')
+        runtime.write_bytes(scatterable)
+        final_bytes = bytearray(root_fixture(11))
+        # Deliberately synthetic nlists exercise the actual Mach-O reader and
+        # distinguish public N_EXT from private N_PEXT|N_EXT visibility.
+        _, _, symbols_offset, symbol_count, strings_offset, _ = struct.unpack_from(
+            '<6I', final_bytes, 32 + 72 + 160)
+        for index in range(symbol_count):
+            final_bytes[symbols_offset + 16 * index + 4] = 0x1e
+        name_offset = struct.unpack_from('<I', final_bytes, symbols_offset)[0]
+        final_bytes[strings_offset + name_offset:strings_offset + name_offset + 11] = b'_kmod_info\0'
+        final_bytes[symbols_offset + 4] = 0x0f
+        final_bytes[symbols_offset + 16 + 4] = 0x1f
+        final_path = folder / 'export-controls.macho'
+        final_path.write_bytes(final_bytes)
+        assert verify_final_exports(Image(final_path, 11)) == ['kmod_info']
+        checks += 1
+        for label, mutate in [
+                ('extra-public-export', lambda data: data.__setitem__(symbols_offset + 16 + 4, 0x0f)),
+                ('weak-module-metadata', lambda data: struct.pack_into('<H', data, symbols_offset + 6, 0x80)),
+                ('private-module-metadata', lambda data: data.__setitem__(symbols_offset + 4, 0x1f))]:
+            changed = bytearray(final_bytes)
+            mutate(changed)
+            final_path.write_bytes(changed)
+            try:
+                verify_final_exports(Image(final_path, 11))
+            except ValueError:
+                checks += 1
+            else:
+                raise AssertionError('Invalid final export surface accepted: ' + label)
+        for label, mapping in [
+                ('changed-compiled-object', {**resumed['input_object_sha256'], 'unchanged-compiled-object': 'changed'}),
+                ('lost-compiled-object', {str(runtime): sha(runtime)}),
+                ('extra-compiled-object', {**resumed['input_object_sha256'], 'extra': 'unreviewed'}),
+                ('old-runtime-hash', previous['input_object_sha256'])]:
+            try:
+                verify_resumed_input_inventory({**resumed, 'input_object_sha256': mapping}, previous, folder)
+            except ValueError:
+                checks += 1
+            else:
+                raise AssertionError('Invalid resumed input inventory accepted: ' + label)
     return {'format': 1, 'status': 'passed-source-plan-controls', 'checks': checks,
             'synthetic_root_pointer_fixtures': True, 'duplicate_local_finalizer_controls': True,
             'native_link_performed': False, **GATES}

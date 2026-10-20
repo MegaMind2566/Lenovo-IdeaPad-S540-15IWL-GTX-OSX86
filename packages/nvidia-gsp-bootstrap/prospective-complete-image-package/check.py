@@ -52,9 +52,13 @@ def report_fixture():
         'gpu_access': False, 'hardware_admission': False, 'original_entry_admission': False,
         'production_candidate_allowed': False,
         'final_image': {'filetype': 'MH_KEXT_BUNDLE', 'installable_bundle': False, 'sha256': 'a' * 64},
-        'final_link_policy': {'dead_strip': True, 'undefined_policy': 'error',
-                              'unresolved_private_imports_permitted': False},
-        'source_plan': {'complete_original_translation_units': 1100,
+        'final_link_policy': {'dead_strip': True,
+            'undefined_policy': 'Apple x86_64 kext dynamic_lookup',
+            'undefined_closure_enforcement': 'independent exact final Mach-O private/public symbol audit',
+            'exported_symbols': ['_kmod_info'], 'unresolved_private_imports_permitted': False},
+        'final_exported_symbols': ['kmod_info'], 'scatterable_input_objects': 1163,
+        'relocatable_image': {'subsections_via_symbols': True},
+        'source_plan': {'complete_original_translation_units': 1100, 'total_expected_link_objects': 1163,
             'complete_metaclass_classes': ['S540NvidiaGspPowerService',
                 'S540ProspectiveLoaderControl', 'S540ProspectiveLoaderClient']},
         'commands': [{'name': name, 'status': 0} for name in
@@ -142,6 +146,22 @@ def run(args):
         ('native_compilation_reports_verified', False), ('format', True)):
         bad = copy.deepcopy(report); bad[key] = value
         refuse_report(bad, 'reject-report-' + key)
+    for key, value in (('undefined_policy', 'error'), ('exported_symbols', ['_kmod_info', '_unreviewed']),
+        ('undefined_closure_enforcement', 'linker exit status only'), ('unresolved_private_imports_permitted', True)):
+        bad = copy.deepcopy(report); bad['final_link_policy'][key] = value
+        refuse_report(bad, 'reject-final-policy-' + key)
+    for key, value in (('final_exported_symbols', ['kmod_info', 'unreviewed']),
+        ('scatterable_input_objects', 1162), ('relocatable_image', {'subsections_via_symbols': False})):
+        bad = copy.deepcopy(report); bad[key] = value
+        refuse_report(bad, 'reject-final-boundaries-' + key)
+    resumed = copy.deepcopy(report)
+    resumed.update(native_compilation_reused=True, original_compilation_performed=False,
+        project_compilation_performed=False, compilation_cache={'complete_native_compilation_verified': True})
+    candidate.validate_report_contract(resumed); checks.append('schema-only-continuation-fixture')
+    for key, value in (('native_compilation_reused', 1), ('original_compilation_performed', True),
+        ('project_compilation_performed', True), ('compilation_cache', {})):
+        bad = copy.deepcopy(resumed); bad[key] = value
+        refuse_report(bad, 'reject-continuation-provenance-' + key)
     bad = copy.deepcopy(report); bad['commands'][1]['status'] = 1
     refuse_report(bad, 'reject-failed-final-command')
     for path in args.negative_report:

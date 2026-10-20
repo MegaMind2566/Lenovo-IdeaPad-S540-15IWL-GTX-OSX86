@@ -1,4 +1,4 @@
-name: Resume NVIDIA idle link from verified native inputs once
+name: Resume NVIDIA idle link from verified native inputs
 
 on:
   push:
@@ -56,6 +56,7 @@ jobs:
           python3 builders/link_nvidia_first_transaction.py --self-test
           python3 packages/nvidia-global-rm/tests/test_first_transaction_composition.py
           python3 packages/nvidia-global-rm/tests/test_combined_metaclasses.py
+          python3 packages/nvidia-gsp-bootstrap/prospective-complete-image-package/check.py --cc /usr/bin/clang --assets-dir build/nvidia-idle-image/firmware --output build/nvidia-idle-image/resume-package-controls
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
