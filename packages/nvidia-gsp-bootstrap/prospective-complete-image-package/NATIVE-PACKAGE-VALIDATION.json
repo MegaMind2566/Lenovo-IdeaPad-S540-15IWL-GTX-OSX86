@@ -62,5 +62,34 @@
   "hardware_admission": false,
   "original_entry_admission": false,
   "production_candidate_allowed": false,
-  "acceleration_test": false
+  "acceleration_test": false,
+  "target_test": {
+    "evidence_source": "user-pasted load.stderr and result.json from Lenovo target",
+    "report_directory": "S540-Idle-Report-20261020-192626",
+    "status": "refused-by-kext-filesystem-ownership-validation",
+    "observed_uid": 0,
+    "observed_gid": 20,
+    "required_uid": 0,
+    "required_gid": 0,
+    "load_command_status": 30,
+    "rollback_status": 0,
+    "external_loader_abi_observed": false,
+    "original_entry_admission": false,
+    "hardware_admission": false,
+    "acceleration_test": false,
+    "image_abi_or_kernel_trust_result": "not established by this filesystem refusal",
+    "source_fix": "assign and verify root:wheel on every temporary payload entry before kmutil",
+    "existing_package_workaround": "correct the previous report tree to 0:0; rerun its unchanged payload launcher with a fresh report beneath that corrected report root",
+    "native_recompilation_required_for_ownership_workaround": false,
+    "ownership_source_controls": {
+      "platform": "Linux host controls; not native kernel validation",
+      "actual_launcher_repair_and_guard_exercised": true,
+      "root_wheel_fixture_passed": true,
+      "payload_bytes_preserved": true,
+      "foreign_uid_gid_fixtures": "unavailable: host ID mapping returns EINVAL",
+      "shell_syntax_passed": true,
+      "python_compilation_passed": true,
+      "native_ci_started": false
+    }
+  }
 }

@@ -12,7 +12,8 @@ if has_identifier "$SESSION/loaded.txt"; then fail 'This bundle identifier is al
 /bin/cp -R "$PKG" "$SESSION/payload"
 PKG=$SESSION/payload
 verify_package
-[ -z "$(/usr/bin/find "$PKG" ! -user root -print)" ] || fail 'Temporary payload ownership is not root.'
+/usr/sbin/chown -R 0:0 "$PKG"
+[ -z "$(/usr/bin/find "$PKG" \( ! -uid 0 -o ! -gid 0 \) -print)" ] || fail 'Temporary payload ownership is not root:wheel (0:0).'
 [ -z "$(/usr/bin/find "$PKG" \( -perm -020 -o -perm -002 \) -print)" ] || fail 'Temporary payload is writable by another user/group.'
 attempted=0; load_status=-1; observed=false
 cleanup() {

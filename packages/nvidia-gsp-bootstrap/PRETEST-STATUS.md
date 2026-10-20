@@ -2,8 +2,9 @@
 
 The current test package is an idle complete-image loader ABI check for the
 S540 TU117, before any original RM/GSP initialization. Native linking and
-packaging are recorded below; loading and unloading this image on the Lenovo
-remain unobserved. The confirmed hardware checkpoint remains v9. Brightness,
+packaging are recorded below. The first Lenovo load attempt was refused at
+filesystem ownership validation; successful loading and unloading remain
+unobserved. The confirmed hardware checkpoint remains v9. Brightness,
 external displays and electrical NVIDIA power-off work remain deferred.
 
 ## Earlier extended native checkpoint
@@ -114,8 +115,17 @@ records exact identities.
 - ZIP SHA256: `efb8e2b7bb569980c14880dfd52b93b6b806aaa4c1afd4ab390dab7b56e68f39`.
 - Packaging attestation SHA256: `c304279b33cfec8fa63d0e3c7de675b43ceebf8e1abffa0e9a6b770a311c8f49`.
 
-Target kernel loading and unloading remain unobserved. Original RM entry,
-GSP initialization, GPU access and acceleration admission remain closed.
+The first supplied Lenovo test report `S540-Idle-Report-20261020-192626`
+reached `kmutil load` after its integrity, signature, exact OS and GPU-identity
+checks passed. Filesystem validation rejected the temporary payload with
+owner/group `0:20` instead of `0:0`; load returned 30 and rollback returned 0.
+The source launcher now assigns `0:0` explicitly and checks both IDs on every
+entry. The already signed package can be retried unchanged by correcting its
+previous report tree to `0:0` and choosing a new report below that corrected
+root. This ownership-only workaround requires no compilation or new signature.
+A successful target load, snapshot and unload, kernel ABI/trust compatibility,
+original RM entry, GSP initialization, GPU access and acceleration remain
+unproven. Original/hardware admission gates remain closed.
 The ZIP is ready only for the specified Lenovo idle load/snapshot/unload test.
 
 The extended native workflow is manual. Intermediate/documentation commits

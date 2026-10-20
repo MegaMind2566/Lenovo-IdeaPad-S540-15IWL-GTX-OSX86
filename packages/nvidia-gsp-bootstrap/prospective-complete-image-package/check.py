@@ -3,9 +3,11 @@
 from __future__ import annotations
 import argparse
 import copy
+import errno
 import json
 import os
 from pathlib import Path
+import shutil
 import struct
 import subprocess
 import sys
@@ -63,6 +65,83 @@ def report_fixture():
                 'S540ProspectiveLoaderControl', 'S540ProspectiveLoaderClient']},
         'commands': [{'name': name, 'status': 0} for name in
                      ('complete-relocatable-link', 'raw-development-kext-link')]}
+
+
+def payload_ownership_controls(output):
+    """Exercise actual launcher ownership commands; never load a kernel image."""
+    source = (HERE / 'scripts/test-idle-loader.sh').read_text()
+    repair = [line for line in source.splitlines() if line.startswith('/usr/sbin/chown ')]
+    guards = [line for line in source.splitlines() if 'Temporary payload ownership is not ' in line]
+    if len(repair) != 1 or len(guards) != 1:
+        raise ValueError('Expected one actual payload ownership repair and guard')
+    if '\\( ! -uid 0 -o ! -gid 0 \\)' not in guards[0]:
+        raise ValueError('Payload ownership guard must reject either a nonzero UID or GID')
+    if not source.index('PKG=$SESSION/payload') < source.index('verify_package') < source.index(repair[0]) < source.index(guards[0]):
+        raise ValueError('Verify the copied package before ownership repair, then check both IDs')
+    shell = 'fail() { exit 29; }; PKG=$1\n'
+    fixture = output / 'payload-ownership'; fixture.mkdir()
+    nested = fixture / 'nested'; nested.mkdir()
+    payload = nested / 'unchanged.bin'; payload.write_bytes(b'ownership-control-only\n')
+    original_bytes = payload.read_bytes()
+    checks = []
+    def guard(expected):
+        result = subprocess.run(['/bin/sh', '-c', shell + guards[0], 'ownership-control', str(fixture)],
+                                capture_output=True, text=True)
+        if result.returncode != (0 if expected else 29):
+            raise ValueError('Actual payload ownership guard gave an unexpected result: ' + result.stderr)
+    repair_command = repair[0]
+    if sys.platform != 'darwin':
+        host_chown = shutil.which('chown')
+        if host_chown is None or ' ' in host_chown:
+            raise ValueError('A plain host chown path is required for ownership controls')
+        repair_command = repair_command.replace('/usr/sbin/chown', host_chown, 1)
+    def repair_fixture():
+        result = subprocess.run(['/bin/sh', '-c', shell + repair_command,
+            'ownership-repair-control', str(fixture)], capture_output=True, text=True)
+        if result.returncode or any((p.stat().st_uid, p.stat().st_gid) != (0, 0)
+                                   for p in (fixture, nested, payload)):
+            raise ValueError('Actual payload ownership repair failed: ' + result.stderr)
+    privileged = os.geteuid() == 0
+    unavailable = None if privileged else 'The source-control process is not root'
+    if privileged:
+        try:
+            for path in (fixture, nested, payload):
+                os.chown(path, 0, 20)
+        except OSError as error:
+            if error.errno not in (errno.EPERM, errno.EACCES, errno.EINVAL):
+                raise
+            privileged = False
+            unavailable = 'The host cannot create the actual UID/GID fixture: errno ' + str(error.errno)
+            repair_fixture()
+    if privileged:
+        old = subprocess.run(['/bin/sh', '-c', shell +
+            '[ -z "$(/usr/bin/find "$PKG" ! -user root -print)" ]',
+            'historical-user-only-control', str(fixture)], capture_output=True, text=True)
+        if old.returncode != 0:
+            raise ValueError('The root:staff fixture must reproduce the historical user-only admission')
+        checks.append('reproduce-root-staff-user-only-admission')
+        guard(False); checks.append('reject-root-staff-payload')
+        # Only the chown executable path is mapped for Linux source controls;
+        # the exact launcher arguments and ownership guard execute unchanged.
+        repair_fixture(); guard(True); checks.append('repair-root-wheel-payload')
+        os.chown(payload, 0, 20)
+        guard(False); checks.append('reject-nested-wrong-group')
+        repair_fixture()
+        os.chown(payload, 1, 0)
+        guard(False); checks.append('reject-nested-wrong-user')
+        repair_fixture(); guard(True)
+    elif os.geteuid() == 0:
+        repair_fixture(); guard(True)
+        checks.append('accept-actual-root-wheel-payload')
+    else:
+        guard(False); checks.append('reject-user-owned-payload')
+    if payload.read_bytes() != original_bytes:
+        raise ValueError('Ownership controls changed payload bytes')
+    checks.append('ownership-repair-preserves-payload-bytes')
+    return {'checks': checks, 'privileged_cases_executed': privileged,
+            'privileged_cases_unavailable': not privileged,
+            'unavailable_reason': unavailable,
+            'actual_launcher_commands_exercised': True, 'kernel_load_attempted': False}
 
 
 def run(args):
@@ -172,6 +251,8 @@ def run(args):
         result = subprocess.run(['/bin/sh', '-n', str(script)], capture_output=True, text=True)
         candidate.require(result.returncode == 0, result.stderr)
         checks.append('shell-syntax-' + script.name)
+    ownership = payload_ownership_controls(output)
+    checks.extend(ownership['checks'])
     expected = 'ABCDEF11-1122-3344-5566-778899AABBCC'
     other = '22222222-2222-2222-2222-222222222222'
     identifier = candidate.BUNDLE_ID
@@ -239,6 +320,7 @@ def run(args):
         'firmware_notice_mapping': notice, 'actual_acquired_notice_verified': notice_verified,
         'archive_license_name_refused_without_fallback': archive_alias_refused,
         'actual_loader_state_decoder': decoded, 'commands': commands, 'source_sha256': frozen,
+        'temporary_payload_ownership_controls': ownership,
         'executing_verifier_source_sha256': candidate.verifier_bindings(bindings),
         'synthetic_image_scope': 'signature invariance comparison only; not a native image or signature validation',
         'schema_fixture_scope': 'JSON contract only; no independently verified image result',
