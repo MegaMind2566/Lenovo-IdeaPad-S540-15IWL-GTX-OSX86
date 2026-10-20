@@ -1,3 +1,5 @@
+> The latest stable package is [EFI v0.2.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.2.0), with [installation instructions](../../docs/releases/v0.2.0/INSTALL.md) and a [versioned recipe](../../config/efi/releases/v0.2.0/). The v0.1.0 assembly below is retained as history; it predates the native Wi-Fi and hardware-name integration.
+
 # S540 macOS Tahoe EFI — v0.1.0
 
 Current OpenCore configuration for the **Lenovo IdeaPad S540-15IWL GTX (81SW)**, Intel Core i7-8565U, UHD 620 and Intel AC9560. See `COMPATIBILITY.md` for hardware status.
@@ -33,3 +35,4 @@ This is a hardware-specific configuration. It does not include macOS or an insta
 Project: https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86
 
 The repository tracks the public configuration, custom ACPI/USB files and immutable upstream dependency hashes. The release workflow reconstructs the EFI and checks every component against the manifest, then validates the configuration with OpenCore's matching validator.
+

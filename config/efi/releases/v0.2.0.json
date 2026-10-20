@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "version": "v0.2.0",
+  "recipe": "config/efi/releases/v0.2.0",
+  "workflow": ".github/workflows/publish-stable-efi.yml",
+  "asset": "S540-Tahoe-EFI-v0.2.0.zip",
+  "release_url": "https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.2.0",
+  "scope": "Stable Intel graphics, native Wi-Fi; no experimental NVIDIA or SD driver. Public SMBIOS placeholders require personalization. Audio is installed separately on macOS.",
+  "size": 47102989,
+  "sha256": "659b1223c16b719a860c509571858b6685b0333b98c19222e480381fa601c039"
+}
