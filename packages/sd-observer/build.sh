@@ -37,6 +37,6 @@ xcrun ld -arch x86_64 -kext -undefined dynamic_lookup -no_function_starts \
     "$OUT/probe.o" "$OUT/module-info.o" "$SDK_PATH/Library/x86_64/libkmod.a"
 cp Info.plist "$KEXT/Contents/Info.plist"
 /usr/bin/plutil -lint "$KEXT/Contents/Info.plist"
-/usr/bin/lipo -verify_arch x86_64 "$KEXT/Contents/MacOS/S540O2MicroReadOnlyProbe"
+/usr/bin/lipo "$KEXT/Contents/MacOS/S540O2MicroReadOnlyProbe" -verify_arch x86_64
 /usr/bin/file "$KEXT/Contents/MacOS/S540O2MicroReadOnlyProbe"
 echo "Built $KEXT"
