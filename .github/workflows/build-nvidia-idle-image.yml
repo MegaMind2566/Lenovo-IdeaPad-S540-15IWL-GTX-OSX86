@@ -59,6 +59,8 @@ jobs:
           python3 packages/nvidia-global-rm/tests/test_first_transaction_composition.py
           python3 packages/nvidia-global-rm/tests/test_combined_metaclasses.py
           python3 packages/nvidia-global-rm/tests/test_selective_native_cache.py
+          python3 packages/nvidia-global-rm/tests/test_phase_byte_snapshot.py
+          python3 packages/nvidia-global-rm/tests/test_native_cache_report_checkpoints.py
           python3 packages/nvidia-global-rm/tests/test_public_callback_rebuild_inputs.py
           python3 builders/test_nvidia_public_kpi_exports.py
           python3 builders/link_nvidia_first_transaction.py --self-test

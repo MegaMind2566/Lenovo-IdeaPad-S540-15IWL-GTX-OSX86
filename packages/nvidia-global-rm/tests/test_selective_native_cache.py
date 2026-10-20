@@ -456,6 +456,64 @@ class NativeCacheTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'mandatory two-source rebuild cost guard'):
                 cache.verify_compilation_result(proof, f.composition, originals, projects)
 
+    def test_postbuild_verification_detects_header_tamper_after_deduplicated_hit(self):
+        f = self.fixture
+        with f.patches():
+            helper = f.instance()
+            proof, originals, projects = f.build_matrices(helper)
+            original_check = cache.PhaseByteSnapshot.check
+            hits = 0
+            def changed_after_hit(snapshot, path, expected):
+                nonlocal hits
+                result = original_check(snapshot, path, expected)
+                if path == f.header:
+                    hits += 1
+                    if hits == 2:
+                        f.header.write_text('changed after duplicate-path validation\n')
+                return result
+            with patch.object(cache.PhaseByteSnapshot, 'check', changed_after_hit):
+                with self.assertRaisesRegex(ValueError, 'input changed'):
+                    cache.verify_compilation_result(proof, f.composition, originals, projects)
+            self.assertGreaterEqual(hits, 2)
+
+    def test_postbuild_verification_rejects_cross_row_conflicting_dependency_hash(self):
+        f = self.fixture
+        with f.patches():
+            helper = f.instance()
+            proof, originals, projects = f.build_matrices(helper)
+            originals['results'][1]['dependency_sha256'][str(f.header)] = 'f' * 64
+            with self.assertRaisesRegex(ValueError, 'Conflicting'):
+                cache.verify_compilation_result(proof, f.composition, originals, projects)
+
+    def assert_fresh_compiled_stack_tamper_detected(self, usage_file):
+        f = self.fixture
+        with f.patches():
+            helper = f.instance()
+            key = ('project', 'packages/test/two.cpp')
+            f.sources[key].write_text('fresh compiled callback source\n')
+            proof, originals, projects = f.build_matrices(helper)
+            fresh = next(row for row in projects['results'] if row['source'] == key[1])
+            self.assertNotIn('native_cache_reuse', fresh)
+            capture_path = Path(fresh['stack_usage']['path'])
+            capture = json.loads(capture_path.read_bytes())
+            path = Path(capture['usage_file']) if usage_file else capture_path
+            expected = capture['usage_sha256'] if usage_file else fresh['stack_usage']['sha256']
+            original_finish = cache.PhaseByteSnapshot.finish
+            def tamper_after_enrolled_hit(snapshot):
+                self.assertIn(str(path), snapshot.files)
+                snapshot.check(path, expected)  # prove this is an existing phase-cache hit
+                path.write_bytes(b'changed after fresh compiler stack validation')
+                return original_finish(snapshot)
+            with patch.object(cache.PhaseByteSnapshot, 'finish', tamper_after_enrolled_hit):
+                with self.assertRaisesRegex(ValueError, 'input changed'):
+                    cache.verify_compilation_result(proof, f.composition, originals, projects)
+
+    def test_fresh_compiled_stack_capture_is_rechecked_at_phase_end(self):
+        self.assert_fresh_compiled_stack_tamper_detected(usage_file=False)
+
+    def test_fresh_compiled_usage_file_is_rechecked_at_phase_end(self):
+        self.assert_fresh_compiled_stack_tamper_detected(usage_file=True)
+
 
 if __name__ == '__main__':
     unittest.main()

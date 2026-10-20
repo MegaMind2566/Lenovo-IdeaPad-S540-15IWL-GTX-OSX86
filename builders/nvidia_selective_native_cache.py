@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 import platform
 import re
+import stat
 import threading
 
 REPORT_SHA256 = '3875dfb142cf040882d58e94f52cf260f493ebb0d06c07e80f810f5898f2f5aa'
@@ -257,6 +258,112 @@ def require_allowed_miss(scope: set[tuple[str, str]] | None,
             repr(key) + '; ' + reason)
 
 
+class PhaseByteSnapshot:
+    """One independent verification phase over unique, unchanged file paths.
+
+    Every edge still supplies its expected digest. Only duplicate reads within
+    this phase are coalesced. File opens traverse no-follow directory FDs;
+    finish() independently reopens and rehashes all unique inputs and checks
+    their identities, catching mutations even after a duplicate-path hit.
+    """
+
+    def __init__(self):
+        require(hasattr(os, 'O_NOFOLLOW') and hasattr(os, 'O_DIRECTORY'),
+                'Native input verification requires no-follow directory/file opens')
+        self.files: dict[str, dict] = {}
+        self.parents: dict[str, tuple] = {}
+        self.finished = False
+
+    @staticmethod
+    def _file_signature(info) -> tuple:
+        return (info.st_dev, info.st_ino, info.st_mode, info.st_size,
+                info.st_mtime_ns, info.st_ctime_ns)
+
+    def _parent(self, path: Path, info, *, capture: bool) -> None:
+        require(stat.S_ISDIR(info.st_mode), 'Native input parent is not a real directory: ' + str(path))
+        identity = (info.st_dev, info.st_ino, stat.S_IFMT(info.st_mode))
+        key = str(path)
+        if key in self.parents:
+            require(self.parents[key] == identity,
+                    'Current native compilation parent directory changed: ' + key)
+        else:
+            require(capture, 'Current native compilation parent binding disappeared: ' + key)
+            self.parents[key] = identity
+
+    def _read(self, path: Path, *, capture: bool) -> tuple[tuple, str]:
+        """Bind the actual directory entries and stable opened bytes."""
+        parent_fd = file_fd = None
+        directory_flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+        try:
+            parent = Path('/')
+            parent_fd = os.open('/', directory_flags)
+            self._parent(parent, os.fstat(parent_fd), capture=capture)
+            for component in path.parts[1:-1]:
+                next_fd = os.open(component, directory_flags, dir_fd=parent_fd)
+                os.close(parent_fd)
+                parent_fd = next_fd
+                parent = parent / component
+                self._parent(parent, os.fstat(parent_fd), capture=capture)
+            entry = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+            require(stat.S_ISREG(entry.st_mode), 'Native input is not a regular no-follow file: ' + str(path))
+            file_fd = os.open(path.name, os.O_RDONLY | os.O_NOFOLLOW, dir_fd=parent_fd)
+            before = os.fstat(file_fd)
+            signature = self._file_signature(before)
+            require(stat.S_ISREG(before.st_mode) and signature == self._file_signature(entry),
+                    'Current native compilation input changed before read: ' + str(path))
+            digest = hashlib.sha256()
+            while chunk := os.read(file_fd, 1024 * 1024):
+                digest.update(chunk)
+            after = os.fstat(file_fd)
+            final_entry = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+            require(signature == self._file_signature(after) == self._file_signature(final_entry),
+                    'Current native compilation input changed during read: ' + str(path))
+            return signature, digest.hexdigest()
+        except OSError as error:
+            raise ValueError('Unable to read a stable no-follow native input: ' + str(path)) from error
+        finally:
+            if file_fd is not None:
+                os.close(file_fd)
+            if parent_fd is not None:
+                os.close(parent_fd)
+
+    def check(self, path: Path, expected: str) -> None:
+        require(not self.finished, 'A completed native byte snapshot cannot be reused')
+        require(path.is_absolute() and '..' not in path.parts and len(path.parts) >= 2,
+                'Native byte snapshot requires confined absolute file paths')
+        require(isinstance(expected, str) and re.fullmatch('[0-9a-f]{64}', expected) is not None,
+                'Malformed current native input SHA256')
+        key = str(path)
+        if key in self.files:
+            require(self.files[key]['sha256'] == expected,
+                    'Conflicting current native compilation SHA256 binding: ' + key)
+            return
+        regular(path)
+        signature, digest = self._read(path, capture=True)
+        require(digest == expected, 'Current native compilation input changed: ' + key)
+        self.files[key] = {'signature': signature, 'sha256': digest}
+
+    def _verify_parents(self) -> None:
+        for path, identity in self.parents.items():
+            try:
+                info = Path(path).lstat()
+            except OSError as error:
+                raise ValueError('Current native compilation parent disappeared: ' + path) from error
+            require(stat.S_ISDIR(info.st_mode) and
+                    (info.st_dev, info.st_ino, stat.S_IFMT(info.st_mode)) == identity,
+                    'Current native compilation parent directory changed: ' + path)
+
+    def finish(self) -> None:
+        require(not self.finished, 'A native byte snapshot can finish only once')
+        self._verify_parents()
+        for name, expected in self.files.items():
+            signature, digest = self._read(Path(name), capture=False)
+            require(signature == expected['signature'] and digest == expected['sha256'],
+                    'Current native compilation input changed: ' + name)
+        self._verify_parents()
+        self.finished = True
+
+
 class SelectiveNativeCache:
     """Thread-safe decisions for a fresh composition at the exact old paths."""
 
@@ -470,13 +577,8 @@ def verify_compilation_result(proof: dict, composition: Path,
         require(scope_rows == rebuild_scope_rows(set(PUBLIC_CALLBACK_REBUILDS)),
                 'Post-build controlled native rebuild scope changed')
         allowed_rebuilds = set(PUBLIC_CALLBACK_REBUILDS)
-    digest_cache = {}
-    def current_bytes(path: Path, expected: str):
-        regular(path)
-        key = str(path)
-        if key not in digest_cache:
-            digest_cache[key] = sha_bytes(path.read_bytes())
-        require(digest_cache[key] == expected, 'Current native compilation input changed: ' + key)
+    snapshot = PhaseByteSnapshot()
+    current_bytes = snapshot.check
     for kind, count, matrix in (('original', ORIGINAL_COUNT, originals), ('project', PROJECT_COUNT, projects)):
         old_matrix = verified['matrices'][kind]
         exact(matrix, {'format': 1, 'status': old_matrix['status'],
@@ -510,7 +612,13 @@ def verify_compilation_result(proof: dict, composition: Path,
                 require(Path(dependency).is_absolute() and '..' not in Path(dependency).parts,
                         'Current native dependency lost its absolute path binding')
                 current_bytes(Path(dependency), expected)
-            _verify_stack(canonical_paths()[0], kind, row, obj)
+            capture = _verify_stack(canonical_paths()[0], kind, row, obj)
+            current_bytes(Path(row['stack_usage']['path']), row['stack_usage']['sha256'])
+            if capture['usage_file'] is not None:
+                current_bytes(Path(capture['usage_file']), capture['usage_sha256'])
+            else:
+                require(not obj.with_suffix('.su').exists(),
+                        'Unexpected current .su output for a unit without emitted stack usage')
             if decision.get('decision') == 'reused-native-object':
                 exact(decision, {'decision': 'reused-native-object', 'compiled_this_run': False},
                       'reused source decision')
@@ -523,13 +631,6 @@ def verify_compilation_result(proof: dict, composition: Path,
                             'source_sha256' if kind == 'original' else 'sha256'):
                     require(row.get(key) == old.get(key),
                             'A reused native compiler result changed: ' + key)
-                capture = verified['captures'][kind][row['source']]
-                current_bytes(Path(old['stack_usage']['path']), old['stack_usage']['sha256'])
-                if capture['usage_file'] is not None:
-                    current_bytes(Path(capture['usage_file']), capture['usage_sha256'])
-                else:
-                    require(not obj.with_suffix('.su').exists(),
-                            'Unexpected current .su output for an empty cached unit')
                 reused += 1
             else:
                 exact(decision, {'decision': 'compile-required', 'compiled_this_run': True},
@@ -542,4 +643,5 @@ def verify_compilation_result(proof: dict, composition: Path,
         exact(group, {'planned_sources': count, 'expected_sources': count,
             'reused_objects': reused, 'compile_required': compiled,
             'compiled_this_run': compiled, 'complete': True}, kind + ' cache counts')
+    snapshot.finish()
     return deepcopy(proof)

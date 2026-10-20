@@ -1102,14 +1102,44 @@ def compile_original_objects(upstream: Path, output: Path, compiler: Path, *,
         'gpu_access': False, 'results': rows, 'failures': failures}
     destination = output / 'full-original-compilation.json'
     write_json(destination, report)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
-        futures = {pool.submit(one, pair): pair[0] for pair in enumerate(commands)}
-        for future in concurrent.futures.as_completed(futures):
-            try:
-                rows.append(future.result())
-            except Exception as error:
-                failures.append({'index': futures[future], 'error': str(error)})
+    # A complete original matrix is about 88 MB. Rewriting its growing
+    # dependency graph for each cache hit produces quadratic diagnostic I/O;
+    # the final authenticated report and every verification remain complete.
+    checkpoint_interval = 100 if native_cache is not None else 1
+    futures, observed = {}, set()
+    try:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
+            for pair in enumerate(commands):
+                futures[pool.submit(one, pair)] = pair[0]
+            for future in concurrent.futures.as_completed(futures):
+                observed.add(future)
+                try:
+                    rows.append(future.result())
+                except Exception as error:
+                    failures.append({'index': futures[future], 'error': str(error)})
+                except BaseException as error:
+                    if native_cache is not None:
+                        failures.append({'index': futures[future], 'error': str(error)})
+                    raise
+                if len(observed) % checkpoint_interval == 0:
+                    write_json(destination, report)
+    except BaseException as error:
+        if native_cache is not None:
+            # Retain all available results on interruption without waiting on
+            # another future or claiming completion for a cancelled action.
+            for future, index in futures.items():
+                if future in observed or not future.done():
+                    continue
+                if future.cancelled():
+                    failures.append({'index': index, 'error': 'Compiler action cancelled before result collection'})
+                    continue
+                try:
+                    rows.append(future.result())
+                except BaseException as pending_error:
+                    failures.append({'index': index, 'error': str(pending_error)})
+            report.update(status='failed', error=str(error), failure_type=type(error).__name__)
             write_json(destination, report)
+        raise
     if failures:
         report['status'] = 'failed'
         write_json(destination, report)

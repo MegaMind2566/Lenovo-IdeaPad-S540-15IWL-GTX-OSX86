@@ -6,6 +6,14 @@ NVIDIA sources and every hardware/original-entry admission gate unchanged.
 The idle target attempt on Darwin 25.6.0 was refused while binding
 `_thread_call_cancel_wait`; no successful target load is established here.
 
+Native run 39483421884 passed both links with only Work and Timer recompiled,
+1,100 original and 58 unchanged project objects reused, and all 388 final live
+imports matched to declared public source exports. The 20-minute job expired
+during independent packaging; it produced no deliverable ZIP. Cache report
+checkpoints and phase-local input verification are being corrected before a
+new grouped native validation. Final matrices and fresh post-signature checks
+remain mandatory.
+
 ## Export and lifetime evidence
 
 The pinned Apple XNU snapshot is `f6217f891ac0bb64f3d375211650a4c1ff8ca1ea`

@@ -265,7 +265,7 @@ original global or adapter entry executes during that test.
 
 | Requirement | Remaining work |
 |---|---|
-| Target loader ABI | The historical packaged image is refused by the target linker because `_thread_call_cancel_wait` is not exported to the declared third-party KPIs. The public callback successor and final live-import export preflight require a new native link/package and then the closed idle load/snapshot/unload check. |
+| Target loader ABI | The historical packaged image is refused because `_thread_call_cancel_wait` is not exported to third-party KPIs. The public callback successor passed both native links and its 388 live imports passed the public source-export audit in run 39483421884. Packaging timed out; a new verified ZIP and then the closed idle load/snapshot/unload check remain required. |
 | Original locks/lifetime | Validate the serialized global/context epoch and close the retained late-OOM construction failure before kernel entry, with ISR/DPC exclusion. A zero current-thread lock mask is not all-thread quiescence. |
 | Callback producers | Compose genuine RC behavior and hard-IRQ/coalesced-BH participation, including master-thread pending drains and a non-destructive persistent hardware-mask phase. Do not invent EVENT/OWNER policy rows for plain 1Hz callbacks. |
 | Allocation ownership | Acquire the real session hardware-DMA hold before any original attempt. Preserve CPU objects, direct service backends, DMA backing/mappings, context and module text after the retained diagnostic. |
