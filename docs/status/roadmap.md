@@ -39,6 +39,15 @@ Host preparation reports `direct_untranslated`, 65,536 bytes, 16 segments and re
 
 The [v9 services bundle](../../packages/nvidia-rm-services/README.md) combines the selected original NVIDIA `RS_STANDALONE`/NVOC Resource Server subsystem with real cached host allocation/kernel-mapping ABIs, retained read-only 4 KiB PCI sessions and the official matching GSP/UCODES pair. Version `0.9.0`, report format `9`, uses success status `resource_server_prepared`. Native macOS CI and compiled-package verification passed, including startup and failure cleanup. The laptop report confirms all 486 kernel startup checks (258 CPU, 132 hardware preparation and 96 services), complete cleanup, the retained two-read TU117 variant-41 identity, 15 separate userspace firmware checks and no warnings. The v9 checkpoint is complete; no repeat laptop test is requested.
 
+The [complete-image idle loader checkpoint](../../packages/nvidia-gsp-bootstrap/prospective-complete-image-package/TARGET-IDLE-ABI-PASS-20261020.json)
+also passed on macOS26.7.1/build25G241/Darwin25.6.0. The exact signed package
+loaded, returned a valid read-only IOKit idle snapshot and unloaded normally
+without force. Its45 payload files match the delivered package pins. Original
+calls, provider preparations and PM registrations stayed zero; original-entry
+policy stayed closed. Operational callback execution, lifetime/stack admission,
+original RM/GSP initialization and acceleration remain open. This completed
+idle milestone needs no repeat laptop test or native rebuild.
+
 | Area | Included in the same bundle | Boundary |
 |---|---|---|
 | Original Resource Server | Real NVOC clients/resources, ownership and access isolation, sharing and original control/refusal paths | Selected standalone subsystem; no full `coreInitializeRm()` or global/GPU RM initialization |

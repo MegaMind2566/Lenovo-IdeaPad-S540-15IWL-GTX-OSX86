@@ -1,13 +1,18 @@
 # Single Lenovo test: prerequisite status
 
 The current test package is an idle complete-image loader ABI check for the
-S540 TU117, before any original RM/GSP initialization. Native linking and
-packaging are recorded below for the historical image. The first Lenovo load
-attempt was refused at filesystem ownership validation. After correcting the
-report ownership, the second attempt reached kernel collection linking and
-failed to resolve the private `_thread_call_cancel_wait` import (status31,
-rollback0). Successful loading and unloading remain unobserved. The confirmed hardware checkpoint remains v9. Brightness,
+S540 TU117, before any original RM/GSP initialization. The public callback image
+passed the target load, read-only idle snapshot and normal unload on macOS
+26.7.1/build25G241/Darwin25.6.0. The exact packaged UUID and all payload hashes
+match the supplied report. Earlier ownership and private-export refusals remain
+historical evidence below. The confirmed hardware checkpoint remains v9. Brightness,
 external displays and electrical NVIDIA power-off work remain deferred.
+
+The [successful target report](prospective-complete-image-package/TARGET-IDLE-ABI-PASS-20261020.json)
+records load0, a valid idle control state and normal unload0, without force or
+security changes. Original calls, provider preparations and PM registrations
+are zero. Runtime callbacks, original RM/GSP initialization and acceleration
+were not exercised; the original-entry policy remains closed.
 
 ## Target private-export refusal and public callback successor
 
@@ -30,8 +35,9 @@ bodies plus one companion header. It uses public IOKit workloop-priority timer
 event sources, gates cancellation after releasing the service Guard, and keeps
 real callback-return synchronization. It introduces no new metaclass, kernel
 entry permission or hardware action. The exact source/SDK cross-compilation and
-concurrent mock-KERNEL controls are distinct from the pending native final link
-and eventual physical target test.
+concurrent mock-KERNEL controls are distinct from the subsequent successful
+native link/package and physical target idle load/snapshot/unload check. The
+idle check does not execute the Work/Timer callback backend.
 
 A selective native rebuild may reuse only the independently pinned complete
 cache when compiler identity, SDK, source, full command/cwd and every recorded
@@ -113,8 +119,10 @@ Timer were compiled; 1,100 original and 58 project objects were reused after
 verification. All 388 final imports match public source exports. The new ZIP
 SHA256 is `8e0247dfe5ef66613f8df7f0dc8afd0ae8463f98b9d4489025cb0e7239aa6ba4`;
 the new attestation pin is `3156302ddf0b41d0ec5b70bb47bcbfc7c5c5e5822381c0a9c607d98df2bb5d34`.
-Target loading remains untested for this new package. Earlier package and target
-results below are historical; all hardware/original-entry gates remain closed.
+The target report `S540-Idle-Report-20261020-222838` now confirms successful
+loading, the exact signed UUID, a valid idle snapshot and normal unload. Earlier
+package and target results below are historical; all hardware/original-entry
+gates remain closed.
 
 Intel macOS continuation run
 [39455599294](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39455599294)
@@ -275,7 +283,7 @@ original global or adapter entry executes during that test.
 
 | Requirement | Remaining work |
 |---|---|
-| Target loader ABI | The historical package was refused because `_thread_call_cancel_wait` is not exported to third-party KPIs. The public callback successor passed both native links, the 388-import public source-export audit, signing and packaging in run 39488036361. The new ZIP requires the closed idle load/snapshot/unload check on the target. |
+| Target loader ABI | Completed for the exact public callback package on macOS26.7.1/build25G241/Darwin25.6.0: exact UUID loaded, read-only idle snapshot valid, normal unload0 and identifier absent afterward. Original RM/GSP entry and callback execution remain separate requirements. |
 | Original locks/lifetime | Validate the serialized global/context epoch and close the retained late-OOM construction failure before kernel entry, with ISR/DPC exclusion. A zero current-thread lock mask is not all-thread quiescence. |
 | Callback producers | Compose genuine RC behavior and hard-IRQ/coalesced-BH participation, including master-thread pending drains and a non-destructive persistent hardware-mask phase. Do not invent EVENT/OWNER policy rows for plain 1Hz callbacks. |
 | Allocation ownership | Acquire the real session hardware-DMA hold before any original attempt. Preserve CPU objects, direct service backends, DMA backing/mappings, context and module text after the retained diagnostic. |
@@ -284,6 +292,7 @@ original global or adapter entry executes during that test.
 | Operational entry | The production KERNEL global entry and bootstrap initializer still refuse. A complete retained transaction and actual target-loader success must precede original GPU entry; loading the idle image alone is not an RM/GSP initialization test. |
 
 The supplied target report identifies macOS 26.7.1/build25G241, Darwin25.6.0.
-Public SDK compilation does not demonstrate exact target export/vtable loading.
-Hardware results are observations for the eventual Lenovo test; software checks
-do not establish GSP firmware execution or graphics acceleration.
+Public SDK compilation alone does not demonstrate target export/vtable loading;
+the supplied exact-image target report now establishes the closed idle loader
+milestone. It does not establish runtime callback behavior, original RM/GSP
+execution, GSP firmware execution or graphics acceleration.

@@ -94,44 +94,36 @@
   },
   "latest_target_test": {
     "format": 1,
-    "status": "refused-by-target-kext-linker-private-export",
-    "evidence_source": "user-pasted load.stderr and result.json from the Lenovo target",
-    "report_directory": "S540-Idle-Report-20261020-192626/retry-20261020-205909",
+    "status": "passed-target-idle-complete-image-abi-check",
+    "evidence_file": "TARGET-IDLE-ABI-PASS-20261020.json",
+    "report_directory": "S540-Idle-Report-20261020-222838",
+    "report_archive_sha256": "dab52d50e3554174c857dc06934a2a7208f15c8afd301894853a4e2916529e25",
+    "product_version": "26.7.1",
+    "scope": "idle-complete-image-target-loader-abi-check",
     "build": "25G241",
     "darwin_release": "25.6.0",
-    "load_command_status": 31,
+    "load_command_status": 0,
+    "external_loader_abi_observed": true,
     "rollback_status": 0,
-    "unresolved_symbol": "_thread_call_cancel_wait",
-    "failure_offset": "0x2f9ff0 in __TEXT,__text",
-    "loader_error": "could not find a kext which exports this symbol",
-    "packaging_attestation_sha256": "c304279b33cfec8fa63d0e3c7de675b43ceebf8e1abffa0e9a6b770a311c8f49",
-    "package_archive_sha256": "efb8e2b7bb569980c14880dfd52b93b6b806aaa4c1afd4ab390dab7b56e68f39",
-    "external_loader_abi_observed": false,
+    "attestation_sha256": "3156302ddf0b41d0ec5b70bb47bcbfc7c5c5e5822381c0a9c607d98df2bb5d34",
     "hardware_admission": false,
     "original_entry_admission": false,
     "rm_initialization_test": false,
     "gsp_initialization_test": false,
     "acceleration_test": false,
     "system_security_changed": false,
-    "source_export_audit": {
-      "live_imports": 390,
-      "matched_declared_public_source_exports": 389,
-      "rejected": [
-        {
-          "symbol": "thread_call_cancel_wait",
-          "classification": "private-only-export"
-        }
-      ],
-      "exact_target_export_proof": false,
-      "xnu_commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
-      "iopcifamily_commit": "4822b27a36e2de70e231ecf2bf3021384fab6ec2"
-    },
-    "root_cause": "The independent SDK reference admitted a header declaration without checking published third-party KPI exports.",
-    "source_successor": "../prospective-public-callback-closure/SOURCE-CONTRACT.json",
-    "remedy": "Replace direct thread-call scheduling/drain in the composed Timer/Work services with public workloop-priority IOTimerEventSource scheduling and synchronous gated cancellation; reject final imports without a declared public source export.",
-    "new_native_link_observed": true,
-    "new_package_observed": true,
-    "target_success_observed": false
+    "normal_unload_command_status": 0,
+    "module_identifier_absent_after_rollback": true,
+    "force_unload_used": false,
+    "loaded_uuid": "D2F08C40-A570-3F3D-A1F1-25D08C9BEC59",
+    "signed_image_sha256": "6731a1995b4919ac23ea8d59ad8e3d712f831a8b0ae4a0b93d4147e04f08c07c",
+    "idle_state_valid": true,
+    "generation_matches_registry": true,
+    "original_calls": 0,
+    "provider_preparations": 0,
+    "pm_registrations": 0,
+    "internal_target_loader_admission_proven": 0,
+    "runtime_callback_execution_tested": false
   },
   "public_callback_native_attempt": {
     "source_commit": "0fd5877ef04c9ceeff12ab96b6d28b7ea23fc7ff",
@@ -204,12 +196,54 @@
     "metaclasses_verified": 3,
     "native_codesign_strict_verification": "passed",
     "signature_invariance": "passed",
-    "target_loader_abi_observed": false,
+    "target_loader_abi_observed": true,
     "hardware_admission": false,
     "original_entry_admission": false,
     "rm_initialization_test": false,
     "gsp_initialization_test": false,
     "acceleration_test": false,
-    "system_security_changed": false
+    "system_security_changed": false,
+    "target_test_evidence": "TARGET-IDLE-ABI-PASS-20261020.json"
+  },
+  "previous_target_export_refusal": {
+    "format": 1,
+    "status": "refused-by-target-kext-linker-private-export",
+    "evidence_source": "user-pasted load.stderr and result.json from the Lenovo target",
+    "report_directory": "S540-Idle-Report-20261020-192626/retry-20261020-205909",
+    "build": "25G241",
+    "darwin_release": "25.6.0",
+    "load_command_status": 31,
+    "rollback_status": 0,
+    "unresolved_symbol": "_thread_call_cancel_wait",
+    "failure_offset": "0x2f9ff0 in __TEXT,__text",
+    "loader_error": "could not find a kext which exports this symbol",
+    "packaging_attestation_sha256": "c304279b33cfec8fa63d0e3c7de675b43ceebf8e1abffa0e9a6b770a311c8f49",
+    "package_archive_sha256": "efb8e2b7bb569980c14880dfd52b93b6b806aaa4c1afd4ab390dab7b56e68f39",
+    "external_loader_abi_observed": false,
+    "hardware_admission": false,
+    "original_entry_admission": false,
+    "rm_initialization_test": false,
+    "gsp_initialization_test": false,
+    "acceleration_test": false,
+    "system_security_changed": false,
+    "source_export_audit": {
+      "live_imports": 390,
+      "matched_declared_public_source_exports": 389,
+      "rejected": [
+        {
+          "symbol": "thread_call_cancel_wait",
+          "classification": "private-only-export"
+        }
+      ],
+      "exact_target_export_proof": false,
+      "xnu_commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "iopcifamily_commit": "4822b27a36e2de70e231ecf2bf3021384fab6ec2"
+    },
+    "root_cause": "The independent SDK reference admitted a header declaration without checking published third-party KPI exports.",
+    "source_successor": "../prospective-public-callback-closure/SOURCE-CONTRACT.json",
+    "remedy": "Replace direct thread-call scheduling/drain in the composed Timer/Work services with public workloop-priority IOTimerEventSource scheduling and synchronous gated cancellation; reject final imports without a declared public source export.",
+    "new_native_link_observed": true,
+    "new_package_observed": true,
+    "target_success_observed": false
   }
 }

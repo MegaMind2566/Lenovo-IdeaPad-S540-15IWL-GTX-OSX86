@@ -78,6 +78,11 @@ The public callback package from native run 39488036361 is now available.
 Both links, independent verification and strict native signature checks passed;
 the new attestation pin is
 `3156302ddf0b41d0ec5b70bb47bcbfc7c5c5e5822381c0a9c607d98df2bb5d34`.
-Its target idle loader check remains outstanding. Exact archive, report and
-signed-image hashes are recorded in `NATIVE-PACKAGE-VALIDATION.json` under
-`public_callback_successful_package`; older fields retain the historical ZIP.
+Its [target idle loader check passed](TARGET-IDLE-ABI-PASS-20261020.json) on
+macOS26.7.1/build25G241/Darwin25.6.0: the exact packaged UUID was loaded,
+the read-only idle snapshot was valid, and normal unload returned0 with the
+identifier absent afterward. Original RM/GSP, callback execution and GPU
+initialization remain untested. Exact archive, report and signed-image hashes
+are recorded in `NATIVE-PACKAGE-VALIDATION.json` under
+`public_callback_successful_package` and `latest_target_test`; older fields
+retain the historical ZIP and its refusal.

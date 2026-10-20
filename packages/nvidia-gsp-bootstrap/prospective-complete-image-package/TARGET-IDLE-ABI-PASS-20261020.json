@@ -1,0 +1,147 @@
+{
+  "format": 1,
+  "status": "passed-target-idle-complete-image-abi-check",
+  "evidence_source": "user-uploaded target report archive, independently checked against delivered package pins",
+  "report_archive": "S540-Idle-Report-20261020-222838.zip",
+  "report_archive_sha256": "dab52d50e3554174c857dc06934a2a7208f15c8afd301894853a4e2916529e25",
+  "report_directory": "S540-Idle-Report-20261020-222838",
+  "report_directory_local_timestamp": "2026-10-20T22:28:38+02:00",
+  "package_source_commit": "d145d9e01f8470a31d499313957e82b47580358b",
+  "native_package_workflow_run_id": 39488036361,
+  "package_archive_sha256": "8e0247dfe5ef66613f8df7f0dc8afd0ae8463f98b9d4489025cb0e7239aa6ba4",
+  "packaging_attestation_sha256": "3156302ddf0b41d0ec5b70bb47bcbfc7c5c5e5822381c0a9c607d98df2bb5d34",
+  "strict_native_report_sha256": "844126f76edcd7c65e7ca8f23b15212ead6957a745ea6107e15f1b40e8a3a6dc",
+  "signed_image_sha256": "6731a1995b4919ac23ea8d59ad8e3d712f831a8b0ae4a0b93d4147e04f08c07c",
+  "loaded_uuid": "D2F08C40-A570-3F3D-A1F1-25D08C9BEC59",
+  "bundle_identifier": "org.osx86.S540ProspectiveLoader",
+  "payload_verification": {
+    "files_verified": 45,
+    "manifest_entries_verified": 43,
+    "all_manifest_hashes_match": true,
+    "exact_payload_inventory_matches_delivered_package": true,
+    "archive_crc_passed": true
+  },
+  "target_os": {
+    "product_version": "26.7.1",
+    "build": "25G241",
+    "darwin_release": "25.6.0",
+    "architecture": "x86_64",
+    "reported_smbios_model": "MacBookPro16,2"
+  },
+  "target_gpu": {
+    "scope": "readonly-registry-identity",
+    "matches": 1,
+    "vendor": 4318,
+    "device": 8081,
+    "subvendor": 6058,
+    "subdevice": 14342,
+    "revision": 161,
+    "class": 196608,
+    "hardware_access": false
+  },
+  "result": {
+    "format": 1,
+    "scope": "idle-complete-image-target-loader-abi-check",
+    "build": "25G241",
+    "darwin_release": "25.6.0",
+    "load_command_status": 0,
+    "external_loader_abi_observed": true,
+    "rollback_status": 0,
+    "attestation_sha256": "3156302ddf0b41d0ec5b70bb47bcbfc7c5c5e5822381c0a9c607d98df2bb5d34",
+    "hardware_admission": false,
+    "original_entry_admission": false,
+    "rm_initialization_test": false,
+    "gsp_initialization_test": false,
+    "acceleration_test": false,
+    "system_security_changed": false
+  },
+  "snapshot": {
+    "format": 1,
+    "bytes": 64,
+    "phase": 2,
+    "last_status": 85,
+    "generation": 4294969369,
+    "module_entry_accepted": 1,
+    "control_service_started": 1,
+    "one_shot_consumed": 0,
+    "requests_accepted": 0,
+    "entry_policy_closed": 1,
+    "target_loader_admission_proven": 0,
+    "original_calls": 0,
+    "provider_preparations": 0,
+    "pm_registrations": 0,
+    "stopping": 0,
+    "actual_registry_entry_id": 4294969369,
+    "generation_matches_registry": true,
+    "idle_state_valid": true
+  },
+  "rollback": {
+    "format": 1,
+    "scope": "normal-idle-image-unload",
+    "unload_command_status": 0,
+    "identifier_absent": true,
+    "force_used": false,
+    "system_security_changed": false,
+    "hardware_admission": false
+  },
+  "module_presence_observations": [
+    {
+      "report_file": "loaded.txt",
+      "sha256": "98ed62ddaf1c94c3b37aec71b2637c37f37cb675c7d492a010926b403d4719c2",
+      "matching_identifier_count": 0,
+      "matching_rows": []
+    },
+    {
+      "report_file": "loaded-after.txt",
+      "sha256": "5bb56699608535e881d61ad7b2dbc0a79fcaff20df260c25f2df07bac7d6f2bc",
+      "matching_identifier_count": 1,
+      "matching_rows": [
+        "  177    0 0xffffff7f96dfb000 0x2ab3a00  0x2ab3a00  org.osx86.S540ProspectiveLoader (0.0.1) D2F08C40-A570-3F3D-A1F1-25D08C9BEC59 <19 9 7 6 3 1>"
+      ]
+    },
+    {
+      "report_file": "rollback/loaded.txt",
+      "sha256": "5bb56699608535e881d61ad7b2dbc0a79fcaff20df260c25f2df07bac7d6f2bc",
+      "matching_identifier_count": 1,
+      "matching_rows": [
+        "  177    0 0xffffff7f96dfb000 0x2ab3a00  0x2ab3a00  org.osx86.S540ProspectiveLoader (0.0.1) D2F08C40-A570-3F3D-A1F1-25D08C9BEC59 <19 9 7 6 3 1>"
+      ]
+    },
+    {
+      "report_file": "rollback/loaded-after.txt",
+      "sha256": "98ed62ddaf1c94c3b37aec71b2637c37f37cb675c7d492a010926b403d4719c2",
+      "matching_identifier_count": 0,
+      "matching_rows": []
+    }
+  ],
+  "source_report_file_sha256": {
+    "result.json": "65c543ff56fbc3425b41a5b0d6c49ef5374fa1856d80938a8d0d6c13872235c0",
+    "snapshot.json": "c6cd60d34c38eac7f116a4a447d936e50993978c645b25c40341ff55b59c20c7",
+    "target.json": "fb9dc3f66367450491e24b24c080788ab41cf86ed9ee34a74446a4d718d15172",
+    "sw_vers.txt": "0b74dee9f2004e79e0ebb6e94909916c30d37db5dfb5c1f733b7ca7f723a701d",
+    "uname.txt": "1ef41208ecad630c5916d374412c59a4e8afa454a83320e0c2ff2c49c5845db0",
+    "hw-model.txt": "887183e0241d992b974da6629f3de0becb14b7632aceba5616293eb3cfbc6c1f",
+    "load.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "load.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "snapshot.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rollback.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rollback/rollback.json": "da06b7c322b6165632075c29228f6edc25760a5819f3db7fc54722117bd89d38",
+    "rollback/unload.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rollback/unload.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "interpretation": {
+    "idle_kernel_module_entry_observed": true,
+    "readonly_control_service_started": true,
+    "exact_uuid_seen_while_loaded": true,
+    "normal_unload_confirmed": true,
+    "last_status_85": "expected NV_ERR_NOT_READY while original-entry policy is closed",
+    "internal_target_loader_admission_proven": 0,
+    "internal_admission_gate_changed": false,
+    "work_timer_runtime_callbacks_exercised": false,
+    "original_rm_or_gsp_entry_executed": false,
+    "gpu_initialization_tested": false,
+    "acceleration_tested": false,
+    "next_original_entry_admitted": false
+  },
+  "native_ci_started_for_this_report_review": false
+}

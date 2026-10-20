@@ -54,6 +54,7 @@ Current status as of **October 15, 2026**. **Pending** means the feature has not
 | NVIDIA CPU support runtime and RM library consumers | Working diagnostic | Version 0.7.0 passed all 258 combined startup checks in the Tahoe kernel: 128 support, 72 lifecycle, 35 caller/reserve and 23 foundations; cleanup complete and no warnings |
 | NVIDIA hardware-transport preparation | Working diagnostic | Version 0.8.0 passed all 390 combined kernel startup checks: 258 CPU and 132 preparation; cleanup complete, two-read TU117 match retained and no warnings. Device DMA and GPU initialization remain unimplemented |
 | NVIDIA Resource Server and host services | Working diagnostic | Version 0.9.0 passed 486 kernel startup checks (258 CPU, 132 hardware and 96 services), all cleanup and 15 separate userspace firmware checks; no warnings. Full RM and GPU initialization remain false |
+| NVIDIA complete-image idle loader ABI | Passed on target | Exact signed image loaded on macOS26.7.1/build25G241/Darwin25.6.0, returned a valid read-only idle snapshot and unloaded normally. Original RM/GSP, runtime callbacks and acceleration were not exercised |
 | Remaining icon keys | Pending | Microphone, refresh, airplane mode, camera, lock and display actions; further icon-key investigation deferred |
 | USB-C video | Pending | No video test available; hardware video capability and routing remain unverified |
 | USB 2 device coverage / storage reliability | Pending | External USB 2 devices, measured throughput and sustained reliability |
@@ -80,7 +81,7 @@ Audio uses a VoodooHDA extension installed in `/Library/Extensions`, including t
 
 The next milestone combines **global RM, device transport and original GSP/adapter startup in one integration**. The [bootstrap owner](packages/nvidia-gsp-bootstrap/README.md) now uses a persistent worker, a real Apple PM child, retained firmware/context/timer bindings and ordered cleanup. Temporary allocations freed with IRQs active remain owned until interrupt drain and backend release. These are implemented development components; original kernel initialization remains disabled. The completed PM child permits resource preparation only: original waits can exceed the declared 30-second power-down acknowledgement deadline, including during normal sleep. The [power-deadline audit](packages/nvidia-gsp-bootstrap/platform/POWER-DEADLINE-AUDIT.md) explains why `PowerLifetime` remains blocked.
 
-The current [checked-source manifest](packages/nvidia-global-rm/upstream/adapted/CHECKED-INTEGRATION-AUDIT.json) composes ten approved patches into twelve source/header files. Its original user-space lifecycle and allocation-domain separation now pass native Intel macOS validation. Original allocations are released while separately tagged external allocations remain owned. Operational callback coverage, target-kernel resolution, original thread/IRQ stack budgets, full-adapter allocation capacity and cancellation/teardown within the actual PM deadline remain open. The work will lead to one combined laptop checkpoint once these gates pass. There is no v10 ZIP or new laptop test yet; v9 remains the confirmed baseline.
+The current [checked-source manifest](packages/nvidia-global-rm/upstream/adapted/CHECKED-INTEGRATION-AUDIT.json) composes ten approved patches into twelve source/header files. Its original user-space lifecycle and allocation-domain separation now pass native Intel macOS validation. Original allocations are released while separately tagged external allocations remain owned. Operational callback coverage, original-entry admission, original thread/IRQ stack budgets, full-adapter allocation capacity and cancellation/teardown within the actual PM deadline remain open. The work will lead to one combined operational laptop checkpoint once these gates pass. The closed idle-loader checkpoint has now passed; an operational v10 package remains gated by these requirements, and v9 remains the confirmed hardware baseline.
 
 Development is grouped into complete integration milestones. The completed v7 bundle covers the selected NVIDIA CPU-runtime dependencies, allocation and synchronization contracts, startup, failure cleanup and one combined reporter. Component implementation, fault tests, stress checks and packaging run in GitHub before any laptop checkpoint. One package and one combined boot/report cover a completed bundle; individual wrappers and library additions do not trigger separate laptop tests. The confirmed v7 checks remain regression coverage within later packages, with no separate rerun. See the [bundled milestone scope](docs/status/roadmap.md#bundled-nvidia-development).
 
@@ -94,6 +95,15 @@ Development is grouped into complete integration milestones. The completed v7 bu
 See the [Roadmap](docs/status/roadmap.md) for the implementation plan.
 
 ## Documentation and downloads
+
+The [complete-image idle loader checkpoint](packages/nvidia-gsp-bootstrap/prospective-complete-image-package/TARGET-IDLE-ABI-PASS-20261020.json)
+passed on the Lenovo with package source `d145d9e01f8470a31d499313957e82b47580358b`
+from native run39488036361. The supplied report verifies all45 package files,
+the exact signed UUID, successful load0, valid idle IOKit control state and
+normal unload0 with the identifier absent afterward. Original calls, provider
+preparations and PM registrations remained zero; security settings were not
+changed. This completes the closed loader ABI milestone, while original RM/GSP
+initialization, real callback execution and acceleration remain separate work.
 
 The [current native Intel macOS development build](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/39175620059) from `76e0f43c6c1eaf5f259acbe73846e89ecd9be1a7` passed 2,008 component checks, 134 checks across the original global controls and all 156 allocation-failure positions per plain and fatal-sanitized variant. The original controls rebuilt a 1,100-unit RM profile per variant, including one generated identification unit and one explicit privileged-CPU replacement, with platform fixtures; all 34 production bridges compiled and matched their reviewed SDK import and metaclass controls. The [validation record](packages/nvidia-global-rm/NATIVE-INTEGRATION-VALIDATION.json) keeps those evidence categories separate. No original RM or GSP code executed in the kernel.
 

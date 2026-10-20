@@ -3,8 +3,9 @@
 This opt-in composition successor replaces the Work/Timer KERNEL callback
 backend with exported IOKit event sources. It leaves the frozen base services,
 NVIDIA sources and every hardware/original-entry admission gate unchanged.
-The idle target attempt on Darwin 25.6.0 was refused while binding
-`_thread_call_cancel_wait`; no successful target load is established here.
+The historical idle target attempt was refused while binding
+`_thread_call_cancel_wait`. The public callback package subsequently passed the
+exact-image target idle load/snapshot/normal-unload check on Darwin 25.6.0.
 
 Native run 39483421884 passed both links with only Work and Timer recompiled,
 1,100 original and 58 unchanged project objects reused, and all 388 final live
@@ -14,8 +15,10 @@ cache report checkpoints and phase-local input verification, run 39488036361
 at `d145d9e01f8470a31d499313957e82b47580358b` passed both native links,
 independent verification, strict ad-hoc signature checks and packaging.
 The link phase took 583 seconds and packaging took 266 seconds. Final matrices
-and fresh post-signature checks remained complete. The new ZIP still requires
-the closed target idle load/snapshot/unload check.
+and fresh post-signature checks remained complete. Target report
+`S540-Idle-Report-20261020-222838` confirms the signed UUID, valid read-only
+idle state and normal unload0. All original-entry gates remain closed; this
+test did not execute Work/Timer callbacks or initialize RM/GSP or the GPU.
 
 ## Export and lifetime evidence
 
