@@ -1,0 +1,128 @@
+name: Cancel superseded NVIDIA builds once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cancel-superseded-nvidia-once.yml'
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  cancel-reviewed-runs:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Cancel only the three reviewed superseded runs
+        env:
+          CANCEL_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime
+          import json
+          import os
+          import urllib.error
+          import urllib.request
+
+          REPOSITORY = 'MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86'
+          API = 'https://api.github.com'
+          KEEP_RUN_ID = 39447802669
+          EXPIRES = datetime.datetime(2026, 10, 20, 15, 45, tzinfo=datetime.timezone.utc)
+          TARGETS = {
+              39447068699: (
+                  'd7977e83e5249e27c9d186821caf92ca04cbea9c',
+                  '.github/workflows/build-nvidia-idle-image.yml'),
+              39447068643: (
+                  'd7977e83e5249e27c9d186821caf92ca04cbea9c',
+                  '.github/workflows/check-nvidia-execution-development.yml'),
+              39447802728: (
+                  '4939252f7c5ab2ee72a26e626f8db2b7b5922c8e',
+                  '.github/workflows/check-nvidia-execution-development.yml'),
+          }
+
+          def main(*, environment=None, clock=None, opener=None, emit=print):
+              environment = os.environ if environment is None else environment
+              clock = clock or (lambda: datetime.datetime.now(datetime.timezone.utc))
+              opener = opener or urllib.request.urlopen
+              if clock() >= EXPIRES:
+                  raise RuntimeError('One-time cancellation window has expired')
+              if (environment.get('GITHUB_REPOSITORY') != REPOSITORY or
+                      environment.get('GITHUB_REF') != 'refs/heads/main' or
+                      environment.get('GITHUB_EVENT_NAME') != 'push' or
+                      environment.get('GITHUB_API_URL') != API):
+                  raise RuntimeError('Unexpected repository, ref, event or API host')
+              token = environment.get('CANCEL_TOKEN')
+              if not token:
+                  raise RuntimeError('Cancellation token is unavailable')
+              if KEEP_RUN_ID in TARGETS or len(TARGETS) != 3:
+                  raise RuntimeError('The fixed cancellation allowlist changed')
+              if environment.get('GITHUB_RUN_ID') in {str(run_id) for run_id in TARGETS}:
+                  raise RuntimeError('The cancellation workflow cannot target itself')
+
+              def request(method, run_id):
+                  endpoint = f'{API}/repos/{REPOSITORY}/actions/runs/{run_id}'
+                  if method == 'POST':
+                      endpoint += '/cancel'
+                  req = urllib.request.Request(
+                      endpoint, method=method,
+                      data=b'' if method == 'POST' else None,
+                      headers={
+                          'Authorization': 'Bearer ' + token,
+                          'Accept': 'application/vnd.github+json',
+                          'X-GitHub-Api-Version': '2022-11-28',
+                          'User-Agent': 's540-bounded-ci-cancellation',
+                      })
+                  try:
+                      with opener(req, timeout=15) as response:
+                          expected_status = 200 if method == 'GET' else 202
+                          if response.status != expected_status:
+                              raise RuntimeError(f'Unexpected HTTP status for {method} run {run_id}')
+                          if method == 'POST':
+                              return None
+                          raw = response.read(262145)
+                          if len(raw) > 262144:
+                              raise RuntimeError(f'Unexpectedly large run metadata for {run_id}')
+                          return json.loads(raw)
+                  except urllib.error.HTTPError as error:
+                      if method == 'POST' and error.code == 409:
+                          emit(f'Run {run_id}: HTTP 409; no retry')
+                          return 'conflict'
+                      raise RuntimeError(f'GitHub {method} run {run_id}: HTTP {error.code}') from None
+                  except urllib.error.URLError:
+                      raise RuntimeError(f'GitHub {method} run {run_id}: transport failure') from None
+
+              # Validate every immutable run identity before issuing any cancellation.
+              reviewed = []
+              for run_id, (expected_sha, expected_path) in TARGETS.items():
+                  run = request('GET', run_id)
+                  if (not isinstance(run, dict) or run.get('id') != run_id or
+                          not isinstance(run.get('repository'), dict) or
+                          run['repository'].get('full_name') != REPOSITORY or
+                          run.get('head_branch') != 'main' or
+                          run.get('head_sha') != expected_sha or
+                          run.get('path') != expected_path):
+                      raise RuntimeError(f'Run {run_id} does not match its reviewed identity')
+                  if run.get('status') not in {
+                          'queued', 'in_progress', 'waiting', 'pending', 'requested', 'completed'}:
+                      raise RuntimeError(f'Run {run_id} has an unexpected status')
+                  reviewed.append((run_id, run['status']))
+
+              emit(f'Keeping run {KEEP_RUN_ID}; cancellation allowlist contains three runs')
+              for run_id, status in reviewed:
+                  if status == 'completed':
+                      emit(f'Run {run_id}: already completed; no cancellation request')
+                      continue
+                  if clock() >= EXPIRES:
+                      raise RuntimeError('One-time cancellation window expired before cancellation')
+                  result = request('POST', run_id)
+                  if result != 'conflict':
+                      emit(f'Run {run_id}: cancellation requested')
+
+          if __name__ == '__main__':
+              main()
+          PY
