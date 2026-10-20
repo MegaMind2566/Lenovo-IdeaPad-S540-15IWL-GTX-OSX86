@@ -1,7 +1,7 @@
 # O2Micro SD reader: native-driver trial
 
-Current result: **native driver attached and card present, but card not
-configured**. The card remains unreadable. Target: S540-15IWL GTX 81SW and the
+Latest result: **BigSurSDXC 1.9.0 loaded on Tahoe, but no card media published**.
+The earlier native-driver trial detected the card without completing configuration. The card remains unreadable. Target: S540-15IWL GTX 81SW and the
 external 240 GB test EFI; macOS remains on the separate USB Samsung SSD.
 
 ## Verified hardware and driver
@@ -156,3 +156,35 @@ distinguish the BgSurSDXC and native driver subtrees.
 
 Generic controller/API labels, the CPU speed field and the misleading NVIDIA
 profiler Metal field are not changed through speculative capability injections.
+
+## October 20 compatibility-test result
+
+The new focused capture confirms `com.apple.driver.BigSurSDXC`, class
+`BgSurSDXC`, active on macOS 26.7.1/Darwin 25.6.0 with probe score 6000.
+The AppleSDXC and CtlnaSDXC controller subtrees are absent. The intended driver
+replacement therefore took effect; another native-driver block is not justified
+by a claim that the wrong driver won matching.
+
+The BgSurSDXC slot and block-storage service exist, but neither IOMedia nor a
+new BSD disk appears. All storage I/O counters remain zero. The card-reader
+profiler section is empty, which alone is inconclusive for renamed legacy
+classes; the missing media is the relevant failure. `Card Configured` is not
+exposed by this driver and must not be reported as an observed false value.
+
+`Card Present` is Yes in both snapshots. This does not establish whether
+removal was missed, whether the property is cached, or whether the card was
+already present. Block-device power state changes from 1 to 3; a 2000 ms
+`pmDriverCallout(0x2)` waiting message is not an SD command error or proof of
+a power fault. `Clock Divisor = 0` does not prove a disabled card clock.
+
+The collector's capture commands all return 0, stderr files are empty and
+the log stream exits with the expected 143. The previous false-timeout bug
+is resolved. There is no detailed command-initialization trace comparable to
+the native-driver capture; fewer errors in these logs do not establish success.
+
+This test verifies loading and matching, not working SD access. Before another
+configuration or driver change, clarify whether the card was present at boot
+or inserted only after macOS started. A controlled startup with the card present,
+or a direct Windows-to-macOS reboot if needed, can distinguish startup and
+hot-insertion behavior. Both remain hypotheses for the next hardware check.
+Personal reports, serial numbers and volume identifiers are excluded.

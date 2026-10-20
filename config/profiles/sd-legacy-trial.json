@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "experimental-runtime-unverified",
+  "status": "tested-driver-loaded-no-card-media",
   "target": "Lenovo IdeaPad S540-15IWL GTX 81SW",
   "boot_scope": "external 240 GB test EFI",
   "baseline": "hardware-v2",
@@ -35,14 +35,18 @@
     "executable_sha256": "dfb316e5e4ce745da6dbbb7470af1720e6719741e2a900aff3b3114e35060bd7",
     "upstream_archive_git_blob": "9c2fb4ef46e68eaf72becf95790b9f89b66d70b1",
     "upstream_archive_sha256": "cae42ad863f5d4ae8a622ce1a9632f7268952fdeeb43306fe7f0d2be7275d3f8",
-    "driver_classes": ["BgSurSDXC", "BgSurSDXCSlot", "BgSurSDXCBlockStorageDevice"],
+    "driver_classes": [
+      "BgSurSDXC",
+      "BgSurSDXCSlot",
+      "BgSurSDXCBlockStorageDevice"
+    ],
     "probe_score": 6000,
     "observed_native_probe_score": 0
   },
   "validation_scope": {
     "historical_same_device_id": true,
     "historical_same_subsystem": false,
-    "darwin_25_load_verified": false,
+    "darwin_25_load_verified": true,
     "card_reading_verified_on_target": false,
     "eject_reinsert_resume_verified": false
   },
@@ -51,5 +55,24 @@
     "https://github.com/mandresve/Lenovo-IdeaPad-S540-Hackintosh",
     "https://github.com/lietxia/XiaoXinAir14IML_2019_hackintosh/issues/29",
     "https://github.com/dortania/OpenCore-Legacy-Patcher/blob/f1d67923c827be2deebb1172333e7f0afb340583/payloads/Kexts/Misc/BigSurSDXC-v1.0.0.zip"
-  ]
+  ],
+  "runtime_result": {
+    "date": "2026-10-20",
+    "macos_version": "26.7.1",
+    "darwin_version": "25.6.0",
+    "attached_class": "BgSurSDXC",
+    "probe_score": 6000,
+    "compatible_match": "pci14e4,16bc",
+    "other_sdxc_controller_subtrees_present": false,
+    "card_present_before": true,
+    "card_present_after": true,
+    "card_configured_property_exposed": false,
+    "media_published": false,
+    "card_bsd_disk_published": false,
+    "storage_io_started": false,
+    "collector_capture_commands_succeeded": true,
+    "stream_exit_status": 143,
+    "reported_card_insertion_timing_at_boot": "not_known",
+    "functional_result": "No readable card media; replacing the driver alone did not resolve access"
+  }
 }
