@@ -1,4 +1,4 @@
-name: Resume NVIDIA idle link from verified native inputs
+name: Resume NVIDIA idle link from verified native inputs once
 
 on:
   push:
