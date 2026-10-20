@@ -46,25 +46,46 @@ jobs:
           base = 'https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/blob/v0.2.0/docs/releases/v0.2.0/'
           Path('build/stable-release-notes.md').write_text(notes.replace('(INSTALL.md)', '(' + base + 'INSTALL.md)'))
           PY
-          gh release create v0.2.0 \
-            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --draft \
-            --title 'v0.2.0 — Stable Intel EFI with native Wi-Fi' \
-            --notes-file build/stable-release-notes.md \
-            build/stable-release/S540-Tahoe-EFI-v0.2.0.zip \
-            build/stable-release/S540-Tahoe-EFI-v0.2.0.zip.sha256
-          python3 - <<'PY'
+          python3 - <<'PY_PUBLISH'
           import hashlib, json, os, subprocess
           from pathlib import Path
           repository = os.environ['GITHUB_REPOSITORY']
-          release = json.loads(subprocess.check_output(['gh', 'api', f'repos/{repository}/releases/tags/v0.2.0']))
+          prefix = f'repos/{repository}'
+          def api(endpoint, *options):
+              return json.loads(subprocess.check_output(['gh', 'api', endpoint, *options]))
+          def find_release():
+              matches = [r for r in api(prefix + '/releases?per_page=100') if r['tag_name'] == 'v0.2.0']
+              assert len(matches) <= 1, 'Ambiguous release identity'
+              return matches[0] if matches else None
+          release = find_release()
+          if release is None:
+              subprocess.run(['gh', 'release', 'create', 'v0.2.0', '--repo', repository,
+                              '--target', os.environ['GITHUB_SHA'], '--draft',
+                              '--title', 'v0.2.0 — Stable Intel EFI with native Wi-Fi',
+                              '--notes-file', 'build/stable-release-notes.md',
+                              'build/stable-release/S540-Tahoe-EFI-v0.2.0.zip',
+                              'build/stable-release/S540-Tahoe-EFI-v0.2.0.zip.sha256'], check=True)
+              release = find_release()
+          else:
+              # Resume only the reviewed first attempt; never replace its assets.
+              assert release['id'] == 418900887, 'Unexpected existing draft'
+              assert release['target_commitish'] == 'e612c52f765fb0592003fcb4b2d221168c247067'
+              assert {a['id'] for a in release['assets']} == {660543394, 660543398}
+          assert release and release['draft'] and not release['prerelease'] and release['tag_name'] == 'v0.2.0'
+          assert release['name'] == 'v0.2.0 — Stable Intel EFI with native Wi-Fi'
+          assert release['body'].replace('\r\n', '\n').strip() == Path('build/stable-release-notes.md').read_text().strip()
           expected = {p.name: p for p in Path('build/stable-release').iterdir() if p.is_file()}
-          assert release['draft'] and release['tag_name'] == 'v0.2.0'
-          assert release['target_commitish'] == os.environ['GITHUB_SHA']
           assert set(expected) == {a['name'] for a in release['assets']}
           for asset in release['assets']:
               data = expected[asset['name']].read_bytes()
               checksum = 'sha256:' + hashlib.sha256(data).hexdigest()
               assert asset['size'] == len(data), 'Uploaded size differs'
               assert asset['digest'] == checksum, 'Uploaded digest differs'
-          PY
-          gh release edit v0.2.0 --repo "$GITHUB_REPOSITORY" --draft=false --latest
+          # A draft without a tag is addressed by ID, not /releases/tags/....
+          published = api(prefix + '/releases/' + str(release['id']),
+                          '--method', 'PATCH', '-F', 'draft=false', '-f', 'make_latest=true')
+          assert not published['draft'] and published['tag_name'] == 'v0.2.0'
+          tag = api(prefix + '/git/ref/tags/v0.2.0')
+          assert tag['object']['sha'] == release['target_commitish']
+          print(published['html_url'])
+          PY_PUBLISH
