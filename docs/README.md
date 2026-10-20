@@ -56,13 +56,13 @@ Graphics experiments, Intel traces and Recovery log collectors are preserved in 
 
 ## Release preparation
 
-[v0.1.0 release notes](releases/v0.1.0.md) describe the published EFI and its remaining limitations. Later companion fixes are documented separately from that release.
+[v0.2.0 release notes](releases/v0.2.0/RELEASE-NOTES.md), [installation](releases/v0.2.0/INSTALL.md) and [source provenance](releases/v0.2.0/SOURCE-PROVENANCE.md) describe the stable Intel-graphics EFI with native Wi-Fi. Public SMBIOS personalization and the separately installed audio driver are required. [v0.1.0](releases/v0.1.0.md) remains a historical snapshot.
 
 ## Current EFI and next hardware task
 
 - The official Samsung EFI has confirmed native-menu Wi-Fi, corrected hardware names, working video/audio capture, Bluetooth headset audio/microphone, wired headset audio/microphone and basic lid sleep/wake. F1–F3 work; F4–F10 are the current keyboard task; F11–F12 work in the non-NVIDIA EFI. SD-reader and operational NVIDIA development are paused.
-- The consolidated private config removes the residual NVMe block; the report already showed the internal SSD available. The exact final-config reboot is not yet explicitly confirmed. The published release and its manifest are historical snapshots, not a new full EFI release.
-- [EFI release v0.1.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.1.0): compatibility, package and checksum.
+- The consolidated private config removes the residual NVMe block; the report already showed the internal SSD available. The exact final-config reboot is not yet explicitly confirmed. The supplied full EFI is packaged as v0.2.0 without driver upgrades; public preparation and static validation do not establish a new target boot. `config/efi/current` still identifies the historical v0.1.0 assembly; the latest recipe is versioned under `config/efi/releases/v0.2.0`.
+- [Stable EFI v0.2.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.2.0): complete package and checksum; [installation](releases/v0.2.0/INSTALL.md).
 - [EFI setup](../packages/efi/README.md): personalization and dependencies outside the EFI.
 - [Function-key diagnosis](../packages/function-keys/README.md): read-only device snapshots and F11/F12 observations for the function-key batch.
 

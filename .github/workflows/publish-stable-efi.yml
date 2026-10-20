@@ -1,0 +1,70 @@
+name: Publish stable Intel EFI v0.2.0
+
+on:
+  push:
+    branches: ['release/stable-efi-v0.2.0']
+    paths:
+      - '.github/workflows/publish-stable-efi.yml'
+      - 'builders/build_stable_efi.py'
+      - 'config/efi/releases/v0.2.0/**'
+      - 'docs/releases/v0.2.0/**'
+      - 'licenses/efi/BrightnessKeys-LICENSE.txt'
+      - 'tests/test_stable_efi.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-stable-efi-v0.2.0
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Check archive rejection behavior
+        run: python3 tests/test_stable_efi.py
+      - name: Verify immutable inputs and assemble reviewed EFI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 builders/build_stable_efi.py --download
+      - name: Stage release and verify uploaded assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          notes = Path('docs/releases/v0.2.0/RELEASE-NOTES.md').read_text()
+          base = 'https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/blob/v0.2.0/docs/releases/v0.2.0/'
+          Path('build/stable-release-notes.md').write_text(notes.replace('(INSTALL.md)', '(' + base + 'INSTALL.md)'))
+          PY
+          gh release create v0.2.0 \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --draft \
+            --title 'v0.2.0 — Stable Intel EFI with native Wi-Fi' \
+            --notes-file build/stable-release-notes.md \
+            build/stable-release/S540-Tahoe-EFI-v0.2.0.zip \
+            build/stable-release/S540-Tahoe-EFI-v0.2.0.zip.sha256
+          python3 - <<'PY'
+          import hashlib, json, os, subprocess
+          from pathlib import Path
+          repository = os.environ['GITHUB_REPOSITORY']
+          release = json.loads(subprocess.check_output(['gh', 'api', f'repos/{repository}/releases/tags/v0.2.0']))
+          expected = {p.name: p for p in Path('build/stable-release').iterdir() if p.is_file()}
+          assert release['draft'] and release['tag_name'] == 'v0.2.0'
+          assert release['target_commitish'] == os.environ['GITHUB_SHA']
+          assert set(expected) == {a['name'] for a in release['assets']}
+          for asset in release['assets']:
+              data = expected[asset['name']].read_bytes()
+              checksum = 'sha256:' + hashlib.sha256(data).hexdigest()
+              assert asset['size'] == len(data), 'Uploaded size differs'
+              assert asset['digest'] == checksum, 'Uploaded digest differs'
+          PY
+          gh release edit v0.2.0 --repo "$GITHUB_REPOSITORY" --draft=false --latest

@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "version": "v0.2.0",
+  "repository": "MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86",
+  "base": {
+    "artifact_id": 11864172878,
+    "run_id": 38497385533,
+    "source_commit": "78f664c3ecd996c4472be75f76cdaff07303f8f5",
+    "filename": "base-artifact.zip",
+    "size": 27842465,
+    "sha256": "45338c2eccb0d394fdcc457b3bf0840d774cca222dde6dd45c5113f63b4763c0",
+    "inner_path": "S540-Tahoe-EFI-v0.1.0.zip",
+    "inner_sha256": "513db0b7b7e81430853b7d98223e6fad9246109da903542731d242b7f96f0553",
+    "name": "S540-Tahoe-EFI-v0.1.0",
+    "workflow_path": ".github/workflows/build-current-efi.yml"
+  },
+  "wifi": {
+    "artifact_id": 12153335295,
+    "run_id": 39171971175,
+    "source_commit": "38e387cd152853033ee25697e8528b5f9399faae",
+    "filename": "wifi-native-artifact.zip",
+    "size": 34096372,
+    "sha256": "72ca287657a55bbe4f279673de0af60ab8ed7e9c1de269f4c40f8c8ecb22fa03",
+    "inner_path": "S540-wifi-native-v1.zip",
+    "inner_sha256": "69c87d5f1ebe0c3782cf8bf4235741c6f7f44a99b73db00d46560ac7fafeb6ba",
+    "upstream_source_commit": "738d4c61b5a64433b27c1ab09dba94916ab77d8d",
+    "name": "S540-wifi-native-v1",
+    "workflow_path": ".github/workflows/build-wifi-native.yml"
+  },
+  "brightness": {
+    "filename": "BrightnessKeys-1.0.3-RELEASE.zip",
+    "url": "https://github.com/acidanthera/BrightnessKeys/releases/download/1.0.3/BrightnessKeys-1.0.3-RELEASE.zip",
+    "size": 66112,
+    "sha256": "c9a80f6275e39c18886087a70ba0fe615ce45f83b7afa254b74335f7a92b8544"
+  },
+  "validator": {
+    "filename": "OpenCore-1.0.8-RELEASE.zip",
+    "url": "https://github.com/acidanthera/OpenCorePkg/releases/download/1.0.8/OpenCore-1.0.8-RELEASE.zip",
+    "size": 10544084,
+    "sha256": "2011e8b7216ecb2645d97ea710df965947edd406846e92050b9bc4190be6d27b"
+  }
+}

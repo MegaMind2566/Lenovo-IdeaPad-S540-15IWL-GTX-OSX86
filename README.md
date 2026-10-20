@@ -60,7 +60,7 @@ The external Samsung 960 EVO holds the working OpenCore/macOS installation. The 
 - VoodooHDA is installed in `/Library/Extensions`; an EFI copy alone does not install the working audio extension.
 - SD experiments, NVIDIA probes and complete-image loader packages are not merged into the official EFI.
 
-The published **v0.1.0 release and `config/efi/current` manifest remain historical package snapshots**. They do not contain all later private-machine integrations. This status update does not publish a new full EFI release. Machine-specific SMBIOS identifiers, credentials and raw diagnostic reports remain outside the repository.
+**[EFI v0.2.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.2.0) is the stable Intel-graphics package with native Wi-Fi and the consolidated hardware names.** It preserves the active binary payload from the supplied official EFI. Read the [installation guide](docs/releases/v0.2.0/INSTALL.md): public SMBIOS fields require personalization, and VoodooHDA audio remains separately installed on macOS. [Release notes](docs/releases/v0.2.0/RELEASE-NOTES.md) state the confirmed scope and open limitations. The v0.1.0 release and `config/efi/current` remain historical snapshots; v0.2.0 has its own [versioned recipe and manifests](config/efi/releases/v0.2.0/). Machine-specific SMBIOS identifiers, credentials and raw diagnostic reports remain outside the repository.
 
 ## NVIDIA validation — grouped milestones
 
@@ -88,7 +88,7 @@ See the [Roadmap](docs/status/roadmap.md) for grouped acceptance criteria.
 ## Documentation and downloads
 
 - [Documentation index](docs/README.md): setup, maintenance, hardware status and recovery.
-- [EFI release v0.1.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.1.0): historical release, compatibility notes and personalization requirements.
+- [Stable EFI release v0.2.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.2.0): complete Intel-graphics EFI, native Wi-Fi, installation guide and checksum. The older [v0.1.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.1.0) is retained as history.
 - [Generated artifacts](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions): compiled companion packages from successful runs. Package guides retain their exact provenance and rollback instructions.
 - [Consolidated NVIDIA validation](docs/status/nvidia-validation.md): current checkpoint summary and historical build/package details previously repeated in this README.
 
