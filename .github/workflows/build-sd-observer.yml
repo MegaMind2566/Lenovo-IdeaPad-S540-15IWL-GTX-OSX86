@@ -1,0 +1,114 @@
+name: Build read-only S540 SD observer
+
+on:
+  push:
+    branches: ['hardware/**']
+    paths:
+      - 'packages/sd-observer/**'
+      - '.github/workflows/build-sd-observer.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15-intel
+    timeout-minutes: 5
+    defaults:
+      run:
+        shell: bash
+        working-directory: packages/sd-observer
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Check collector with the system Bash
+        run: |
+          /bin/bash --version
+          /bin/bash -n tools/RACCOGLI-STATO-SD.command
+          /bin/bash -n tools/tests/check_collector_bash.sh
+          /bin/bash tools/tests/check_collector_bash.sh
+          /bin/bash -n build.sh
+      - name: Fetch the pinned kernel SDK
+        run: |
+          set -euo pipefail
+          sdk_commit=3f750085caa17ec3a7880f11c11bf4f48cd6a164
+          sdk_path="$RUNNER_TEMP/MacKernelSDK"
+          /usr/bin/git init "$sdk_path"
+          /usr/bin/git -C "$sdk_path" remote add origin https://github.com/acidanthera/MacKernelSDK.git
+          /usr/bin/git -C "$sdk_path" fetch --depth 1 --no-tags origin "$sdk_commit"
+          /usr/bin/git -C "$sdk_path" checkout --detach FETCH_HEAD
+          test "$(/usr/bin/git -C "$sdk_path" rev-parse HEAD)" = "$sdk_commit"
+          test -d "$sdk_path/Headers"
+          printf 'SDK_PATH=%s\n' "$sdk_path" >> "$GITHUB_ENV"
+      - name: Compile the x86_64 observer
+        run: /bin/bash build.sh
+      - name: Verify bundle metadata and package the build
+        run: |
+          set -euo pipefail
+          bundle=build/Release/S540O2MicroReadOnlyProbe.kext
+          binary="$bundle/Contents/MacOS/S540O2MicroReadOnlyProbe"
+          test "$(/usr/bin/lipo -archs "$binary")" = x86_64
+          /usr/bin/file "$binary"
+          /usr/bin/otool -hv "$binary"
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          bundle = Path("build/Release/S540O2MicroReadOnlyProbe.kext")
+          with (bundle / "Contents/Info.plist").open("rb") as source:
+              info = plistlib.load(source)
+          assert info["CFBundleVersion"] == "0.1.0"
+          assert info["CFBundlePackageType"] == "KEXT"
+          assert info["CFBundleExecutable"] == "S540O2MicroReadOnlyProbe"
+          personalities = list(info["IOKitPersonalities"].values())
+          assert len(personalities) == 1
+          personality = personalities[0]
+          assert personality["IOClass"] == "S540O2MicroReadOnlyProbe"
+          assert personality["IOProviderClass"] == "IOResources"
+          assert not any(key.startswith("IOPCI") for key in personality)
+          assert (bundle / "Contents/MacOS/S540O2MicroReadOnlyProbe").stat().st_mode & 0o111
+          print("Verified x86_64 observer bundle, version 0.1.0, IOResources personality.")
+          PY
+          mkdir -p build/artifact
+          /usr/bin/ditto "$bundle" build/artifact/S540O2MicroReadOnlyProbe.kext
+          /bin/cp tools/RACCOGLI-STATO-SD.command build/artifact/
+          /bin/cp README.md LICENSE build/artifact/
+          printf 'ObserverVersion=0.1.0\nSourceRepository=%s\nSourceCommit=%s\nMacKernelSDKCommit=3f750085caa17ec3a7880f11c11bf4f48cd6a164\nRunner=macos-15-intel\n' \
+            "$GITHUB_REPOSITORY" "$GITHUB_SHA" > build/artifact/build-info.txt
+          /usr/bin/shasum -a 256 "$binary" >> build/artifact/build-info.txt
+          /bin/chmod 755 build/artifact/RACCOGLI-STATO-SD.command
+          /usr/bin/ditto -c -k --keepParent build/artifact build/S540O2MicroReadOnlyProbe-0.1.0.zip
+          /usr/bin/shasum -a 256 build/S540O2MicroReadOnlyProbe-0.1.0.zip
+      - name: Extract the pinned Linux config validator
+        run: |
+          set -euo pipefail
+          /usr/bin/curl --fail --location --retry 2 --connect-timeout 10 --max-time 60 \
+            https://github.com/acidanthera/OpenCorePkg/releases/download/1.0.8/OpenCore-1.0.8-RELEASE.zip \
+            --output "$RUNNER_TEMP/OpenCore-1.0.8-RELEASE.zip"
+          printf '2011e8b7216ecb2645d97ea710df965947edd406846e92050b9bc4190be6d27b  %s\n' \
+            "$RUNNER_TEMP/OpenCore-1.0.8-RELEASE.zip" | /usr/bin/shasum -a 256 -c -
+          python3 - <<'PY'
+          import os
+          import zipfile
+          from pathlib import Path
+          archive = Path(os.environ["RUNNER_TEMP"]) / "OpenCore-1.0.8-RELEASE.zip"
+          target = Path("build/artifact-tools/ocvalidate.linux")
+          target.parent.mkdir(parents=True, exist_ok=True)
+          with zipfile.ZipFile(archive) as source:
+              binary = source.read("Utilities/ocvalidate/ocvalidate.linux")
+          assert binary[:6] == b"\x7fELF\x02\x01", "Expected a 64-bit little-endian Linux binary"
+          assert int.from_bytes(binary[18:20], "little") == 62, "Expected x86_64"
+          target.write_bytes(binary)
+          target.chmod(0o755)
+          PY
+          /usr/bin/file -L build/artifact-tools/ocvalidate.linux
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: S540O2MicroReadOnlyProbe-0.1.0-x86_64
+          path: |
+            packages/sd-observer/build/S540O2MicroReadOnlyProbe-0.1.0.zip
+            packages/sd-observer/build/artifact-tools/ocvalidate.linux
+          if-no-files-found: error
+          retention-days: 7
+

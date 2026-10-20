@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "status": "diagnostic-hardware-runtime-pending",
+  "target": "Lenovo IdeaPad S540-15IWL GTX 81SW",
+  "boot_scope": "external 240 GB test EFI",
+  "baseline": "sd-legacy-trial",
+  "preceding_results": {
+    "native_driver_media": false,
+    "legacy_driver_loaded": true,
+    "legacy_driver_media": false,
+    "hot_insertion_reading": false,
+    "powered_off_startup_with_card_inserted_reading": false,
+    "windows_to_macos_restart_reading": false,
+    "windows_same_card_reading_reported": true
+  },
+  "observer": {
+    "bundle_identifier": "org.s540.driver.S540O2MicroReadOnlyProbe",
+    "version": "0.1.0",
+    "provider": "IOResources",
+    "owns_pci_driver_binding": false,
+    "observed_vendor_device": "1217:8621",
+    "observed_subsystem": "17AA:3803",
+    "observed_class": "080501",
+    "architecture": "x86_64",
+    "darwin_major": 25,
+    "snapshot_seconds": [
+      0,
+      2,
+      10,
+      20
+    ],
+    "maximum_snapshots": 4,
+    "intentional_pci_or_mmio_writes": false,
+    "forced_power_or_memory_enable": false,
+    "mmio_requires_existing_D0_and_memory_enable": true,
+    "mmio_mapping": "unique read-only existing BAR0 descriptor",
+    "snapshots_are_atomic": false,
+    "reads_card_payload_or_identity_registers": false,
+    "hardware_runtime_verified": false
+  },
+  "config_changes": {
+    "single_kernel_add": "S540O2MicroReadOnlyProbe.kext",
+    "MinKernel": "25.0.0",
+    "MaxKernel": "25.99.99",
+    "legacy_driver_preserved": true,
+    "other_config_changes": false
+  },
+  "sources": {
+    "directory": "packages/sd-observer",
+    "sdk_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+    "workflow": ".github/workflows/build-sd-observer.yml"
+  },
+  "delivery": {
+    "purpose": "Capture targeted PCI/SDHCI register evidence; not a functional card-reader fix",
+    "recovery": "Exact previous SD legacy-trial config"
+  }
+}
