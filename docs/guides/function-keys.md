@@ -1,6 +1,6 @@
 # Function keys and brightness
 
-Status reviewed **October 20, 2026**, against the official Samsung boot EFI. The latest user report confirms **F1–F3 working, F4–F10 still open, and F11/F12 working with the non-NVIDIA EFI**. F6 had an earlier confirmed touchpad-toggle result, but is included in the user's current F4–F10 completion scope; that earlier result does not close its current status or establish a new failure. The brightness slider also works with the official non-NVIDIA EFI and the BrightnessKeys companion driver. The separate NVIDIA-test brightness regression remains deferred; it is not a failure of this official EFI.
+Status reviewed **October 21, 2026**, against the official non-NVIDIA EFI. The user has now confirmed **F5 browser reload and F6 touchpad toggling**, in addition to the working F1–F3 controls and F11/F12 brightness. F6 disables and re-enables the touchpad, while Fn+F6 leaves it enabled. Direct F7 changes neither Wi-Fi nor Bluetooth power state, and direct F8 has no observed camera effect. F4, F7, F8 and F9 remain open; F10 awaits a working external display. The brightness slider also works with the official non-NVIDIA EFI and the BrightnessKeys companion driver. The separate NVIDIA-test brightness regression remains deferred; it is not a failure of this official EFI.
 
 The remaining function-row work concerns the unconfirmed icon actions and application use of ordinary function keys after the macOS shortcut refresh. No new keyboard map, BIOS setting, ACPI patch or kext is justified by the current reports.
 
@@ -14,10 +14,10 @@ The complete row follows the keyboard legends: direct presses perform the icon a
 | F2 | Decrease volume | Working; reconfirmed October 20 | F2 |
 | F3 | Increase volume | Working; reconfirmed October 20 | F3 |
 | F4 | Mute microphone | Pending; trigger not established | F4 |
-| F5 | Reload the current browser page | Pending; direct and Fn inputs currently indistinguishable | F5 |
-| F6 | Toggle touchpad | Open in the current F4–F10 scope; earlier toggle confirmation retained as history | F6 |
-| F7 | Toggle airplane mode | Pending; radio-state action not established | F7 |
-| F8 | Disable/enable the built-in camera | Pending; camera privacy/power action not established | F8 |
+| F5 | Reload the current browser page | User confirmed after browser-specific shortcut setup; direct and Fn inputs remain indistinguishable | F5 |
+| F6 | Toggle touchpad | Reconfirmed October 21: disable, re-enable, and Fn+F6 leaves it enabled | F6 |
+| F7 | Toggle airplane mode | October 21: neither Wi-Fi nor Bluetooth changes state; trigger/action still unresolved | F7 |
+| F8 | Disable/enable the built-in camera | October 21: no observed effect during camera preview; trigger/action still unresolved | F8 |
 | F9 | Lock screen | Pending; observed Command-L must be distinguished from ordinary Command-L | F9 |
 | F10 | Choose external display mode | Pending; trigger and working external-display prerequisite unresolved | F10 |
 | F11 | Decrease brightness | Working with the official non-NVIDIA EFI | F11 |
@@ -25,7 +25,7 @@ The complete row follows the keyboard legends: direct presses perform the icon a
 
 ## Remaining verification scope
 
-The current completion scope is the direct **F4–F10** icon actions, plus application handling of ordinary **Fn+F9–F12** after the normal session refresh. The full Fn row has already produced its expected key events; it does not need another twelve-key event capture. F10 remains recorded as pending until a working external display is available, rather than requesting an inconclusive display-mode check. This status update requests no new F6 test.
+The current completion scope is direct **F4, F7, F8 and F9**, plus application handling of ordinary **Fn+F9–F12** after the normal session refresh. F5 and F6 are functionally confirmed and need no repeat test. The full Fn row has already produced its expected key events; it does not need another twelve-key event capture. F10 remains recorded as pending until a working external display is available, rather than requesting an inconclusive display-mode check. This status update requests no new F6 test.
 
 Keep the working F1–F3 audio controls, brightness slider and direct F11/F12 keys out of this repeat-check scope. No new collector or driver trace is needed merely to reconfirm those controls. A pending icon action is not implemented simply because its physical key emits an event: the target state must change as described below. If an action remains unavailable, retain its existing evidence and identify a distinct input path before changing a map.
 
@@ -48,9 +48,13 @@ The input device exposes a writable master mute control, enabling an F4 action o
 
 The [driver diagnostic](../../packages/function-key-scancodes/README.md) was prepared to compare VoodooPS2Keyboard traces for these keys and ordinary Command-L/Command-P. Its laptop report stopped after three empty F4/F5/Fn+F5 windows: trace visibility was not confirmed by the positive controls, and logging restoration is verified. No raw key identity can be inferred from this report. Further keyboard diagnostics are deferred. Distinct raw sequences can justify a narrow keyboard mapping; identical sequences cannot safely be separated by a global chord replacement. The driver's trace is not a complete PS/2 wire capture. If a key has no retained trace, both earlier driver handling and the verified Lenovo VPC path remain candidates requiring their own evidence.
 
-F5 can also be assigned to a browser's own Reload menu command through macOS [App Shortcuts](https://support.apple.com/guide/mac-help/mchlp2271/mac). This preserves the F5 key identity received by other applications and applies equally to direct F5 and Fn+F5 inside that browser. The exact localized menu title must be checked, and assigning its new equivalent can replace the existing Command-R equivalent. No browser override has been installed.
+F5 can also be assigned to a browser's own Reload menu command through macOS [App Shortcuts](https://support.apple.com/guide/mac-help/mchlp2271/mac). This preserves the F5 key identity received by other applications and applies equally to direct F5 and Fn+F5 inside that browser. The exact localized menu title must be checked, and assigning its new equivalent can replace the existing Command-R equivalent. The user confirmed F5 reload after the browser-specific setup on October 21. This does not establish a distinct physical Fn signal.
 
 Observer 1.0 marked all trials interrupted while still recording the positive key identities above. It reused a tap across intentional disable/enable operations, allowing queued disable notifications to affect the next trial. Version 1.1 creates a fresh tap per window, records genuine interruption reasons, and supports a seven-trial targeted capture. Missing events in the initial interrupted windows do not establish a missing firmware event.
+
+### Passive HID observation checkpoint
+
+The current `hidutil help` has no monitoring subcommand. `hidutil list` exposes two `IOHIDKeyboardEventDevice` devices, including one with PS2 transport, plus separate consumer/vendor services. Enumeration alone is not evidence of event delivery. The [passive HID observer](../../packages/hid-key-observer/README.txt) uses public IOHIDManager input-value callbacks, records device identities separately and checks a same-device/element F5 press and release before any target trial. Failure of that control stops the capture as inconclusive. It neither seizes devices nor changes keyboard properties, preferences, drivers or the EFI. Native compilation/self-tests and the laptop's actual capture remain separate checkpoints. A missing HID event cannot establish absent PS/2 activity or absent ACPI VPC notifications.
 
 ### Existing diagnostic and rollback tools
 
@@ -122,12 +126,13 @@ Restart after restoration. If the current configuration was edited after install
 
 BrightnessKeys uses the existing Lilu dependency; it has no additional Tahoe beta boot argument. Both direct brightness directions are reported working on the laptop. The companion package and its rollback backup are retained while the remaining function keys are addressed.
 
-The recorded ordinary Fn function-key path and working audio and brightness controls remain the baseline. The earlier working touchpad-toggle report is retained as history while the current F4–F10 completion scope remains open.
+The recorded ordinary Fn function-key path and working audio and brightness controls remain the baseline. The touchpad toggle has now also been reconfirmed on the current installation; retain it while the remaining direct actions are addressed.
 
 ## FAT boot-volume metadata
 
 Version 2 uses data-only copies for the configuration snapshots and recognizes validated AppleDouble sidecars and Finder metadata. It retains these metadata files. Real configuration, manifest and driver hashes, backup ownership and all rollback guards remain enforced.
 
 The private backup format and driver payload are compatible with version 1. A valid interrupted backup can be resumed; keep `backup-function-keys` in place. Unexpected files still stop the operation, and the error now includes the filename.
+
 
 

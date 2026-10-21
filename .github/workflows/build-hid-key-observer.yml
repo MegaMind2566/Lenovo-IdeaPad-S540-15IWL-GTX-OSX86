@@ -1,0 +1,35 @@
+name: Build passive HID key observer
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['work/hid-key-observer-v1']
+    paths:
+      - '.github/native-ci/hid-key-observer-request.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: s540-native-hid-key-observer-${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[native ci]') }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[native ci]')
+    runs-on: macos-15-intel
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Build and test without opening HID devices
+        run: python3 builders/build_hid_key_observer.py --source-dir packages/hid-key-observer --output-dir build/hid-key-observer
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: S540-HID-Keys-v1
+          path: |
+            build/hid-key-observer/S540-HID-Keys-v1.zip
+            build/hid-key-observer/S540-HID-Keys-v1.zip.sha256
+          if-no-files-found: error
+          retention-days: 30

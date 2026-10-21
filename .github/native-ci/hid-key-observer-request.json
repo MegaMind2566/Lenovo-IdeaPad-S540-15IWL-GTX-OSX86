@@ -1,0 +1,12 @@
+{
+  "format": 1,
+  "batch": "s540-hid-keys-v1-20261021",
+  "scope": "Build and self-test the passive userspace HID observer for F4 F7 F8 and F9",
+  "hardware_access_in_ci": false,
+  "nvidia_validation": false,
+  "source_sha256": {
+    "src/hid_key_probe.m": "f0b71096f68d11b222143886c325bb24f49673aeb18c22d40f68a9d9e62c9da1",
+    "COLLECT-HID-KEYS.command": "6b1974287eeade81eec97c8b8e98cdcb83c397ec29300378d8d97730262edc55",
+    "README.txt": "61c0804d8ddcbdac8439ee2c1ce9cc0252ca06677b61b8737dc6273f82d54a15"
+  }
+}
