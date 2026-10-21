@@ -6,6 +6,23 @@
 #include <stddef.h>
 
 typedef struct { bool wifi, bluetooth; } HKRadioState;
+typedef enum { HKLockPass, HKLockConsume, HKLockRequest } HKLockDecision;
+static inline HKLockDecision HKDirectLock(bool *held, bool down, bool up,
+                                         uint64_t keyCode, bool command,
+                                         bool otherModifiers, bool repeating) {
+    if (keyCode != 37 || (!down && !up)) return HKLockPass;
+    bool matches = command && !otherModifiers;
+    if (up) {
+        bool consumed = *held;
+        *held = false;
+        return consumed ? HKLockConsume : HKLockPass;
+    }
+    if (*held) return HKLockConsume;
+    if (repeating) return HKLockPass;
+    if (!matches) return HKLockPass;
+    *held = true;
+    return HKLockRequest;
+}
 static inline bool HKEventFresh(uint64_t nowNs, uint64_t eventNs) {
     return eventNs != 0 && nowNs >= eventNs && nowNs - eventNs <= UINT64_C(3000000000);
 }

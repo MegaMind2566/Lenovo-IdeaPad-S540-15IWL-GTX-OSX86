@@ -1,0 +1,21 @@
+{
+  "archive": "S540HotkeysVPC-0.1.0.zip",
+  "archive_sha256": "75738e8293c6baa9aefe6bcccf65b8e772399ee9f077c21d3f8b83313ddeb26c",
+  "binary_sha256": "5e529274ecba7905e023e5b807de4dda2e14be51cbff45dcf84bceeb01b78fc4",
+  "bundle_files": {
+    "Contents/Info.plist": "c439c8a777e5f3ba3736fb9ae417f42c3ff1874bee30dec1adfa1ac139ab7508",
+    "Contents/MacOS/S540HotkeysVPC": "5e529274ecba7905e023e5b807de4dda2e14be51cbff45dcf84bceeb01b78fc4",
+    "Contents/_CodeSignature/CodeResources": "6686de10a28a2fe11b36cbb86dcbacc827cfc4ea116b4dabf1845e5aee629e9b"
+  },
+  "bundle_identifier": "org.s540.HotkeysVPC",
+  "bundle_root": "S540HotkeysVPC.kext",
+  "bundle_version": "0.1.0",
+  "native_ci_commit": "816edfda9c5a7e6217ac344c044edd94ef66042d",
+  "native_ci_run_id": "39631773181",
+  "provenance_files": {
+    "BUILD.json": "b2d76269ffc078a2b5404eb8bffd036a9c04ed8803932deb420d1ed75d1c4a77",
+    "kernel-symbols-reviewed.json": "3c4168f7841e787d4c17dc88a01acc1e2dcba8bb31d47200a07304c3fb8d0161",
+    "s540-hotkeys-bzero-review.json": "6b56c4ad49a86026fa835a0dbbcc6b23a359a412cd2a0929dcfc36d4880946a2"
+  },
+  "schema": 1
+}

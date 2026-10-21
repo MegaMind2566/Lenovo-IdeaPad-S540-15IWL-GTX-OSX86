@@ -1,0 +1,2256 @@
+{
+  "baseline_provenance": {
+    "binary_sha256": "043a669fdd06152213677d6e27bfedb815137dc5037293808ac4027967a9f26e",
+    "scope": "Exact common IOService subclass ABI only; excludes IOPCIDevice, timers and other observer-specific APIs.",
+    "source_commit": "e91c8bef0a5abc38db2ce640783e6b3484f12d67"
+  },
+  "bound_source_files": [
+    "kernel/S540HotkeysVPC.cpp",
+    "kernel/S540HotkeysVPC.hpp",
+    "kernel/ProtocolCore.hpp"
+  ],
+  "exact_demangled": {
+    "IOACPIPlatformDevice::metaClass": {
+      "reason": "Exact source-reviewed public SDK signature (x86_64 types at pinned MacKernelSDK); no overload wildcard.",
+      "source_tokens": [
+        "OSDynamicCast(IOACPIPlatformDevice, provider)"
+      ]
+    },
+    "IOCommandGate::commandGate(OSObject*, int (*)(OSObject*, void*, void*, void*, void*))": {
+      "reason": "Exact source-reviewed public SDK signature (x86_64 types at pinned MacKernelSDK); no overload wildcard.",
+      "source_tokens": [
+        "IOCommandGate::commandGate(this)"
+      ]
+    },
+    "IOInterruptEventSource::interruptEventSource(OSObject*, void (*)(OSObject*, IOInterruptEventSource*, int), IOService*, int)": {
+      "reason": "Exact source-reviewed public SDK signature (x86_64 types at pinned MacKernelSDK); no overload wildcard.",
+      "source_tokens": [
+        "IOInterruptEventSource::interruptEventSource"
+      ]
+    },
+    "IORegistryEntry::free()": {
+      "reason": "Exact source-reviewed public SDK signature (x86_64 types at pinned MacKernelSDK); no overload wildcard.",
+      "source_tokens": [
+        "IOService::free()"
+      ]
+    },
+    "IOService::acknowledgeSetPowerState()": {
+      "reason": "Exact source-reviewed public SDK PM acknowledgement signature; no overload wildcard.",
+      "source_tokens": [
+        "acknowledgeSetPowerState()"
+      ]
+    },
+    "IOService::changePowerStateTo(unsigned long)": {
+      "reason": "Exact source-reviewed public SDK signature (x86_64 types at pinned MacKernelSDK); no overload wildcard.",
+      "source_tokens": [
+        "changePowerStateTo(1)"
+      ]
+    },
+    "IOService::free()": {
+      "reason": "Exact source-reviewed public SDK signature (x86_64 types at pinned MacKernelSDK); no overload wildcard.",
+      "source_tokens": [
+        "IOService::free()"
+      ]
+    },
+    "IOService::start(IOService*)": {
+      "reason": "Exact source-reviewed public SDK signature (x86_64 types at pinned MacKernelSDK); no overload wildcard.",
+      "source_tokens": [
+        "IOService::start(provider)"
+      ]
+    },
+    "IOService::stop(IOService*)": {
+      "reason": "Exact source-reviewed public SDK signature (x86_64 types at pinned MacKernelSDK); no overload wildcard.",
+      "source_tokens": [
+        "IOService::stop(provider)"
+      ]
+    },
+    "IOWorkLoop::workLoop()": {
+      "reason": "Exact source-reviewed public SDK signature (x86_64 types at pinned MacKernelSDK); no overload wildcard.",
+      "source_tokens": [
+        "IOWorkLoop::workLoop()"
+      ]
+    },
+    "OSArray::withCapacity(unsigned int)": {
+      "reason": "Exact source-reviewed public SDK signature (x86_64 types at pinned MacKernelSDK); no overload wildcard.",
+      "source_tokens": [
+        "OSArray::withCapacity"
+      ]
+    },
+    "OSDictionary::withCapacity(unsigned int)": {
+      "reason": "Exact source-reviewed public SDK signature (x86_64 types at pinned MacKernelSDK); no overload wildcard.",
+      "source_tokens": [
+        "OSDictionary::withCapacity"
+      ]
+    },
+    "OSNumber::metaClass": {
+      "reason": "Exact source-reviewed public SDK signature (x86_64 types at pinned MacKernelSDK); no overload wildcard.",
+      "source_tokens": [
+        "OSNumber::withNumber"
+      ]
+    },
+    "OSNumber::withNumber(unsigned long long, unsigned int)": {
+      "reason": "Exact source-reviewed public SDK signature (x86_64 types at pinned MacKernelSDK); no overload wildcard.",
+      "source_tokens": [
+        "OSNumber::withNumber"
+      ]
+    },
+    "OSString::metaClass": {
+      "reason": "Exact source-reviewed public SDK signature (x86_64 types at pinned MacKernelSDK); no overload wildcard.",
+      "source_tokens": [
+        "OSDynamicCast(OSString,"
+      ]
+    },
+    "OSString::withCString(char const*)": {
+      "reason": "Exact source-reviewed public SDK signature (x86_64 types at pinned MacKernelSDK); no overload wildcard.",
+      "source_tokens": [
+        "OSString::withCString"
+      ]
+    }
+  },
+  "exact_mangled": {
+    "_IOLockAlloc": {
+      "reason": "Exact C runtime/global explicitly referenced in reviewed driver source; no compiler memory-helper family allowance.",
+      "source_tokens": [
+        "IOLockAlloc()"
+      ]
+    },
+    "_IOLockFree": {
+      "reason": "Exact C runtime/global explicitly referenced in reviewed driver source; no compiler memory-helper family allowance.",
+      "source_tokens": [
+        "IOLockFree(_lock)"
+      ]
+    },
+    "_IOLockLock": {
+      "reason": "Exact C runtime/global explicitly referenced in reviewed driver source; no compiler memory-helper family allowance.",
+      "source_tokens": [
+        "IOLockLock("
+      ]
+    },
+    "_IOLockUnlock": {
+      "reason": "Exact C runtime/global explicitly referenced in reviewed driver source; no compiler memory-helper family allowance.",
+      "source_tokens": [
+        "IOLockUnlock("
+      ]
+    },
+    "_IOLog": {
+      "reason": "Exact C runtime/global explicitly referenced in reviewed driver source; no compiler memory-helper family allowance.",
+      "source_tokens": [
+        "IOLog("
+      ]
+    },
+    "_IOSleep": {
+      "reason": "Exact C runtime/global explicitly referenced in reviewed driver source; no compiler memory-helper family allowance.",
+      "source_tokens": [
+        "IOSleep(1)"
+      ]
+    },
+    "__ZN11OSMetaClass21_RESERVEDOSMetaClass0Ev": {
+      "demangled": "OSMetaClass::_RESERVEDOSMetaClass0()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN11OSMetaClass21_RESERVEDOSMetaClass1Ev": {
+      "demangled": "OSMetaClass::_RESERVEDOSMetaClass1()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN11OSMetaClass21_RESERVEDOSMetaClass2Ev": {
+      "demangled": "OSMetaClass::_RESERVEDOSMetaClass2()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN11OSMetaClass21_RESERVEDOSMetaClass3Ev": {
+      "demangled": "OSMetaClass::_RESERVEDOSMetaClass3()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN11OSMetaClass21_RESERVEDOSMetaClass4Ev": {
+      "demangled": "OSMetaClass::_RESERVEDOSMetaClass4()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN11OSMetaClass21_RESERVEDOSMetaClass5Ev": {
+      "demangled": "OSMetaClass::_RESERVEDOSMetaClass5()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN11OSMetaClass21_RESERVEDOSMetaClass6Ev": {
+      "demangled": "OSMetaClass::_RESERVEDOSMetaClass6()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN11OSMetaClass21_RESERVEDOSMetaClass7Ev": {
+      "demangled": "OSMetaClass::_RESERVEDOSMetaClass7()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN11OSMetaClassC2EPKcPKS_j": {
+      "demangled": "OSMetaClass::OSMetaClass(char const*, OSMetaClass const*, unsigned int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN11OSMetaClassD2Ev": {
+      "demangled": "OSMetaClass::~OSMetaClass()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry11detachAboveEPK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::detachAbove(IORegistryPlane const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry11setLocationEPK8OSSymbolPK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::setLocation(OSSymbol const*, IORegistryPlane const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry11setLocationEPKcPK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::setLocation(char const*, IORegistryPlane const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry11setPropertyEPK8OSStringP8OSObject": {
+      "demangled": "IORegistryEntry::setProperty(OSString const*, OSObject*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry11setPropertyEPK8OSSymbolP8OSObject": {
+      "demangled": "IORegistryEntry::setProperty(OSSymbol const*, OSObject*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry11setPropertyEPKcP8OSObject": {
+      "demangled": "IORegistryEntry::setProperty(char const*, OSObject*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry11setPropertyEPKcPvj": {
+      "demangled": "IORegistryEntry::setProperty(char const*, void*, unsigned int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry11setPropertyEPKcS1_": {
+      "demangled": "IORegistryEntry::setProperty(char const*, char const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry11setPropertyEPKcb": {
+      "demangled": "IORegistryEntry::setProperty(char const*, bool)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry11setPropertyEPKcyj": {
+      "demangled": "IORegistryEntry::setProperty(char const*, unsigned long long, unsigned int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry13attachToChildEPS_PK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::attachToChild(IORegistryEntry*, IORegistryPlane const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry13childFromPathEPKcPK15IORegistryPlanePcPi": {
+      "demangled": "IORegistryEntry::childFromPath(char const*, IORegistryPlane const*, char*, int*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry13setPropertiesEP8OSObject": {
+      "demangled": "IORegistryEntry::setProperties(OSObject*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry14attachToParentEPS_PK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::attachToParent(IORegistryEntry*, IORegistryPlane const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry14removePropertyEPK8OSString": {
+      "demangled": "IORegistryEntry::removeProperty(OSString const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry14removePropertyEPK8OSSymbol": {
+      "demangled": "IORegistryEntry::removeProperty(OSSymbol const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry14removePropertyEPKc": {
+      "demangled": "IORegistryEntry::removeProperty(char const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry15detachFromChildEPS_PK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::detachFromChild(IORegistryEntry*, IORegistryPlane const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry16detachFromParentEPS_PK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::detachFromParent(IORegistryEntry*, IORegistryPlane const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry16setPropertyTableEP12OSDictionary": {
+      "demangled": "IORegistryEntry::setPropertyTable(OSDictionary*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry17runPropertyActionEPFiP8OSObjectPvS2_S2_S2_ES1_S2_S2_S2_S2_": {
+      "demangled": "IORegistryEntry::runPropertyAction(int (*)(OSObject*, void*, void*, void*, void*), OSObject*, void*, void*, void*, void*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry25_RESERVEDIORegistryEntry0Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry0()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry25_RESERVEDIORegistryEntry1Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry1()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry25_RESERVEDIORegistryEntry2Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry2()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry25_RESERVEDIORegistryEntry3Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry3()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry25_RESERVEDIORegistryEntry4Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry4()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry25_RESERVEDIORegistryEntry5Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry5()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry25_RESERVEDIORegistryEntry6Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry6()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry25_RESERVEDIORegistryEntry7Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry7()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry25_RESERVEDIORegistryEntry8Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry8()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry25_RESERVEDIORegistryEntry9Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry9()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry10Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry10()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry11Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry11()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry12Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry12()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry13Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry13()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry14Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry14()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry15Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry15()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry16Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry16()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry17Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry17()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry18Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry18()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry19Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry19()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry20Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry20()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry21Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry21()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry22Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry22()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry23Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry23()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry24Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry24()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry25Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry25()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry26Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry26()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry27Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry27()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry28Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry28()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry29Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry29()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry30Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry30()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry26_RESERVEDIORegistryEntry31Ev": {
+      "demangled": "IORegistryEntry::_RESERVEDIORegistryEntry31()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry7setNameEPK8OSSymbolPK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::setName(OSSymbol const*, IORegistryPlane const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry7setNameEPKcPK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::setName(char const*, IORegistryPlane const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15IORegistryEntry9detachAllEPK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::detachAll(IORegistryPlane const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15OSMetaClassBase12safeMetaCastEPKS_PK11OSMetaClass": {
+      "demangled": "OSMetaClassBase::safeMetaCast(OSMetaClassBase const*, OSMetaClass const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15OSMetaClassBase25_RESERVEDOSMetaClassBase4Ev": {
+      "demangled": "OSMetaClassBase::_RESERVEDOSMetaClassBase4()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15OSMetaClassBase25_RESERVEDOSMetaClassBase5Ev": {
+      "demangled": "OSMetaClassBase::_RESERVEDOSMetaClassBase5()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15OSMetaClassBase25_RESERVEDOSMetaClassBase6Ev": {
+      "demangled": "OSMetaClassBase::_RESERVEDOSMetaClassBase6()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15OSMetaClassBase25_RESERVEDOSMetaClassBase7Ev": {
+      "demangled": "OSMetaClassBase::_RESERVEDOSMetaClassBase7()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN15OSMetaClassBase8DispatchE5IORPC": {
+      "demangled": "OSMetaClassBase::Dispatch(IORPC)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN8OSObject18_RESERVEDOSObject0Ev": {
+      "demangled": "OSObject::_RESERVEDOSObject0()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN8OSObject18_RESERVEDOSObject1Ev": {
+      "demangled": "OSObject::_RESERVEDOSObject1()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN8OSObject18_RESERVEDOSObject2Ev": {
+      "demangled": "OSObject::_RESERVEDOSObject2()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN8OSObject18_RESERVEDOSObject3Ev": {
+      "demangled": "OSObject::_RESERVEDOSObject3()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN8OSObject18_RESERVEDOSObject4Ev": {
+      "demangled": "OSObject::_RESERVEDOSObject4()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN8OSObject18_RESERVEDOSObject5Ev": {
+      "demangled": "OSObject::_RESERVEDOSObject5()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN8OSObject18_RESERVEDOSObject6Ev": {
+      "demangled": "OSObject::_RESERVEDOSObject6()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN8OSObject18_RESERVEDOSObject7Ev": {
+      "demangled": "OSObject::_RESERVEDOSObject7()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN8OSObject18_RESERVEDOSObject8Ev": {
+      "demangled": "OSObject::_RESERVEDOSObject8()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN8OSObject18_RESERVEDOSObject9Ev": {
+      "demangled": "OSObject::_RESERVEDOSObject9()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN8OSObject19_RESERVEDOSObject10Ev": {
+      "demangled": "OSObject::_RESERVEDOSObject10()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN8OSObject19_RESERVEDOSObject11Ev": {
+      "demangled": "OSObject::_RESERVEDOSObject11()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN8OSObject19_RESERVEDOSObject12Ev": {
+      "demangled": "OSObject::_RESERVEDOSObject12()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN8OSObject19_RESERVEDOSObject13Ev": {
+      "demangled": "OSObject::_RESERVEDOSObject13()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN8OSObject19_RESERVEDOSObject14Ev": {
+      "demangled": "OSObject::_RESERVEDOSObject14()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN8OSObject19_RESERVEDOSObject15Ev": {
+      "demangled": "OSObject::_RESERVEDOSObject15()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN8OSObject4initEv": {
+      "demangled": "OSObject::init()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN8OSObjectdlEPvm": {
+      "demangled": "OSObject::operator delete(void*, unsigned long)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN8OSObjectnwEm": {
+      "demangled": "OSObject::operator new(unsigned long)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService10adjustBusyEi": {
+      "demangled": "IOService::adjustBusy(int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService10gMetaClassE": {
+      "demangled": "IOService::gMetaClass",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService10handleOpenEPS_jPv": {
+      "demangled": "IOService::handleOpen(IOService*, unsigned int, void*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService10joinPMtreeEPS_": {
+      "demangled": "IOService::joinPMtree(IOService*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService11handleCloseEPS_j": {
+      "demangled": "IOService::handleClose(IOService*, unsigned int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService12didTerminateEPS_jPb": {
+      "demangled": "IOService::didTerminate(IOService*, unsigned int, bool*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService12getBusyStateEv": {
+      "demangled": "IOService::getBusyState()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService12getResourcesEv": {
+      "demangled": "IOService::getResources()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService12requestProbeEj": {
+      "demangled": "IOService::requestProbe(unsigned int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService12tellChangeUpEm": {
+      "demangled": "IOService::tellChangeUp(unsigned long)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService12updateReportEP19IOReportChannelListjPvS2_": {
+      "demangled": "IOService::updateReport(IOReportChannelList*, unsigned int, void*, void*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService13addPowerChildEPS_": {
+      "demangled": "IOService::addPowerChild(IOService*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService13askChangeDownEm": {
+      "demangled": "IOService::askChangeDown(unsigned long)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService13matchLocationEPS_": {
+      "demangled": "IOService::matchLocation(IOService*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService13messageClientEjP8OSObjectPvm": {
+      "demangled": "IOService::messageClient(unsigned int, OSObject*, void*, unsigned long)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService13newUserClientEP4taskPvjP12OSDictionaryPP12IOUserClient": {
+      "demangled": "IOService::newUserClient(task*, void*, unsigned int, OSDictionary*, IOUserClient**)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService13newUserClientEP4taskPvjPP12IOUserClient": {
+      "demangled": "IOService::newUserClient(task*, void*, unsigned int, IOUserClient**)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService13setPowerStateEmPS_": {
+      "demangled": "IOService::setPowerState(unsigned long, IOService*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService13willTerminateEPS_j": {
+      "demangled": "IOService::willTerminate(IOService*, unsigned int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService14activityTickleEmm": {
+      "demangled": "IOService::activityTickle(unsigned long, unsigned long)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService14applyToClientsEPFvPS_PvES1_": {
+      "demangled": "IOService::applyToClients(void (*)(IOService*, void*), void*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService14causeInterruptEi": {
+      "demangled": "IOService::causeInterrupt(int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService14messageClientsEjPvm": {
+      "demangled": "IOService::messageClients(unsigned int, void*, unsigned long)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService14tellChangeDownEm": {
+      "demangled": "IOService::tellChangeDown(unsigned long)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService15comparePropertyEP12OSDictionaryPK8OSString": {
+      "demangled": "IOService::compareProperty(OSDictionary*, OSString const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService15comparePropertyEP12OSDictionaryPKc": {
+      "demangled": "IOService::compareProperty(OSDictionary*, char const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService15configureReportEP19IOReportChannelListjPvS2_": {
+      "demangled": "IOService::configureReport(IOReportChannelList*, unsigned int, void*, void*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService15enableInterruptEi": {
+      "demangled": "IOService::enableInterrupt(int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService15errnoFromReturnEi": {
+      "demangled": "IOService::errnoFromReturn(int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService15getDeviceMemoryEv": {
+      "demangled": "IOService::getDeviceMemory()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService15nextIdleTimeoutEyyj": {
+      "demangled": "IOService::nextIdleTimeout(unsigned long long, unsigned long long, unsigned int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService15powerChangeDoneEm": {
+      "demangled": "IOService::powerChangeDone(unsigned long)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService15registerServiceEj": {
+      "demangled": "IOService::registerService(unsigned int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService15setDeviceMemoryEP7OSArray": {
+      "demangled": "IOService::setDeviceMemory(OSArray*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService15terminateClientEPS_j": {
+      "demangled": "IOService::terminateClient(IOService*, unsigned int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService16allowPowerChangeEm": {
+      "demangled": "IOService::allowPowerChange(unsigned long)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService16applyToProvidersEPFvPS_PvES1_": {
+      "demangled": "IOService::applyToProviders(void (*)(IOService*, void*), void*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService16disableInterruptEi": {
+      "demangled": "IOService::disableInterrupt(int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService16getInterruptTypeEiPi": {
+      "demangled": "IOService::getInterruptType(int, int*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService16registerInterestEPK8OSSymbolPFiPvS3_jPS_S3_mES3_S3_": {
+      "demangled": "IOService::registerInterest(OSSymbol const*, int (*)(void*, void*, unsigned int, IOService*, void*, unsigned long), void*, void*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService16removePowerChildEP17IOPowerConnection": {
+      "demangled": "IOService::removePowerChild(IOPowerConnection*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService16requestTerminateEPS_j": {
+      "demangled": "IOService::requestTerminate(IOService*, unsigned int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService16stringFromReturnEi": {
+      "demangled": "IOService::stringFromReturn(int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService16tellNoChangeDownEm": {
+      "demangled": "IOService::tellNoChangeDown(unsigned long)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService17addNeededResourceEPKc": {
+      "demangled": "IOService::addNeededResource(char const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService17applyToInterestedEPK8OSSymbolPFvP8OSObjectPvES5_": {
+      "demangled": "IOService::applyToInterested(OSSymbol const*, void (*)(OSObject*, void*), void*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService17cancelPowerChangeEm": {
+      "demangled": "IOService::cancelPowerChange(unsigned long)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService17comparePropertiesEP12OSDictionaryP12OSCollection": {
+      "demangled": "IOService::compareProperties(OSDictionary*, OSCollection*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService17getAggressivenessEmPm": {
+      "demangled": "IOService::getAggressiveness(unsigned long, unsigned long*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService17registerInterruptEiP8OSObjectPFvS1_PvPS_iES2_": {
+      "demangled": "IOService::registerInterrupt(int, OSObject*, void (*)(OSObject*, void*, IOService*, int), void*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService17setAggressivenessEmm": {
+      "demangled": "IOService::setAggressiveness(unsigned long, unsigned long)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService18lockForArbitrationEb": {
+      "demangled": "IOService::lockForArbitration(bool)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService18matchPropertyTableEP12OSDictionary": {
+      "demangled": "IOService::matchPropertyTable(OSDictionary*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService18matchPropertyTableEP12OSDictionaryPi": {
+      "demangled": "IOService::matchPropertyTable(OSDictionary*, int*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService18setIdleTimerPeriodEm": {
+      "demangled": "IOService::setIdleTimerPeriod(unsigned long)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService18systemWillShutdownEj": {
+      "demangled": "IOService::systemWillShutdown(unsigned int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService19_RESERVEDIOService2Ev": {
+      "demangled": "IOService::_RESERVEDIOService2()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService19_RESERVEDIOService3Ev": {
+      "demangled": "IOService::_RESERVEDIOService3()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService19_RESERVEDIOService4Ev": {
+      "demangled": "IOService::_RESERVEDIOService4()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService19_RESERVEDIOService5Ev": {
+      "demangled": "IOService::_RESERVEDIOService5()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService19_RESERVEDIOService6Ev": {
+      "demangled": "IOService::_RESERVEDIOService6()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService19_RESERVEDIOService7Ev": {
+      "demangled": "IOService::_RESERVEDIOService7()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService19_RESERVEDIOService8Ev": {
+      "demangled": "IOService::_RESERVEDIOService8()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService19_RESERVEDIOService9Ev": {
+      "demangled": "IOService::_RESERVEDIOService9()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService19registerPowerDriverEPS_P14IOPMPowerStatem": {
+      "demangled": "IOService::registerPowerDriver(IOService*, IOPMPowerState*, unsigned long)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService19unregisterInterruptEi": {
+      "demangled": "IOService::unregisterInterrupt(int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService10Ev": {
+      "demangled": "IOService::_RESERVEDIOService10()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService11Ev": {
+      "demangled": "IOService::_RESERVEDIOService11()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService12Ev": {
+      "demangled": "IOService::_RESERVEDIOService12()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService13Ev": {
+      "demangled": "IOService::_RESERVEDIOService13()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService14Ev": {
+      "demangled": "IOService::_RESERVEDIOService14()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService15Ev": {
+      "demangled": "IOService::_RESERVEDIOService15()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService16Ev": {
+      "demangled": "IOService::_RESERVEDIOService16()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService17Ev": {
+      "demangled": "IOService::_RESERVEDIOService17()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService18Ev": {
+      "demangled": "IOService::_RESERVEDIOService18()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService19Ev": {
+      "demangled": "IOService::_RESERVEDIOService19()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService20Ev": {
+      "demangled": "IOService::_RESERVEDIOService20()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService21Ev": {
+      "demangled": "IOService::_RESERVEDIOService21()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService22Ev": {
+      "demangled": "IOService::_RESERVEDIOService22()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService23Ev": {
+      "demangled": "IOService::_RESERVEDIOService23()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService24Ev": {
+      "demangled": "IOService::_RESERVEDIOService24()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService25Ev": {
+      "demangled": "IOService::_RESERVEDIOService25()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService26Ev": {
+      "demangled": "IOService::_RESERVEDIOService26()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService27Ev": {
+      "demangled": "IOService::_RESERVEDIOService27()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService28Ev": {
+      "demangled": "IOService::_RESERVEDIOService28()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService29Ev": {
+      "demangled": "IOService::_RESERVEDIOService29()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService30Ev": {
+      "demangled": "IOService::_RESERVEDIOService30()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService31Ev": {
+      "demangled": "IOService::_RESERVEDIOService31()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService32Ev": {
+      "demangled": "IOService::_RESERVEDIOService32()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService33Ev": {
+      "demangled": "IOService::_RESERVEDIOService33()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService34Ev": {
+      "demangled": "IOService::_RESERVEDIOService34()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService35Ev": {
+      "demangled": "IOService::_RESERVEDIOService35()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService36Ev": {
+      "demangled": "IOService::_RESERVEDIOService36()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService37Ev": {
+      "demangled": "IOService::_RESERVEDIOService37()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService38Ev": {
+      "demangled": "IOService::_RESERVEDIOService38()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService39Ev": {
+      "demangled": "IOService::_RESERVEDIOService39()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService40Ev": {
+      "demangled": "IOService::_RESERVEDIOService40()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService41Ev": {
+      "demangled": "IOService::_RESERVEDIOService41()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService42Ev": {
+      "demangled": "IOService::_RESERVEDIOService42()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService43Ev": {
+      "demangled": "IOService::_RESERVEDIOService43()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService44Ev": {
+      "demangled": "IOService::_RESERVEDIOService44()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService45Ev": {
+      "demangled": "IOService::_RESERVEDIOService45()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService46Ev": {
+      "demangled": "IOService::_RESERVEDIOService46()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20_RESERVEDIOService47Ev": {
+      "demangled": "IOService::_RESERVEDIOService47()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20callPlatformFunctionEPK8OSSymbolbPvS3_S3_S3_": {
+      "demangled": "IOService::callPlatformFunction(OSSymbol const*, bool, void*, void*, void*, void*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20callPlatformFunctionEPKcbPvS2_S2_S2_": {
+      "demangled": "IOService::callPlatformFunction(char const*, bool, void*, void*, void*, void*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20getDeviceMemoryCountEv": {
+      "demangled": "IOService::getDeviceMemoryCount()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService20unlockForArbitrationEv": {
+      "demangled": "IOService::unlockForArbitration()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService21powerStateDidChangeToEmmPS_": {
+      "demangled": "IOService::powerStateDidChangeTo(unsigned long, unsigned long, IOService*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService22copyClientWithCategoryEPK8OSSymbol": {
+      "demangled": "IOService::copyClientWithCategory(OSSymbol const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService22powerStateWillChangeToEmmPS_": {
+      "demangled": "IOService::powerStateWillChangeTo(unsigned long, unsigned long, IOService*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService23acknowledgeNotificationEPvj": {
+      "demangled": "IOService::acknowledgeNotification(void*, unsigned int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService23requestPowerDomainStateEmP17IOPowerConnectionm": {
+      "demangled": "IOService::requestPowerDomainState(unsigned long, IOPowerConnection*, unsigned long)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService24getDeviceMemoryWithIndexEj": {
+      "demangled": "IOService::getDeviceMemoryWithIndex(unsigned int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService24mapDeviceMemoryWithIndexEjj": {
+      "demangled": "IOService::mapDeviceMemoryWithIndex(unsigned int, unsigned int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService24powerStateForDomainStateEm": {
+      "demangled": "IOService::powerStateForDomainState(unsigned long)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService27maxCapabilityForDomainStateEm": {
+      "demangled": "IOService::maxCapabilityForDomainState(unsigned long)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService31initialPowerStateForDomainStateEm": {
+      "demangled": "IOService::initialPowerStateForDomainState(unsigned long)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService4initEP12OSDictionary": {
+      "demangled": "IOService::init(OSDictionary*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService4initEP15IORegistryEntryPK15IORegistryPlane": {
+      "demangled": "IOService::init(IORegistryEntry*, IORegistryPlane const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService4openEPS_jPv": {
+      "demangled": "IOService::open(IOService*, unsigned int, void*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService5closeEPS_j": {
+      "demangled": "IOService::close(IOService*, unsigned int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService5probeEPS_Pi": {
+      "demangled": "IOService::probe(IOService*, int*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService6PMinitEv": {
+      "demangled": "IOService::PMinit()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService6PMstopEv": {
+      "demangled": "IOService::PMstop()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService6attachEPS_": {
+      "demangled": "IOService::attach(IOService*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService6detachEPS_": {
+      "demangled": "IOService::detach(IOService*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService7messageEjPS_Pv": {
+      "demangled": "IOService::message(unsigned int, IOService*, void*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService8DispatchE5IORPC": {
+      "demangled": "IOService::Dispatch(IORPC)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService8finalizeEj": {
+      "demangled": "IOService::finalize(unsigned int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService9metaClassE": {
+      "demangled": "IOService::metaClass",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOService9terminateEj": {
+      "demangled": "IOService::terminate(unsigned int)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOServiceC2EPK11OSMetaClass": {
+      "demangled": "IOService::IOService(OSMetaClass const*)",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZN9IOServiceD2Ev": {
+      "demangled": "IOService::~IOService()",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK11OSMetaClass12getClassNameEv": {
+      "demangled": "OSMetaClass::getClassName() const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK11OSMetaClass12getMetaClassEv": {
+      "demangled": "OSMetaClass::getMetaClass() const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK11OSMetaClass12taggedRetainEPKv": {
+      "demangled": "OSMetaClass::taggedRetain(void const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK11OSMetaClass13taggedReleaseEPKv": {
+      "demangled": "OSMetaClass::taggedRelease(void const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK11OSMetaClass13taggedReleaseEPKvi": {
+      "demangled": "OSMetaClass::taggedRelease(void const*, int) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK11OSMetaClass14getRetainCountEv": {
+      "demangled": "OSMetaClass::getRetainCount() const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK11OSMetaClass19instanceConstructedEv": {
+      "demangled": "OSMetaClass::instanceConstructed() const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK11OSMetaClass6retainEv": {
+      "demangled": "OSMetaClass::retain() const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK11OSMetaClass7releaseEi": {
+      "demangled": "OSMetaClass::release(int) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK11OSMetaClass7releaseEv": {
+      "demangled": "OSMetaClass::release() const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK11OSMetaClass9serializeEP11OSSerialize": {
+      "demangled": "OSMetaClass::serialize(OSSerialize*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry11compareNameEP8OSStringPS1_": {
+      "demangled": "IORegistryEntry::compareName(OSString*, OSString**) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry11getLocationEPK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::getLocation(IORegistryPlane const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry11getPropertyEPK8OSString": {
+      "demangled": "IORegistryEntry::getProperty(OSString const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry11getPropertyEPK8OSStringPK15IORegistryPlanej": {
+      "demangled": "IORegistryEntry::getProperty(OSString const*, IORegistryPlane const*, unsigned int) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry11getPropertyEPK8OSSymbol": {
+      "demangled": "IORegistryEntry::getProperty(OSSymbol const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry11getPropertyEPK8OSSymbolPK15IORegistryPlanej": {
+      "demangled": "IORegistryEntry::getProperty(OSSymbol const*, IORegistryPlane const*, unsigned int) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry11getPropertyEPKc": {
+      "demangled": "IORegistryEntry::getProperty(char const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry11getPropertyEPKcPK15IORegistryPlanej": {
+      "demangled": "IORegistryEntry::getProperty(char const*, IORegistryPlane const*, unsigned int) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry12compareNamesEP8OSObjectPP8OSString": {
+      "demangled": "IORegistryEntry::compareNames(OSObject*, OSString**) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry12copyLocationEPK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::copyLocation(IORegistryPlane const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry12copyPropertyEPK8OSString": {
+      "demangled": "IORegistryEntry::copyProperty(OSString const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry12copyPropertyEPK8OSStringPK15IORegistryPlanej": {
+      "demangled": "IORegistryEntry::copyProperty(OSString const*, IORegistryPlane const*, unsigned int) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry12copyPropertyEPK8OSSymbol": {
+      "demangled": "IORegistryEntry::copyProperty(OSSymbol const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry12copyPropertyEPK8OSSymbolPK15IORegistryPlanej": {
+      "demangled": "IORegistryEntry::copyProperty(OSSymbol const*, IORegistryPlane const*, unsigned int) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry12copyPropertyEPKc": {
+      "demangled": "IORegistryEntry::copyProperty(char const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry12copyPropertyEPKcPK15IORegistryPlanej": {
+      "demangled": "IORegistryEntry::copyProperty(char const*, IORegistryPlane const*, unsigned int) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry13getChildEntryEPK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::getChildEntry(IORegistryPlane const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry14applyToParentsEPFvPS_PvES1_PK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::applyToParents(void (*)(IORegistryEntry*, void*), void*, IORegistryPlane const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry14copyChildEntryEPK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::copyChildEntry(IORegistryPlane const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry14getParentEntryEPK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::getParentEntry(IORegistryPlane const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry15applyToChildrenEPFvPS_PvES1_PK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::applyToChildren(void (*)(IORegistryEntry*, void*), void*, IORegistryPlane const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry15copyParentEntryEPK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::copyParentEntry(IORegistryPlane const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry16getChildIteratorEPK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::getChildIterator(IORegistryPlane const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry16getPathComponentEPcPiPK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::getPathComponent(char*, int*, IORegistryPlane const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry17getParentIteratorEPK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::getParentIterator(IORegistryPlane const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry24dictionaryWithPropertiesEv": {
+      "demangled": "IORegistryEntry::dictionaryWithProperties() const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry7getNameEPK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::getName(IORegistryPlane const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry7getPathEPcPiPK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::getPath(char*, int*, IORegistryPlane const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry7inPlaneEPK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::inPlane(IORegistryPlane const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry7isChildEPS_PK15IORegistryPlaneb": {
+      "demangled": "IORegistryEntry::isChild(IORegistryEntry*, IORegistryPlane const*, bool) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry8copyNameEPK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::copyName(IORegistryPlane const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry8getDepthEPK15IORegistryPlane": {
+      "demangled": "IORegistryEntry::getDepth(IORegistryPlane const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15IORegistryEntry8isParentEPS_PK15IORegistryPlaneb": {
+      "demangled": "IORegistryEntry::isParent(IORegistryEntry*, IORegistryPlane const*, bool) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK15OSMetaClassBase9isEqualToEPKS_": {
+      "demangled": "OSMetaClassBase::isEqualTo(OSMetaClassBase const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK8OSObject12taggedRetainEPKv": {
+      "demangled": "OSObject::taggedRetain(void const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK8OSObject13taggedReleaseEPKv": {
+      "demangled": "OSObject::taggedRelease(void const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK8OSObject13taggedReleaseEPKvi": {
+      "demangled": "OSObject::taggedRelease(void const*, int) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK8OSObject14getRetainCountEv": {
+      "demangled": "OSObject::getRetainCount() const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK8OSObject6retainEv": {
+      "demangled": "OSObject::retain() const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK8OSObject7releaseEi": {
+      "demangled": "OSObject::release(int) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK8OSObject7releaseEv": {
+      "demangled": "OSObject::release() const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK8OSObject9serializeEP11OSSerialize": {
+      "demangled": "OSObject::serialize(OSSerialize*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK9IOService10isInactiveEv": {
+      "demangled": "IOService::isInactive() const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK9IOService11getProviderEv": {
+      "demangled": "IOService::getProvider() const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK9IOService11getWorkLoopEv": {
+      "demangled": "IOService::getWorkLoop() const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK9IOService12handleIsOpenEPKS_": {
+      "demangled": "IOService::handleIsOpen(IOService const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK9IOService17getClientIteratorEv": {
+      "demangled": "IOService::getClientIterator() const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK9IOService19getProviderIteratorEv": {
+      "demangled": "IOService::getProviderIterator() const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK9IOService19serializePropertiesEP11OSSerialize": {
+      "demangled": "IOService::serializeProperties(OSSerialize*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK9IOService21getOpenClientIteratorEv": {
+      "demangled": "IOService::getOpenClientIterator() const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK9IOService23getOpenProviderIteratorEv": {
+      "demangled": "IOService::getOpenProviderIterator() const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK9IOService6isOpenEPKS_": {
+      "demangled": "IOService::isOpen(IOService const*) const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK9IOService8getStateEv": {
+      "demangled": "IOService::getState() const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZNK9IOService9getClientEv": {
+      "demangled": "IOService::getClient() const",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "__ZTV9IOService": {
+      "demangled": "vtable for IOService",
+      "reason": "Exact inherited IOService/OSObject/OSMetaClass subclass ABI, including SDK vtable padding. Observed native with this SDK in the prior IOService observer; only subclass ABI symbols are reused.",
+      "source_tokens": [
+        "OSDefineMetaClassAndStructors(S540HotkeysVPC, IOService)"
+      ]
+    },
+    "_absolutetime_to_nanoseconds": {
+      "reason": "Exact C runtime/global explicitly referenced in reviewed driver source; no compiler memory-helper family allowance.",
+      "source_tokens": [
+        "absolutetime_to_nanoseconds("
+      ]
+    },
+    "_bzero": {
+      "reason": "Exact C runtime/global explicitly referenced in reviewed driver source; no compiler memory-helper family allowance.",
+      "source_tokens": [
+        "bzero("
+      ]
+    },
+    "_clock_get_uptime": {
+      "reason": "Exact C runtime/global explicitly referenced in reviewed driver source; no compiler memory-helper family allowance.",
+      "source_tokens": [
+        "clock_get_uptime("
+      ]
+    },
+    "_kOSBooleanFalse": {
+      "reason": "Exact C runtime/global explicitly referenced in reviewed driver source; no compiler memory-helper family allowance.",
+      "source_tokens": [
+        "kOSBooleanFalse"
+      ]
+    },
+    "_kOSBooleanTrue": {
+      "reason": "Exact C runtime/global explicitly referenced in reviewed driver source; no compiler memory-helper family allowance.",
+      "source_tokens": [
+        "kOSBooleanTrue"
+      ]
+    },
+    "_strcmp": {
+      "reason": "Exact C runtime/global explicitly referenced in reviewed driver source; no compiler memory-helper family allowance.",
+      "source_tokens": [
+        "strcmp("
+      ]
+    },
+    "_strstr": {
+      "reason": "Exact C runtime/global explicitly referenced in reviewed driver source; no compiler memory-helper family allowance.",
+      "source_tokens": [
+        "strstr("
+      ]
+    }
+  },
+  "notes": [
+    "Every accepted import is an exact mangled name or an exact full demangled signature. There are no namespace/method-prefix wildcards.",
+    "The immutable SDK commit fixes typedef widths and C++ signatures; native nlist64 imports are independently checked against native nm output.",
+    "C++ superclass/metaclass vtable padding includes reserved selectors emitted by OSDefineMetaClassAndStructors; these are compiler-required subclass ABI, not driver calls to undocumented power APIs.",
+    "Compiler-introduced memory helper symbols are not admitted without native evidence and a source-bound review update.",
+    "The full actual manifest and read-only kmutil libraries XML are retained; no kmutil load occurs in CI."
+  ],
+  "reviewed_native_exceptions": {
+    "___bzero": {
+      "bindings": {
+        "ci_commit": "816edfda9c5a7e6217ac344c044edd94ef66042d",
+        "ci_run_id": "39631773181",
+        "compiler_version_sha256": "6d366eee5ac6d909249830892c8846df457f835554e1481da864b4d455e951d5",
+        "driver_object_sha256": "98e05c19624dfba6741a0307327f409cd177abfbfcfcf892bdbad000a388e814",
+        "kernel_binary_sha256": "5e529274ecba7905e023e5b807de4dda2e14be51cbff45dcf84bceeb01b78fc4",
+        "sdk_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164"
+      },
+      "bound_source_hashes": {
+        "kernel/ProtocolCore.hpp": "8883a06bcf471102864abe7b8674b3508df54f2c20ffad80b9821c2a411b9956",
+        "kernel/S540HotkeysVPC.cpp": "b514efead0e4bb2eb4730641998dc2d3d6f2984133d6a33cfb25234c95031ba4",
+        "kernel/S540HotkeysVPC.hpp": "7fa051a2f96ff51e1854090fa7690bafd70af894efbff8a9fac77ebe02cb9580"
+      },
+      "evidence_file": "s540-hotkeys-bzero-review.json",
+      "evidence_sha256": "6b56c4ad49a86026fa835a0dbbcc6b23a359a412cd2a0929dcfc36d4880946a2",
+      "reason": "Public XNU bzero alias emitted by the actual reviewed compiler; accepted only for the exact native artifact and source bindings, independently reviewed call sites and public export evidence."
+    }
+  },
+  "schema": 1,
+  "sdk_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164"
+}

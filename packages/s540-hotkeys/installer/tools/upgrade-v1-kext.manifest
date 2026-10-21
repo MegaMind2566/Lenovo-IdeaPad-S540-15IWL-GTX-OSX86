@@ -1,0 +1,7 @@
+D .
+D ./Contents
+D ./Contents/MacOS
+D ./Contents/_CodeSignature
+F 5e529274ecba7905e023e5b807de4dda2e14be51cbff45dcf84bceeb01b78fc4  ./Contents/MacOS/S540HotkeysVPC
+F 6686de10a28a2fe11b36cbb86dcbacc827cfc4ea116b4dabf1845e5aee629e9b  ./Contents/_CodeSignature/CodeResources
+F c439c8a777e5f3ba3736fb9ae417f42c3ff1874bee30dec1adfa1ac139ab7508  ./Contents/Info.plist

@@ -1,4 +1,4 @@
-S540 Tasti 0.1.0
+S540 Tasti app 0.1.1 / kernel 0.1.0
 
 Kernel sources: GPL-2.0-only. See src/kernel/LICENSE and
 licenses/GPL-2.0-YogaSMC.txt. The VPC command protocol and numeric hotkey mapping

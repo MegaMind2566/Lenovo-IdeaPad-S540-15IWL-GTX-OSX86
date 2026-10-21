@@ -1,0 +1,49 @@
+name: Build S540 hotkey app update
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['work/s540-hotkeys-v1']
+    paths:
+      - '.github/native-ci/s540-hotkeys-app-update-request.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: s540-native-hotkeys
+  cancel-in-progress: false
+
+jobs:
+  app-update:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[native ci]')
+    runs-on: macos-15-intel
+    timeout-minutes: 10
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Verify reviewed app inputs and immutable signed kernel
+        run: >-
+          python3 builders/build_s540_hotkeys_app_update.py
+          --source-dir packages/s540-hotkeys
+          --check-sources
+          --verify-native-request .github/native-ci/s540-hotkeys-app-update-request.json
+          --repository-root "$GITHUB_WORKSPACE"
+      - name: Compile app only and package original kernel unchanged
+        run: >-
+          python3 builders/build_s540_hotkeys_app_update.py
+          --source-dir packages/s540-hotkeys
+          --output-dir build/s540-hotkeys-app-update
+      - name: Preserve complete update or app build diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: S540-Tasti-v1.1-app-update
+          path: |
+            build/s540-hotkeys-app-update/*.zip
+            build/s540-hotkeys-app-update/*.zip.sha256
+          if-no-files-found: warn
+          retention-days: 30

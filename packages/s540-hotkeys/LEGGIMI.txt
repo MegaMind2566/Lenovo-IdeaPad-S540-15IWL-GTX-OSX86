@@ -1,12 +1,22 @@
-S540 Tasti 0.1.0 — Lenovo IdeaPad S540-15IWL GTX / 81SW
+S540 Tasti 0.1.1 — Lenovo IdeaPad S540-15IWL GTX / 81SW
 
-INSTALLAZIONE
+INSTALLAZIONE / AGGIORNAMENTO
 1. Estrai tutto lo ZIP nella cartella Download.
 2. Nel Terminale esegui:
-   bash "$HOME/Downloads/S540-Tasti-v1/INSTALLA-TASTI.command"
+   bash "$HOME/Downloads/S540-Tasti-v1.1/INSTALLA-TASTI.command"
 3. Inserisci la password quando richiesta. Segui l'eventuale richiesta di
    autorizzazione di macOS e riavvia soltanto se l'installer lo richiede.
    L'app S540 partirà automaticamente nella tua sessione.
+
+Se la versione 0.1.0 è già installata e verificabile, il comando aggiorna
+soltanto l'app e la ricevuta. Conserva una copia dell'app precedente per il
+ripristino automatico in caso di errore e riusa il driver 0.1.0 già installato.
+
+CORREZIONE 0.1.1
+Il valore firmware a 32 bit era ricevuto da macOS come numero con segno.
+L'app precedente lo rifiutava come «stato non valido» e quindi non elaborava
+F4/F7/F8. La lettura è ora corretta soltanto per i campi firmware a 32 bit;
+le verifiche su sequenze, tempi e identità del driver restano attive.
 
 TASTI AGGIUNTI
 F4       Attiva/disattiva il mute del microfono di ingresso corrente.
@@ -14,16 +24,18 @@ F7       Spegne Wi-Fi e Bluetooth; alla pressione successiva ripristina gli
          stati precedenti. L'esito viene verificato sui controlli delle radio.
 F8       Comanda la webcam attraverso il firmware e ne verifica lo stato.
          Se il firmware ha già cambiato lo stato, evita una seconda inversione.
-Fn+F9    Richiede il blocco schermo di macOS.
+F9       Richiede il blocco schermo di macOS. Anche Comando+L blocca lo schermo.
 
-Per Fn+F9 scegli "Abilita Fn+F9…" dal menu S540 e consenti Monitoraggio input
-e Accessibilità nelle Impostazioni di Sistema. Poi scegli "Rileggi permessi
-Fn+F9". Questi permessi servono solo a Fn+F9. F9 da solo rimane invariato:
-la tastiera lo trasmette come Windows/Comando+L e non è distinguibile da quella
-scorciatoia ordinaria senza cambiare la configurazione della tastiera.
+Per F9 scegli "Abilita F9…" dal menu S540 e consenti gli eventuali permessi
+richiesti da macOS. Se Fn+F9 era già abilitato nella versione precedente,
+l'aggiornamento attiva F9 automaticamente; i permessi potrebbero essere
+richiesti di nuovo da macOS per la nuova app. Poi scegli "Rileggi permessi F9".
+F9 da solo è trasmesso dalla tastiera come Comando+L: entrambe le combinazioni
+ora richiedono il blocco schermo. Fn+F9 non è più associato al blocco schermo.
+I permessi di questa scorciatoia non servono a F4/F7/F8.
 
 UNICO CONTROLLO FINALE
-Prova F4, F7, F8 e Fn+F9 nell'uso normale. Il menu S540 mostra l'esito.
+Prova F4, F7, F8 e F9 nell'uso normale. Il menu S540 mostra l'esito.
 Per F8 verifica anche l'immagine in un'app che utilizza la webcam: la conferma
 del firmware da sola non prova l'effetto visibile sul sensore. La compilazione
 e i controlli del pacchetto non sostituiscono questa prima prova sul portatile.
@@ -49,8 +61,8 @@ NVIDIA, lettore schede e F10 sono fuori dall'ambito di questa versione.
 Non carica YogaSMC/ReYogaSMC: usa solo il protocollo VPC necessario a questi
 tasti. Se uno di quei driver è già attivo, l'installazione si ferma per evitare
 che due componenti utilizzino contemporaneamente lo stesso controller.
-L'app non registra testo digitato o audio. Per Fn+F9 osserva soltanto F9
-della tastiera PS/2 selezionata. I log locali riportano stati ed errori.
+L'app non registra testo digitato o audio. Per F9 intercetta soltanto la combinazione Comando+L
+e i relativi rilasci, senza memorizzare altri tasti. I log locali riportano stati ed errori.
 
 I sorgenti, i riferimenti alle implementazioni precedenti, le licenze e la
 provenienza di compilazione sono inclusi nel pacchetto.

@@ -1,0 +1,56 @@
+S540 Tasti 0.1.0 — Lenovo IdeaPad S540-15IWL GTX / 81SW
+
+INSTALLAZIONE
+1. Estrai tutto lo ZIP nella cartella Download.
+2. Nel Terminale esegui:
+   bash "$HOME/Downloads/S540-Tasti-v1/INSTALLA-TASTI.command"
+3. Inserisci la password quando richiesta. Segui l'eventuale richiesta di
+   autorizzazione di macOS e riavvia soltanto se l'installer lo richiede.
+   L'app S540 partirà automaticamente nella tua sessione.
+
+TASTI AGGIUNTI
+F4       Attiva/disattiva il mute del microfono di ingresso corrente.
+F7       Spegne Wi-Fi e Bluetooth; alla pressione successiva ripristina gli
+         stati precedenti. L'esito viene verificato sui controlli delle radio.
+F8       Comanda la webcam attraverso il firmware e ne verifica lo stato.
+         Se il firmware ha già cambiato lo stato, evita una seconda inversione.
+Fn+F9    Richiede il blocco schermo di macOS.
+
+Per Fn+F9 scegli "Abilita Fn+F9…" dal menu S540 e consenti Monitoraggio input
+e Accessibilità nelle Impostazioni di Sistema. Poi scegli "Rileggi permessi
+Fn+F9". Questi permessi servono solo a Fn+F9. F9 da solo rimane invariato:
+la tastiera lo trasmette come Windows/Comando+L e non è distinguibile da quella
+scorciatoia ordinaria senza cambiare la configurazione della tastiera.
+
+UNICO CONTROLLO FINALE
+Prova F4, F7, F8 e Fn+F9 nell'uso normale. Il menu S540 mostra l'esito.
+Per F8 verifica anche l'immagine in un'app che utilizza la webcam: la conferma
+del firmware da sola non prova l'effetto visibile sul sensore. La compilazione
+e i controlli del pacchetto non sostituiscono questa prima prova sul portatile.
+
+Se una funzione non risponde, comunica quale e il messaggio del menu S540.
+VERIFICA-TASTI.command legge lo stato senza premere tasti, cambiare radio o
+registrare audio. Non occorre eseguirlo se le funzioni vanno bene.
+
+RIPRISTINO
+Esegui RIPRISTINA-TASTI.command dal pacchetto completo. Rimuove i componenti
+riconosciuti di questa installazione. Se macOS impedisce lo scaricamento del
+driver, conserva i file e indica il passaggio necessario.
+
+AMBITO
+Il pacchetto installa S540HotkeysVPC.kext in /Library/Extensions,
+S540Tasti.app in /Applications e un LaunchAgent per il tuo utente.
+Richiede macOS Intel 13 o successivo e il firmware S540 con VPC2004,
+VPC0 e _CFG=0xFE0D0014. Non è destinato a modelli Lenovo diversi.
+Non modifica EFI, rEFInd, OpenCore, Windows, SIP, NVRAM o driver audio.
+Le funzioni già operative restano affidate alla configurazione corrente.
+NVIDIA, lettore schede e F10 sono fuori dall'ambito di questa versione.
+
+Non carica YogaSMC/ReYogaSMC: usa solo il protocollo VPC necessario a questi
+tasti. Se uno di quei driver è già attivo, l'installazione si ferma per evitare
+che due componenti utilizzino contemporaneamente lo stesso controller.
+L'app non registra testo digitato o audio. Per Fn+F9 osserva soltanto F9
+della tastiera PS/2 selezionata. I log locali riportano stati ed errori.
+
+I sorgenti, i riferimenti alle implementazioni precedenti, le licenze e la
+provenienza di compilazione sono inclusi nel pacchetto.

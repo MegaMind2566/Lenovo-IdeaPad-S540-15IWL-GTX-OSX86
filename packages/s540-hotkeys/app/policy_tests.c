@@ -11,6 +11,17 @@ int main(void) {
     CHECK(!HKEventFresh(3000000002, 1));
     CHECK(!HKEventFresh(0, 0));
     CHECK(!HKEventFresh(1, 2));
+    bool held = false;
+    CHECK(HKDirectLock(&held, true, false, 37, true, false, false) == HKLockRequest && held);
+    CHECK(HKDirectLock(&held, true, false, 37, true, false, true) == HKLockConsume && held);
+    CHECK(HKDirectLock(&held, false, true, 37, false, false, false) == HKLockConsume && !held);
+    CHECK(HKDirectLock(&held, true, false, 37, false, false, false) == HKLockPass && !held);
+    CHECK(HKDirectLock(&held, true, false, 37, true, false, true) == HKLockPass && !held);
+    CHECK(HKDirectLock(&held, false, true, 37, true, false, false) == HKLockPass && !held);
+    CHECK(HKDirectLock(&held, true, false, 37, true, true, false) == HKLockPass && !held);
+    CHECK(HKDirectLock(&held, false, true, 37, true, false, false) == HKLockPass && !held);
+    CHECK(HKDirectLock(&held, true, false, 101, false, false, false) == HKLockPass && !held);
+    CHECK(HKDirectLock(&held, false, false, 37, true, false, false) == HKLockPass && !held);
     CHECK(HKRadioEqual(HKRadioTarget(wifi, false, off), off));
     CHECK(HKRadioEqual(HKRadioTarget(bt, false, off), off));
     CHECK(HKRadioEqual(HKRadioTarget(both, false, off), off));

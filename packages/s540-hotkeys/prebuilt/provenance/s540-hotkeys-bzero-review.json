@@ -1,0 +1,112 @@
+{
+  "bindings": {
+    "ci_commit": "816edfda9c5a7e6217ac344c044edd94ef66042d",
+    "ci_run_id": "39631773181",
+    "compiler_version_sha256": "6d366eee5ac6d909249830892c8846df457f835554e1481da864b4d455e951d5",
+    "driver_object_sha256": "98e05c19624dfba6741a0307327f409cd177abfbfcfcf892bdbad000a388e814",
+    "kernel_binary_sha256": "5e529274ecba7905e023e5b807de4dda2e14be51cbff45dcf84bceeb01b78fc4",
+    "sdk_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164"
+  },
+  "bound_source_hashes": {
+    "kernel/ProtocolCore.hpp": "8883a06bcf471102864abe7b8674b3508df54f2c20ffad80b9821c2a411b9956",
+    "kernel/S540HotkeysVPC.cpp": "b514efead0e4bb2eb4730641998dc2d3d6f2984133d6a33cfb25234c95031ba4",
+    "kernel/S540HotkeysVPC.hpp": "7fa051a2f96ff51e1854090fa7690bafd70af894efbff8a9fac77ebe02cb9580"
+  },
+  "decision": "Accept this actual compiler-produced zero-fill helper only for the exact recorded sources, SDK, compiler version, object, signed kernel binary and native CI run. No other helper or artifact is admitted.",
+  "object_relocations": [
+    {
+      "containing_function": "__ZN14S540HotkeysVPCC2EPK11OSMetaClass",
+      "context_hex": "00be000300004889df4883c4085b5de900000000",
+      "offset": 430,
+      "opcode": "0xe9",
+      "pc_relative": 1,
+      "relocation_type": 2,
+      "section": "__text",
+      "symbol": "___bzero",
+      "width_log2": 2
+    },
+    {
+      "containing_function": "__ZN14S540HotkeysVPCC1EPK11OSMetaClass",
+      "context_hex": "00be000300004889df4883c4085b5de900000000",
+      "offset": 798,
+      "opcode": "0xe9",
+      "pc_relative": 1,
+      "relocation_type": 2,
+      "section": "__text",
+      "symbol": "___bzero",
+      "width_log2": 2
+    },
+    {
+      "containing_function": "__ZNK14S540HotkeysVPC9MetaClass5allocEv",
+      "context_hex": "000000488dbb20010000be00030000e800000000",
+      "offset": 1341,
+      "opcode": "0xe8",
+      "pc_relative": 1,
+      "relocation_type": 2,
+      "section": "__text",
+      "symbol": "___bzero",
+      "width_log2": 2
+    },
+    {
+      "containing_function": "__ZN14S540HotkeysVPCC1Ev",
+      "context_hex": "4981c620010000be000300004c89f7e800000000",
+      "offset": 1748,
+      "opcode": "0xe8",
+      "pc_relative": 1,
+      "relocation_type": 2,
+      "section": "__text",
+      "symbol": "___bzero",
+      "width_log2": 2
+    },
+    {
+      "containing_function": "__ZN14S540HotkeysVPCC2Ev",
+      "context_hex": "4981c620010000be000300004c89f7e800000000",
+      "offset": 2148,
+      "opcode": "0xe8",
+      "pc_relative": 1,
+      "relocation_type": 2,
+      "section": "__text",
+      "symbol": "___bzero",
+      "width_log2": 2
+    },
+    {
+      "containing_function": "__ZN14S540HotkeysVPC5startEP9IOService",
+      "context_hex": "4c8dbd20ffffffbec00000004c89ffe800000000",
+      "offset": 3554,
+      "opcode": "0xe8",
+      "pc_relative": 1,
+      "relocation_type": 2,
+      "section": "__text",
+      "symbol": "___bzero",
+      "width_log2": 2
+    }
+  ],
+  "public_export_evidence": [
+    {
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "git_blob_sha": "366d2e4984b3afe2f2eb6a46487f8fb69b83dfb8",
+      "observed_exact_export": "___bzero",
+      "path": "config/Libkern.exports",
+      "repository": "apple-oss-distributions/xnu",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/config/Libkern.exports"
+    },
+    {
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "git_blob_sha": "90e4a296aef375d35ec0ecbbccec3927cdf40b4a",
+      "observed_alias": "ENTRY2(bzero,__bzero)",
+      "path": "osfmk/x86_64/bzero.s",
+      "repository": "apple-oss-distributions/xnu",
+      "semantics": "The same public zero-fill entry body: pointer in rdi, length in rsi, zero stores and return.",
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/x86_64/bzero.s"
+    }
+  ],
+  "schema": 1,
+  "source_interpretation": {
+    "constructor_and_alloc_count": 5,
+    "notes": "Five constructor/MetaClass::alloc helper branches zero the in-class initialized 32 by 24 byte ring. The start helper call uses the same 192-byte stack IOPMPowerState[2] buffer as the immediately following explicit _bzero call. Attribution of that preceding helper to automatic stack initialization is an inference from native object code; the helper semantics and all six call sites are independently verified.",
+    "ring_zero_bytes": 768,
+    "start_count": 1,
+    "start_zero_bytes": 192
+  },
+  "symbol": "___bzero"
+}

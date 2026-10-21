@@ -5,9 +5,6 @@
 #import <CoreWLAN/CoreWLAN.h>
 #import <IOBluetooth/IOBluetooth.h>
 #import <IOKit/IOKitLib.h>
-#import <IOKit/hid/IOHIDLib.h>
-#import <IOKit/hid/IOHIDManager.h>
-#import <IOKit/hidsystem/IOHIDLib.h>
 #import <ApplicationServices/ApplicationServices.h>
 #include <dispatch/dispatch.h>
 #include <dlfcn.h>
@@ -23,13 +20,15 @@
 #include <string.h>
 #include "HotkeyPolicy.h"
 
-static NSString *const AppVersion = @"0.1.0";
+static NSString *const AppVersion = @"0.1.1";
+static NSString *const DriverVersion = @"0.1.0";
 static NSString *const DriverClass = @"S540HotkeysVPC";
 static NSString *const DriverBundle = @"org.s540.HotkeysVPC";
 static const uint32_t ExpectedCFG = 0xFE0D0014;
 static atomic_bool CancelActions;
 static atomic_bool Terminating;
 static atomic_uint_fast64_t LifecycleEpoch;
+static atomic_uint_fast64_t LockPreferenceEpoch;
 static BOOL ActionsCancelled(void) { return atomic_load(&CancelActions) || atomic_load(&Terminating); }
 static uint64_t NowNs(void) {
     static mach_timebase_info_data_t scale;
@@ -43,8 +42,30 @@ static BOOL Unsigned(id value, uint64_t *result) {
     *result = [value unsignedLongLongValue];
     return YES;
 }
+// IOKit decodes OSNumber32 as CFNumberSInt32, including high-bit bit patterns.
+// Only fields whose driver contract is uint32 may use this reinterpretation.
+static BOOL UInt32Bits(id value, uint32_t *result) {
+    if (!value || CFGetTypeID((__bridge CFTypeRef)value) != CFNumberGetTypeID() ||
+        CFNumberIsFloatType((__bridge CFNumberRef)value)) return NO;
+    int64_t signedValue = 0;
+    if (!CFNumberGetValue((__bridge CFNumberRef)value, kCFNumberSInt64Type, &signedValue) ||
+        signedValue < INT32_MIN || signedValue > UINT32_MAX) return NO;
+    *result = (uint32_t)signedValue;
+    return YES;
+}
 static BOOL IsBoolean(id value) {
     return value && CFGetTypeID((__bridge CFTypeRef)value) == CFBooleanGetTypeID();
+}
+static BOOL LockKeysEnabled(void) {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    if ([defaults objectForKey:@"EnableF9"] != nil) return [defaults boolForKey:@"EnableF9"];
+    return [defaults boolForKey:@"EnableFnF9"] || [defaults boolForKey:@"EnableLockKeys"];
+}
+static void MigrateLockPreference(void) {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    if ([defaults objectForKey:@"EnableF9"] == nil) [defaults setBool:LockKeysEnabled() forKey:@"EnableF9"];
+    [defaults removeObjectForKey:@"EnableFnF9"];
+    [defaults removeObjectForKey:@"EnableLockKeys"];
 }
 static NSString *PrivateDirectory(void) {
     return [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/S540Tasti"];
@@ -66,6 +87,20 @@ static BOOL PrepareDirectory(void) {
     struct stat info;
     return lstat(path.fileSystemRepresentation, &info) == 0 && S_ISDIR(info.st_mode) &&
         info.st_uid == getuid() && (info.st_mode & 0077) == 0;
+}
+static NSString *DriverContractFailure(NSDictionary *snapshot) {
+    uint64_t schema = 0, sequence = 0; uint32_t cfg = 0;
+    if (!Unsigned(snapshot[@"Schema"], &schema) || schema != 1) return @"driver-contract-Schema-invalid";
+    if (!UInt32Bits(snapshot[@"CFG"], &cfg)) return @"driver-contract-CFG-type-invalid";
+    if (cfg != ExpectedCFG) return @"driver-contract-CFG-mismatch";
+    if (!Unsigned(snapshot[@"EventSequence"], &sequence)) return @"driver-contract-EventSequence-invalid";
+    if (![snapshot[@"Version"] isEqual:DriverVersion]) return @"driver-contract-Version-mismatch";
+    if (!IsBoolean(snapshot[@"Ready"])) return @"driver-contract-Ready-invalid";
+    if (!IsBoolean(snapshot[@"Awake"])) return @"driver-contract-Awake-invalid";
+    if (![snapshot[@"State"] isKindOfClass:[NSString class]] ||
+        ![@[@"Ready", @"Fault", @"Stopping"] containsObject:snapshot[@"State"]]) return @"driver-contract-State-invalid";
+    if (![snapshot[@"EventRing"] isKindOfClass:[NSArray class]]) return @"driver-contract-EventRing-invalid";
+    return nil;
 }
 static NSDictionary *DriverSnapshot(uint64_t *registryID, NSString **failure) {
     io_iterator_t iterator = IO_OBJECT_NULL;
@@ -92,15 +127,8 @@ static NSDictionary *DriverSnapshot(uint64_t *registryID, NSString **failure) {
         *failure = @"driver-identity-or-snapshot-invalid"; return nil;
     }
     NSDictionary *snapshot = CFBridgingRelease(raw);
-    uint64_t schema, cfg, sequence;
-    if (!Unsigned(snapshot[@"Schema"], &schema) || schema != 1 ||
-        !Unsigned(snapshot[@"CFG"], &cfg) || cfg != ExpectedCFG ||
-        !Unsigned(snapshot[@"EventSequence"], &sequence) ||
-        ![snapshot[@"Version"] isEqual:AppVersion] || !IsBoolean(snapshot[@"Ready"]) || !IsBoolean(snapshot[@"Awake"]) ||
-        ![@[@"Ready", @"Fault", @"Stopping"] containsObject:snapshot[@"State"]] ||
-        ![snapshot[@"EventRing"] isKindOfClass:[NSArray class]]) {
-        *failure = @"driver-contract-invalid"; return nil;
-    }
+    *failure = DriverContractFailure(snapshot);
+    if (*failure) return nil;
     *registryID = identifier;
     return snapshot;
 }
@@ -243,8 +271,8 @@ static NSString *ToggleRadios(void) {
     return target.wifi && target.bluetooth ? @"Wi-Fi e Bluetooth attivi" : target.wifi ? @"Wi-Fi attivo; Bluetooth spento" : @"Bluetooth attivo; Wi-Fi spento";
 }
 static NSString *CameraStatus(NSDictionary *snapshot) {
-    uint64_t result = 0, state = UINT32_MAX;
-    if (!Unsigned(snapshot[@"LastCameraResult"], &result) || !Unsigned(snapshot[@"CameraState"], &state)) return @"Webcam: stato non disponibile";
+    uint64_t result = 0; uint32_t state = UINT32_MAX;
+    if (!Unsigned(snapshot[@"LastCameraResult"], &result) || !UInt32Bits(snapshot[@"CameraState"], &state)) return @"Webcam: stato non disponibile";
     if (result == 0) return @"Webcam: pronta per F8";
     if (result == 1) return @"Webcam: comando non supportato dal firmware";
     if (result == 2 || result == 3 || result == 7) {
@@ -252,25 +280,6 @@ static NSString *CameraStatus(NSDictionary *snapshot) {
         if (state == 1) return @"Webcam attiva: stato firmware confermato";
     }
     return @"Webcam: modifica non confermata dal firmware";
-}
-static BOOL PS2Device(IOHIDDeviceRef device) {
-    CFTypeRef vendor = IOHIDDeviceGetProperty(device, CFSTR(kIOHIDVendorIDKey));
-    CFTypeRef product = IOHIDDeviceGetProperty(device, CFSTR(kIOHIDProductIDKey));
-    CFTypeRef transport = IOHIDDeviceGetProperty(device, CFSTR(kIOHIDTransportKey));
-    uint64_t v = 0, p = 0;
-    if (!Unsigned((__bridge id)vendor, &v) || v != 0x05ac || !Unsigned((__bridge id)product, &p) || p != 0xffff ||
-        !transport || CFGetTypeID(transport) != CFStringGetTypeID() || !CFEqual(transport, CFSTR("PS2"))) return NO;
-    io_registry_entry_t cursor = IOHIDDeviceGetService(device);
-    if (!cursor || IOObjectRetain(cursor) != KERN_SUCCESS) return NO;
-    BOOL found = NO;
-    for (unsigned depth = 0; cursor && depth < 16; depth++) {
-        if (IOObjectConformsTo(cursor, "ApplePS2Keyboard")) { found = YES; break; }
-        io_registry_entry_t parent = IO_OBJECT_NULL;
-        kern_return_t result = IORegistryEntryGetParentEntry(cursor, kIOServicePlane, &parent);
-        IOObjectRelease(cursor); cursor = result == KERN_SUCCESS ? parent : IO_OBJECT_NULL;
-    }
-    if (cursor) IOObjectRelease(cursor);
-    return found;
 }
 static BOOL PostLockRequest(void) {
     if (!AXIsProcessTrusted()) return NO;
@@ -292,24 +301,21 @@ static BOOL PostLockRequest(void) {
     uint64_t _registryID, _sequence, _lastF4, _lastF7, _lastF9;
     bool _seenF4, _seenF7, _seenF9;
     BOOL _baselineNeeded, _suspended, _stopping;
-    IOHIDManagerRef _hid;
-    uint64_t _ps2ID;
-    BOOL _f9Down;
+    CFMachPortRef _lockTap;
+    CFRunLoopSourceRef _lockTapSource;
+    uint64_t _tapBaselineNs;
+    bool _lockLDown;
     int _lockFD;
 }
 - (void)updateFeature:(NSString *)feature text:(NSString *)text;
-- (void)refreshHID;
-- (void)closeHID;
-- (void)handleValue:(IOHIDValueRef)value;
+- (void)refreshLockTap;
+- (void)closeLockTap;
+- (CGEventRef)handleLockEvent:(CGEventRef)event type:(CGEventType)type;
 @end
 
-static void HIDValue(void *context, IOReturn result, void *sender, IOHIDValueRef value) {
-    (void)sender;
-    if (result == kIOReturnSuccess) [(__bridge S540Delegate *)context handleValue:value];
-}
-static void HIDChanged(void *context, IOReturn result, void *sender, IOHIDDeviceRef device) {
-    (void)result; (void)sender; (void)device;
-    [(__bridge S540Delegate *)context performSelector:@selector(refreshHID) withObject:nil afterDelay:0.1];
+static CGEventRef LockTapCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *context) {
+    (void)proxy;
+    return [(__bridge S540Delegate *)context handleLockEvent:event type:type];
 }
 @implementation S540Delegate
 - (instancetype)init {
@@ -324,7 +330,7 @@ static void HIDChanged(void *context, IOReturn result, void *sender, IOHIDDevice
     (void)WritePrivateDictionary(saved, @"runtime.plist");
     dispatch_async(dispatch_get_main_queue(), ^{
         NSMenuItem *target = [feature isEqual:@"F4"] ? self->_micItem : [feature isEqual:@"F7"] ? self->_radioItem :
-            [feature isEqual:@"F8"] ? self->_cameraItem : [feature isEqual:@"FnF9"] ? self->_lockItem : self->_driverItem;
+            [feature isEqual:@"F8"] ? self->_cameraItem : [feature isEqual:@"F9"] ? self->_lockItem : self->_driverItem;
         target.title = text;
         self->_item.button.toolTip = [NSString stringWithFormat:@"S540 Tasti — %@", text];
     });
@@ -335,7 +341,8 @@ static void HIDChanged(void *context, IOReturn result, void *sender, IOHIDDevice
     NSDictionary *snapshot = DriverSnapshot(&identifier, &failure);
     if (!snapshot) {
         _baselineNeeded = YES;
-        NSString *text = [failure isEqual:@"driver-not-loaded"] ? @"Driver tasti in attesa: installazione o riavvio necessario" : @"Driver tasti: stato non valido";
+        NSString *text = [failure isEqual:@"driver-not-loaded"] ? @"Driver tasti in attesa: installazione o riavvio necessario" :
+            [NSString stringWithFormat:@"Driver tasti: %@", failure ?: @"driver-state-invalid"];
         if (![_featureStatus[@"Driver"] isEqual:text]) [self updateFeature:@"Driver" text:text];
         return;
     }
@@ -384,94 +391,91 @@ static void HIDChanged(void *context, IOReturn result, void *sender, IOHIDDevice
     NSString *camera = CameraStatus(snapshot);
     if (![_featureStatus[@"F8"] isEqual:camera]) [self updateFeature:@"F8" text:camera];
 }
-- (void)handleValue:(IOHIDValueRef)value {
-    IOHIDElementRef element = IOHIDValueGetElement(value);
-    if (IOHIDElementGetUsagePage(element) != 7 || IOHIDElementGetUsage(element) != 0x42 || !_ps2ID) return;
-    uint64_t identifier = 0;
-    if (IORegistryEntryGetRegistryEntryID(IOHIDDeviceGetService(IOHIDElementGetDevice(element)), &identifier) || identifier != _ps2ID) return;
-    CFIndex state = IOHIDValueGetIntegerValue(value);
-    if (state == 0) { _f9Down = NO; return; }
-    if (state != 1 || _f9Down) return;
-    _f9Down = YES;
-    CGEventFlags modifiers = CGEventSourceFlagsState(kCGEventSourceStateCombinedSessionState);
-    if (modifiers & (kCGEventFlagMaskCommand | kCGEventFlagMaskControl | kCGEventFlagMaskAlternate | kCGEventFlagMaskShift)) return;
-    uint64_t now = NowNs();
+- (CGEventRef)handleLockEvent:(CGEventRef)event type:(CGEventType)type {
+    if (type == kCGEventTapDisabledByTimeout || type == kCGEventTapDisabledByUserInput) {
+        _lockLDown = false; _tapBaselineNs = NowNs();
+        if (_lockTap && LockKeysEnabled() && !ActionsCancelled() && CGPreflightListenEventAccess() && AXIsProcessTrusted())
+            CGEventTapEnable(_lockTap, true);
+        else dispatch_async(_actions, ^{ [self updateFeature:@"F9" text:@"F9 / ⌘+L: filtro sospeso, rileggi i permessi"]; });
+        return event;
+    }
+    if (!event || (type != kCGEventKeyDown && type != kCGEventKeyUp) || !LockKeysEnabled()) return event;
+    uint64_t keyCode = (uint64_t)CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
+    if (keyCode != 37) return event;
+    CGEventFlags flags = CGEventGetFlags(event);
+    BOOL command = (flags & kCGEventFlagMaskCommand) != 0;
+    BOOL otherModifiers = (flags & (kCGEventFlagMaskControl | kCGEventFlagMaskAlternate | kCGEventFlagMaskShift)) != 0;
+    HKLockDecision decision = HKDirectLock(&_lockLDown, type == kCGEventKeyDown, type == kCGEventKeyUp,
+        keyCode, command, otherModifiers, CGEventGetIntegerValueField(event, kCGKeyboardEventAutorepeat) != 0);
+    if (decision == HKLockPass) return event;
+    if (decision == HKLockConsume) return NULL;
+    uint64_t now = CGEventGetTimestamp(event), baseline = _tapBaselineNs;
+    uint64_t epoch = atomic_load(&LifecycleEpoch);
+    uint64_t lockEpoch = atomic_load(&LockPreferenceEpoch);
     dispatch_async(_actions, ^{
-        if (self->_stopping || self->_suspended || ActionsCancelled() || ![[NSUserDefaults standardUserDefaults] boolForKey:@"EnableFnF9"] ||
+        if (self->_stopping || self->_suspended || ActionsCancelled() || !LockKeysEnabled() || atomic_load(&LifecycleEpoch) != epoch ||
+            atomic_load(&LockPreferenceEpoch) != lockEpoch ||
             !HKDebounce(now, &self->_lastF9, &self->_seenF9)) return;
-        if (!HKEventFresh(NowNs(), now)) {
-            [self updateFeature:@"FnF9" text:@"Fn+F9: evento scaduto, ripremi il tasto"];
+        if (now < baseline || !HKEventFresh(NowNs(), now)) {
+            [self updateFeature:@"F9" text:@"F9 / ⌘+L: evento scaduto, ripremi il tasto"];
             return;
         }
         BOOL sent = PostLockRequest();
-        [self updateFeature:@"FnF9" text:sent ? @"Fn+F9: richiesta blocco schermo inviata" : @"Fn+F9: consenti Accessibilità"];
+        [self updateFeature:@"F9" text:sent ? @"F9 / ⌘+L: richiesta blocco schermo inviata" : @"F9 / ⌘+L: consenti Accessibilità"];
     });
+    return NULL;
 }
-- (void)closeHID {
-    _ps2ID = 0; _f9Down = NO;
-    if (!_hid) return;
-    IOHIDManagerUnscheduleFromRunLoop(_hid, CFRunLoopGetMain(), kCFRunLoopCommonModes);
-    IOHIDManagerClose(_hid, kIOHIDOptionsTypeNone);
-    CFRelease(_hid); _hid = NULL;
+- (void)closeLockTap {
+    (void)atomic_fetch_add(&LockPreferenceEpoch, 1);
+    _lockLDown = false;
+    if (_lockTapSource) {
+        CFRunLoopRemoveSource(CFRunLoopGetMain(), _lockTapSource, kCFRunLoopCommonModes);
+        CFRelease(_lockTapSource); _lockTapSource = NULL;
+    }
+    if (_lockTap) { CFMachPortInvalidate(_lockTap); CFRelease(_lockTap); _lockTap = NULL; }
 }
-- (void)refreshHID {
-    _ps2ID = 0; _f9Down = NO;
-    BOOL enabled = [[NSUserDefaults standardUserDefaults] boolForKey:@"EnableFnF9"];
-    if (!enabled || IOHIDCheckAccess(kIOHIDRequestTypeListenEvent) != kIOHIDAccessTypeGranted || !AXIsProcessTrusted()) {
-        [self closeHID];
-        NSString *message = enabled ? @"Fn+F9: servono Monitoraggio input e Accessibilità" : @"Fn+F9: abilitalo dal menu S540";
-        dispatch_async(_actions, ^{ [self updateFeature:@"FnF9" text:message]; });
+- (void)refreshLockTap {
+    _lockLDown = false; _tapBaselineNs = NowNs();
+    BOOL enabled = LockKeysEnabled();
+    if (!enabled || !CGPreflightListenEventAccess() || !AXIsProcessTrusted()) {
+        [self closeLockTap];
+        NSString *message = enabled ? @"F9 / ⌘+L: servono Monitoraggio input e Accessibilità" : @"F9 / ⌘+L: abilitalo dal menu S540";
+        dispatch_async(_actions, ^{ [self updateFeature:@"F9" text:message]; });
         return;
     }
-    if (!_hid) {
-        _hid = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);
-        if (!_hid) return;
-        NSDictionary *match = @{ @kIOHIDVendorIDKey:@0x05ac, @kIOHIDProductIDKey:@0xffff,
-            @kIOHIDTransportKey:@"PS2", @kIOHIDPrimaryUsagePageKey:@1, @kIOHIDPrimaryUsageKey:@6 };
-        IOHIDManagerSetDeviceMatching(_hid, (__bridge CFDictionaryRef)match);
-        NSDictionary *valueMatch = @{ @kIOHIDElementUsagePageKey:@7, @kIOHIDElementUsageKey:@0x42 };
-        IOHIDManagerSetInputValueMatching(_hid, (__bridge CFDictionaryRef)valueMatch);
-        IOHIDManagerRegisterInputValueCallback(_hid, HIDValue, (__bridge void *)self);
-        IOHIDManagerRegisterDeviceMatchingCallback(_hid, HIDChanged, (__bridge void *)self);
-        IOHIDManagerRegisterDeviceRemovalCallback(_hid, HIDChanged, (__bridge void *)self);
-        IOHIDManagerScheduleWithRunLoop(_hid, CFRunLoopGetMain(), kCFRunLoopCommonModes);
-        if (IOHIDManagerOpen(_hid, kIOHIDOptionsTypeNone) != kIOReturnSuccess) {
-            IOHIDManagerUnscheduleFromRunLoop(_hid, CFRunLoopGetMain(), kCFRunLoopCommonModes);
-            CFRelease(_hid); _hid = NULL;
-            dispatch_async(_actions, ^{ [self updateFeature:@"FnF9" text:@"Fn+F9: impossibile aprire la tastiera PS/2"]; });
+    if (!_lockTap) {
+        CGEventMask mask = CGEventMaskBit(kCGEventKeyDown) | CGEventMaskBit(kCGEventKeyUp);
+        _lockTap = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault,
+            mask, LockTapCallback, (__bridge void *)self);
+        if (_lockTap) _lockTapSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, _lockTap, 0);
+        if (!_lockTap || !_lockTapSource) {
+            [self closeLockTap];
+            dispatch_async(_actions, ^{ [self updateFeature:@"F9" text:@"F9 / ⌘+L: filtro non disponibile, rileggi i permessi"]; });
             return;
         }
+        CFRunLoopAddSource(CFRunLoopGetMain(), _lockTapSource, kCFRunLoopCommonModes);
     }
-    CFSetRef devices = IOHIDManagerCopyDevices(_hid);
-    NSUInteger matches = 0; uint64_t chosen = 0;
-    for (id raw in (__bridge NSSet *)devices) {
-        IOHIDDeviceRef device = (__bridge IOHIDDeviceRef)raw;
-        if (PS2Device(device) && !IORegistryEntryGetRegistryEntryID(IOHIDDeviceGetService(device), &chosen)) matches++;
-    }
-    if (devices) CFRelease(devices);
-    if (matches == 1) _ps2ID = chosen;
-    NSString *text = _ps2ID ? @"Fn+F9: blocco schermo pronto" : @"Fn+F9: tastiera PS/2 non univoca o non disponibile";
-    dispatch_async(_actions, ^{ [self updateFeature:@"FnF9" text:text]; });
+    CGEventTapEnable(_lockTap, true);
+    dispatch_async(_actions, ^{ [self updateFeature:@"F9" text:@"F9 / ⌘+L: blocco schermo pronto"]; });
 }
 - (void)enableF9:(id)sender {
     (void)sender;
-    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"EnableFnF9"];
-    if (IOHIDCheckAccess(kIOHIDRequestTypeListenEvent) != kIOHIDAccessTypeGranted)
-        (void)IOHIDRequestAccess(kIOHIDRequestTypeListenEvent);
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"EnableF9"];
+    if (!CGPreflightListenEventAccess()) (void)CGRequestListenEventAccess();
     NSDictionary *options = @{(__bridge NSString *)kAXTrustedCheckOptionPrompt:@YES};
     (void)AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)options);
-    [self refreshHID];
+    [self refreshLockTap];
 }
 - (void)disableF9:(id)sender {
     (void)sender;
-    [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"EnableFnF9"];
-    [self closeHID];
+    [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"EnableF9"];
+    [self closeLockTap];
     dispatch_async(_actions, ^{
         self->_seenF9 = false;
-        [self updateFeature:@"FnF9" text:@"Fn+F9: disabilitato dal menu S540"];
+        [self updateFeature:@"F9" text:@"F9 / ⌘+L: disabilitato dal menu S540"];
     });
 }
-- (void)refreshPermissions:(id)sender { (void)sender; [self refreshHID]; }
+- (void)refreshPermissions:(id)sender { (void)sender; [self refreshLockTap]; }
 - (void)quit:(id)sender { (void)sender; [NSApp terminate:nil]; }
 - (void)willSleep:(NSNotification *)notification {
     (void)notification;
@@ -487,7 +491,7 @@ static void HIDChanged(void *context, IOReturn result, void *sender, IOHIDDevice
         if (atomic_load(&LifecycleEpoch) == epoch && !atomic_load(&Terminating))
             atomic_store(&CancelActions, false);
     });
-    [self refreshHID];
+    [self refreshLockTap];
 }
 - (void)applicationDidFinishLaunching:(NSNotification *)notification {
     (void)notification;
@@ -500,20 +504,21 @@ static void HIDChanged(void *context, IOReturn result, void *sender, IOHIDDevice
         if (_lockFD >= 0) close(_lockFD);
         _lockFD = -1; [NSApp terminate:nil]; return;
     }
+    MigrateLockPreference();
     _actions = dispatch_queue_create("org.s540.Hotkeys.actions", DISPATCH_QUEUE_SERIAL);
     _featureStatus = [@{@"Driver":@"Collegamento tasti Lenovo…", @"F4":@"F4: microfono pronto",
-        @"F7":@"F7: Wi-Fi e Bluetooth pronti", @"F8":@"F8: webcam in attesa", @"FnF9":@"Fn+F9: abilitalo dal menu S540"} mutableCopy];
+        @"F7":@"F7: Wi-Fi e Bluetooth pronti", @"F8":@"F8: webcam in attesa", @"F9":@"F9 / ⌘+L: abilitalo dal menu S540"} mutableCopy];
     _item = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
     _item.button.title = @"S540";
     NSMenu *menu = [[NSMenu alloc] initWithTitle:@"S540 Tasti"];
-    NSArray *titles = @[_featureStatus[@"Driver"],_featureStatus[@"F4"],_featureStatus[@"F7"],_featureStatus[@"F8"],_featureStatus[@"FnF9"]];
+    NSArray *titles = @[_featureStatus[@"Driver"],_featureStatus[@"F4"],_featureStatus[@"F7"],_featureStatus[@"F8"],_featureStatus[@"F9"]];
     NSMutableArray *items = [NSMutableArray array];
     for (NSString *title in titles) { NSMenuItem *item = [[NSMenuItem alloc] initWithTitle:title action:NULL keyEquivalent:@""]; item.enabled = NO; [menu addItem:item]; [items addObject:item]; }
     _driverItem=items[0]; _micItem=items[1]; _radioItem=items[2]; _cameraItem=items[3]; _lockItem=items[4];
     [menu addItem:[NSMenuItem separatorItem]];
-    NSMenuItem *enable = [[NSMenuItem alloc] initWithTitle:@"Abilita Fn+F9…" action:@selector(enableF9:) keyEquivalent:@""]; enable.target=self; [menu addItem:enable];
-    NSMenuItem *disable = [[NSMenuItem alloc] initWithTitle:@"Disabilita Fn+F9" action:@selector(disableF9:) keyEquivalent:@""]; disable.target=self; [menu addItem:disable];
-    NSMenuItem *refresh = [[NSMenuItem alloc] initWithTitle:@"Rileggi permessi Fn+F9" action:@selector(refreshPermissions:) keyEquivalent:@""]; refresh.target=self; [menu addItem:refresh];
+    NSMenuItem *enable = [[NSMenuItem alloc] initWithTitle:@"Abilita F9 / ⌘+L per il blocco…" action:@selector(enableF9:) keyEquivalent:@""]; enable.target=self; [menu addItem:enable];
+    NSMenuItem *disable = [[NSMenuItem alloc] initWithTitle:@"Disabilita F9 / ⌘+L per il blocco" action:@selector(disableF9:) keyEquivalent:@""]; disable.target=self; [menu addItem:disable];
+    NSMenuItem *refresh = [[NSMenuItem alloc] initWithTitle:@"Rileggi permessi F9" action:@selector(refreshPermissions:) keyEquivalent:@""]; refresh.target=self; [menu addItem:refresh];
     [menu addItem:[NSMenuItem separatorItem]];
     NSMenuItem *quit = [[NSMenuItem alloc] initWithTitle:@"Esci da S540 Tasti" action:@selector(quit:) keyEquivalent:@""]; quit.target=self; [menu addItem:quit];
     _item.menu = menu;
@@ -529,14 +534,14 @@ static void HIDChanged(void *context, IOReturn result, void *sender, IOHIDDevice
     NSNotificationCenter *workspace = [[NSWorkspace sharedWorkspace] notificationCenter];
     [workspace addObserver:self selector:@selector(willSleep:) name:NSWorkspaceWillSleepNotification object:nil];
     [workspace addObserver:self selector:@selector(didWake:) name:NSWorkspaceDidWakeNotification object:nil];
-    [self refreshHID];
+    [self refreshLockTap];
 }
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender {
     (void)sender;
     atomic_store(&Terminating, true);
     atomic_store(&CancelActions, true);
     if (_actions) dispatch_sync(_actions, ^{ self->_stopping = YES; if (self->_timer) dispatch_source_cancel(self->_timer); });
-    [self closeHID];
+    [self closeLockTap];
     if (_termSignal) dispatch_source_cancel(_termSignal);
     [[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver:self];
     if (_lockFD >= 0) { close(_lockFD); _lockFD = -1; }
@@ -547,10 +552,11 @@ static void HIDChanged(void *context, IOReturn result, void *sender, IOHIDDevice
 static NSDictionary *Status(void) {
     uint64_t identifier = 0; NSString *failure = nil;
     NSDictionary *snapshot = DriverSnapshot(&identifier, &failure);
-    NSMutableDictionary *status = [@{@"schema":@1,@"app_version":AppVersion,@"driver_found":@(snapshot != nil),
+    NSMutableDictionary *status = [@{@"schema":@1,@"app_version":AppVersion,@"expected_driver_version":DriverVersion,@"driver_found":@(snapshot != nil),
         @"driver_ready":@([snapshot[@"Ready"] boolValue] && [snapshot[@"State"] isEqual:@"Ready"]), @"driver_status":snapshot[@"State"] ?: failure ?: @"unknown",
-        @"input_monitoring_granted":@(IOHIDCheckAccess(kIOHIDRequestTypeListenEvent) == kIOHIDAccessTypeGranted),
-        @"accessibility_granted":@(AXIsProcessTrusted()), @"fn_f9_enabled":[[NSUserDefaults standardUserDefaults] objectForKey:@"EnableFnF9"] ?: @NO} mutableCopy];
+        @"input_monitoring_granted":@(CGPreflightListenEventAccess()),
+        @"accessibility_granted":@(AXIsProcessTrusted()), @"f9_enabled":@(LockKeysEnabled()), @"fn_f9_enabled":@NO,
+        @"command_l_locks_screen":@(LockKeysEnabled())} mutableCopy];
     if (snapshot) status[@"driver_snapshot"] = snapshot;
     AudioDeviceID device = kAudioObjectUnknown; UInt32 mute = 0; BOOL writable = NO;
     BOOL mic = ReadDefaultInput(&device) && ReadMute(device, &mute, &writable);
@@ -561,13 +567,47 @@ static NSDictionary *Status(void) {
     status[@"radio_controls_available"] = @(radios);
     if (radios) { status[@"wifi_powered"] = @(state.wifi); status[@"bluetooth_powered"] = @(state.bluetooth); }
     NSDictionary *runtime = ReadPrivateDictionary(@"runtime.plist");
-    if ([runtime[@"features"] isKindOfClass:[NSDictionary class]]) status[@"last_feature_status"] = runtime[@"features"];
+    if ([runtime[@"app_version"] isEqual:AppVersion] && [runtime[@"features"] isKindOfClass:[NSDictionary class]])
+        status[@"last_feature_status"] = runtime[@"features"];
     return status;
 }
 static int PrintJSON(NSDictionary *object) {
     NSData *data = [NSJSONSerialization dataWithJSONObject:object options:NSJSONWritingPrettyPrinted error:NULL];
     if (!data) return 1;
     return fwrite(data.bytes, 1, data.length, stdout) == data.length && fputc('\n', stdout) != EOF ? 0 : 1;
+}
+static BOOL DecoderAndContractTests(void) {
+    uint32_t cfgRaw = ExpectedCFG;
+    int32_t signedCFG = 0, signedUnknown = -1;
+    memcpy(&signedCFG, &cfgRaw, sizeof(signedCFG));
+    id cfg = CFBridgingRelease(CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &signedCFG));
+    id unknown = CFBridgingRelease(CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &signedUnknown));
+    uint32_t bits = 0; uint64_t wide = 0;
+    if (!cfg || !unknown || Unsigned(cfg, &wide) || !UInt32Bits(cfg, &bits) || bits != ExpectedCFG ||
+        !UInt32Bits(unknown, &bits) || bits != UINT32_MAX ||
+        !UInt32Bits(@(UINT32_MAX), &bits) || bits != UINT32_MAX ||
+        !UInt32Bits(@(INT32_MIN), &bits) || bits != UINT32_C(0x80000000) ||
+        UInt32Bits(@YES, &bits) || UInt32Bits(@1.0, &bits) || UInt32Bits(@"1", &bits) ||
+        UInt32Bits(@(-INT64_C(2147483649)), &bits) || UInt32Bits(@UINT64_C(4294967296), &bits) ||
+        UInt32Bits(@UINT64_MAX, &bits)) return NO;
+    NSMutableDictionary *snapshot = [@{@"Schema":@1, @"CFG":cfg, @"EventSequence":@0,
+        @"Version":DriverVersion, @"Ready":@YES, @"Awake":@YES, @"State":@"Ready", @"EventRing":@[]} mutableCopy];
+    if (DriverContractFailure(snapshot) != nil) return NO;
+    snapshot[@"CFG"] = @YES;
+    if (![DriverContractFailure(snapshot) isEqual:@"driver-contract-CFG-type-invalid"]) return NO;
+    snapshot[@"CFG"] = cfg; snapshot[@"Version"] = AppVersion;
+    if (![DriverContractFailure(snapshot) isEqual:@"driver-contract-Version-mismatch"]) return NO;
+    snapshot[@"Version"] = DriverVersion; snapshot[@"EventSequence"] = @(-1);
+    if (![DriverContractFailure(snapshot) isEqual:@"driver-contract-EventSequence-invalid"]) return NO;
+    bool held = false;
+    return HKDirectLock(&held, true, false, 37, true, false, false) == HKLockRequest &&
+        HKDirectLock(&held, true, false, 37, true, false, true) == HKLockConsume &&
+        HKDirectLock(&held, false, true, 37, false, false, false) == HKLockConsume &&
+        HKDirectLock(&held, true, false, 37, false, false, false) == HKLockPass &&
+        HKDirectLock(&held, true, false, 37, true, false, true) == HKLockPass &&
+        HKDirectLock(&held, false, true, 37, true, false, false) == HKLockPass &&
+        HKDirectLock(&held, true, false, 37, true, true, false) == HKLockPass &&
+        HKDirectLock(&held, true, false, 101, false, false, false) == HKLockPass;
 }
 static int SelfTest(void) {
     HKRadioState off = {false,false}, wifi={true,false};
@@ -577,7 +617,7 @@ static int SelfTest(void) {
         HKValidateRing(events,2,2,0)==HKRingValid && HKValidateRing(events+1,1,2,0)==HKRingGap &&
         HKDebounce(1,&last,&seen) && !HKDebounce(1000,&last,&seen) && HKDebounce(300001000,&last,&seen) &&
         !Unsigned(@NO,&last) && !Unsigned(@"0",&last) && !Unsigned(@0.0,&last) && Unsigned(@0,&last) &&
-        HKEventFresh(3000000001,1) && !HKEventFresh(3000000002,1);
+        HKEventFresh(3000000001,1) && !HKEventFresh(3000000002,1) && DecoderAndContractTests();
     (void)PrintJSON(@{@"result":passed?@"SELF_TEST_PASSED":@"SELF_TEST_FAILED",@"app_version":AppVersion,@"hardware_actions_performed":@NO});
     return passed ? 0 : 1;
 }

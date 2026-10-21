@@ -7,7 +7,10 @@ umask 077
 
 S540_KEXT_ID=org.s540.HotkeysVPC
 S540_APP_ID=org.s540.Hotkeys
-S540_VERSION=0.1.0
+S540_KEXT_VERSION=0.1.0
+S540_APP_VERSION=0.1.1
+S540_V1_APP_MANIFEST_SHA256=05bfcf271293f1e11e9def08acfddb4f7330adeda1f35243fea1ae6567cf3bb1
+S540_V1_KEXT_MANIFEST_SHA256=13f6070000c5487f67ce5e9acf30face88d189e89d1bf005d7f36009395b946c
 S540_LABEL=org.s540.Hotkeys
 S540_KEXT=/Library/Extensions/S540HotkeysVPC.kext
 S540_APP=/Applications/S540Tasti.app
@@ -29,9 +32,16 @@ S540_LOADED_HERE=0
 S540_RECEIPT_OURS=0
 S540_PRESERVE=0
 S540_INSTALL_DONE=0
+S540_INSTALL_MUTATION_STARTED=0
 S540_CACHE_REMOVAL_PENDING=0
 S540_UNLOAD_PENDING=0
 S540_DRIVER_STATE=''
+S540_UPGRADE_ACTIVE=0
+S540_UPGRADE_OLD_APP_MOVED=0
+S540_UPGRADE_NEW_APP_INSTALLED=0
+S540_UPGRADE_BACKUP=''
+S540_UPGRADE_RECEIPT_SHA256=''
+S540_UPGRADE_AGENT_SHA256=''
 S540_OPERATION=verify
 
 s540_fail() { printf '\nSTOP: %s\n' "$1" >&2; return 1; }
@@ -91,9 +101,8 @@ s540_package() {
     done
     [ "$(s540_plist "$S540_PACKAGE/assets/S540HotkeysVPC.kext/Contents/Info.plist" CFBundleIdentifier string)" = "$S540_KEXT_ID" ] || s540_fail 'Identificatore driver inatteso.'
     [ "$(s540_plist "$S540_PACKAGE/assets/S540Tasti.app/Contents/Info.plist" CFBundleIdentifier string)" = "$S540_APP_ID" ] || s540_fail 'Identificatore app inatteso.'
-    for path in "$S540_PACKAGE/assets/S540HotkeysVPC.kext" "$S540_PACKAGE/assets/S540Tasti.app"; do
-        [ "$(s540_plist "$path/Contents/Info.plist" CFBundleVersion string)" = "$S540_VERSION" ] || s540_fail 'Versione dei componenti inattesa.'
-    done
+    [ "$(s540_plist "$S540_PACKAGE/assets/S540HotkeysVPC.kext/Contents/Info.plist" CFBundleVersion string)" = "$S540_KEXT_VERSION" ] || s540_fail 'Versione driver inattesa.'
+    [ "$(s540_plist "$S540_PACKAGE/assets/S540Tasti.app/Contents/Info.plist" CFBundleVersion string)" = "$S540_APP_VERSION" ] || s540_fail 'Versione app inattesa.'
     s540_tree_manifest "$S540_PACKAGE/assets/S540HotkeysVPC.kext" "$S540_RUN/kext.manifest" || s540_fail 'Struttura driver non valida.'
     s540_tree_manifest "$S540_PACKAGE/assets/S540Tasti.app" "$S540_RUN/app.manifest" || s540_fail 'Struttura app non valida.'
     executable="$S540_PACKAGE/assets/S540Tasti.app/Contents/MacOS/S540Tasti"
@@ -169,7 +178,7 @@ s540_ready() {
     version=$(printf '%s' "$snapshot" | /usr/bin/plutil -extract 0.Version raw -expect string -o - - 2>/dev/null) || return 1
     ready=$(printf '%s' "$snapshot" | /usr/bin/plutil -extract 0.Ready raw -expect bool -o - - 2>/dev/null) || return 1
     S540_DRIVER_STATE=$(printf '%s' "$snapshot" | /usr/bin/plutil -extract 0.State raw -expect string -o - - 2>/dev/null) || return 1
-    [ "$version" = "$S540_VERSION" ] && [ "$ready" = true ] && [ "$S540_DRIVER_STATE" = Ready ]
+    [ "$version" = "$S540_KEXT_VERSION" ] && [ "$ready" = true ] && [ "$S540_DRIVER_STATE" = Ready ]
 }
 
 s540_competitors() {
@@ -208,11 +217,11 @@ s540_write_receipt() {
     /usr/bin/plutil -create xml1 "$draft"
     /usr/bin/plutil -insert Schema -integer 1 "$draft"
     /usr/bin/plutil -insert OwnerUID -integer "$S540_UID" "$draft"
-    for key in RunID State KextPath AppPath AgentPath BundleID LaunchLabel Version PackageManifestSHA256 KextManifestSHA256 AppManifestSHA256 AgentSHA256 RunDirectory; do
+    for key in RunID State KextPath AppPath AgentPath BundleID LaunchLabel Version KextVersion AppVersion PackageManifestSHA256 KextManifestSHA256 AppManifestSHA256 AgentSHA256 RunDirectory; do
         case "$key" in
             RunID) value="$S540_RUN_ID";; State) value=prepared;; KextPath) value="$S540_KEXT";;
             AppPath) value="$S540_APP";; AgentPath) value="$S540_AGENT";; BundleID) value="$S540_KEXT_ID";;
-            LaunchLabel) value="$S540_LABEL";; Version) value="$S540_VERSION";;
+            LaunchLabel) value="$S540_LABEL";; Version|AppVersion) value="$S540_APP_VERSION";; KextVersion) value="$S540_KEXT_VERSION";;
             PackageManifestSHA256) value=$(s540_hash "$S540_PACKAGE/SHA256SUMS");;
             KextManifestSHA256) value=$(s540_hash "$S540_RUN/kext.manifest");;
             AppManifestSHA256) value=$(s540_hash "$S540_RUN/app.manifest");;
@@ -351,12 +360,133 @@ s540_rollback_new() {
     s540_phase failed_new_files_removed
 }
 
+s540_v1_upgrade_eligible() {
+    [ -d "$S540_APP" ] && [ -d "$S540_KEXT" ] && [ -f "$S540_AGENT" ] || return 1
+    [ "$(s540_plist "$S540_RECEIPT" Version string)" = 0.1.0 ] || return 1
+    [ "$(s540_hash "$S540_ROOT/app.manifest")" = "$S540_V1_APP_MANIFEST_SHA256" ] &&
+    [ "$(s540_hash "$S540_ROOT/kext.manifest")" = "$S540_V1_KEXT_MANIFEST_SHA256" ] || return 1
+    [ "$(s540_hash "$S540_PACKAGE/tools/upgrade-v1-app.manifest")" = "$S540_V1_APP_MANIFEST_SHA256" ] &&
+    [ "$(s540_hash "$S540_PACKAGE/tools/upgrade-v1-kext.manifest")" = "$S540_V1_KEXT_MANIFEST_SHA256" ] || return 1
+    /usr/bin/cmp -s "$S540_RUN/kext.manifest" "$S540_ROOT/kext.manifest"
+}
+
+s540_rollback_app_upgrade() {
+    local file current_hash temporary
+    [ -n "$S540_UPGRADE_BACKUP" ] && s540_protected "$S540_UPGRADE_BACKUP" || return 1
+    [ "$(s540_hash "$S540_UPGRADE_BACKUP/receipt.plist")" = "$S540_UPGRADE_RECEIPT_SHA256" ] &&
+    [ "$(s540_hash "$S540_UPGRADE_BACKUP/agent.plist")" = "$S540_UPGRADE_AGENT_SHA256" ] &&
+    [ "$(s540_hash "$S540_UPGRADE_BACKUP/app.manifest")" = "$S540_V1_APP_MANIFEST_SHA256" ] &&
+    [ "$(s540_hash "$S540_UPGRADE_BACKUP/kext.manifest")" = "$S540_V1_KEXT_MANIFEST_SHA256" ] || return 1
+    if [ "$S540_UPGRADE_NEW_APP_INSTALLED" = 1 ]; then s540_stop_agent || return 1; fi
+    if [ "$S540_UPGRADE_OLD_APP_MOVED" = 1 ]; then
+        if [ -d "$S540_UPGRADE_BACKUP/S540Tasti.app" ]; then
+            s540_tree_matches "$S540_UPGRADE_BACKUP/S540Tasti.app" "$S540_UPGRADE_BACKUP/app.manifest" || return 1
+            if [ -e "$S540_APP" ] || [ -L "$S540_APP" ]; then
+                s540_tree_matches "$S540_APP" "$S540_RUN/app.manifest" && s540_protected "$S540_APP" || return 1
+                /usr/bin/sudo -n /bin/rm -rf -- "$S540_APP" || return 1
+                [ ! -e "$S540_APP" ] && [ ! -L "$S540_APP" ] || return 1
+            fi
+            /usr/bin/sudo -n /bin/mv "$S540_UPGRADE_BACKUP/S540Tasti.app" "$S540_APP" || return 1
+        else
+            # The rename may have failed, or a signal arrived before it ran.
+            s540_tree_matches "$S540_APP" "$S540_UPGRADE_BACKUP/app.manifest" || return 1
+        fi
+        S540_UPGRADE_OLD_APP_MOVED=0
+    fi
+    if [ -e "$S540_AGENT" ] || [ -L "$S540_AGENT" ]; then
+        [ -f "$S540_AGENT" ] && [ ! -L "$S540_AGENT" ] || return 1
+        current_hash=$(s540_hash "$S540_AGENT") || return 1
+        [ "$current_hash" = "$S540_UPGRADE_AGENT_SHA256" ] ||
+        [ "$current_hash" = "$(s540_hash "$S540_RUN/agent.plist")" ] || return 1
+    fi
+    temporary=$(/usr/bin/mktemp "$HOME/Library/LaunchAgents/.S540-restore.XXXXXX") || return 1
+    /bin/cp "$S540_UPGRADE_BACKUP/agent.plist" "$temporary" && /bin/chmod 600 "$temporary" &&
+    /bin/mv -f "$temporary" "$S540_AGENT" || return 1
+    for file in app.manifest kext.manifest receipt.plist; do
+        /usr/bin/sudo -n /usr/bin/ditto "$S540_UPGRADE_BACKUP/$file" "$S540_ROOT/$file" || return 1
+        /usr/bin/cmp -s "$S540_UPGRADE_BACKUP/$file" "$S540_ROOT/$file" || return 1
+    done
+    s540_receipt_valid && s540_owned_paths || return 1
+    [ "$(s540_hash "$S540_RECEIPT")" = "$S540_UPGRADE_RECEIPT_SHA256" ] || return 1
+    if ! /bin/launchctl print "gui/$S540_UID/$S540_LABEL" >/dev/null 2>&1; then
+        /bin/launchctl bootstrap "gui/$S540_UID" "$S540_AGENT" > "$S540_RUN/agent-rollback.log" 2>&1 || return 1
+    fi
+    S540_UPGRADE_ACTIVE=0
+    printf '\nAggiornamento annullato: app, ricevuta e avvio automatico precedenti ripristinati. Driver invariato.\n'
+}
+
+s540_upgrade_app() {
+    local file agent_stage backup_hash
+    S540_OPERATION=upgrade
+    s540_take_lock
+    s540_receipt_valid && s540_owned_paths && s540_v1_upgrade_eligible || s540_fail 'La v1 installata non coincide con il pacchetto originale: aggiornamento fermato.'
+    s540_ready || s540_fail 'Il driver originale non risulta pronto: aggiornamento app fermato senza modificare il driver.'
+    s540_make_agent
+    S540_UPGRADE_BACKUP="$S540_ROOT/upgrade-v1-$S540_RUN_ID"
+    /usr/bin/sudo -n /bin/mkdir "$S540_UPGRADE_BACKUP"
+    /usr/bin/sudo -n /bin/chmod 755 "$S540_UPGRADE_BACKUP"
+    for file in receipt.plist app.manifest kext.manifest; do
+        /usr/bin/sudo -n /usr/bin/ditto "$S540_ROOT/$file" "$S540_UPGRADE_BACKUP/$file"
+        /usr/bin/cmp -s "$S540_ROOT/$file" "$S540_UPGRADE_BACKUP/$file" || s540_fail 'Backup della ricevuta non verificato.'
+    done
+    /usr/bin/sudo -n /usr/bin/ditto "$S540_AGENT" "$S540_UPGRADE_BACKUP/agent.plist"
+    /usr/bin/sudo -n /usr/sbin/chown root:wheel "$S540_UPGRADE_BACKUP/agent.plist"
+    /usr/bin/sudo -n /bin/chmod 644 "$S540_UPGRADE_BACKUP/agent.plist"
+    S540_UPGRADE_RECEIPT_SHA256=$(s540_hash "$S540_RECEIPT")
+    S540_UPGRADE_AGENT_SHA256=$(s540_hash "$S540_AGENT")
+    [ "$(s540_hash "$S540_UPGRADE_BACKUP/agent.plist")" = "$S540_UPGRADE_AGENT_SHA256" ] || s540_fail 'Backup avvio automatico non verificato.'
+    S540_STAGE=$(/usr/bin/sudo -n /usr/bin/mktemp -d "$S540_ROOT/.stage-$S540_RUN_ID.XXXXXX")
+    /usr/bin/sudo -n /bin/chmod 755 "$S540_STAGE"
+    /usr/bin/sudo -n /usr/bin/ditto --norsrc --noextattr --noacl --noqtn "$S540_PACKAGE/assets/S540Tasti.app" "$S540_STAGE/S540Tasti.app"
+    /usr/bin/sudo -n /usr/sbin/chown -R root:wheel "$S540_STAGE/S540Tasti.app"
+    /usr/bin/sudo -n /bin/chmod -R go-w "$S540_STAGE/S540Tasti.app"
+    s540_tree_matches "$S540_STAGE/S540Tasti.app" "$S540_RUN/app.manifest" || s540_fail 'Copia temporanea app non verificata.'
+    /usr/bin/codesign --verify --strict "$S540_STAGE/S540Tasti.app" > "$S540_RUN/app-stage-codesign.log" 2>&1 || s540_fail 'Firma della copia temporanea app non valida.'
+    S540_UPGRADE_ACTIVE=1
+    s540_stop_agent || s540_fail 'App ancora attiva: aggiornamento annullato.'
+    s540_phase app_upgrade_pending
+    /usr/bin/sudo -n /usr/bin/plutil -insert PendingAppUpgradeBackupPath -string "$S540_UPGRADE_BACKUP" "$S540_RECEIPT"
+    s540_owned_paths || s540_fail 'File installati cambiati durante l’aggiornamento.'
+    # Record intent before each rename: an interrupt can arrive when mv returns.
+    S540_UPGRADE_OLD_APP_MOVED=1
+    /usr/bin/sudo -n /bin/mv "$S540_APP" "$S540_UPGRADE_BACKUP/S540Tasti.app"
+    S540_UPGRADE_NEW_APP_INSTALLED=1
+    /usr/bin/sudo -n /bin/mv "$S540_STAGE/S540Tasti.app" "$S540_APP"
+    s540_tree_matches "$S540_APP" "$S540_RUN/app.manifest" || s540_fail 'App aggiornata non verificata.'
+    agent_stage=$(/usr/bin/mktemp "$HOME/Library/LaunchAgents/.S540-update.XXXXXX")
+    /bin/cp "$S540_RUN/agent.plist" "$agent_stage"
+    /bin/chmod 600 "$agent_stage"
+    [ "$(s540_hash "$S540_AGENT")" = "$S540_UPGRADE_AGENT_SHA256" ] || s540_fail 'Avvio automatico cambiato durante l’aggiornamento.'
+    /bin/mv -f "$agent_stage" "$S540_AGENT"
+    s540_write_receipt
+    s540_tree_manifest "$S540_UPGRADE_BACKUP" "$S540_RUN/upgrade-backup.manifest" || s540_fail 'Backup dell’app precedente non verificato.'
+    backup_hash=$(s540_hash "$S540_RUN/upgrade-backup.manifest")
+    /usr/bin/sudo -n /usr/bin/plutil -insert UpgradeBackupPath -string "$S540_UPGRADE_BACKUP" "$S540_RECEIPT"
+    /usr/bin/sudo -n /usr/bin/plutil -insert UpgradeBackupTreeSHA256 -string "$backup_hash" "$S540_RECEIPT"
+    s540_receipt_valid && s540_owned_paths || s540_fail 'Ricevuta aggiornata non verificata.'
+    /bin/launchctl bootstrap "gui/$S540_UID" "$S540_AGENT" > "$S540_RUN/agent-bootstrap.log" 2>&1 || s540_fail 'Avvio app aggiornata non riuscito.'
+    S540_BOOTSTRAPPED=1
+    s540_phase ready
+    S540_INSTALL_DONE=1
+    S540_UPGRADE_ACTIVE=0
+    "$S540_APP_BIN" --status 2> "$S540_RUN/app-status.stderr" || true
+    printf '\nS540 Tasti aggiornato alla 0.1.1. Driver 0.1.0 invariato; nessun riavvio richiesto dall’aggiornamento.\n'
+    printf 'Backup app precedente: %s\n' "$S540_UPGRADE_BACKUP"
+    printf 'Preferenze conservate. Se macOS richiede nuovamente un permesso per l’app aggiornata, abilitalo dal menu dell’app.\n'
+}
+
 s540_cleanup() {
     local code=$?
     trap - EXIT
     trap '' INT TERM HUP QUIT
     set +e
-    if [ "$S540_OPERATION" = install ] && [ "$code" != 0 ] && [ "$S540_INSTALL_DONE" = 0 ] && [ "$S540_RECEIPT_OURS" = 1 ]; then
+    if [ "$S540_OPERATION" = upgrade ] && [ "$code" != 0 ] && [ "$S540_UPGRADE_ACTIVE" = 1 ]; then
+        if ! s540_rollback_app_upgrade; then
+            printf '\nRipristino dell’app non completato. Nessun intervento sul driver. Backup conservato: %s\n' "$S540_UPGRADE_BACKUP" >&2
+            printf 'Non ripetere l’installazione prima di verificare questo backup.\n' >&2
+        fi
+    fi
+    if [ "$S540_OPERATION" = install ] && [ "$code" != 0 ] && [ "$S540_INSTALL_DONE" = 0 ] && [ "$S540_INSTALL_MUTATION_STARTED" = 1 ] && [ "$S540_RECEIPT_OURS" = 1 ]; then
         if ! s540_rollback_new; then
             if [ "$S540_CACHE_REMOVAL_PENDING" != 1 ] && [ "$S540_UNLOAD_PENDING" != 1 ]; then
                 s540_phase cleanup_required
@@ -386,13 +516,17 @@ s540_install() {
     s540_new_run
     s540_traps
     s540_package
-    s540_competitors
     local exists=0 status load_status rebuild_status phase=driver_pending
     [ ! -e "$S540_ROOT" ] && [ ! -L "$S540_ROOT" ] || exists=1
     if [ "$exists" = 1 ]; then
         s540_receipt_valid && s540_owned_paths || s540_fail 'Esistono componenti o ricevute non verificabili: nessuna sovrascrittura.'
-        /usr/bin/cmp -s "$S540_RUN/kext.manifest" "$S540_ROOT/kext.manifest" &&
-        /usr/bin/cmp -s "$S540_RUN/app.manifest" "$S540_ROOT/app.manifest" || s540_fail 'È installata una versione diversa: usa prima RIPRISTINA-TASTI.command.'
+        /usr/bin/cmp -s "$S540_RUN/kext.manifest" "$S540_ROOT/kext.manifest" || s540_fail 'Il driver installato è diverso: nessuna sostituzione automatica.'
+        if ! /usr/bin/cmp -s "$S540_RUN/app.manifest" "$S540_ROOT/app.manifest"; then
+            S540_OPERATION=upgrade
+            s540_v1_upgrade_eligible || s540_fail 'App installata diversa dalla v1 originale: nessun aggiornamento automatico.'
+            s540_upgrade_app
+            return
+        fi
     else
         [ ! -e "$S540_KEXT" ] && [ ! -L "$S540_KEXT" ] && [ ! -e "$S540_APP" ] && [ ! -L "$S540_APP" ] && [ ! -e "$S540_AGENT" ] && [ ! -L "$S540_AGENT" ] || s540_fail 'Un percorso di destinazione esiste già: nessuna sovrascrittura.'
         if s540_loaded "$S540_KEXT_ID"; then status=0; else status=$?; fi
@@ -403,6 +537,7 @@ s540_install() {
             s540_fail 'Un LaunchAgent con lo stesso nome è già registrato senza ricevuta.'
         fi
     fi
+    s540_competitors
     s540_take_lock
     /usr/bin/sudo -n /usr/bin/kmutil libraries --bundle-path "$S540_PACKAGE/assets/S540HotkeysVPC.kext" --xml > "$S540_RUN/kmutil-libraries.xml" 2> "$S540_RUN/kmutil-libraries.stderr" || s540_fail 'Le dipendenze del driver non sono risolte. Nessun nuovo driver è stato copiato.'
     s540_make_agent
@@ -410,6 +545,7 @@ s540_install() {
     else
         [ "$(s540_hash "$S540_RUN/agent.plist")" = "$(s540_plist "$S540_RECEIPT" AgentSHA256 string)" ] || s540_fail 'Definizione dell’avvio automatico diversa dalla ricevuta esistente.'
     fi
+    S540_INSTALL_MUTATION_STARTED=1
     s540_stage_commit
     s540_phase load_requested
     if s540_loaded "$S540_KEXT_ID"; then status=0; else status=$?; fi
@@ -496,6 +632,19 @@ s540_verify() {
     printf '\nLa verifica non ha modificato microfono, radio o webcam.\n'
 }
 
+s540_remove_upgrade_backup() {
+    local backup expected
+    backup=$(s540_plist "$S540_RECEIPT" UpgradeBackupPath string 2>/dev/null || true)
+    [ -n "$backup" ] || return 0
+    case "$backup" in "$S540_ROOT/upgrade-v1-"*) ;; *) return 1;; esac
+    [ "$(/usr/bin/dirname "$backup")" = "$S540_ROOT" ] && s540_protected "$backup" || return 1
+    expected=$(s540_plist "$S540_RECEIPT" UpgradeBackupTreeSHA256 string) || return 1
+    s540_tree_manifest "$backup" "$S540_RUN/backup-removal.manifest" || return 1
+    [ "$(s540_hash "$S540_RUN/backup-removal.manifest")" = "$expected" ] || return 1
+    /usr/bin/sudo -n /bin/rm -rf -- "$backup" || return 1
+    [ ! -e "$backup" ] && [ ! -L "$backup" ]
+}
+
 s540_restore() {
     S540_OPERATION=restore
     s540_host
@@ -514,6 +663,7 @@ s540_restore() {
     if [ -e "$S540_KEXT" ]; then /usr/bin/sudo -n /bin/rm -rf -- "$S540_KEXT"; fi
     [ ! -e "$S540_KEXT" ] && [ ! -L "$S540_KEXT" ] || s540_fail 'Rimozione driver non confermata.'
     s540_rebuild_after_removal || s540_fail 'Rimozione da completare: aggiornamento della raccolta kernel non confermato; ricevuta conservata.'
+    s540_remove_upgrade_backup || s540_fail 'Componenti rimossi, ma backup aggiornamento non verificabile: backup e ricevuta conservati.'
     /usr/bin/sudo -n /bin/rm -f "$S540_RECEIPT" "$S540_ROOT/kext.manifest" "$S540_ROOT/app.manifest"
     /usr/bin/sudo -n /bin/rmdir "$S540_ROOT" 2>/dev/null || true
     printf '\nS540 Tasti rimosso. Gli altri driver, l’EFI e il boot non sono stati modificati.\n'
