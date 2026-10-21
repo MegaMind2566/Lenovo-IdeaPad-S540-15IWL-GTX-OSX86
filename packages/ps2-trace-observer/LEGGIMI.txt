@@ -1,0 +1,48 @@
+S540 - prova guidata PS/2, versione 1
+
+Non serve una chiavetta Linux. Esegui questa prova da macOS Intel sul Lenovo.
+
+1. Estrai S540-PS2-Trace-v1.zip nella cartella Downloads.
+2. Nel Terminale incolla questa unica riga:
+
+bash "$HOME/Downloads/S540-PS2-Trace-v1/CONTROLLA-TASTI.command"
+
+3. Inserisci la password amministratore quando richiesta, prima delle prove.
+4. Premi Invio UNA volta. Poi segui il conto alla rovescia:
+   attendi VIA, premi/rilascia una volta la combinazione indicata, attendi FINE.
+   Non premere Invio tra le prove. Non digitare altro testo o password.
+5. Al termine allega lo ZIP S540-PS2-Trace.XXXXXX.zip creato sul Desktop.
+
+Ordine automatico:
+  Fn+F5 (controllo iniziale), F4, F7, F8, F9, Windows+L.
+  Per Windows+L, il tasto Windows e quello con il logo Windows.
+  Per Fn+F5 e Windows+L, rilascia prima il secondo tasto, poi il modificatore.
+
+Se il primo controllo Fn+F5 non rende visibili i codici, la prova si ferma:
+non occorre premere gli altri tasti. Allega comunque lo ZIP prodotto.
+Ctrl+C interrompe e ripristina il Terminale e il logging.
+
+Cosa fa
+Il programma gia compilato e verificato abilita temporaneamente LogScanCodes=2
+nel VoodooPS2Keyboard 2.3.7 identificato dal suo UUID. Ogni finestra dura al
+massimo 3 secondi. Lo stesso programma riporta LogScanCodes a 0, anche se lo
+script si interrompe; lo script controlla la conferma finale e il valore letto.
+Non installa driver e non modifica EFI, mappature, dischi o preferenze.
+
+Il report condivisibile contiene codici numerici dei tasti e lo stato della
+prova. Eventuali errori degli strumenti sono conservati in diagnostics.txt,
+con un limite di 8192 byte per strumento. I log grezzi temporanei non vengono
+inclusi nello ZIP. Durante le finestre possono essere registrati anche tasti
+premuti per errore: usa soltanto quelli richiesti.
+
+Se appare "ripristino non verificato", non ripetere la prova e invia il messaggio
+e lo ZIP disponibile. Non viene eseguito alcun tentativo automatico aggiuntivo.
+
+Verifica disponibile
+Il programma nativo e riusato senza modifiche dalla build Intel gia completata
+con 64 controlli automatici. La nuova orchestrazione e il parser sono verificati
+con controlli locali e simulazioni; la visibilita del trace sul tuo macOS deve
+essere confermata dal primo controllo Fn+F5. Un report senza codici non prova
+l'assenza di eventi ACPI o di dati a monte del punto di trace del driver.
+
+NVIDIA, lettore schede e F10 non fanno parte di questa prova.
