@@ -1,0 +1,38 @@
+{
+  "admission": {
+    "hardware_admission": false,
+    "kernel_stack_bound_proven": false,
+    "native_ci_requested": false,
+    "original_entry_admission": false
+  },
+  "base_composition_sha256": "40f0fd1fc279421464c14f9b98f7fa84f6850e6fafb61d46aa60663ce471dd4c",
+  "code_sha256": {
+    "check.py": "0d41a34e91c5b1bb2c132b919cda654d4d107b7b285353dbd95e74201f2980fd",
+    "check_integration.py": "e1ef02680e0654b4f68eea6308fe08b9eb5082cb399529ab36faba4c03aa6df9",
+    "prepare.py": "fc201a3449f6ba91bd3b0e561bc3692b45782d96e8eea328b5c07cb8fcc2e772",
+    "tests/check_oom.c": "54968c1ced8eb68532101ecaec1dbf16011c8a7c02a72d9a540f249f6328a22f"
+  },
+  "compilation_policy": "Only source-local common bodies request always_inline; exported generic ABI wrappers remain. Fresh machine code must prove actual global direct callees.",
+  "existing_generic_abi_preserved": true,
+  "exports_added": [],
+  "format": 1,
+  "input_sha256": "c27d0ac3576137f9d5c42703f51f4d473d9cfb733781d849acf22099f5c8187e",
+  "original_algorithm_bodies": {
+    "_portMemAllocatorAlloc": {
+      "helper": "s540StackAllocatorAllocBody",
+      "only_function_name_changed": true,
+      "selected_original_body_sha256": "d8d4ce3eeec601a6b9e4142c2ec4b0f34f2164a1605b3cb8447c4eac0de0141f",
+      "successor_private_body_sha256": "019b701a7ac07bff9b25dced20791ff31deb3eb9d4ebc2778e249e2c98929e26"
+    },
+    "_portMemAllocatorFree": {
+      "helper": "s540StackAllocatorFreeBody",
+      "only_function_name_changed": true,
+      "selected_original_body_sha256": "903119ffe8dfc49921b269df6e3ff57e9a3543d63dafd30c632f06149647a40d",
+      "successor_private_body_sha256": "0d635aa9d75032220ad50b21548d8750817accaf9039c9c06afb61e38b541688"
+    }
+  },
+  "original_input": "src/nvidia/src/libraries/nvport/memory/memory_tracking.c",
+  "output_sha256": "b55ae1f99b29127f0707d81ad22711a22237ced3c249c2349ef811b79cc7b27b",
+  "profile": "source-local-global-allocator-context-specialization",
+  "project_translation_units_added": 0
+}

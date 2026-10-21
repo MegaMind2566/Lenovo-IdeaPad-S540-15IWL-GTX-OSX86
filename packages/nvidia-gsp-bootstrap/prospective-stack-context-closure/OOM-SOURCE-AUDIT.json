@@ -1,0 +1,55 @@
+{
+  "candidate_memory_sha256": "b55ae1f99b29127f0707d81ad22711a22237ced3c249c2349ef811b79cc7b27b",
+  "format": 1,
+  "functions": {
+    "portMemRegisterOomReportCb": {
+      "body_sha256": "0e2b160f93a2ba70a39919ddc7aedcd70e461fb3799116aafcbd211d9798a610",
+      "unchanged_in_successor": true
+    },
+    "portMemReportOom": {
+      "body_sha256": "a8450b543a8fe7fb10da3ec0833a103a665f525b75e0ae61666ed3a04eb372af",
+      "unchanged_in_successor": true
+    }
+  },
+  "hardware_admission": false,
+  "kernel_stack_bound_proven": false,
+  "limitations": [
+    "Named source token inventory is not enforceable first-core CPU/firmware producer exclusion.",
+    "The OOM indirect callback and transitive external/locking barriers remain in the actual aggregate graph.",
+    "No arbitrary C alias corruption or privileged writer immunity is claimed."
+  ],
+  "memory_header_sha256": "8c1741998b7990e40dda196492add447ddaf06d211cbc804c24e0f685c3ba4d0",
+  "named_nonzero_writer": "portMemRegisterOomReportCb assigns portMemGlobals.pOomReportCb=pReportCb",
+  "native_ci_requested": false,
+  "no_named_registration_callsite_found": true,
+  "original_entry_admission": false,
+  "register_token_references_in_selected_source_and_project": [
+    {
+      "line": 572,
+      "path": "source/src/nvidia/inc/libraries/nvport/memory.h",
+      "source_sha256": "8c1741998b7990e40dda196492add447ddaf06d211cbc804c24e0f685c3ba4d0",
+      "text": "void portMemRegisterOomReportCb(PORT_MEM_OOM_REPORT_CB pReportCb);"
+    },
+    {
+      "line": 1587,
+      "path": "source/src/nvidia/src/libraries/nvport/memory/memory_tracking.c",
+      "source_sha256": "c27d0ac3576137f9d5c42703f51f4d473d9cfb733781d849acf22099f5c8187e",
+      "text": "portMemRegisterOomReportCb(PORT_MEM_OOM_REPORT_CB pReportCb)"
+    }
+  ],
+  "runtime_facts": [
+    "Unregistered ReportOom returns before diagnostics/callback.",
+    "Registered path preserves original prints, tracking traversal and actual callback.",
+    "Function-pointer setter, replacement, lifetime and reentry are not synchronized or bounded here.",
+    "Rate interval10 is functional reporting policy, not a callback time/stack certificate."
+  ],
+  "selected_composition_sha256": "40f0fd1fc279421464c14f9b98f7fa84f6850e6fafb61d46aa60663ce471dd4c",
+  "selected_memory_sha256": "c27d0ac3576137f9d5c42703f51f4d473d9cfb733781d849acf22099f5c8187e",
+  "source_files": 4005,
+  "static_initial_value": "NULL",
+  "status": "named-source-writer-inventory; callback-producer-exclusion-unproven",
+  "whole_object_zero_writes": [
+    "memory initialization lock failure resets original globals",
+    "original memory shutdown reset is retained behind shutdown refusal"
+  ]
+}

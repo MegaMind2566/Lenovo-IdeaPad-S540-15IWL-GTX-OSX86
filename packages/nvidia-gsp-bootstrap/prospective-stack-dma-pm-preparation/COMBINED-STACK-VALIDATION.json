@@ -1,0 +1,109 @@
+{
+  "capture": {
+    "dynamic_function_count": 0,
+    "function_count": 29,
+    "native_apple_compiler": false,
+    "path": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/shutdown-successor-2/changed-original-objects/memory_tracking.stack.json",
+    "sha256": "5b87a7b2f78840dccbab05294e0671bc00379ef01a517dd4e306fff787e325bb"
+  },
+  "composition_sha256": "72b7d5a5d93504218e8a7953d79c90c1609e4580c55922deb2ec5dab13de24d8",
+  "dynamic_allocator_and_oom_indirect_barriers_preserved": true,
+  "format": 1,
+  "global_functions": {
+    "_s540Global_portMemAllocNonPaged": {
+      "calls": [
+        {
+          "address": 941,
+          "kind": "call",
+          "target": {
+            "symbol": "_s540AllocatorGlobalUse"
+          }
+        },
+        {
+          "address": 970,
+          "kind": "call",
+          "target": {
+            "symbol": "_s540Global__portMemAllocNonPagedUntracked"
+          }
+        },
+        {
+          "address": 1140,
+          "kind": "call",
+          "target": {
+            "symbol": "_s540Global_portMemReportOom"
+          }
+        }
+      ],
+      "direct_callees": [
+        "_s540AllocatorGlobalUse",
+        "_s540Global__portMemAllocNonPagedUntracked",
+        "_s540Global_portMemReportOom"
+      ],
+      "static_frame_bytes": 24,
+      "unknown_sites": []
+    },
+    "_s540Global_portMemAllocPaged": {
+      "calls": [
+        {
+          "address": 669,
+          "kind": "call",
+          "target": {
+            "symbol": "_s540AllocatorGlobalUse"
+          }
+        },
+        {
+          "address": 698,
+          "kind": "call",
+          "target": {
+            "symbol": "_s540Global__portMemAllocPagedUntracked"
+          }
+        },
+        {
+          "address": 868,
+          "kind": "call",
+          "target": {
+            "symbol": "_s540Global_portMemReportOom"
+          }
+        }
+      ],
+      "direct_callees": [
+        "_s540AllocatorGlobalUse",
+        "_s540Global__portMemAllocPagedUntracked",
+        "_s540Global_portMemReportOom"
+      ],
+      "static_frame_bytes": 24,
+      "unknown_sites": []
+    },
+    "_s540Global_portMemFree": {
+      "calls": [
+        {
+          "address": 1218,
+          "kind": "call",
+          "target": {
+            "symbol": "_s540AllocatorGlobalUse"
+          }
+        },
+        {
+          "address": 1257,
+          "kind": "branch",
+          "target": {
+            "symbol": "_s540Global__portMemFreeUntracked"
+          }
+        }
+      ],
+      "direct_callees": [
+        "_s540AllocatorGlobalUse",
+        "_s540Global__portMemFreeUntracked"
+      ],
+      "static_frame_bytes": 24,
+      "unknown_sites": []
+    }
+  },
+  "hardware_admission": false,
+  "kernel_stack_bound_proven": false,
+  "native_darwin_compilation": false,
+  "object_sha256": "7eb2755e1a8db549b4822a39721f2319d130edc0692b1f4167435177efbb0a35",
+  "original_compile_report_sha256": "787213814e3435b8e68d5c501895e4ab20aa9b817cf5fafd25ed63ccb00424ce",
+  "source_sha256": "b55ae1f99b29127f0707d81ad22711a22237ced3c249c2349ef811b79cc7b27b",
+  "status": "passed-actual-combined-global-machine-contract"
+}

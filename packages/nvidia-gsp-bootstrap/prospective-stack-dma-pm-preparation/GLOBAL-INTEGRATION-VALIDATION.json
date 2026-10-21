@@ -1,0 +1,122 @@
+{
+  "admission": {
+    "gpu_access": false,
+    "hardware_admission": false,
+    "kernel_execution": false,
+    "kernel_stack_bound_proven": false,
+    "native_ci_requested": false,
+    "original_entry_admission": false,
+    "physical_reclamation_authorized": false,
+    "pm_30_second_shutdown_bound_proven": false,
+    "production_candidate_allowed": false,
+    "whole_dma_stop_proven": false
+  },
+  "checker_sha256": "7b5196c248382a989a69bc88a899e2eb4b178086d677d872254dee7b6c7e7ea5",
+  "composition_sha256": "72b7d5a5d93504218e8a7953d79c90c1609e4580c55922deb2ec5dab13de24d8",
+  "copied_current_source_and_header_sha256": {
+    "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c": "8f86f051b92dd9ce2818b0dc91cd5b9f189a42db1265fe4b4f4d76352958aa88",
+    "packages/nvidia-gsp-bootstrap/prospective-dma-producer-closure/S540NvidiaDmaProducer.h": "496fbc67658f7d54608374cb6ac567616455a9d0e792f0ae9bb60618fb38ea9c",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c": "6d728dddb7ccd5ecb684ccfb11ed0b96f69d77dcb37e39dfdb4140e3234b3d0c",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/Participants.h": "a7b44608bb7a13e4328ac0fdba8a476bde80fdcf5a11268a102d033c3295da5c",
+    "packages/nvidia-gsp-bootstrap/prospective-irq-callback-closure/S540NvidiaIrqClosure.h": "e38395c21d1938494a2d106f8b0b1e1cc02591a8d53dbad1271f316ae61d90b0",
+    "packages/nvidia-gsp-bootstrap/prospective-pm-revocation-closure/S540NvidiaGspCommit.h": "1663afaecabfa43df4594ea0a5e1b94bbf6cfb9ce28d8d878040106d67a384da"
+  },
+  "cpu_project_inventory_sha256": "b5d68277125eda970c9faa87f62fbb64124fe23c6566a44bc8fadc3ae03a1a83",
+  "exact_current_production_units": [
+    "src/nvidia/src/libraries/nvport/memory/memory_tracking.c",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c",
+    "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c"
+  ],
+  "format": 1,
+  "full_evidence": {
+    "path": "build/shutdown-global-integration-1/results.json",
+    "sha256": "83a82bbc71402f58f96bd0db525ccdd8c3fd3d9e1baa1d4109eb6ef43922f722"
+  },
+  "header_compatibility": "Existing public record/cancellation headers are byte-identical. The previous CPU Participants header gains exactly four IRQ declarations; existing types and prototypes are unchanged. IRQClosure and new PM/DMA companion headers are copied explicitly. All other hooked CPU files remain byte-identical.",
+  "historical_compiler_executable_digest_available": false,
+  "historical_failed_report_preserved": true,
+  "limitations": [
+    "Only the global constructor path is executed. New commit acceptance endpoints, cleanup-mask query, IRQ, timers, PCI/MMIO/BME, TX, GSP and GPU paths are not executed here.",
+    "The exact new record and cancellation bodies are compiled and linked with the genuine constructor; this is a regression/integration check, not coverage of every function in those units.",
+    "Privileged-CPU and platform facts remain explicit historical fixtures; no identity success fixture or new physical endpoint fixture is introduced.",
+    "Authenticated Linux CPU object reuse establishes no Apple native artifact eligibility, complete original compilation profile, target ABI, runtime admission or stack/PM/DMA bound."
+  ],
+  "native_cache_eligibility_established": false,
+  "previous_genuine_stack_report_sha256": "9352993631a9d9c8a1c4740c492a452c6ca9a95d11819d502a603a36408943d6",
+  "privileged_cpu_and_platform_fixtures": true,
+  "record_identity_fixture": false,
+  "scope": "Genuine original global construction and retained allocator/lifecycle behavior with exact current child record, cancellation and memory translation units on Linux CPU.",
+  "status": "passed-current-shutdown-record-cancellation-global-cpu-integration",
+  "variants": {
+    "plain": {
+      "all_original_observations_identical": true,
+      "assertions": 3886,
+      "binary_sha256": "af95761d1e1972b5d71e7b78173ac0d765b5b28db359511315adf903775acc4a",
+      "fresh_bindings": [
+        {
+          "command_json_sha256": "a807358e64434bb791d85cc408f7ee12d299c4defea7c034dc7e39546cb96bcd",
+          "compiler_sha256": "0e11f7e4300c0a5be8fe6bcd889a24ff9551778f2dfa62f169590dd5ffb72575",
+          "dependency_inventory_json_sha256": "4a44a2ed110148e9dddc4e3b6b7212530c73c24753ffb17852b95cffcd1cb5f4",
+          "object_sha256": "341751df43fdbac8d8196bff77d028b4ed09b13527dfb36c86edfad273015da2",
+          "source": "src/nvidia/src/libraries/nvport/memory/memory_tracking.c",
+          "source_sha256": "b55ae1f99b29127f0707d81ad22711a22237ced3c249c2349ef811b79cc7b27b"
+        },
+        {
+          "command_json_sha256": "95a3d900f0a9244d649f83dec4c57e8eeaf28849af4606866599be4167cf7a3d",
+          "compiler_sha256": "0e11f7e4300c0a5be8fe6bcd889a24ff9551778f2dfa62f169590dd5ffb72575",
+          "dependency_inventory_json_sha256": "51fd2eac4cec698813d4b550b60ea8ede62c4cbc24e4122eb18b51c2c4da31ff",
+          "object_sha256": "bbb260dd64090c9cf420dea33a7ea4bfbff8c80d1658f11b4d5d4ee2afa43ff9",
+          "source": "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c",
+          "source_sha256": "6d728dddb7ccd5ecb684ccfb11ed0b96f69d77dcb37e39dfdb4140e3234b3d0c"
+        },
+        {
+          "command_json_sha256": "7e30f7e0c79b149d47bf99d14662d81f27a13aeef1c9b1070f88a93c738dfa75",
+          "compiler_sha256": "0e11f7e4300c0a5be8fe6bcd889a24ff9551778f2dfa62f169590dd5ffb72575",
+          "dependency_inventory_json_sha256": "a0991bdf95d0883b883d8f0a63e7eca7a12352717a2fc59feaefbf2aa01c99ed",
+          "object_sha256": "ae62b88de56225016e169d7741e6d97e5f21fa8874603e132f29bbec2e1a103b",
+          "source": "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c",
+          "source_sha256": "8f86f051b92dd9ce2818b0dc91cd5b9f189a42db1265fe4b4f4d76352958aa88"
+        }
+      ],
+      "fresh_units": 3,
+      "positive_cases": 168,
+      "reused_link_objects": 1160,
+      "status": "passed"
+    },
+    "sanitized": {
+      "all_original_observations_identical": true,
+      "assertions": 3886,
+      "binary_sha256": "61bf5a71ee37a8e9550b966ea81c1ed2824e6e8bf781892ecd13313877ec4aac",
+      "fresh_bindings": [
+        {
+          "command_json_sha256": "50b3189546fd2477884a5eea924c496127874537bf78362e27a4745fb64e19e8",
+          "compiler_sha256": "0e11f7e4300c0a5be8fe6bcd889a24ff9551778f2dfa62f169590dd5ffb72575",
+          "dependency_inventory_json_sha256": "21fd7c18e1be9a5a4c8af03dc59d7457ec5824ce1ef4d7f734e0f8e525ef7a27",
+          "object_sha256": "746d17cf496ae7e70ccc60042ae80cec92ce67f18b025d8de5fd03030af5dd4d",
+          "source": "src/nvidia/src/libraries/nvport/memory/memory_tracking.c",
+          "source_sha256": "b55ae1f99b29127f0707d81ad22711a22237ced3c249c2349ef811b79cc7b27b"
+        },
+        {
+          "command_json_sha256": "035c82595ef2c6b57f87dc00d1ebe8987ac87520546afe07267a08aa05dbcabe",
+          "compiler_sha256": "0e11f7e4300c0a5be8fe6bcd889a24ff9551778f2dfa62f169590dd5ffb72575",
+          "dependency_inventory_json_sha256": "a09f77750b679797b6e6501be677ff28ac2cfb6848bf9250ab87f70f22cebf2a",
+          "object_sha256": "1507cecb2e4a9a92f0ceaac25a25c734c7363e18f89b03fcddd666771a06b52c",
+          "source": "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c",
+          "source_sha256": "6d728dddb7ccd5ecb684ccfb11ed0b96f69d77dcb37e39dfdb4140e3234b3d0c"
+        },
+        {
+          "command_json_sha256": "5f9efbb32f4c556f6dd4150f740a9c2723b52e849fdfacf12d99de0388eb1567",
+          "compiler_sha256": "0e11f7e4300c0a5be8fe6bcd889a24ff9551778f2dfa62f169590dd5ffb72575",
+          "dependency_inventory_json_sha256": "807377514c94b399c46386ccc25869ae9704afb2fc24b0a58b285d4c67f23265",
+          "object_sha256": "668aeb3f8f8cfb8604bd9af49866bf0e25c5fde7c15ac57ed9d88627f0e4d81c",
+          "source": "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c",
+          "source_sha256": "8f86f051b92dd9ce2818b0dc91cd5b9f189a42db1265fe4b4f4d76352958aa88"
+        }
+      ],
+      "fresh_units": 3,
+      "positive_cases": 168,
+      "reused_link_objects": 1160,
+      "status": "passed"
+    }
+  }
+}

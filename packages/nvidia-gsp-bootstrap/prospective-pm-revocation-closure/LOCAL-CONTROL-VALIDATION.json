@@ -1,0 +1,237 @@
+{
+  "actual_source_execution": {
+    "actual_backend_arm_body_and_selected_platform_layout": true,
+    "actual_original_send_msgq_bodies_and_typed_gpu_bridge": true,
+    "actual_timer_arm_helper": true,
+    "backend_endpoint_calls_per_mode": {
+      "successful_or_failed_enable_covered": true,
+      "wrong_return_thread_enable_failure": true,
+      "wrong_return_thread_enable_success": true
+    },
+    "complete_cancellation_translation_unit": true,
+    "genuine_cancellation_binding_and_enrollment": true,
+    "independent_first_transaction_irq_authority": "Explicit fixed endpoint fixture",
+    "legacy_irq_scope_controls": true,
+    "thread_clock_provider_framework_and_register_endpoints": "Explicit fixtures; no target observation"
+  },
+  "admission": {
+    "gpu_access": false,
+    "hardware_admission": false,
+    "hardware_stop_proven": false,
+    "kernel_execution": false,
+    "native_ci_requested": false,
+    "native_darwin_compilation": false,
+    "original_entry_admission": false,
+    "physical_release_authorized": false,
+    "pm_30_second_shutdown_bound_proven": false
+  },
+  "checks_per_mode": {
+    "plain": 860,
+    "sanitized": 860
+  },
+  "compiler_sha256": {
+    "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/llvm-repaired/bin/clang": "0e11f7e4300c0a5be8fe6bcd889a24ff9551778f2dfa62f169590dd5ffb72575",
+    "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/llvm-repaired/bin/clang++": "3c683e91e35245d2760aec697d92713f8c4051591b750cf7650b3c9d8c7063a7"
+  },
+  "component": "actual-cancellation-revocation-commit-ordering",
+  "control_source_sha256": {
+    "check.py": "db3cc2a7a6c7e557a022790f707ca74d09a6ede83cabfb0ed30aed4d26579f6f",
+    "tests/check_commit.c": "1fcb0556658e139262812c6e967902ea3c7d8e910b62cb4395c2de6b4bf01921",
+    "tests/check_endpoints.cpp": "c29d55178f810d5f71dc029f00537b2c53f865ea4205fee403f47b11732ce332"
+  },
+  "format": 1,
+  "full_evidence": {
+    "path": "build/pm-revocation-controls-3/results.json",
+    "sha256": "2759c5ad324d870d91a5a6f46fe8407ea81c2da7b031b894a3e517f498726bed"
+  },
+  "full_evidence_binds_compiler_dependencies_and_executed_binaries": true,
+  "historical_local_runners": {
+    "build/pm-revocation-controls-1/results.json": {
+      "scope": "Historical local runner; first negative mutant scaffolding had an unused-function compile error, second predates final defensive IRQ leave-failure software-ingress correction.",
+      "sha256": "6040f6d603f75f38da02a6355d82adcc1e998997b94c6a38ee2e7444bb31802a",
+      "status_preserved": "failed"
+    },
+    "build/pm-revocation-controls-2/results.json": {
+      "scope": "Historical local runner; first negative mutant scaffolding had an unused-function compile error, second predates final defensive IRQ leave-failure software-ingress correction.",
+      "sha256": "c51d906799a61f794cd64e3d76423b143803ef7f64d08ea73c11065ac8631aae",
+      "status_preserved": "passed-actual-revocation-commit-controls"
+    }
+  },
+  "independent_source_review": {
+    "limits": "Source review only; no target execution, endpoint timing, hardware stop or complete stack/PM proof.",
+    "method": "Independent read-only bounded source inspection of exact current transforms and generated bodies",
+    "production_sha256": {
+      "S540NvidiaGspCommit.h": "1663afaecabfa43df4594ea0a5e1b94bbf6cfb9ce28d8d878040106d67a384da",
+      "commit-api.c.inc": "f254361efdb9aa87d482b5fd868a17885bd8f8d8a364910109f7e9ac74f08361",
+      "prepare.py": "292759b94d77721b0c0e46679961c035def166d5e0b3618d8e6460b77ae51bbb"
+    },
+    "resolved_finding": "Successful enableInterrupt followed by failed commit leave now closes software accepting, retaining truthful irqEnabled/controller/mask flags and the real outstanding reservation.",
+    "status": "clean-after-defensive-irq-correction"
+  },
+  "kernel_sdk_compilation": "Separate root-owned complete child compiler receipt; CPU checks establish no Apple native compilation.",
+  "limitations": [
+    "Acceptance CAS occurs after the earlier power protocol event; a delayed PM hook remains a real gap, and the fixed event deadline is preserved.",
+    "A zero commit snapshot does not prove closed ingress, whole CPU-producer quiescence, PCIe posted-write drain, device/firmware stop or a PM acknowledgement.",
+    "Endpoint duration, arbitrary callback/OOM recursion, scheduling and complete original unwind remain unbounded.",
+    "This adds real frames and calls; no aggregate kernel stack or target capacity proof is established.",
+    "Generic cancellation enrollment is not first-transaction or hardware admission; existing independent owner/record checks remain required."
+  ],
+  "negative_mutants_detected": {
+    "allow_cleanup_during_commit": {
+      "exit_status": 1,
+      "log_sha256": "f67acc7ec753a1ce5dc2ddb5c967c147aaa335ef7185f391e394a54797dc7472"
+    },
+    "hide_payload_publication_window": {
+      "exit_status": 1,
+      "log_sha256": "dcafdfc5b1dc7812c5de9ae2872992dc8d3bf8ed5e636fb6973c647bf0eff926"
+    },
+    "ignore_origin_revocation": {
+      "exit_status": 1,
+      "log_sha256": "37df21aae2fd5890e281e1a6a0b8fe110b054ecfc051ea5fc1ba6d11a2b19df3"
+    }
+  },
+  "production_sha256": {
+    "S540NvidiaGspCommit.h": "1663afaecabfa43df4594ea0a5e1b94bbf6cfb9ce28d8d878040106d67a384da",
+    "commit-api.c.inc": "f254361efdb9aa87d482b5fd868a17885bd8f8d8a364910109f7e9ac74f08361",
+    "prepare.py": "292759b94d77721b0c0e46679961c035def166d5e0b3618d8e6460b77ae51bbb"
+  },
+  "reference_output_scope": "Exact operational-successor-2 parent, standalone PM transform; the ordered full child composition owns final outputs after any independent DMA successor.",
+  "reference_parent_replacement_outputs": [
+    {
+      "input_sha256": "c379d1513e592ce0916e3db11ec089bd144b4fa4e184097015af762b6d7bac22",
+      "output_sha256": "8f86f051b92dd9ce2818b0dc91cd5b9f189a42db1265fe4b4f4d76352958aa88",
+      "scope": "project",
+      "source": "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c"
+    },
+    {
+      "input_sha256": "6ea70a348aafb70b4c03ca393bab95939526bf995c583ab73f141d844f76c334",
+      "output_sha256": "356e74acbbd31bf8a7d47c109818af9123c292704d45e54149485071c2f3388c",
+      "scope": "project",
+      "source": "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellationOriginal.c"
+    },
+    {
+      "input_sha256": "901c8bd01dce3eacf0c8856f36d6827a4ee417d62d413a8946be303a294c77fe",
+      "output_sha256": "d17ecb7d1fd1d5fbe5b7ca52f504f11abf8dedfdc71c6bef4243e30fafdfda7e",
+      "scope": "project",
+      "source": "packages/nvidia-gsp-bootstrap/timers/S540NvidiaGspTimersOriginal.c"
+    },
+    {
+      "input_sha256": "1f80b3739bce641959066e2f873f2118d2163fd7a0cf51bb77f578031b2254b3",
+      "output_sha256": "83e6389661fbcd54f47a9a130e758cd4b195e3865dc16920f3b76183ffe2a4b6",
+      "scope": "project",
+      "source": "packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp"
+    },
+    {
+      "input_sha256": "7280805221de30bd1e68841584a14bdb8a8e945da58963d6cba16173da4066a0",
+      "output_sha256": "0440443870ba25a91c8fe0d645568701be41a85598c6d3107cc47d80ac430a75",
+      "scope": "source",
+      "source": "src/nvidia/src/kernel/gpu/gsp/message_queue_cpu.c"
+    }
+  ],
+  "source_bound_existing_controls": {
+    "prospective-irq-callback-closure/tests/check_cancellation.c": "cd0107ab6953a7a77136cee180b1fbefe4f07967e09c3304644e7e0943d3db4f",
+    "prospective-session-lifetime-closure/tests/tx-control.c.inc": "0207dd366d7994b384df7a673a4daa7cd9c70f327c2e30b08fcfa43e0efd32ef"
+  },
+  "source_contract_sha256": "1a00a1551d7ae6d46ee7b5bd5eb5815aa198bc495d16331270b1566b3a8fe15f",
+  "status": "passed-actual-revocation-commit-controls",
+  "variants": {
+    "plain": {
+      "commit": {
+        "checks": 604,
+        "clock_thread_and_irq_record_endpoints_fixture": true,
+        "genuine_cancellation_translation_unit": true,
+        "pm_30_second_shutdown_bound_proven": false,
+        "status": "passed"
+      },
+      "endpoints": {
+        "actual_timer_and_irq_arm_bodies": true,
+        "checks": 73,
+        "pm_30_second_shutdown_bound_proven": false,
+        "provider_and_record_authority_endpoints_fixture": true,
+        "real_cancellation_record": true,
+        "retained_failed_leave": true,
+        "status": "passed"
+      },
+      "irq_leave_failure_1": {
+        "actual_irq_enable_body": true,
+        "checks": 11,
+        "hardware_enable_obligation_retained": true,
+        "pm_30_second_shutdown_bound_proven": false,
+        "software_ingress_closed_on_failed_leave": true,
+        "status": "passed"
+      },
+      "irq_leave_failure_2": {
+        "actual_irq_enable_body": true,
+        "checks": 11,
+        "hardware_enable_obligation_retained": true,
+        "pm_30_second_shutdown_bound_proven": false,
+        "software_ingress_closed_on_failed_leave": true,
+        "status": "passed"
+      },
+      "legacy_scope": {
+        "actual_cancellation_translation_unit": true,
+        "checks": 45,
+        "status": "passed"
+      },
+      "tx": {
+        "actual_send_and_msgq_bodies": true,
+        "checks": 116,
+        "failures": 0,
+        "hardware_endpoints_fixture": true,
+        "original_entry_admission": false,
+        "pm_30_second_shutdown_bound_proven": false,
+        "real_cancellation_record": true,
+        "status": "passed"
+      }
+    },
+    "sanitized": {
+      "commit": {
+        "checks": 604,
+        "clock_thread_and_irq_record_endpoints_fixture": true,
+        "genuine_cancellation_translation_unit": true,
+        "pm_30_second_shutdown_bound_proven": false,
+        "status": "passed"
+      },
+      "endpoints": {
+        "actual_timer_and_irq_arm_bodies": true,
+        "checks": 73,
+        "pm_30_second_shutdown_bound_proven": false,
+        "provider_and_record_authority_endpoints_fixture": true,
+        "real_cancellation_record": true,
+        "retained_failed_leave": true,
+        "status": "passed"
+      },
+      "irq_leave_failure_1": {
+        "actual_irq_enable_body": true,
+        "checks": 11,
+        "hardware_enable_obligation_retained": true,
+        "pm_30_second_shutdown_bound_proven": false,
+        "software_ingress_closed_on_failed_leave": true,
+        "status": "passed"
+      },
+      "irq_leave_failure_2": {
+        "actual_irq_enable_body": true,
+        "checks": 11,
+        "hardware_enable_obligation_retained": true,
+        "pm_30_second_shutdown_bound_proven": false,
+        "software_ingress_closed_on_failed_leave": true,
+        "status": "passed"
+      },
+      "legacy_scope": {
+        "actual_cancellation_translation_unit": true,
+        "checks": 45,
+        "status": "passed"
+      },
+      "tx": {
+        "actual_send_and_msgq_bodies": true,
+        "checks": 116,
+        "failures": 0,
+        "hardware_endpoints_fixture": true,
+        "original_entry_admission": false,
+        "pm_30_second_shutdown_bound_proven": false,
+        "real_cancellation_record": true,
+        "status": "passed"
+      }
+    }
+  }
+}

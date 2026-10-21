@@ -1,0 +1,218 @@
+{
+  "admission": {
+    "final_release_issued": false,
+    "gpu_access": false,
+    "hardware_admission": false,
+    "irreversible_bme_seal_proven": false,
+    "kernel_execution": "not_tested",
+    "kernel_stack_bound_proven": false,
+    "original_entry_admission": false,
+    "physical_reclamation_authorized": false,
+    "pm_30_second_shutdown_bound_proven": false,
+    "pm_acknowledgement_authorized": false,
+    "production_candidate_allowed": false,
+    "runtime_coordinator_installed": false,
+    "stop_receipt_issued": false,
+    "target_package_ready": false,
+    "whole_dma_stop_proven": false
+  },
+  "base_commit": "944ee1c2b901b2078b742590b8babf227a1de278",
+  "base_composition_sha256": "40f0fd1fc279421464c14f9b98f7fa84f6850e6fafb61d46aa60663ce471dd4c",
+  "canonical_parent_composition_sha256": "1392052eda0733713e345e938033a06c539669d4b443ba5c3104c70ae171e298",
+  "changed_original_compilation": {
+    "path": "build/shutdown-successor-2/changed-original-compilation.json",
+    "sha256": "787213814e3435b8e68d5c501895e4ab20aa9b817cf5fafd25ed63ccb00424ce"
+  },
+  "component_receipts": {
+    "combined_machine_stack": {
+      "path": "packages/nvidia-gsp-bootstrap/prospective-stack-dma-pm-preparation/COMBINED-STACK-VALIDATION.json",
+      "sha256": "c78aef47a7c15658121b03a64c4d7108a618a09b54211c27a0b1dba29137e8d7"
+    },
+    "dma_producer": {
+      "path": "packages/nvidia-gsp-bootstrap/prospective-dma-producer-closure/LOCAL-CONTROL-VALIDATION.json",
+      "sha256": "20c71d494a184ab186b057b0f81495b09a0d3358d2cdd56ae3b03c0c93e24f7a"
+    },
+    "genuine_current_global": {
+      "path": "packages/nvidia-gsp-bootstrap/prospective-stack-dma-pm-preparation/GLOBAL-INTEGRATION-VALIDATION.json",
+      "sha256": "a89df06ea64cccdf050ab23c3e49794f183f0aeddebf1d049d8771d033e6ca8f"
+    },
+    "independent_review": {
+      "path": "packages/nvidia-gsp-bootstrap/prospective-stack-dma-pm-preparation/BOUNDED-SOURCE-REVIEW.json",
+      "sha256": "7a7f5735a5796b4c131ce0b3cc2cb5e56f513a2ba548c2632e8a99d52154463c"
+    },
+    "pm": {
+      "path": "packages/nvidia-gsp-bootstrap/prospective-pm-revocation-closure/LOCAL-CONTROL-VALIDATION.json",
+      "sha256": "fb1814a63f173e41ec5fedb1a41e5a0fb8dbe83c6293a0b0dbf9bb8af2b1947b"
+    },
+    "pm_event_boundary": {
+      "path": "packages/nvidia-gsp-bootstrap/prospective-stack-dma-pm-preparation/PM-EVENT-BOUNDARY.json",
+      "sha256": "e614a6333c70e4d942aff9e7af82b136b1f83d43ce4be7cc7ed05592fb26ddbd"
+    },
+    "stack": {
+      "path": "packages/nvidia-gsp-bootstrap/prospective-stack-context-closure/VALIDATION.json",
+      "sha256": "0667479246b2f4d2d8d5d0d7e5b4c5a4945e9dfd6622826edb8b670108c01539"
+    }
+  },
+  "composition": {
+    "path": "build/shutdown-successor-2/composition.json",
+    "sha256": "72b7d5a5d93504218e8a7953d79c90c1609e4580c55922deb2ec5dab13de24d8"
+  },
+  "cost_control": {
+    "existing_saved_repository_files_unchanged": 1376,
+    "idle_target_test_repeated": false,
+    "intermediate_commit_marker": "[skip ci]",
+    "native_cache_eligibility_established": false,
+    "native_cache_policy": "Exact compiler, SDK, command and full dependency bindings remain mandatory. CPU reuse does not establish native reuse.",
+    "native_ci_requested": false,
+    "native_request_file_changed": false
+  },
+  "date_utc": "2026-10-21",
+  "format": 1,
+  "inherited_operational_record_scope": "historical-base-only; unchanged",
+  "integrated_base_composition_sha256": "fcf44e804e1308c37b39f2d25c207434d06fd0b60b9fc9624453bcef1b2d8590",
+  "local_compilation": {
+    "changed_original_source_sha256": {
+      "src/nvidia/src/kernel/gpu/arch/maxwell/kern_gpu_gm107.c": "e091627587694e5c5cd78f4ac261c7d9b10977dbd4146d68d2639464646d853c",
+      "src/nvidia/src/kernel/gpu/gsp/message_queue_cpu.c": "0440443870ba25a91c8fe0d645568701be41a85598c6d3107cc47d80ac430a75",
+      "src/nvidia/src/libraries/nvport/memory/memory_tracking.c": "b55ae1f99b29127f0707d81ad22711a22237ced3c249c2349ef811b79cc7b27b"
+    },
+    "compilers": {
+      "cc": {
+        "path": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/../llvm-repaired/bin/clang",
+        "version": "Ubuntu clang version 18.1.3 (1ubuntu1)"
+      },
+      "cxx": {
+        "path": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/../llvm-repaired/bin/clang++",
+        "version": "Ubuntu clang version 18.1.3 (1ubuntu1)"
+      }
+    },
+    "complete_symbol_closure_proven": false,
+    "final_link": "not_performed",
+    "fresh_changed_original_units": 3,
+    "fresh_project_units": 62,
+    "full_original_profile_validated": false,
+    "header_dependency_closure_proven": false,
+    "host": "Linux",
+    "individual_frame_limit_bytes": 4096,
+    "native_darwin_compilation": false,
+    "new_original_export_owners": {},
+    "new_strong_export_owners": {
+      "s540FirstTxnCleanupMaskReadMaster": "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c",
+      "s540GspCancellationCommitEnterState": "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c",
+      "s540GspCancellationCommitLeaveGpu": "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellationOriginal.c",
+      "s540GspCancellationCommitLeaveState": "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c",
+      "s540GspCancellationCommitReadState": "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c",
+      "s540GspCancellationSubmitEnterGpu": "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellationOriginal.c",
+      "s540GspCancellationSubmitEnterState": "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c"
+    },
+    "original_subset_scope": "child-delta-only",
+    "sdk": {
+      "file_count": 1232,
+      "provided": true,
+      "reference_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+      "source": "clean pinned Git checkout and every tracked blob",
+      "tree_sha256": "50d4e3689ba17a2865ad707dc6ba70f4273a6b12fe8faa1ea15bb02f92ce0fc8",
+      "used_by_original_c_tus": false
+    },
+    "stack_usage": {
+      "aggregate_stack_proven": false,
+      "dynamic_function_count": 0,
+      "function_count": 974,
+      "path": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/shutdown-successor-2/project-stack-usage-manifest.json",
+      "sha256": "86fb5482a25aa76dbdc87811400a1f84fcbbf3515b106cc13b545064e6417246",
+      "unit_count": 62
+    }
+  },
+  "project_compilation": {
+    "path": "build/shutdown-successor-2/project-compilation.json",
+    "sha256": "bd76b1afd4423419afd4f0a0ff564db340e099f42785e7188891b455440246ce"
+  },
+  "remaining_requirements": [
+    "Aggregate global/adapter/IRQ/callback stack graphs, actual target capacity, framework headroom and synchronous reentry.",
+    "Earlier PM callback-to-cancellation publication gap and real callback/endpoint duration within the fixed shutdown budget.",
+    "General clean CLOSING cleanup authority; the new observer deliberately covers sticky RETAINED failed-init masking only.",
+    "Transitive original HAL-mask execution, all CPU/firmware/MMIO producer cessation and actual posted-write drain.",
+    "Complete original dependency/symbol profile, runtime coordinator, Apple-native final link and one integrated target-test package.",
+    "Actual Lenovo kernel loading and GPU initialization for this successor; all local CPU fixtures and Mach-O objects remain insufficient for those claims."
+  ],
+  "selected_profiles": [
+    "stack-context",
+    "pm-revocation",
+    "dma-producer"
+  ],
+  "source_and_cpu_controls": {
+    "child_source_plan_tests": 15,
+    "dma_producer": {
+      "actual_endpoint_scope": "Actual strong record, full Session and two original GM107 writer bodies; explicit hardware/platform/global-validation endpoints in component controls.",
+      "gm107_writer_checks": 143,
+      "gm107_writer_scenarios": 15,
+      "negative_mutants_detected_per_mode": 3,
+      "scenarios_per_mode": 44,
+      "session_checks": 1705,
+      "session_checks_in_finite_lane_predicate_coverage": 1632,
+      "session_scenarios": 8,
+      "strong_record_checks": 399,
+      "strong_record_scenarios": 21
+    },
+    "genuine_current_global": {
+      "assertions": 7772,
+      "current_sources": [
+        "memory_tracking.c",
+        "S540NvidiaGspFirstTransaction.c",
+        "S540NvidiaGspCancellation.c"
+      ],
+      "fatal_sanitized_cases": 168,
+      "fresh_units_per_mode": 3,
+      "historical_compiler_executable_digest_available": false,
+      "native_cache_eligibility_established": false,
+      "plain_cases": 168,
+      "prior_observations_identical": true,
+      "privileged_cpu_and_platform_fixtures": true,
+      "record_identity_fixture": false,
+      "reused_link_objects_per_mode": 1160,
+      "scope": "Global constructor regression only; new commit acceptance/cleanup/IRQ/PCI/GSP endpoints are not executed by this run."
+    },
+    "pm": {
+      "actual_endpoint_scope": "Cancellation, timer/IRQ acceptance and TX/msgq bodies; explicit clock/thread/provider/record endpoints in component controls.",
+      "fatal_sanitized_checks": 860,
+      "negative_mutants_detected_per_mode": 3,
+      "plain_checks": 860
+    },
+    "pm_event_boundary": {
+      "fatal_sanitized_assertions": 56,
+      "finish_guard_mutant_detected": true,
+      "fixed_earlier_deadline_preserved": true,
+      "hook_delays_ns": [
+        250000000,
+        31000000000
+      ],
+      "hook_preemption_window_closed": false,
+      "plain_assertions": 56,
+      "schedules_per_mode": 2
+    },
+    "stack": {
+      "aggregate_bound_proven": false,
+      "combined_immediate_frames_bytes": 24,
+      "dynamic_and_oom_indirect_barriers_preserved": true,
+      "isolated_actual_body_scenarios": 13,
+      "isolated_assertions": 141,
+      "machine_regression_mutants_detected": 2,
+      "measured_global_functions": 3,
+      "nonpaged_previous_frame_bytes": 8,
+      "original_algorithm_bodies_preserved": true,
+      "registered_oom_assertions_per_implementation": 39
+    }
+  },
+  "status": "locally-validated-three-profile-source-checkpoint-admission-closed",
+  "superseded_source_plan": {
+    "path": "build/shutdown-successor-1",
+    "scope": "Pre-defensive IRQ failed-retirement correction; source plan only, no full compilation. Not selected.",
+    "sha256": "e7fc6658f048e6e812a0fcd00d48acb2c605624967bfd4f6d75b84be0da82595"
+  },
+  "unchanged_runtime_gate_sha256": {
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRmLifecycle.c": "d8304f6a91a9b4671d8ccfe56ba5805e601b2962e0a7296dc5a1c9612711f27b",
+    "packages/nvidia-gsp-bootstrap/prospective-loader/S540ProspectiveLoaderState.c": "f1d95ec85bf22f10108b0245e5a24156afb2a66fda557fe269c149a0335f8204",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp": "69b903c3c955b4a286eac05a59423f10d2acb0c022c9076fd4433024cd537ee8"
+  },
+  "working_branch": "codex/stack-dma-pm-preparation-20261021-c1"
+}

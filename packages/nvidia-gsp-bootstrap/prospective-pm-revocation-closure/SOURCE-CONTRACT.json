@@ -1,0 +1,89 @@
+{
+  "acceptance_contract": {
+    "accepted_work_may_physically_complete_after_revocation": true,
+    "actual_pm_protocol_event_atomic_with_commit": false,
+    "drain_observation": "COMMIT_BUSY remains in-flight before token publication and during retirement. Finish, Unbind and Cleanup transition refuse it in the same compared word.",
+    "earlier_pm_timestamp_and_30_second_deadline_unchanged": true,
+    "interrupt_contention": "Refuse immediately; never wait for an interrupted holder.",
+    "invalid_leave": "Keep reservation/binding; actual endpoint error takes precedence. IRQ software accepting closes on enable or leave failure; hardware flags remain truthful.",
+    "linearization_point": "Strong CAS on genuine cancellation control word, mutually ordered with RevokeAt PUBLISHING reservation.",
+    "operation_endpoints": [
+      "all4 original RC/nano timer arm callers",
+      "actual backend enableInterrupt endpoint",
+      "DMA module BME-enable leaf writers when independently selected"
+    ],
+    "single_nonrecursive_commit_reservation": true,
+    "snapshot_origin_values": {
+      "cleanup": 4,
+      "note": "Internal origin bits; distinct from public CancellationPhase values and never an admission capability.",
+      "operation": 2
+    },
+    "transport_submit": "Actual GPU-derived identity; genuine current OPERATION or CLEANUP origin, with real cleanup deadline rechecked after reservation.",
+    "unknown_unbound_foreign_state_or_thread": "Refuse before endpoint entry; no fallback NV_OK from CancellationCheckState."
+  },
+  "admission": {
+    "hardware_admission": false,
+    "hardware_stop_proven": false,
+    "kernel_execution": false,
+    "native_ci_requested": false,
+    "original_entry_admission": false,
+    "physical_release_authorized": false,
+    "pm_30_second_shutdown_bound_proven": false
+  },
+  "base_composition_sha256": "40f0fd1fc279421464c14f9b98f7fa84f6850e6fafb61d46aa60663ce471dd4c",
+  "component": "actual-cancellation-revocation-commit-ordering",
+  "existing_public_cancellation_header_changed": false,
+  "explicit_limits": [
+    "Acceptance CAS occurs after the earlier power protocol event; a delayed PM hook remains a real gap, and the fixed event deadline is preserved.",
+    "A zero commit snapshot does not prove closed ingress, whole CPU-producer quiescence, PCIe posted-write drain, device/firmware stop or a PM acknowledgement.",
+    "Endpoint duration, arbitrary callback/OOM recursion, scheduling and complete original unwind remain unbounded.",
+    "This adds real frames and calls; no aggregate kernel stack or target capacity proof is established.",
+    "Generic cancellation enrollment is not first-transaction or hardware admission; existing independent owner/record checks remain required."
+  ],
+  "format": 1,
+  "new_project_exports": {
+    "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c": [
+      "s540GspCancellationCommitEnterState",
+      "s540GspCancellationSubmitEnterState",
+      "s540GspCancellationCommitLeaveState",
+      "s540GspCancellationCommitReadState"
+    ],
+    "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellationOriginal.c": [
+      "s540GspCancellationSubmitEnterGpu",
+      "s540GspCancellationCommitLeaveGpu"
+    ]
+  },
+  "new_translation_units": [],
+  "production_sha256": {
+    "S540NvidiaGspCommit.h": "1663afaecabfa43df4594ea0a5e1b94bbf6cfb9ce28d8d878040106d67a384da",
+    "commit-api.c.inc": "f254361efdb9aa87d482b5fd868a17885bd8f8d8a364910109f7e9ac74f08361",
+    "prepare.py": "292759b94d77721b0c0e46679961c035def166d5e0b3618d8e6460b77ae51bbb"
+  },
+  "source_replacements": {
+    "packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp": {
+      "input_sha256": "1f80b3739bce641959066e2f873f2118d2163fd7a0cf51bb77f578031b2254b3",
+      "output_sha256": "83e6389661fbcd54f47a9a130e758cd4b195e3865dc16920f3b76183ffe2a4b6",
+      "scope": "project"
+    },
+    "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c": {
+      "input_sha256": "c379d1513e592ce0916e3db11ec089bd144b4fa4e184097015af762b6d7bac22",
+      "output_sha256": "8f86f051b92dd9ce2818b0dc91cd5b9f189a42db1265fe4b4f4d76352958aa88",
+      "scope": "project"
+    },
+    "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellationOriginal.c": {
+      "input_sha256": "6ea70a348aafb70b4c03ca393bab95939526bf995c583ab73f141d844f76c334",
+      "output_sha256": "356e74acbbd31bf8a7d47c109818af9123c292704d45e54149485071c2f3388c",
+      "scope": "project"
+    },
+    "packages/nvidia-gsp-bootstrap/timers/S540NvidiaGspTimersOriginal.c": {
+      "input_sha256": "901c8bd01dce3eacf0c8856f36d6827a4ee417d62d413a8946be303a294c77fe",
+      "output_sha256": "d17ecb7d1fd1d5fbe5b7ca52f504f11abf8dedfdc71c6bef4243e30fafdfda7e",
+      "scope": "project"
+    },
+    "src/nvidia/src/kernel/gpu/gsp/message_queue_cpu.c": {
+      "input_sha256": "7280805221de30bd1e68841584a14bdb8a8e945da58963d6cba16173da4066a0",
+      "output_sha256": "0440443870ba25a91c8fe0d645568701be41a85598c6d3107cc47d80ac430a75",
+      "scope": "source"
+    }
+  }
+}

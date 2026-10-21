@@ -1,0 +1,131 @@
+{
+  "actual_code": {
+    "cancellation_complete": true,
+    "original_objgpu_and_nv_state_layout_headers": true,
+    "original_two_full_writer_bodies": true,
+    "session_complete": true,
+    "strong_record_complete": true
+  },
+  "base_composition_sha256": "40f0fd1fc279421464c14f9b98f7fa84f6850e6fafb61d46aa60663ce471dd4c",
+  "code_sha256": {
+    "S540NvidiaDmaProducer.h": "496fbc67658f7d54608374cb6ac567616455a9d0e792f0ae9bb60618fb38ea9c",
+    "check.py": "74272085163445318378106b157f5c7e569bfdbc4078a8214ed9515d4ffbb88d",
+    "check_gpu.py": "4512141e850cf7d36c810ad695bc2190eb5d3c1c517d5d1f1d2477ddd71d944f",
+    "cleanup-mask.c.inc": "06b74e543be3ea5ba0b1ad6e3516b018c6460f4d25e3cf7c1f1d0317a51662ab",
+    "prepare.py": "0a309f3a7da1b681cc301914a5f9df9b2789730fd81cdc8ecf1e8a95e2fcffab",
+    "tests/check_gpu.c": "99a1e4966e5bcbb8cc58eb4429541ba347bca2cff6a4adbde64f8f92cfe1e1bc",
+    "tests/check_record.c": "c33c0b9361867f4beefbf8b52526326633ecc7eb603eb297b7ab8bbbb04cda3c",
+    "tests/check_session.cpp": "c0b0b222f8ef90a37a75108c1aaad30b91718cd287ae429d36e48971f55e152c"
+  },
+  "fixtures": [
+    "Clock/current-thread/may-sleep and unused IRQ-record endpoints are explicit platform fixtures.",
+    "Strong-record original global/adapter return and validation completions, service metadata/queue context, backend IRQ observations and lock-release endpoint are explicit fixtures; the complete original global RM constructor is not reexecuted by these controls.",
+    "Actual complete Session executes with an explicit PCI/backend fixture; no IOPCIDevice operation runs.",
+    "Original GPU bodies use genuine original layout headers and real PM cancellation code, with explicit MMIO/log/assert endpoints."
+  ],
+  "format": 1,
+  "full_original_profile_validated": false,
+  "hardware_execution": false,
+  "kernel_execution": false,
+  "native_ci_requested": false,
+  "native_darwin_compilation": false,
+  "original_entry_admission": false,
+  "original_gpu_writer_report": {
+    "path": "build/dma-gpu-controls-6/gpu-controls.json",
+    "sha256": "52683a8bcf4e456b3c72bfb8d8a4ed9891b6d144cd6d03cede5deec55b277f36"
+  },
+  "physical_reclamation_authorized": false,
+  "pm_acknowledgement_authorized": false,
+  "provenance": {
+    "captured_parent_compiler_profile_sha256": "5317a8cccf5189be42da338a8c0f7b2f1b0de30950c79d0679d59292b3f37a0e",
+    "compiler_file_sha256": {
+      "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/llvm-repaired/bin/clang": "0e11f7e4300c0a5be8fe6bcd889a24ff9551778f2dfa62f169590dd5ffb72575",
+      "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/llvm-repaired/bin/clang++": "3c683e91e35245d2760aec697d92713f8c4051591b750cf7650b3c9d8c7063a7"
+    },
+    "executed_binary_pre_post_bindings_verified": true,
+    "original_header_dependency_bindings_authenticated": true,
+    "parent_project_headers_authenticated": true,
+    "project_inventory_sha256": "252737702056a4d526f8b935580d4ebdb7b70d89f5ed6830ce544feb2450cedb",
+    "source_and_project_pre_post_bindings_verified": true
+  },
+  "record_and_session_report": {
+    "path": "build/dma-producer-controls-3/results.json",
+    "sha256": "bb4fe1d41599d51c149ec93c1edebc5f64ff187537a19003872b7c34bb8fe556"
+  },
+  "remaining_requirements": [
+    "No actual transitive API/GPU lock/runtime/HAL full-mask execution is established, including possible retained sticky backend-service refusals.",
+    "Generic MMIO/config entry points, backend configuration restore and firmware producers remain outside the known BME-enable source-path guard.",
+    "No complete hardware BME readback, accepted-producer shutdown, PCIe posted-write drain or firmware DMA cessation is established.",
+    "Shared commit acceptance is ordered against actual cancellation publication, not the earlier PM event or instantaneous physical endpoint completion.",
+    "Aggregate stack/context capacity, PM duration, final native dependency/symbol closure and target operational integration remain unproved."
+  ],
+  "source_contract_sha256": "3fc6f884291590a4b779e76e6e48dd1771deafd7d5605b5e57719125c1c94a04",
+  "status": "passed-scoped-record-session-and-original-writer-cpu-controls",
+  "superseded_cpu_report": {
+    "path": "build/dma-producer-controls-2/results.json",
+    "scope": "Same functional controls before stronger parent-header/compiler/executed-binary bindings."
+  },
+  "variants": {
+    "plain": {
+      "finite_byte_lane_checks_in_session_total": 1632,
+      "gpu_guard_mutation_failures": 3,
+      "negative_mutations_detected": 3,
+      "original_writer_binary_sha256": "6127b46b1074938a565e9285855bfb484edc125a24197b8e51501e082a30689d",
+      "original_writer_checks": 143,
+      "original_writer_scenarios": 15,
+      "record_binary_sha256": "974ea655c015778113f5144e9cbcd01d6d49d529874b499c373c15b9154420a0",
+      "record_checks": 399,
+      "record_scenarios": 21,
+      "session_binary_sha256": "9ad38a17e286d4ff441337f115af7c9ab6b00d07fecf2fc33c4c0ed68875b7d2",
+      "session_checks": 1705,
+      "session_scenarios": 8,
+      "source_mutation_results": {
+        "foreign-cleanup-authorizer": {
+          "binary_sha256": "755b1ac533aa5e9d07add83248f266918c3a92c1e4999767ac2e45fafc13821e",
+          "failures_detected": 2,
+          "scenario": 1,
+          "source_sha256": "e8054131ab591fcd32a1db11049994bb42f208375f1e359337ca1103bc26a481"
+        },
+        "session-bme-commit-bypass": {
+          "binary_sha256": "0be26299d0f109cedcaf90a319fa9438b0185f2dd6028871be39ac9fec69cbdc",
+          "failures_detected": 10,
+          "scenario": 3,
+          "source_sha256": "5ab33956c35b16f065a11c2d6afdb38e897645732cf0da64b6d7d73f4c1c064a"
+        }
+      },
+      "total_checks": 2247,
+      "total_state_scenarios": 44
+    },
+    "sanitized": {
+      "finite_byte_lane_checks_in_session_total": 1632,
+      "gpu_guard_mutation_failures": 3,
+      "negative_mutations_detected": 3,
+      "original_writer_binary_sha256": "b5da31ab90b094ca3d2b669355527863111878b31b779b1f6cd5415ad9686be7",
+      "original_writer_checks": 143,
+      "original_writer_scenarios": 15,
+      "record_binary_sha256": "56a5bc080683f71358501c009097950b007b26f9c79f7f4430d375de56938eaa",
+      "record_checks": 399,
+      "record_scenarios": 21,
+      "session_binary_sha256": "67d5ce5f39ddfc9a87f29c2e9d1921d298dd73a0886c17216fbd9d9187b434f7",
+      "session_checks": 1705,
+      "session_scenarios": 8,
+      "source_mutation_results": {
+        "foreign-cleanup-authorizer": {
+          "binary_sha256": "a710310e03464cbcd58c6e9fc0f1ddded86e59440b80c997cfd3752956288827",
+          "failures_detected": 2,
+          "scenario": 1,
+          "source_sha256": "e8054131ab591fcd32a1db11049994bb42f208375f1e359337ca1103bc26a481"
+        },
+        "session-bme-commit-bypass": {
+          "binary_sha256": "c4de2cfabc2f6efc654776c7472c10c2dceae32262881e4b913cf14ccf5fbb51",
+          "failures_detected": 10,
+          "scenario": 3,
+          "source_sha256": "5ab33956c35b16f065a11c2d6afdb38e897645732cf0da64b6d7d73f4c1c064a"
+        }
+      },
+      "total_checks": 2247,
+      "total_state_scenarios": 44
+    }
+  },
+  "whole_dma_stop_proven": false
+}

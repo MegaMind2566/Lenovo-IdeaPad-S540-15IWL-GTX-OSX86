@@ -1,0 +1,107 @@
+{
+  "actual_body_sha256": {
+    "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c": "8f86f051b92dd9ce2818b0dc91cd5b9f189a42db1265fe4b4f4d76352958aa88",
+    "packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.cpp": "49eeb79853a8c6a8ecd411c7f2d17da72376675b4dfc57b570f08d0a3bb0f2b1"
+  },
+  "composition_sha256": "72b7d5a5d93504218e8a7953d79c90c1609e4580c55922deb2ec5dab13de24d8",
+  "control_source_sha256": {
+    "check_pm_event_boundary.cpp": "03f2e3fd2e64e607c102e48c918a2d3aed8c6bb6eaa2849940ba22c85116dfe3",
+    "check_pm_event_boundary.py": "7fb096ff11a9abd8ad29a4c7aaf51347f742853cc8b403239ac6a418f5bec303"
+  },
+  "demonstrated_boundary": [
+    "The actual Protocol retains an earlier revocation event without acknowledging shutdown.",
+    "The genuine cancellation word can still accept a commit while the independently invoked hook is delayed.",
+    "The accepted reservation blocks Finish, Unbind and operation-to-cleanup transition until the exact endpoint return.",
+    "RevokeAt preserves the earlier fixed deadline under both a 250ms delay and a 31s exhausted-budget delay.",
+    "New operation commits refuse after cancellation publication, and cleanup transport refuses after the fixed deadline."
+  ],
+  "fixtures": [
+    "Monotonic clock and current ordinary thread identity.",
+    "Modeled endpoint return only; no physical endpoint executes.",
+    "IRQ participant refusal stub is linked; no IRQ admission is exercised."
+  ],
+  "format": 1,
+  "full_evidence": {
+    "path": "build/shutdown-pm-event-boundary-1/results.json",
+    "sha256": "0d83f6949ea6bf7b08e4cc74f3ca664aad4ad4575e7c08cec8488857716d1a4a"
+  },
+  "gpu_access": false,
+  "hardware_stop_proven": false,
+  "hook_preemption_window_closed": false,
+  "kernel_execution": false,
+  "native_ci_requested": false,
+  "pm_30_second_shutdown_bound_proven": false,
+  "scope": "Linux CPU control of genuine Protocol/cancellation bodies and explicit scheduling/platform fixtures; not the IOService callback or physical GPU.",
+  "status": "passed-genuine-protocol-cancellation-event-boundary",
+  "variants": {
+    "fatal-sanitized": {
+      "assertions": 56,
+      "binary_sha256": "415632b79c0de4f1a21f95f44de344b7cb46d8c81e03968194a9f91363186d42",
+      "finish_guard_mutation_detected": true,
+      "negative_binary_sha256": "8f236c3e8c415a7ccb290e9121f4d337d95af0c2aec35f69a8a03942f169a371",
+      "observations": [
+        {
+          "checks": 29,
+          "failures": 0,
+          "fixed_deadline_ns": 31000000000,
+          "format": 1,
+          "gpu_access": false,
+          "hardware_stop_proven": false,
+          "hook_window_closed": false,
+          "kernel_execution": false,
+          "late_hook": false,
+          "pm_event_ns": 1000000000,
+          "status": "passed"
+        },
+        {
+          "checks": 27,
+          "failures": 0,
+          "fixed_deadline_ns": 31000000000,
+          "format": 1,
+          "gpu_access": false,
+          "hardware_stop_proven": false,
+          "hook_window_closed": false,
+          "kernel_execution": false,
+          "late_hook": true,
+          "pm_event_ns": 1000000000,
+          "status": "passed"
+        }
+      ]
+    },
+    "plain": {
+      "assertions": 56,
+      "binary_sha256": "ddbade16f1646179d0f20abdaf3df91284401c1307e2b36e95e6acca54feef58",
+      "finish_guard_mutation_detected": true,
+      "negative_binary_sha256": "8430acc8b8114565b1249d51c2131759ae622129cf1a67448edbf7ad8fa90963",
+      "observations": [
+        {
+          "checks": 29,
+          "failures": 0,
+          "fixed_deadline_ns": 31000000000,
+          "format": 1,
+          "gpu_access": false,
+          "hardware_stop_proven": false,
+          "hook_window_closed": false,
+          "kernel_execution": false,
+          "late_hook": false,
+          "pm_event_ns": 1000000000,
+          "status": "passed"
+        },
+        {
+          "checks": 27,
+          "failures": 0,
+          "fixed_deadline_ns": 31000000000,
+          "format": 1,
+          "gpu_access": false,
+          "hardware_stop_proven": false,
+          "hook_window_closed": false,
+          "kernel_execution": false,
+          "late_hook": true,
+          "pm_event_ns": 1000000000,
+          "status": "passed"
+        }
+      ]
+    }
+  },
+  "whole_operational_runtime_executed": false
+}

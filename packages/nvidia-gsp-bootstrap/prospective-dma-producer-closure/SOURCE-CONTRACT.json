@@ -1,0 +1,65 @@
+{
+  "added_project_units": [],
+  "admission": {
+    "hardware_admission": false,
+    "kernel_stack_bound_proven": false,
+    "native_ci_requested": false,
+    "original_entry_admission": false,
+    "physical_reclamation_authorized": false,
+    "pm_30_second_shutdown_bound_proven": false,
+    "pm_acknowledgement_authorized": false,
+    "whole_dma_stop_proven": false
+  },
+  "base_commit": "944ee1c2b901b2078b742590b8babf227a1de278",
+  "base_composition_sha256": "40f0fd1fc279421464c14f9b98f7fa84f6850e6fafb61d46aa60663ce471dd4c",
+  "completion_semantics": "Accepted-before-revoke operations may physically complete later; their reservations survive until actual endpoint return. Zero observation is not ingress closure or DMA drain.",
+  "existing_code_preserved": {
+    "all_old_profiles_and_contracts": true,
+    "bme_clear_path": true,
+    "callback_drain_old_authorizer": true,
+    "context_dma_stop_receipt_refusal": true,
+    "pre_original_kernel_and_loader_refusals": true
+  },
+  "format": 1,
+  "input_sha256": {
+    "packages/nvidia-device-transport/src/S540NvidiaDeviceTransport.cpp": "edcdb89fb766848c118af188c0426bf1edb9d520e6ec5995373d65e5c349e34d",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c": "56c7f4f082308255d1474475d7d64a9d7f088bd664508caaabeb7d0f687af496",
+    "packages/nvidia-gsp-bootstrap/prospective-irq-callback-closure/rc/S540NvidiaIrqOriginal.c": "5995e259aef081013bdcdb441f5aca7ee560d9fd693acf1d0e92e9726085e7fe",
+    "src/nvidia/src/kernel/gpu/arch/maxwell/kern_gpu_gm107.c": "5551162ba1a6c895eb4332074d49824b37b40d437755060c483371801c8670c9"
+  },
+  "new_export_owners": {
+    "s540FirstTxnCleanupMaskReadMaster": "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c"
+  },
+  "original_inputs": [
+    "src/nvidia/src/kernel/gpu/arch/maxwell/kern_gpu_gm107.c"
+  ],
+  "output_sha256": {
+    "project/packages/nvidia-device-transport/src/S540NvidiaDeviceTransport.cpp": "46f2a708536568fbef13fbd7fe9d42d18d78b1c4bdf45ef83be9ae10a2b2c218",
+    "project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c": "6d728dddb7ccd5ecb684ccfb11ed0b96f69d77dcb37e39dfdb4140e3234b3d0c",
+    "project/packages/nvidia-gsp-bootstrap/prospective-irq-callback-closure/rc/S540NvidiaIrqOriginal.c": "287620b5a47040761865520c546e91cbe8ff5275bab772bab8a836d2cc65bb12",
+    "source/src/nvidia/src/kernel/gpu/arch/maxwell/kern_gpu_gm107.c": "e091627587694e5c5cd78f4ac261c7d9b10977dbd4146d68d2639464646d853c"
+  },
+  "pm_dependency": {
+    "authorization": "Exact genuinely bound cancellation state and actual OPERATION scope; no caller readiness or phase Boolean.",
+    "header_sha256": "1663afaecabfa43df4594ea0a5e1b94bbf6cfb9ce28d8d878040106d67a384da",
+    "module": "prospective-pm-revocation-closure"
+  },
+  "production_sha256": {
+    "S540NvidiaDmaProducer.h": "496fbc67658f7d54608374cb6ac567616455a9d0e792f0ae9bb60618fb38ea9c",
+    "cleanup-mask.c.inc": "06b74e543be3ea5ba0b1ad6e3516b018c6460f4d25e3cf7c1f1d0317a51662ab",
+    "prepare.py": "0a309f3a7da1b681cc301914a5f9df9b2789730fd81cdc8ecf1e8a95e2fcffab"
+  },
+  "project_inputs": [
+    "packages/nvidia-device-transport/src/S540NvidiaDeviceTransport.cpp",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c",
+    "packages/nvidia-gsp-bootstrap/prospective-irq-callback-closure/rc/S540NvidiaIrqOriginal.c"
+  ],
+  "scope": [
+    "Two complete original GM107 BAR0 configuration writers hold real operation commits for actual BME-enabling command stores, including function1; unaligned DWORD offsets refuse.",
+    "Complete Session writeConfig holds the same real commit for bound-RM BME enables; conservative lifetime holds alone cannot authenticate the state.",
+    "Only the full IRQ mask path selects retained cleanup identity after its normal master authorizer refuses; the actual original lock/mask execution remains separately unproved.",
+    "Cleanup identity requires genuine sticky RETAINED master, validated global READY, actual outer original wrapper return, actual revoked CLEANUP phase before its fixed deadline, no accepted endpoint or unfinished tracked producer, and real IRQ software drain.",
+    "All first-error and phase state is preserved; new identity observation never authorizes RM/GSP entry, general callback execution, destruction or a hardware-stop receipt."
+  ],
+  "status": "scoped-producer-source-profile-runtime-and-hardware-admission-closed"
+}

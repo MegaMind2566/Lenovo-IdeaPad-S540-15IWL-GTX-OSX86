@@ -1,0 +1,165 @@
+{
+  "admission": {
+    "gpu_access": false,
+    "hardware_admission": false,
+    "kernel_execution": false,
+    "kernel_stack_bound_proven": false,
+    "native_ci_requested": false,
+    "native_darwin_compilation": false,
+    "original_entry_admission": false,
+    "pm_30_second_shutdown_bound_proven": false,
+    "production_candidate_allowed": false
+  },
+  "algorithm_bodies_preserved": true,
+  "code_sha256": {
+    "check.py": "0d41a34e91c5b1bb2c132b919cda654d4d107b7b285353dbd95e74201f2980fd",
+    "check_integration.py": "e1ef02680e0654b4f68eea6308fe08b9eb5082cb399529ab36faba4c03aa6df9",
+    "prepare.py": "fc201a3449f6ba91bd3b0e561bc3692b45782d96e8eea328b5c07cb8fcc2e772",
+    "tests/check_oom.c": "54968c1ced8eb68532101ecaec1dbf16011c8a7c02a72d9a540f249f6328a22f"
+  },
+  "complete_memory_graph_barriers": {
+    "path": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/stack-context-validation-2/local-aggregate-barriers.json",
+    "scope": "Memory TU only; every outgoing edge/barrier retained.",
+    "sha256": "64d31a79fab3a953420d257b01de41466c5130a94dc743196ddd09eb5034679e"
+  },
+  "exported_generic_abi_unchanged": true,
+  "format": 1,
+  "genuine_global_integration": {
+    "full_evidence": {
+      "path": "build/stack-context-genuine-2/results.json",
+      "sha256": "9352993631a9d9c8a1c4740c492a452c6ca9a95d11819d502a603a36408943d6"
+    },
+    "historical_compiler_executable_digest_available": false,
+    "native_cache_eligibility_established": false,
+    "privileged_cpu_and_platform_fixtures": true,
+    "record_identity_fixture": false,
+    "variants": {
+      "plain": {
+        "all_original_observations_identical": true,
+        "assertions": 3886,
+        "binary_sha256": "ad16f1b60c6fe164a32975eff783899060b1a9f6a3f0f508e5c1cd3e813d1de8",
+        "compiler_sha256": "0e11f7e4300c0a5be8fe6bcd889a24ff9551778f2dfa62f169590dd5ffb72575",
+        "fresh_original_units": 1,
+        "object_sha256": "a0b0625bbd495e569caeb0728f63d3410117420450a16e16cd7b10311c3ebff3",
+        "positive_cases": 168,
+        "reused_link_objects": 1162
+      },
+      "sanitized": {
+        "all_original_observations_identical": true,
+        "assertions": 3886,
+        "binary_sha256": "ccae3c65b7c3b5fa89bf9f5f3e750a61088ea4e8641f7c6c80e88c708a9be01f",
+        "compiler_sha256": "0e11f7e4300c0a5be8fe6bcd889a24ff9551778f2dfa62f169590dd5ffb72575",
+        "fresh_original_units": 1,
+        "object_sha256": "7f862338897b802f7c317081ae1712a0510d97c1faaac70e9d1a9a9166e445d9",
+        "positive_cases": 168,
+        "reused_link_objects": 1162
+      }
+    }
+  },
+  "isolated_actual_body": {
+    "assertions": 141,
+    "fatal_sanitized_scenarios": 13,
+    "fixture_scope": "Complete transformed NVIDIA core/memory_tracking bodies and real guard; record identity, raw allocation, tracking lock and other port module implementations are explicit host fixtures.",
+    "observations_identical": true
+  },
+  "limitations": [
+    "Global nonpaged immediate frame grows8to24 bytes; caller and transitive aggregate bounds must be regenerated rather than inherited.",
+    "Actual generic dynamic allocator callback and original OOM callback barriers remain; no target set is installed for them.",
+    "Memory-only graph retains every edge, external provider, diagnostic and callback barrier. It is not a full original pipeline graph.",
+    "Registered OOM rate behavior remains functional reporting policy, not a callback lifetime, recursion, PM time or stack bound.",
+    "Only Linux CPU and fresh SDK Mach-O evidence is supplied; target capacity, framework headroom, IRQ reentry and runtime execution remain unproven."
+  ],
+  "machine_global_functions": {
+    "_s540Global_portMemAllocNonPaged": {
+      "baseline_static_frame_bytes": 8,
+      "candidate_direct_callees": [
+        "_s540AllocatorGlobalUse",
+        "_s540Global__portMemAllocNonPagedUntracked",
+        "_s540Global_portMemReportOom"
+      ],
+      "candidate_static_frame_bytes": 24,
+      "candidate_unknown_sites": [],
+      "scope": "Immediate compiled function only, not a transitive or target stack budget."
+    },
+    "_s540Global_portMemAllocPaged": {
+      "baseline_static_frame_bytes": 24,
+      "candidate_direct_callees": [
+        "_s540AllocatorGlobalUse",
+        "_s540Global__portMemAllocPagedUntracked",
+        "_s540Global_portMemReportOom"
+      ],
+      "candidate_static_frame_bytes": 24,
+      "candidate_unknown_sites": [],
+      "scope": "Immediate compiled function only, not a transitive or target stack budget."
+    },
+    "_s540Global_portMemFree": {
+      "baseline_static_frame_bytes": 24,
+      "candidate_direct_callees": [
+        "_s540AllocatorGlobalUse",
+        "_s540Global__portMemFreeUntracked"
+      ],
+      "candidate_static_frame_bytes": 24,
+      "candidate_unknown_sites": [],
+      "scope": "Immediate compiled function only, not a transitive or target stack budget."
+    }
+  },
+  "machine_negative_controls": [
+    {
+      "reason": "Actual global dispatch differs from reviewed concrete callees: _s540Global_portMemAllocNonPaged",
+      "variant": "baseline"
+    },
+    {
+      "reason": "Actual global dispatch differs from reviewed concrete callees: _s540Global_portMemAllocNonPaged",
+      "variant": "noinline-mutant"
+    }
+  ],
+  "narrow_machine_and_isolated_evidence": {
+    "path": "build/stack-context-validation-2/results.json",
+    "sha256": "37e0eff01ba57431703cd76b5f89e7139300efe598dbe9d9b05bd390dc826b5d"
+  },
+  "preserved_actual_machine_barriers": {
+    "generic_allocator": [
+      {
+        "address": 2863,
+        "instruction": "callq *(%r14)",
+        "reason": "indirect-control-transfer"
+      }
+    ],
+    "oom_callback": [
+      {
+        "address": 4683,
+        "instruction": "callq *%rax",
+        "reason": "indirect-control-transfer"
+      }
+    ]
+  },
+  "registered_original_oom_behavior": {
+    "baseline": {
+      "checks": 39,
+      "failures": 0,
+      "oom_count": 10,
+      "reports": 2
+    },
+    "candidate": {
+      "checks": 39,
+      "failures": 0,
+      "oom_count": 10,
+      "reports": 2
+    }
+  },
+  "source_contract": {
+    "path": "packages/nvidia-gsp-bootstrap/prospective-stack-context-closure/SOURCE-CONTRACT.json",
+    "sha256": "376079b957809d9d3f11eee3c54c42f6091f8f799d802664267af09cf787a407"
+  },
+  "source_input_sha256": "c27d0ac3576137f9d5c42703f51f4d473d9cfb733781d849acf22099f5c8187e",
+  "source_output_sha256": "b55ae1f99b29127f0707d81ad22711a22237ced3c249c2349ef811b79cc7b27b",
+  "status": "passed-local-global-allocator-dispatch-context-specialization",
+  "superseded_invalidated_run": {
+    "full_evidence": {
+      "path": "build/stack-context-genuine-1/results.json",
+      "sha256": "9fd066d1f7bcb898833a25195c239c13b4f7f09074562a22bc975a1886302c21"
+    },
+    "reason": "Control inputs changed during execution; final helper binding refused. Final2 reran with frozen controls.",
+    "status": "failed"
+  }
+}
