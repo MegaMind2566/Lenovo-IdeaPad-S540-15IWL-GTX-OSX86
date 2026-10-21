@@ -1,0 +1,217 @@
+{
+  "all_registrations_repeat": true,
+  "callbacks": [
+    {
+      "callback": "_kbifCheckIfGpuExists",
+      "classification": "positive-tu117-first-state-load",
+      "duration_bound_proven": false,
+      "registration": "osSchedule1HzCallback(pGpu, _kbifCheckIfGpuExists, NULL, NV_OS_1HZ_REPEAT);",
+      "registration_line": 187,
+      "remaining_transitive_bound": "gpuVerifyExistence_HAL -> gpu_access.c:1263 osHandleGpuLost -> osinit.c:361 reset/Xid/events/disconnect; transitive duration unproved",
+      "source": "src/nvidia/src/kernel/gpu/bif/kernel_bif.c",
+      "source_condition": "kernel_bif.c kbifStateLoad: CHECK_IF_GPU_EXISTS_DEF && !IS_VIRTUAL; TU117 explicitly enabled by g_kernel_bif_nvoc.c:246-255",
+      "source_sha256": "8d3339e2c6ec332b709d6c194532c5827f99521c36372f76a9a9df13ac99e078"
+    },
+    {
+      "callback": "confComputeKeyRotationCallback",
+      "classification": "excluded-tu117-by-generated-dispatch",
+      "duration_bound_proven": false,
+      "registration": "osSchedule1HzCallback(pGpu, confComputeKeyRotationCallback, NULL /* pData */, NV_OS_1HZ_REPEAT);",
+      "registration_line": 118,
+      "remaining_transitive_bound": "Real key rotation remains arbitrary callback work on supported architecture",
+      "source": "src/nvidia/src/kernel/gpu/conf_compute/arch/hopper/conf_compute_key_rotation_gh100.c",
+      "source_condition": "g_conf_compute_nvoc.c:623-638 GH100 only; TU117 noop",
+      "source_sha256": "f438e4a5aa43426bd1095680fdc9b58584e09b2d052beb37b41d10ebb30a0847"
+    },
+    {
+      "callback": "_gpuFabricProbeRbmCheckLinkWake1HzCallback",
+      "classification": "conditional-async-fabric-probe",
+      "duration_bound_proven": false,
+      "registration": "osSchedule1HzCallback(pGpu, _gpuFabricProbeRbmCheckLinkWake1HzCallback, (void *)pCallbackData, NV_OS_1HZ_REPEAT);",
+      "registration_line": 388,
+      "remaining_transitive_bound": "Bandwidth probes and asynchronous fabric state are not bounded by entry check",
+      "source": "src/nvidia/src/kernel/gpu/gpu_fabric_probe.c",
+      "source_condition": "Async NVLink wake creates callback data; self-remove/free at gpu_fabric_probe.c:304/312",
+      "source_sha256": "e17f9508c6ba515a53b2a9bf310ec8f739b18bb5e1a95f3729d3fc360513edb1"
+    },
+    {
+      "callback": "_kgspHealthPeriodicHealthCheck",
+      "classification": "conditional-first-gsp-init",
+      "duration_bound_proven": false,
+      "registration": "osSchedule1HzCallback(pGpu, _kgspHealthPeriodicHealthCheck, pKernelGsp, NV_OS_1HZ_REPEAT);",
+      "registration_line": 2525,
+      "remaining_transitive_bound": "_kgspCheckAndLogTimeout -> _kgspLogGspTimeout/eventbus flush -> _kgspHandleFatalTimeout; entered callback duration unproved",
+      "source": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+      "source_condition": "kgspInitRm:5815 actual runtime gspPeriodicHealthcheck registry enable; default disabled does not prove absence",
+      "source_sha256": "2d026d3f55bc10b972c072ad6d02a79117ac3338d24e3bf548eb4cd806b88a81"
+    },
+    {
+      "callback": "_kgspLogPollingCallback",
+      "classification": "positive-first-gsp-init",
+      "duration_bound_proven": false,
+      "registration": "osSchedule1HzCallback(pGpu, _kgspLogPollingCallback, NULL, NV_OS_1HZ_REPEAT);",
+      "registration_line": 7201,
+      "remaining_transitive_bound": "kgspDumpGspLogs checks cancellation at entry/log-lock wait but decoder/output duration unproved",
+      "source": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c",
+      "source_condition": "kgspInitRm success:5810 starts polling; LIBOS_LOG_DECODE_ENABLE for NVRM liblogdecode.h:33",
+      "source_sha256": "2d026d3f55bc10b972c072ad6d02a79117ac3338d24e3bf548eb4cd806b88a81"
+    },
+    {
+      "callback": "gspRatsNotifyAllConsumers",
+      "classification": "conditional-client-bind",
+      "duration_bound_proven": false,
+      "registration": "osSchedule1HzCallback(pGpu, gspRatsNotifyAllConsumers, NULL, NV_OS_1HZ_REPEAT);",
+      "registration_line": 314,
+      "remaining_transitive_bound": "Iterates/notifies registered consumers; closed frontend ingress needed to exclude",
+      "source": "src/nvidia/src/kernel/gpu/gsp/kernel_gsp_trace_rats.c",
+      "source_condition": "Trace client/event-buffer bindpoint kernel_gsp_trace_rats.c:190 and successful trace control; first binding registers",
+      "source_sha256": "a5345bc96c9eb6f79d445d25524130983d950dcd65d46a60f2d2028d74d19088"
+    },
+    {
+      "callback": "_kgspliteLogPollingCallback",
+      "classification": "conditional-property-and-log-buffer",
+      "duration_bound_proven": false,
+      "registration": "osSchedule1HzCallback(pGpu, _kgspliteLogPollingCallback, pKernelGsplite, NV_OS_1HZ_REPEAT);",
+      "registration_line": 366,
+      "remaining_transitive_bound": "Log decoding/output duration unproved; remove in destructor via stop polling",
+      "source": "src/nvidia/src/kernel/gpu/gsplite/kernel_gsplite.c",
+      "source_condition": "StateInitLocked:80 CMC_NVLOG property and log memdesc, LIBOS_LOG_ENABLE && UNIX; default false insufficient whole-program exclusion",
+      "source_sha256": "de736887ee955b0f65cd5318ec382bf85646d33ed93c59fbb842099cdfa9fe87"
+    },
+    {
+      "callback": "_gpuNvEncSessionDataProcessingCallback",
+      "classification": "conditional-client-session",
+      "duration_bound_proven": false,
+      "registration": "osSchedule1HzCallback(pGpu, _gpuNvEncSessionDataProcessingCallback, NULL, NV_OS_1HZ_REPEAT);",
+      "registration_line": 178,
+      "remaining_transitive_bound": "Data processing may queue or run synchronously on queue failure; closed frontend ingress required",
+      "source": "src/nvidia/src/kernel/gpu/nvenc/nvencsession.c",
+      "source_condition": "NVENC session constructor version1, nonhypervisor first session; destructor removes:244",
+      "source_sha256": "356f594e29d6f806b3ab539b2fc12b4b66954b008fc91e5e8d696e6bf2e69ab5"
+    },
+    {
+      "callback": "knvlinkABM_WORKITEM",
+      "classification": "excluded-tu117-by-generated-dispatch",
+      "duration_bound_proven": false,
+      "registration": "osSchedule1HzCallback(pGpu, knvlinkABM_WORKITEM, NULL, NV_OS_1HZ_REPEAT);",
+      "registration_line": 452,
+      "remaining_transitive_bound": "Actual bandwidth management work remains transitive on supported architecture",
+      "source": "src/nvidia/src/kernel/gpu/nvlink/arch/blackwell/kernel_nvlink_gb100.c",
+      "source_condition": "g_kernel_nvlink_nvoc.c:940-953 GB100/GR100 only",
+      "source_sha256": "486f6c4cff783b66c7d50dd2772999a6132e08d8ef3dc77d1d4593277137373c"
+    },
+    {
+      "callback": "_knvlinkP2PIdleCallback",
+      "classification": "excluded-tu117-by-generated-dispatch",
+      "duration_bound_proven": false,
+      "registration": "osSchedule1HzCallback(pGpu, _knvlinkP2PIdleCallback, NULL, NV_OS_1HZ_REPEAT);",
+      "registration_line": 856,
+      "remaining_transitive_bound": "Actual link idle state work remains transitive on supported architecture",
+      "source": "src/nvidia/src/kernel/gpu/nvlink/arch/blackwell/kernel_nvlink_gb100.c",
+      "source_condition": "g_kernel_nvlink_nvoc.c:896-905 GB100 family only",
+      "source_sha256": "486f6c4cff783b66c7d50dd2772999a6132e08d8ef3dc77d1d4593277137373c"
+    },
+    {
+      "callback": "knvlinkUncontainedErrorRecoveryReadyCheck_WORKITEM",
+      "classification": "conditional-nvlink-recovery",
+      "duration_bound_proven": false,
+      "registration": "osSchedule1HzCallback(pGpu, knvlinkUncontainedErrorRecoveryReadyCheck_WORKITEM, pInfo, NV_OS_1HZ_REPEAT), fail);",
+      "registration_line": 3405,
+      "remaining_transitive_bound": "Recovery readiness and rescheduling/control require transitive bound",
+      "source": "src/nvidia/src/kernel/gpu/nvlink/kernel_nvlink.c",
+      "source_condition": "Actual recovery path; remove kernel_nvlink.c:2669; default NVLINK property mask omits TU117 but not a blanket proof",
+      "source_sha256": "89145e654dd6fd337120a08e367791f61aabb63e81de86e61a38e25407b31fd7"
+    },
+    {
+      "callback": "knvlinkResiliencyRecovery_WORKITEM",
+      "classification": "conditional-nvlink-recovery",
+      "duration_bound_proven": false,
+      "registration": "osSchedule1HzCallback(pGpu, knvlinkResiliencyRecovery_WORKITEM, pInfo, NV_OS_1HZ_REPEAT), fail);",
+      "registration_line": 3481,
+      "remaining_transitive_bound": "Work queue and recovery RM control duration unproved",
+      "source": "src/nvidia/src/kernel/gpu/nvlink/kernel_nvlink.c",
+      "source_condition": "Actual resiliency recovery path; remove kernel_nvlink.c:3048; default property insufficient exclusion",
+      "source_sha256": "89145e654dd6fd337120a08e367791f61aabb63e81de86e61a38e25407b31fd7"
+    },
+    {
+      "callback": "knvlinkLazyErrorRecovery_WORKITEM",
+      "classification": "conditional-nvlink-recovery",
+      "duration_bound_proven": false,
+      "registration": "osSchedule1HzCallback(pGpu, knvlinkLazyErrorRecovery_WORKITEM, NULL, NV_OS_1HZ_REPEAT);",
+      "registration_line": 3529,
+      "remaining_transitive_bound": "Traverses clients/devices/channels and RM control, duration unproved",
+      "source": "src/nvidia/src/kernel/gpu/nvlink/kernel_nvlink.c",
+      "source_condition": "Actual lazy recovery; remove kernel_nvlink.c:2419/nonlazy3538; default property insufficient exclusion",
+      "source_sha256": "89145e654dd6fd337120a08e367791f61aabb63e81de86e61a38e25407b31fd7"
+    },
+    {
+      "callback": "krcWatchdogTimerProc",
+      "classification": "conditional-resource-watchdog",
+      "duration_bound_proven": false,
+      "registration": "osSchedule1HzCallback(pGpu, krcWatchdogTimerProc, pKernelWatchdog /* pData */, NV_OS_1HZ_REPEAT);",
+      "registration_line": 1315,
+      "remaining_transitive_bound": "Watchdog recovery/performance paths and MIG require transitive bound",
+      "source": "src/nvidia/src/kernel/gpu/rc/kernel_rc_watchdog.c",
+      "source_condition": "After successful watchdog internal channel/pushbuffer init; removes kernel_rc_watchdog.c:494; MIG hook uses existing instance/graphics resources",
+      "source_sha256": "5a0f4380998dfaaf1107dc2cd1b6656f4c78995315ced3679f3a9e010adf9445"
+    }
+  ],
+  "component": "source-pinned-original-1hz-producer-inventory",
+  "composition_sha256": "fcf44e804e1308c37b39f2d25c207434d06fd0b60b9fc9624453bcef1b2d8590",
+  "dispatch_producers": [
+    {
+      "lines": [
+        1784,
+        2370
+      ],
+      "path": "nv_start_rc_timer -> real direct-timer service admission; synchronous cancel retains live running lease",
+      "source": "src/nvidia/arch/nvalloc/unix/src/osinit.c",
+      "source_sha256": "e53129b6bb1f9a32fc62e2590383d16fe25a035e39521ed3988ecb3b602dd6c2"
+    },
+    {
+      "lines": [
+        151,
+        164,
+        186,
+        188,
+        196,
+        263,
+        280
+      ],
+      "path": "rc_callback transfers actual arm to running lease, DirectEnter creates genuine cancellation lease scope; original rm_run_rc_callback status -> DirectOriginalReturned; rearm only NV_OK",
+      "scope": "project",
+      "source": "packages/nvidia-gsp-bootstrap/timers/S540NvidiaGspTimersOriginal.c",
+      "source_sha256": "901c8bd01dce3eacf0c8856f36d6827a4ee417d62d413a8946be303a294c77fe"
+    },
+    {
+      "path": "osInit creates actual _os1HzCallback PTIMER target; original PTIMER service owns its event; typed now-status controls actual dispatch/rearm",
+      "source": "src/nvidia/src/kernel/os/os_timer.c",
+      "source_sha256": "78da8c6f23d9732dc4ff393b83553ecf06d800699362b70bc67a5f867dd41b4c"
+    },
+    {
+      "lines": [
+        1606
+      ],
+      "path": "_gpuLocksReleaseHandleDeferredWork -> legacy void queued wrapper; new delegate retains pending bit and sticky refusal",
+      "source": "src/nvidia/src/kernel/core/locks.c",
+      "source_sha256": "4ef306b2cafdfc6af21b43a97835c1e758e1d3d323d4ab48e10a59a140fb5a43"
+    },
+    {
+      "path": "actual master-drain operation consumes exact new typed status under genuine original GPU/API ownership",
+      "scope": "project",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-irq-callback-closure/rc/S540NvidiaIrqOriginal.c",
+      "source_sha256": "d4689e4f628e5ac7020c5cc8fca3e3ff4fcdbf0e19c26ea784d107c9c5017199"
+    }
+  ],
+  "format": 1,
+  "hardware_stop_proven": false,
+  "list_mutation_translation_units": [
+    "src/nvidia/src/kernel/os/os_timer.c"
+  ],
+  "original_c_files_searched": 1543,
+  "original_entry_admission": false,
+  "pm_30_second_shutdown_bound_proven": false,
+  "registration_count": 14,
+  "runtime_callback_whitelist_added": false,
+  "source_inventory_does_not_authorize_callback_dispatch": true
+}

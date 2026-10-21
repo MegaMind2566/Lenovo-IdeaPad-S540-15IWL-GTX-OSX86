@@ -1,0 +1,124 @@
+{
+  "actions_performed": "Read-only selected-source audit and new-directory documentation. No frozen core or existing profile edits, compilation, binary execution, CI or remote actions.",
+  "demonstrated_writer_path": [
+    "kbifStopSysMemRequests_GM107(bStop == NV_FALSE)",
+    "set NV_XVE_DEV_CTRL.CMD_BUS_MASTER=ENABLED; offset0x4 bit2",
+    "GPU_BUS_CFG_WR32 -> gpuWriteBusConfigReg_HAL",
+    "generated TU117 dispatch -> gpuWriteBusConfigReg_GM107",
+    "GPU_REG_WR32(pGpu, DEVICE_BASE(NV_PCFG)+index,value)",
+    "retained BAR0 MMIO; bypasses IOPCIDevice/transport configWrite seal"
+  ],
+  "draft": {
+    "admitted": false,
+    "compiled": false,
+    "executed": false,
+    "location": "build/dma-containment-draft",
+    "source_transform_anchor_check_only": true
+  },
+  "first_missing_observable": "An enforceable complete original/firmware MMIO writer and CPU-producer boundary after BME readback. No existing Session/provider state proves that boundary.",
+  "format": 1,
+  "public_sdk": {
+    "anchors": [
+      562,
+      568
+    ],
+    "path": "../MacKernelSDK/Headers/IOKit/pci/IOPCIDevice.h",
+    "setBusMasterEnable_result": "previous enable state; not success",
+    "sha256": "64a32261140503d1b332dd67ab656d3f79e946f223a730ad739b81fe5bb5ae3a"
+  },
+  "scope": {
+    "containment_implemented": false,
+    "hardware_admission": false,
+    "irreversible_bme_seal_proven": false,
+    "kernel_stack_bound_proven": false,
+    "native_ci_requested": false,
+    "original_entry_admission": false,
+    "physical_reclamation_authorized": false,
+    "pm_30_second_shutdown_bound_proven": false,
+    "pm_acknowledgement_authorized": false,
+    "runtime_coordinator_installed": false,
+    "whole_dma_stop_proven": false
+  },
+  "selected_composition_sha256": "fcf44e804e1308c37b39f2d25c207434d06fd0b60b9fc9624453bcef1b2d8590",
+  "selected_root": "build/integrated-successor-5",
+  "source_bindings": {
+    "project/packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp": {
+      "anchors": [
+        269,
+        348
+      ],
+      "sha256": "faaea3f83118f559a0d7880528f5e7bdf7c28b3b1cbad21f8442054a513c1655"
+    },
+    "project/packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c": {
+      "anchors": [
+        78
+      ],
+      "sha256": "1bf0218af81af2b694b6ab73ef643a85193cf02d9523acd0578609517729a0a6"
+    },
+    "source/src/common/inc/swref/published/maxwell/gm107/dev_nv_xve.h": {
+      "anchors": [
+        30,
+        37
+      ],
+      "sha256": "1d98c252197e77fa245c1312f7cad758ec879d4f8fde32e090d2a6de9e9dfbea"
+    },
+    "source/src/nvidia/generated/g_gpu_access_nvoc.h": {
+      "anchors": [
+        259,
+        358
+      ],
+      "sha256": "55120d5ad58cfc5f9a35de3c8b2d9125f165c63414ea3f7b58782fa62ff4ab5f"
+    },
+    "source/src/nvidia/generated/g_gpu_nvoc.c": {
+      "anchors": [
+        1321,
+        1328
+      ],
+      "sha256": "1ac5687a07fb6c22eab9d314603d6750caf5fe317a92f973ba4a68cac161f823"
+    },
+    "source/src/nvidia/src/kernel/gpu/arch/maxwell/kern_gpu_gm107.c": {
+      "anchors": [
+        222,
+        239
+      ],
+      "sha256": "5551162ba1a6c895eb4332074d49824b37b40d437755060c483371801c8670c9"
+    },
+    "source/src/nvidia/src/kernel/gpu/bif/arch/maxwell/kernel_bif_gm107.c": {
+      "anchors": [
+        1121,
+        1138,
+        1141
+      ],
+      "sha256": "8adf51c33580a9cabff61756d29a5ad1b93c4379fa9f70cf7e1c02c747f0e67b"
+    },
+    "source/src/nvidia/src/kernel/gpu/bif/arch/turing/kernel_bif_tu102.c": {
+      "anchors": [
+        291,
+        310,
+        572,
+        578
+      ],
+      "sha256": "deb0b0aa06023fd73e233e6c727e2fb2a2574ed764b990239605ee18a910a289"
+    },
+    "source/src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c": {
+      "anchors": [
+        5867,
+        5933,
+        5965
+      ],
+      "sha256": "2d026d3f55bc10b972c072ad6d02a79117ac3338d24e3bf548eb4cd806b88a81"
+    }
+  },
+  "status": "blocked-evidence-only-no-selectable-profile",
+  "supported_bif_observations": {
+    "flr_not_admitted": "Full FLR ignores some precondition failures, resets and restores config; not a containment API.",
+    "new_requests": "GM107 BME clearing is documented as inhibiting new function-0 system-memory requests.",
+    "separate_completions": "TU102 polls TRANSACTIONS_PENDING for function-issued transaction completions."
+  },
+  "unknowns": [
+    "No proof that all retained original CPU producers cease or cannot write BME through mapped BAR0.",
+    "No proof that device firmware cannot change the relevant request-generation state.",
+    "No proof BME-off or TRANSACTIONS_PENDING==0 drains all posted writes in the PCIe fabric.",
+    "No proven upper bound for original shutdown plus config access and safe parent power-down within the 30-second PM budget."
+  ]
+}

@@ -1,0 +1,679 @@
+{
+  "actual_body_assertions": 141,
+  "actual_body_controls": {
+    "actual": {
+      "binary_sha256": "236d5717622b9fe9f3d66a841e42c629f06e55234ebe4b85716435e2df61a70a",
+      "observations": [
+        {
+          "checks": 22,
+          "exit_code": 0,
+          "failures": 0,
+          "poison_allocations": 1,
+          "poison_frees": 1,
+          "refused_initializations": 0,
+          "refused_shutdowns": 5,
+          "scenario": 0
+        },
+        {
+          "checks": 6,
+          "exit_code": 0,
+          "failures": 0,
+          "poison_allocations": 0,
+          "poison_frees": 0,
+          "refused_initializations": 1,
+          "refused_shutdowns": 0,
+          "scenario": 1
+        },
+        {
+          "checks": 13,
+          "exit_code": 0,
+          "failures": 0,
+          "poison_allocations": 0,
+          "poison_frees": 0,
+          "refused_initializations": 1,
+          "refused_shutdowns": 0,
+          "scenario": 2
+        },
+        {
+          "checks": 11,
+          "exit_code": 0,
+          "failures": 0,
+          "poison_allocations": 0,
+          "poison_frees": 0,
+          "refused_initializations": 1,
+          "refused_shutdowns": 0,
+          "scenario": 3
+        },
+        {
+          "checks": 8,
+          "exit_code": 0,
+          "failures": 0,
+          "poison_allocations": 0,
+          "poison_frees": 0,
+          "refused_initializations": 0,
+          "refused_shutdowns": 0,
+          "scenario": 4
+        },
+        {
+          "checks": 6,
+          "exit_code": 0,
+          "failures": 0,
+          "poison_allocations": 0,
+          "poison_frees": 0,
+          "refused_initializations": 2,
+          "refused_shutdowns": 0,
+          "scenario": 5
+        },
+        {
+          "checks": 8,
+          "exit_code": 0,
+          "failures": 0,
+          "poison_allocations": 0,
+          "poison_frees": 0,
+          "refused_initializations": 3,
+          "refused_shutdowns": 0,
+          "scenario": 6
+        },
+        {
+          "checks": 6,
+          "exit_code": 0,
+          "failures": 0,
+          "poison_allocations": 0,
+          "poison_frees": 0,
+          "refused_initializations": 1,
+          "refused_shutdowns": 0,
+          "scenario": 7
+        },
+        {
+          "checks": 13,
+          "exit_code": 0,
+          "failures": 0,
+          "poison_allocations": 0,
+          "poison_frees": 0,
+          "refused_initializations": 0,
+          "refused_shutdowns": 0,
+          "scenario": 8
+        },
+        {
+          "checks": 14,
+          "exit_code": 0,
+          "failures": 0,
+          "poison_allocations": 0,
+          "poison_frees": 0,
+          "refused_initializations": 4,
+          "refused_shutdowns": 0,
+          "scenario": 9
+        },
+        {
+          "checks": 9,
+          "exit_code": 0,
+          "failures": 0,
+          "poison_allocations": 0,
+          "poison_frees": 0,
+          "refused_initializations": 2,
+          "refused_shutdowns": 0,
+          "scenario": 10
+        },
+        {
+          "checks": 15,
+          "exit_code": 0,
+          "failures": 0,
+          "poison_allocations": 0,
+          "poison_frees": 0,
+          "refused_initializations": 12,
+          "refused_shutdowns": 6,
+          "scenario": 11
+        },
+        {
+          "checks": 10,
+          "exit_code": 0,
+          "failures": 0,
+          "poison_allocations": 0,
+          "poison_frees": 0,
+          "refused_initializations": 3,
+          "refused_shutdowns": 0,
+          "scenario": 12
+        }
+      ]
+    },
+    "foreign-entry-mutant": {
+      "binary_sha256": "ccd278879ec91d8eba25085c36dce420348a6b350b1f0e813b5e61ed359c48f2",
+      "observations": [
+        {
+          "checks": 6,
+          "exit_code": 1,
+          "failures": 4,
+          "poison_allocations": 0,
+          "poison_frees": 0,
+          "refused_initializations": 0,
+          "refused_shutdowns": 0,
+          "scenario": 1
+        }
+      ]
+    },
+    "mutable-global-callback-mutant": {
+      "binary_sha256": "061e70d50ccd05ecfede93357c148be6d1b604865cee2e0fc37a79cecd86a19e",
+      "observations": [
+        {
+          "checks": 22,
+          "exit_code": 1,
+          "failures": 2,
+          "poison_allocations": 5,
+          "poison_frees": 1,
+          "refused_initializations": 0,
+          "refused_shutdowns": 5,
+          "scenario": 0
+        }
+      ]
+    },
+    "tracking-public-bypass-mutant": {
+      "binary_sha256": "2d7f247ea4a7cfd7aa1bb1a3bc22855962378e59b8540500843e9f7fbee858b3",
+      "observations": [
+        {
+          "checks": 9,
+          "exit_code": 1,
+          "failures": 2,
+          "poison_allocations": 0,
+          "poison_frees": 0,
+          "refused_initializations": 0,
+          "refused_shutdowns": 0,
+          "scenario": 10
+        }
+      ]
+    }
+  },
+  "actual_original_sources": {
+    "src/nvidia/src/libraries/nvport/core/core.c": {
+      "input_sha256": "ab654590c63b55dad276da4edf9d1ab5f621b2d2f956a71e0e28aca36811bd1c",
+      "output_sha256": "1edf9e881b2d14fbb47e86ac1bcff51da2793390399aeb44a554d6e8ae0df802"
+    },
+    "src/nvidia/src/libraries/nvport/memory/memory_tracking.c": {
+      "input_sha256": "2f0f0f56272725a6348bae85d04a1330bd7352d3421bf94a90fff2d9debf7618",
+      "output_sha256": "c27d0ac3576137f9d5c42703f51f4d473d9cfb733781d849acf22099f5c8187e"
+    }
+  },
+  "aggregate_stack_proven": false,
+  "ci_requested": false,
+  "code_sha256": {
+    "S540NvidiaAllocatorEpoch.c": "74571a67c3e0f47633331a9e7ab4c66bbd08782ec41803ad294bc236ad8a59ae",
+    "S540NvidiaAllocatorEpoch.h": "7f27796f3eff2ecb970a3b441e7220983daef12f271f76fe923c1a72df589720",
+    "check.py": "5c79a7f10c5d331044453d891197e757f33ce095608857dc04ebe42cc4e37b76",
+    "check_integration.py": "40708404f37ca08758c3a3506051e8f7c1282d3e2878c49a2f16962cd38f2269",
+    "prepare.py": "b9021bb17b53248d3dcc6fb9891bfdd3295c53300129c9b83142890b0393342c",
+    "tests/check_actual.c": "233af09d611de752b633403373993bfe87ce789303b143c6edaf74227f2d69bd",
+    "tests/test_transform.py": "f9b592e8e006a0be7a13dcfc38a38c5b9551c353839f2583cdabdb35fd5d9c0c"
+  },
+  "cross_objects": [
+    {
+      "capture": {
+        "dynamic_function_count": 0,
+        "function_count": 28,
+        "native_apple_compiler": false,
+        "path": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/allocator-stack-validation-final-4/cross/baseline-memory.stack.json",
+        "sha256": "13ea17f3efd89a43af8fa0a64fdf340b0ab1dee3f9e5158d407e82bb6171de48"
+      },
+      "defined_external_symbols": [
+        "_s540Global__portMemAllocatorAlloc",
+        "_s540Global__portMemAllocatorFree",
+        "_s540Global_portMemAllocNonPaged",
+        "_s540Global_portMemAllocPaged",
+        "_s540Global_portMemAllocatorCreateNonPaged",
+        "_s540Global_portMemAllocatorCreateOnExistingBlock",
+        "_s540Global_portMemAllocatorCreatePaged",
+        "_s540Global_portMemAllocatorGetGlobalNonPaged",
+        "_s540Global_portMemAllocatorGetGlobalPaged",
+        "_s540Global_portMemAllocatorRelease",
+        "_s540Global_portMemExAllocatorCreateLockedOnExistingBlock",
+        "_s540Global_portMemExTrackingGetActiveStats",
+        "_s540Global_portMemExTrackingGetPeakStats",
+        "_s540Global_portMemExTrackingGetTotalStats",
+        "_s540Global_portMemFree",
+        "_s540Global_portMemInitialize",
+        "_s540Global_portMemInitializeAllocatorTracking",
+        "_s540Global_portMemPrintAllTrackingInfo",
+        "_s540Global_portMemPrintTrackingInfo",
+        "_s540Global_portMemRegisterOomReportCb",
+        "_s540Global_portMemReportOom",
+        "_s540Global_portMemShutdown"
+      ],
+      "label": "baseline-memory",
+      "object_sha256": "b0282ac96b2d3f7d05e2ea84f6f3f8d8e5bfb9032b36366c4b4f7bdedc60b73b",
+      "source_sha256": "2f0f0f56272725a6348bae85d04a1330bd7352d3421bf94a90fff2d9debf7618"
+    },
+    {
+      "capture": {
+        "dynamic_function_count": 0,
+        "function_count": 29,
+        "native_apple_compiler": false,
+        "path": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/allocator-stack-validation-final-4/cross/candidate-memory.stack.json",
+        "sha256": "6deb1205d88008bf5af6dc7b890a9d1292c63f4daff501d7d6c89b8cdb455bb0"
+      },
+      "defined_external_symbols": [
+        "_s540Global__portMemAllocatorAlloc",
+        "_s540Global__portMemAllocatorFree",
+        "_s540Global_portMemAllocNonPaged",
+        "_s540Global_portMemAllocPaged",
+        "_s540Global_portMemAllocatorCreateNonPaged",
+        "_s540Global_portMemAllocatorCreateOnExistingBlock",
+        "_s540Global_portMemAllocatorCreatePaged",
+        "_s540Global_portMemAllocatorGetGlobalNonPaged",
+        "_s540Global_portMemAllocatorGetGlobalPaged",
+        "_s540Global_portMemAllocatorRelease",
+        "_s540Global_portMemExAllocatorCreateLockedOnExistingBlock",
+        "_s540Global_portMemExTrackingGetActiveStats",
+        "_s540Global_portMemExTrackingGetPeakStats",
+        "_s540Global_portMemExTrackingGetTotalStats",
+        "_s540Global_portMemFree",
+        "_s540Global_portMemInitialize",
+        "_s540Global_portMemInitializeAllocatorTracking",
+        "_s540Global_portMemPrintAllTrackingInfo",
+        "_s540Global_portMemPrintTrackingInfo",
+        "_s540Global_portMemRegisterOomReportCb",
+        "_s540Global_portMemReportOom",
+        "_s540Global_portMemShutdown"
+      ],
+      "label": "candidate-memory",
+      "object_sha256": "fd410d60a898527472b9ab25cad91eb3b592d85f25d5fe710e254fde1279c93b",
+      "source_sha256": "c27d0ac3576137f9d5c42703f51f4d473d9cfb733781d849acf22099f5c8187e"
+    },
+    {
+      "capture": {
+        "dynamic_function_count": 0,
+        "function_count": 3,
+        "native_apple_compiler": false,
+        "path": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/allocator-stack-validation-final-4/cross/candidate-core.stack.json",
+        "sha256": "d6859dfb883186e1dec8a62095f1dce7b5c3ca45e99b6de51b7f284e4c8effef"
+      },
+      "defined_external_symbols": [
+        "_s540Global_portInitialize",
+        "_s540Global_portIsInitialized",
+        "_s540Global_portShutdown"
+      ],
+      "label": "candidate-core",
+      "object_sha256": "e62f4688ab104104dba05a8128469a9633ebc4585f9554af73e2251524b6c95a",
+      "source_sha256": "1edf9e881b2d14fbb47e86ac1bcff51da2793390399aeb44a554d6e8ae0df802"
+    },
+    {
+      "capture": {
+        "dynamic_function_count": 0,
+        "function_count": 10,
+        "native_apple_compiler": false,
+        "path": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/allocator-stack-validation-final-4/cross/candidate-epoch.stack.json",
+        "sha256": "2e414f76c9a27bdd513048720f6dbf35c96c154c3bc7fecd79993b50bd0734fb"
+      },
+      "defined_external_symbols": [
+        "_s540AllocatorEpochSnapshot",
+        "_s540AllocatorGlobalUse",
+        "_s540AllocatorMemoryBegin",
+        "_s540AllocatorMemoryEnd",
+        "_s540AllocatorMemoryShutdown",
+        "_s540AllocatorPortableBegin",
+        "_s540AllocatorPortableEnd",
+        "_s540AllocatorPortableRelease",
+        "_s540AllocatorPortableVisible",
+        "_s540AllocatorTrackingRefused"
+      ],
+      "label": "candidate-epoch",
+      "object_sha256": "1f04524df630a8b3c1318bfe9aa19ada721ec23c86b1e283d0210b2884202e92",
+      "source_sha256": "74571a67c3e0f47633331a9e7ab4c66bbd08782ec41803ad294bc236ad8a59ae"
+    }
+  ],
+  "cross_scope": "Linux LLVM18 x86_64-apple-macos15 KERNEL/__KERNEL__ with actual pinned SDK headers available; not native Apple compilation or kernel execution.",
+  "format": 1,
+  "full_evidence": {
+    "path": "build/allocator-stack-validation-final-4/results.json",
+    "sha256": "12a52386ade3c4e4acd4777786f5195ad7309a4e5109fbc673a1d75fb1ed41ce"
+  },
+  "genuine_global_owner_integration": {
+    "historical_compiler_digest_available": false,
+    "historical_failed_report_preserved": true,
+    "path": "build/allocator-global-integration-1/results.json",
+    "record_identity_fixture": false,
+    "sha256": "ee8adb1ef7cff89cda05c78af606aa403433aeea659fc0280ab6b0110b266a09",
+    "status": "passed-genuine-global-owner-allocator-cpu-integration",
+    "variants": {
+      "plain": {
+        "assertions": 3886,
+        "binary_sha256": "88018088e575537a4506ccc174310dcf9ba95cf216e50717b892e4dad6f75c47",
+        "cases_with_allocator_refusals": [
+          {
+            "case": [
+              "5"
+            ],
+            "refusals": 1,
+            "shutdown_refusals": 0
+          },
+          {
+            "case": [
+              "6"
+            ],
+            "refusals": 2,
+            "shutdown_refusals": 0
+          },
+          {
+            "case": [
+              "6",
+              "2"
+            ],
+            "refusals": 2,
+            "shutdown_refusals": 0
+          },
+          {
+            "case": [
+              "6",
+              "3"
+            ],
+            "refusals": 1,
+            "shutdown_refusals": 0
+          },
+          {
+            "case": [
+              "6",
+              "4"
+            ],
+            "refusals": 1,
+            "shutdown_refusals": 0
+          },
+          {
+            "case": [
+              "6",
+              "5"
+            ],
+            "refusals": 1,
+            "shutdown_refusals": 0
+          },
+          {
+            "case": [
+              "6",
+              "6"
+            ],
+            "refusals": 1,
+            "shutdown_refusals": 1
+          },
+          {
+            "case": [
+              "6",
+              "7"
+            ],
+            "refusals": 1,
+            "shutdown_refusals": 1
+          },
+          {
+            "case": [
+              "6",
+              "8"
+            ],
+            "refusals": 1,
+            "shutdown_refusals": 0
+          },
+          {
+            "case": [
+              "6",
+              "9"
+            ],
+            "refusals": 0,
+            "shutdown_refusals": 1
+          }
+        ],
+        "freshly_compiled_units": 5,
+        "positive_cases": 168,
+        "reused_auxiliary_units": 3,
+        "reused_original_units": 1098,
+        "reused_project_units": 57
+      },
+      "sanitized": {
+        "assertions": 3886,
+        "binary_sha256": "67570e52ba4e832ff1ff4ca9fa7650e42d6bae3db2327e7ff320b0b5c07ca35e",
+        "cases_with_allocator_refusals": [
+          {
+            "case": [
+              "5"
+            ],
+            "refusals": 1,
+            "shutdown_refusals": 0
+          },
+          {
+            "case": [
+              "6"
+            ],
+            "refusals": 2,
+            "shutdown_refusals": 0
+          },
+          {
+            "case": [
+              "6",
+              "2"
+            ],
+            "refusals": 2,
+            "shutdown_refusals": 0
+          },
+          {
+            "case": [
+              "6",
+              "3"
+            ],
+            "refusals": 1,
+            "shutdown_refusals": 0
+          },
+          {
+            "case": [
+              "6",
+              "4"
+            ],
+            "refusals": 1,
+            "shutdown_refusals": 0
+          },
+          {
+            "case": [
+              "6",
+              "5"
+            ],
+            "refusals": 1,
+            "shutdown_refusals": 0
+          },
+          {
+            "case": [
+              "6",
+              "6"
+            ],
+            "refusals": 1,
+            "shutdown_refusals": 1
+          },
+          {
+            "case": [
+              "6",
+              "7"
+            ],
+            "refusals": 1,
+            "shutdown_refusals": 1
+          },
+          {
+            "case": [
+              "6",
+              "8"
+            ],
+            "refusals": 1,
+            "shutdown_refusals": 0
+          },
+          {
+            "case": [
+              "6",
+              "9"
+            ],
+            "refusals": 0,
+            "shutdown_refusals": 1
+          }
+        ],
+        "freshly_compiled_units": 5,
+        "positive_cases": 168,
+        "reused_auxiliary_units": 3,
+        "reused_original_units": 1098,
+        "reused_project_units": 57
+      }
+    }
+  },
+  "global_allocator_machine_sites": {
+    "portMemAllocNonPaged": {
+      "baseline_indirect_sites": [
+        {
+          "address": 1344,
+          "instruction": "callq *0x80(%rip)",
+          "reason": "indirect-control-transfer"
+        }
+      ],
+      "baseline_static_frame_bytes": 24,
+      "candidate_calls": [
+        {
+          "address": 1363,
+          "kind": "branch",
+          "target": {
+            "symbol": "_s540Global__portMemAllocatorAlloc"
+          }
+        }
+      ],
+      "candidate_indirect_sites": [],
+      "candidate_static_frame_bytes": 8,
+      "scope": "Immediate machine function only; callees and context-sensitive generic dispatch remain separate."
+    },
+    "portMemAllocPaged": {
+      "baseline_indirect_sites": [
+        {
+          "address": 880,
+          "instruction": "callq *0x58(%rip)",
+          "reason": "indirect-control-transfer"
+        }
+      ],
+      "baseline_static_frame_bytes": 24,
+      "candidate_calls": [
+        {
+          "address": 669,
+          "kind": "call",
+          "target": {
+            "symbol": "_s540AllocatorGlobalUse"
+          }
+        },
+        {
+          "address": 698,
+          "kind": "call",
+          "target": {
+            "symbol": "_s540Global__portMemAllocPagedUntracked"
+          }
+        },
+        {
+          "address": 868,
+          "kind": "call",
+          "target": {
+            "symbol": "_s540Global_portMemReportOom"
+          }
+        }
+      ],
+      "candidate_indirect_sites": [],
+      "candidate_static_frame_bytes": 24,
+      "scope": "Immediate machine function only; callees and context-sensitive generic dispatch remain separate."
+    },
+    "portMemFree": {
+      "baseline_indirect_sites": [
+        {
+          "address": 1622,
+          "instruction": "jmpq *%rax",
+          "reason": "indirect-control-transfer"
+        }
+      ],
+      "baseline_static_frame_bytes": 8,
+      "candidate_calls": [
+        {
+          "address": 1426,
+          "kind": "call",
+          "target": {
+            "symbol": "_s540AllocatorGlobalUse"
+          }
+        },
+        {
+          "address": 1465,
+          "kind": "branch",
+          "target": {
+            "symbol": "_s540Global__portMemFreeUntracked"
+          }
+        }
+      ],
+      "candidate_indirect_sites": [],
+      "candidate_static_frame_bytes": 24,
+      "scope": "Immediate machine function only; callees and context-sensitive generic dispatch remain separate."
+    }
+  },
+  "global_use_guard_bound_scope": "Exact local compiled graph only; no target capacity or framework headroom implied.",
+  "global_use_guard_compiled_bound_bytes": 16,
+  "guard_export_strength": {
+    "_s540AllocatorEpochSnapshot": {
+      "descriptor": 0,
+      "kind": 15
+    },
+    "_s540AllocatorGlobalUse": {
+      "descriptor": 0,
+      "kind": 15
+    },
+    "_s540AllocatorMemoryBegin": {
+      "descriptor": 0,
+      "kind": 15
+    },
+    "_s540AllocatorMemoryEnd": {
+      "descriptor": 0,
+      "kind": 15
+    },
+    "_s540AllocatorMemoryShutdown": {
+      "descriptor": 0,
+      "kind": 15
+    },
+    "_s540AllocatorPortableBegin": {
+      "descriptor": 0,
+      "kind": 15
+    },
+    "_s540AllocatorPortableEnd": {
+      "descriptor": 0,
+      "kind": 15
+    },
+    "_s540AllocatorPortableRelease": {
+      "descriptor": 0,
+      "kind": 15
+    },
+    "_s540AllocatorPortableVisible": {
+      "descriptor": 0,
+      "kind": 15
+    },
+    "_s540AllocatorTrackingRefused": {
+      "descriptor": 0,
+      "kind": 15
+    }
+  },
+  "hardware_execution": false,
+  "identity_fixture_scope": "Actual-body isolated tests use explicit record/raw allocator/lock fixtures. Separate336case integration uses genuine unchanged record and actual original global construction with only privileged-CPU/platform fixtures.",
+  "lifetime_proof": [
+    "All actual original port initialization entries authenticate the genuine current GlobalReadMaster IN_CORE before touching counters.",
+    "A nonrecursive initializer CAS rejects same-thread reentry and foreign callers; memory publication follows the complete actual memory initializer.",
+    "Global allocator common bodies refuse use before that private publication; initialization-lock storage still uses the original untracked path.",
+    "Retained base port and memory shutdown and global getter release cannot erase live metadata. Nested original TLS/NVLOG references may balance above the retained base.",
+    "Global alloc/free compare the actual allocator address and directly call original static wrappers; mutating exposed callback fields cannot redirect these paths.",
+    "Dynamic/existing-block allocators retain original callback dispatch and their unresolved target/lifetime requirements.",
+    "The original global tracking body is private static; only the three exact initializer sites and the public generic wrapper call it. The initializer sites preserve ordering after successful tracking-lock initialization.",
+    "The public tracking wrapper rejects either exact global allocator or any reserved main/paged/nonPaged static tracking address, independently of its allocator argument; otherwise it requires actual memory publication.",
+    "Exact global tracking reads select immutable static storage. Nonglobal alloc/free and public release reject reserved tracking aliases; static unlink also refuses them before metadata or callback effects.",
+    "Existing-block constructors refuse regions overlapping the entire original global metadata object, with overflow checked, while genuine private block allocation/free remains exercised."
+  ],
+  "original_entry_admission": false,
+  "production_candidate_allowed": false,
+  "residual_requirements": [
+    "A complete operational successor must bind the fresh transformed objects and current companion profiles; frozen historical native objects are not a successor aggregate proof.",
+    "The new guards add real frames; all remaining external, indirect, recursive, worker/IRQ and framework depths and actual target capacities remain unproven.",
+    "Nonpaged allocation now delegates the generic helper in this compiler output. Its constant global-identity source branch is not silently installed as context-sensitive aggregate machine graph proof.",
+    "Generic allocator callback and metadata lifetimes, arbitrary direct writes through exposed C structs, raw diagnostic entrypoints and OOM callback registration/recursion remain outside this bounded closure.",
+    "Linux CPU execution uses genuine record identity but explicit privileged-CPU/platform fixtures. It establishes no Apple native-cache eligibility, kernel execution, GPU access, PM deadline or DMA stop.",
+    "Original/global/loader/hardware admission gates remain closed."
+  ],
+  "source_contract_sha256": "9412b38977d697400d98c74bc916f773f67f2fe8d52428087b2afec8422ab046",
+  "source_inventory_refusal_controls": 3,
+  "status": "first-real-global-nonpaged-slot-closed; aggregate-stack-unproven",
+  "superseded_pre_tracking_receipt": {
+    "path": "build/allocator-stack-validation-final-3/reviewed-VALIDATION.json",
+    "sha256": "a650db9d6beae4e7a9190241a115833fadc1ed11fc96de1062b00e0ae5b13e19"
+  }
+}

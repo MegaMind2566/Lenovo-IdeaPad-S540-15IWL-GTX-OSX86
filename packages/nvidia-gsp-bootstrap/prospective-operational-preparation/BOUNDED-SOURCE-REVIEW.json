@@ -1,0 +1,84 @@
+{
+  "admission": {
+    "aggregate_kernel_stack_proven": false,
+    "complete_symbol_closure_proven": false,
+    "hardware_admission": false,
+    "native_ci_requested": false,
+    "original_entry_admission": false,
+    "physical_reclamation_authorized": false,
+    "pm_30_second_shutdown_bound_proven": false,
+    "runtime_coordinator_installed": false,
+    "whole_original_build_validated": false
+  },
+  "allocator_authority": {
+    "genuine_record_full_integration_verified_by_this_review": false,
+    "review": "Initialization authorizes through genuine s540FirstTxnGlobalReadMaster, requiring the actual ordinary global IN_CORE master and its nonzero owner/generation/thread. Nonrecursive CAS and genuine memory completion govern publication. These are production checks, distinct from the identity fixture used by local allocator controls.",
+    "same_thread_and_foreign_raw_initialization": "Public tracking initialization cannot initialize either global allocator or any reserved static tracker. Non-global public tracking initialization requires actual memory publication. No blanket master-only restriction is added to published dynamic allocation use."
+  },
+  "candidate": "build/operational-successor-2",
+  "composition_sha256": "40f0fd1fc279421464c14f9b98f7fa84f6850e6fafb61d46aa60663ce471dd4c",
+  "format": 1,
+  "generated_source_sha256": {
+    "project/packages/nvidia-global-rm/src/S540NvidiaGlobalRmLifecycle.c": "d8304f6a91a9b4671d8ccfe56ba5805e601b2962e0a7296dc5a1c9612711f27b",
+    "project/packages/nvidia-gsp-bootstrap/prospective-allocator-stack-closure/S540NvidiaAllocatorEpoch.c": "74571a67c3e0f47633331a9e7ab4c66bbd08782ec41803ad294bc236ad8a59ae",
+    "project/packages/nvidia-gsp-bootstrap/prospective-allocator-stack-closure/S540NvidiaAllocatorEpoch.h": "7f27796f3eff2ecb970a3b441e7220983daef12f271f76fe923c1a72df589720",
+    "source/src/nvidia/src/libraries/nvport/core/core.c": "1edf9e881b2d14fbb47e86ac1bcff51da2793390399aeb44a554d6e8ae0df802",
+    "source/src/nvidia/src/libraries/nvport/memory/memory_tracking.c": "c27d0ac3576137f9d5c42703f51f4d473d9cfb733781d849acf22099f5c8187e"
+  },
+  "global_result": {
+    "new_runtime_authority": false,
+    "review": "Exact original input hash and exactly three return-boundary replacements align startupStatus with the already returned stronger status. Original outcome remains separately recorded. Entire KERNEL refusal prefix, authority checks, initialization calls and shutdown body are preserved."
+  },
+  "local_controls_scope": {
+    "interpretation": "Saved local full-body controls and mutation checks use explicit CPU identity/platform/module fixtures. This review read their receipt; it did not rerun tests or treat fixture authorization as production identity proof.",
+    "receipt": "build/allocator-stack-validation-final-4/results.json",
+    "sha256": "12a52386ade3c4e4acd4777786f5195ad7309a4e5109fbc673a1d75fb1ed41ce",
+    "source_matches_reviewed_candidate_memory": true
+  },
+  "method": "Independent read-only production source and generated-source review; no builds, binary execution, CI, remote actions or production edits performed by this review.",
+  "production_sha256": {
+    "packages/nvidia-gsp-bootstrap/prospective-allocator-stack-closure/S540NvidiaAllocatorEpoch.c": "74571a67c3e0f47633331a9e7ab4c66bbd08782ec41803ad294bc236ad8a59ae",
+    "packages/nvidia-gsp-bootstrap/prospective-allocator-stack-closure/S540NvidiaAllocatorEpoch.h": "7f27796f3eff2ecb970a3b441e7220983daef12f271f76fe923c1a72df589720",
+    "packages/nvidia-gsp-bootstrap/prospective-allocator-stack-closure/prepare.py": "b9021bb17b53248d3dcc6fb9891bfdd3295c53300129c9b83142890b0393342c",
+    "packages/nvidia-gsp-bootstrap/prospective-global-result-closure/prepare.py": "7a1932731acd718a8b5bc80635d866edcd32d8c0d2e8f1bf83bfbd09bfce5146"
+  },
+  "remaining_limitations": [
+    "A genuine global-record integration run of the new allocator guard is still a separate required validation; this review does not declare it complete.",
+    "Generic dynamic/existing-block allocator callbacks, OOM callbacks and their contextual/aggregate stack bounds remain unproved.",
+    "The unrestricted OOM callback setter and raw diagnostic/Print paths are outside the checked allocator entrypoint closure. No selected first-core setter callsite was found; they remain explicit nonadmission barriers, not silently covered by this review.",
+    "No arbitrary C memory-corruption resistance is claimed. Writable pointers and general memory utilities are not made immutable by these entrypoint checks.",
+    "No hardware DMA stop, PM deadline, original shutdown timing, target kernel stack capacity, native Apple execution or GPU initialization proof is supplied."
+  ],
+  "resolved_findings": [
+    {
+      "id": "tracking-init-raw-entry",
+      "resolution": "Public wrapper rejects global allocator identities and independently rejects main/paged/nonpaged static tracking identities, including NULL or non-global allocator aliases, before any write or list operation."
+    },
+    {
+      "id": "initialization-order-and-reentry",
+      "resolution": "Only the source-local static original implementation initializes global tracking. Its three source-conditional calls remain in the genuine memory initializer after successful tracking-lock initialization and private allocator setup, before MemoryEnd publication. Public same-pair reentry always refuses; a public readiness claim cannot open that path."
+    },
+    {
+      "id": "mutable-global-tracking",
+      "resolution": "Exact global allocator addresses select fixed static tracking addresses, with nonpaged selection following PORT_MEM_TRACK_USE_FENCEPOSTS; writable pTracking/pImpl fields do not select global runtime tracking."
+    },
+    {
+      "id": "reserved-tracker-release-and-use-alias",
+      "resolution": "Non-global reserved pTracking aliases refuse before allocation/free mutation or release callbacks. Public release also denies global allocator identities; the static unlink helper independently refuses reserved trackers. The original release wrapper does not dereference pImpl; arbitrary dynamic allocator callbacks remain outside the bounded proof."
+    },
+    {
+      "id": "existing-block-global-overlap",
+      "resolution": "Existing-block constructor rejects wraparound and any claimed range overlapping the retained portMemGlobals object before writing allocator fields. Genuine caller-owned block behavior remains original."
+    }
+  ],
+  "selected_compile_profile": {
+    "NVOS_IS_LIBOS": 0,
+    "PORT_IS_CHECKED_BUILD": 0,
+    "PORT_MEM_TRACK_USE_FENCEPOSTS": 0,
+    "PORT_MEM_TRACK_USE_LIMIT": 0,
+    "gfid_limit_reset_paths": "Compile out in the selected host profile; no proof is transferred to a GFID/LibOS/limit-enabled profile.",
+    "global_tracking_setup": "Selected non-fence profile initializes the paged static tracker once and aliases both global allocators to it; fence-enabled source branch retains its distinct exact static pair ordering.",
+    "public_counter_reset_api_found": false
+  },
+  "status": "bounded-source-review-complete-no-remaining-confirmed-blocker-in-reviewed-changes"
+}

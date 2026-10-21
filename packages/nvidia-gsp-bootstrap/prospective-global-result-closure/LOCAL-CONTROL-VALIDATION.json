@@ -1,0 +1,182 @@
+{
+  "auxiliary_audit_sha256": "383bedf5a847a3fb90d6585c879065c853b18f7591507493688f9b6c80351a11",
+  "canonical_lifecycle_sha256": "ccf6483a792dd9b0b22624ffb86e509199ebb971c9273408a7c6d9e931555f44",
+  "corrected_historical_full_runner_reexecuted": false,
+  "cpu_lifecycle_sha256": "6f03a769657f3e75898f81d587fd8e03e57c9e30e3aa64926b4b84494761841c",
+  "format": 1,
+  "fresh_cpu_project_headers_and_harness_final_bindings_verified": true,
+  "full_local_report_sha256": "d95dbd8dbb540a434fe9a25e2fd144e46b6561750a7cf44fcb3dd1e2e2499288",
+  "gpu_access": false,
+  "hardware_admission": false,
+  "harness_sha256": "27d05c16a6d218f4b3bb38607cc255f05d886c36f6ff7c015ae194d4b45ace46",
+  "historical_compiler_executable_digest_available": false,
+  "historical_report_status_preserved": "failed",
+  "historical_results_sha256": "9bd1e8a7c92f5139104aadec7adb13c50c0378368676f2a86b0a143f26e6663f",
+  "kernel_aggregate_stack_bound_proven": false,
+  "kernel_execution": false,
+  "kernel_refusal_prefix_unchanged": true,
+  "original_and_project_header_bytes_unchanged": true,
+  "original_entry_admission": false,
+  "original_status_preserved_separately_in_epoch": true,
+  "pm_30_second_shutdown_bound_proven": false,
+  "production_lifecycle_sha256": "d8304f6a91a9b4671d8ccfe56ba5805e601b2962e0a7296dc5a1c9612711f27b",
+  "reviewed_auxiliary_audit_pinned": true,
+  "scope": "Actual original CPU result consistency and measured allocation positions only",
+  "source_sha256": {
+    "check.py": "1cd9d018aa598e47d9d763e17c7e950dd923ddfe380b4a72eed8beb99d8f26a8",
+    "prepare.py": "7a1932731acd718a8b5bc80635d866edcd32d8c0d2e8f1bf83bfbd09bfce5146"
+  },
+  "status": "passed-actual-original-global-result-consistency",
+  "variants": {
+    "plain": {
+      "auxiliary_object_sha256": {
+        "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/retained-construction-controls/plain/epoch-original-control.o": "dfb50960bcbcb69b245706076773527ea541d58405a5340b04838bfb2efbd35d",
+        "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/retained-construction-controls/plain/native-unavailable-boundaries.o": "ea95cc3f9b967b417122c666ea4737f275f2ce623665e5ca2ea6a5d95fc1f654",
+        "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/retained-construction-controls/plain/nvswitch-assert-fixture.o": "de76f14efd87a8de051cbcbbe1556e297c8ffa2e34eb2d098675e8e6e18773e5"
+      },
+      "binary_sha256": "c7a9189a77860c6434578424e711dea8a51fa3805499a2e0f5ceb9479d2caaaa",
+      "constructor_allocation_positions": 154,
+      "fresh_artifact_and_compiler_final_bindings_verified": true,
+      "freshly_compiled_units": [
+        {
+          "command_json_sha256": "8312a513c3a51aa541232bee0ae6e7f4ab05dde01d85d13a0ce8ab1789ae75ef",
+          "compiler_sha256": "0e11f7e4300c0a5be8fe6bcd889a24ff9551778f2dfa62f169590dd5ffb72575",
+          "dependencies_sha256": "13e087eb4db87079d821565b1ec0a522d573e41f81715db2e6f0c57cd25abe5d",
+          "dependency_file": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/global-result-controls-2/plain/lifecycle.d",
+          "object": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/global-result-controls-2/plain/lifecycle.o",
+          "object_sha256": "500902920d0048330aa4b120c06b2658d7ca64bde719c38b7ce7e4c9c426ac7f",
+          "source": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/global-result-controls-2/project/packages/nvidia-global-rm/src/S540NvidiaGlobalRmLifecycle.c",
+          "source_sha256": "6f03a769657f3e75898f81d587fd8e03e57c9e30e3aa64926b4b84494761841c"
+        },
+        {
+          "command_json_sha256": "ac6fac27f977d0ce567d40b3f45b3561f2d4904609930926c626faededfb1283",
+          "compiler_sha256": "3c683e91e35245d2760aec697d92713f8c4051591b750cf7650b3c9d8c7063a7",
+          "dependencies_sha256": "68035cebad71f55f4f2aae678ed9bb086e4c92396051ecb060fa1aef2cd55547",
+          "dependency_file": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/global-result-controls-2/plain/harness.d",
+          "object": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/global-result-controls-2/plain/harness.o",
+          "object_sha256": "9c57dbdbe30a640d05337508e5f23a5663f4184fb7738725650116f490e63518",
+          "source": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/global-result-controls-2/result-harness.cpp",
+          "source_sha256": "27d05c16a6d218f4b3bb38607cc255f05d886c36f6ff7c015ae194d4b45ace46"
+        }
+      ],
+      "legacy_binary_sha256": "6073af28d29239ad6f09141de749f8f8d679deb0d85119fd90e7c2ea80953ab7",
+      "legacy_regression_detected": true,
+      "legacy_regression_ordinal": 2,
+      "legacy_regression_result": {
+        "allocation_failures": 1,
+        "allocations": 1,
+        "checks": 22,
+        "cleanup_after_claim": 0,
+        "construction_retained": false,
+        "construction_status": 0,
+        "diagnostic_retired_allocations": 0,
+        "epoch_state": 5,
+        "failures": 1,
+        "global_initialized": false,
+        "gpu_access": false,
+        "kernel_execution": false,
+        "original_core_returns": 1,
+        "original_live_allocations": 1,
+        "original_returned": true,
+        "original_status": 65535,
+        "physical_frees": 0,
+        "postcore_hook_status": 0,
+        "record_status": 81,
+        "retention_claims": 0,
+        "scenario": 6,
+        "startup_status": 65535,
+        "status": 81,
+        "validated": false,
+        "validation_status": 0
+      },
+      "positive_cases": 168,
+      "postcore_allocation_positions": [
+        155,
+        156
+      ],
+      "reused_auxiliary_units": 3,
+      "reused_original_units": 1100,
+      "reused_project_units": 57,
+      "status": "passed",
+      "unreached_terminal_ordinals": [
+        155,
+        157
+      ]
+    },
+    "sanitized": {
+      "auxiliary_object_sha256": {
+        "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/retained-construction-controls/sanitized/epoch-original-control.o": "74f7dbd149213e00e13a45f0b70061d80e239d3c6a0c68b866ceb80e854288d8",
+        "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/retained-construction-controls/sanitized/native-unavailable-boundaries.o": "2d0aa36e32b3cd1ba71703dbd4dde59d9e674572346e357906d2cdd43b163fee",
+        "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/retained-construction-controls/sanitized/nvswitch-assert-fixture.o": "810a1c94015e61e1be248cb312bd1f7730c64b8f471efc00201ecc15aeb9c101"
+      },
+      "binary_sha256": "e71aaf1a5373c75fb6a93556040038b6e4bea4ab4314ed96df7fcd1676238f36",
+      "constructor_allocation_positions": 154,
+      "fresh_artifact_and_compiler_final_bindings_verified": true,
+      "freshly_compiled_units": [
+        {
+          "command_json_sha256": "9d562315b4201b5b23cc91b78b50e231442f20941092d00bc1843d65746864a5",
+          "compiler_sha256": "0e11f7e4300c0a5be8fe6bcd889a24ff9551778f2dfa62f169590dd5ffb72575",
+          "dependencies_sha256": "26e9f77280240076cf6933629249e3e09b1b84268f42c781f3458f3f3bfce20b",
+          "dependency_file": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/global-result-controls-2/sanitized/lifecycle.d",
+          "object": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/global-result-controls-2/sanitized/lifecycle.o",
+          "object_sha256": "034f3ae150362029cc0fd6984a5df9564b3baabb9cdd97e2a1d6863c3f59941a",
+          "source": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/global-result-controls-2/project/packages/nvidia-global-rm/src/S540NvidiaGlobalRmLifecycle.c",
+          "source_sha256": "6f03a769657f3e75898f81d587fd8e03e57c9e30e3aa64926b4b84494761841c"
+        },
+        {
+          "command_json_sha256": "beeaadcb9d38585d21c8e18a431dadb03d08303019d35fbc0f45bb43b39dc92e",
+          "compiler_sha256": "3c683e91e35245d2760aec697d92713f8c4051591b750cf7650b3c9d8c7063a7",
+          "dependencies_sha256": "891e1d2447b97e1601792220fa28e2d2eeacbc55b6253b156c89c48d69cb764b",
+          "dependency_file": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/global-result-controls-2/sanitized/harness.d",
+          "object": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/global-result-controls-2/sanitized/harness.o",
+          "object_sha256": "880cd23e4dae03bf63371771ad4bb8b5e82049cc11d81115aff16341b0335fb8",
+          "source": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/project/build/global-result-controls-2/result-harness.cpp",
+          "source_sha256": "27d05c16a6d218f4b3bb38607cc255f05d886c36f6ff7c015ae194d4b45ace46"
+        }
+      ],
+      "legacy_binary_sha256": "74c630504cdde3d9190e134b7c8b1790ff52a315c76379578ea4f7de3b982d86",
+      "legacy_regression_detected": true,
+      "legacy_regression_ordinal": 2,
+      "legacy_regression_result": {
+        "allocation_failures": 1,
+        "allocations": 1,
+        "checks": 22,
+        "cleanup_after_claim": 0,
+        "construction_retained": false,
+        "construction_status": 0,
+        "diagnostic_retired_allocations": 0,
+        "epoch_state": 5,
+        "failures": 1,
+        "global_initialized": false,
+        "gpu_access": false,
+        "kernel_execution": false,
+        "original_core_returns": 1,
+        "original_live_allocations": 1,
+        "original_returned": true,
+        "original_status": 65535,
+        "physical_frees": 0,
+        "postcore_hook_status": 0,
+        "record_status": 81,
+        "retention_claims": 0,
+        "scenario": 6,
+        "startup_status": 65535,
+        "status": 81,
+        "validated": false,
+        "validation_status": 0
+      },
+      "positive_cases": 168,
+      "postcore_allocation_positions": [
+        155,
+        156
+      ],
+      "reused_auxiliary_units": 3,
+      "reused_original_units": 1100,
+      "reused_project_units": 57,
+      "status": "passed",
+      "unreached_terminal_ordinals": [
+        155,
+        157
+      ]
+    }
+  }
+}

@@ -1,0 +1,208 @@
+{
+  "aggregate_stack_proven": false,
+  "allocator_code_sha256": {
+    "S540NvidiaAllocatorEpoch.c": "74571a67c3e0f47633331a9e7ab4c66bbd08782ec41803ad294bc236ad8a59ae",
+    "S540NvidiaAllocatorEpoch.h": "7f27796f3eff2ecb970a3b441e7220983daef12f271f76fe923c1a72df589720",
+    "prepare.py": "b9021bb17b53248d3dcc6fb9891bfdd3295c53300129c9b83142890b0393342c"
+  },
+  "checker_sha256": "40708404f37ca08758c3a3506051e8f7c1282d3e2878c49a2f16962cd38f2269",
+  "format": 1,
+  "gpu_access": false,
+  "historical_compiler_digest_available": false,
+  "historical_failed_cpu_report_sha256": "9bd1e8a7c92f5139104aadec7adb13c50c0378368676f2a86b0a143f26e6663f",
+  "historical_failed_report_preserved": true,
+  "kernel_execution": false,
+  "limitations": [
+    "No Apple native-cache eligibility or historical compiler executable binding is reconstructed.",
+    "Only allocator, result-consistency and retained-construction companions are integrated here; callback/PM hardware execution is separate.",
+    "All original/global/loader/hardware gates remain closed."
+  ],
+  "original_entry_admission": false,
+  "path": "build/allocator-global-integration-1/results.json",
+  "production_candidate_allowed": false,
+  "record_identity_fixture": false,
+  "scope": "Genuine record IN_CORE identity and actual NVIDIA portable/global construction on Linux CPU, with authenticated unchanged object reuse and explicit privileged CPU/platform fixtures.",
+  "sha256": "ee8adb1ef7cff89cda05c78af606aa403433aeea659fc0280ab6b0110b266a09",
+  "source_contract_sha256": "9412b38977d697400d98c74bc916f773f67f2fe8d52428087b2afec8422ab046",
+  "status": "passed-genuine-global-owner-allocator-cpu-integration",
+  "variants": {
+    "plain": {
+      "assertions": 3886,
+      "binary_sha256": "88018088e575537a4506ccc174310dcf9ba95cf216e50717b892e4dad6f75c47",
+      "cases_with_allocator_refusals": [
+        {
+          "case": [
+            "5"
+          ],
+          "refusals": 1,
+          "shutdown_refusals": 0
+        },
+        {
+          "case": [
+            "6"
+          ],
+          "refusals": 2,
+          "shutdown_refusals": 0
+        },
+        {
+          "case": [
+            "6",
+            "2"
+          ],
+          "refusals": 2,
+          "shutdown_refusals": 0
+        },
+        {
+          "case": [
+            "6",
+            "3"
+          ],
+          "refusals": 1,
+          "shutdown_refusals": 0
+        },
+        {
+          "case": [
+            "6",
+            "4"
+          ],
+          "refusals": 1,
+          "shutdown_refusals": 0
+        },
+        {
+          "case": [
+            "6",
+            "5"
+          ],
+          "refusals": 1,
+          "shutdown_refusals": 0
+        },
+        {
+          "case": [
+            "6",
+            "6"
+          ],
+          "refusals": 1,
+          "shutdown_refusals": 1
+        },
+        {
+          "case": [
+            "6",
+            "7"
+          ],
+          "refusals": 1,
+          "shutdown_refusals": 1
+        },
+        {
+          "case": [
+            "6",
+            "8"
+          ],
+          "refusals": 1,
+          "shutdown_refusals": 0
+        },
+        {
+          "case": [
+            "6",
+            "9"
+          ],
+          "refusals": 0,
+          "shutdown_refusals": 1
+        }
+      ],
+      "freshly_compiled_units": 5,
+      "positive_cases": 168,
+      "reused_auxiliary_units": 3,
+      "reused_original_units": 1098,
+      "reused_project_units": 57
+    },
+    "sanitized": {
+      "assertions": 3886,
+      "binary_sha256": "67570e52ba4e832ff1ff4ca9fa7650e42d6bae3db2327e7ff320b0b5c07ca35e",
+      "cases_with_allocator_refusals": [
+        {
+          "case": [
+            "5"
+          ],
+          "refusals": 1,
+          "shutdown_refusals": 0
+        },
+        {
+          "case": [
+            "6"
+          ],
+          "refusals": 2,
+          "shutdown_refusals": 0
+        },
+        {
+          "case": [
+            "6",
+            "2"
+          ],
+          "refusals": 2,
+          "shutdown_refusals": 0
+        },
+        {
+          "case": [
+            "6",
+            "3"
+          ],
+          "refusals": 1,
+          "shutdown_refusals": 0
+        },
+        {
+          "case": [
+            "6",
+            "4"
+          ],
+          "refusals": 1,
+          "shutdown_refusals": 0
+        },
+        {
+          "case": [
+            "6",
+            "5"
+          ],
+          "refusals": 1,
+          "shutdown_refusals": 0
+        },
+        {
+          "case": [
+            "6",
+            "6"
+          ],
+          "refusals": 1,
+          "shutdown_refusals": 1
+        },
+        {
+          "case": [
+            "6",
+            "7"
+          ],
+          "refusals": 1,
+          "shutdown_refusals": 1
+        },
+        {
+          "case": [
+            "6",
+            "8"
+          ],
+          "refusals": 1,
+          "shutdown_refusals": 0
+        },
+        {
+          "case": [
+            "6",
+            "9"
+          ],
+          "refusals": 0,
+          "shutdown_refusals": 1
+        }
+      ],
+      "freshly_compiled_units": 5,
+      "positive_cases": 168,
+      "reused_auxiliary_units": 3,
+      "reused_original_units": 1098,
+      "reused_project_units": 57
+    }
+  }
+}

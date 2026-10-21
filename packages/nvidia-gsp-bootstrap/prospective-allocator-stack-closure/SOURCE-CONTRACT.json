@@ -1,0 +1,48 @@
+{
+  "base_source_sha256": {
+    "src/nvidia/src/libraries/nvport/core/core.c": "ab654590c63b55dad276da4edf9d1ab5f621b2d2f956a71e0e28aca36811bd1c",
+    "src/nvidia/src/libraries/nvport/memory/memory_tracking.c": "2f0f0f56272725a6348bae85d04a1330bd7352d3421bf94a90fff2d9debf7618"
+  },
+  "code_sha256": {
+    "S540NvidiaAllocatorEpoch.c": "74571a67c3e0f47633331a9e7ab4c66bbd08782ec41803ad294bc236ad8a59ae",
+    "S540NvidiaAllocatorEpoch.h": "7f27796f3eff2ecb970a3b441e7220983daef12f271f76fe923c1a72df589720",
+    "check.py": "5c79a7f10c5d331044453d891197e757f33ce095608857dc04ebe42cc4e37b76",
+    "check_integration.py": "40708404f37ca08758c3a3506051e8f7c1282d3e2878c49a2f16962cd38f2269",
+    "prepare.py": "b9021bb17b53248d3dcc6fb9891bfdd3295c53300129c9b83142890b0393342c",
+    "tests/check_actual.c": "233af09d611de752b633403373993bfe87ce789303b143c6edaf74227f2d69bd",
+    "tests/test_transform.py": "f9b592e8e006a0be7a13dcfc38a38c5b9551c353839f2583cdabdb35fd5d9c0c"
+  },
+  "format": 1,
+  "generic_dynamic_callback_policy": "unchanged allocator callback fallback",
+  "global_destruction_implemented": false,
+  "global_tracking_selection": "Exact global allocator identity selects immutable original static paged/nonPaged implementation tracking by compile-time fence profile.",
+  "global_tracking_setup": "Only three source-local private calls in original memory initializer after successful original lock setup; public ABI refuses global allocator or static tracking aliases before mutation.",
+  "guard_exports": [
+    "s540AllocatorEpochSnapshot",
+    "s540AllocatorGlobalUse",
+    "s540AllocatorMemoryBegin",
+    "s540AllocatorMemoryEnd",
+    "s540AllocatorMemoryShutdown",
+    "s540AllocatorPortableBegin",
+    "s540AllocatorPortableEnd",
+    "s540AllocatorPortableRelease",
+    "s540AllocatorPortableVisible",
+    "s540AllocatorTrackingRefused"
+  ],
+  "include_directory": "packages/nvidia-gsp-bootstrap/prospective-allocator-stack-closure",
+  "port_global_allocation_target": "original static wrapper selected by global allocator address, independent of writable callback member",
+  "profile": "opt-in-retained-allocator-stack-closure",
+  "project_units": [
+    {
+      "kind": "original-c",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-allocator-stack-closure/S540NvidiaAllocatorEpoch.c"
+    }
+  ],
+  "runtime_admission_granted": false,
+  "scope_limit": "No blanket protection against arbitrary writes through exposed C structs; OOM callbacks, diagnostics, generic callback/metadata lifetimes and whole aggregate stack remain barriers.",
+  "successor_source_sha256": {
+    "src/nvidia/src/libraries/nvport/core/core.c": "1edf9e881b2d14fbb47e86ac1bcff51da2793390399aeb44a554d6e8ae0df802",
+    "src/nvidia/src/libraries/nvport/memory/memory_tracking.c": "c27d0ac3576137f9d5c42703f51f4d473d9cfb733781d849acf22099f5c8187e"
+  },
+  "tracking_release_policy": "Public allocator release and static unlink reject reserved main/paged/nonPaged tracking aliases; generic dynamic tracking remains original."
+}

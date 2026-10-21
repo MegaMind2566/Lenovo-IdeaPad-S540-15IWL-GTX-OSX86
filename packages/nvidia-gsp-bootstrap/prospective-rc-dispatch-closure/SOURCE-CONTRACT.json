@@ -1,0 +1,54 @@
+{
+  "companions": {
+    "packages/nvidia-gsp-bootstrap/prospective-rc-dispatch-closure/include/S540NvidiaRcDispatchOriginal.h": "c030d1ef0ea52ad57dfc9a253e0faa987adf9dd8878550a30a49f444fd19908c"
+  },
+  "compile_definitions": {},
+  "component": "prospective-rc-dispatch-closure",
+  "concurrent_revoke_arm_commit_guard_proven": false,
+  "exports": {
+    "src/nvidia/src/kernel/os/os_timer.c": [
+      "s540Global_s540OsRun1HzCallbacksNowStatus",
+      "s540Global_s540OsRunQueued1HzCallbacksUnderLockStatus"
+    ]
+  },
+  "format": 1,
+  "frozen_parent_composition_sha256": "fcf44e804e1308c37b39f2d25c207434d06fd0b60b9fc9624453bcef1b2d8590",
+  "generated_header_abi_changed": false,
+  "hardware_admission": false,
+  "hardware_stop_proven": false,
+  "include_directories": [
+    "packages/nvidia-gsp-bootstrap/prospective-rc-dispatch-closure/include"
+  ],
+  "input_source_sha256": {
+    "packages/nvidia-gsp-bootstrap/prospective-irq-callback-closure/rc/S540NvidiaIrqOriginal.c": "d4689e4f628e5ac7020c5cc8fca3e3ff4fcdbf0e19c26ea784d107c9c5017199",
+    "src/nvidia/arch/nvalloc/unix/src/osapi.c": "275e46868aa90b9c0a5d60c45c23aa0aa6773e11d0c268e56fc3d2e7f940cfaa",
+    "src/nvidia/src/kernel/os/os_timer.c": "78da8c6f23d9732dc4ff393b83553ecf06d800699362b70bc67a5f867dd41b4c"
+  },
+  "new_callback_whitelist": false,
+  "original_entry_admission": false,
+  "original_inputs": [
+    "src/nvidia/src/kernel/os/os_timer.c",
+    "src/nvidia/arch/nvalloc/unix/src/osapi.c"
+  ],
+  "physical_release_authorized": false,
+  "pm_30_second_shutdown_bound_proven": false,
+  "pm_deadline_changed": false,
+  "production_helper_sha256": {
+    "include/S540NvidiaRcDispatchOriginal.h": "c030d1ef0ea52ad57dfc9a253e0faa987adf9dd8878550a30a49f444fd19908c",
+    "prepare.py": "74c4fefc7d2ea95948088d9aed0f1f2a8e4caa5229944ead0b0c0410ebb0fe0f",
+    "rc-dispatch.c.inc": "69aec474bc400a1ce8137e753ae9f883d6375bd652bdbb595aaab23ff4705d12",
+    "rc-state.c.inc": "671e322a80693be880347c0efbed558a70889b545208710caa20bf984810f2ca"
+  },
+  "project_inputs": [
+    "packages/nvidia-gsp-bootstrap/prospective-irq-callback-closure/rc/S540NvidiaIrqOriginal.c"
+  ],
+  "project_units": [],
+  "reference_parent_output_source_sha256": {
+    "packages/nvidia-gsp-bootstrap/prospective-irq-callback-closure/rc/S540NvidiaIrqOriginal.c": "5995e259aef081013bdcdb441f5aca7ee560d9fd693acf1d0e92e9726085e7fe",
+    "src/nvidia/arch/nvalloc/unix/src/osapi.c": "dd05f4bacfa9959e54a75ff0f8822a08fac5ff948fe4259084fa0cfa921f6ac2",
+    "src/nvidia/src/kernel/os/os_timer.c": "2a9ddc1d8931e15c2eae2b33448df3d06ddd05e7c8792c1b4c68091770b1651c"
+  },
+  "reference_project_hash_scope": "Frozen integrated-successor-5 standalone reference; ordered IRQ-installation predecessor preserves this exact transform anchor but changes final bridge hash. Final integrated bridge hash belongs to the root composition receipt.",
+  "source_only": true,
+  "status": "source-frozen-local-controls-passed"
+}

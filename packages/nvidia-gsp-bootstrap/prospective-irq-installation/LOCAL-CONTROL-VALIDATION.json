@@ -1,0 +1,100 @@
+{
+  "candidate_input": false,
+  "checks_per_mode_total": 202,
+  "ci_requested": false,
+  "component": "original-context-session-irq-installation",
+  "concrete_path": "Owner dispatcher -> embedded retained Binding -> actual Session install/arm -> actual backend -> original Context ISR/fault and locked/unlocked BH wrappers",
+  "control_source_sha256": {
+    "tests/check_backend.cpp": "5ed83bb02801ad2f467f6c901c480556ecea1f031158c52abd88af2b62f4496e",
+    "tests/check_backend.py": "f27bb192b29243002c5d975839bc5a88bcb4a7e2cb165b3f579f7b7931c47b53",
+    "tests/context_identity.c": "9352318eaed0678d7badbcbb492c99c459bde54917f8fda284154a8e5f073e3f",
+    "tests/context_identity.py": "9783bb671f0dd4cdb6b251d5f6736dfac3cfe71edc9d0d8ad620243e82a92a19",
+    "tests/installation_binding.cpp": "308a087bcff84839b4a927c0358b4addaea41a1e1242c6c3891e543d31f51689",
+    "tests/installation_binding.py": "c9f979bba56341d86c1ed4509a56d753729950ecdc5bbeeb5665216b8f332563",
+    "tests/preinit_original.c": "ee018f3c2382ccf16d0150f6316cfbf19d245756bac372d6f114f48e78fa81f5",
+    "tests/preinit_original.py": "0395445dc56142d9a2e1e0ae0e4103798cef79c7e79d8ffecf2dc9d5bfc493f0"
+  },
+  "controls": {
+    "backend": {
+      "checks": {
+        "fatal-sanitized": 46,
+        "plain": 46
+      },
+      "report": "build/irq-installation-backend.json",
+      "report_sha256": "19d6974a6e8202bd27c5508c5277033ed9ef4e7f29755e5b6d41e5d580d581b7",
+      "status": "pass"
+    },
+    "binding": {
+      "checks": {
+        "fatal-sanitized": 60,
+        "plain": 60
+      },
+      "report": "build/irq-installation-binding.json",
+      "report_sha256": "7794ce6e43ed34eba9bcfe7d25411f0e586543188cfc7e2dd9bc3b693a644f05",
+      "status": "passed"
+    },
+    "context-identity": {
+      "checks": {
+        "fatal-sanitized": 78,
+        "plain": 78
+      },
+      "report": "build/irq-installation-context-identity.json",
+      "report_sha256": "b5dc7c6fab2f100e165794a4be9df1555ab4db17016119c936dd15c648aac96c",
+      "status": "passed"
+    },
+    "original-preinit": {
+      "checks": {
+        "fatal-sanitized": 18,
+        "plain": 18
+      },
+      "report": "build/irq-installation-preinit-original.json",
+      "report_sha256": "910d2537d9299527676e8618d71aaa4dcfdf27974ce856660d23bba22bbdb230",
+      "status": "passed"
+    }
+  },
+  "existing_source_sha256": {
+    "../MacKernelSDK/Headers/IOKit/IOService.h": "b63a858ca74fe35b6e1d6af6ff7f558da14fdb97eba7410e46db181545112ab1",
+    "../MacKernelSDK/Headers/IOKit/pci/IOPCIDevice.h": "64a32261140503d1b332dd67ab656d3f79e946f223a730ad739b81fe5bb5ae3a",
+    "build/integrated-successor-5/project/packages/nvidia-hardware-transport/src/S540NvidiaPci.cpp": "aa68554b9162f5a81c141514d0a8467f53527ec0774ecca048b6dbb900acc03e"
+  },
+  "format": 1,
+  "full_hardware_cleanup_proven": false,
+  "hardware_interrupt_delivery": false,
+  "initial_control_findings": [
+    "SDK compile rejected private Session::live use; source now uses actual public Session::accessible",
+    "retained-stop control exposed readyToArm remaining true; source now refuses monotonically after actual stop attempt",
+    "preinit control now uses exact selected Context layout whenever selected source is supplied"
+  ],
+  "kernel_execution": false,
+  "limitations": [
+    "OS/controller/public-callout framework and strong-record policy endpoints in backend controls are explicit fixtures; PCI inventory parser is an endpoint fixture there",
+    "Binding controls use explicit Session/Lease/record endpoints; actual Session/backend implementations are not executed by those controls",
+    "original wrapper controls execute pinned genuine source with complete original headers and explicit runtime/TLS/HAL/spinlock endpoints",
+    "pre-GPU original persistent mask needs an actual OBJGPU; sticky/closing original cleanup-master authority remains unresolved",
+    "no genuine CPU stack switch/budget, PM deadline, original-init bounded unwind, hardware DMA-stop receipt or whole-runtime admission is established"
+  ],
+  "original_entry_admission": false,
+  "original_gpu_init": false,
+  "physical_reclamation_authorized": false,
+  "production_sha256": {
+    "S540NvidiaGspIrqIdentity.h": "d322d563e8a461779ef92b7e9882f8ea2798674f9ccf6d184488704a2bb6fce1",
+    "S540NvidiaGspIrqInstallation.hpp": "8cd3d4d918afaf3d3bf3bd854de06356efd7f8ba8602365764a814b94eb1b266",
+    "backend-mode.cpp.inc": "3dc9f2eb5646ca51afeab3894036efbc89f1e6b788290e78ed856f41b1aa09a0",
+    "context-identity.c.inc": "317be9843989a01c2c37848365c9e4de48d9fa089aad8c8b3ad34cf33c97e060",
+    "owner-methods.cpp.inc": "245cdcd62167329b340a8c74145cf346c7f2f563cf0a9091ddfff0d89dd188bf",
+    "prepare.py": "1ec3fab4d114da3b05c01e712c537908152aad88255493a7041c3e00a4c908ee"
+  },
+  "remote_writes": false,
+  "selected_sdk": {
+    "final_link": false,
+    "new_strong_c_exports": 5,
+    "report": "build/irq-installation-sdk-final3/selected-compilation.json",
+    "report_sha256": "dff541ae89e79a78a3f7e91c41af79530177ef3d52a3d7004de190f366533501",
+    "status": "pass",
+    "translation_units": 3,
+    "whole_project_compile": false
+  },
+  "source_contract_sha256": "96aeaededb9991c387a9db6e56889ced7be2b1011ef0402d4057b4d54481b76c",
+  "startup_invokes_new_install_method": false,
+  "whole_runtime_closure_proven": false
+}

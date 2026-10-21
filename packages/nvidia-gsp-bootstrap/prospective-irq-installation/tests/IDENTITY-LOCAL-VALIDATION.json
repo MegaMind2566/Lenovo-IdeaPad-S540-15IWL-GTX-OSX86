@@ -1,0 +1,95 @@
+{
+  "candidate_input": false,
+  "controls": {
+    "context_identity": {
+      "checker_sha256": "9783bb671f0dd4cdb6b251d5f6736dfac3cfe71edc9d0d8ad620243e82a92a19",
+      "context_layout_sha256": "f51fa31f0df651535f9f7e8d208fec3873eea1b17158f9fcf156133cbcbc23cf",
+      "context_owner_body_sha256": "f516fb0b819006672f53f9060faaa3b46358bb7745cadb9b935b2e5626b76c9b",
+      "fixture_sha256": "9352318eaed0678d7badbcbb492c99c459bde54917f8fda284154a8e5f073e3f",
+      "production_identity_header_sha256": "d322d563e8a461779ef92b7e9882f8ea2798674f9ccf6d184488704a2bb6fce1",
+      "production_identity_sha256": "317be9843989a01c2c37848365c9e4de48d9fa089aad8c8b3ad34cf33c97e060",
+      "report": "build/irq-installation-context-identity.json",
+      "report_sha256": "b5dc7c6fab2f100e165794a4be9df1555ab4db17016119c936dd15c648aac96c",
+      "results": {
+        "fatal-sanitized": {
+          "checks": 78,
+          "failures": 0,
+          "original_adapter_calls": 0
+        },
+        "plain": {
+          "checks": 78,
+          "failures": 0,
+          "original_adapter_calls": 0
+        }
+      },
+      "selected_context_sha256": "3823304a498b872ee3c8df62d4e7b6880fb7f8cbd44203662dd2099e213b5cc5"
+    },
+    "installation_binding": {
+      "checker_sha256": "c9f979bba56341d86c1ed4509a56d753729950ecdc5bbeeb5665216b8f332563",
+      "fixture_sha256": "308a087bcff84839b4a927c0358b4addaea41a1e1242c6c3891e543d31f51689",
+      "production_header_sha256": {
+        "S540NvidiaGspIrqIdentity.h": "d322d563e8a461779ef92b7e9882f8ea2798674f9ccf6d184488704a2bb6fce1",
+        "S540NvidiaGspIrqInstallation.hpp": "8cd3d4d918afaf3d3bf3bd854de06356efd7f8ba8602365764a814b94eb1b266"
+      },
+      "report": "build/irq-installation-binding.json",
+      "report_sha256": "7794ce6e43ed34eba9bcfe7d25411f0e586543188cfc7e2dd9bc3b693a644f05",
+      "results": {
+        "fatal-sanitized": {
+          "checks": 60,
+          "failures": 0,
+          "hardware_execution": false
+        },
+        "plain": {
+          "checks": 60,
+          "failures": 0,
+          "hardware_execution": false
+        }
+      }
+    },
+    "original_preinit": {
+      "checker_sha256": "0395445dc56142d9a2e1e0ae0e4103798cef79c7e79d8ffecf2dc9d5bfc493f0",
+      "context_layout_sha256": "f51fa31f0df651535f9f7e8d208fec3873eea1b17158f9fcf156133cbcbc23cf",
+      "fixture_sha256": "ee018f3c2382ccf16d0150f6316cfbf19d245756bac372d6f114f48e78fa81f5",
+      "report": "build/irq-installation-preinit-original.json",
+      "report_sha256": "910d2537d9299527676e8618d71aaa4dcfdf27974ce856660d23bba22bbdb230",
+      "results": {
+        "fatal-sanitized": {
+          "checks": 18,
+          "complete_context_bodies": 3,
+          "complete_original_bodies": 4,
+          "failures": 0,
+          "hardware_execution": false,
+          "original_layout_headers_used": true
+        },
+        "plain": {
+          "checks": 18,
+          "complete_context_bodies": 3,
+          "complete_original_bodies": 4,
+          "failures": 0,
+          "hardware_execution": false,
+          "original_layout_headers_used": true
+        }
+      },
+      "selected_context_sha256": "3823304a498b872ee3c8df62d4e7b6880fb7f8cbd44203662dd2099e213b5cc5",
+      "source_bodies_sha256": "b67fd5167fb4fbc914432145119f92d2725ca56ef51458c4f0621200ac2c9c83"
+    }
+  },
+  "format": 1,
+  "limits": [
+    "Explicit runtime, allocator, TLS, HAL, spinlock, metadata, ordinary-thread, global-master, cancellation, Session, Lease, backend-mode and mask/drain endpoint fixtures",
+    "Binding uses actual selected Session/Lease declarations; their implementations are not executed by these Binding controls",
+    "No execution of original private constructor or original adapter initialization",
+    "No backend PCI-mode observation, controller registration, hardware IRQ, CPU stack switch, GPU initialization or whole-session admission",
+    "Pre-pGpu full hardware-mask proof remains refused; successful software drain cannot release retained ownership"
+  ],
+  "local_control_only": true,
+  "original_preinit_source_facts": [
+    "Linux nv_start_device registers the controller before rm_init_adapter",
+    "Original private constructor zeroes storage before NV_SET_NV_PRIV publication; constructor itself is not executed",
+    "rm_isr requires actual nonnull nv->priv and takes the unloaded private-only early return",
+    "Original NULL-pGpu fault path zeros copied count and returns NV_ERR_OBJECT_NOT_FOUND"
+  ],
+  "passed_checks_per_mode": 156,
+  "source_selection_only": true,
+  "whole_irq_admission": false
+}

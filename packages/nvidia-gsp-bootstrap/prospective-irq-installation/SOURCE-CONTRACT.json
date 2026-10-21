@@ -1,0 +1,66 @@
+{
+  "compile_definitions": {
+    "packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp": {
+      "S540_NVIDIA_IRQ_INSTALLATION": "1"
+    },
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp": {
+      "S540_NVIDIA_IRQ_INSTALLATION": "1"
+    },
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c": {
+      "S540_NVIDIA_IRQ_INSTALLATION": "1"
+    }
+  },
+  "component": "original-context-session-irq-installation",
+  "exports": {
+    "packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp": [
+      "s540GspIrqReadBackendMode"
+    ],
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp": [
+      "s540GspIrqInstallationCheckContext"
+    ],
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c": [
+      "s540GspContextReadIrqIdentity",
+      "s540GspContextMatchIrqIdentity",
+      "s540GspContextSelectMessageInterrupt"
+    ]
+  },
+  "format": 1,
+  "full_hardware_cleanup_proven": false,
+  "hardware_admission": false,
+  "kernel_execution": false,
+  "mode_evidence": "fresh actual provider getInterruptType + complete bounded PCI capability inventory; no static GPU-family assumption",
+  "mode_policy": "one-vector MSI only; refuse unknown/legacy/MSI-X/multivector; set original MSI flag before registration/init",
+  "original_entry_admission": false,
+  "parent_input_sha256": {
+    "packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp": "faaea3f83118f559a0d7880528f5e7bdf7c28b3b1cbad21f8442054a513c1655",
+    "packages/nvidia-device-transport/src/S540NvidiaDeviceTransport.hpp": "b9a94ac1f797732f0e46518bad22a1f408596a07c4f1d618ac9988f4f118545d",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp": "78e9545b20efcdd2c94d7ac5e05a8ee506dcac6179fd4eb06c851a970d4cb1c3",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.hpp": "74a5b4cf2549889ab471308461e2a2193bf9a0e166a7b8ea9f976ec59c80ae80",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c": "1bf0218af81af2b694b6ab73ef643a85193cf02d9523acd0578609517729a0a6",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.h": "848b26f96094d0775b1dcaa5a8aa2aa6e3b9d80b7b6a351a79e610ecb029e8e2"
+  },
+  "parent_selected_output_sha256": {
+    "packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp": "1f80b3739bce641959066e2f873f2118d2163fd7a0cf51bb77f578031b2254b3",
+    "packages/nvidia-device-transport/src/S540NvidiaDeviceTransport.hpp": "33b9f4d6d87643a2cf7c467f2d23ef2551843e62c9ccf30ece20cf15e005bb62",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp": "69b903c3c955b4a286eac05a59423f10d2acb0c022c9076fd4433024cd537ee8",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.hpp": "e599f50a7565b08ad04248d53afe04bcf48bd53487e38c282b88b5aceb312bdd",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c": "3823304a498b872ee3c8df62d4e7b6880fb7f8cbd44203662dd2099e213b5cc5",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.h": "d086ba94d4a6547ba9c771899dd0664b3e2254eb8b227e66d225475cb854200d"
+  },
+  "physical_reclamation_authorized": false,
+  "preconditions_unresolved": [
+    "original global/private/epoch coordinator caller absent",
+    "pre-GPU persistent mask requires actual OBJGPU",
+    "sticky/closing original cleanup-master authority",
+    "original stack and PM bounded unwind admission"
+  ],
+  "production_sha256": {
+    "S540NvidiaGspIrqIdentity.h": "d322d563e8a461779ef92b7e9882f8ea2798674f9ccf6d184488704a2bb6fce1",
+    "S540NvidiaGspIrqInstallation.hpp": "8cd3d4d918afaf3d3bf3bd854de06356efd7f8ba8602365764a814b94eb1b266",
+    "backend-mode.cpp.inc": "3dc9f2eb5646ca51afeab3894036efbc89f1e6b788290e78ed856f41b1aa09a0",
+    "context-identity.c.inc": "317be9843989a01c2c37848365c9e4de48d9fa089aad8c8b3ad34cf33c97e060",
+    "owner-methods.cpp.inc": "245cdcd62167329b340a8c74145cf346c7f2f563cf0a9091ddfff0d89dd188bf",
+    "prepare.py": "1ec3fab4d114da3b05c01e712c537908152aad88255493a7041c3e00a4c908ee"
+  },
+  "source_selection_only": true
+}
