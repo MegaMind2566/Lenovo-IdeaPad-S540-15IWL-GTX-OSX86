@@ -4,20 +4,13 @@ on:
   push:
     branches: [main]
     paths:
-      - 'builders/**'
-      - 'packages/nvidia-global-rm/**'
-      - 'packages/nvidia-global-rm-crypto/**'
-      - 'packages/nvidia-darwin-services/**'
-      - 'packages/nvidia-device-transport/**'
-      - 'packages/nvidia-hardware-transport/**'
-      - 'packages/nvidia-firmware-assets/**'
-      - 'packages/nvidia-os-adapter/**'
-      - 'packages/nvidia-gsp-bootstrap/**'
-      - '.github/workflows/build-nvidia-idle-image.yml'
+      # Add/update this file only for a reviewed native validation request.
+      # The head commit must also contain [native ci].
+      - '.github/native-ci/nvidia-idle-request.json'
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[native ci]'))) && 'native' || github.run_id }}
   cancel-in-progress: true
 
 permissions:
@@ -26,6 +19,7 @@ permissions:
 
 jobs:
   source-cache-preflight:
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[native ci]')) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -109,6 +103,7 @@ jobs:
           retention-days: 7
 
   native-link-and-package:
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[native ci]')) }}
     needs: source-cache-preflight
     runs-on: macos-15-intel
     timeout-minutes: 20
