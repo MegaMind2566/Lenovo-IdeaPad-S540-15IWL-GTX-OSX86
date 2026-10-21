@@ -1,0 +1,33 @@
+{
+  "files": {
+    ".github/workflows/build-s540-hotkeys.yml": "7be9cad8715041b6ec919a12e6e086bf7d7c8e68c60dee24551031b6cfa0dec9",
+    "builders/build_s540_hotkeys.py": "dbeb2d9bb556b828f44c8095e905290e9d6b14a95737cf34d6e30afa4154677e",
+    "builders/s540-hotkeys-abi-allowlist.json": "343fdaf766f4f03fa70b24b1f98b7fc2c27688d412d882137809d010454e3eaa",
+    "packages/s540-hotkeys/LEGGIMI.txt": "153e32090817578f5c75703d909e8fca22f103b6f918fc3beedaf653831ea156",
+    "packages/s540-hotkeys/LICENSE": "2417a7db843819f70fc3121ddb9c4f830a87991ae98473876e3d40b1c36e466f",
+    "packages/s540-hotkeys/README.md": "7d77c418104f3c2dd8be9b2e3a674b603c7f2413de5f593cd2be0d56e03d9b3d",
+    "packages/s540-hotkeys/SOURCE-REVIEW.json": "f6878380dcf3842ff6cf198559fe058fa520d33f00b8870c13c4e056b1e60356",
+    "packages/s540-hotkeys/app/HotkeyPolicy.h": "ba8688b933301770f4e0ed90306f4e8f898f8d187b06a739cabf278df7e08f64",
+    "packages/s540-hotkeys/app/Info.plist": "5dc60423047876833712eb2f1e5fad23a6613bf136cdc10165cec19da945c06d",
+    "packages/s540-hotkeys/app/LICENSE": "155875122ce65a3e6b92f67b49d2f8f4300454c1dabbb2d13dbc559d8c9fa3dc",
+    "packages/s540-hotkeys/app/README.md": "99d79195ddb87c10d69ae9eac66f2f504f4084716697c529d2efe450057ce95f",
+    "packages/s540-hotkeys/app/S540Tasti.m": "79de72ca7f30165c74db57072c268d5d801fd231595caa2d63f54da1a7027265",
+    "packages/s540-hotkeys/app/policy_tests.c": "b4eb40e72bdafc6e1dc8dfc438d4a6f85d718c89805608526f9a440d6409b369",
+    "packages/s540-hotkeys/installer/INSTALLA-TASTI.command": "494844c2d2fa7d59e8d6729575aa5bba0733b8301547ffdaf8749b488b435017",
+    "packages/s540-hotkeys/installer/RIPRISTINA-TASTI.command": "31b96c6222196fba282478eddf478164c6b2987d26ac44e26a6f43abdc86bf4a",
+    "packages/s540-hotkeys/installer/VERIFICA-TASTI.command": "24b7c0ce9cb4b34acb023f5c6cd4a657ad08f998cee3778588103f2226f9bb20",
+    "packages/s540-hotkeys/installer/tests/test-manifest.sh": "76d02b3e47ed69ef29d7605bfb02f1e6696199aa4cc94501f75989a026b29dec",
+    "packages/s540-hotkeys/installer/tools/s540-common.sh": "529fb374c07016b93fd728ab5cc640bf7b87ca0f005520bba1a20ad27853ebd9",
+    "packages/s540-hotkeys/kernel/CONTRACT.md": "9f8914e42c9c476a2654b0186f4a5b7e8b7c8d80437afcdecc6f899908e06489",
+    "packages/s540-hotkeys/kernel/Info.plist": "c439c8a777e5f3ba3736fb9ae417f42c3ff1874bee30dec1adfa1ac139ab7508",
+    "packages/s540-hotkeys/kernel/LICENSE": "640d90f6ee401241ff62834d0d1b33f83049e99b8bfdfa04ed1b0a1635dde3e7",
+    "packages/s540-hotkeys/kernel/NOTICE.md": "5504efe93d8f4dc1fc3791f4d530d2eaab8bdbdc1f6e773de70634ad350ba2fc",
+    "packages/s540-hotkeys/kernel/ProtocolCore.hpp": "8883a06bcf471102864abe7b8674b3508df54f2c20ffad80b9821c2a411b9956",
+    "packages/s540-hotkeys/kernel/S540HotkeysVPC.cpp": "d647174515d415df1a06fe8e0ae210f41f76c1babacce770c17d3adf9057393f",
+    "packages/s540-hotkeys/kernel/S540HotkeysVPC.hpp": "f5b986ecd4b3e4de33923bc68050a08ec0ba5cf7303c644e3677fe12486e3db0",
+    "packages/s540-hotkeys/kernel/tests/ProtocolCoreTests.cpp": "3266bf96175bbb0e6793b24622f7f4e329ef544a89bc9927969317f52e2a65db",
+    "packages/s540-hotkeys/licenses/GPL-2.0-YogaSMC.txt": "640d90f6ee401241ff62834d0d1b33f83049e99b8bfdfa04ed1b0a1635dde3e7",
+    "packages/s540-hotkeys/licenses/NOTICES.txt": "b679a606c81e40388d34c116a4276fa9418b8295a5e872c731a16809908bdce1"
+  },
+  "schema": 1
+}
