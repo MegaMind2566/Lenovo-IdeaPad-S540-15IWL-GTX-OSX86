@@ -1,5 +1,13 @@
 # Bounded PS/2 trace transport for the S540
 
+Version 1.0.1 fixes the shell's registry readback. Text-tree indentation and
+descendant properties must not determine the matched keyboard service's value.
+Read `0.LogScanCodes` from `ioreg -a` with `plutil raw -expect integer`, then
+require exact zero. Missing or incorrectly typed properties remain a refusal,
+and the unchanged native guard independently checks the live integer property.
+The ZIP keeps its existing filename but extracts to `S540-PS2-Trace-v1.0.1` to
+avoid accidentally executing the old folder. No native build is needed.
+
 The completed HID report captures Fn+F5, captures no HID events for direct
 F4/F7/F8, and shows the same HID sequence for F9 and ordinary Command+L.
 This diagnostic checks the driver's earlier trace point without a Linux USB.
@@ -18,11 +26,14 @@ windows. Raw trace files remain temporary. F10, NVIDIA, and the SD reader are
 outside this diagnostic.
 
 Local validation comprises the pure parser fixtures, a Foundation-shaped JXA
-adapter stub, and eight isolated Linux PTY shell scenarios. These checks do not
+adapter stub, and fourteen isolated Linux PTY shell scenarios. These checks do not
 establish execution on macOS or hardware trace visibility. The package runs its
 guard and parser self-tests on the laptop before any logging mutation; Fn+F5
 then checks the actual transport. The runtime JXA bridge and trace visibility
-still require that target run.
+still require that target run. The registry regressions include a parent zero
+with a nonzero child, a nonzero parent with a zero child, a missing parent
+property, and Boolean, string, and floating-point zero values. Nonzero initial
+state is preserved without launching a key window.
 
 ```sh
 node packages/ps2-trace-observer/test-parser.js

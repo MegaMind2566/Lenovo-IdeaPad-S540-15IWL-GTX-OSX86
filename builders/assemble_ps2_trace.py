@@ -14,6 +14,7 @@ BINARY_SHA = "658d784f0e5de692e17e35df090982ae13c32a8fc1f993193cbdade72a667ef4"
 SOURCE_SHA = "825d0daee8a8143e4e216199fe95c4d6baa260ea0dc9b819b65c54b7ce4d8731"
 ORIGINAL_COMMIT = "b8461368dac069de2d8f8b7911e29cd206b6bbc3"
 PACKAGE = "S540-PS2-Trace-v1"
+DIRECTORY = "S540-PS2-Trace-v1.0.1"
 OLD_PACKAGE = "S540-function-key-scancodes"
 SOURCE_FILES = ("CONTROLLA-TASTI.command", "parse-trace.js", "LEGGIMI.txt")
 
@@ -53,7 +54,7 @@ def assemble(source: Path, artifact: Path, output: Path) -> Path:
     files.update({"bin/function-key-scancodes": binary, "LICENSE": license_bytes,
                   "ORIGINAL-BUILD.json": original_build, "src/function_key_scancodes.m": helper_source})
     build = {
-        "schema": 1, "package": PACKAGE, "version": "1.0.0",
+        "schema": 1, "package": PACKAGE, "version": "1.0.1", "directory": DIRECTORY,
         "architecture": "x86_64", "minimum_macos": "13.0",
         "native_guard_unchanged": True, "native_guard_binary_sha256": BINARY_SHA,
         "original_build_commit": ORIGINAL_COMMIT, "original_workflow_run": 38614049964,
@@ -70,7 +71,7 @@ def assemble(source: Path, artifact: Path, output: Path) -> Path:
         raise ValueError("Output already exists; use a new output directory.")
     with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
         for name, data in sorted(files.items()):
-            info = zipfile.ZipInfo(PACKAGE + "/" + name, (1980, 1, 1, 0, 0, 0))
+            info = zipfile.ZipInfo(DIRECTORY + "/" + name, (1980, 1, 1, 0, 0, 0))
             info.create_system = 3
             mode = 0o100755 if name in ("CONTROLLA-TASTI.command", "bin/function-key-scancodes") else 0o100644
             info.external_attr = mode << 16

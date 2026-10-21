@@ -9,6 +9,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import plistlib
 import pty
 import select
 import signal
@@ -20,8 +21,8 @@ import time
 SOURCE = Path(__file__).resolve().parents[1] / 'CONTROLLA-TASTI.command'
 
 FAKE = r'''#!/usr/bin/env python3
-import json,os,pathlib,select,signal,sys,time
-name=pathlib.Path(sys.argv[0]).name
+import json,os,pathlib,plistlib,select,signal,sys,time
+name=os.environ.get('FIXTURE_NATIVE_NAME',pathlib.Path(sys.argv[0]).name)
 root=pathlib.Path(os.environ['FIXTURE_STATE'])
 scenario=os.environ['FIXTURE_SCENARIO']
 args=sys.argv[1:]
@@ -43,9 +44,34 @@ if name=='plutil':
   print(str(value).lower() if isinstance(value,bool) else value)
  except Exception:sys.exit(1)
  sys.exit()
+if name=='plutil-xml':
+ try:
+  objects=plistlib.loads(pathlib.Path(args[-1]).read_bytes())
+  value=objects[0]['LogScanCodes']
+  fmt=args[2]
+  if fmt=='json':
+   if not isinstance(value,(dict,list)):raise ValueError('Top-level JSON scalar is not supported')
+   print(json.dumps(value,separators=(',',':')))
+  elif fmt=='raw':
+   if '-expect' not in args or args[args.index('-expect')+1]!='integer':
+    raise ValueError('This fixture requires the production integer expectation')
+   if type(value) is not int:raise TypeError('Expected integer, got '+type(value).__name__)
+   print(value)
+  else:raise ValueError('Unexpected extraction format '+fmt)
+ except Exception as error:
+  print('FIXTURE structured property reader: '+str(error),file=sys.stderr);sys.exit(1)
+ sys.exit()
 if name=='ioreg':
- print('+-o ApplePS2Keyboard  <class ApplePS2Keyboard, id 0x100000378>')
- print('    "LogScanCodes" = '+(root/'state').read_text().strip());sys.exit()
+ value=int((root/'state').read_text().strip())
+ if scenario=='final-readback-mismatch' and (root/'arms').read_text().strip():value=2
+ if scenario=='reader-root-false-child-zero':value=False
+ if scenario=='reader-root-string-zero-child-zero':value='0'
+ if scenario=='reader-root-float-zero-child-zero':value=0.0
+ child_value=0 if scenario.startswith('reader-') and scenario!='reader-tree-bars-root-zero-child-two' else 2
+ node={'IORegistryEntryName':'ApplePS2Keyboard','IOObjectClass':'ApplePS2Keyboard',
+       'LogScanCodes':value,'IORegistryEntryChildren':[{'LogScanCodes':child_value}]}
+ if scenario=='reader-root-missing-child-zero':del node['LogScanCodes']
+ sys.stdout.buffer.write(plistlib.dumps([node]));sys.exit()
 if name=='log':
  if scenario=='logger-startup-error':
   print('FIXTURE log: unsupported output style',file=sys.stderr,flush=True);sys.exit(2)
@@ -116,6 +142,9 @@ case "${0##*/}" in
    exec "$@" ;;
  plutil)
    KEY=$2
+   if [ "$KEY" = 0.LogScanCodes ]; then
+     FIXTURE_NATIVE_NAME=plutil-xml exec /usr/bin/python3 "$FIXTURE_PYTHON_DRIVER" "$@"
+   fi
    IFS= read -r LINE
    VALUE=${LINE#*\"$KEY\":}
    [ "$VALUE" != "$LINE" ] || exit 1
@@ -123,10 +152,17 @@ case "${0##*/}" in
    else VALUE=${VALUE%%,*}; VALUE=${VALUE%%\}*}; fi
    printf '%s\n' "$VALUE" ;;
  ioreg)
+   for ARG in "$@"; do
+     if [ "$ARG" = -a ]; then
+       FIXTURE_NATIVE_NAME=ioreg exec /usr/bin/python3 "$FIXTURE_PYTHON_DRIVER" "$@"
+     fi
+   done
    printf '%s\n' '+-o ApplePS2Keyboard  <class ApplePS2Keyboard, id 0x100000378>'
    if [ "$FIXTURE_SCENARIO" = final-readback-mismatch ] && [ -s "$FIXTURE_STATE/arms" ]; then VALUE=2;
    else VALUE=$(cat "$FIXTURE_STATE/state"); fi
-   printf '    "LogScanCodes" = %s\n' "$VALUE" ;;
+   printf '  | {\n  |   "LogScanCodes" = %s\n  | }\n  |\n' "$VALUE"
+   printf '%s\n' '  +-o IOHIDKeyboardEventDevice  <class IOHIDKeyboardEventDevice>'
+   printf '      {\n        "LogScanCodes" = 2\n      }\n' ;;
  *) exit 65 ;;
 esac
 '''
@@ -141,7 +177,8 @@ def run_case(scenario: str) -> dict:
         home = base/'home'
         for path in (package/'bin', fake, state, home/'Desktop'):
             path.mkdir(parents=True)
-        (state/'state').write_text('0')
+        initial_state='2' if scenario=='reader-root-two-child-zero' else '0'
+        (state/'state').write_text(initial_state)
         (state/'arms').write_text('')
         driver = fake/'driver.py'
         driver.write_text(FAKE)
@@ -177,7 +214,16 @@ def run_case(scenario: str) -> dict:
             hashlib.sha256(p.read_bytes()).hexdigest()+'  '+str(p.relative_to(package))+'\n'
             for p in files))
         env = dict(os.environ, HOME=str(home), TMPDIR=str(base),
-                   FIXTURE_STATE=str(state), FIXTURE_SCENARIO=scenario)
+                   FIXTURE_STATE=str(state), FIXTURE_SCENARIO=scenario,
+                   FIXTURE_PYTHON_DRIVER=str(driver))
+        if scenario=='complete':
+            # Ensure this harness rejects the old scalar-JSON extraction plan.
+            scalar=base/'scalar.plist'
+            scalar.write_bytes(plistlib.dumps([{'LogScanCodes':0}]))
+            old_reader=subprocess.run([str(fake/'plutil'),'-extract','0.LogScanCodes',
+                                       'json','-o','-',str(scalar)],env=env,
+                                      capture_output=True,text=True)
+            assert old_reader.returncode!=0 and 'Top-level JSON scalar' in old_reader.stderr
         pid, master = pty.fork()
         if pid == 0:
             os.execve('/bin/bash', ['/bin/bash', str(command)], env)
@@ -221,13 +267,25 @@ def run_case(scenario: str) -> dict:
         os.close(master)
         arms = [int(x) for x in (state/'arms').read_text().splitlines()]
         reports=list((home/'Desktop').glob('*/report.json'))
-        expected_arms = list(range(6)) if scenario in ('complete','final-readback-mismatch') else ([] if scenario in ('logger-startup-error','tty-prepare-error') else [0])
-        expected_exit=0 if scenario in ('complete','positive-missing','parser-error') else (130 if scenario=='interrupt-during-window' else 1)
+        completes=scenario in ('complete','reader-tree-bars-root-zero-child-two')
+        reader_block=scenario.startswith('reader-') and not completes
+        expected_arms = list(range(6)) if completes or scenario=='final-readback-mismatch' else ([] if scenario in ('logger-startup-error','tty-prepare-error') or reader_block else [0])
+        expected_exit=0 if completes or scenario in ('positive-missing','parser-error') else (130 if scenario=='interrupt-during-window' else 1)
         assert arms==expected_arms,(scenario,'ARM sequence',arms,transcript.decode(errors='replace'))
         assert status==expected_exit,(scenario,'exit',status,transcript.decode(errors='replace'))
-        assert (state/'state').read_text()=='0',(scenario,'logging left enabled')
+        expected_state=initial_state if reader_block else '0'
+        assert (state/'state').read_text()==expected_state,(scenario,'logging changed unexpectedly')
         assert restored,(scenario,'TTY attributes not restored')
-        if scenario=='complete':
+        if reader_block:
+            assert not sent_enter,(scenario,'reader rejection reached the key-test prompt')
+            if scenario in ('reader-root-missing-child-zero','reader-root-false-child-zero',
+                            'reader-root-string-zero-child-zero','reader-root-float-zero-child-zero'):
+                assert b'Impossibile leggere LogScanCodes' in transcript
+            elif scenario=='reader-root-two-child-zero':
+                assert b'LogScanCodes vale 2' in transcript
+            else:
+                assert b'LogScanCodes non e lo zero numerico richiesto' in transcript
+        if completes:
             assert reports and json.loads(reports[0].read_text())['reason']=='complete'
         if scenario in ('positive-missing','parser-error'):
             assert reports and json.loads(reports[0].read_text())['reason']=='positive_control_missing'
@@ -240,7 +298,7 @@ def run_case(scenario: str) -> dict:
             assert reports and json.loads(reports[0].read_text())['reason']=='restoration_unverified'
             assert b'Logging ripristinato a 0.\r\n' not in transcript
         return {'scenario':scenario,'passed':True,'exitCode':status,'armedTrials':arms,
-                'ttyRestored':restored,'fixtureLoggingState':0,
+                'ttyRestored':restored,'fixtureLoggingState':int(expected_state),
                 'reports':len(reports),
                 'startupErrorPreserved':'FIXTURE log: unsupported output style' in diagnostics,
                 'parserErrorPreserved':'FIXTURE parser: bad schema' in diagnostics}
@@ -249,7 +307,10 @@ def run_case(scenario: str) -> dict:
 if __name__=='__main__':
     scenarios=('complete','positive-missing','logger-startup-error',
                'off-restoration-false','interrupt-during-window','parser-error',
-               'tty-prepare-error','final-readback-mismatch')
+               'tty-prepare-error','final-readback-mismatch',
+               'reader-tree-bars-root-zero-child-two','reader-root-two-child-zero',
+               'reader-root-missing-child-zero','reader-root-false-child-zero',
+               'reader-root-string-zero-child-zero','reader-root-float-zero-child-zero')
     results=[]
     for scenario in scenarios:
         result=run_case(scenario)

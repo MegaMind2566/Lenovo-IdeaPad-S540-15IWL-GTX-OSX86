@@ -20,6 +20,8 @@ RESTORED=0
 FINISHED=0
 REASON=interrupted
 PREFIX=''
+SCAN_READ_STATE=unreadable
+SCAN_VALUE=''
 
 alive() { jobs -pr | /usr/bin/grep -qx -- "$1"; }
 
@@ -38,8 +40,18 @@ receive() {
 }
 
 zero_now() {
-    /usr/sbin/ioreg -r -c ApplePS2Keyboard -l -w0 > "$TMP_WORK/after.ioreg" 3>&- 4>&- || return 1
-    /usr/bin/awk '/^[ \t]*"LogScanCodes" = 0[ \t]*$/ {n++} END {exit(n != 1)}' "$TMP_WORK/after.ioreg" 3>&- 4>&-
+    SCAN_READ_STATE=unreadable
+    SCAN_VALUE=''
+    # ioreg's text tree may prefix properties with vertical bars and include children.
+    # The XML archive is an array: read only the matched service's own property.
+    /usr/sbin/ioreg -a -r -c ApplePS2Keyboard -l -w0 > "$TMP_WORK/after.plist" 3>&- 4>&- || return 1
+    SCAN_VALUE=$(/usr/bin/plutil -extract 0.LogScanCodes raw -expect integer -o - "$TMP_WORK/after.plist" 3>&- 4>&- 2>/dev/null) || return 1
+    if [ "$SCAN_VALUE" = 0 ]; then
+        SCAN_READ_STATE=zero
+        return 0
+    fi
+    SCAN_READ_STATE=nonzero
+    return 1
 }
 
 stop_helper() {
@@ -170,7 +182,15 @@ TMP_WORK=$(/usr/bin/mktemp -d "${TMPDIR:-/tmp}/S540-PS2-private.XXXXXX")
 PREFIX=$(/usr/bin/awk '/\+-o / && /<class ApplePS2Keyboard,/ {sub(/^.*\+-o /, ""); sub(/[ \t]+<class.*$/, ""); print}' "$TMP_WORK/before.ioreg")
 printf '%s\n' "$PREFIX" | /usr/bin/grep -Eq '^[A-Za-z0-9_. -]{1,80}$' || fail 'Nome del servizio PS/2 non riconosciuto.'
 [ "$(printf '%s\n' "$PREFIX" | /usr/bin/wc -l | /usr/bin/tr -d ' ')" = 1 ] || fail 'Trovati piu servizi PS/2.'
-zero_now || fail 'LogScanCodes non e impostato a 0: nessuna prova eseguita.'
+if ! zero_now; then
+    if [ "$SCAN_READ_STATE" = unreadable ]; then
+        fail 'Impossibile leggere LogScanCodes sul servizio PS/2: valore assente, tipo inatteso o dati non leggibili. Nessuna prova eseguita.'
+    fi
+    case "$SCAN_VALUE" in
+        1|2|3) fail "LogScanCodes vale $SCAN_VALUE; la prova richiede 0. Nessuna modifica eseguita." ;;
+        *) fail 'LogScanCodes non e lo zero numerico richiesto. Nessuna modifica eseguita.' ;;
+    esac
+fi
 
 printf '\nQuesta prova osserva sei combinazioni, senza installare driver.\n'
 printf 'Il logging si attiva soltanto nelle finestre VIA di 3 secondi.\n'

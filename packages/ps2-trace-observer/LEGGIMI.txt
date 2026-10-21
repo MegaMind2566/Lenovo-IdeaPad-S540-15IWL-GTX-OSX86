@@ -1,11 +1,12 @@
-S540 - prova guidata PS/2, versione 1
+S540 - prova guidata PS/2, versione 1.0.1
 
 Non serve una chiavetta Linux. Esegui questa prova da macOS Intel sul Lenovo.
 
-1. Estrai S540-PS2-Trace-v1.zip nella cartella Downloads.
+1. Estrai il nuovo S540-PS2-Trace-v1.zip nella cartella Downloads.
+   La cartella corretta si chiama S540-PS2-Trace-v1.0.1, distinta dalla vecchia.
 2. Nel Terminale incolla questa unica riga:
 
-bash "$HOME/Downloads/S540-PS2-Trace-v1/CONTROLLA-TASTI.command"
+bash "$HOME/Downloads/S540-PS2-Trace-v1.0.1/CONTROLLA-TASTI.command"
 
 3. Inserisci la password amministratore quando richiesta, prima delle prove.
 4. Premi Invio UNA volta. Poi segui il conto alla rovescia:
@@ -39,6 +40,8 @@ Se appare "ripristino non verificato", non ripetere la prova e invia il messaggi
 e lo ZIP disponibile. Non viene eseguito alcun tentativo automatico aggiuntivo.
 
 Verifica disponibile
+La versione 1.0.1 legge LogScanCodes dal plist strutturato del servizio PS/2,
+senza interpretare l'indentazione testuale o i valori dei suoi dispositivi figli.
 Il programma nativo e riusato senza modifiche dalla build Intel gia completata
 con 64 controlli automatici. La nuova orchestrazione e il parser sono verificati
 con controlli locali e simulazioni; la visibilita del trace sul tuo macOS deve
