@@ -32,7 +32,8 @@ Un errore nell'apertura di un dispositivo rilevante, un cambiamento dell'elenco
 dispositivi, errori di callback o troppi eventi interrompono la raccolta.
 Ogni finestra usa un nuovo IOHIDManager passivo. Gli eventi antecedenti o
 successivi alla finestra vengono esclusi usando il timestamp HID monotono.
-Non vengono esclusi gli usi consumer/vendor soltanto perché non sono F1-F12.
+Sono inclusi anche gli input Telephony, System Control, consumer e vendor:
+la pagina HID di un tasto non viene presunta prima di osservarlo.
 Movimenti X/Y e rotella del mouse non sono dati della diagnosi tastiera.
 
 RISULTATO

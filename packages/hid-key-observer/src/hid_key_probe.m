@@ -22,7 +22,7 @@ static NSArray *Limitations(void) {
              @"ACPI/VPC notifications not published as HID are outside this observer.",
              @"An empty target window does not prove absence of a physical or firmware event.",
              @"No key mapping, radio/camera setting, EFI component or driver is changed.",
-             @"Only numeric input values in keyboard, consumer or vendor collections are retained during prompted windows."];
+             @"Numeric input values are retained only during prompted windows; pointer-axis and wheel usages are excluded."];
 }
 
 static NSString *UTCNow(void) {
@@ -86,6 +86,12 @@ static NSDictionary *TestEvent(NSString *device, NSNumber *cookie, NSNumber *val
              @"usage": @62, @"value": value, @"offsetMilliseconds": @1};
 }
 
+static BOOL RelevantUsage(uint32_t page, uint32_t usage) {
+    // Keep telephony, system-control and vendor inputs as well as keyboard inputs.
+    // Do not infer the key's usage page before observing it.
+    return !(page == 1 && usage >= 0x30 && usage <= 0x38);
+}
+
 static int SelfTest(void) {
     NSMutableArray<NSDictionary *> *checks = [NSMutableArray array];
     void (^check)(NSString *, BOOL) = ^(NSString *name, BOOL passed) {
@@ -104,6 +110,9 @@ static int SelfTest(void) {
     check(@"start-timestamp-accepted", InsideWindow(100, 100, 200));
     check(@"end-timestamp-rejected", !InsideWindow(200, 100, 200));
     check(@"future-timestamp-rejected", !InsideWindow(201, 100, 200));
+    check(@"telephony-phone-mute-retained", RelevantUsage(0x0b, 0x2f));
+    check(@"generic-system-control-retained", RelevantUsage(1, 0x81));
+    check(@"pointer-axis-excluded", !RelevantUsage(1, 0x30));
     check(@"different-device-sequences-distinct", ![Sequence(@[down]) isEqual:Sequence(@[TestEvent(@"0x200", @12, @1)])]);
     NSMutableDictionary *sample = NewReport();
     sample[@"devices"] = @[@{@"registryID": @"0x100", @"transport": @"PS2", @"class": @"IOHIDKeyboardEventDevice", @"product": @"Keyboard", @"relevantInputCollection": @YES}];
@@ -149,16 +158,7 @@ static BOOL InputElement(IOHIDElementRef element) {
 
 static BOOL RelevantElement(IOHIDElementRef element) {
     if (!InputElement(element)) return NO;
-    uint32_t page = IOHIDElementGetUsagePage(element), usage = IOHIDElementGetUsage(element);
-    // Mouse axes and wheel movement are not keyboard diagnostic data.
-    if (page == 1 && usage >= 0x30 && usage <= 0x38) return NO;
-    if (page == 7 || page == 0x0c || page >= 0xff00) return YES;
-    for (IOHIDElementRef parent = IOHIDElementGetParent(element); parent; parent = IOHIDElementGetParent(parent)) {
-        uint32_t collectionPage = IOHIDElementGetUsagePage(parent), collectionUsage = IOHIDElementGetUsage(parent);
-        if ((collectionPage == 1 && collectionUsage == 6) || collectionPage == 0x0c || collectionPage >= 0xff00)
-            return YES;
-    }
-    return NO;
+    return RelevantUsage(IOHIDElementGetUsagePage(element), IOHIDElementGetUsage(element));
 }
 
 static BOOL DeviceRelevant(IOHIDDeviceRef device) {
@@ -272,7 +272,7 @@ static NSDictionary *RunWindow(NSString *label, NSString *instruction, NSArray *
             [allowed addObject:RegistryID(device)];
         }
         if (!allOpen) break;
-        if (!allowed.count) { *failure = @"No keyboard/consumer/vendor input collection is available."; break; }
+        if (!allowed.count) { *failure = @"No observable non-axis HID input collection is available."; break; }
         // New manager per window; drain pre-window reports and the prompt's Return release.
         printf("Preparazione: non premere tasti...\n"); fflush(stdout);
         CFAbsoluteTime drainUntil = CFAbsoluteTimeGetCurrent() + 0.75;
