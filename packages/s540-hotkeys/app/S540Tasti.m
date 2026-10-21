@@ -47,6 +47,11 @@ static BOOL Unsigned(id value, uint64_t *result) {
 static BOOL UInt32Bits(id value, uint32_t *result) {
     if (!value || CFGetTypeID((__bridge CFTypeRef)value) != CFNumberGetTypeID() ||
         CFNumberIsFloatType((__bridge CFNumberRef)value)) return NO;
+    // NSNumber's unsigned bridge may convert UINT64_MAX to signed -1. Bound
+    // the mathematical value before asking for any signed scalar conversion.
+    NSNumber *number = value;
+    if ([number compare:@(INT32_MIN)] == NSOrderedAscending ||
+        [number compare:@(UINT32_MAX)] == NSOrderedDescending) return NO;
     int64_t signedValue = 0;
     if (!CFNumberGetValue((__bridge CFNumberRef)value, kCFNumberSInt64Type, &signedValue) ||
         signedValue < INT32_MIN || signedValue > UINT32_MAX) return NO;
@@ -576,49 +581,116 @@ static int PrintJSON(NSDictionary *object) {
     if (!data) return 1;
     return fwrite(data.bytes, 1, data.length, stdout) == data.length && fputc('\n', stdout) != EOF ? 0 : 1;
 }
-static BOOL DecoderAndContractTests(void) {
+// Diagnostics below are exclusively for fixed build-time fixtures. Never pass
+// live keyboard, audio, radio, registry, or user data into this helper.
+static NSDictionary *FixtureValueInfo(id value) {
+    if (!value) return @{@"value":@"nil"};
+    CFTypeID type = CFGetTypeID((__bridge CFTypeRef)value);
+    NSMutableDictionary *info = [@{@"value":[value description], @"class":NSStringFromClass([value class]),
+        @"cf_type":@(type)} mutableCopy];
+    if (type == CFNumberGetTypeID()) {
+        NSNumber *number = value; int64_t scalar = 0;
+        info[@"cf_number_type"] = @(CFNumberGetType((__bridge CFNumberRef)value));
+        info[@"is_float"] = @(CFNumberIsFloatType((__bridge CFNumberRef)value));
+        info[@"objc_type"] = [NSString stringWithUTF8String:number.objCType] ?: @"unknown";
+        info[@"scalar_conversion_ok"] = @(CFNumberGetValue((__bridge CFNumberRef)value, kCFNumberSInt64Type, &scalar));
+        info[@"scalar_conversion_value"] = @(scalar);
+        info[@"compare_min"] = @([number compare:@(INT32_MIN)]);
+        info[@"compare_max"] = @([number compare:@(UINT32_MAX)]);
+    }
+    return info;
+}
+static void RecordCheck(NSMutableArray *checks, NSString *name, BOOL passed, NSDictionary *failureDetails) {
+    NSMutableDictionary *check = [@{@"name":name, @"passed":@(passed)} mutableCopy];
+    if (!passed && failureDetails) check[@"details"] = failureDetails;
+    [checks addObject:check];
+}
+static void CheckUInt32(NSMutableArray *checks, NSString *name, id input, BOOL expectedAccepted, uint32_t expectedBits) {
+    uint32_t bits = 0;
+    BOOL accepted = UInt32Bits(input, &bits);
+    BOOL passed = accepted == expectedAccepted && (!accepted || bits == expectedBits);
+    NSDictionary *details = passed ? nil : @{@"input":FixtureValueInfo(input),
+        @"expected_accepted":@(expectedAccepted), @"actual_accepted":@(accepted),
+        @"expected_bits":@(expectedBits), @"actual_bits":@(bits)};
+    RecordCheck(checks, name, passed, details);
+}
+static void CheckContract(NSMutableArray *checks, NSString *name, NSDictionary *snapshot, NSString *expectedFailure) {
+    NSString *actual = DriverContractFailure(snapshot);
+    BOOL passed = expectedFailure ? [actual isEqual:expectedFailure] : actual == nil;
+    RecordCheck(checks, name, passed, passed ? nil : @{@"expected":expectedFailure ?: @"valid", @"actual":actual ?: @"valid"});
+}
+static void CheckLock(NSMutableArray *checks, NSString *name, bool *held, bool down, bool up,
+                      uint64_t keyCode, bool command, bool otherModifiers, bool repeating,
+                      HKLockDecision expected, bool expectedHeld) {
+    HKLockDecision actual = HKDirectLock(held, down, up, keyCode, command, otherModifiers, repeating);
+    BOOL passed = actual == expected && *held == expectedHeld;
+    RecordCheck(checks, name, passed, passed ? nil : @{@"expected_decision":@(expected), @"actual_decision":@(actual),
+        @"expected_held":@(expectedHeld), @"actual_held":@(*held)});
+}
+static void DecoderAndContractTests(NSMutableArray *checks) {
     uint32_t cfgRaw = ExpectedCFG;
     int32_t signedCFG = 0, signedUnknown = -1;
     memcpy(&signedCFG, &cfgRaw, sizeof(signedCFG));
     id cfg = CFBridgingRelease(CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &signedCFG));
     id unknown = CFBridgingRelease(CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &signedUnknown));
-    uint32_t bits = 0; uint64_t wide = 0;
-    if (!cfg || !unknown || Unsigned(cfg, &wide) || !UInt32Bits(cfg, &bits) || bits != ExpectedCFG ||
-        !UInt32Bits(unknown, &bits) || bits != UINT32_MAX ||
-        !UInt32Bits(@(UINT32_MAX), &bits) || bits != UINT32_MAX ||
-        !UInt32Bits(@(INT32_MIN), &bits) || bits != UINT32_C(0x80000000) ||
-        UInt32Bits(@YES, &bits) || UInt32Bits(@1.0, &bits) || UInt32Bits(@"1", &bits) ||
-        UInt32Bits(@(-INT64_C(2147483649)), &bits) || UInt32Bits(@UINT64_C(4294967296), &bits) ||
-        UInt32Bits(@UINT64_MAX, &bits)) return NO;
+    RecordCheck(checks, @"cf-sint32-fixtures-created", cfg != nil && unknown != nil, nil);
+    if (!cfg || !unknown) return;
+    uint64_t wide = 0;
+    RecordCheck(checks, @"strict-unsigned-rejects-signed-cfg", !Unsigned(cfg, &wide), FixtureValueInfo(cfg));
+    CheckUInt32(checks, @"u32-signed-cfg", cfg, YES, ExpectedCFG);
+    CheckUInt32(checks, @"u32-signed-unknown-camera", unknown, YES, UINT32_MAX);
+    CheckUInt32(checks, @"u32-positive-max", @(UINT32_MAX), YES, UINT32_MAX);
+    CheckUInt32(checks, @"u32-negative-min", @(INT32_MIN), YES, UINT32_C(0x80000000));
+    CheckUInt32(checks, @"u32-zero", @0, YES, 0);
+    CheckUInt32(checks, @"u32-reject-bool", @YES, NO, 0);
+    CheckUInt32(checks, @"u32-reject-float-one", @1.0, NO, 0);
+    CheckUInt32(checks, @"u32-reject-float-fraction", @1.5, NO, 0);
+    CheckUInt32(checks, @"u32-reject-string", @"1", NO, 0);
+    CheckUInt32(checks, @"u32-reject-below-min", @(-INT64_C(2147483649)), NO, 0);
+    CheckUInt32(checks, @"u32-reject-two-to-32", @(UINT64_C(4294967296)), NO, 0);
+    CheckUInt32(checks, @"u32-reject-uint64-max", @(UINT64_MAX), NO, 0);
     NSMutableDictionary *snapshot = [@{@"Schema":@1, @"CFG":cfg, @"EventSequence":@0,
         @"Version":DriverVersion, @"Ready":@YES, @"Awake":@YES, @"State":@"Ready", @"EventRing":@[]} mutableCopy];
-    if (DriverContractFailure(snapshot) != nil) return NO;
+    CheckContract(checks, @"contract-signed-cfg-driver-010", snapshot, nil);
     snapshot[@"CFG"] = @YES;
-    if (![DriverContractFailure(snapshot) isEqual:@"driver-contract-CFG-type-invalid"]) return NO;
+    CheckContract(checks, @"contract-reject-bool-cfg", snapshot, @"driver-contract-CFG-type-invalid");
     snapshot[@"CFG"] = cfg; snapshot[@"Version"] = AppVersion;
-    if (![DriverContractFailure(snapshot) isEqual:@"driver-contract-Version-mismatch"]) return NO;
+    CheckContract(checks, @"contract-app-version-not-driver-version", snapshot, @"driver-contract-Version-mismatch");
     snapshot[@"Version"] = DriverVersion; snapshot[@"EventSequence"] = @(-1);
-    if (![DriverContractFailure(snapshot) isEqual:@"driver-contract-EventSequence-invalid"]) return NO;
+    CheckContract(checks, @"contract-strict-unsigned-sequence", snapshot, @"driver-contract-EventSequence-invalid");
     bool held = false;
-    return HKDirectLock(&held, true, false, 37, true, false, false) == HKLockRequest &&
-        HKDirectLock(&held, true, false, 37, true, false, true) == HKLockConsume &&
-        HKDirectLock(&held, false, true, 37, false, false, false) == HKLockConsume &&
-        HKDirectLock(&held, true, false, 37, false, false, false) == HKLockPass &&
-        HKDirectLock(&held, true, false, 37, true, false, true) == HKLockPass &&
-        HKDirectLock(&held, false, true, 37, true, false, false) == HKLockPass &&
-        HKDirectLock(&held, true, false, 37, true, true, false) == HKLockPass &&
-        HKDirectLock(&held, true, false, 101, false, false, false) == HKLockPass;
+    CheckLock(checks, @"lock-command-l-down", &held, true, false, 37, true, false, false, HKLockRequest, true);
+    CheckLock(checks, @"lock-owned-repeat-consumed", &held, true, false, 37, true, false, true, HKLockConsume, true);
+    CheckLock(checks, @"lock-owned-release-without-command", &held, false, true, 37, false, false, false, HKLockConsume, false);
+    CheckLock(checks, @"lock-plain-l-passes", &held, true, false, 37, false, false, false, HKLockPass, false);
+    CheckLock(checks, @"lock-unowned-command-repeat-passes", &held, true, false, 37, true, false, true, HKLockPass, false);
+    CheckLock(checks, @"lock-unowned-release-passes", &held, false, true, 37, true, false, false, HKLockPass, false);
+    CheckLock(checks, @"lock-other-modifiers-pass", &held, true, false, 37, true, true, false, HKLockPass, false);
+    CheckLock(checks, @"lock-normal-f9-passes", &held, true, false, 101, false, false, false, HKLockPass, false);
 }
 static int SelfTest(void) {
+    NSMutableArray *checks = [NSMutableArray array];
     HKRadioState off = {false,false}, wifi={true,false};
     HKEvent events[]={{1,0x100,1},{2,0x2000,2}};
     uint64_t last=0; bool seen=false;
-    BOOL passed = HKRadioEqual(HKRadioTarget(wifi,false,off),off) && HKRadioEqual(HKRadioTarget(off,true,wifi),wifi) &&
-        HKValidateRing(events,2,2,0)==HKRingValid && HKValidateRing(events+1,1,2,0)==HKRingGap &&
-        HKDebounce(1,&last,&seen) && !HKDebounce(1000,&last,&seen) && HKDebounce(300001000,&last,&seen) &&
-        !Unsigned(@NO,&last) && !Unsigned(@"0",&last) && !Unsigned(@0.0,&last) && Unsigned(@0,&last) &&
-        HKEventFresh(3000000001,1) && !HKEventFresh(3000000002,1) && DecoderAndContractTests();
-    (void)PrintJSON(@{@"result":passed?@"SELF_TEST_PASSED":@"SELF_TEST_FAILED",@"app_version":AppVersion,@"hardware_actions_performed":@NO});
+    RecordCheck(checks, @"radio-off-target", HKRadioEqual(HKRadioTarget(wifi,false,off),off), nil);
+    RecordCheck(checks, @"radio-restore-original-mix", HKRadioEqual(HKRadioTarget(off,true,wifi),wifi), nil);
+    RecordCheck(checks, @"ring-contiguous", HKValidateRing(events,2,2,0)==HKRingValid, nil);
+    RecordCheck(checks, @"ring-gap-rejected", HKValidateRing(events+1,1,2,0)==HKRingGap, nil);
+    RecordCheck(checks, @"debounce-first", HKDebounce(1,&last,&seen), nil);
+    RecordCheck(checks, @"debounce-repeat", !HKDebounce(1000,&last,&seen), nil);
+    RecordCheck(checks, @"debounce-quiet-window", HKDebounce(300001000,&last,&seen), nil);
+    RecordCheck(checks, @"unsigned-reject-bool", !Unsigned(@NO,&last), FixtureValueInfo(@NO));
+    RecordCheck(checks, @"unsigned-reject-string", !Unsigned(@"0",&last), FixtureValueInfo(@"0"));
+    RecordCheck(checks, @"unsigned-reject-float-zero", !Unsigned(@0.0,&last), FixtureValueInfo(@0.0));
+    RecordCheck(checks, @"unsigned-accept-zero", Unsigned(@0,&last), FixtureValueInfo(@0));
+    RecordCheck(checks, @"fresh-boundary-accepted", HKEventFresh(3000000001,1), nil);
+    RecordCheck(checks, @"fresh-expired-rejected", !HKEventFresh(3000000002,1), nil);
+    DecoderAndContractTests(checks);
+    BOOL passed = YES; NSMutableArray *failures = [NSMutableArray array];
+    for (NSDictionary *check in checks) if (![check[@"passed"] boolValue]) { passed = NO; [failures addObject:check]; }
+    (void)PrintJSON(@{@"result":passed?@"SELF_TEST_PASSED":@"SELF_TEST_FAILED",@"app_version":AppVersion,
+        @"hardware_actions_performed":@NO,@"checks_run":@(checks.count),@"checks":checks,@"failures":failures});
     return passed ? 0 : 1;
 }
 static S540Delegate *StrongDelegate;

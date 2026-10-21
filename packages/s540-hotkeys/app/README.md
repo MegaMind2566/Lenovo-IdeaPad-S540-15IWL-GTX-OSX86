@@ -83,7 +83,9 @@ Apple's IOKit deserializer creates a signed CFNumberSInt32 for OSNumber values
 with width up to 32. Consequently CFG can arrive as `-32702444` and unknown
 CameraState as `-1`. `UInt32Bits` accepts only non-Boolean integer CFNumbers,
 requires lossless conversion to signed 64-bit, bounds the value to
-`INT32_MIN..UINT32_MAX`, and converts that range to its uint32 bit pattern.
+`INT32_MIN..UINT32_MAX` with mathematical NSNumber comparisons before any
+scalar conversion, and converts that range to its uint32 bit pattern. This
+prevents an unsigned NSNumber such as UINT64_MAX from wrapping to signed -1.
 Only CFG and CameraState use this decoder. Sequence/time decoding stays strict
 and unsigned. Boolean, floating-point, string and oversized values are rejected.
 Contract failures identify the field, such as `driver-contract-CFG-type-invalid`
@@ -126,7 +128,10 @@ needed.
 
 `S540Tasti --self-test` checks pure policies, real signed CFNumberSInt32 fixtures
 for CFG and unknown CameraState, invalid types/ranges, driver-version separation,
-and direct-lock pass/consume ownership. It prints JSON and exits 0 on success.
+and direct-lock pass/consume ownership. Each assertion is named and evaluated
+independently. Failure JSON includes expected/actual results and fixed fixture
+values, CF/Objective-C types and scalar-conversion results. No live data enters
+these diagnostics. It prints JSON and exits 0 on success.
 No hardware access, files, permission checks, prompts, tap creation or actions
 are performed. Portable policy fixtures:
 
