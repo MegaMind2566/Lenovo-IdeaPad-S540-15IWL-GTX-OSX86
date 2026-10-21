@@ -36,7 +36,8 @@ private:
     bool _pendingOverflow {false}, _cameraEnabled {false}, _cameraSeen {false};
     bool _cameraBaselineValid {false};
     UInt32 _pending {0}, _cfg {0}, _lastMask {0};
-    UInt32 _error {0}, _lastIOReturn {0};
+    UInt32 _error {0};
+    IOReturn _lastIOReturn {kIOReturnSuccess};
     UInt32 _cameraState {S540Protocol::UnknownCamera};
     UInt32 _cameraResult {S540Protocol::CameraNeverRequested};
     UInt32 _cameraError {0};

@@ -19,10 +19,10 @@
     "kernel/CONTRACT.md": "9f8914e42c9c476a2654b0186f4a5b7e8b7c8d80437afcdecc6f899908e06489",
     "kernel/Info.plist": "c439c8a777e5f3ba3736fb9ae417f42c3ff1874bee30dec1adfa1ac139ab7508",
     "kernel/LICENSE": "640d90f6ee401241ff62834d0d1b33f83049e99b8bfdfa04ed1b0a1635dde3e7",
-    "kernel/NOTICE.md": "5504efe93d8f4dc1fc3791f4d530d2eaab8bdbdc1f6e773de70634ad350ba2fc",
+    "kernel/NOTICE.md": "9adf9eb71018ab75dca600e6ff1c54cf65b7a38ff20f28c21090afa1253419fe",
     "kernel/ProtocolCore.hpp": "8883a06bcf471102864abe7b8674b3508df54f2c20ffad80b9821c2a411b9956",
-    "kernel/S540HotkeysVPC.cpp": "d647174515d415df1a06fe8e0ae210f41f76c1babacce770c17d3adf9057393f",
-    "kernel/S540HotkeysVPC.hpp": "f5b986ecd4b3e4de33923bc68050a08ec0ba5cf7303c644e3677fe12486e3db0",
+    "kernel/S540HotkeysVPC.cpp": "b514efead0e4bb2eb4730641998dc2d3d6f2984133d6a33cfb25234c95031ba4",
+    "kernel/S540HotkeysVPC.hpp": "7fa051a2f96ff51e1854090fa7690bafd70af894efbff8a9fac77ebe02cb9580",
     "kernel/tests/ProtocolCoreTests.cpp": "3266bf96175bbb0e6793b24622f7f4e329ef544a89bc9927969317f52e2a65db",
     "licenses/GPL-2.0-YogaSMC.txt": "640d90f6ee401241ff62834d0d1b33f83049e99b8bfdfa04ed1b0a1635dde3e7",
     "licenses/NOTICES.txt": "b679a606c81e40388d34c116a4276fa9418b8295a5e872c731a16809908bdce1"

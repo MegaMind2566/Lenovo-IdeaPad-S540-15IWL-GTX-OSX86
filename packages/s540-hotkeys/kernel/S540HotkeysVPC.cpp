@@ -32,6 +32,18 @@ static bool dictionaryString(OSDictionary *dictionary, const char *key, const ch
     string->release();
     return good;
 }
+static bool containsIdentifier(const char *identifier, const char *token) {
+    // The kernel KPI does not expose strstr. Inputs are NUL-terminated OSString
+    // bundle identifiers and fixed nonempty tokens; no allocation or import.
+    if (!identifier || !token || !*token) return false;
+    for (const char *start = identifier; *start; start++) {
+        const char *cursor = start;
+        const char *match = token;
+        while (*cursor && *match && *cursor == *match) { cursor++; match++; }
+        if (!*match) return true;
+    }
+    return false;
+}
 
 bool S540HotkeysVPC::init(OSDictionary *dictionary) {
     if (!IOService::init(dictionary)) return false;
@@ -68,7 +80,7 @@ bool S540HotkeysVPC::competingClient() {
         OSString *bundle = OSDynamicCast(OSString, client->getProperty("CFBundleIdentifier"));
         const char *identifier = bundle ? bundle->getCStringNoCopy() : "";
         if (!strcmp(name, "IdeaVPC") || !strcmp(name, "YogaVPC") || !strcmp(name, "S540HotkeysVPC") ||
-            strstr(identifier, "YogaSMC") || strstr(identifier, "HotkeysVPC")) {
+            containsIdentifier(identifier, "YogaSMC") || containsIdentifier(identifier, "HotkeysVPC")) {
             conflict = true;
             break;
         }
@@ -515,7 +527,7 @@ bool S540HotkeysVPC::publishSnapshot(const char *state) {
         dictionaryNumber(snapshot, "QueryCount", _queryCount) &&
         dictionaryNumber(snapshot, "QueryFailureCount", _queryFailureCount) &&
         dictionaryNumber(snapshot, "ErrorCode", _error, 32) &&
-        dictionaryNumber(snapshot, "LastIOReturn", _lastIOReturn, 32) &&
+        dictionaryNumber(snapshot, "LastIOReturn", static_cast<UInt32>(_lastIOReturn), 32) &&
         dictionaryNumber(snapshot, "LastMask", _lastMask, 32) &&
         dictionaryNumber(snapshot, "CameraState", _cameraState, 32) &&
         dictionaryNumber(snapshot, "LastCameraResult", _cameraResult, 32) &&
