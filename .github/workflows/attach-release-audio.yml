@@ -1,0 +1,35 @@
+name: Attach fresh Tahoe audio to EFI v0.2.0
+
+on:
+  push:
+    branches: ['release/efi-v0.2.0-audio']
+    paths:
+      - '.github/workflows/attach-release-audio.yml'
+      - 'builders/attach_release_audio.py'
+      - 'docs/releases/v0.2.0/AUDIO-*.md'
+      - 'packages/audio-fresh/releases/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: attach-audio-efi-v0.2.0
+  cancel-in-progress: false
+
+jobs:
+  attach:
+    if: github.repository == 'MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Validate the exact audio archive
+        run: python3 builders/attach_release_audio.py --check-only
+      - name: Attach audio assets and update the audio instructions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 builders/attach_release_audio.py --publish
