@@ -1,0 +1,138 @@
+{
+  "actual_owner_session_controls": {
+    "native": {
+      "ack_after_cleanup_verified": true,
+      "checks": 115,
+      "cleanup_retry_verified": true,
+      "component": "nvidia-gsp-bootstrap-owner",
+      "execution": "native-user-space",
+      "failures": 0,
+      "firmware_loaded": false,
+      "fixed_pm_deadline_verified": true,
+      "format": 1,
+      "gpu_access": false,
+      "gpu_initialized": false,
+      "kernel_execution": "not_tested",
+      "original_entry_tripwires": true,
+      "original_rm_executed": false,
+      "permanent_session_retained": true,
+      "persistent_worker_verified": true,
+      "platform_fixture": true,
+      "pm_hook_lifetime_verified": true,
+      "pm_revocation_fixture": true,
+      "preparation_verified": true,
+      "real_context_store_transport_timers": true,
+      "status": "passed"
+    },
+    "sanitized": {
+      "ack_after_cleanup_verified": true,
+      "checks": 115,
+      "cleanup_retry_verified": true,
+      "component": "nvidia-gsp-bootstrap-owner",
+      "execution": "native-user-space",
+      "failures": 0,
+      "firmware_loaded": false,
+      "fixed_pm_deadline_verified": true,
+      "format": 1,
+      "gpu_access": false,
+      "gpu_initialized": false,
+      "kernel_execution": "not_tested",
+      "original_entry_tripwires": true,
+      "original_rm_executed": false,
+      "permanent_session_retained": true,
+      "persistent_worker_verified": true,
+      "platform_fixture": true,
+      "pm_hook_lifetime_verified": true,
+      "pm_revocation_fixture": true,
+      "preparation_verified": true,
+      "real_context_store_transport_timers": true,
+      "status": "passed"
+    }
+  },
+  "changed_source_sha256": {
+    "packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.cpp": "49eeb79853a8c6a8ecd411c7f2d17da72376675b4dfc57b570f08d0a3bb0f2b1",
+    "packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.hpp": "4e6b2aa100c28fb3c973ba2966e26077dfd4ad364163c21d753bfcab3c5b6e05",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp": "78e9545b20efcdd2c94d7ac5e05a8ee506dcac6179fd4eb06c851a970d4cb1c3",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.hpp": "74a5b4cf2549889ab471308461e2a2193bf9a0e166a7b8ea9f976ec59c80ae80"
+  },
+  "component": "prospective-session-lifetime-closure",
+  "format": 1,
+  "gpu_initialized": false,
+  "guarded_loader_sha256": "f4cc03030b17bb9265ec848abe37f8325a9eb29415c39f97c5aac69eb917be3a",
+  "hardware_admission": false,
+  "helper_source_sha256": {
+    "PM-DEADLINE-AUDIT.json": "2134e6c7c7219ddbc63e05e27101691bed7efe51089d815337b88e0cdcdf4c61",
+    "README.md": "ccc568c1afe0f0cbf5bd6c2a205089c1b47ae17c8087006fa32828330d568a0d",
+    "SOURCE-CONTRACT.json": "a3b530010a84c4d7db8dbaccdc787a771cc1c48263dad5569386c6b41a0ed221",
+    "TX-CONTROL-VALIDATION.json": "5673e2b6a2e3ea42f537ace86bd78d8f778d15a4ee9aba29b8cae33a6647a257",
+    "check.py": "1603a17dc856be4f334535b834c278c147914ae17b7185e61d16b73a101b0ee4",
+    "check_tx.py": "f0affe181cdda32f5e76d2b41836d1d4ef225c67cbc4147d499037f70bf332da",
+    "module-pin.cpp.inc": "ce74e66a8fa4f2a9680950c259c035bcd296a5ef42e60c9b8a25011fbf5d4860",
+    "owner-lifetime.cpp.inc": "2a8428fc35965c966f46fc02dfc4037a83e9f795c264017d725cd10f9d2272ea",
+    "power-event.cpp.inc": "b4ee8981cc39d00472a011969b4de6467d048243256ad571356a8d437b73839b",
+    "prepare.py": "e970012be13f738a167067008c746adfb6ebc8fc03ef3f0cafbb87b330b524f4",
+    "tests/page-fixture.cpp.inc": "222440ae67b636f057911a09f93f8ee04384295884c9ff7a818be46cddfce938",
+    "tests/retained-case.cpp.inc": "8adebacf87229ec25074ad8307349511a013c78636bbcccf9a78eec5dc603e2f",
+    "tests/test_source_contracts.py": "ccb31cedbf0f35a500c7594c87573eb082ffd4f41714577f8e3c0a028b56cddd",
+    "tests/tx-control.c.inc": "0207dd366d7994b384df7a673a4daa7cd9c70f327c2e30b08fcfa43e0efd32ef"
+  },
+  "input_sha256": {
+    "packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.cpp": "bb54856cf9e0e373eb12a8d9c47ab95500d23b30b3478135f82a2b77542fffad",
+    "packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.hpp": "aacac3a1cbb15ab4ddbf1ef5001f8b8aee82630564cdeb2dfe7a5de654d3eb7e",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp": "1c4cd89bc61665fbeb56d8efdacd356414c1c7c5de0134363f8859bf624365f5",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.hpp": "383e980f9f1af4057395151914d1b8b1db369e989102c29aab3e2fb3fb4d914d"
+  },
+  "kernel_cross_compilation": {
+    "packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.cpp": {
+      "format": "Mach-O object",
+      "frame_warning_bytes": 4096,
+      "kernel_execution": false,
+      "object_sha256": "8833da8c9b57d7f04e40b469b6d219017b67fc1f881cd0d83d6cae5fff97c0a0",
+      "source_sha256": "49eeb79853a8c6a8ecd411c7f2d17da72376675b4dfc57b570f08d0a3bb0f2b1",
+      "status": "compiled",
+      "target": "x86_64-apple-darwin",
+      "warnings_are_errors": true
+    },
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp": {
+      "format": "Mach-O object",
+      "frame_warning_bytes": 4096,
+      "kernel_execution": false,
+      "object_sha256": "a02bfe4771f4fc888a2a8d81f76c257ca79c6f068bf4b0dcb49cf980d29006f5",
+      "source_sha256": "78e9545b20efcdd2c94d7ac5e05a8ee506dcac6179fd4eb06c851a970d4cb1c3",
+      "status": "compiled",
+      "target": "x86_64-apple-darwin",
+      "warnings_are_errors": true
+    }
+  },
+  "leak_sanitizer_disabled_for_intentionally_retained_worker": true,
+  "loader_stop_guards_source_order_verified": true,
+  "native_provider_and_dma_endpoints_are_fixtures": true,
+  "original_rm_executed": false,
+  "physical_reclamation_authorized": false,
+  "pm_30_second_shutdown_bound_proven": false,
+  "pm_source_audit": {
+    "callback_and_commit_ordering_remain_unproved": true,
+    "file": "PM-DEADLINE-AUDIT.json",
+    "opt_in_tx_gap_observed_cancellation_fixed": true,
+    "parent_tx_gap_identified": true,
+    "pm_30_second_shutdown_bound_proven": false,
+    "sha256": "2134e6c7c7219ddbc63e05e27101691bed7efe51089d815337b88e0cdcdf4c61"
+  },
+  "production_cpp_final_atomic_event_variant": true,
+  "raw_namespace_sha256": "cb79f788baddb7f046e870b1e2e09bfde310b4b12417ec8c737fad1ef440f7a1",
+  "source_contract_tests": {
+    "checks": 5,
+    "failures": 0,
+    "gates_preserved": 15
+  },
+  "status": "passed",
+  "test_source_sha256": "31f10dbc8bceeb1a19577c0055fabc3a06adfc7e3a2317ec9fd19dbcaf8a2f9c",
+  "tx_actual_body_controls": {
+    "file": "TX-CONTROL-VALIDATION.json",
+    "full_original_tu_compiled": true,
+    "hardware_execution": false,
+    "native_checks": 114,
+    "sanitized_checks": 114,
+    "sha256": "5673e2b6a2e3ea42f537ace86bd78d8f778d15a4ee9aba29b8cae33a6647a257"
+  }
+}

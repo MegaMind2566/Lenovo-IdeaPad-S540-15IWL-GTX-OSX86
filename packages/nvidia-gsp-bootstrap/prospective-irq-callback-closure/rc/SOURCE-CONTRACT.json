@@ -1,0 +1,38 @@
+{
+  "candidate_source_sha256": {
+    "README.md": "0c3e840862f3e0396c33369ee1761a87b40a8bf14481811290e432f2c19fe289",
+    "S540NvidiaIrqOriginal.c": "d4689e4f628e5ac7020c5cc8fca3e3ff4fcdbf0e19c26ea784d107c9c5017199",
+    "S540NvidiaIrqOriginal.h": "bb315855644480d940ba6cf4e74109986b37ed8544e919ec6b310074d6b8e0c4",
+    "check_actual_1hz.c": "5dfaf1d87bc9e9555279e7877b2fd7a761d7a7dcb6e0eb1d58b249361d23053c",
+    "check_actual_1hz.py": "2a8e22ec9d13d6fea2b986e4e0fab1f751f7df5749addea1d0d6c5e08b9d7d92",
+    "check_irq_original.c": "5279b968b0ca303d907f1dc7a5a2f0f9845b9a27b0da87feef781e93f3d2be06",
+    "check_irq_original.py": "bfc9abf588d89ba747ff1067c3a5d654c3d413e174126860442827ae39b4eac4"
+  },
+  "dma_stop_receipt": false,
+  "event_owner_rows_added": 0,
+  "final_release_receipt": false,
+  "format": 1,
+  "hardware_admission": false,
+  "lock_reader_precondition": "Authenticated s540FirstTxnIrqValidateSoftwareDrained() success before any complete original lock-ownership read",
+  "original_entry_admission": false,
+  "production_default_changed": false,
+  "profile": "typed-original-irq-callback-helpers",
+  "required_defines": [
+    "S540_NVIDIA_IRQ_CALLBACK_CLOSURE=1",
+    "S540_NVIDIA_NO_LEGACY_RM_SEMAPHORE=1"
+  ],
+  "strong_exports": [
+    "s540FirstTxnIrqMaskHardware",
+    "s540FirstTxnDrainQueued1Hz"
+  ],
+  "translation_units": [
+    "S540NvidiaIrqOriginal.c"
+  ],
+  "unresolved": [
+    "No actual target kernel or hardware execution",
+    "No complete profile 1Hz reachability proof",
+    "No sticky/closing cleanup-master authority",
+    "HardIRQ nested cancellation enrollment owned by coordinated IRQ participant"
+  ],
+  "upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5"
+}

@@ -1,0 +1,31 @@
+The prior complete native checkpoint has been replayed against all 1,100 original and 60 project translation units: exact source bytes, compiler commands, actual Mach-O objects and compiler `.su` sidecars. The replay verifies 4,624 inputs and decodes 30,068 functions. The historical missing-project-input barrier is removed. This is a companion audit; it changes no existing builder, frozen source profile or original-entry gate.
+
+`VALIDATION.json` is the small checkpoint receipt. Full per-function evidence, generated source-body controls and binaries remain under `build/stack-admission-runs`, outside this package.
+
+Two constant `LEA RSP,[RSP+constant]` instructions are independently bound to their actual opcode bytes and static compiler frames. They have the same stack-depth behavior as the constant ADD/SUB forms already accepted by the frozen collector. Dynamic/indexed writes remain unknown. The selected global-initialize graph retains 338 barriers and adapter-initialize retains 915 after this narrow correction.
+
+The separately checked Owner action switch has five bounded destinations. Its native unsigned index guard, unrelocated signed-offset table, actual `LC_DATA_IN_CODE` jump-table marker and complete direct-branch checks prove that its indirect JMP stays inside the same measured function. Five data words are consequently data rather than undecoded executable instructions. `SWITCH-CONTROL-VALIDATION.json` resolves these six specific barriers; the frozen graph is not silently rewritten. Applying only that proof changes the Owner action's count from 803 to 797. It does not resolve the dispatcher's action function pointer.
+
+The actual extracted ACPI remapping bodies establish a separate local recursion constraint. The twelve immutable precedence-table values are concrete DSM functions, so `test(Generic) → remap(Generic) → test(Concrete) → remap(Concrete)` is the maximum local sequence: four simultaneous activations. The last remap returns before taking the remap-to-test edge. Both original bodies run in 7,168 ASAN/UBSAN fixture scenarios with zero depth-guard hits. Replacing one table value with the generic CURRENT value triggers the guard 1,152 times. External helper fixtures deliberately allow generic remapping outputs; the bound does not assume a convenient helper scalar result. External callee frames and arbitrary callback reentry remain unbounded. `ACPI-DEPTH-VALIDATION.json` records this source-bound constraint; no recursion barrier is deleted from the legacy aggregate graph on the strength of fixture execution.
+
+Exact remaining witnesses include:
+
+- `coreInitializeRm → __nvoc_objCreate_OBJSYS → portMemAllocNonPaged → callq *0x80(%rip)`. Successful memory initialization assigns the global nonpaged slot to `_portMemAllocatorAllocNonPagedWrapper`, but initialization/lifetime and writable getter aliases must be established before installing an unconditional indirect edge. Concurrent raw first `portInitialize` is a concrete counterexample: a second caller can return success while the first has not installed the slots; a subsequent first-caller failure can clear the globals.
+- `rm_init_adapter → threadStateFree → callq *0x8(%r15)` and the adapter's direct `___bzero` import. Generic allocators cannot be reduced to the global allocator pair: existing-block and dynamic allocator callbacks remain relevant.
+- `rm_execute_work_item → callq *0x8(%rbx)` and `rm_run_rc_callback → osRun1HzCallbacksNow → callq *%rax`. A registered callback identity alone does not prove its complete stack or nested reentry bound.
+- `rm_isr → osSanityTestIsr → callq *0x190(%r14)`. Thread-stack capacity does not supply IRQ or exception-stack headroom.
+- `clientUpdatePendingFreeList` recursively walks child and dependency references. Its maximum active reference-chain depth remains unknown. The broad assertion/error/reporting SCC also remains unbounded. Timer absolute/relative scheduling needs stable predicate/ownership facts before treating the apparent cycle as exclusive branches.
+
+The current public KERNEL `s540GlobalRmInitialize` refusal has a finite 16-byte compiled graph. It returns before original initialization, so that small bound cannot certify the intended RM/GSP path. Sequential global and adapter stages require the maximum of their complete stage peaks, while synchronous reentry requires a separate nested-activation bound. Actual target thread/IRQ capacities, framework entry depth, callback reentry, interrupt/exception nesting and a supported enlargement boundary are not established.
+
+The integrated successor changes `system.c`, `g_system_nvoc.c`, the first-transaction record/header and a typed IRQ bridge. Its snapshot ABI grows from 56 to 72 bytes. This prior native graph does not transfer to those sources. Fresh changed-object `.su` files are useful per-frame evidence, but every affected header consumer must also be rebound and the complete graph recomputed before making any successor aggregate claim. All original/hardware/production gates remain closed.
+
+Run the small mutation controls with:
+
+```sh
+python3 -m unittest discover -s packages/nvidia-gsp-bootstrap/prospective-stack-admission-closure/tests -v
+```
+
+`check.py` takes the two recorded stack manifests, a repository and LLVM decoder path, exact prefix relocation maps, and a fresh output directory. It refuses missing project inputs, overlapping measured inventories, changed source/object/sidecar bytes and guessed finite unknown bounds. The combined-image manifest lives above `original-objects`; the companion uses the frozen exact input verifier and additionally enforces that complete original object directory, without changing the old binder's older layout rule. Internalized dispatcher callbacks are selected only by their unique actual machine symbol; a check forbids that root indexing from changing any symbolic machine edge.
+
+`check_acpi_depth.py` takes `--source`, `--cc` and a fresh `--output`. `check_switch_control.py` takes `--repository`, `--object`, `--source`, `--llvm-objdump` and a fresh `--output` file. The switch checker intentionally accepts only the exact reviewed native object/source hashes. New compiler output must be reviewed again.

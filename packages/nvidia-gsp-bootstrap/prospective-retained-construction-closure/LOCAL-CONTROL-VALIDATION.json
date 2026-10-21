@@ -1,0 +1,146 @@
+{
+  "additional_current_test_input_sha256": {
+    "packages/nvidia-global-rm/tests/fixtures/nv_rdcr_fixture.c": "38fb119c0f37a3e74ff8fbd55171424b1e8f6134addebd81d87cd21ca3f1c077",
+    "packages/nvidia-global-rm/tests/fixtures/nvswitch_assert_fixture.c": "4ad28fbf26c808755191d0ec5e7658189ec05f4d7f36d71e741f978634e32be3"
+  },
+  "audit_method": "Read-only SHA-256 inventory, recorded source/object/binary verification, saved-log JSON reconciliation, static checker inspection, and deterministic preparation replay in memory. No build, binary execution, injection, source modification, or whole-pipeline rerun was performed.",
+  "canonical_parent_composition_sha256": "1392052eda0733713e345e938033a06c539669d4b443ba5c3104c70ae171e298",
+  "correction_scope": "Only final original-tree inventory uses output/source explicitly; the previous local source variable was overwritten by the project compile loop. Original failed run is preserved and not relabelled passed.",
+  "digest_encoding": "Inventory digests are SHA-256 of UTF-8 JSON with sorted keys and separators (comma, colon); file mode entries use 100644 or 100755 as in the existing composition inventory.",
+  "final_verifier_defect": {
+    "actual_faulty_inventory": {},
+    "confirmed": true,
+    "corrected_checker_execution_performed": false,
+    "corrected_checker_note": "A later one-line guard correction may be recorded in corrected_checker_sha256. It is not the executed checker and does not change the original failed pipeline status or claim a rerun.",
+    "corrected_checker_sha256": "ba5efd8526072aa190bb8b56c1910828e3bb860907bd83fd39fcd954c02b7050",
+    "executed_checker_sha256": "e44b36fc00d4f6e17b1af4fa65b4ae3b848da8c424fa493bc6bae0650b4bd14a",
+    "faulty_final_expression": "check.py:304 composition.inventory(source)",
+    "last_project_source": "packages/nvidia-hardware-transport/src/S540NvidiaPci.cpp",
+    "original_root_assignment": "check.py:63 source = output / 'source'",
+    "reason": "The project compilation loop leaves source bound to its final project file. The final guard inventories that file instead of the original root. Independently auditing output/source matches the report's original inventory exactly.",
+    "shadowing_assignment": "check.py:216 source = project / row['source']"
+  },
+  "format": 1,
+  "limitations": [
+    "The original pipeline remains failed. This receipt independently validates its saved runtime-control results and current bound artifacts; it does not replace results.json or mark the whole pipeline passed.",
+    "The CPU harness does not assert result.startupStatus. Per variant, 45 of 154 fault cases return sticky status 81 while raw original_status is 26 in 27 cases or 65535 in 18 cases. The CPU lifecycle stores the raw status in startupStatus before returning the stronger record status. StartupStatus/function-return consistency remains unresolved and is not proven here.",
+    "These are Linux CPU controls with the explicit privileged CPU and platform-facts fixtures, observation hooks, and two excluded kernel-only translation units described in results.json. They do not prove kernel stack bounds, PM shutdown deadlines, GPU initialization, DMA cessation, or hardware safety.",
+    "Control harness and auxiliary artifact hashes newly listed in this receipt are current audit fingerprints. The executed report records compiler path/version but no historical compiler executable digest; this audit does not reconstruct missing historical toolchain provenance."
+  ],
+  "namespace_sha256": "b920354cd2d6778f21b3c17802d470c2ea248981374ebbe4f0ae9d22cbcc7efa",
+  "original_report": {
+    "failure": "Actual original source changed during retained-construction checks",
+    "failure_type": "ValueError",
+    "file": "results.json",
+    "preserved_unchanged": true,
+    "sha256": "9bd1e8a7c92f5139104aadec7adb13c50c0378368676f2a86b0a143f26e6663f",
+    "status": "failed"
+  },
+  "scope": {
+    "authoritative_darwin_execution": false,
+    "existing_cpu_runtime_assertions_passed": true,
+    "global_allocation_failure_closure_proven": false,
+    "gpu_access": false,
+    "hardware_admission": false,
+    "installable_candidate_generated": false,
+    "kernel_execution": false,
+    "kernel_stack_bound_proven": false,
+    "original_entry_admission": false,
+    "physical_reclamation_authorized": false,
+    "pm_30_second_shutdown_bound_proven": false,
+    "production_candidate_allowed": false,
+    "whole_pipeline_passed": false
+  },
+  "source_verification": {
+    "all_executed_control_sources_matched_at_audit": true,
+    "both_trees_match_exact_canonical_parent_plus_cpu_control_preparation": true,
+    "executed_control_source_sha256": {
+      "README.md": "c175aa478f02d614955847231f540f2fdf4bbaaceefebd0adcab4183f7fa2980",
+      "check.py": "e44b36fc00d4f6e17b1af4fa65b4ae3b848da8c424fa493bc6bae0650b4bd14a",
+      "check_epoch.cpp": "000711b4dcaf986840fc131583139b95707dfdce44d85c4ce05ff19963e95b4f",
+      "check_kernel.py": "eed6ab5fd5a8bcb13d22843306a4dcbe0482279681b9e87ae74d2410db05d88d",
+      "check_original.c": "5d9c41333d2c84529bf1e5dcaa815297997be017123005209c6b6fa5f6803809",
+      "construction-api.c.inc": "b2547c85379c5b6187bb603c751565a9699cac876531b1d7ba23bd8cf7753f0c",
+      "construction-api.h.inc": "1651b7e0095f3f80d7328fb55dca79bd7b17c5ac09438b0849ea861cd154d3fa",
+      "prepare.py": "bd5423f5572a7aa19da198d0da2cbe6f24c4a39aacc35933c56c6418bc42bba4"
+    },
+    "matches_original_report_inventory": true,
+    "original_files": 4005,
+    "original_source_inventory_sha256": "458cd1993eda75f83f91c2ba13609b0efe01073f5b29653785f9f60c6a224dda",
+    "project_files": 186,
+    "project_source_inventory_sha256": "3d7199aaea983dbd018d4e3f1a01763c18d9da35290a46a2ba2d80caccc07d13"
+  },
+  "status": "verified-existing-local-cpu-control-evidence-only",
+  "variants": {
+    "plain": {
+      "additional_current_control_artifact_sha256": {
+        "epoch-original-control.o": "dfb50960bcbcb69b245706076773527ea541d58405a5340b04838bfb2efbd35d",
+        "g_nvid_string.c": "547b2ebc1a7c561f8a9d36d023ccbf13e711396aa4a012388e890fd3480cdcda",
+        "global-epoch-harness.o": "a0ed76a4089e551790491c9d625a499cf2818316934d1d153a8cd0d1edfad17c",
+        "native-unavailable-boundaries.c": "5162a192d5703c8969185514acefd2239ccaff0ba51ed298c0dab8c75a83656e",
+        "native-unavailable-boundaries.o": "ea95cc3f9b967b417122c666ea4737f275f2ce623665e5ca2ea6a5d95fc1f654",
+        "nvswitch-assert-fixture.o": "de76f14efd87a8de051cbcbbe1556e297c8ffa2e34eb2d098675e8e6e18773e5"
+      },
+      "all_log_files": 1328,
+      "all_log_files_tree_sha256": "192601916a6aa5e8d6316bd590818166d7ea169531e3ce862ef304c2baa5c2c4",
+      "all_recorded_source_and_object_hashes_match": true,
+      "all_saved_runtime_logs_match_report_rows": true,
+      "binary_hash_matches_executed_report": true,
+      "binary_sha256": "2e10b39a2e6b9d3c56aa3c810d35ba45cd9dfd198e495396d7de077e0dd22f4d",
+      "construction_retained_fault_positions": {
+        "count": 144,
+        "first": 11,
+        "last": 154
+      },
+      "injected_fault_positions": 154,
+      "original_compilation_sha256": "1767d657f639ba83eef7845009efc3166baf22aa33f80b481f79a7db864c4ba4",
+      "project_compilation_sha256": "6aa301e1098ab9d84796031ac056e42327622d8c362f056fddf2990562017e6a",
+      "recorded_assertion_failures": 0,
+      "recorded_original_source_and_object_rows_verified": 1100,
+      "recorded_process_failures": 0,
+      "recorded_project_source_and_object_rows_verified": 58,
+      "returned_vs_raw_original_status_difference_count": 45,
+      "runtime_logs_with_additional_non_sanitizer_diagnostics": 151,
+      "sanitizer_error_signatures_in_saved_runtime_logs": 0,
+      "saved_runtime_logs_tree_sha256": "e18c214ff57be30c801ea152acc8c4b7ebbde1ca0b255b291d54443852e5223c",
+      "saved_runtime_logs_verified": 165,
+      "scenario_rows": 10,
+      "terminal_unreached_fault_controls": 1
+    },
+    "sanitized": {
+      "additional_current_control_artifact_sha256": {
+        "epoch-original-control.o": "74f7dbd149213e00e13a45f0b70061d80e239d3c6a0c68b866ceb80e854288d8",
+        "g_nvid_string.c": "547b2ebc1a7c561f8a9d36d023ccbf13e711396aa4a012388e890fd3480cdcda",
+        "global-epoch-harness.o": "929bfbd2673100b3ce1e3fe99d86c4e84da835430894b0ca9d35b4b1aa157aef",
+        "native-unavailable-boundaries.c": "5162a192d5703c8969185514acefd2239ccaff0ba51ed298c0dab8c75a83656e",
+        "native-unavailable-boundaries.o": "2d0aa36e32b3cd1ba71703dbd4dde59d9e674572346e357906d2cdd43b163fee",
+        "nvswitch-assert-fixture.o": "810a1c94015e61e1be248cb312bd1f7730c64b8f471efc00201ecc15aeb9c101"
+      },
+      "all_log_files": 1328,
+      "all_log_files_tree_sha256": "192601916a6aa5e8d6316bd590818166d7ea169531e3ce862ef304c2baa5c2c4",
+      "all_recorded_source_and_object_hashes_match": true,
+      "all_saved_runtime_logs_match_report_rows": true,
+      "binary_hash_matches_executed_report": true,
+      "binary_sha256": "2322838cf95ca2a2a157970032c206b18092085c4c82ba9ccdf5894b3b571e8b",
+      "construction_retained_fault_positions": {
+        "count": 144,
+        "first": 11,
+        "last": 154
+      },
+      "injected_fault_positions": 154,
+      "original_compilation_sha256": "39adb70102e9314902fdf73ec496063e378cb73676c1202770d31945e9755815",
+      "project_compilation_sha256": "0616cfb0f6c25f455638b875b62c26bc995bddaa9f613c0915e63dca57aee2ca",
+      "recorded_assertion_failures": 0,
+      "recorded_original_source_and_object_rows_verified": 1100,
+      "recorded_process_failures": 0,
+      "recorded_project_source_and_object_rows_verified": 58,
+      "returned_vs_raw_original_status_difference_count": 45,
+      "runtime_logs_with_additional_non_sanitizer_diagnostics": 151,
+      "sanitizer_error_signatures_in_saved_runtime_logs": 0,
+      "saved_runtime_logs_tree_sha256": "e18c214ff57be30c801ea152acc8c4b7ebbde1ca0b255b291d54443852e5223c",
+      "saved_runtime_logs_verified": 165,
+      "scenario_rows": 10,
+      "terminal_unreached_fault_controls": 1
+    }
+  }
+}

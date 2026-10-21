@@ -1,0 +1,40 @@
+{
+  "component": "permanent-operational-owner-session-lifetime",
+  "format": 1,
+  "hardware_stop_receipt": false,
+  "input_sha256": {
+    "packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp": "57a3805c1308a0c96ac5cd1e224273825bf018fb158b3c001f0618fcdf82d4b2",
+    "packages/nvidia-device-transport/src/S540NvidiaDeviceServices.cpp": "392963aab766158890bdd056c1c295d0e9bdce06a0ad49c3c3553fcbc31ac528",
+    "packages/nvidia-device-transport/src/S540NvidiaDeviceTransport.cpp": "edcdb89fb766848c118af188c0426bf1edb9d520e6ec5995373d65e5c349e34d",
+    "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c": "7220c072b5a32e81bfee39f2966aaeefcd59308cf688dd6c47e03bb17f675a42",
+    "packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.cpp": "bb54856cf9e0e373eb12a8d9c47ab95500d23b30b3478135f82a2b77542fffad",
+    "packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.hpp": "aacac3a1cbb15ab4ddbf1ef5001f8b8aee82630564cdeb2dfe7a5de654d3eb7e",
+    "packages/nvidia-gsp-bootstrap/prospective-loader/S540ProspectiveLoaderKernel.cpp": "30803d1544f30b845ad871c8096b54c18e5733d6d61cd00a9084198005a8fa3d",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp": "1c4cd89bc61665fbeb56d8efdacd356414c1c7c5de0134363f8859bf624365f5",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.hpp": "383e980f9f1af4057395151914d1b8b1db369e989102c29aab3e2fb3fb4d914d"
+  },
+  "loader_module_and_service_stop_transform_required": true,
+  "original_entry_admission": false,
+  "original_tx_input_sha256": {
+    "src/nvidia/src/kernel/gpu/gsp/message_queue_cpu.c": "426b45f7cd754a80068d0093e67f7308dcd0dd828056dc4c5abf8d872af69f57"
+  },
+  "original_tx_output_sha256": {
+    "src/nvidia/src/kernel/gpu/gsp/message_queue_cpu.c": "7280805221de30bd1e68841584a14bdb8a8e945da58963d6cba16173da4066a0"
+  },
+  "original_tx_protocol_sha256": {
+    "src/nvidia/inc/libraries/msgq/msgq.h": "22228e77d7764d0a54d396042cb8f7dec0c20aa293e212352072fecab69bf950",
+    "src/nvidia/inc/libraries/msgq/msgq_priv.h": "9c9d383d1d01b1a4ba687769a23b209778ac4b9535a4263800353a6357e52792",
+    "src/nvidia/src/libraries/msgq/msgq.c": "fc4b8c3e1e53d3426442b02063cebcad7497baf00b2afb8870c2e55c9c0850a4"
+  },
+  "physical_reclamation_authorized": false,
+  "pm_deadline_ns": 30000000000,
+  "pm_shutdown_bound_proven": false,
+  "repository_commit": "06237ad9e9cf2d7113c88ffd7edce71d3e3f68d9",
+  "required_fixed_source_profiles": [
+    "retained_diagnostic",
+    "retained_backends",
+    "global_epoch"
+  ],
+  "source_gate_mask_preserved": 15,
+  "tx_publication_race_linearized_with_pm_revoke": false
+}

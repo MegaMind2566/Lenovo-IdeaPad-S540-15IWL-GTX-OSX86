@@ -1,0 +1,62 @@
+{
+  "aggregate_stack_proven": false,
+  "format": 1,
+  "function": "__ZN22S540NvidiaGspBootstrap5Owner4Impl6actionEPvj",
+  "function_range": [
+    1104,
+    4208
+  ],
+  "gpu_access": false,
+  "kernel_execution": false,
+  "object_sha256": "183e8929486c0bb1c0b9a922d032f8701f9c205a42d7bbc8903f1ab95761800f",
+  "original_entry_admission": false,
+  "proof": {
+    "guard_address": 1211,
+    "indirect_jump_address": 1238,
+    "new_inter_function_call_edges": 0,
+    "out_of_range_destination": 1646,
+    "reason": "Every guarded JMP target remains inside this measured function; table bytes are compiler-identified data.",
+    "resolved_barriers": [
+      {
+        "address": 1238,
+        "reason": "indirect-control-transfer"
+      },
+      {
+        "address": 4184,
+        "reason": "undecoded-instruction"
+      },
+      {
+        "address": 4188,
+        "reason": "undecoded-instruction"
+      },
+      {
+        "address": 4192,
+        "reason": "undecoded-instruction"
+      },
+      {
+        "address": 4196,
+        "reason": "undecoded-instruction"
+      },
+      {
+        "address": 4200,
+        "reason": "undecoded-instruction"
+      }
+    ],
+    "table_address": 4184,
+    "table_bytes": "0bf5ffffd1f4ffff80f4ffff80f4ffff4afcffff",
+    "table_destinations": [
+      1379,
+      1321,
+      1240,
+      1240,
+      3234
+    ],
+    "unsigned_index_range": [
+      0,
+      4
+    ]
+  },
+  "scope": "This exact native object only; no function-pointer target, callback lifetime or external stack bound inferred.",
+  "source_sha256": "1c4cd89bc61665fbeb56d8efdacd356414c1c7c5de0134363f8859bf624365f5",
+  "status": "exact-native-intra-function-switch-proven"
+}

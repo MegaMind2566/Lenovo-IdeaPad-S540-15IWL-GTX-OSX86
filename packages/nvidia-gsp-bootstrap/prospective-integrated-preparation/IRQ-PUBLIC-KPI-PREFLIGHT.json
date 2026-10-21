@@ -1,0 +1,545 @@
+{
+  "audit": {
+    "architecture": "x86_64",
+    "declared_libraries": [
+      "com.apple.iokit.IOPCIFamily",
+      "com.apple.kpi.bsd",
+      "com.apple.kpi.iokit",
+      "com.apple.kpi.libkern",
+      "com.apple.kpi.mach",
+      "com.apple.kpi.unsupported"
+    ],
+    "exact_target_export_proof": false,
+    "format": 1,
+    "import_count": 31,
+    "limitations": [
+      "Published source export maps do not establish the exports of a particular installed kernel or family binary.",
+      "Architecture and platform overlays are combined only for the x86_64 MacOSX source profile; ARM and private export lists never authorize imports."
+    ],
+    "manifest_sha256": "0784ca8bc579c5ca5d60055b2c4652e0f9a2af8d3dfa3d4947987ed7021c1ee5",
+    "matched": [
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.iokit"
+        ],
+        "source_files": [
+          "IOKit.exports"
+        ],
+        "symbol": "IOFree"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.iokit"
+        ],
+        "source_files": [
+          "IOKit.exports"
+        ],
+        "symbol": "IOMalloc"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.iokit"
+        ],
+        "source_files": [
+          "IOKit.exports"
+        ],
+        "symbol": "IOSimpleLockAlloc"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.iokit"
+        ],
+        "source_files": [
+          "IOKit.exports"
+        ],
+        "symbol": "IOSimpleLockFree"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.iokit"
+        ],
+        "source_files": [
+          "IOKit.exports"
+        ],
+        "symbol": "IOSimpleLockLock"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.iokit"
+        ],
+        "source_files": [
+          "IOKit.exports"
+        ],
+        "symbol": "IOSimpleLockUnlock"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.iokit"
+        ],
+        "source_files": [
+          "IOKit.exports"
+        ],
+        "symbol": "IOSleep"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.iokit"
+        ],
+        "source_files": [
+          "IOKit.exports"
+        ],
+        "symbol": "_ZN10IOWorkLoop8workLoopEv"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.iokit"
+        ],
+        "source_files": [
+          "IOKit.exports"
+        ],
+        "symbol": "_ZN11IOMemoryMap18getPhysicalAddressEv"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.iokit.IOPCIFamily"
+        ],
+        "source_files": [
+          "IOPCIFamily.exports"
+        ],
+        "symbol": "_ZN11IOPCIDevice19extendedConfigRead8Ey"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.iokit.IOPCIFamily"
+        ],
+        "source_files": [
+          "IOPCIFamily.exports"
+        ],
+        "symbol": "_ZN11IOPCIDevice20extendedConfigRead16Ey"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.iokit.IOPCIFamily"
+        ],
+        "source_files": [
+          "IOPCIFamily.exports"
+        ],
+        "symbol": "_ZN11IOPCIDevice20extendedConfigRead32Ey"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.iokit.IOPCIFamily"
+        ],
+        "source_files": [
+          "IOPCIFamily.exports"
+        ],
+        "symbol": "_ZN11IOPCIDevice20extendedConfigWrite8Eyh"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.iokit.IOPCIFamily"
+        ],
+        "source_files": [
+          "IOPCIFamily.exports"
+        ],
+        "symbol": "_ZN11IOPCIDevice21extendedConfigWrite16Eyt"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.iokit.IOPCIFamily"
+        ],
+        "source_files": [
+          "IOPCIFamily.exports"
+        ],
+        "symbol": "_ZN11IOPCIDevice21extendedConfigWrite32Eyj"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.iokit"
+        ],
+        "source_files": [
+          "IOKit.x86_64.exports"
+        ],
+        "symbol": "_ZN12IODMACommand12OutputHost64EPS_NS_9Segment64EPvj"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.iokit"
+        ],
+        "source_files": [
+          "IOKit.x86_64.exports"
+        ],
+        "symbol": "_ZN12IODMACommand17withSpecificationEPFbPS_NS_9Segment64EPvjEhyNS_14MappingOptionsEyjP8IOMapperS2_"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.libkern"
+        ],
+        "source_files": [
+          "Libkern.exports"
+        ],
+        "symbol": "_ZN15OSMetaClassBase12safeMetaCastEPKS_PK11OSMetaClass"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.iokit"
+        ],
+        "source_files": [
+          "IOKit.exports"
+        ],
+        "symbol": "_ZN18IOTimerEventSource16timerEventSourceEjP8OSObjectPFvS1_PS_E"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.iokit"
+        ],
+        "source_files": [
+          "IOKit.x86_64.exports"
+        ],
+        "symbol": "_ZN24IOBufferMemoryDescriptor11withOptionsEjmm"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.libkern"
+        ],
+        "source_files": [
+          "Libkern.exports"
+        ],
+        "symbol": "_ZN6OSData9withBytesEPKvj"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.iokit"
+        ],
+        "source_files": [
+          "IOKit.exports"
+        ],
+        "symbol": "_ZN8IOMapper7gSystemE"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.iokit"
+        ],
+        "source_files": [
+          "IOKit.exports"
+        ],
+        "symbol": "_ZN8IOMapper9metaClassE"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.iokit"
+        ],
+        "source_files": [
+          "IOKit.exports"
+        ],
+        "symbol": "_ZN9IOService11getPlatformEv"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.iokit"
+        ],
+        "source_files": [
+          "IOKit.exports"
+        ],
+        "symbol": "_ZNK9IOService10isInactiveEv"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.libkern"
+        ],
+        "source_files": [
+          "Libkern.exports"
+        ],
+        "symbol": "__bzero"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.libkern"
+        ],
+        "source_files": [
+          "Libkern.exports"
+        ],
+        "symbol": "bzero"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.mach"
+        ],
+        "source_files": [
+          "Mach.exports"
+        ],
+        "symbol": "clock_get_uptime"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.libkern"
+        ],
+        "source_files": [
+          "Libkern.exports"
+        ],
+        "symbol": "ml_at_interrupt_context"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.libkern"
+        ],
+        "source_files": [
+          "Libkern.exports"
+        ],
+        "symbol": "ml_get_interrupts_enabled"
+      },
+      {
+        "declared_public_export_owners": [
+          "com.apple.kpi.libkern"
+        ],
+        "source_files": [
+          "Libkern.exports"
+        ],
+        "symbol": "ml_set_interrupts_enabled"
+      }
+    ],
+    "matched_count": 31,
+    "platform": "MacOSX",
+    "rejected": [],
+    "scope": "pinned Apple source export snapshot; preflight only",
+    "sources": [
+      {
+        "architecture": "source-common",
+        "bundle_id": "com.apple.kpi.bsd",
+        "bytes": 14116,
+        "classification": "public",
+        "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+        "file": "BSDKernel.exports",
+        "parsed_export_count": 857,
+        "platform": "source-common",
+        "repository": "apple-oss-distributions/xnu",
+        "sha256": "4902d52f00fe79e6cbeb3bb499e3eab6979f40274e74bb3bc328b609d9863540",
+        "source_path": "config/BSDKernel.exports"
+      },
+      {
+        "architecture": "x86_64",
+        "bundle_id": "com.apple.kpi.bsd",
+        "bytes": 115,
+        "classification": "public",
+        "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+        "file": "BSDKernel.x86_64.MacOSX.exports",
+        "parsed_export_count": 4,
+        "platform": "MacOSX",
+        "repository": "apple-oss-distributions/xnu",
+        "sha256": "6e78e35006eccf894251baf8b7a00cf7d939a95651057c04094b7cd19c232dab",
+        "source_path": "config/BSDKernel.x86_64.MacOSX.exports"
+      },
+      {
+        "architecture": "x86_64",
+        "bundle_id": "com.apple.kpi.bsd",
+        "bytes": 246,
+        "classification": "public",
+        "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+        "file": "BSDKernel.x86_64.exports",
+        "parsed_export_count": 15,
+        "platform": "source-common",
+        "repository": "apple-oss-distributions/xnu",
+        "sha256": "5fb25e410d2676720b49ed116a4147f4a27ff1b075a96fc0216d955944074782",
+        "source_path": "config/BSDKernel.x86_64.exports"
+      },
+      {
+        "architecture": "source-common",
+        "bundle_id": "com.apple.kpi.iokit",
+        "bytes": 80797,
+        "classification": "public",
+        "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+        "file": "IOKit.exports",
+        "parsed_export_count": 2011,
+        "platform": "source-common",
+        "repository": "apple-oss-distributions/xnu",
+        "sha256": "5435d901591777679419018e8051d33d614636f078e43aa08ef51bf9e088081d",
+        "source_path": "config/IOKit.exports"
+      },
+      {
+        "architecture": "x86_64",
+        "bundle_id": "com.apple.kpi.iokit",
+        "bytes": 12111,
+        "classification": "public",
+        "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+        "file": "IOKit.x86_64.MacOSX.exports",
+        "parsed_export_count": 241,
+        "platform": "MacOSX",
+        "repository": "apple-oss-distributions/xnu",
+        "sha256": "40135908a358431d1ee365a96536f9712a76f775cdae5cd97a5892eba1fc64d3",
+        "source_path": "config/IOKit.x86_64.MacOSX.exports"
+      },
+      {
+        "architecture": "x86_64",
+        "bundle_id": "com.apple.kpi.iokit",
+        "bytes": 13403,
+        "classification": "public",
+        "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+        "file": "IOKit.x86_64.exports",
+        "parsed_export_count": 273,
+        "platform": "source-common",
+        "repository": "apple-oss-distributions/xnu",
+        "sha256": "c33616433824a14ded767ff24eb911b3d6499b9a859204f82cbd12c27fa51450",
+        "source_path": "config/IOKit.x86_64.exports"
+      },
+      {
+        "architecture": "source-common",
+        "bundle_id": "com.apple.iokit.IOPCIFamily",
+        "bytes": 17470,
+        "classification": "public",
+        "commit": "4822b27a36e2de70e231ecf2bf3021384fab6ec2",
+        "file": "IOPCIFamily.exports",
+        "parsed_export_count": 388,
+        "platform": "source-common",
+        "repository": "apple-oss-distributions/IOPCIFamily",
+        "sha256": "97a9f76d102f57a297a252e3d29f6e7abccd233e3f3e7681d2a78799ffc07fbe",
+        "source_path": "config/IOPCIFamily.exports"
+      },
+      {
+        "architecture": "source-common",
+        "bundle_id": "com.apple.kpi.libkern",
+        "bytes": 25082,
+        "classification": "public",
+        "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+        "file": "Libkern.exports",
+        "parsed_export_count": 866,
+        "platform": "source-common",
+        "repository": "apple-oss-distributions/xnu",
+        "sha256": "f9256a3fe5fa4729660933d42b096d883ce2b8c1e2ffd25c06263b854ba0b1ac",
+        "source_path": "config/Libkern.exports"
+      },
+      {
+        "architecture": "x86_64",
+        "bundle_id": "com.apple.kpi.libkern",
+        "bytes": 5207,
+        "classification": "public",
+        "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+        "file": "Libkern.x86_64.MacOSX.exports",
+        "parsed_export_count": 135,
+        "platform": "MacOSX",
+        "repository": "apple-oss-distributions/xnu",
+        "sha256": "20c99f7b113a07fd21c1dbf622f46f9568a5afdffe749f5ece7e6fc021bd56ab",
+        "source_path": "config/Libkern.x86_64.MacOSX.exports"
+      },
+      {
+        "architecture": "x86_64",
+        "bundle_id": "com.apple.kpi.libkern",
+        "bytes": 296,
+        "classification": "public",
+        "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+        "file": "Libkern.x86_64.exports",
+        "parsed_export_count": 9,
+        "platform": "source-common",
+        "repository": "apple-oss-distributions/xnu",
+        "sha256": "d7a66f639d0aaee9a5e69f5da2c62aff3d36b5760c674261ad5993e3c4fb3e57",
+        "source_path": "config/Libkern.x86_64.exports"
+      },
+      {
+        "architecture": "source-common",
+        "bundle_id": "com.apple.kpi.mach",
+        "bytes": 1785,
+        "classification": "public",
+        "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+        "file": "Mach.exports",
+        "parsed_export_count": 74,
+        "platform": "source-common",
+        "repository": "apple-oss-distributions/xnu",
+        "sha256": "25848d1a4f1380ca69177f36035b0c7aa7d346e9a3c3f64aba53507fd4c8a981",
+        "source_path": "config/Mach.exports"
+      },
+      {
+        "architecture": "x86_64",
+        "bundle_id": "com.apple.kpi.mach",
+        "bytes": 25,
+        "classification": "public",
+        "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+        "file": "Mach.x86_64.exports",
+        "parsed_export_count": 2,
+        "platform": "source-common",
+        "repository": "apple-oss-distributions/xnu",
+        "sha256": "266cce656899dffb4265fc3547f558be91006e9a1c716405cd01172041c03e5b",
+        "source_path": "config/Mach.x86_64.exports"
+      },
+      {
+        "architecture": "source-common",
+        "bundle_id": null,
+        "bytes": 40903,
+        "classification": "private",
+        "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+        "file": "Private.exports",
+        "parsed_export_count": 1446,
+        "platform": "source-common",
+        "repository": "apple-oss-distributions/xnu",
+        "sha256": "5bb5885cef26ff8aedd8d4b8f5b98adf542997f48f208bcebd5e77b82dba38ec",
+        "source_path": "config/Private.exports"
+      },
+      {
+        "architecture": "x86_64",
+        "bundle_id": null,
+        "bytes": 277,
+        "classification": "private",
+        "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+        "file": "Private.x86_64.MacOSX.exports",
+        "parsed_export_count": 7,
+        "platform": "MacOSX",
+        "repository": "apple-oss-distributions/xnu",
+        "sha256": "fa31709d61236499a0a727299182b8eee922caba97dc8fd2555a660142e7cf20",
+        "source_path": "config/Private.x86_64.MacOSX.exports"
+      },
+      {
+        "architecture": "x86_64",
+        "bundle_id": null,
+        "bytes": 2732,
+        "classification": "private",
+        "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+        "file": "Private.x86_64.exports",
+        "parsed_export_count": 114,
+        "platform": "source-common",
+        "repository": "apple-oss-distributions/xnu",
+        "sha256": "821c58ca0a3b32950b614168fe4159a2eb7d887f3a17d0f5b503479907e2fc1d",
+        "source_path": "config/Private.x86_64.exports"
+      },
+      {
+        "architecture": "source-common",
+        "bundle_id": "com.apple.kpi.unsupported",
+        "bytes": 4446,
+        "classification": "public",
+        "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+        "file": "Unsupported.exports",
+        "parsed_export_count": 196,
+        "platform": "source-common",
+        "repository": "apple-oss-distributions/xnu",
+        "sha256": "ebfacb06eba4788f2f845387319d2fb9940e63339394f0f4be563211003d68b4",
+        "source_path": "config/Unsupported.exports"
+      },
+      {
+        "architecture": "x86_64",
+        "bundle_id": "com.apple.kpi.unsupported",
+        "bytes": 958,
+        "classification": "public",
+        "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+        "file": "Unsupported.x86_64.MacOSX.exports",
+        "parsed_export_count": 27,
+        "platform": "MacOSX",
+        "repository": "apple-oss-distributions/xnu",
+        "sha256": "557280a6e109ba16868d1cb81d03b6e1547e716fd751b3ce2c7a5fd46a69c823",
+        "source_path": "config/Unsupported.x86_64.MacOSX.exports"
+      },
+      {
+        "architecture": "x86_64",
+        "bundle_id": "com.apple.kpi.unsupported",
+        "bytes": 605,
+        "classification": "public",
+        "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+        "file": "Unsupported.x86_64.exports",
+        "parsed_export_count": 32,
+        "platform": "source-common",
+        "repository": "apple-oss-distributions/xnu",
+        "sha256": "e84136681c161e8eb5b93f8cf5a010013955351ff93c1791634d3aa35f630e0b",
+        "source_path": "config/Unsupported.x86_64.exports"
+      }
+    ],
+    "status": "passed"
+  },
+  "private_thread_call_imports": [],
+  "scope": "Changed DarwinDevice object references only; no final-image or target export claim"
+}

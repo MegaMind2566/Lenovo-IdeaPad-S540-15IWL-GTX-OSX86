@@ -1,0 +1,120 @@
+{
+  "admission": {
+    "acceleration": false,
+    "concrete_irq_installation_proven": false,
+    "gpu_initialization": false,
+    "hardware": false,
+    "hardware_dma_stop_receipt_proven": false,
+    "kernel_aggregate_stack_bound_proven": false,
+    "native_ci_requested": false,
+    "original_entry": false,
+    "physical_reclamation_authorized": false,
+    "pm_30_second_shutdown_bound_proven": false,
+    "runtime_coordinator_installed": false,
+    "target_package_ready": false,
+    "whole_callback_lifetime_proven": false
+  },
+  "base_commit": "06237ad9e9cf2d7113c88ffd7edce71d3e3f68d9",
+  "changed_irq_object_kpi_preflight": {
+    "exact_target_export_proof": false,
+    "final_image_audit": false,
+    "matched_imports": 31,
+    "private_thread_call_imports": 0,
+    "receipt_sha256": "b22250e507818f19d59c77c3cc24824801390a27c163745dedcc43c784ff0dca",
+    "rejected": 0,
+    "status": "passed"
+  },
+  "checks": {
+    "integrated_provenance_and_mutation_controls": {
+      "failures": 0,
+      "passed": 14
+    },
+    "session_ordering_controls": {
+      "failures": 0,
+      "passed": 5
+    },
+    "stack_companion_controls": {
+      "failures": 0,
+      "passed": 16
+    }
+  },
+  "component_receipts": {
+    "prospective-irq-callback-closure/LOCAL-CONTROL-VALIDATION.json": "3b79e518d7128b1a62c4be75232b65a93f5aff883743bb60574e0178460db4a4",
+    "prospective-retained-construction-closure/LOCAL-CONTROL-VALIDATION.json": "383bedf5a847a3fb90d6585c879065c853b18f7591507493688f9b6c80351a11",
+    "prospective-session-lifetime-closure/LOCAL-CONTROL-VALIDATION.json": "d61bed7fa193b3ea59e2110ab84fb0e26a1884513b8674000ec07ae6773f040f",
+    "prospective-session-lifetime-closure/PM-DEADLINE-AUDIT.json": "2134e6c7c7219ddbc63e05e27101691bed7efe51089d815337b88e0cdcdf4c61",
+    "prospective-session-lifetime-closure/TX-CONTROL-VALIDATION.json": "ae801f4044bec9dea0c87bd0fb6ffb06e9d71a3fab12361bd92bcb1d50a150c2",
+    "prospective-stack-admission-closure/ACPI-DEPTH-VALIDATION.json": "cfccb11e56e7e4ab6bb83aeb5f768bb3d097f98147db127909aa608557036a63",
+    "prospective-stack-admission-closure/SWITCH-CONTROL-VALIDATION.json": "427fa34523da8b28365c67d2bb582b0c1251999f631d6b3c40eacccf31fecbf1",
+    "prospective-stack-admission-closure/VALIDATION.json": "9829777fd6acffe05dc09930472f5724d03847ddd9883273fbb215a4d1538ec9"
+  },
+  "cost": {
+    "bulky_diagnostics_committed": false,
+    "github_actions_in_progress_at_checkpoint": 0,
+    "github_actions_queued_at_checkpoint": 0,
+    "native_ci_request_files_created": 0,
+    "native_workflows_started": 0,
+    "paid_native_minutes_requested": 0
+  },
+  "date": "2026-10-21",
+  "format": 1,
+  "integrated_cross_compilation": {
+    "changed_original": {
+      "full_profile_validated": false,
+      "report_sha256": "9796c64c4f736dfe5cc448379e19edbf4254f4b07de01ab556f234c8cbd6453f",
+      "sources": [
+        "src/nvidia/generated/g_system_nvoc.c",
+        "src/nvidia/src/kernel/core/system.c",
+        "src/nvidia/src/kernel/gpu/gsp/message_queue_cpu.c"
+      ],
+      "status": "compiled-original-subset-source-only"
+    },
+    "complete_symbol_closure_proven": false,
+    "exact_new_export_owners_verified": true,
+    "host_control": true,
+    "host_system": "Linux",
+    "native_darwin_compilation": false,
+    "new_declared_strong_exports_verified": 17,
+    "objects_reused": false,
+    "project_objects": 61,
+    "status": "compiled-integrated-project-source-only"
+  },
+  "integrated_project_report_sha256": "21cfa1db9eccab563876a256fc128180781773028221a1e13f1dc865c99689ac",
+  "milestone": "Unified prerequisites plus first RM/GSP/GPU initialization; source preparation checkpoint only",
+  "parent_composition_sha256": "1392052eda0733713e345e938033a06c539669d4b443ba5c3104c70ae171e298",
+  "preserved": {
+    "all_1260_base_git_blobs_unchanged": true,
+    "closed_idle_target_checkpoint_not_retested": true,
+    "frozen_builders_and_mapping_guard_unchanged": true,
+    "operational_and_global_kernel_entry_refusals_closed": true
+  },
+  "remaining_blockers": [
+    "Full intended global/adapter/IRQ/callback stack and synchronous reentry bounds; actual target capacities and framework headroom remain unproven.",
+    "Whole PM revocation-to-hardware-stop completion within30seconds, including the unbounded void1Hz callback quantum and authentic DMA-stop proof.",
+    "Concrete production IRQ installation/arming and complete callback lifetime/sticky cleanup authority; source helpers alone do not install those paths.",
+    "Actual runtime coordinator and reviewed integrated final-link/package contract after prerequisites; existing closed idle profile remains unchanged.",
+    "CPU global-result startupStatus consistency after an optional-allocation fallback is not asserted by the retained-control harness; function return and raw original status remain separate."
+  ],
+  "retained_construction_controls": {
+    "constructor_failure_positions_per_variant": 154,
+    "corrected_full_runner_reexecuted": false,
+    "epoch_scenarios_per_variant": 10,
+    "final_failure": "Actual original source changed during retained-construction checks",
+    "final_verifier_shadow_bug_fixed": true,
+    "global_allocation_failure_closure_proven": false,
+    "independent_read_only_audit": "passed-input-object-binary-and330runtime-log-revalidation",
+    "original_pipeline_status_preserved": "failed",
+    "original_report_status": "failed",
+    "plain_existing_assertions_passed": true,
+    "postcore_tls155_156_failure_controls_executed": false,
+    "sanitized_existing_assertions_passed": true,
+    "terminal_controls_per_variant": 1,
+    "whole_runner_pass_claimed": false
+  },
+  "source_profiles": [
+    "retained-construction",
+    "session-lifetime",
+    "irq-callback"
+  ],
+  "successor_composition_sha256": "fcf44e804e1308c37b39f2d25c207434d06fd0b60b9fc9624453bcef1b2d8590"
+}

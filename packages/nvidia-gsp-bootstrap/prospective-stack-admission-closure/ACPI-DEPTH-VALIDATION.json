@@ -1,0 +1,40 @@
+{
+  "aggregate_stack_proven": false,
+  "component": [
+    "remapDsmFunctionAndSubFunction",
+    "testIfDsmSubFunctionEnabled"
+  ],
+  "external_callees": "Explicit fixtures; their own frames and callback reentry remain unbounded.",
+  "format": 1,
+  "gpu_access": false,
+  "kernel_execution": false,
+  "maximum_simultaneous_local_activations": 4,
+  "observations": {
+    "actual": {
+      "cases": 7168,
+      "depth_guard_hits": 0,
+      "maximum_local_activations": 4
+    },
+    "generic-table-mutation": {
+      "cases": 7168,
+      "depth_guard_hits": 1152,
+      "maximum_local_activations": 5
+    }
+  },
+  "original_entry_admission": false,
+  "proof": [
+    "Every immutable precedence-table value is a concrete DSM enum below ACPI_DSM_FUNCTION_COUNT.",
+    "The only remap-to-test recursive edge passes a precedence-table value by value.",
+    "The next test-to-remap activation therefore has a nongeneric DSM function.",
+    "That remap returns through its nongeneric branch before reaching the remap-to-test edge.",
+    "Entering test(Generic) permits test\u2192remap\u2192test(Concrete)\u2192remap(Concrete): four local activations."
+  ],
+  "source_sha256": {
+    "src/nvidia/inc/kernel/platform/acpi_common.h": "caa3efa1da4416ca0a200299be381444b4e1e2652d1324f3312cae946582f2b2",
+    "src/nvidia/interface/acpigenfuncs.h": "e558f7936d0886f1ee7686a0561c31ca055414c5ebfec335cef8546a9f42635b",
+    "src/nvidia/interface/nvacpitypes.h": "05d3023c8ea7dc41326f1324491880df70802d953faca19219f181d284a5e352",
+    "src/nvidia/src/kernel/platform/acpi_common.c": "b382e8f0260c8d56be62b18e31d7a7f25e04e078bb29c4546c655c8f1ba1f94f"
+  },
+  "stack_graph_rewritten": false,
+  "status": "source-bound-local-recursion-depth-established"
+}

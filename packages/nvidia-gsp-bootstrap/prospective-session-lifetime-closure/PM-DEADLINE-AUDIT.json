@@ -1,0 +1,154 @@
+{
+  "already_cooperative": [
+    "timeoutCondWait loop",
+    "Falcon halt wait candidate",
+    "GspStatusQueueInit handshake loop",
+    "inner RPC event-drain iteration",
+    "RPC receive poll iteration",
+    "boot attempt/retry boundary",
+    "optional GSP log cancellation"
+  ],
+  "audit_date": "2026-10-21",
+  "component": "bounded-source-only-pm-deadline-audit",
+  "conclusion": {
+    "actual_hardware_stop_proven": false,
+    "original_entry_admission": false,
+    "pm_30_second_shutdown_bound_proven": false,
+    "power_lifetime_gate_closed": true,
+    "timeout_or_retention_substitution_accepted": false
+  },
+  "deadline_ns": 30000000000,
+  "findings": [
+    {
+      "classification": "noncooperative polling boundary with nominal per-message bound; no infinite-loop claim",
+      "id": "PM-TX-001",
+      "limit_of_claim": "Configured local timeout sums omit scheduler/endpoint latency and do not bound multiple commands or the subsequent original unwind and hardware stop. No claim that this single wait necessarily exceeds 30 seconds.",
+      "maximum_fragments_per_message": 16,
+      "nominal_local_timeout_us_per_fragment": 1000000,
+      "nominal_maximum_fragment_wait_sum_seconds_per_message": 16,
+      "path": [
+        "normal kgspBootstrap_TU102",
+        "kgspSendInitRpcs_IMPL / GMCAPI_CMD_GSP_INIT",
+        "gpuSendGmcRpc_KERNEL",
+        "kgspSendRpc_IMPL",
+        "GspMsgQueueSendCommand TX-space loop"
+      ],
+      "required_closure": "Statusful cancellation before accepting TX work and during waits, reviewed original ownership/unwind for partially staged/published messages, and measured or justified remaining cleanup budget. No timeout-constant change supplies this proof.",
+      "source_behavior": "TX waiting reads GPU timeout and spins. It does not call the cancellation API. Generic timeoutCheck and threadStateCheckTimeout do not read the real PM revocation record. The receive-poll cancellation check is reached only after successful send."
+    },
+    {
+      "classification": "unbounded callback quantum / missing transitive cancellation proof",
+      "id": "PM-CB-002",
+      "limit_of_claim": "Conditional on a genuine queued obligation. This audit does not claim the callback is present or runs in every first initialization; it identifies a reachable admission obligation that must be bounded or excluded from the exact selected profile.",
+      "path": [
+        "original rmGpuLocksRelease / group-lock release deferred work",
+        "_gpuLocksReleaseHandleDeferredWork",
+        "osRunQueued1HzCallbacksUnderLock when bCallbackQueued",
+        "_osRunAll1HzCallbacks",
+        "void pProc(pGpu, pData)"
+      ],
+      "required_closure": "An exact source-derived callback inventory and run/retain/cancel policy, producer close ordering, a statusful bounded dispatch contract and proof for each selected callback body. Checking only before or after an arbitrary callback cannot bound time spent inside it.",
+      "source_behavior": "A queued list is traversed without cancellation, deadline or iteration checks. Each authentic original callback is called synchronously through a void function pointer, and callbacks can change the list. No finite callback-duration or list-size bound is established by the current profile."
+    }
+  ],
+  "format": 1,
+  "hardware_stop_blocker": {
+    "behavior": "Always refuses with NV_ERR_NOT_SUPPORTED after identity checks. Typed shutdown protocol success, IRQ drain, PMstop and retained memory supply no authentic hardware-DMA-stop receipt.",
+    "function": "s540GspContextValidateDmaStopReceipt",
+    "project_source": "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c",
+    "source_sha256": "9f8fee42cd2e9ffb2c86a0de368d259fa8879b70398becf7c508887dd941181f"
+  },
+  "original_inputs": {
+    "src/nvidia/src/kernel/core/locks.c": {
+      "anchors": {
+        "_gpuLocksReleaseHandleDeferredWork": 1525,
+        "osRunQueued1HzCallbacksUnderLock(pGpu)": 1606,
+        "rmGpuLocksRelease": 1955
+      },
+      "sha256": "4ef306b2cafdfc6af21b43a97835c1e758e1d3d323d4ab48e10a59a140fb5a43"
+    },
+    "src/nvidia/src/kernel/core/thread_state.c": {
+      "anchors": {
+        "threadStateCheckTimeout": 1249
+      },
+      "sha256": "a412e2070fa2bb49d56941415d07e6176dedd4776c817aa66e36f78d8d9e8f66"
+    },
+    "src/nvidia/src/kernel/gpu/gpu.c": {
+      "anchors": {
+        "gpuSendGmcRpc_KERNEL": 7854,
+        "kgspSendRpc(pGpu, pKernelGsp, NVDM_TYPE_GMCAPI": 7894
+      },
+      "sha256": "4e5d5f438acf9ca591f35d793009265afac0c21fc4818eabeff52271019ddc31"
+    },
+    "src/nvidia/src/kernel/gpu/gpu_timeout.c": {
+      "anchors": {
+        "timeoutCheck": 472,
+        "timeoutCondWait cancellation check": 594
+      },
+      "sha256": "4505b0877a6fada44a673d1ee10c9564170f12a75e8a462fe7a3a7b9524f6834"
+    },
+    "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_tu102.c": {
+      "anchors": {
+        "kgspSendInitRpcs(pGpu, pKernelGsp)": 479
+      },
+      "sha256": "5dad9e3f5aaedfc4f8aee59fa4ce7f30ed3d7051f110d2201cebcd44fa632ae0"
+    },
+    "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c": {
+      "anchors": {
+        "GspMsgQueueSendCommand(pRpc->pMessageQueueInfo": 508,
+        "_kgspProcessRpcEvent": 1559,
+        "_kgspRpcDrainEvents": 2051,
+        "_kgspRpcDrainOneEvent": 1959,
+        "kgspSendInitRpcs_IMPL": 5304,
+        "kgspSendRpc_IMPL": 474,
+        "s540GspCancellationCheckGpu event-drain": 2067,
+        "s540GspCancellationCheckGpu receive-poll": 3377
+      },
+      "sha256": "2d026d3f55bc10b972c072ad6d02a79117ac3338d24e3bf548eb4cd806b88a81"
+    },
+    "src/nvidia/src/kernel/gpu/gsp/message_queue_cpu.c": {
+      "anchors": {
+        "GspMsgQueueSendCommand": 486,
+        "TX-space while (NV_TRUE)": 565,
+        "gpuSetTimeout(pGpu, 1000000": 562,
+        "queueElementSizeMax = RM_PAGE_SIZE * 16": 87,
+        "queueElementSizeMin = RM_PAGE_SIZE": 86
+      },
+      "sha256": "426b45f7cd754a80068d0093e67f7308dcd0dd828056dc4c5abf8d872af69f57"
+    },
+    "src/nvidia/src/kernel/os/os_timer.c": {
+      "anchors": {
+        "_osRunAll1HzCallbacks": 201,
+        "osRunQueued1HzCallbacksUnderLock": 370,
+        "void callback pProc(pGpu, pData)": 230
+      },
+      "sha256": "78da8c6f23d9732dc4ff393b83553ecf06d800699362b70bc67a5f867dd41b4c"
+    },
+    "src/nvidia/src/kernel/vgpu/rpc.c": {
+      "anchors": {
+        "_issueRpcLarge": 2111,
+        "continuation remainingSize loop": 2162
+      },
+      "sha256": "0357e3bbedaeb64c982644d352037c183236416967fe03c35e334eca5bdcc3e2"
+    }
+  },
+  "original_rm_executed_by_audit": false,
+  "repository_commit": "06237ad9e9cf2d7113c88ffd7edce71d3e3f68d9",
+  "scope": "Selected Turing normal GSP bootstrap and original queued callback dispatch. This is not an exhaustive transitive first-RM-init or hardware timing proof.",
+  "source_profile_composition_sha256": "1392052eda0733713e345e938033a06c539669d4b443ba5c3104c70ae171e298",
+  "source_profile_original_tree_sha256": "8347c3cca262360009d757321b79cd97556e69e9ef181ab9c92abcba308d55b7",
+  "successor_resolution": {
+    "actual_body_native_checks": 114,
+    "actual_body_sanitized_checks": 114,
+    "aggregate_pm_30_second_shutdown_bound_proven": false,
+    "concurrent_pm_submit_commit_linearized": false,
+    "full_original_tu_cross_compiled": true,
+    "input_sha256": "426b45f7cd754a80068d0093e67f7308dcd0dd828056dc4c5abf8d872af69f57",
+    "observed_tx_wait_cancellation_gap_addressed": true,
+    "original_callback_quantum_bound_proven": false,
+    "output_sha256": "7280805221de30bd1e68841584a14bdb8a8e945da58963d6cba16173da4066a0",
+    "partial_fragments_safely_remain_unpublished": true,
+    "source": "src/nvidia/src/kernel/gpu/gsp/message_queue_cpu.c"
+  },
+  "upstream_commit": "1a82fbfda8f321b056eb3568850f9316c5e465c5"
+}

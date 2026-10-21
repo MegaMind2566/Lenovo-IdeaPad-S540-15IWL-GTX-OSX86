@@ -1,0 +1,138 @@
+{
+  "admission": {
+    "concrete_production_irq_install_caller_present": false,
+    "final_release_receipt_issued": false,
+    "hardware_stop_receipt_issued": false,
+    "native_apple_execution": false,
+    "original_entry_allowed": false,
+    "original_gpu_initialization": false,
+    "production_default_changed": false,
+    "target_callback_execution": false,
+    "whole_runtime_closure_proved": false
+  },
+  "candidate_input": false,
+  "format": 1,
+  "irq_controls": {
+    "cancellation_stage_authority_control": "explicit source-stage fixture; genuine cancellation translation unit executes",
+    "fatal_address_undefined": {
+      "backend": {
+        "actual_transformed_irq_bodies": true,
+        "checks": 27,
+        "status": "passed",
+        "strong_record_policy": "explicit fixture"
+      },
+      "cancellation": {
+        "actual_cancellation_translation_unit": true,
+        "checks": 45,
+        "status": "passed"
+      }
+    },
+    "matching_transformed_source_sha256": {
+      "packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp": "faaea3f83118f559a0d7880528f5e7bdf7c28b3b1cbad21f8442054a513c1655",
+      "packages/nvidia-device-transport/src/S540NvidiaDeviceTransport.hpp": "b9a94ac1f797732f0e46518bad22a1f408596a07c4f1d618ac9988f4f118545d",
+      "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c": "c379d1513e592ce0916e3db11ec089bd144b4fa4e184097015af762b6d7bac22",
+      "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c": "cb22c8239fec71cfc9d07bcdea12f0f638ee9828f9c9d3b7ec0d9ce850f13ca1",
+      "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/Participants.h": "a7b44608bb7a13e4328ac0fdba8a476bde80fdcf5a11268a102d033c3295da5c",
+      "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/S540NvidiaGspCancellation.c": "c379d1513e592ce0916e3db11ec089bd144b4fa4e184097015af762b6d7bac22"
+    },
+    "negative_source_anchors": 6,
+    "os_framework": "explicit concurrent IOKit fixtures",
+    "plain": {
+      "backend": {
+        "actual_transformed_irq_bodies": true,
+        "checks": 27,
+        "status": "passed",
+        "strong_record_policy": "explicit fixture"
+      },
+      "cancellation": {
+        "actual_cancellation_translation_unit": true,
+        "checks": 45,
+        "status": "passed"
+      }
+    },
+    "strong_record_authority_in_backend_control": "explicit fixed policy fixture"
+  },
+  "original_helper_controls": {
+    "complete_original_mask_enable_bodies": 4,
+    "fatal_sanitized_checks": 23,
+    "full_original_headers": true,
+    "kernel_target_compilation": {
+      "definitions": [
+        "s540FirstTxnDrainQueued1Hz",
+        "s540FirstTxnIrqMaskHardware"
+      ],
+      "imports": [
+        "s540FirstTxnGlobalReadMaster",
+        "s540FirstTxnIrqValidateSoftwareDrained",
+        "s540Global_g_pSys",
+        "s540Global_intrGetIntrEn_IMPL",
+        "s540Global_intrSetIntrEn_IMPL",
+        "s540Global_osDisableInterrupts",
+        "s540Global_osRunQueued1HzCallbacksUnderLock",
+        "s540Global_rmDeviceGpuLockIsOwner",
+        "s540Global_rm_acquire_api_lock",
+        "s540Global_rm_acquire_gpu_lock",
+        "s540Global_rm_release_api_lock",
+        "s540Global_rm_release_gpu_lock",
+        "s540Global_threadStateFree",
+        "s540Global_threadStateInit",
+        "s540ProspectiveOriginalCurrentThreadLocksReleased",
+        "s540ProspectiveReadOriginalLockOwnership"
+      ],
+      "object_sha256": "22b15d9cb9fece936ebd96d6e09d4ecb4e837f9d43e21a7ad0b77d524e143fd2",
+      "sections": [
+        "__text"
+      ]
+    },
+    "plain_checks": 23,
+    "quiescence_and_strong_record_adapters": "explicit fixtures; refusal precedes lock reader"
+  },
+  "original_rc_controls": {
+    "complete_original_bodies": 11,
+    "fatal_sanitized_checks": 17,
+    "layout_lock_power_dependencies": "explicit fixtures",
+    "plain_checks": 17,
+    "whole_profile_plain_1hz_reachability_proved": false
+  },
+  "pinned_candidate_files": 18,
+  "public_work_timer_controls": {
+    "actual_iokit_execution": false,
+    "actual_transformed_kernel_service_bodies": true,
+    "compiler": "/workspace/scratch/9046a5958dfd/nvidia-integrated-recovery/llvm-repaired/bin/clang++",
+    "fatal_address_undefined_checks": 105,
+    "initial_attempt": {
+      "assertion": "interrupt arm acquired sleeping workloop gate",
+      "compiler": "/usr/bin/g++",
+      "fatal_address_undefined": true,
+      "scheduler_wait_ms": 100,
+      "status": "failed",
+      "underlying_cause_established": false
+    },
+    "plain_checks": 105,
+    "subsequent_repaired_clang_runs": "plain and fatal sanitized passed without source edits"
+  },
+  "raw_report_sha256": {
+    "irq_fatal_sanitized": "6674bb8f54cbcd82290cc3a337f2928139a7e62b731a45b3f5e2e6ab3cf43263",
+    "irq_plain": "dbb0e14ae2e217e8a20259da1ef584703527c5c717a9e28f6592ea39eecda3eb",
+    "original_helper": "abe00c3550aa072efaa665503802f86037d73e7b38bb60ab1e1c2a5be9c9997e",
+    "original_rc_fatal_sanitized": "101322a6341b5372a82949eedf29fa621ef83f5c5ee1cf8ff1ad4c6c07333982",
+    "original_rc_plain": "2656a660d8f6612b70a161631d2d653b1a6d77932ef24d1581397502adb3cb4d",
+    "public_work_timer_fatal_sanitized": "19235ef67fec616316caff7a5e6a09bfd293dd6f142bcdda74a10a162b34ca5f",
+    "public_work_timer_plain": "a0b3ccb03f23ae8969e249160b15e0d5582481ced5e1cda0b01c96b43b5ca30d"
+  },
+  "reference_composition_sha256": "1392052eda0733713e345e938033a06c539669d4b443ba5c3104c70ae171e298",
+  "remaining_gates": [
+    "whole-profile plain 1Hz callback lifetime",
+    "complete strong-record/IRQ runtime composition",
+    "sticky-state cleanup-master authority",
+    "bounded revoked pending-BH unwind",
+    "aggregate kernel stack",
+    "PM deadline",
+    "allocation capacity",
+    "authentic GSP/DMA cessation",
+    "admitted bootstrap IRQ installation caller",
+    "native target callback execution"
+  ],
+  "source_contract_sha256": "ec27ec9961f9683320028ce5f3a366aa8b8d87e6e097ea7a7a9bb2fdc1e0d85b",
+  "status": "focused-local-controls-passed"
+}

@@ -1,0 +1,77 @@
+{
+  "candidate_sha256": {
+    "README.md": "af22516e3a88bab79744a043d2fdccf0f3ee691269f54a3bc5180b8d5a019ad5",
+    "S540NvidiaIrqClosure.h": "e38395c21d1938494a2d106f8b0b1e1cc02591a8d53dbad1271f316ae61d90b0",
+    "backend-lifetime.hpp.inc": "d210bdd1a52cf202ed79a8a3a6d3ebccce5cc76d8df1ddc737b4965c99c1dbdf",
+    "cancellation-api.c.inc": "eaef50786907dfa39a312f9249312766a5f5aca013716e6e86cb68b377f98a3d",
+    "check.py": "89777094a7df1169b87c9a679078ce6007a334b679351d3f803fb713ce97485f",
+    "irq-bodies.cpp.inc": "3ec6530a83e51080d14d9e39013bd89a8037685da3559a52646bccfd29a7c043",
+    "prepare.py": "9d8782d2117e71dda839025aa2240065828e930f59029160a47c82871b3fd993",
+    "rc/README.md": "0c3e840862f3e0396c33369ee1761a87b40a8bf14481811290e432f2c19fe289",
+    "rc/S540NvidiaIrqOriginal.c": "d4689e4f628e5ac7020c5cc8fca3e3ff4fcdbf0e19c26ea784d107c9c5017199",
+    "rc/S540NvidiaIrqOriginal.h": "bb315855644480d940ba6cf4e74109986b37ed8544e919ec6b310074d6b8e0c4",
+    "rc/SOURCE-CONTRACT.json": "2e2b6b7474a92f80403df7f8e60bd0f436bb8028cba4aa98e58e279b7a83602f",
+    "rc/check_actual_1hz.c": "5dfaf1d87bc9e9555279e7877b2fd7a761d7a7dcb6e0eb1d58b249361d23053c",
+    "rc/check_actual_1hz.py": "2a8e22ec9d13d6fea2b986e4e0fab1f751f7df5749addea1d0d6c5e08b9d7d92",
+    "rc/check_irq_original.c": "5279b968b0ca303d907f1dc7a5a2f0f9845b9a27b0da87feef781e93f3d2be06",
+    "rc/check_irq_original.py": "bfc9abf588d89ba747ff1067c3a5d654c3d413e174126860442827ae39b4eac4",
+    "record-api.c.inc": "c5628dbc789bcb4cc421c2bb4a402839538ce440dcd322a61be26307f25bcfc0",
+    "tests/check_backend.cpp": "ffc20b5390f6573a3e34dd54084bd386e2bcc7a17c2c3d8515eaca49cd2e4057",
+    "tests/check_cancellation.c": "cd0107ab6953a7a77136cee180b1fbefe4f07967e09c3304644e7e0943d3db4f"
+  },
+  "default_original_entry_allowed": false,
+  "exports": {
+    "packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp": [
+      "s540FirstTxnIrqReadContext"
+    ],
+    "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c": [
+      "s540GspCancellationEnterIrqScope",
+      "s540GspCancellationLeaveIrqScope",
+      "s540GspCancellationIrqOrigin"
+    ],
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c": [
+      "s540FirstTxnIrqBind",
+      "s540FirstTxnIrqCheckArm",
+      "s540FirstTxnIrqEnter",
+      "s540FirstTxnIrqLeave",
+      "s540FirstTxnIrqOrigin",
+      "s540FirstTxnIrqReadEnteredScope",
+      "s540FirstTxnIrqValidateDrained",
+      "s540FirstTxnIrqValidateSoftwareDrained"
+    ],
+    "packages/nvidia-gsp-bootstrap/prospective-irq-callback-closure/rc/S540NvidiaIrqOriginal.c": [
+      "s540FirstTxnIrqMaskHardware",
+      "s540FirstTxnDrainQueued1Hz"
+    ]
+  },
+  "format": 1,
+  "hardware_stop_receipt_issued": false,
+  "mode": "isolated-irq-callback-successor",
+  "production_candidate_allowed": false,
+  "reference_composition_sha256": "1392052eda0733713e345e938033a06c539669d4b443ba5c3104c70ae171e298",
+  "reference_input_sha256": {
+    "packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp": "57a3805c1308a0c96ac5cd1e224273825bf018fb158b3c001f0618fcdf82d4b2",
+    "packages/nvidia-device-transport/src/S540NvidiaDeviceTransport.hpp": "03536aa006278612ae37db652def8af0b45050c4799b6fc604ff3059f17ee27d",
+    "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c": "56c64fdb995d2bf03e6d5b0cfec1b733aefdca0bfbe912cc3afa67c41099c174",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c": "f968b57403e0957801403899f1714e82e42dd037aa15ee451cf662a49c897185",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/Participants.h": "7ffc4eadcb6e3b9c8e7cfe524f8eaaaa64ac25642632d728eda0382165140f38",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/S540NvidiaGspCancellation.c": "56c64fdb995d2bf03e6d5b0cfec1b733aefdca0bfbe912cc3afa67c41099c174"
+  },
+  "remaining_gates": [
+    "whole-profile plain 1Hz callback lifetime",
+    "complete strong-record/IRQ runtime composition",
+    "sticky-state cleanup-master authority",
+    "bounded revoked pending-BH unwind",
+    "aggregate kernel stack",
+    "PM deadline",
+    "allocation capacity",
+    "authentic GSP/DMA cessation",
+    "admitted bootstrap IRQ installation caller",
+    "native target callback execution"
+  ],
+  "required_defines": [
+    "S540_NVIDIA_IRQ_CALLBACK_CLOSURE=1",
+    "S540_NVIDIA_NO_LEGACY_RM_SEMAPHORE=1"
+  ],
+  "whole_profile_irq_closure_proved": false
+}

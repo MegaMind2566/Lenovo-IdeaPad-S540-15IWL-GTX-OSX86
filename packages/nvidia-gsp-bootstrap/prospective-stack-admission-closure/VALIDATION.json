@@ -1,0 +1,1132 @@
+{
+  "aggregate_stack_proven": false,
+  "allocator_targets": {
+    "alias_gap": "Global getters expose writable allocator pointers; a field-name assignment scan is not a complete byte-alias writer proof.",
+    "counterexample": "Concurrent raw first portInitialize can return success from initCount==2 while initCount==1 initializer has not installed slots; its subsequent failure can clear globals.",
+    "generic_allocator_warning": "Existing-block alloc/free and dynamic release targets remain part of generic allocator target sets.",
+    "global_free": "_portMemAllocatorFreeWrapper",
+    "global_nonpaged_alloc": "_portMemAllocatorAllocNonPagedWrapper",
+    "global_paged_alloc": "_portMemAllocatorAllocPagedWrapper",
+    "global_release": null,
+    "validity": "Conditional on completed successful initialization and exclusive epoch/lifetime; no unconditional edge installed."
+  },
+  "checkpoint_replay_companion_sha256": "508db0fd647187bb813556a9598506efe78e478570ebc1aac06fd0f3b01f7315",
+  "checks": {
+    "command": "python3 -m unittest discover -s packages/nvidia-gsp-bootstrap/prospective-stack-admission-closure/tests -v",
+    "unit_control_groups": 16
+  },
+  "constant_rsp_lea_proofs": [
+    {
+      "instruction": "leaq 0x8(%rsp), %rsp",
+      "instruction_bytes": "488d642408",
+      "machine_address": 1764,
+      "node": "42bc024acc88188f32cd1d63669f24f752a4d0be643f0d9f816e08328d25bd51:_s540Global_instmemStateLoad_IMPL",
+      "object_sha256": "42bc024acc88188f32cd1d63669f24f752a4d0be643f0d9f816e08328d25bd51",
+      "proof": "Exact LEA RSP,[RSP+constant] equals constant ADD/SUB for stack depth; no register index or alignment.",
+      "resolved_reason": "unreviewed-stack-pointer-write",
+      "rsp_constant_delta_bytes": 8,
+      "static_compiler_frame_bytes": 24,
+      "symbols": [
+        "_s540Global_instmemStateLoad_IMPL"
+      ]
+    },
+    {
+      "instruction": "leaq 0x10(%rsp), %rsp",
+      "instruction_bytes": "488d642410",
+      "machine_address": 21469,
+      "node": "bc8463743840eddb8d3f937c51f39b72ddf0d03348dd939f43ff30d1e7cb67fd:_s540FirstTxnCheckBeforeDestroy",
+      "object_sha256": "bc8463743840eddb8d3f937c51f39b72ddf0d03348dd939f43ff30d1e7cb67fd",
+      "proof": "Exact LEA RSP,[RSP+constant] equals constant ADD/SUB for stack depth; no register index or alignment.",
+      "resolved_reason": "unreviewed-stack-pointer-write",
+      "rsp_constant_delta_bytes": 16,
+      "static_compiler_frame_bytes": 24,
+      "symbols": [
+        "_s540FirstTxnCheckBeforeDestroy"
+      ]
+    }
+  ],
+  "decoded_functions": 30068,
+  "decoder_binary_sha256": "4f98b86448d23bd1f858c50e93fbfc799f1c3640961a95e3b6c89d229a1b91bb",
+  "format": 1,
+  "full_replay_evidence": {
+    "all_selected_roots": "build/stack-admission-runs/native-complete-final/selected-roots.json.gz",
+    "all_selected_roots_sha256": "d012d2ee3856e7ac99af052d288856b15520812fea0367138568064e87ec3a4c",
+    "report": "build/stack-admission-runs/native-complete-final/stack-admission.json",
+    "report_sha256": "3253d5227f43ea32f4956f7409837461281590a6992beab748f44d22d3fd916a"
+  },
+  "gpu_access": false,
+  "kernel_execution": false,
+  "local_root_selections": [
+    {
+      "actual_linkage": "internal",
+      "label": "dispatcher_action_prerequisite",
+      "new_machine_edges": 0,
+      "node": "183e8929486c0bb1c0b9a922d032f8701f9c205a42d7bbc8903f1ab95761800f:__ZN22S540NvidiaGspBootstrap5Owner4Impl6actionEPvj",
+      "object_sha256": "183e8929486c0bb1c0b9a922d032f8701f9c205a42d7bbc8903f1ab95761800f",
+      "scope": "root selection only; no external ABI definition asserted",
+      "source_sha256": "1c4cd89bc61665fbeb56d8efdacd356414c1c7c5de0134363f8859bf624365f5",
+      "symbol": "__ZN22S540NvidiaGspBootstrap5Owner4Impl6actionEPvj"
+    },
+    {
+      "actual_linkage": "internal",
+      "label": "dispatcher_thread_entry",
+      "new_machine_edges": 0,
+      "node": "042de02ad606282b2b4a32dde2cabe5dd01dcd13d9f04c86d9802c130d303e70:__ZN22S540NvidiaGspBootstrap10Dispatcher4Impl5entryEPvi",
+      "object_sha256": "042de02ad606282b2b4a32dde2cabe5dd01dcd13d9f04c86d9802c130d303e70",
+      "scope": "root selection only; no external ABI definition asserted",
+      "source_sha256": "35b4d00126188a5f5a3c0107c0ece86b45910712ae23eaa6e275ec55da28f7b7",
+      "symbol": "__ZN22S540NvidiaGspBootstrap10Dispatcher4Impl5entryEPvi"
+    }
+  ],
+  "measured_original_units": 1100,
+  "measured_project_units": 60,
+  "missing_project_input_count": 0,
+  "native_artifact": {
+    "artifact_id": 12294584576,
+    "outer_zip_sha256": "26af44c7faec40181ab02a9cb2059e24f91a583b25ac54cd0563064870320f43",
+    "run_id": 39488036361
+  },
+  "original_entry_admission": false,
+  "package_code_sha256": {
+    "check.py": "508db0fd647187bb813556a9598506efe78e478570ebc1aac06fd0f3b01f7315",
+    "check_acpi_depth.py": "6f7633020c2d2b4da329cb11513dca6d18e3a0c8f75e0744761f8dedb777301c",
+    "check_switch_control.py": "7bd639167c1622d2411ea5360d03c7acd07f96607ca56b4335ff82567f846804",
+    "tests/test_check.py": "d72b1391c289ebf986521ac970ba004641277a2a83420bebc2eb861e89513cf3",
+    "tests/test_switch_control.py": "b8bcd90c8257ddeb0e86a963f6bff40015bae5de6f73f3958cc1dfe8b1a1af1f"
+  },
+  "production_candidate_allowed": false,
+  "project_manifest_sha256": "d57fa19a6ba4046366c2a1a3171991599864aac0066bc499d14d6bebb48a7a58",
+  "prospective_successor": {
+    "additional_irq_bridge": "New typed bridge is outside this native checkpoint graph.",
+    "known_changed_original_units": [
+      "src/nvidia/src/kernel/core/system.c",
+      "src/nvidia/generated/g_system_nvoc.c"
+    ],
+    "known_changed_project_units": [
+      "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c"
+    ],
+    "native_checkpoint_graph_transfers_automatically": false,
+    "required_remeasurement": "Every changed TU and every full dependency consumer of the changed record/header plus the new IRQ bridge must receive actual replacement object/stack-usage capture; compile-only frame output does not establish aggregate closure.",
+    "snapshot_abi_after_bytes": 72,
+    "snapshot_abi_before_bytes": 56
+  },
+  "rm_manifest_sha256": "0bc7b7299c28aa1b8c075339b46690caab9c46972beb572c0ae7667fde155d5b",
+  "root_graphs": {
+    "adapter_initialize_prerequisite": {
+      "barrier_count": 915,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 144,
+        "indirect-control-transfer": 755,
+        "non-strong-code-definition": 2,
+        "non-strong-external-definition": 4,
+        "recursion-cycle": 3,
+        "unreviewed-special-control-transfer": 7
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "reachable_function_count": 2924,
+      "recursive_component_count": 3,
+      "shortest_blocker_witnesses": {
+        "external-stack-bound-unavailable": {
+          "address": 2760,
+          "function": {
+            "capture_sha256": "b06c5b1a10b7d4ceb3eb1e0357ef77e7a818e1111b744a07a188682b6db0c9d3",
+            "compiler_source_locations": [
+              "arch/nvalloc/unix/src/osapi.c:1833:s540Global_rm_init_adapter"
+            ],
+            "object_sha256": "645041047225af0a8d7dcea762b7a23845de69423ae4ab8f2329854103ea037b",
+            "source_sha256": "275e46868aa90b9c0a5d60c45c23aa0aa6773e11d0c268e56fc3d2e7f940cfaa",
+            "static_frame_bytes": 232,
+            "symbols": [
+              "_s540Global_rm_init_adapter"
+            ]
+          },
+          "shortest_compiled_path": [
+            "_s540Global_rm_init_adapter"
+          ],
+          "target": "___bzero"
+        },
+        "indirect-control-transfer": {
+          "address": 2659,
+          "function": {
+            "capture_sha256": "80c2897da5997029106bf884eb1629678df2a2f6137fe5e96a819b8f0d7bf8aa",
+            "compiler_source_locations": [
+              "src/kernel/core/thread_state.c:875:s540Global_threadStateFree"
+            ],
+            "object_sha256": "2195156db0e0794b8d6a891962bb006f20d3a1b277f554d2d8cb8547a6e974c9",
+            "source_sha256": "a412e2070fa2bb49d56941415d07e6176dedd4776c817aa66e36f78d8d9e8f66",
+            "static_frame_bytes": 40,
+            "symbols": [
+              "_s540Global_threadStateFree"
+            ]
+          },
+          "instruction": "callq *0x8(%r15)",
+          "shortest_compiled_path": [
+            "_s540Global_rm_init_adapter",
+            "_s540Global_threadStateFree"
+          ]
+        },
+        "non-strong-code-definition": {
+          "function": {
+            "capture_sha256": "5f77b2d8fc417892a767d6ae22e87abed1c6428d19adb4f1f8760b05efd13d3b",
+            "compiler_source_locations": [
+              "src/kernel/gpu/gpu_fabric_probe.c:713:s540Global_gpuFabricProbeGetFabricHealthStatus"
+            ],
+            "object_sha256": "ca5a859283a13aab8d796e927a92efa6562bd9b6602dc19cdda141568f54cdfe",
+            "source_sha256": "e17f9508c6ba515a53b2a9bf310ec8f739b18bb5e1a95f3729d3fc360513edb1",
+            "static_frame_bytes": 24,
+            "symbols": [
+              "_s540Global_gpuFabricProbeGetFabricHealthStatus"
+            ]
+          },
+          "shortest_compiled_path": [
+            "_s540Global_rm_init_adapter",
+            "_s540Global_RmInitAdapter",
+            "_RmInitNvDevice",
+            "_s540Global_gpumgrStateLoadGpu",
+            "_s540Global_gpuStateLoad_IMPL",
+            "_s540Global_CliGetSystemP2pCaps",
+            "_s540Global_p2pGetCapsStatus",
+            "_s540Global_knvlinkIsNvlinkP2pSupported_IMPL",
+            "_s540Global_knvlinkGetP2pConnectionStatus_IMPL",
+            "_s540Global_knvlinkCheckNvswitchP2pConfig_IMPL",
+            "_s540Global_gpuFabricProbeGetFabricHealthStatus"
+          ],
+          "target": "_s540Global_gpuFabricProbeGetFabricHealthStatus"
+        },
+        "non-strong-external-definition": {
+          "address": 1787,
+          "function": {
+            "capture_sha256": "344d47c0a351ceb4d6d6e9d8afd97dc8b94917560426610c43b9bca07bf961d7",
+            "compiler_source_locations": [
+              "src/kernel/gpu/nvlink/kernel_nvlink.c:405:s540Global_knvlinkCheckNvswitchP2pConfig_IMPL"
+            ],
+            "object_sha256": "8a4baf46f971d28f1123c2e1fff34e961e6dffdd69deb1875877ab7fbe689836",
+            "source_sha256": "89145e654dd6fd337120a08e367791f61aabb63e81de86e61a38e25407b31fd7",
+            "static_frame_bytes": 88,
+            "symbols": [
+              "_s540Global_knvlinkCheckNvswitchP2pConfig_IMPL"
+            ]
+          },
+          "shortest_compiled_path": [
+            "_s540Global_rm_init_adapter",
+            "_s540Global_RmInitAdapter",
+            "_RmInitNvDevice",
+            "_s540Global_gpumgrStateLoadGpu",
+            "_s540Global_gpuStateLoad_IMPL",
+            "_s540Global_CliGetSystemP2pCaps",
+            "_s540Global_p2pGetCapsStatus",
+            "_s540Global_knvlinkIsNvlinkP2pSupported_IMPL",
+            "_s540Global_knvlinkGetP2pConnectionStatus_IMPL",
+            "_s540Global_knvlinkCheckNvswitchP2pConfig_IMPL"
+          ],
+          "target": "_s540Global_gpuFabricProbeGetFabricHealthStatus"
+        },
+        "recursion-cycle": {
+          "function": {
+            "capture_sha256": "c0d6eea4a7a94e86fbd8aac19ba5bda0f5ee3cfd558c3392e200a58e46058b8b",
+            "compiler_source_locations": [
+              "src/kernel/rmapi/rmapi.c:817:s540Global_rmapiLockIsOwner"
+            ],
+            "object_sha256": "b5d037a4b9b1f6c97ec9b171dcc2180cd104b5c8885c8e64bf2eb680750b6cc8",
+            "source_sha256": "99c6892af9395f693d50472d95153dddd7d6e2930f4cc65c0c31bec37362b170",
+            "static_frame_bytes": 8,
+            "symbols": [
+              "_s540Global_rmapiLockIsOwner"
+            ]
+          },
+          "shortest_compiled_path": [
+            "_s540Global_rm_init_adapter",
+            "_s540Global_rmapiLockIsOwner"
+          ]
+        },
+        "unreviewed-special-control-transfer": {
+          "address": 136,
+          "function": {
+            "capture_sha256": "b23a32e32500f0c1a6670296f2402da49a38572bd9e2b3526893234f99ffb446",
+            "compiler_source_locations": [
+              "packages/nvidia-gsp-bootstrap/prospective-live-platform-closure/S540ProspectiveLivePlatformClosure.c:25:violation"
+            ],
+            "object_sha256": "ce7a0e9e41a8aeec78b2118593f979f3323d59558a6d14d9105f1d2b8c3f9a54",
+            "source_sha256": "4472d6f2db83b199e8c45d9cb203fce41c80d3607c7bf130c2cc0421eb788aa9",
+            "static_frame_bytes": 24,
+            "symbols": [
+              "_violation"
+            ]
+          },
+          "shortest_compiled_path": [
+            "_s540Global_rm_init_adapter",
+            "_s540Global_os_disable_console_access",
+            "_violation"
+          ]
+        }
+      },
+      "symbol": "_s540Global_rm_init_adapter"
+    },
+    "dispatcher_action_prerequisite": {
+      "barrier_count": 803,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 258,
+        "indirect-control-transfer": 529,
+        "recursion-cycle": 4,
+        "undecoded-instruction": 5,
+        "unreviewed-special-control-transfer": 7
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "reachable_function_count": 2140,
+      "recursive_component_count": 4,
+      "shortest_blocker_witnesses": {
+        "external-stack-bound-unavailable": {
+          "address": 1573,
+          "function": {
+            "capture_sha256": "48853dad8e8281e6b912992c928927adfe13665ae8d9eb0f6287fe993e5f50f4",
+            "compiler_source_locations": [
+              "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp:102:_ZN22S540NvidiaGspBootstrap5Owner4Impl6actionEPvj"
+            ],
+            "object_sha256": "183e8929486c0bb1c0b9a922d032f8701f9c205a42d7bbc8903f1ab95761800f",
+            "source_sha256": "1c4cd89bc61665fbeb56d8efdacd356414c1c7c5de0134363f8859bf624365f5",
+            "static_frame_bytes": 456,
+            "symbols": [
+              "__ZN22S540NvidiaGspBootstrap5Owner4Impl6actionEPvj"
+            ]
+          },
+          "shortest_compiled_path": [
+            "__ZN22S540NvidiaGspBootstrap5Owner4Impl6actionEPvj"
+          ],
+          "target": "___bzero"
+        },
+        "indirect-control-transfer": {
+          "address": 1238,
+          "function": {
+            "capture_sha256": "48853dad8e8281e6b912992c928927adfe13665ae8d9eb0f6287fe993e5f50f4",
+            "compiler_source_locations": [
+              "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp:102:_ZN22S540NvidiaGspBootstrap5Owner4Impl6actionEPvj"
+            ],
+            "object_sha256": "183e8929486c0bb1c0b9a922d032f8701f9c205a42d7bbc8903f1ab95761800f",
+            "source_sha256": "1c4cd89bc61665fbeb56d8efdacd356414c1c7c5de0134363f8859bf624365f5",
+            "static_frame_bytes": 456,
+            "symbols": [
+              "__ZN22S540NvidiaGspBootstrap5Owner4Impl6actionEPvj"
+            ]
+          },
+          "instruction": "jmpq *%rcx",
+          "shortest_compiled_path": [
+            "__ZN22S540NvidiaGspBootstrap5Owner4Impl6actionEPvj"
+          ]
+        },
+        "recursion-cycle": {
+          "function": {
+            "capture_sha256": "80c2897da5997029106bf884eb1629678df2a2f6137fe5e96a819b8f0d7bf8aa",
+            "compiler_source_locations": [
+              "src/kernel/core/thread_state.c:1197:s540Global_threadStateResetTimeout"
+            ],
+            "object_sha256": "2195156db0e0794b8d6a891962bb006f20d3a1b277f554d2d8cb8547a6e974c9",
+            "source_sha256": "a412e2070fa2bb49d56941415d07e6176dedd4776c817aa66e36f78d8d9e8f66",
+            "static_frame_bytes": 40,
+            "symbols": [
+              "_s540Global_threadStateResetTimeout"
+            ]
+          },
+          "shortest_compiled_path": [
+            "__ZN22S540NvidiaGspBootstrap5Owner4Impl6actionEPvj",
+            "__ZN22S540NvidiaGspBootstrap5Owner4Impl4stopEv",
+            "_s540GspContextDisableAdapter",
+            "_s540Global_rm_disable_adapter",
+            "_s540Global_s540RmDisableAdapterChecked",
+            "_s540Global_rmapiLockAcquire",
+            "_s540Global_threadStateResetTimeout"
+          ]
+        },
+        "undecoded-instruction": {
+          "address": 4184,
+          "function": {
+            "capture_sha256": "48853dad8e8281e6b912992c928927adfe13665ae8d9eb0f6287fe993e5f50f4",
+            "compiler_source_locations": [
+              "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp:102:_ZN22S540NvidiaGspBootstrap5Owner4Impl6actionEPvj"
+            ],
+            "object_sha256": "183e8929486c0bb1c0b9a922d032f8701f9c205a42d7bbc8903f1ab95761800f",
+            "source_sha256": "1c4cd89bc61665fbeb56d8efdacd356414c1c7c5de0134363f8859bf624365f5",
+            "static_frame_bytes": 456,
+            "symbols": [
+              "__ZN22S540NvidiaGspBootstrap5Owner4Impl6actionEPvj"
+            ]
+          },
+          "shortest_compiled_path": [
+            "__ZN22S540NvidiaGspBootstrap5Owner4Impl6actionEPvj"
+          ]
+        },
+        "unreviewed-special-control-transfer": {
+          "address": 822,
+          "function": {
+            "capture_sha256": "fb80aa70408aabf0eca3598b081ebed04ac46ed6fb1ba093254e08fd59a8aa10",
+            "compiler_source_locations": [
+              "packages/nvidia-global-rm/src/S540NvidiaGlobalRmHost.cpp:120:s540GlobalRmHostShutdown"
+            ],
+            "object_sha256": "1f3d8cb877e6c0dd83599beda74ed1ec93284eec81817c1294c4e0ea8704c408",
+            "source_sha256": "b67fce0e40cdcb456e8a665ec6c3d59561343fb4aeb975153fe411939ac71f6f",
+            "static_frame_bytes": 40,
+            "symbols": [
+              "_s540GlobalRmHostShutdown"
+            ]
+          },
+          "shortest_compiled_path": [
+            "__ZN22S540NvidiaGspBootstrap5Owner4Impl6actionEPvj",
+            "__ZN22S540NvidiaGspBootstrap5Owner4Impl4stopEv",
+            "_s540GlobalRmHostShutdown"
+          ]
+        }
+      },
+      "symbol": "__ZN22S540NvidiaGspBootstrap5Owner4Impl6actionEPvj"
+    },
+    "dispatcher_thread_entry": {
+      "barrier_count": 17,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 16,
+        "indirect-control-transfer": 1
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "reachable_function_count": 8,
+      "recursive_component_count": 0,
+      "shortest_blocker_witnesses": {
+        "external-stack-bound-unavailable": {
+          "address": 777,
+          "function": {
+            "capture_sha256": "51a9e9ec2252d6664405ffadef0efabc1e24e13e6a4ff3c9c44bdd3fd6b17634",
+            "compiler_source_locations": [
+              "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspDispatcher.cpp:60:_ZN22S540NvidiaGspBootstrap10Dispatcher4Impl5entryEPvi"
+            ],
+            "object_sha256": "042de02ad606282b2b4a32dde2cabe5dd01dcd13d9f04c86d9802c130d303e70",
+            "source_sha256": "35b4d00126188a5f5a3c0107c0ece86b45910712ae23eaa6e275ec55da28f7b7",
+            "static_frame_bytes": 8,
+            "symbols": [
+              "__ZN22S540NvidiaGspBootstrap10Dispatcher4Impl5entryEPvi"
+            ]
+          },
+          "shortest_compiled_path": [
+            "__ZN22S540NvidiaGspBootstrap10Dispatcher4Impl5entryEPvi"
+          ],
+          "target": "_current_thread"
+        },
+        "indirect-control-transfer": {
+          "address": 1995,
+          "function": {
+            "capture_sha256": "51a9e9ec2252d6664405ffadef0efabc1e24e13e6a4ff3c9c44bdd3fd6b17634",
+            "compiler_source_locations": [
+              "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspDispatcher.cpp:25:_ZN22S540NvidiaGspBootstrap10Dispatcher4Impl7executeEPS1_"
+            ],
+            "object_sha256": "042de02ad606282b2b4a32dde2cabe5dd01dcd13d9f04c86d9802c130d303e70",
+            "source_sha256": "35b4d00126188a5f5a3c0107c0ece86b45910712ae23eaa6e275ec55da28f7b7",
+            "static_frame_bytes": 56,
+            "symbols": [
+              "__ZN22S540NvidiaGspBootstrap10Dispatcher4Impl7executeEPS1_"
+            ]
+          },
+          "instruction": "callq *0x138(%rbx)",
+          "shortest_compiled_path": [
+            "__ZN22S540NvidiaGspBootstrap10Dispatcher4Impl5entryEPvi",
+            "__ZN22S540NvidiaGspBootstrap10Dispatcher4Impl7executeEPS1_"
+          ]
+        }
+      },
+      "symbol": "__ZN22S540NvidiaGspBootstrap10Dispatcher4Impl5entryEPvi"
+    },
+    "global_initialize_prerequisite": {
+      "barrier_count": 338,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 105,
+        "indirect-control-transfer": 228,
+        "recursion-cycle": 2,
+        "unreviewed-special-control-transfer": 3
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "reachable_function_count": 1757,
+      "recursive_component_count": 2,
+      "shortest_blocker_witnesses": {
+        "external-stack-bound-unavailable": {
+          "address": 90,
+          "function": {
+            "capture_sha256": "5774b219d8aacecb83c4675a76a7c705b75657e30c058758ffce30e7e0f92a44",
+            "compiler_source_locations": [
+              "packages/nvidia-global-rm/src/S540NvidiaGlobalRmFormat.cpp:19:s540GlobalRmLogV"
+            ],
+            "object_sha256": "76090c291cb2e3784fcb974fb7e399f8e7aee233c2c9804ba0d468dceaa1c050",
+            "source_sha256": "af9c218dd148fe4cfcaf2481910653324632588083fb74fda65cbadff4b97d36",
+            "static_frame_bytes": 1064,
+            "symbols": [
+              "_s540GlobalRmLogV"
+            ]
+          },
+          "shortest_compiled_path": [
+            "_s540Global_coreInitializeRm",
+            "_s540Global___nvoc_objCreate_OBJSYS",
+            "_s540Global_portMemAllocNonPaged",
+            "_s540Global_portMemReportOom",
+            "_s540Global_nv_printf",
+            "_s540GlobalRmLogV"
+          ],
+          "target": "___bzero"
+        },
+        "indirect-control-transfer": {
+          "address": 1360,
+          "function": {
+            "capture_sha256": "80c8f17dd6f2439e8eabeed8814d3850b2881e5667c1403a13689cb8c2573042",
+            "compiler_source_locations": [
+              "src/libraries/nvport/memory/memory_tracking.c:976:s540Global_portMemAllocNonPaged"
+            ],
+            "object_sha256": "dff35bc9f3ef7064b178ea643df6b27549536342f300d149b894ffabcd75e45e",
+            "source_sha256": "2f0f0f56272725a6348bae85d04a1330bd7352d3421bf94a90fff2d9debf7618",
+            "static_frame_bytes": 24,
+            "symbols": [
+              "_s540Global_portMemAllocNonPaged"
+            ]
+          },
+          "instruction": "callq *0x80(%rip)",
+          "shortest_compiled_path": [
+            "_s540Global_coreInitializeRm",
+            "_s540Global___nvoc_objCreate_OBJSYS",
+            "_s540Global_portMemAllocNonPaged"
+          ]
+        },
+        "recursion-cycle": {
+          "function": {
+            "capture_sha256": "ac1258a11f0722216de51eb83bed5b23223874c1b32610acb3ea845cfa4336bd",
+            "compiler_source_locations": [
+              "src/libraries/containers/map.c:69:s540Global_mapInitIntrusive_IMPL"
+            ],
+            "object_sha256": "3b04f44776f319e575712e3b103c7e9cd9b7743660d639920e78156a6426312e",
+            "source_sha256": "40c3f3906053a4f13dd43bd9d03a079428d8c5346fabd7f399c9402dd9d2d77c",
+            "static_frame_bytes": 24,
+            "symbols": [
+              "_s540Global_mapInitIntrusive_IMPL"
+            ]
+          },
+          "shortest_compiled_path": [
+            "_s540Global_coreInitializeRm",
+            "_s540Global_nvlogInit",
+            "_s540Global_tlsInitialize",
+            "_s540Global_mapInitIntrusive_IMPL"
+          ]
+        },
+        "unreviewed-special-control-transfer": {
+          "address": 1192,
+          "function": {
+            "capture_sha256": "4d2e8fc5711f8d552f853bd01862c168dac7c96095d684314ac8bcf4282f00ca",
+            "compiler_source_locations": [
+              "packages/nvidia-global-rm/src/S540NvidiaGlobalRmFeatureProfile.c:49:violation"
+            ],
+            "object_sha256": "0310997b602a37f8e29d1369dd7e6c8d53d9538ce55cc16e5f85dee70d73eb67",
+            "source_sha256": "25e967f5a9387d1c838efd6a5fb497754952e05e69df765fd30c72884e449667",
+            "static_frame_bytes": 24,
+            "symbols": [
+              "_violation"
+            ]
+          },
+          "shortest_compiled_path": [
+            "_s540Global_coreInitializeRm",
+            "_s540Global___nvoc_objCreate_OBJSYS",
+            "_s540Global___nvoc_ctor_OBJSYS",
+            "_s540Global_sysConstruct_IMPL",
+            "_s540Global_osRmCapRegisterSys",
+            "_s540Global_os_nv_cap_destroy_entry",
+            "_violation"
+          ]
+        }
+      },
+      "symbol": "_s540Global_coreInitializeRm"
+    },
+    "global_shutdown_prerequisite": {
+      "barrier_count": 280,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 101,
+        "indirect-control-transfer": 176,
+        "recursion-cycle": 1,
+        "unreviewed-special-control-transfer": 2
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "reachable_function_count": 1245,
+      "recursive_component_count": 1,
+      "symbol": "_s540Global_coreShutdownRm"
+    },
+    "gsp_state_initialize_prerequisite": {
+      "barrier_count": 10,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 8,
+        "indirect-control-transfer": 2
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "reachable_function_count": 21,
+      "recursive_component_count": 0,
+      "shortest_blocker_witnesses": {
+        "external-stack-bound-unavailable": {
+          "address": 90,
+          "function": {
+            "capture_sha256": "5774b219d8aacecb83c4675a76a7c705b75657e30c058758ffce30e7e0f92a44",
+            "compiler_source_locations": [
+              "packages/nvidia-global-rm/src/S540NvidiaGlobalRmFormat.cpp:19:s540GlobalRmLogV"
+            ],
+            "object_sha256": "76090c291cb2e3784fcb974fb7e399f8e7aee233c2c9804ba0d468dceaa1c050",
+            "source_sha256": "af9c218dd148fe4cfcaf2481910653324632588083fb74fda65cbadff4b97d36",
+            "static_frame_bytes": 1064,
+            "symbols": [
+              "_s540GlobalRmLogV"
+            ]
+          },
+          "shortest_compiled_path": [
+            "_s540Global_kgspStateInitLocked_IMPL",
+            "_s540Global_nvdEngineSignUp_IMPL",
+            "_s540Global_portMemAllocNonPaged",
+            "_s540Global_portMemReportOom",
+            "_s540Global_nv_printf",
+            "_s540GlobalRmLogV"
+          ],
+          "target": "___bzero"
+        },
+        "indirect-control-transfer": {
+          "address": 1360,
+          "function": {
+            "capture_sha256": "80c8f17dd6f2439e8eabeed8814d3850b2881e5667c1403a13689cb8c2573042",
+            "compiler_source_locations": [
+              "src/libraries/nvport/memory/memory_tracking.c:976:s540Global_portMemAllocNonPaged"
+            ],
+            "object_sha256": "dff35bc9f3ef7064b178ea643df6b27549536342f300d149b894ffabcd75e45e",
+            "source_sha256": "2f0f0f56272725a6348bae85d04a1330bd7352d3421bf94a90fff2d9debf7618",
+            "static_frame_bytes": 24,
+            "symbols": [
+              "_s540Global_portMemAllocNonPaged"
+            ]
+          },
+          "instruction": "callq *0x80(%rip)",
+          "shortest_compiled_path": [
+            "_s540Global_kgspStateInitLocked_IMPL",
+            "_s540Global_nvdEngineSignUp_IMPL",
+            "_s540Global_portMemAllocNonPaged"
+          ]
+        }
+      },
+      "symbol": "_s540Global_kgspStateInitLocked_IMPL"
+    },
+    "interrupt_top_prerequisite": {
+      "barrier_count": 365,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 107,
+        "indirect-control-transfer": 254,
+        "recursion-cycle": 1,
+        "unreviewed-special-control-transfer": 3
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "reachable_function_count": 1561,
+      "recursive_component_count": 1,
+      "shortest_blocker_witnesses": {
+        "external-stack-bound-unavailable": {
+          "address": 217,
+          "function": {
+            "capture_sha256": "7037800bf6d80e155ddc0988167c8e7f422cfea7f9ec668020a637b9d434ed0c",
+            "compiler_source_locations": [
+              "arch/nvalloc/unix/src/unix_intr.c:173:osInterruptPending"
+            ],
+            "object_sha256": "054dfa271abe2f737354e2b0a8da373895d3ff3a9f43a89454680b01f733fda4",
+            "source_sha256": "952e1ccb8b3214c83cfb54748324131900eaff68986169ad7e794be29ef86819",
+            "static_frame_bytes": 856,
+            "symbols": [
+              "_osInterruptPending"
+            ]
+          },
+          "shortest_compiled_path": [
+            "_s540Global_rm_isr",
+            "_s540Global_osIsr",
+            "_osInterruptPending"
+          ],
+          "target": "___bzero"
+        },
+        "indirect-control-transfer": {
+          "address": 46,
+          "function": {
+            "capture_sha256": "f3bf6ec43348869ea313fbd320d07c2f00a42e3b4bc97e8c5e796453ca1b45a6",
+            "compiler_source_locations": [
+              "src/kernel/os/os_sanity.c:103:s540Global_osSanityTestIsr"
+            ],
+            "object_sha256": "2b709d9ff9dcd3e7c9ffa82541f9d127db04168773f1fd2e5a7d8caddd0100c8",
+            "source_sha256": "809f7fbad8e118d991175edde93b381f93ce31d66e01aa4c3b280aa79d4c88d1",
+            "static_frame_bytes": 40,
+            "symbols": [
+              "_s540Global_osSanityTestIsr"
+            ]
+          },
+          "instruction": "callq *0x190(%r14)",
+          "shortest_compiled_path": [
+            "_s540Global_rm_isr",
+            "_s540Global_osSanityTestIsr"
+          ]
+        },
+        "recursion-cycle": {
+          "function": {
+            "capture_sha256": "a1216a90be38a8ea07ee33b303367fd86c93866360d5f48d2bf878746cc67003",
+            "compiler_source_locations": [
+              "src/libraries/utils/nvassert.c:185:s540Global_nvAssertFailedNoLog"
+            ],
+            "object_sha256": "9e4fb092144dc0b3d3629bd15c034fc78c6b4d4e0ea535782c27a67bd6c55674",
+            "source_sha256": "9f6f44bddd1490b7ae75e86e517ed62abc6bd11c4f7635ae7ecacb022834c6ad",
+            "static_frame_bytes": 24,
+            "symbols": [
+              "_s540Global_nvAssertFailedNoLog"
+            ]
+          },
+          "shortest_compiled_path": [
+            "_s540Global_rm_isr",
+            "_s540Global_osSanityTestIsr",
+            "_s540Global_nvAssertFailedNoLog"
+          ]
+        },
+        "unreviewed-special-control-transfer": {
+          "address": 1192,
+          "function": {
+            "capture_sha256": "4d2e8fc5711f8d552f853bd01862c168dac7c96095d684314ac8bcf4282f00ca",
+            "compiler_source_locations": [
+              "packages/nvidia-global-rm/src/S540NvidiaGlobalRmFeatureProfile.c:49:violation"
+            ],
+            "object_sha256": "0310997b602a37f8e29d1369dd7e6c8d53d9538ce55cc16e5f85dee70d73eb67",
+            "source_sha256": "25e967f5a9387d1c838efd6a5fb497754952e05e69df765fd30c72884e449667",
+            "static_frame_bytes": 24,
+            "symbols": [
+              "_violation"
+            ]
+          },
+          "shortest_compiled_path": [
+            "_s540Global_rm_isr",
+            "_s540Global_osIsr",
+            "_osInterruptPending",
+            "_s540Global_nv_get_current_irq_type",
+            "_violation"
+          ]
+        }
+      },
+      "symbol": "_s540Global_rm_isr"
+    },
+    "locked_bottom_half_prerequisite": {
+      "barrier_count": 320,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 106,
+        "indirect-control-transfer": 210,
+        "recursion-cycle": 1,
+        "unreviewed-special-control-transfer": 3
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "reachable_function_count": 1499,
+      "recursive_component_count": 1,
+      "symbol": "_s540Global_rm_isr_bh"
+    },
+    "mmu_fault_prerequisite": {
+      "barrier_count": 288,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 103,
+        "indirect-control-transfer": 182,
+        "recursion-cycle": 1,
+        "unreviewed-special-control-transfer": 2
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "reachable_function_count": 1241,
+      "recursive_component_count": 1,
+      "symbol": "_s540Global_rm_gpu_handle_mmu_faults"
+    },
+    "nano_timer_prerequisite": {
+      "barrier_count": 281,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 102,
+        "indirect-control-transfer": 176,
+        "recursion-cycle": 1,
+        "unreviewed-special-control-transfer": 2
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "reachable_function_count": 1240,
+      "recursive_component_count": 1,
+      "symbol": "_s540Global_rm_run_nano_timer_callback"
+    },
+    "public_context_disable": {
+      "barrier_count": 370,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 112,
+        "indirect-control-transfer": 254,
+        "recursion-cycle": 1,
+        "unreviewed-special-control-transfer": 3
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "reachable_function_count": 1589,
+      "recursive_component_count": 1,
+      "symbol": "_s540GspContextDisableAdapter"
+    },
+    "public_context_initialize": {
+      "barrier_count": 917,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 146,
+        "indirect-control-transfer": 755,
+        "non-strong-code-definition": 2,
+        "non-strong-external-definition": 4,
+        "recursion-cycle": 3,
+        "unreviewed-special-control-transfer": 7
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "reachable_function_count": 2932,
+      "recursive_component_count": 3,
+      "symbol": "_s540GspContextInitializeAdapter"
+    },
+    "public_context_prepare": {
+      "barrier_count": 301,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 112,
+        "indirect-control-transfer": 185,
+        "recursion-cycle": 1,
+        "unreviewed-special-control-transfer": 3
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "reachable_function_count": 1308,
+      "recursive_component_count": 1,
+      "symbol": "_s540GspContextPrepare"
+    },
+    "public_context_shutdown": {
+      "barrier_count": 512,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 116,
+        "indirect-control-transfer": 386,
+        "recursion-cycle": 4,
+        "unreviewed-special-control-transfer": 6
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "reachable_function_count": 2040,
+      "recursive_component_count": 4,
+      "symbol": "_s540GspContextShutdownAdapter"
+    },
+    "public_global_initialize": {
+      "barrier_count": 0,
+      "barrier_reason_counts": {},
+      "compiled_subgraph_complete": true,
+      "compiled_subgraph_upper_bound_bytes": 16,
+      "definition_count": 1,
+      "reachable_function_count": 1,
+      "recursive_component_count": 0,
+      "symbol": "_s540GlobalRmInitialize"
+    },
+    "public_interrupt_top": {
+      "barrier_count": 373,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 109,
+        "indirect-control-transfer": 260,
+        "recursion-cycle": 1,
+        "unreviewed-special-control-transfer": 3
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "reachable_function_count": 1563,
+      "recursive_component_count": 1,
+      "symbol": "_s540GspContextInterruptTop"
+    },
+    "public_locked_bottom_half": {
+      "barrier_count": 320,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 106,
+        "indirect-control-transfer": 210,
+        "recursion-cycle": 1,
+        "unreviewed-special-control-transfer": 3
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "reachable_function_count": 1500,
+      "recursive_component_count": 1,
+      "symbol": "_s540GspContextLockedBottomHalf"
+    },
+    "public_unlocked_bottom_half": {
+      "barrier_count": 342,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 110,
+        "indirect-control-transfer": 224,
+        "non-strong-code-definition": 1,
+        "non-strong-external-definition": 3,
+        "recursion-cycle": 1,
+        "unreviewed-special-control-transfer": 3
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "reachable_function_count": 1543,
+      "recursive_component_count": 1,
+      "symbol": "_s540GspContextUnlockedBottomHalf"
+    },
+    "recovery_timer_prerequisite": {
+      "barrier_count": 327,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 106,
+        "indirect-control-transfer": 217,
+        "recursion-cycle": 1,
+        "unreviewed-special-control-transfer": 3
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "reachable_function_count": 1500,
+      "recursive_component_count": 1,
+      "shortest_blocker_witnesses": {
+        "external-stack-bound-unavailable": {
+          "address": 849,
+          "function": {
+            "capture_sha256": "d3e5616b1fc57e36d75b33289f13a1b157ef20c4a7ede090a908732cbce5784e",
+            "compiler_source_locations": [
+              "src/kernel/os/os_timer.c:300:s540Global_osRun1HzCallbacksNow"
+            ],
+            "object_sha256": "02940f52c535b2d30e336a4fab377db39b698e498a47a50c620bdc8bd500f7bf",
+            "source_sha256": "78da8c6f23d9732dc4ff393b83553ecf06d800699362b70bc67a5f867dd41b4c",
+            "static_frame_bytes": 216,
+            "symbols": [
+              "_s540Global_osRun1HzCallbacksNow"
+            ]
+          },
+          "shortest_compiled_path": [
+            "_s540Global_rm_run_rc_callback",
+            "_s540Global_osRun1HzCallbacksNow"
+          ],
+          "target": "___bzero"
+        },
+        "indirect-control-transfer": {
+          "address": 1074,
+          "function": {
+            "capture_sha256": "d3e5616b1fc57e36d75b33289f13a1b157ef20c4a7ede090a908732cbce5784e",
+            "compiler_source_locations": [
+              "src/kernel/os/os_timer.c:300:s540Global_osRun1HzCallbacksNow"
+            ],
+            "object_sha256": "02940f52c535b2d30e336a4fab377db39b698e498a47a50c620bdc8bd500f7bf",
+            "source_sha256": "78da8c6f23d9732dc4ff393b83553ecf06d800699362b70bc67a5f867dd41b4c",
+            "static_frame_bytes": 216,
+            "symbols": [
+              "_s540Global_osRun1HzCallbacksNow"
+            ]
+          },
+          "instruction": "callq *%rax",
+          "shortest_compiled_path": [
+            "_s540Global_rm_run_rc_callback",
+            "_s540Global_osRun1HzCallbacksNow"
+          ]
+        },
+        "recursion-cycle": {
+          "function": {
+            "capture_sha256": "b3531ae1a5e1546424a8444321b7f441ed9da23cae1184006bb9030636c06e82",
+            "compiler_source_locations": [
+              "src/kernel/gpu_mgr/gpu_mgr.c:491:s540Global_gpumgrGetGpu"
+            ],
+            "object_sha256": "52e97dec29ad32133a9b4d52c7be53cb5e5531c487cc3a0ddd32147a6babab43",
+            "source_sha256": "c79f1ffae36981b69ababec919ac75cd9d216f514ae7e823a1f0d78ef82d257c",
+            "static_frame_bytes": 56,
+            "symbols": [
+              "_s540Global_gpumgrGetGpu"
+            ]
+          },
+          "shortest_compiled_path": [
+            "_s540Global_rm_run_rc_callback",
+            "_s540Global_osRun1HzCallbacksNow",
+            "_s540Global_rmGpuGroupLockAcquire",
+            "_s540Global_gpumgrGetGpu"
+          ]
+        },
+        "unreviewed-special-control-transfer": {
+          "address": 1192,
+          "function": {
+            "capture_sha256": "4d2e8fc5711f8d552f853bd01862c168dac7c96095d684314ac8bcf4282f00ca",
+            "compiler_source_locations": [
+              "packages/nvidia-global-rm/src/S540NvidiaGlobalRmFeatureProfile.c:49:violation"
+            ],
+            "object_sha256": "0310997b602a37f8e29d1369dd7e6c8d53d9538ce55cc16e5f85dee70d73eb67",
+            "source_sha256": "25e967f5a9387d1c838efd6a5fb497754952e05e69df765fd30c72884e449667",
+            "static_frame_bytes": 24,
+            "symbols": [
+              "_violation"
+            ]
+          },
+          "shortest_compiled_path": [
+            "_s540Global_rm_run_rc_callback",
+            "_s540Global_osRun1HzCallbacksNow",
+            "_s540Global_rmGpuGroupLockAcquire",
+            "__rmGpuLocksAcquire",
+            "_s540Global_osDisableInterrupts",
+            "_s540Global_nv_control_soc_irqs",
+            "_violation"
+          ]
+        }
+      },
+      "symbol": "_s540Global_rm_run_rc_callback"
+    },
+    "unlocked_bottom_half_prerequisite": {
+      "barrier_count": 342,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 110,
+        "indirect-control-transfer": 224,
+        "non-strong-code-definition": 1,
+        "non-strong-external-definition": 3,
+        "recursion-cycle": 1,
+        "unreviewed-special-control-transfer": 3
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "reachable_function_count": 1542,
+      "recursive_component_count": 1,
+      "symbol": "_s540Global_rm_isr_bh_unlocked"
+    },
+    "work_item_prerequisite": {
+      "barrier_count": 333,
+      "barrier_reason_counts": {
+        "external-stack-bound-unavailable": 110,
+        "indirect-control-transfer": 219,
+        "recursion-cycle": 1,
+        "unreviewed-special-control-transfer": 3
+      },
+      "compiled_subgraph_complete": false,
+      "compiled_subgraph_upper_bound_bytes": null,
+      "definition_count": 1,
+      "reachable_function_count": 1518,
+      "recursive_component_count": 1,
+      "shortest_blocker_witnesses": {
+        "external-stack-bound-unavailable": {
+          "address": 12102,
+          "function": {
+            "capture_sha256": "b06c5b1a10b7d4ceb3eb1e0357ef77e7a818e1111b744a07a188682b6db0c9d3",
+            "compiler_source_locations": [
+              "arch/nvalloc/unix/src/osapi.c:3664:s540Global_rm_execute_work_item"
+            ],
+            "object_sha256": "645041047225af0a8d7dcea762b7a23845de69423ae4ab8f2329854103ea037b",
+            "source_sha256": "275e46868aa90b9c0a5d60c45c23aa0aa6773e11d0c268e56fc3d2e7f940cfaa",
+            "static_frame_bytes": 184,
+            "symbols": [
+              "_s540Global_rm_execute_work_item"
+            ]
+          },
+          "shortest_compiled_path": [
+            "_s540Global_rm_execute_work_item"
+          ],
+          "target": "___bzero"
+        },
+        "indirect-control-transfer": {
+          "address": 12307,
+          "function": {
+            "capture_sha256": "b06c5b1a10b7d4ceb3eb1e0357ef77e7a818e1111b744a07a188682b6db0c9d3",
+            "compiler_source_locations": [
+              "arch/nvalloc/unix/src/osapi.c:3664:s540Global_rm_execute_work_item"
+            ],
+            "object_sha256": "645041047225af0a8d7dcea762b7a23845de69423ae4ab8f2329854103ea037b",
+            "source_sha256": "275e46868aa90b9c0a5d60c45c23aa0aa6773e11d0c268e56fc3d2e7f940cfaa",
+            "static_frame_bytes": 184,
+            "symbols": [
+              "_s540Global_rm_execute_work_item"
+            ]
+          },
+          "instruction": "callq *0x8(%rbx)",
+          "shortest_compiled_path": [
+            "_s540Global_rm_execute_work_item"
+          ]
+        },
+        "recursion-cycle": {
+          "function": {
+            "capture_sha256": "b3531ae1a5e1546424a8444321b7f441ed9da23cae1184006bb9030636c06e82",
+            "compiler_source_locations": [
+              "src/kernel/gpu_mgr/gpu_mgr.c:491:s540Global_gpumgrGetGpu"
+            ],
+            "object_sha256": "52e97dec29ad32133a9b4d52c7be53cb5e5531c487cc3a0ddd32147a6babab43",
+            "source_sha256": "c79f1ffae36981b69ababec919ac75cd9d216f514ae7e823a1f0d78ef82d257c",
+            "static_frame_bytes": 56,
+            "symbols": [
+              "_s540Global_gpumgrGetGpu"
+            ]
+          },
+          "shortest_compiled_path": [
+            "_s540Global_rm_execute_work_item",
+            "_s540Global_gpumgrGetGpu"
+          ]
+        },
+        "unreviewed-special-control-transfer": {
+          "address": 1192,
+          "function": {
+            "capture_sha256": "4d2e8fc5711f8d552f853bd01862c168dac7c96095d684314ac8bcf4282f00ca",
+            "compiler_source_locations": [
+              "packages/nvidia-global-rm/src/S540NvidiaGlobalRmFeatureProfile.c:49:violation"
+            ],
+            "object_sha256": "0310997b602a37f8e29d1369dd7e6c8d53d9538ce55cc16e5f85dee70d73eb67",
+            "source_sha256": "25e967f5a9387d1c838efd6a5fb497754952e05e69df765fd30c72884e449667",
+            "static_frame_bytes": 24,
+            "symbols": [
+              "_violation"
+            ]
+          },
+          "shortest_compiled_path": [
+            "_s540Global_rm_execute_work_item",
+            "_s540Global_workItemLocksAcquire",
+            "_s540Global_rmGpuGroupLockAcquire",
+            "__rmGpuLocksAcquire",
+            "_s540Global_osDisableInterrupts",
+            "_s540Global_nv_control_soc_irqs",
+            "_violation"
+          ]
+        }
+      },
+      "symbol": "_s540Global_rm_execute_work_item"
+    }
+  },
+  "scope": "Exact prior native complete-image compiler profile only. The newer integrated successor changes source/ABI and requires dependency-bound replacement objects.",
+  "separate_bounded_proofs": {
+    "acpi_local_component": {
+      "actual_body_sanitizer_scenarios": 7168,
+      "actual_guard_hits": 0,
+      "generic_table_mutation_guard_hits": 1152,
+      "maximum_simultaneous_activations": 4,
+      "receipt": "ACPI-DEPTH-VALIDATION.json",
+      "scope": "Local pair edges only; external callee frames and callback reentry remain unknown."
+    },
+    "owner_action_switch": {
+      "legacy_graph_rewritten": false,
+      "receipt": "SWITCH-CONTROL-VALIDATION.json",
+      "residual_owner_action_barriers_if_only_this_refinement_applied": 797,
+      "resolved_machine_barriers": 6
+    }
+  },
+  "status": "verified-closed-native-checkpoint-stack-audit; integrated-successor-not-proven",
+  "target_budget": {
+    "actual_irq_stack_bytes": null,
+    "actual_thread_stack_bytes": null,
+    "external_callback_reentry_depth": null,
+    "framework_entry_headroom_bytes": null,
+    "interrupt_exception_nesting_headroom_bytes": null,
+    "supported_stack_enlargement_established": false
+  },
+  "tool_sha256": {
+    "nvidia_metaclass_initializers.py": "07570071ac3ca5a5bbb54c989ff9a39a2af071bb6a9b53c86acc1d8414e59a56",
+    "nvidia_nvoc_definitions.py": "8bc5a377ff27be9b848ece1d16b044eb22044ef5ed27e1f2f43417a4e7196b00",
+    "nvidia_stack_root_closure.py": "4abc2acc4d9b85a95e76fe574191a55b304e48d46aafddbdddb9baad07a74050",
+    "nvidia_stack_usage.py": "79a14393d69452d01ad42067b9933ccc842abc98fc50ee443051a96b601d8abd"
+  },
+  "toolchain_manifest_sha256": "3e782ac10d1cc1c01b3b28fbd3060c8a568fcc8a8c745491b418efd929011b5a",
+  "verified_input_count": 4624
+}
