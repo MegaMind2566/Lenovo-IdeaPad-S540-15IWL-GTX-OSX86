@@ -1,12 +1,12 @@
 {
   "format": 1,
-  "batch": "s540-hid-keys-v1-20261021-telephony",
-  "scope": "Build and self-test the passive userspace HID observer for F4 F7 F8 and F9",
+  "batch": "s540-hid-keys-v2-20261021-tty-regression",
+  "scope": "Build observer 1.0.1 with real PTY regression for function-key escape contamination",
   "hardware_access_in_ci": false,
   "nvidia_validation": false,
   "source_sha256": {
-    "src/hid_key_probe.m": "048846000d05120e6c14d6fac9fda51b5688d078b7c1f94ae4c9edb4e1934fb8",
+    "src/hid_key_probe.m": "e6e71b73163fa82d0a41369704983ba311cdfb07f17a2769c64c8679d4ee2343",
     "COLLECT-HID-KEYS.command": "6b1974287eeade81eec97c8b8e98cdcb83c397ec29300378d8d97730262edc55",
-    "README.txt": "dde882f1329566e06317347d3fe27c8d754cc790536e5abbfeb25e86af05cff5"
+    "README.txt": "f98fc81b25117c78a7e4a9b43603f4e6e219489629d00735db2233bd26251eaa"
   }
 }

@@ -13,8 +13,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+#include <termios.h>
+#include <poll.h>
 
-static NSString *const ProbeVersion = @"1.0.0";
+static NSString *const ProbeVersion = @"1.0.1";
 static volatile sig_atomic_t StopSignal = 0;
 static void StopHandler(int signalNumber) { StopSignal = signalNumber; }
 static NSArray *Limitations(void) {
@@ -33,6 +35,117 @@ static NSString *UTCNow(void) {
 
 static BOOL InsideWindow(uint64_t timestamp, uint64_t start, uint64_t end) {
     return timestamp >= start && timestamp < end;
+}
+
+typedef struct {
+    struct termios original;
+    int fd;
+    BOOL active;
+} TerminalCapture;
+
+static struct termios CaptureTerminalAttributes(struct termios original) {
+    struct termios capture = original;
+    // Keep signal handling (including Ctrl-C) and every unrelated attribute.
+    capture.c_lflag &= (tcflag_t)~(ICANON | ECHO | ECHONL);
+    capture.c_cc[VMIN] = 0;
+    capture.c_cc[VTIME] = 0;
+    return capture;
+}
+
+static int FlushTerminalInput(int fd) {
+    int result;
+    do { result = tcflush(fd, TCIFLUSH); } while (result < 0 && errno == EINTR);
+    return result;
+}
+
+static BOOL BeginTerminalCapture(TerminalCapture *terminal, int fd, NSString **failure) {
+    terminal->fd = fd;
+    if (!isatty(fd) || tcgetattr(fd, &terminal->original) != 0) {
+        *failure = @"An interactive Terminal is required; terminal attributes could not be read.";
+        return NO;
+    }
+    struct termios attributes = CaptureTerminalAttributes(terminal->original);
+    int changed;
+    do { changed = tcsetattr(fd, TCSANOW, &attributes); } while (changed < 0 && errno == EINTR);
+    if (changed != 0) {
+        *failure = @"Terminal capture mode could not be prepared; no capture window was started.";
+        return NO;
+    }
+    terminal->active = YES;
+    if (FlushTerminalInput(fd) != 0) {
+        *failure = @"Pending terminal input could not be cleared before the capture window.";
+        return NO;
+    }
+    return YES;
+}
+
+static BOOL EndTerminalCapture(TerminalCapture *terminal) {
+    if (!terminal->active) return YES;
+    BOOL flushed = FlushTerminalInput(terminal->fd) == 0;
+    int restored;
+    // TCSAFLUSH also discards a key sequence arriving between flush and restore.
+    do { restored = tcsetattr(terminal->fd, TCSAFLUSH, &terminal->original); } while (restored < 0 && errno == EINTR);
+    if (restored == 0) terminal->active = NO;
+    return flushed && restored == 0;
+}
+
+static BOOL TerminalAttributesEqual(struct termios a, struct termios b) {
+    return a.c_iflag == b.c_iflag && a.c_oflag == b.c_oflag && a.c_cflag == b.c_cflag &&
+        a.c_lflag == b.c_lflag && memcmp(a.c_cc, b.c_cc, sizeof(a.c_cc)) == 0 &&
+        cfgetispeed(&a) == cfgetispeed(&b) && cfgetospeed(&a) == cfgetospeed(&b);
+}
+
+static BOOL WriteTerminalBytes(int fd, const char *bytes, size_t remaining) {
+    while (remaining) {
+        ssize_t written = write(fd, bytes, remaining);
+        if (written < 0 && errno == EINTR) continue;
+        if (written <= 0) return NO;
+        bytes += written; remaining -= (size_t)written;
+    }
+    return YES;
+}
+
+static BOOL TerminalPTYRegression(void) {
+    // Exercise the production guard with an isolated PTY: no HID or user TTY.
+    int master = posix_openpt(O_RDWR | O_NOCTTY);
+    if (master < 0) return NO;
+    int slave = -1;
+    FILE *input = NULL;
+    TerminalCapture terminal = {0};
+    BOOL passed = NO;
+    do {
+        if (grantpt(master) != 0 || unlockpt(master) != 0) break;
+        char *name = ptsname(master);
+        if (!name) break;
+        slave = open(name, O_RDWR | O_NOCTTY);
+        if (slave < 0) break;
+        NSString *failure = nil;
+        if (!BeginTerminalCapture(&terminal, slave, &failure)) break;
+        const char escape[] = "\033[15~";
+        if (!WriteTerminalBytes(master, escape, sizeof(escape) - 1)) break;
+        struct pollfd pending = {.fd = slave, .events = POLLIN, .revents = 0};
+        if (poll(&pending, 1, 1000) != 1 || !(pending.revents & POLLIN)) break;
+        // Do not read the escape: production cleanup must discard it.
+        if (!EndTerminalCapture(&terminal)) break;
+        struct termios restored;
+        if (tcgetattr(slave, &restored) != 0 || !TerminalAttributesEqual(terminal.original, restored)) break;
+        if (!WriteTerminalBytes(master, "\n", 1)) break;
+        pending.revents = 0;
+        if (poll(&pending, 1, 1000) != 1 || !(pending.revents & POLLIN)) break;
+        int duplicate = dup(slave);
+        if (duplicate < 0) break;
+        input = fdopen(duplicate, "r");
+        if (!input) { close(duplicate); break; }
+        char *line = NULL; size_t capacity = 0;
+        ssize_t length = getline(&line, &capacity, input);
+        passed = length == 1 && line && line[0] == '\n';
+        free(line);
+    } while (0);
+    if (!EndTerminalCapture(&terminal)) passed = NO;
+    if (input) fclose(input);
+    if (slave >= 0) close(slave);
+    close(master);
+    return passed;
 }
 
 static NSDictionary *ValidatePositive(NSArray<NSDictionary *> *events) {
@@ -113,6 +226,26 @@ static int SelfTest(void) {
     check(@"telephony-phone-mute-retained", RelevantUsage(0x0b, 0x2f));
     check(@"generic-system-control-retained", RelevantUsage(1, 0x81));
     check(@"pointer-axis-excluded", !RelevantUsage(1, 0x30));
+    struct termios originalTerminal;
+    memset(&originalTerminal, 0, sizeof(originalTerminal));
+    originalTerminal.c_lflag = ICANON | ECHO | ECHONL | ISIG | IEXTEN;
+    originalTerminal.c_iflag = ICRNL;
+    originalTerminal.c_oflag = OPOST;
+    originalTerminal.c_cflag = CREAD;
+    originalTerminal.c_cc[VMIN] = 1;
+    originalTerminal.c_cc[VTIME] = 9;
+    originalTerminal.c_cc[VINTR] = 3;
+    struct termios captureTerminal = CaptureTerminalAttributes(originalTerminal);
+    check(@"capture-terminal-canonical-echo-off", (captureTerminal.c_lflag & (ICANON | ECHO | ECHONL)) == 0);
+    check(@"capture-terminal-signals-preserved", (captureTerminal.c_lflag & ISIG) == (originalTerminal.c_lflag & ISIG));
+    check(@"capture-terminal-read-nonblocking", captureTerminal.c_cc[VMIN] == 0 && captureTerminal.c_cc[VTIME] == 0);
+    check(@"capture-terminal-unrelated-flags-preserved", captureTerminal.c_iflag == originalTerminal.c_iflag &&
+          captureTerminal.c_oflag == originalTerminal.c_oflag && captureTerminal.c_cflag == originalTerminal.c_cflag &&
+          (captureTerminal.c_lflag & (tcflag_t)~(ICANON | ECHO | ECHONL)) == (originalTerminal.c_lflag & (tcflag_t)~(ICANON | ECHO | ECHONL)) &&
+          captureTerminal.c_cc[VINTR] == originalTerminal.c_cc[VINTR]);
+    check(@"capture-terminal-original-retained", (originalTerminal.c_lflag & (ICANON | ECHO | ECHONL)) == (ICANON | ECHO | ECHONL) &&
+          originalTerminal.c_cc[VMIN] == 1 && originalTerminal.c_cc[VTIME] == 9);
+    check(@"pty-function-escape-does-not-contaminate-next-prompt", TerminalPTYRegression());
     check(@"different-device-sequences-distinct", ![Sequence(@[down]) isEqual:Sequence(@[TestEvent(@"0x200", @12, @1)])]);
     NSMutableDictionary *sample = NewReport();
     sample[@"devices"] = @[@{@"registryID": @"0x100", @"transport": @"PS2", @"class": @"IOHIDKeyboardEventDevice", @"product": @"Keyboard", @"relevantInputCollection": @YES}];
@@ -228,6 +361,8 @@ static void ValueCallback(void *context, IOReturn result, void *sender, IOHIDVal
 }
 
 static BOOL Prompt(NSString *label, NSString *instruction) {
+    // A function key may also send terminal escape bytes after a HID window.
+    if (isatty(STDIN_FILENO) && FlushTerminalInput(STDIN_FILENO) != 0) return NO;
     printf("\n%s\n%s\nPremi Invio per preparare la finestra; poi attendi VIA.\n", label.UTF8String, instruction.UTF8String);
     fflush(stdout);
     char *line = NULL; size_t capacity = 0;
@@ -249,6 +384,7 @@ static NSDictionary *RunWindow(NSString *label, NSString *instruction, NSArray *
     CFSetRef devices = opened == kIOReturnSuccess ? IOHIDManagerCopyDevices(manager) : NULL;
     NSMutableArray *explicitlyOpened = [NSMutableArray array];
     NSDictionary *trial = nil;
+    TerminalCapture terminal = {0};
     do {
         if (opened != kIOReturnSuccess || !devices || !CFSetGetCount(devices)) {
             *failure = [NSString stringWithFormat:@"HID manager open/enumeration failed (0x%08x); no target test is valid.", (unsigned int)opened]; break;
@@ -284,6 +420,8 @@ static NSDictionary *RunWindow(NSString *label, NSString *instruction, NSArray *
         if (mach_timebase_info(&capture.timebase) != KERN_SUCCESS || !capture.timebase.numer || !capture.timebase.denom) {
             *failure = @"Monotonic HID timebase is unavailable."; break;
         }
+        if (!BeginTerminalCapture(&terminal, STDIN_FILENO, failure)) break;
+        if (StopSignal) { *failure = @"Collection interrupted before the capture window."; break; }
         capture.start = mach_absolute_time();
         capture.end = capture.start + (uint64_t)(3000000000.0 * capture.timebase.denom / capture.timebase.numer);
         NSString *started = UTCNow();
@@ -291,13 +429,16 @@ static NSDictionary *RunWindow(NSString *label, NSString *instruction, NSArray *
         printf("VIA: premi e rilascia UNA volta il tasto indicato. Tre secondi.\n"); fflush(stdout);
         while (!StopSignal && mach_absolute_time() < capture.end) CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.01, true);
         IOHIDManagerRegisterInputValueCallback(manager, NULL, NULL);
-        printf("FINE.\n"); fflush(stdout);
+        BOOL terminalRestored = EndTerminalCapture(&terminal);
+        if (terminalRestored) { printf("FINE.\n"); fflush(stdout); }
         CFSetRef finalDevices = IOHIDManagerCopyDevices(manager);
         BOOL finalMetadataValid = NO;
         NSArray *finalMetadata = finalDevices ? DeviceMetadata(finalDevices, &finalMetadataValid) : @[];
         BOOL topologyChanged = !finalMetadataValid || ![metadata isEqual:finalMetadata];
         if (finalDevices) CFRelease(finalDevices);
-        if (StopSignal) {
+        if (!terminalRestored) {
+            *failure = @"Terminal input flush or attribute restoration failed; collection stopped.";
+        } else if (StopSignal) {
             *failure = @"Collection interrupted; the current window is incomplete.";
         } else if (topologyChanged) {
             *failure = @"HID device topology changed during the capture window.";
@@ -307,8 +448,12 @@ static NSDictionary *RunWindow(NSString *label, NSString *instruction, NSArray *
         trial = @{@"label": label, @"startedAtUTC": started, @"durationSeconds": @3,
                   @"events": events, @"nonNumericValuesOmitted": @(capture.nonNumericOmitted),
                   @"outsideWindowValuesOmitted": @(capture.staleOmitted),
-                  @"valid": @(!StopSignal && !topologyChanged && !capture.invalidDevice && !capture.callbackError && !capture.overflow)};
+                  @"valid": @(terminalRestored && !StopSignal && !topologyChanged && !capture.invalidDevice && !capture.callbackError && !capture.overflow)};
     } while (0);
+    if (!EndTerminalCapture(&terminal)) {
+        *failure = @"Terminal attribute restoration failed during cleanup; collection stopped.";
+        fprintf(stderr, "Ripristino Terminale non riuscito. Interrompi la prova e riapri Terminale.\n");
+    }
     for (id object in explicitlyOpened) IOHIDDeviceClose((__bridge IOHIDDeviceRef)object, kIOHIDOptionsTypeNone);
     if (devices) CFRelease(devices);
     IOHIDManagerClose(manager, kIOHIDOptionsTypeNone);
@@ -372,6 +517,8 @@ int main(int argc, const char *argv[]) {
         sigemptyset(&stopAction.sa_mask);
         sigaction(SIGINT, &stopAction, NULL);
         sigaction(SIGTERM, &stopAction, NULL);
+        sigaction(SIGHUP, &stopAction, NULL);
+        sigaction(SIGQUIT, &stopAction, NULL);
         int exitCode = 2;
         do {
             IOHIDAccessType access = IOHIDCheckAccess(kIOHIDRequestTypeListenEvent);

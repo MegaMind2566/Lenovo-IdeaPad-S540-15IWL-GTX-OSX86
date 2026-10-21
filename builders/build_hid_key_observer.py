@@ -37,7 +37,7 @@ def main():
         if request.get('source_sha256', {}).get(relative) != digest:
             raise SystemExit('Explicit build request does not match source: ' + relative)
     with tempfile.TemporaryDirectory(prefix='s540-hid-build-') as tmp:
-        package = Path(tmp) / 'S540-HID-Keys-v1'
+        package = Path(tmp) / 'S540-HID-Keys-v2'
         (package / 'bin').mkdir(parents=True)
         for relative in required:
             destination = package / relative
@@ -59,9 +59,12 @@ def main():
         self_test = run([str(binary), '--self-test'])
         self_test_data = json.loads(self_test)
         if (self_test_data.get('result') != 'SELF_TEST_PASSED'
-                or len(self_test_data.get('checks', [])) < 14
+                or len(self_test_data.get('checks', [])) < 23
                 or not all(item.get('passed') is True for item in self_test_data['checks'])):
             raise SystemExit('Offline self-tests did not pass.')
+        if not any(item.get('name') == 'pty-function-escape-does-not-contaminate-next-prompt'
+                   and item.get('passed') is True for item in self_test_data['checks']):
+            raise SystemExit('The real terminal escape/input regression did not pass.')
         cli_checks = []
         for arguments in [[], ['--unknown'], ['--output', 'relative-report.json']]:
             result = subprocess.run([str(binary), *arguments], text=True, capture_output=True)
@@ -84,7 +87,7 @@ def main():
         (package / 'SHA256SUMS').write_text(''.join(
             hashlib.sha256(p.read_bytes()).hexdigest() + '  ' + p.relative_to(package).as_posix() + '\n'
             for p in files))
-        archive = output / 'S540-HID-Keys-v1.zip'
+        archive = output / 'S540-HID-Keys-v2.zip'
         with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED) as z:
             for p in sorted(package.rglob('*')):
                 if p.is_file():

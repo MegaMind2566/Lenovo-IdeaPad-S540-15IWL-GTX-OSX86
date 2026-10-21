@@ -27,9 +27,9 @@ jobs:
         run: python3 builders/build_hid_key_observer.py --source-dir packages/hid-key-observer --output-dir build/hid-key-observer
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: S540-HID-Keys-v1
+          name: S540-HID-Keys-v2
           path: |
-            build/hid-key-observer/S540-HID-Keys-v1.zip
-            build/hid-key-observer/S540-HID-Keys-v1.zip.sha256
+            build/hid-key-observer/S540-HID-Keys-v2.zip
+            build/hid-key-observer/S540-HID-Keys-v2.zip.sha256
           if-no-files-found: error
           retention-days: 30

@@ -1,4 +1,4 @@
-S540 HID Keys v1
+S540 HID Keys: observer 1.0.1
 
 Questo pacchetto osserva i valori HID pubblicati da macOS dopo l'elaborazione
 del driver. Non cambia EFI, kext, mappature, Wi-Fi, Bluetooth o webcam.
@@ -20,6 +20,12 @@ PROVE
 Prima di ogni finestra premi soltanto Invio, attendi VIA, quindi premi e rilascia
 una volta il tasto richiesto. La finestra dura tre secondi. Durante VIA non
 digitare testo o password. Le azioni attuali dei tasti restano attive.
+Durante i tre secondi il programma sospende soltanto l'eco e la lettura a righe
+del Terminale: un tasto funzione può produrre anche una sequenza escape che,
+altrimenti, contaminerebbe la richiesta di Invio successiva. Questi byte vengono
+scartati prima e dopo la finestra; gli eventi HID restano osservati normalmente.
+Gli attributi originali del Terminale vengono ripristinati al termine della
+finestra e nell'uscita controllata con Ctrl-C. Occorre un Terminale interattivo.
 
 1. Controllo positivo: Fn+F5. Deve essere osservato esattamente un F5 premuto
    e rilasciato dallo stesso dispositivo e dallo stesso elemento HID.
@@ -55,5 +61,8 @@ PER CHI COMPILA
 Il sorgente Objective-C richiede Foundation e IOKit, Intel x86_64, macOS 10.15+.
 --self-test esegue soltanto verifiche offline della logica: nessun accesso HID,
 nessuna richiesta permessi, nessuna scrittura sul disco.
+Include una regressione su uno pseudo-terminale isolato: immette una sequenza
+escape F5 senza leggerla, ripristina gli attributi originali e controlla che
+la successiva richiesta di Invio riceva soltanto la nuova riga.
 L'esecuzione nativa sul Lenovo resta un passaggio distinto dalla compilazione
 e dal self-test. Non dichiarare verifiche native senza il relativo risultato.
