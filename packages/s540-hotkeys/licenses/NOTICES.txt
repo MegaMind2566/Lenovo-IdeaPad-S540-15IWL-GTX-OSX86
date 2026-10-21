@@ -1,0 +1,15 @@
+S540 Tasti 0.1.0
+
+Kernel sources: GPL-2.0-only. See src/kernel/LICENSE and
+licenses/GPL-2.0-YogaSMC.txt. The VPC command protocol and numeric hotkey mapping
+were checked against Linux ideapad-laptop and YogaSMC/ReYogaSMC. The kernel
+implementation is restricted to the target machine and commands documented in
+README.md. Full corresponding kernel sources are included under src/kernel.
+
+Companion app: MIT. See src/app/LICENSE.
+Installer and build tooling: MIT unless a source header states otherwise.
+
+MacKernelSDK is used as a pinned build dependency; its commit, compilation
+commands and source hashes are recorded in BUILD.json. Its binaries are not
+installed on the target system. The package contains the resulting Intel app
+and kernel bundle and their corresponding sources.

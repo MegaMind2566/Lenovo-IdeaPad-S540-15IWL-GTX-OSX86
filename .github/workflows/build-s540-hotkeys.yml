@@ -1,0 +1,60 @@
+name: Build S540 missing hotkeys
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['work/s540-hotkeys-v1']
+    paths:
+      - '.github/native-ci/s540-hotkeys-request.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: s540-native-hotkeys
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[native ci]')
+    runs-on: macos-15-intel
+    timeout-minutes: 10
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      S540_SDK_PIN: 3f750085caa17ec3a7880f11c11bf4f48cd6a164
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Verify reviewed source freeze and exact native request
+        run: >-
+          python3 builders/build_s540_hotkeys.py
+          --source-dir packages/s540-hotkeys
+          --check-sources
+          --verify-native-request .github/native-ci/s540-hotkeys-request.json
+          --repository-root "$GITHUB_WORKSPACE"
+      - name: Fetch exact public kernel SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/S540-MacKernelSDK"
+          git -C "$RUNNER_TEMP/S540-MacKernelSDK" fetch --no-tags --depth=1 https://github.com/acidanthera/MacKernelSDK.git "$S540_SDK_PIN"
+          git -C "$RUNNER_TEMP/S540-MacKernelSDK" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/S540-MacKernelSDK" rev-parse HEAD)" = "$S540_SDK_PIN"
+          test -z "$(git -C "$RUNNER_TEMP/S540-MacKernelSDK" status --porcelain --untracked-files=all)"
+      - name: Compile once, run pure fixtures and seal verified package
+        run: >-
+          python3 builders/build_s540_hotkeys.py
+          --source-dir packages/s540-hotkeys
+          --output-dir build/s540-hotkeys
+          --sdk-path "$RUNNER_TEMP/S540-MacKernelSDK"
+      - name: Preserve package or native diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: S540-Tasti-v1-native
+          path: |
+            build/s540-hotkeys/*.zip
+            build/s540-hotkeys/*.zip.sha256
+          if-no-files-found: warn
+          retention-days: 30
