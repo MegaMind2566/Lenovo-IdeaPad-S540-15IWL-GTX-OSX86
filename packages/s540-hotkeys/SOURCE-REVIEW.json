@@ -1,6 +1,6 @@
 {
-  "abi_policy_sha256": "343fdaf766f4f03fa70b24b1f98b7fc2c27688d412d882137809d010454e3eaa",
-  "builder_sha256": "dbeb2d9bb556b828f44c8095e905290e9d6b14a95737cf34d6e30afa4154677e",
+  "abi_policy_sha256": "21ee7fb4c25c4feb741f35f4ebae4ebb1d3a3a4648747e4ebea6cbae1428fbc7",
+  "builder_sha256": "700202eafcde57e70c40db3f2313784dddcf9b2c60845719be8fef5fa20cd399",
   "files": {
     "LEGGIMI.txt": "153e32090817578f5c75703d909e8fca22f103b6f918fc3beedaf653831ea156",
     "LICENSE": "2417a7db843819f70fc3121ddb9c4f830a87991ae98473876e3d40b1c36e466f",

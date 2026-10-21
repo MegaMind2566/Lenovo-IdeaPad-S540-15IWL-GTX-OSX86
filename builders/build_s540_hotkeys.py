@@ -79,6 +79,99 @@ def file_hash(path: Path) -> str:
     return digest(path.read_bytes())
 
 
+def abi_evidence_files(policy: dict | None = None) -> list[Path]:
+    """Evidence is immutable input, never a generic compiler-helper allowance."""
+    if policy is None:
+        policy = json.loads(POLICY.read_text())
+    paths = []
+    for symbol, rule in policy.get("reviewed_native_exceptions", {}).items():
+        name = rule["evidence_file"]
+        require(Path(name).name == name and name.endswith(".json"), "Invalid ABI evidence path")
+        path = POLICY.with_name(name)
+        require(file_hash(path) == rule["evidence_sha256"], "Reviewed native ABI evidence changed")
+        evidence = json.loads(path.read_text())
+        require(evidence.get("schema") == 1 and evidence.get("symbol") == symbol and
+                evidence.get("bindings") == rule["bindings"] and
+                evidence.get("bound_source_hashes") == rule["bound_source_hashes"],
+                "Native ABI exception and independent evidence disagree")
+        paths.append(path)
+    return sorted(set(paths))
+
+
+def native_exception_context(metadata: dict, kernel_binary: Path, driver_object: Path) -> dict:
+    """Derive the exception context from actual files and recorded compiler CLI.
+
+    Offline callers also verify all original command-log hashes and provenance;
+    this function does not replace that artifact integrity check.
+    """
+    actual = file_hash(kernel_binary)
+    require(actual == metadata["kernel_binary_sha256"], "Native signed kernel binary changed")
+    return {"sdk_commit": metadata["mac_kernel_sdk_commit"],
+            "kernel_binary_sha256": actual,
+            "driver_object_sha256": file_hash(driver_object),
+            "compiler_version_sha256": digest(metadata["clang_version"].encode()),
+            "ci_commit": metadata["ci_commit"], "ci_run_id": metadata["ci_run_id"]}
+
+
+def classify_imports(undefined: list[str], decoded: list[str], source: Path,
+                     *, context: dict | None = None) -> tuple[list[dict], list[dict]]:
+    """Exact imports plus explicitly source/compiler/artifact-bound exceptions.
+
+    Missing context, a different compiler, object, signed binary, source body,
+    SDK or CI provenance leaves the helper unapproved. No prefix is accepted.
+    """
+    require(len(undefined) == len(decoded), "Demangler changed symbol count")
+    policy = json.loads(POLICY.read_text())
+    require(policy.get("schema") == 1 and policy.get("sdk_commit") == SDK_PIN, "Invalid ABI policy")
+    abi_evidence_files(policy)
+    source_hashes = {p: file_hash(source / p) for p in policy["bound_source_files"]}
+    sources = "\n".join((source / p).read_text() for p in policy["bound_source_files"])
+    approved, unknown = [], []
+    for symbol, demangled in zip(undefined, decoded):
+        rule = policy["exact_mangled"].get(symbol) or policy["exact_demangled"].get(demangled)
+        if rule and all(token in sources for token in rule.get("source_tokens", [])):
+            approved.append({"symbol": symbol, "demangled": demangled, "reason": rule["reason"]})
+            continue
+        exception = policy.get("reviewed_native_exceptions", {}).get(symbol)
+        if (exception and context is not None and context == exception["bindings"] and
+                source_hashes == exception["bound_source_hashes"] and context.get("sdk_commit") == SDK_PIN):
+            approved.append({"symbol": symbol, "demangled": demangled, "reason": exception["reason"],
+                             "reviewed_native_exception": exception})
+        else:
+            unknown.append({"symbol": symbol, "demangled": demangled})
+    return approved, unknown
+
+
+def verify_compiler_exception(kernel_binary: Path, native_work: Path, source: Path) -> dict:
+    """One-time offline review of the retained, otherwise successful native build.
+
+    The caller verifies the native artifact provenance and every command-log
+    hash. This verifier independently re-reads the actual Mach-O imports and
+    enforces the exact source/compiler/object/binary/SDK/CI exception tuple.
+    """
+    metadata = json.loads((native_work / "BUILD-FAILED.json").read_text())
+    require(metadata.get("native_build") is True and metadata.get("kernel_loaded") is False and
+            metadata.get("target_hardware_tested") is False, "Wrong retained native milestone")
+    original = metadata["kernel_abi"]
+    require(original.get("unapproved_imports") == [{"symbol": "___bzero", "demangled": "___bzero"}],
+            "Retained build has a different ABI review failure")
+    actual = macho_symbols(kernel_binary, 11)
+    require(actual["undefined"] == original["undefined"] and actual["defined"] == original["defined"],
+            "Retained native Mach-O imports or definitions changed")
+    commands = metadata["native_commands"]
+    slots = [i for i, command in enumerate(commands, 1) if command.get("label") == "kernel-demangle-symbols"]
+    require(len(slots) == 1, "Missing or ambiguous original native demangler output")
+    decoded_path = native_work / f"{slots[0]:02d}-kernel-demangle-symbols.stdout.txt"
+    require(file_hash(decoded_path) == commands[slots[0] - 1]["stdout_sha256"], "Native demangler log changed")
+    decoded = decoded_path.read_text().strip().splitlines()
+    context = native_exception_context(metadata, kernel_binary, native_work / "driver.o")
+    approved, unknown = classify_imports(actual["undefined"], decoded, source, context=context)
+    require(not unknown, "Actual retained artifact is outside the exact reviewed compiler exception")
+    exceptions = [entry for entry in approved if "reviewed_native_exception" in entry]
+    require(len(exceptions) == 1 and exceptions[0]["symbol"] == "___bzero", "Expected exactly one reviewed compiler helper")
+    return exceptions[0]
+
+
 def write_json(path: Path, obj: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -145,6 +238,7 @@ def freeze_sources(source: Path) -> None:
     hashes = validate_layout(source)
     policy = json.loads(POLICY.read_text())
     require(policy.get("sdk_commit") == SDK_PIN and policy.get("schema") == 1, "Wrong ABI policy")
+    abi_evidence_files(policy)
     write_json(source / SOURCE_REVIEW, {
         "schema": 1,
         "purpose": "Explicit source review freeze; hashes alone do not assert hardware validation.",
@@ -163,6 +257,7 @@ def check_sources(source: Path) -> dict:
     require(review.get("files") == actual, "Sources differ from SOURCE-REVIEW.json; finish review and freeze again")
     require(review.get("abi_policy_sha256") == file_hash(POLICY), "ABI policy changed after source review")
     require(review.get("builder_sha256") == file_hash(BUILDER), "Builder changed after source review")
+    abi_evidence_files()
     print(f"PASS: {len(actual)} exact source hashes, bundle contracts, licenses, shell syntax, ABI-policy binding")
     return review
 
@@ -172,6 +267,7 @@ def verify_request(request: Path, source: Path, repository: Path) -> None:
     require(data.get("schema") == 1, "Wrong native request schema")
     paths = {BUILDER.relative_to(repository).as_posix(), POLICY.relative_to(repository).as_posix(),
              ".github/workflows/build-s540-hotkeys.yml"}
+    paths.update(p.relative_to(repository).as_posix() for p in abi_evidence_files())
     paths.update(path.relative_to(repository).as_posix() for path in source.rglob("*") if path.is_file())
     expected = {p: file_hash(repository / p) for p in sorted(paths)}
     require(data.get("files") == expected, "Native request must bind exactly builder, ABI policy, workflow and all package sources")
@@ -262,7 +358,8 @@ class Runner:
         return result.stdout.strip()
 
 
-def inspect_imports(binary: Path, runner: Runner, source: Path, output: Path) -> dict:
+def inspect_imports(binary: Path, runner: Runner, source: Path, output: Path,
+                    *, context: dict | None = None) -> dict:
     result = macho_symbols(binary, 11)
     # Keep the native tool's actual output as well as independently parsed nlist64.
     native = runner.run(["xcrun", "nm", "-u", "-j", str(binary)], label="kernel-native-undefined-symbols")
@@ -275,15 +372,7 @@ def inspect_imports(binary: Path, runner: Runner, source: Path, output: Path) ->
     decoded = runner.run(["xcrun", "c++filt", "-n"], input_="\n".join(mangled) + "\n", label="kernel-demangle-symbols").splitlines()
     require(len(decoded) == len(mangled), "Demangler changed symbol count")
     policy = json.loads(POLICY.read_text())
-    require(policy.get("schema") == 1 and policy.get("sdk_commit") == SDK_PIN, "Invalid ABI policy")
-    sources = "\n".join((source / p).read_text() for p in policy["bound_source_files"])
-    approved, unknown = [], []
-    for symbol, demangled in zip(result["undefined"], decoded):
-        rule = policy["exact_mangled"].get(symbol) or policy["exact_demangled"].get(demangled)
-        if rule and all(token in sources for token in rule.get("source_tokens", [])):
-            approved.append({"symbol": symbol, "demangled": demangled, "reason": rule["reason"]})
-        else:
-            unknown.append({"symbol": symbol, "demangled": demangled})
+    approved, unknown = classify_imports(result["undefined"], decoded, source, context=context)
     result.update({"imports": approved, "unapproved_imports": unknown,
                    "abi_policy_sha256": file_hash(POLICY), "sdk_commit": SDK_PIN,
                    "bound_source_hashes": {p: file_hash(source / p) for p in policy["bound_source_files"]},
@@ -371,7 +460,9 @@ def native_build(source: Path, output: Path, sdk: Path, review: dict) -> Path:
             runner.run(["/usr/bin/codesign", "--force", "--sign", "-", "--timestamp=none", "--identifier", identifier, str(bundle)], label="sign-" + identifier)
             runner.run(["/usr/bin/codesign", "--verify", "--strict", "--verbose=2", str(bundle)], label="verify-signature-" + identifier)
         runner.run([str(app_bin), "--self-test"], label="app-pure-self-test")
-        kernel_manifest = inspect_imports(kernel_bin, runner, source, work / "kernel-symbols.json")
+        context_metadata = {**metadata, "kernel_binary_sha256": file_hash(kernel_bin)}
+        import_context = native_exception_context(context_metadata, kernel_bin, work / "driver.o")
+        kernel_manifest = inspect_imports(kernel_bin, runner, source, work / "kernel-symbols.json", context=import_context)
         app_manifest = macho_symbols(app_bin, 2)
         require(not any("IOBluetoothPreferenceSetControllerPowerState" in s for s in app_manifest["undefined"]),
                 "Bluetooth private setter must not be a direct binary import")
@@ -404,6 +495,8 @@ def native_build(source: Path, output: Path, sdk: Path, review: dict) -> Path:
                 copy_file(license_file, stage / "licenses" / license_file.relative_to(source / "licenses"))
         copy_file(BUILDER, stage / "src/builders" / BUILDER.name)
         copy_file(POLICY, stage / "src/builders" / POLICY.name)
+        for evidence in abi_evidence_files():
+            copy_file(evidence, stage / "src/builders" / evidence.name)
         copy_file(shim, stage / "src/builders/module-info.cpp")
         for name in ("kernel-symbols.json", "app-symbols.json", "kmutil-libraries.xml", "commands.json"):
             copy_file(work / name, stage / "validation" / name)

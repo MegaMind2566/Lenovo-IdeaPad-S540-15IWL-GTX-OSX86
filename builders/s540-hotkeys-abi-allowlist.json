@@ -2231,6 +2231,26 @@
     "Compiler-introduced memory helper symbols are not admitted without native evidence and a source-bound review update.",
     "The full actual manifest and read-only kmutil libraries XML are retained; no kmutil load occurs in CI."
   ],
+  "reviewed_native_exceptions": {
+    "___bzero": {
+      "bindings": {
+        "ci_commit": "816edfda9c5a7e6217ac344c044edd94ef66042d",
+        "ci_run_id": "39631773181",
+        "compiler_version_sha256": "6d366eee5ac6d909249830892c8846df457f835554e1481da864b4d455e951d5",
+        "driver_object_sha256": "98e05c19624dfba6741a0307327f409cd177abfbfcfcf892bdbad000a388e814",
+        "kernel_binary_sha256": "5e529274ecba7905e023e5b807de4dda2e14be51cbff45dcf84bceeb01b78fc4",
+        "sdk_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164"
+      },
+      "bound_source_hashes": {
+        "kernel/ProtocolCore.hpp": "8883a06bcf471102864abe7b8674b3508df54f2c20ffad80b9821c2a411b9956",
+        "kernel/S540HotkeysVPC.cpp": "b514efead0e4bb2eb4730641998dc2d3d6f2984133d6a33cfb25234c95031ba4",
+        "kernel/S540HotkeysVPC.hpp": "7fa051a2f96ff51e1854090fa7690bafd70af894efbff8a9fac77ebe02cb9580"
+      },
+      "evidence_file": "s540-hotkeys-bzero-review.json",
+      "evidence_sha256": "6b56c4ad49a86026fa835a0dbbcc6b23a359a412cd2a0929dcfc36d4880946a2",
+      "reason": "Public XNU bzero alias emitted by the actual reviewed compiler; accepted only for the exact native artifact and source bindings, independently reviewed call sites and public export evidence."
+    }
+  },
   "schema": 1,
   "sdk_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164"
 }

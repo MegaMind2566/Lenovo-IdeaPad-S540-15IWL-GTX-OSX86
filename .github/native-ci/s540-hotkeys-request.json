@@ -1,12 +1,13 @@
 {
   "files": {
     ".github/workflows/build-s540-hotkeys.yml": "7be9cad8715041b6ec919a12e6e086bf7d7c8e68c60dee24551031b6cfa0dec9",
-    "builders/build_s540_hotkeys.py": "dbeb2d9bb556b828f44c8095e905290e9d6b14a95737cf34d6e30afa4154677e",
-    "builders/s540-hotkeys-abi-allowlist.json": "343fdaf766f4f03fa70b24b1f98b7fc2c27688d412d882137809d010454e3eaa",
+    "builders/build_s540_hotkeys.py": "700202eafcde57e70c40db3f2313784dddcf9b2c60845719be8fef5fa20cd399",
+    "builders/s540-hotkeys-abi-allowlist.json": "21ee7fb4c25c4feb741f35f4ebae4ebb1d3a3a4648747e4ebea6cbae1428fbc7",
+    "builders/s540-hotkeys-bzero-review.json": "6b56c4ad49a86026fa835a0dbbcc6b23a359a412cd2a0929dcfc36d4880946a2",
     "packages/s540-hotkeys/LEGGIMI.txt": "153e32090817578f5c75703d909e8fca22f103b6f918fc3beedaf653831ea156",
     "packages/s540-hotkeys/LICENSE": "2417a7db843819f70fc3121ddb9c4f830a87991ae98473876e3d40b1c36e466f",
     "packages/s540-hotkeys/README.md": "7d77c418104f3c2dd8be9b2e3a674b603c7f2413de5f593cd2be0d56e03d9b3d",
-    "packages/s540-hotkeys/SOURCE-REVIEW.json": "2bba3b36284938d8f35620a7a4f14b08371e971bf7f10ee04c4e96399b205ce4",
+    "packages/s540-hotkeys/SOURCE-REVIEW.json": "719c59152ea04ad5b0ae76d856d22a2c7436b057e6beb602fb5019770afeba84",
     "packages/s540-hotkeys/app/HotkeyPolicy.h": "ba8688b933301770f4e0ed90306f4e8f898f8d187b06a739cabf278df7e08f64",
     "packages/s540-hotkeys/app/Info.plist": "5dc60423047876833712eb2f1e5fad23a6613bf136cdc10165cec19da945c06d",
     "packages/s540-hotkeys/app/LICENSE": "155875122ce65a3e6b92f67b49d2f8f4300454c1dabbb2d13dbc559d8c9fa3dc",
