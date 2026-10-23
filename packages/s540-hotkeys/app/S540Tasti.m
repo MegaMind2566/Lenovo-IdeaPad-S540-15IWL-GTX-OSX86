@@ -21,7 +21,7 @@
 #include <string.h>
 #include "HotkeyPolicy.h"
 
-static NSString *const AppVersion = @"0.1.2";
+static NSString *const AppVersion = @"0.1.3";
 static NSString *const DriverVersion = @"0.1.0";
 static NSString *const DriverClass = @"S540HotkeysVPC";
 static NSString *const DriverBundle = @"org.s540.HotkeysVPC";
@@ -291,25 +291,15 @@ static NSDictionary *ToggleRadios(void) {
     return Feedback(HKFeedbackConfirmed, message, message, target.wifi ? @"wifi" : @"antenna.radiowaves.left.and.right");
 }
 static NSString *CameraStatus(NSDictionary *snapshot) {
-    uint64_t result = 0; uint32_t state = UINT32_MAX;
-    if (!Unsigned(snapshot[@"LastCameraResult"], &result) || !UInt32Bits(snapshot[@"CameraState"], &state)) return @"Webcam: stato non disponibile";
-    if (result == 0) return @"Webcam: pronta per F8";
-    if (result == 1) return @"Webcam: comando non supportato dal firmware";
-    if (result == 2 || result == 3 || result == 7) {
-        if (state == 0) return @"Webcam disattivata: stato firmware confermato";
-        if (state == 1) return @"Webcam attiva: stato firmware confermato";
-    }
-    return @"Webcam: modifica non confermata dal firmware";
+    (void)snapshot;
+    // This S540 continues streaming after the EC reports CameraState=0.
+    // An EC value/readback is therefore not evidence of video capture blocking.
+    return @"Webcam: solo comando firmware; blocco video non disponibile su questo S540";
 }
 static NSDictionary *CameraFeedback(NSDictionary *snapshot) {
-    uint64_t result = 0; uint32_t state = UINT32_MAX;
-    if (!Unsigned(snapshot[@"LastCameraResult"], &result) || !UInt32Bits(snapshot[@"CameraState"], &state))
-        return Feedback(HKFeedbackError, @"Webcam: stato non disponibile", @"Stato webcam non disponibile", @"camera.slash.fill");
-    if (result == 0 || result == 3) return nil; // Baseline or no new confirmed action.
-    if ((result == 2 || result == 7) && state <= 1)
-        return Feedback(HKFeedbackConfirmed, CameraStatus(snapshot), state ? @"Webcam attiva · firmware" : @"Webcam disattivata · firmware",
-            state ? @"camera.fill" : @"camera.slash.fill");
-    return Feedback(HKFeedbackError, CameraStatus(snapshot), result == 1 ? @"Comando webcam non supportato" : @"Webcam: modifica non confermata", @"camera.slash.fill");
+    uint64_t result = 0;
+    if (Unsigned(snapshot[@"LastCameraResult"], &result) && (result == 0 || result == 3)) return nil;
+    return Feedback(HKFeedbackError, CameraStatus(snapshot), @"Blocco webcam non disponibile", @"exclamationmark.triangle.fill");
 }
 static BOOL PostLockRequest(void) {
     if (!AXIsProcessTrusted()) return NO;
@@ -644,7 +634,7 @@ static CGEventRef LockTapCallback(CGEventTapProxy proxy, CGEventType type, CGEve
     MigrateLockPreference();
     _actions = dispatch_queue_create("org.s540.Hotkeys.actions", DISPATCH_QUEUE_SERIAL);
     _featureStatus = [@{@"Driver":@"Collegamento tasti Lenovo…", @"F4":@"F4: microfono pronto",
-        @"F7":@"F7: Wi-Fi e Bluetooth pronti", @"F8":@"F8: webcam in attesa", @"F9":@"F9 / ⌘+L: abilitalo dal menu S540"} mutableCopy];
+        @"F7":@"F7: Wi-Fi e Bluetooth pronti", @"F8":CameraStatus(@{}), @"F9":@"F9 / ⌘+L: abilitalo dal menu S540"} mutableCopy];
     _item = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
     NSString *menuIconPath = [[NSBundle mainBundle] pathForResource:@"MenuBarIconTemplate" ofType:@"png"];
     NSImage *menuIcon = menuIconPath ? [[NSImage alloc] initWithContentsOfFile:menuIconPath] : nil;
@@ -815,6 +805,29 @@ static void DecoderAndContractTests(NSMutableArray *checks) {
     CheckLock(checks, @"lock-other-modifiers-pass", &held, true, false, 37, true, true, false, HKLockPass, false);
     CheckLock(checks, @"lock-normal-f9-passes", &held, true, false, 101, false, false, false, HKLockPass, false);
 }
+static void CameraFeedbackTests(NSMutableArray *checks) {
+    // These EC readbacks previously produced false video-off/on confirmations.
+    // Exercise the actual presentation path for each formerly-successful case.
+    const uint64_t results[] = {2, 7};
+    for (NSUInteger i = 0; i < 2; i++) {
+        for (uint32_t state = 0; state <= 1; state++) {
+            NSDictionary *snapshot = @{@"LastCameraResult":@(results[i]), @"CameraState":@(state)};
+            NSDictionary *feedback = CameraFeedback(snapshot);
+            BOOL warning = feedback != nil && [feedback[@"outcome"] integerValue] == HKFeedbackError &&
+                [feedback[@"brief"] isEqual:@"Blocco webcam non disponibile"] &&
+                [feedback[@"symbol"] isEqual:@"exclamationmark.triangle.fill"];
+            NSString *name = [NSString stringWithFormat:@"camera-ec-result-%llu-state-%u-never-confirms-video",
+                (unsigned long long)results[i], state];
+            RecordCheck(checks, name, warning, warning ? nil : @{@"snapshot":snapshot, @"feedback":feedback ?: [NSNull null]});
+        }
+    }
+    NSDictionary *baseline = @{@"LastCameraResult":@0, @"CameraState":@0};
+    NSDictionary *debounced = @{@"LastCameraResult":@3, @"CameraState":@1};
+    RecordCheck(checks, @"camera-baseline-does-not-show-hud", CameraFeedback(baseline) == nil, nil);
+    RecordCheck(checks, @"camera-debounce-does-not-show-hud", CameraFeedback(debounced) == nil, nil);
+    RecordCheck(checks, @"camera-baseline-status-declares-video-block-unavailable",
+        [CameraStatus(baseline) rangeOfString:@"blocco video non disponibile"].location != NSNotFound, nil);
+}
 static int SelfTest(void) {
     NSMutableArray *checks = [NSMutableArray array];
     HKRadioState off = {false,false}, wifi={true,false};
@@ -834,6 +847,7 @@ static int SelfTest(void) {
     RecordCheck(checks, @"fresh-boundary-accepted", HKEventFresh(3000000001,1), nil);
     RecordCheck(checks, @"fresh-expired-rejected", !HKEventFresh(3000000002,1), nil);
     DecoderAndContractTests(checks);
+    CameraFeedbackTests(checks);
     BOOL passed = YES; NSMutableArray *failures = [NSMutableArray array];
     for (NSDictionary *check in checks) if (![check[@"passed"] boolValue]) { passed = NO; [failures addObject:check]; }
     (void)PrintJSON(@{@"result":passed?@"SELF_TEST_PASSED":@"SELF_TEST_FAILED",@"app_version":AppVersion,

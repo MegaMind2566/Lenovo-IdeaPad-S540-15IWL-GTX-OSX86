@@ -1,0 +1,11 @@
+D .
+D ./Contents
+D ./Contents/MacOS
+D ./Contents/Resources
+D ./Contents/_CodeSignature
+F 28a48c5eed7d0b801c34e6cdf677e4ccb5cc9c4e358762a77d3f3218f860313a  ./Contents/Resources/MenuBarIconTemplate.png
+F 49d42d5fdc0f81e77663b2b8fcc39eafe02a4d62b88962eb60e1317e51b20ecc  ./Contents/Resources/AppIcon.icns
+F 5e7f8cbeac5ccfb51995208b343319fab00e7770ef0f32b1960b1512f9850263  ./Contents/_CodeSignature/CodeResources
+F a743a2c41c15db5ef2d335148127c150ed2947c3361eb2a7e05ce5c379007853  ./Contents/Info.plist
+F bb043f2e54a253fdcb9b8ba253d7bf63ba248d152a9f34c889c6c02c37d0ec25  ./Contents/MacOS/S540Tasti
+F cc78edf3a7d84b6d1da4411de51fee8c80cf23a6a743fb6716ba85a085541420  ./Contents/Resources/MenuBarIconTemplate@2x.png

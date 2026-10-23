@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build app 0.1.2 and package the exact previously signed kernel 0.1.0.
+"""Build app 0.1.3 and package the exact previously signed kernel 0.1.0.
 
 No kernel compiler, SDK download, driver loading or kernel dependency probe is
 invoked. The reused bundle and its original provenance are immutable inputs.
@@ -31,8 +31,8 @@ BuildError, require = base.BuildError, base.require
 file_hash, digest, write_json = base.file_hash, base.digest, base.write_json
 tree_hashes, copy_file, zip_tree = base.tree_hashes, base.copy_file, base.zip_tree
 
-PACKAGE = "S540-Tasti-v1.2"
-APP_VERSION = "0.1.2"
+PACKAGE = "S540-Tasti-v1.3"
+APP_VERSION = "0.1.3"
 KERNEL_VERSION = "0.1.0"
 KERNEL_SHA = "5e529274ecba7905e023e5b807de4dda2e14be51cbff45dcf84bceeb01b78fc4"
 KERNEL_ID = "org.s540.HotkeysVPC"
@@ -191,7 +191,7 @@ def validate_sources(source: Path) -> dict[str, str]:
     require(info.get("CFBundleIdentifier") == APP_ID and info.get("CFBundleExecutable") == APP_NAME and
             info.get("CFBundlePackageType") == "APPL" and info.get("CFBundleVersion") == APP_VERSION and
             info.get("CFBundleShortVersionString") == APP_VERSION and info.get("LSMinimumSystemVersion") == "13.0" and
-            info.get("LSUIElement") is True, "App must be version 0.1.2 for Intel macOS 13 or later")
+            info.get("LSUIElement") is True, "App must be version 0.1.3 for Intel macOS 13 or later")
     verify_app_resources(source, info)
     verify_prebuilt(source)
     for script in sorted((source / "installer").rglob("*")):
@@ -202,6 +202,9 @@ def validate_sources(source: Path) -> dict[str, str]:
     for test in sorted((source / "installer/tests").glob("test-*.sh")):
         result = subprocess.run(["/bin/bash", str(test)], capture_output=True, text=True, timeout=30)
         require(result.returncode == 0, "Installer pure fixture failed: " + test.name + result.stdout + result.stderr)
+    for test in sorted((source / "installer/tests").glob("test-*.py")):
+        result = subprocess.run([sys.executable, str(test)], capture_output=True, text=True, timeout=60)
+        require(result.returncode == 0, "Installer upgrade fixture failed: " + test.name + result.stdout + result.stderr)
     return files
 
 

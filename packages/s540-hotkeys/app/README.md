@@ -1,8 +1,9 @@
-# S540 Tasti 0.1.2 — companion contract
+# S540 Tasti 0.1.3 — companion contract
 
 Intel macOS 13 or later. This user-session companion uses the unchanged
-`S540HotkeysVPC` **0.1.0** driver. App 0.1.1 fixes the decoding of its unsigned
-32-bit registry fields and implements the requested direct F9 screen lock.
+`S540HotkeysVPC` **0.1.0** driver. App 0.1.3 corrects misleading F8 feedback:
+this S540 can continue streaming video even after the firmware reports camera
+state 0. A firmware command/readback is not a verified camera privacy block.
 No developer tools are needed on the target machine.
 
 Install `/Applications/S540Tasti.app`; the package's `org.s540.Hotkeys`
@@ -15,7 +16,7 @@ including Retina and light/dark appearances. The app waits for driver approval/r
 | --- | --- |
 | F4, driver mask bit 8 | Toggle the default CoreAudio input's master mute property. Requires property availability, writability and readback. No recording or gain changes. Missing writable master mute is reported in the menu. |
 | F7, driver mask bit 13 | Turn Wi-Fi and the Bluetooth controller off, then restore their previous combination. Both actual power states are read back. This controls the two radios, without asserting a global macOS airplane-mode flag. |
-| F8, driver mask bit 7 | The driver handles the firmware camera command. The app displays its actual firmware state/readback result. |
+| F8, driver mask bit 7 | The unchanged driver handles the firmware command, but it does not provide a verified video block on this S540. The app reports **Blocco webcam non disponibile** with a warning, never a camera-off/on success inferred from the EC state. |
 | F9 directly, or Command+L | Request screen lock using Apple's Control+Command+Q shortcut. F9 emits Command+L on this S540, so **Command+L also locks the screen globally, including on other keyboards**. Its previous browser-address action is replaced as explicitly requested. |
 | Fn+F9 | No app mapping or listener. It remains an ordinary F9 event. |
 
@@ -104,10 +105,15 @@ before recovery; cancellation prevents new actions and the next component.
 Recovery can finish a confirmed owned change. Wake cannot clear a newer sleep
 or termination request.
 
-Camera results: 0 not requested, 1 unsupported, 2 changed and verified,
+Camera results: 0 not requested, 1 unsupported, 2 EC write and readback,
 3 debounced, 4 invalid state, 5 readback mismatch, 6 protocol failure,
-7 firmware already changed and read back. Results 2/3/7 display confirmed state
-only for CameraState 0 or 1. The driver owns camera control and debounce.
+7 firmware already changed and read back. These describe the firmware protocol
+only. No result or CameraState value is treated as proof that video capture
+stopped or resumed. This includes results 2/7 with either state 0 or 1. The
+menu states that webcam blocking is unavailable on this S540, including at the
+initial baseline. Baseline and debounce results do not show a HUD. Other fresh
+F8 results show the unavailable warning. No camera suspension API, permission,
+audio action or driver behavior is added or changed by this correction.
 
 ## Build and validation
 
@@ -128,7 +134,10 @@ target-side compilation is needed.
 
 `S540Tasti --self-test` checks pure policies, real signed CFNumberSInt32 fixtures
 for CFG and unknown CameraState, invalid types/ranges, driver-version separation,
-and direct-lock pass/consume ownership. Each assertion is named and evaluated
+and direct-lock pass/consume ownership. Camera regression fixtures exercise
+results 2/7 with both states 0/1 through the actual feedback function and reject
+success presentation; they also check baseline/debounce HUD suppression and
+the honest baseline status. Each assertion is named and evaluated
 independently. Failure JSON includes expected/actual results and fixed fixture
 values, CF/Objective-C types and scalar-conversion results. No live data enters
 these diagnostics. It prints JSON and exits 0 on success.
@@ -164,15 +173,17 @@ Primary API references:
 - https://github.com/toy/blueutil/blob/main/blueutil.m
 - https://support.apple.com/102650 (Control+Command+Q)
 
-## Action feedback 0.1.2
+## Action feedback 0.1.2 and F8 correction 0.1.3
 
 A silent, nonactivating visual-effect panel shows a function symbol and concise
-result for new F4/F7/F8 actions. Errors show an amber warning. It ignores mouse
+result for new F4/F7 actions. Fresh F8 firmware events show an amber
+**Blocco webcam non disponibile** warning rather than a successful camera-off
+symbol. Errors show an amber warning. The panel ignores mouse
 events, never takes keyboard focus, and hides after 1.4 seconds. A new popup
 replaces the previous one; old timers cannot hide newer feedback. Startup,
 wake baselines, reconnects, gaps and ordinary driver polling do not show a HUD.
-F8 uses only the newest fresh camera event and the final firmware result, not
-one success claim for every retained ring entry.
+F8 uses only the newest fresh camera event and its final firmware result,
+without a success claim for any retained ring entry or EC state.
 
 F9 shows a lock-request HUD, then submits Control+Command+Q after 180 ms. The
 delayed block rechecks event freshness, user preference and lifecycle epochs.

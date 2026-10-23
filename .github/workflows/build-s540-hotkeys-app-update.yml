@@ -41,7 +41,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: S540-Tasti-v1.2-app-update
+          name: S540-Tasti-v1.3-app-update
           path: |
             build/s540-hotkeys-app-update/*.zip
             build/s540-hotkeys-app-update/*.zip.sha256

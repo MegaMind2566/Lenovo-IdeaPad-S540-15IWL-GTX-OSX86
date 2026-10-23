@@ -1,18 +1,26 @@
-S540 Tasti 0.1.2 — Lenovo IdeaPad S540-15IWL GTX / 81SW
+S540 Tasti 0.1.3 — Lenovo IdeaPad S540-15IWL GTX / 81SW
 
 INSTALLAZIONE / AGGIORNAMENTO
 1. Estrai tutto lo ZIP nella cartella Download.
 2. Nel Terminale esegui:
-   bash "$HOME/Downloads/S540-Tasti-v1.2/INSTALLA-TASTI.command"
+   bash "$HOME/Downloads/S540-Tasti-v1.3/INSTALLA-TASTI.command"
 3. Inserisci la password quando richiesta. Segui l'eventuale richiesta di
    autorizzazione di macOS e riavvia soltanto se l'installer lo richiede.
    L'app S540 partirà automaticamente nella tua sessione.
 
-Se la versione 0.1.0 o 0.1.1 è già installata e verificabile, il comando aggiorna
+Se la versione 0.1.0, 0.1.1 o 0.1.2 è già installata e verificabile, il comando aggiorna
 soltanto l'app e la ricevuta. Conserva una copia dell'app precedente per il
 ripristino automatico in caso di errore e riusa il driver 0.1.0 già installato.
 
-NOVITÀ 0.1.2
+CORREZIONE 0.1.3 — WEBCAM
+La prova sul portatile ha confermato che F8 cambia il valore del firmware ma
+la webcam continua a mostrare video, anche chiudendo e riaprendo Photo Booth.
+F8 non costituisce quindi un blocco della webcam. Il popup ora segnala
+"Blocco webcam non disponibile" e non dichiara più la webcam disattivata.
+La modifica corregge l'indicazione: non introduce un blocco video funzionante.
+F4, F7 e blocco schermo sono stati confermati dall'utente con la versione 0.1.2.
+
+NOVITÀ GIÀ INCLUSE DALLA 0.1.2
 Nuova icona dell'app dedicata ai tasti rapidi e icona coordinata nella barra
 dei menu. Ogni azione dei tasti gestiti dall'app mostra un breve popup con
 l'icona della funzione e il relativo esito, senza suoni né cambio di finestra.
@@ -32,8 +40,8 @@ TASTI AGGIUNTI
 F4       Attiva/disattiva il mute del microfono di ingresso corrente.
 F7       Spegne Wi-Fi e Bluetooth; alla pressione successiva ripristina gli
          stati precedenti. L'esito viene verificato sui controlli delle radio.
-F8       Comanda la webcam attraverso il firmware e ne verifica lo stato.
-         Se il firmware ha già cambiato lo stato, evita una seconda inversione.
+F8       Segnala che il blocco webcam non è disponibile su questo portatile.
+         Il valore del firmware non dimostra l'interruzione del video.
 F9       Richiede il blocco schermo di macOS. Anche Comando+L blocca lo schermo.
 
 Per F9 scegli "Abilita F9…" dal menu S540 e consenti gli eventuali permessi
@@ -44,11 +52,11 @@ F9 da solo è trasmesso dalla tastiera come Comando+L: entrambe le combinazioni
 ora richiedono il blocco schermo. Fn+F9 non è più associato al blocco schermo.
 I permessi di questa scorciatoia non servono a F4/F7/F8.
 
-UNICO CONTROLLO FINALE
-Prova F4, F7, F8 e F9 nell'uso normale. Il menu dell'app e i popup mostrano l'esito.
-Per F8 verifica anche l'immagine in un'app che utilizza la webcam: la conferma
-del firmware da sola non prova l'effetto visibile sul sensore. La compilazione
-e i controlli del pacchetto non sostituiscono questa prima prova sul portatile.
+CONTROLLO DOPO L'AGGIORNAMENTO
+Non occorre ripetere la raccolta diagnostica o la prova della webcam.
+F8 deve mostrare l'avviso di blocco non disponibile. Le altre funzioni restano
+quelle già confermate. Se macOS richiede nuovamente i permessi F9, usa il menu
+S540 per rileggerli dopo averli concessi.
 
 Se una funzione non risponde, comunica quale e il messaggio del menu S540.
 VERIFICA-TASTI.command legge lo stato senza premere tasti, cambiare radio o

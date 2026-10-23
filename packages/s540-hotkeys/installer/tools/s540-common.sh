@@ -8,9 +8,10 @@ umask 077
 S540_KEXT_ID=org.s540.HotkeysVPC
 S540_APP_ID=org.s540.Hotkeys
 S540_KEXT_VERSION=0.1.0
-S540_APP_VERSION=0.1.2
+S540_APP_VERSION=0.1.3
 S540_V1_APP_MANIFEST_SHA256=05bfcf271293f1e11e9def08acfddb4f7330adeda1f35243fea1ae6567cf3bb1
 S540_V11_APP_MANIFEST_SHA256=c44f5b94bbd7daa127072973460136d79318c8ae7e40e2a22572cfc4e8c57c20
+S540_V12_APP_MANIFEST_SHA256=d4e601dfd91adb5792d27fd536db7a6aa3a77b0b42c0ec30b25576f80cd5c983
 S540_V1_KEXT_MANIFEST_SHA256=13f6070000c5487f67ce5e9acf30face88d189e89d1bf005d7f36009395b946c
 S540_LABEL=org.s540.Hotkeys
 S540_KEXT=/Library/Extensions/S540HotkeysVPC.kext
@@ -46,6 +47,8 @@ S540_UPGRADE_AGENT_SHA256=''
 S540_UPGRADE_SOURCE_APP_SHA256=''
 S540_UPGRADE_PRIOR_PATH=''
 S540_UPGRADE_PRIOR_SHA256=''
+S540_UPGRADE_EARLIER_PATH=''
+S540_UPGRADE_EARLIER_SHA256=''
 S540_OPERATION=verify
 
 s540_fail() { printf '\nSTOP: %s\n' "$1" >&2; return 1; }
@@ -378,18 +381,24 @@ s540_backup_matches() {
 }
 
 s540_app_upgrade_eligible() {
-    local version pinned
+    local version pinned prefix backup expected previous='' count=0 maximum
     S540_UPGRADE_SOURCE_APP_SHA256=''
     S540_UPGRADE_PRIOR_PATH=''
     S540_UPGRADE_PRIOR_SHA256=''
+    S540_UPGRADE_EARLIER_PATH=''
+    S540_UPGRADE_EARLIER_SHA256=''
     [ -d "$S540_APP" ] && [ -d "$S540_KEXT" ] && [ -f "$S540_AGENT" ] || return 1
     version=$(s540_plist "$S540_RECEIPT" Version string) || return 1
     case "$version" in
-        0.1.0) S540_UPGRADE_SOURCE_APP_SHA256="$S540_V1_APP_MANIFEST_SHA256"; pinned=upgrade-v1-app.manifest;;
+        0.1.0) S540_UPGRADE_SOURCE_APP_SHA256="$S540_V1_APP_MANIFEST_SHA256"; pinned=upgrade-v1-app.manifest; maximum=0;;
         0.1.1)
             [ "$(s540_plist "$S540_RECEIPT" AppVersion string)" = 0.1.1 ] &&
             [ "$(s540_plist "$S540_RECEIPT" KextVersion string)" = "$S540_KEXT_VERSION" ] || return 1
-            S540_UPGRADE_SOURCE_APP_SHA256="$S540_V11_APP_MANIFEST_SHA256"; pinned=upgrade-v1.1-app.manifest;;
+            S540_UPGRADE_SOURCE_APP_SHA256="$S540_V11_APP_MANIFEST_SHA256"; pinned=upgrade-v1.1-app.manifest; maximum=1;;
+        0.1.2)
+            [ "$(s540_plist "$S540_RECEIPT" AppVersion string)" = 0.1.2 ] &&
+            [ "$(s540_plist "$S540_RECEIPT" KextVersion string)" = "$S540_KEXT_VERSION" ] || return 1
+            S540_UPGRADE_SOURCE_APP_SHA256="$S540_V12_APP_MANIFEST_SHA256"; pinned=upgrade-v1.2-app.manifest; maximum=2;;
         *) return 1;;
     esac
     [ "$(s540_hash "$S540_ROOT/app.manifest")" = "$S540_UPGRADE_SOURCE_APP_SHA256" ] &&
@@ -397,13 +406,24 @@ s540_app_upgrade_eligible() {
     [ "$(s540_hash "$S540_PACKAGE/tools/$pinned")" = "$S540_UPGRADE_SOURCE_APP_SHA256" ] &&
     [ "$(s540_hash "$S540_PACKAGE/tools/upgrade-v1-kext.manifest")" = "$S540_V1_KEXT_MANIFEST_SHA256" ] || return 1
     /usr/bin/cmp -s "$S540_RUN/kext.manifest" "$S540_ROOT/kext.manifest" || return 1
-    S540_UPGRADE_PRIOR_PATH=$(s540_plist "$S540_RECEIPT" UpgradeBackupPath string 2>/dev/null || true)
-    S540_UPGRADE_PRIOR_SHA256=$(s540_plist "$S540_RECEIPT" UpgradeBackupTreeSHA256 string 2>/dev/null || true)
-    if [ -n "$S540_UPGRADE_PRIOR_PATH" ]; then
-        [ "$version" = 0.1.1 ] && s540_backup_matches "$S540_UPGRADE_PRIOR_PATH" "$S540_UPGRADE_PRIOR_SHA256" || return 1
-    else
-        [ -z "$S540_UPGRADE_PRIOR_SHA256" ] || return 1
-    fi
+    # Delivered 0.1.2 may carry both the 0.1.1 and 0.1.0 backups. Validate
+    # every pair before moving the app; reject gaps, duplicates and extra levels.
+    for prefix in Upgrade PriorUpgrade EarlierUpgrade; do
+        backup=$(s540_plist "$S540_RECEIPT" "${prefix}BackupPath" string 2>/dev/null || true)
+        expected=$(s540_plist "$S540_RECEIPT" "${prefix}BackupTreeSHA256" string 2>/dev/null || true)
+        if [ -z "$backup" ]; then [ -z "$expected" ] || return 1; continue; fi
+        count=$((count + 1))
+        [ "$count" -le "$maximum" ] && [ "$backup" != "$previous" ] || return 1
+        case "$prefix" in
+            Upgrade) S540_UPGRADE_PRIOR_PATH="$backup"; S540_UPGRADE_PRIOR_SHA256="$expected";;
+            PriorUpgrade)
+                [ -n "$S540_UPGRADE_PRIOR_PATH" ] || return 1
+                S540_UPGRADE_EARLIER_PATH="$backup"; S540_UPGRADE_EARLIER_SHA256="$expected";;
+            *) return 1;;
+        esac
+        s540_backup_matches "$backup" "$expected" || return 1
+        previous="$backup"
+    done
 }
 
 s540_rollback_app_upgrade() {
@@ -455,7 +475,7 @@ s540_upgrade_app() {
     local file agent_stage backup_hash
     S540_OPERATION=upgrade
     s540_take_lock
-    s540_receipt_valid && s540_owned_paths && s540_app_upgrade_eligible || s540_fail 'App o backup installati non coincidono con la versione originale 0.1.0/0.1.1: aggiornamento fermato.'
+    s540_receipt_valid && s540_owned_paths && s540_app_upgrade_eligible || s540_fail 'App o backup installati non coincidono con la versione originale 0.1.0/0.1.1/0.1.2: aggiornamento fermato.'
     s540_ready || s540_fail 'Il driver originale non risulta pronto: aggiornamento app fermato senza modificare il driver.'
     s540_make_agent
     S540_UPGRADE_BACKUP="$S540_ROOT/upgrade-v1-$S540_RUN_ID"
@@ -503,6 +523,10 @@ s540_upgrade_app() {
         /usr/bin/sudo -n /usr/bin/plutil -insert PriorUpgradeBackupPath -string "$S540_UPGRADE_PRIOR_PATH" "$S540_RECEIPT"
         /usr/bin/sudo -n /usr/bin/plutil -insert PriorUpgradeBackupTreeSHA256 -string "$S540_UPGRADE_PRIOR_SHA256" "$S540_RECEIPT"
     fi
+    if [ -n "$S540_UPGRADE_EARLIER_PATH" ]; then
+        /usr/bin/sudo -n /usr/bin/plutil -insert EarlierUpgradeBackupPath -string "$S540_UPGRADE_EARLIER_PATH" "$S540_RECEIPT"
+        /usr/bin/sudo -n /usr/bin/plutil -insert EarlierUpgradeBackupTreeSHA256 -string "$S540_UPGRADE_EARLIER_SHA256" "$S540_RECEIPT"
+    fi
     s540_receipt_valid && s540_owned_paths || s540_fail 'Ricevuta aggiornata non verificata.'
     /bin/launchctl bootstrap "gui/$S540_UID" "$S540_AGENT" > "$S540_RUN/agent-bootstrap.log" 2>&1 || s540_fail 'Avvio app aggiornata non riuscito.'
     S540_BOOTSTRAPPED=1
@@ -513,7 +537,7 @@ s540_upgrade_app() {
     printf '\nS540 Tasti aggiornato alla %s. Driver 0.1.0 invariato; nessun riavvio richiesto dall’aggiornamento.\n' "$S540_APP_VERSION"
     printf 'Backup app precedente: %s\n' "$S540_UPGRADE_BACKUP"
     printf 'Preferenze conservate. Se macOS richiede nuovamente un permesso per l’app aggiornata, abilitalo dal menu dell’app.\n'
-    printf 'Prova F4 microfono, F7 radio, F8 webcam e F9 blocco schermo.\n'
+    printf 'F4, F7 e blocco schermo conservati. F8 segnala che il blocco webcam non è disponibile.\n'
 }
 
 s540_cleanup() {
@@ -564,7 +588,7 @@ s540_install() {
         /usr/bin/cmp -s "$S540_RUN/kext.manifest" "$S540_ROOT/kext.manifest" || s540_fail 'Il driver installato è diverso: nessuna sostituzione automatica.'
         if ! /usr/bin/cmp -s "$S540_RUN/app.manifest" "$S540_ROOT/app.manifest"; then
             S540_OPERATION=upgrade
-            s540_app_upgrade_eligible || s540_fail 'App o backup installati diversi dalle versioni originali 0.1.0/0.1.1: nessun aggiornamento automatico.'
+            s540_app_upgrade_eligible || s540_fail 'App o backup installati diversi dalle versioni originali 0.1.0/0.1.1/0.1.2: nessun aggiornamento automatico.'
             s540_upgrade_app
             return
         fi
@@ -647,12 +671,12 @@ s540_install() {
     "$S540_APP_BIN" --status 2> "$S540_RUN/app-status.stderr" || true
     if [ "$phase" = ready ]; then
         printf '\nInstallazione completata. S540 Tasti è nella barra dei menu.\n'
-        printf 'Prova funzionale: F4 microfono, F7 radio, F8 webcam e F9 blocco schermo.\n'
+        printf 'Funzioni: F4 microfono, F7 radio e F9 blocco schermo. F8 segnala blocco webcam non disponibile.\n'
         printf 'Se F9 richiede permessi, usa la relativa voce nel menu dell’app.\n'
     else
         printf '\nFile e avvio automatico installati; driver ancora in attesa (%s).\n' "$phase"
         printf 'Segui l’eventuale richiesta macOS in Privacy e sicurezza e riavvia normalmente quando richiesto.\n'
-        printf 'L’app attende il driver. Dopo il riavvio verifica F4, F7, F8 e F9 una volta.\n'
+        printf 'L’app attende il driver. Dopo il riavvio sono disponibili F4, F7 e F9; F8 segnala il limite della webcam.\n'
     fi
 }
 
@@ -675,16 +699,19 @@ s540_verify() {
 }
 
 s540_remove_upgrade_backup() {
-    local prefix backup expected other='' index=0
+    local prefix backup expected other index=0 gap=0
     local backups=()
-    # Validate the complete bounded chain before deleting either backup.
-    for prefix in Upgrade PriorUpgrade; do
+    # Validate all three bounded levels before deleting any backup.
+    for prefix in Upgrade PriorUpgrade EarlierUpgrade; do
         backup=$(s540_plist "$S540_RECEIPT" "${prefix}BackupPath" string 2>/dev/null || true)
         expected=$(s540_plist "$S540_RECEIPT" "${prefix}BackupTreeSHA256" string 2>/dev/null || true)
-        if [ -z "$backup" ]; then [ -z "$expected" ] || return 1; continue; fi
-        s540_backup_path_valid "$backup" && [ "$backup" != "$other" ] || return 1
+        if [ -z "$backup" ]; then [ -z "$expected" ] || return 1; gap=1; continue; fi
+        [ "$gap" = 0 ] && s540_backup_path_valid "$backup" || return 1
+        if [ "$index" != 0 ]; then
+            for other in "${backups[@]}"; do [ "$backup" != "$other" ] || return 1; done
+        fi
         if [ -e "$backup" ] || [ -L "$backup" ]; then s540_backup_matches "$backup" "$expected" || return 1; fi
-        backups[$index]="$backup"; index=$((index + 1)); other="$backup"
+        backups[$index]="$backup"; index=$((index + 1))
     done
     [ "$index" != 0 ] || return 0
     for backup in "${backups[@]}"; do

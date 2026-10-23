@@ -2,7 +2,13 @@
 
 Functional integration of the missing Lenovo IdeaPad S540-15IWL GTX (81SW)
 hotkeys: microphone mute (F4), Wi-Fi/Bluetooth power and restoration (F7),
-firmware camera power (F8), and macOS screen lock request (F9 / Command+L).
+camera-firmware event reporting (F8), and macOS screen lock request (F9 / Command+L).
+
+On the tested S540, F8 does not block camera video. App 0.1.3 corrects the
+earlier success popup: EC state 0 and a successful firmware readback are not
+evidence of a disabled camera. The camera remains available after Photo Booth
+is closed and reopened. F8 reports that the video block is unavailable. This
+update corrects feedback; it does not implement a working camera block.
 
 The kernel component matches VPC2004/VPC0 only and requires the observed
 `_CFG=0xFE0D0014`. Deferred ACPI notifications expose a versioned immutable
@@ -31,11 +37,11 @@ Host fixtures, native compilation, packaging, target loading and actual function
 are distinct milestones. Native CI does not load the driver or change host radios.
 
 On the target 81SW, driver 0.1.0 is loaded and publishes a ready snapshot with
-zero query failures. The supplied event ring contains F4 mask `0x0100` and F8
-mask `0x0080`; the camera command returned a successful firmware change and
-readback. An input master mute control is present. The user confirmed F7 and
-F9 working with app 0.1.1. These observations do not independently measure
-microphone silence or the camera image, and do not validate the new HUD.
+zero query failures. The user confirmed F4 microphone mute, F7 Wi-Fi/Bluetooth,
+F9 screen lock and their HUDs with app 0.1.2. The latest F8 event has mask
+`0x0080`, CameraState 0 and result 7 (firmware changed), while video remains
+available after reopening the camera app. The EC flag cannot be treated as a
+camera privacy indication on this target.
 
 ## References
 
@@ -51,8 +57,17 @@ microphone silence or the camera image, and do not validate the new HUD.
   <https://github.com/toy/blueutil>.
 
 No complete YogaSMC/ReYogaSMC binary or EFI from another laptop is installed.
-The camera integration and radio state restoration require the final functional
-check on the intended laptop. Existing F1–F3, F5, F6 and F11/F12 are not remapped.
+The camera video block remains unresolved. Existing F1–F3, F5, F6 and F11/F12
+are not remapped.
+
+## Camera feedback correction 0.1.3
+
+F8 reports an unavailable video block, including when firmware reports a
+successful state change. It never emits a confirmed camera-off HUD. No camera
+recording, USB reset, assistant termination, permission changes or guessed
+vendor commands are added. The signed kernel remains the original 0.1.0.
+Owned app 0.1.0, 0.1.1 and 0.1.2 installations can be upgraded without a driver
+reload. The update preserves the existing app preference and backup chain.
 
 ## App feedback 0.1.2
 
@@ -60,8 +75,8 @@ The app has a keyboard-and-shortcut icon and a matching template menu-bar icon.
 Brief nonactivating HUD panels show the result of F4/F7/F8/F9 actions without
 notification permissions, sound, or focus changes. Baseline reads, reconnects,
 and periodic status polling do not produce action feedback. Camera feedback
-reports firmware state, and screen-lock feedback reports a request rather than
-claiming independent verification of either physical result.
+reported firmware state. App 0.1.3 replaces that camera feedback with the
+confirmed limitation above. Screen-lock feedback reports a request.
 
 The microphone action uses the input mute exposed by CoreAudio. In the installed
 VoodooHDA 3.6.10 implementation that control zeros the input mixer and restores
