@@ -2,7 +2,7 @@
 
 An OpenCore project for **macOS Tahoe 26** on the Lenovo IdeaPad S540-15IWL GTX. The working configuration boots from the external Samsung 960 EVO and uses Intel graphics. The official EFI now includes native-menu Intel Wi-Fi and corrected hardware names.
 
-**Status: October 20, 2026.** Webcam, internal microphone, Bluetooth headset audio and microphone, the 3.5 mm headset jack, and lid-close sleep/open-lid wake have been tested on the laptop. **Hotkey update, October 24: F4 microphone mute, F7 Wi-Fi/Bluetooth control and F9 screen lock are user-confirmed working. F8 camera disablement is NOT WORKING and further work is paused by request.** F1–F3 and non-NVIDIA F11–F12 retain their working status. SD-reader work and operational NVIDIA development are paused.
+**Status: October 20, 2026.** Webcam, internal microphone, Bluetooth headset audio and microphone, the 3.5 mm headset jack, and lid-close sleep/open-lid wake have been tested on the laptop. **Hotkey update, October 24: F4 microphone mute, F7 Wi-Fi/Bluetooth control and F9 screen lock are user-confirmed working. F8 camera disablement is NOT WORKING and further work is paused by request.** F1–F3 and non-NVIDIA F11–F12 retain their working status. SD-reader investigation resumed on October 24; operational NVIDIA development remains paused.
 
 ## Hardware
 
@@ -44,8 +44,8 @@ An OpenCore project for **macOS Tahoe 26** on the Lenovo IdeaPad S540-15IWL GTX.
 | Battery and basic sleep/wake | Working | Battery and basic sleep/wake confirmed; user reports modest runtime and attributes it to an aged battery. No further autonomy test requested. |
 | USB-A and USB-C storage | Working | Tested connectors at 5 Gb/s; USB-C tested in both orientations; active nine-port map confirmed |
 | Internal NVMe detection | Working | 512 GB PM981a available; SMART verified and TRIM reported active |
-| SD reader | Unresolved / paused | No working macOS card-reading result established; experimental drivers remain outside the official EFI |
-| Fingerprint reader | Unresolved | No working macOS authentication support established |
+| SD reader | Unresolved / investigation resumed | O2Micro 1217:8621; direct matching candidate retained, but not confirmed on Tahoe or the current internal EFI. See [SD and fingerprint scope](docs/status/sd-fingerprint.md). |
+| Fingerprint reader | No macOS biometric integration | Goodix 27c6:55b4 enumerates on USB. The reviewed community driver is for Linux; native Touch ID requires Apple Secure Enclave integration. See [scope and dual-boot limits](docs/status/sd-fingerprint.md). |
 | HDMI | Not working | No display output established; NVIDIA-related investigation remains deferred |
 | USB-C video | Not verified | Video capability and routing not established |
 | NVIDIA diagnostics | Confirmed checkpoints | V9 kernel preparation and the complete-image idle-loader ABI passed; see the consolidated validation record |
@@ -82,7 +82,7 @@ The existing native workflows already group the automatic checks: the idle-image
 ## Remaining work
 
 1. Preserve the confirmed [function-key actions](docs/guides/function-keys.md), including F4, F7 and F9. F8 camera disablement is recorded as non-working and paused; no further F8 tests or builds are planned unless explicitly resumed.
-2. Keep SD-reader work and operational NVIDIA development paused until resumed explicitly.
+2. Complete the resumed [SD-reader investigation](docs/status/sd-fingerprint.md) against the current non-NVIDIA internal EFI. Fingerprint capture/matching development is distinct from native Touch ID and is not a ready EFI feature. Keep operational NVIDIA development paused.
 3. Treat battery runtime, long standby, sustained thermal behavior and storage endurance as unmeasured coverage, not as demonstrated faults requiring new patches.
 
 See the [Roadmap](docs/status/roadmap.md) for grouped acceptance criteria.

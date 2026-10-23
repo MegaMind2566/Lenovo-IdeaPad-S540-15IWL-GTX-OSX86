@@ -8,6 +8,8 @@ The user reconfirms that USB operation was already checked; no repeat USB test i
 
 A subsequent user concern about Low Power Mode was checked with one battery OFF–ON–ON–OFF CPU comparison on 24 October. The mode had been disabled; after enabling it for battery use, both ON phases show about 11.4 W estimated package power and 2.4 GHz active frequency, versus 34.4–36.5 W and 3.89–4.00 GHz OFF. The original battery-on / AC-off preferences were restored. This closes the requested CPU-response check; it does not reopen autonomy measurement or establish equal-work efficiency. OFF phases contain thermal/performance-limit flags despite Nominal pressure; detailed evidence and limits are in [Battery and sleep](battery-sleep.md#low-power-mode-under-cpu-load--24-october-2026).
 
+The user subsequently resumed SD-reader and fingerprint investigation before consolidating the **non-NVIDIA EFI**. This supersedes only the SD pause; NVIDIA, HDMI and F8 remain outside the active work. The latest direct SD candidate is statically verified, but the current internal EFI must be compared before preparing its test delta. Native fingerprint authentication is not promised as an EFI fix; the reviewed technical boundary is recorded separately.
+
 ## Current work order
 
 | Order | Work | Scope |
@@ -16,10 +18,10 @@ A subsequent user concern about Low Power Mode was checked with one battery OFF�
 | Paused | F8 camera disablement | NOT WORKING: the firmware camera flag changes but video capture continues after reopening Photo Booth. The user accepts this limitation; no additional F8 tests or builds are planned unless explicitly resumed. |
 | Consolidated | Official EFI | Native Wi-Fi, hardware names, USB mapping, CPU/battery reporting and the existing audio stack are retained. The config removing the old NVMe-block entry has been delivered; a subsequent boot with that final cleanup has not yet been explicitly confirmed. |
 | Paused | NVIDIA implementation and target tests | v9 diagnostic startup and the complete-image idle-loader ABI have passed. Group the next original RM/transport/GSP work into one operational checkpoint after its admission gates; do not rerun completed milestones. |
-| Paused | O2Micro SD reader | Same card works in Windows; macOS reader operation remains unresolved. Native and older Apple-driver experiments are separate from the official EFI. The latest direct O2 match candidate has not been confirmed working. |
+| Active investigation | O2Micro SD reader | Resumed by request on 24 October, for the current internal non-NVIDIA EFI. Reuse the verified direct-match candidate; its old 240 GB instructions require current-config adaptation. No card-reading success is claimed. See [SD and fingerprint scope](sd-fingerprint.md). |
 | Paused | External displays | HDMI has no confirmed image; physical GPU routing remains unresolved. USB-C video capability/operation is unverified. |
 | Later, if needed | Reliability and refinements | Measured battery runtime, extended sleep/peripheral recovery, sustained storage/cooling, fan RPM and audio equalisation remain separate from basic confirmed operation. No new patch is inferred from missing measurements. |
-| Research | Fingerprint reader | USB mapping is established; a usable macOS integration is not established. |
+| Research / integration limit | Fingerprint reader | Goodix `27c6:55b4` already enumerates on HS02. No macOS driver was established. Native Touch ID depends on Apple Secure Enclave integration; the Linux reference driver also changes Windows pairing. A separate userspace port is not an EFI completion claim. See [scope](sd-fingerprint.md). |
 
 ## Confirmed official-configuration baseline
 
