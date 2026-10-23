@@ -1,0 +1,25 @@
+{
+  "actual_codesigning_performed": false,
+  "actual_lenovo_test_performed": false,
+  "actual_native_package_created": false,
+  "actual_unzip_mode_hash_roundtrip": true,
+  "corresponding_source_files": 6796,
+  "evidence_sha256": {
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-package/evidence/actual-source-archive-controls.json": "d7c8e4eabb4da8ac5802ba3949a3495413b65e72cbd7025bde5a5f153bbff9bd"
+  },
+  "executable_source_modes_restored": 4,
+  "format": 1,
+  "linux_native_packaging_refused_before_output": true,
+  "missing_original_notice_refused": true,
+  "original_files": 4005,
+  "project_files": 213,
+  "sdk_files": 1232,
+  "source_sha256": {
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-package/TARGET-GUIDE.md": "00d6bb2cdd7b877f7209d9e7dd25a7b22ec53f3046b38fd5ee44eef1cd7f835b",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-package/check.py": "e7fccf322fb54ad48424411e72e0a80a98911252aa834cf79cf3946e28a270ab",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-package/package.py": "1aa2338ce9c4f971d59c94828ef1500c362b0af75e3f9827937c82af944a16c7",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-package/test-retained-first-initialization.sh": "0b530862992ce6559d1c427b942a1b5035cc531131c2e76b00addabb7c352114"
+  },
+  "status": "source-archive-and-package-refusal-controls-passed",
+  "system_security_changed": false
+}

@@ -1,0 +1,32 @@
+{
+  "actual_unzip_restored_inventory_modes": true,
+  "archive": {
+    "files": 6796,
+    "original_source_files": 4005,
+    "path": "actual-corresponding-source.zip",
+    "project_source_files": 213,
+    "sdk_source_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+    "sha256": "3d657ba83dfef29b997fbee32e81597b2b5d6cfbebd499a9419668e09304e912"
+  },
+  "checks": {
+    "executable": 4,
+    "original": 4005,
+    "project": 213,
+    "sdk": 1232
+  },
+  "composition_sha256": "5b88f913b5ecb582aabeb3bd8fec2c3a920e5ce678b8c59dee139722f8a2598d",
+  "format": 1,
+  "gpu_access": false,
+  "host_control": true,
+  "kernel_execution": "not_tested",
+  "missing_original_notice_refused": true,
+  "native_darwin_packaging": false,
+  "nonnative_package": "refused-before-native-output",
+  "source_sha256": {
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-package/TARGET-GUIDE.md": "00d6bb2cdd7b877f7209d9e7dd25a7b22ec53f3046b38fd5ee44eef1cd7f835b",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-package/check.py": "e7fccf322fb54ad48424411e72e0a80a98911252aa834cf79cf3946e28a270ab",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-package/package.py": "1aa2338ce9c4f971d59c94828ef1500c362b0af75e3f9827937c82af944a16c7",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-package/test-retained-first-initialization.sh": "0b530862992ce6559d1c427b942a1b5035cc531131c2e76b00addabb7c352114"
+  },
+  "status": "actual-source-archive-controls-passed"
+}
