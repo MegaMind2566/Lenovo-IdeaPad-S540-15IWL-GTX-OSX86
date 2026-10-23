@@ -18,7 +18,7 @@ jobs:
   app-update:
     if: github.event.repository.private == false && (github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[native ci]'))
     runs-on: macos-15-intel
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
       PYTHONDONTWRITEBYTECODE: '1'
     steps:

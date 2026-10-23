@@ -2,7 +2,7 @@
   "app_version": "0.1.3",
   "builder_inputs": {
     "build_s540_hotkeys.py": "700202eafcde57e70c40db3f2313784dddcf9b2c60845719be8fef5fa20cd399",
-    "build_s540_hotkeys_app_update.py": "d6eec7c1ce4ddb6a51d3d4a956c91203c2b084414e67b214f3d8f50680f0fdd5"
+    "build_s540_hotkeys_app_update.py": "6b8f14a73796dbae1716fc39ce10f784b29694868e9f5c46cb9792f9add101e1"
   },
   "files": {
     "LEGGIMI.txt": "3d8db3c0e601d792a7cea3184bce011c0c31331ab11e318ca20ae969b51f90c3",

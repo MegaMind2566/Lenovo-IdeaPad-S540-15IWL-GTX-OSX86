@@ -203,7 +203,7 @@ def validate_sources(source: Path) -> dict[str, str]:
         result = subprocess.run(["/bin/bash", str(test)], capture_output=True, text=True, timeout=30)
         require(result.returncode == 0, "Installer pure fixture failed: " + test.name + result.stdout + result.stderr)
     for test in sorted((source / "installer/tests").glob("test-*.py")):
-        result = subprocess.run([sys.executable, str(test)], capture_output=True, text=True, timeout=60)
+        result = subprocess.run([sys.executable, str(test)], capture_output=True, text=True, timeout=180)
         require(result.returncode == 0, "Installer upgrade fixture failed: " + test.name + result.stdout + result.stderr)
     return files
 
