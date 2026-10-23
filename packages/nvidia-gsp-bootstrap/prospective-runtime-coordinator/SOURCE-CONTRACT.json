@@ -1,0 +1,18 @@
+{
+  "format": 1,
+  "scope": "separate-manual-retained-first-initialization",
+  "base_composition_sha256": "72b7d5a5d93504218e8a7953d79c90c1609e4580c55922deb2ec5dab13de24d8",
+  "prerequisites": ["pm-event", "dma-stop", "checked-context", "first-lock-observation"],
+  "input_sha256": {
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp": "2d16539f0596c00a0576f686389ad583e072784c21ae46880d2c11c9fbf72f53",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.hpp": "e599f50a7565b08ad04248d53afe04bcf48bd53487e38c282b88b5aceb312bdd",
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRmLifecycle.c": "d8304f6a91a9b4671d8ccfe56ba5805e601b2962e0a7296dc5a1c9612711f27b"
+  },
+  "production_candidate_allowed": false,
+  "formal_stack_proof": false,
+  "whole_dma_stop_proven": false,
+  "pm_acknowledgement_authorized": false,
+  "physical_reclamation_authorized": false,
+  "normal_unload_after_attempt": false,
+  "acceleration_test": false
+}

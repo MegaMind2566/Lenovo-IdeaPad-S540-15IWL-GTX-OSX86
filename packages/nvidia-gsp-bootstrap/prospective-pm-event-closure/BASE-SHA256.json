@@ -1,0 +1,6 @@
+{
+  "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c": "8f86f051b92dd9ce2818b0dc91cd5b9f189a42db1265fe4b4f4d76352958aa88",
+  "packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.cpp": "49eeb79853a8c6a8ecd411c7f2d17da72376675b4dfc57b570f08d0a3bb0f2b1",
+  "packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.hpp": "4e6b2aa100c28fb3c973ba2966e26077dfd4ad364163c21d753bfcab3c5b6e05",
+  "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp": "69b903c3c955b4a286eac05a59423f10d2acb0c022c9076fd4433024cd537ee8"
+}

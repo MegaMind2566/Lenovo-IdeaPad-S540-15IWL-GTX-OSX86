@@ -1,0 +1,21 @@
+{
+  "format": 1,
+  "scope": "current-native-retained-experiment-stack-measurement",
+  "inventory": "1100 actual original make units plus every current project source-plan unit",
+  "measurement": "freshly decoded current native Mach-O objects and actual compiler .su sidecars; complete command and .d dependency bindings",
+  "final_selection": "actual final kernel text nlist aliases; ambiguous local owners retained conservatively; missing auxiliary captures explicitly unknown",
+  "context_policy": "current receiver layouts are rechecked; unknown aliases and all unproven indirect edges remain barriers; no historical graph rewrites transferred",
+  "framework_allowance_bytes": 2048,
+  "unknown_allowance_bytes": 4096,
+  "recursion_allowance_bytes": 1024,
+  "exception_allowance_bytes": 1024,
+  "required_capacity": "round up actual diagnostic acyclic frame sum plus explicit allowances to4096 bytes; equality allowed",
+  "experimental_worker_capacity_limit_bytes": 16384,
+  "experimental_irq_capacity_assumption_bytes": 16384,
+  "actual_worker_capacity_source": "target kern.stack_size; kern.stack_depth_max is not capacity",
+  "physical_irq_capacity_observed": false,
+  "unknown_contributions_formally_bounded": false,
+  "kernel_stack_bound_proven": false,
+  "scheduler_completion_bound_proven": false,
+  "production_candidate_allowed": false
+}

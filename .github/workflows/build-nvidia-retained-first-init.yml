@@ -1,0 +1,242 @@
+name: Build NVIDIA retained first-initialization test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/native-ci/nvidia-retained-first-init-request.json'
+  workflow_dispatch:
+    inputs:
+      batch_id:
+        description: Unique reviewed source batch identifier
+        required: true
+        type: string
+
+# Unrequested path-filter fallbacks cannot cancel or queue ahead of a requested
+# native validation. Requested runs share one group across branches.
+concurrency:
+  group: ${{ (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[native ci]'))) && 's540-nvidia-retained-first-init' || format('s540-unrequested-{0}', github.run_id) }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  source-preflight:
+    if: ${{ github.event.repository.private == false && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[native ci]'))) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    outputs:
+      requested: ${{ steps.request.outputs.requested }}
+      batch_id: ${{ steps.request.outputs.batch_id }}
+      source_commit: ${{ steps.request.outputs.source_commit }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Independently validate the explicit one-file request and public repository
+        id: request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(gh api "repos/$GITHUB_REPOSITORY" --jq .private)" = false
+          python3 - <<'PY'
+          import json, os, re, subprocess
+          from pathlib import Path
+          event=json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text())
+          call=lambda *args:subprocess.check_output(args,text=True).strip()
+          head=call('git','rev-parse','HEAD')
+          assert head==os.environ['GITHUB_SHA']
+          if os.environ['GITHUB_EVENT_NAME']=='workflow_dispatch':
+              batch=event['inputs']['batch_id']
+              source=head
+          else:
+              assert os.environ['GITHUB_REF']=='refs/heads/main'
+              message=call('git','show','-s','--format=%B','HEAD')
+              assert '[native ci]' in message and '[skip ci]' not in message
+              path='.github/native-ci/nvidia-retained-first-init-request.json'
+              changed=call('git','diff-tree','--no-commit-id','--name-status','-r','HEAD').splitlines()
+              assert changed in ([f'A\t{path}'],[f'M\t{path}']), changed
+              request=json.loads(Path(path).read_text())
+              assert set(request)=={'format','scope','batch_id','source_commit'}
+              assert type(request['format']) is int and request['format']==1
+              assert request['scope']=='s540-retained-first-initialization'
+              source=call('git','rev-parse','HEAD^')
+              assert request['source_commit']==source
+              batch=request['batch_id']
+          assert isinstance(batch,str) and re.fullmatch(r'[a-z0-9][a-z0-9-]{7,95}',batch)
+          assert re.fullmatch(r'[0-9a-f]{40}',source)
+          with open(os.environ['GITHUB_OUTPUT'],'a') as out:
+              out.write(f'requested=true\nbatch_id={batch}\nsource_commit={source}\n')
+          PY
+      - name: Refuse all overlapping native runs and fetch only the pinned historical inputs
+        if: steps.request.outputs.requested == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import os, sys
+          from pathlib import Path
+          sys.path.insert(0,'builders')
+          import check_nvidia_idle_resume_cache as cache
+          cache.NATIVE_PATHS.add('.github/workflows/build-nvidia-retained-first-init.yml')
+          import prepare_nvidia_public_callback_rebuild as preparation
+          preparation.download_cache(Path(os.environ['RUNNER_TEMP'])/'nvidia-idle-4939252-native')
+          PY
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        if: steps.request.outputs.requested == 'true'
+        with:
+          repository: NVIDIA/open-gpu-kernel-modules
+          ref: 1a82fbfda8f321b056eb3568850f9316c5e465c5
+          path: build-src/nvidia-upstream
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        if: steps.request.outputs.requested == 'true'
+        with:
+          repository: acidanthera/MacKernelSDK
+          ref: 3f750085caa17ec3a7880f11c11bf4f48cd6a164
+          path: build-src/MacKernelSDK
+          persist-credentials: false
+      - name: Verify the complete source preparation and focused contract controls
+        if: steps.request.outputs.requested == 'true'
+        run: |
+          set -euo pipefail
+          python3 -B builders/build_nvidia_retained_trial.py --phase prepare \
+            --upstream build-src/nvidia-upstream --kernel-sdk build-src/MacKernelSDK \
+            --cache "$RUNNER_TEMP/nvidia-idle-4939252-native" --output build/retained-first-init
+          python3 -B builders/build_nvidia_retained_trial.py --phase verify \
+            --upstream build-src/nvidia-upstream --kernel-sdk build-src/MacKernelSDK \
+            --cache "$RUNNER_TEMP/nvidia-idle-4939252-native" --output build/retained-first-init
+          python3 -B builders/tests/test_nvidia_shutdown_successor.py
+          python3 -B packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/tests/test_policy.py
+          python3 -B packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/tests/test_workflow.py
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          names=['builders/build_nvidia_retained_trial.py','builders/prepare_nvidia_retained_trial.py']
+          for directory in ('prospective-native-target-preparation','prospective-experimental-image',
+              'prospective-experimental-target-package','prospective-aggregate-stack-closure'):
+              names += [str(p) for p in (Path('packages/nvidia-gsp-bootstrap')/directory).rglob('*.py')]
+          for name in names:ast.parse(Path(name).read_text(),filename=name)
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always() && steps.request.outputs.requested == 'true'
+        with:
+          name: S540-retained-source-preflight-${{ steps.request.outputs.batch_id }}
+          path: |
+            build/retained-first-init/**/*.json
+            build/retained-first-init/**/*.log
+          if-no-files-found: warn
+          retention-days: 1
+          compression-level: 9
+
+  native-link-and-package:
+    if: ${{ github.event.repository.private == false && needs.source-preflight.outputs.requested == 'true' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[native ci]'))) }}
+    needs: source-preflight
+    runs-on: macos-15-intel
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Prove native Intel host and actual numeric Mach-O decoder before full compilation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(gh api "repos/$GITHUB_REPOSITORY" --jq .private)" = false
+          test "$(uname -s)" = Darwin
+          test "$(uname -m)" = x86_64
+          S540_DECODER="$(xcrun --find llvm-objdump 2>/dev/null || true)"
+          if ! test -x "$S540_DECODER"; then
+            for S540_CANDIDATE in /usr/local/opt/llvm/bin/llvm-objdump /usr/local/opt/llvm@18/bin/llvm-objdump; do
+              if test -x "$S540_CANDIDATE"; then S540_DECODER="$S540_CANDIDATE"; break; fi
+            done
+          fi
+          test -x "$S540_DECODER"
+          mkdir -p "$RUNNER_TEMP/s540-decoder-probe"
+          cat > "$RUNNER_TEMP/s540-decoder-probe/probe.c" <<'C'
+          __attribute__((noinline)) int s540_decoder_callee(volatile int *p) { return *p+3; }
+          int s540_decoder_caller(volatile int *p) { return s540_decoder_callee(p)+7; }
+          C
+          /usr/bin/clang -arch x86_64 -mkernel -fstack-usage -c "$RUNNER_TEMP/s540-decoder-probe/probe.c" -o "$RUNNER_TEMP/s540-decoder-probe/probe.o"
+          "$S540_DECODER" --macho --disassemble --no-show-raw-insn --no-symbolic-operands "$RUNNER_TEMP/s540-decoder-probe/probe.o" > "$RUNNER_TEMP/s540-decoder-probe/probe.txt"
+          python3 - "$RUNNER_TEMP/s540-decoder-probe/probe.txt" <<'PY'
+          from pathlib import Path
+          import sys
+          sys.path.insert(0,'builders')
+          import nvidia_stack_usage as stack
+          rows=stack.parse_disassembly(Path(sys.argv[1]).read_text())
+          assert rows and any(row['mnemonic'].startswith('call') for row in rows)
+          assert not any(row['mnemonic']=='<undecoded>' for row in rows)
+          PY
+          printf 'S540_LLVM_OBJDUMP=%s\n' "$S540_DECODER" >> "$GITHUB_ENV"
+      - name: Recheck overlap and fetch the independently pinned namespace and firmware inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import os,sys
+          from pathlib import Path
+          sys.path.insert(0,'builders')
+          import check_nvidia_idle_resume_cache as cache
+          cache.NATIVE_PATHS.add('.github/workflows/build-nvidia-retained-first-init.yml')
+          import prepare_nvidia_public_callback_rebuild as preparation
+          preparation.download_cache(Path(os.environ['RUNNER_TEMP'])/'nvidia-idle-4939252-native')
+          PY
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: NVIDIA/open-gpu-kernel-modules
+          ref: 1a82fbfda8f321b056eb3568850f9316c5e465c5
+          path: build-src/nvidia-upstream
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: acidanthera/MacKernelSDK
+          ref: 3f750085caa17ec3a7880f11c11bf4f48cd6a164
+          path: build-src/MacKernelSDK
+          persist-credentials: false
+      - name: Prepare, compile, link, measure and sign one retained experimental target package
+        env:
+          S540_SOURCE_COMMIT: ${{ needs.source-preflight.outputs.source_commit }}
+          S540_BATCH_ID: ${{ needs.source-preflight.outputs.batch_id }}
+        run: |
+          set -euo pipefail
+          python3 -B builders/build_nvidia_retained_trial.py --phase all \
+            --upstream build-src/nvidia-upstream --kernel-sdk build-src/MacKernelSDK \
+            --cache "$RUNNER_TEMP/nvidia-idle-4939252-native" --output build/retained-first-init \
+            --cc /usr/bin/clang --cxx /usr/bin/clang++ --llvm-objdump "$S540_LLVM_OBJDUMP"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: S540ExperimentalInitRetained-${{ needs.source-preflight.outputs.batch_id }}
+          path: |
+            build/retained-first-init/package/S540ExperimentalInitRetained.zip
+            build/retained-first-init/package/packaging-attestation.json
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 0
+      - name: Compress current native evidence for a strictly validated resume
+        if: always()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import tarfile
+          root=Path('build/retained-first-init')
+          if root.exists():
+              with tarfile.open('build/S540-retained-current-native-evidence.tar.gz','w:gz',compresslevel=9) as out:
+                  for area in ('native','image'):
+                      path=root/area
+                      if path.exists():out.add(path,arcname=area,recursive=True)
+                  for path in root.glob('*.json'):out.add(path,arcname=path.name)
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: S540-retained-current-native-evidence-${{ needs.source-preflight.outputs.batch_id }}
+          path: build/S540-retained-current-native-evidence.tar.gz
+          if-no-files-found: warn
+          retention-days: 1
+          compression-level: 0

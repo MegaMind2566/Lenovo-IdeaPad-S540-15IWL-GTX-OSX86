@@ -1,0 +1,21 @@
+{
+  "format": 1,
+  "scope": "actual-power-event-cancellation-ordering",
+  "parent_composition_sha256": "72b7d5a5d93504218e8a7953d79c90c1609e4580c55922deb2ec5dab13de24d8",
+  "ordering": [
+    "PM service guard captures genuine event",
+    "fixed exact state and generation cancellation control closes OPERATION",
+    "Power event timestamp publication",
+    "PM guard unlock",
+    "external stop enqueue hook"
+  ],
+  "coupling": "Exact owner-thread IDLE binding; Power guard serializes acquire/release and actual callback. POWER_COUPLED prevents Unbind and service finish.",
+  "clock_failure": "Zero, missing or backward clock closes OPERATION with deadline zero; no cleanup-time authority is fabricated. First published revocation remains immutable.",
+  "preserved": ["genuine in-flight commit serial and leave", "existing cancellation Snapshot ABI", "permanent retained owner lifetime", "all ancestor source validators"],
+  "production_candidate_allowed": false,
+  "hardware_stop_proven": false,
+  "physical_release_authorized": false,
+  "pm_acknowledgement_authorized": false,
+  "pm_30_second_scheduler_bound_proven": false,
+  "kernel_execution": "not_tested"
+}

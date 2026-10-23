@@ -1,0 +1,20 @@
+{
+  "format": 1,
+  "scope": "manual-once-per-boot-retained-first-initialization",
+  "protocol_version": 1,
+  "request_bytes": 144,
+  "identity_bytes": 80,
+  "native_profile_bytes": 104,
+  "target_build": "25G241",
+  "target_darwin_release": "25.6.0",
+  "target_pci": {"vendor_device": "1f9110de", "class_revision": "030000a1", "subsystem": "380617aa"},
+  "automatic_gpu_start_on_module_load": false,
+  "normal_unload_after_request": false,
+  "retains_facade_provider_module_until_reboot": true,
+  "diagnostic_snapshot_grants_release_authority": false,
+  "production_candidate_allowed": false,
+  "whole_dma_stop_proven": false,
+  "formal_stack_capacity_proven": false,
+  "pm_acknowledgement_authorized": false,
+  "acceleration_test": false
+}

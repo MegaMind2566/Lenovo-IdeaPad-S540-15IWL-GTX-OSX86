@@ -1,0 +1,39 @@
+{
+  "checks": {
+    "plain": 97,
+    "sanitized": 97
+  },
+  "format": 1,
+  "hardware_stop_proven": false,
+  "kernel_execution": "not_tested",
+  "negative_controls": [
+    "actual_kernel_callback_without_atomic_close",
+    "changed_parent_bytes",
+    "delayed_hook_without_atomic_close",
+    "destroy_coupled_power_owner",
+    "invented_invalid_clock_deadline",
+    "unbind_without_pm_hold"
+  ],
+  "output_source_sha256": {
+    "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c": "38f8b9d8075a7306c4c5a42181f80e924eda1cfb7e383d548e6ec27ebaf747d5",
+    "packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.cpp": "8d56d045d40048ef843db036e3539a2f008ca249aabe7052f9f87f4d62596a77",
+    "packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.hpp": "07daaace47e94ed9c7d5dbde4884ce4d4b58df8c59c2bdd95c98c7e486c2ca4b",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp": "2d16539f0596c00a0576f686389ad583e072784c21ae46880d2c11c9fbf72f53"
+  },
+  "physical_release_authorized": false,
+  "pm_acknowledgement_authorized": false,
+  "report_path": "build/pm-event-controls-3/results.json",
+  "report_sha256": "e74124e82e5fc32bbf2ca7d0c0506703f759ad4b54efb86b3b081dbed662c09e",
+  "source_sha256": {
+    "BASE-SHA256.json": "8c141ffcd0be16c392d38492ff5e4f7027083157931ce3b14f25925f9c349215",
+    "S540NvidiaPowerCoupling.h": "26d544bdbd459219b8ab5ec5bcbd776056dda5e6ca67243c183ede0c53d68e78",
+    "SOURCE-CONTRACT.json": "1103cde2a02901b53131c0b9c1444a9d75e8eca2f51c353ebb34920056b33a3c",
+    "check.py": "33550daded25cc70ec2c87435dcbfedbd9da5d345aaf00d7c3a7c9191c890c35",
+    "power-coupling.c.inc": "3500bd2bc3838e255ac4aae9a02d239ec1d836d73b7ec4e76b455559f0ba2f82",
+    "power-lease.cpp.inc": "d1eac4593d19be4a7ce214d3319c63d3ecc5f16eb44c3ee2682c0f2633f78a2f",
+    "power-protocol.cpp.inc": "d1d5519e6a2a5a60d53169c102d8ab02136208263352d2aaa6239153923349d2",
+    "prepare.py": "97b43388d35aee4179e9d7140dd29e4eb1ffcfb5c0f1843557049a0a04af30f6",
+    "tests/check_pm_event.cpp": "c30bcf930710466d277c9a1fb659422bd9f5a12a05c1eb9d0cc2f70503671025"
+  },
+  "status": "passed-actual-cancellation-and-power-controls"
+}
