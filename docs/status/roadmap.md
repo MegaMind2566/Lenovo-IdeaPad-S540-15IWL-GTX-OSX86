@@ -4,6 +4,8 @@ Status updated on **October 20, 2026**. The official EFI on the external Samsung
 
 Hotkey update, **October 24, 2026**: F4, F7 and F9 are confirmed. **F8 camera disablement is non-working and paused at the user’s request.** This update does not resume other paused work.
 
+The user reconfirms that USB operation was already checked; no repeat USB test is requested. Battery runtime is described as modest and attributed by the user to an aged battery. Autonomy measurement is not an active task, and no macOS power-management repair is inferred from that report. The current routine-verification round is closed; paused items remain paused.
+
 ## Current work order
 
 | Order | Work | Scope |

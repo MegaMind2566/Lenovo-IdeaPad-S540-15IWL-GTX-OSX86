@@ -40,7 +40,7 @@ An OpenCore project for **macOS Tahoe 26** on the Lenovo IdeaPad S540-15IWL GTX.
 | Touchpad and gestures | Working | ELAN0662 gestures and daily operation confirmed; F6 remains within the current F4–F10 review group |
 | CPU power management and telemetry | Working | X86PlatformPlugin active; historical frequency, temperature and estimated package-power responses recorded |
 | RAM and hardware names | Verified | 12 GB DDR4-2400; expandable memory status and CPU/GPU/panel labels corrected |
-| Battery and basic sleep/wake | Working | Battery detected; lid-close stop and open-lid resume confirmed by the user; measured runtime remains open |
+| Battery and basic sleep/wake | Working | Battery and basic sleep/wake confirmed; user reports modest runtime and attributes it to an aged battery. No further autonomy test requested. |
 | USB-A and USB-C storage | Working | Tested connectors at 5 Gb/s; USB-C tested in both orientations; active nine-port map confirmed |
 | Internal NVMe detection | Working | 512 GB PM981a available; SMART verified and TRIM reported active |
 | SD reader | Unresolved / paused | No working macOS card-reading result established; experimental drivers remain outside the official EFI |

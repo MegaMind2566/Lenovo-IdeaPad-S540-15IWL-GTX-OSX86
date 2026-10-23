@@ -16,6 +16,10 @@ Updated on **20 October 2026** for the working official EFI on the external Sams
 
 The lid result closes the ordinary close/open check. No extra lid collector, power patch or repeat cycle is requested. It does not establish overnight drain, prolonged sleep reliability, measured battery autonomy or hibernation. Full peripheral recovery is claimed only where separately confirmed by the user.
 
+## User assessment — 24 October 2026
+
+The user reports modest battery runtime and attributes it to an aged battery. This is a user-reported explanation, not a new capacity comparison or a measured system-power result. No further autonomy test or macOS power-setting change is requested on that basis. The earlier Good-health/296-cycle inventory remains historical evidence and does not quantify present wear.
+
 ## Earlier counters and measurements
 
 The 13 October report recorded Sleep Count 1, User Wake Count 1 and Dark Wake Count 0. Those counters cover that earlier boot and do not identify a controlled cycle. The 20 October hardware collection preceded the user's later direct lid confirmation; absence of a new cycle in that collection does not contradict the subsequent result.
