@@ -30,7 +30,7 @@ An OpenCore project for **macOS Tahoe 26** on the Lenovo IdeaPad S540-15IWL GTX.
 | Native-menu Wi-Fi | Working | AirportItlwm 2.4.0, native menu/network selection; `itlwm` disabled; official Samsung EFI confirmed |
 | Internal speakers and microphone | Working | VoodooHDA 3.6.10; video recording tested both webcam and microphone |
 | 3.5 mm headset output, microphone and switching | Working | Headphone playback, microphone input and speaker/headphone switching tested |
-| Bluetooth headset audio and microphone | Working | Playback, voice capture, disconnection and reconnection tested |
+| Bluetooth headset audio and microphone | Working | Playback and headset microphone also confirmed after reconnection following sleep/wake on October 24; automatic reconnection was not separately established |
 | Webcam | Working | Video recording confirmed |
 | F1–F3 audio keys | Working | Confirmed again on October 20; no repeat test required |
 | F4, F7 and F9 icon actions | Working | Microphone mute, Wi-Fi/Bluetooth control and screen lock confirmed by the user with S540 Tasti |
