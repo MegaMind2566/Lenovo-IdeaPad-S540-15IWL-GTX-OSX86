@@ -1,0 +1,10 @@
+{
+  "composed": {
+    "graph_sha256": "f2ab97f8d8160ad7963287e50c9f87806b40e51e14106ba75c0715475aa6db37",
+    "matched": true
+  },
+  "raw": {
+    "matched": false,
+    "message": "Actual loader initialization differs from the exact SDK metaclass reference"
+  }
+}

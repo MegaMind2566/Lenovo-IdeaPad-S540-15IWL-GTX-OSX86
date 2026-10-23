@@ -217,13 +217,43 @@ jobs:
           ref: 3f750085caa17ec3a7880f11c11bf4f48cd6a164
           path: build-src/MacKernelSDK
           persist-credentials: false
-      - name: Prepare, compile, link, measure and sign one retained experimental target package
+      - name: Prepare current retained experimental sources
         env:
           S540_SOURCE_COMMIT: ${{ needs.source-preflight.outputs.source_commit }}
           S540_BATCH_ID: ${{ needs.source-preflight.outputs.batch_id }}
         run: |
           set -euo pipefail
-          python3 -B builders/build_nvidia_retained_trial.py --phase all \
+          python3 -B builders/build_nvidia_retained_trial.py --phase prepare \
+            --upstream build-src/nvidia-upstream --kernel-sdk build-src/MacKernelSDK \
+            --cache "$RUNNER_TEMP/nvidia-idle-4939252-native" --output build/retained-first-init \
+            --cc /usr/bin/clang --cxx /usr/bin/clang++ --llvm-objdump "$S540_LLVM_OBJDUMP"
+      - name: Compile the complete current native source matrix
+        env:
+          S540_SOURCE_COMMIT: ${{ needs.source-preflight.outputs.source_commit }}
+          S540_BATCH_ID: ${{ needs.source-preflight.outputs.batch_id }}
+        run: |
+          set -euo pipefail
+          python3 -B builders/build_nvidia_retained_trial.py --phase native \
+            --upstream build-src/nvidia-upstream --kernel-sdk build-src/MacKernelSDK \
+            --cache "$RUNNER_TEMP/nvidia-idle-4939252-native" --output build/retained-first-init \
+            --cc /usr/bin/clang --cxx /usr/bin/clang++ --llvm-objdump "$S540_LLVM_OBJDUMP"
+      - name: Link and measure the current experimental kernel image
+        env:
+          S540_SOURCE_COMMIT: ${{ needs.source-preflight.outputs.source_commit }}
+          S540_BATCH_ID: ${{ needs.source-preflight.outputs.batch_id }}
+        run: |
+          set -euo pipefail
+          python3 -B builders/build_nvidia_retained_trial.py --phase link \
+            --upstream build-src/nvidia-upstream --kernel-sdk build-src/MacKernelSDK \
+            --cache "$RUNNER_TEMP/nvidia-idle-4939252-native" --output build/retained-first-init \
+            --cc /usr/bin/clang --cxx /usr/bin/clang++ --llvm-objdump "$S540_LLVM_OBJDUMP"
+      - name: Sign and package the current retained first-initialization test
+        env:
+          S540_SOURCE_COMMIT: ${{ needs.source-preflight.outputs.source_commit }}
+          S540_BATCH_ID: ${{ needs.source-preflight.outputs.batch_id }}
+        run: |
+          set -euo pipefail
+          python3 -B builders/build_nvidia_retained_trial.py --phase package \
             --upstream build-src/nvidia-upstream --kernel-sdk build-src/MacKernelSDK \
             --cache "$RUNNER_TEMP/nvidia-idle-4939252-native" --output build/retained-first-init \
             --cc /usr/bin/clang --cxx /usr/bin/clang++ --llvm-objdump "$S540_LLVM_OBJDUMP"

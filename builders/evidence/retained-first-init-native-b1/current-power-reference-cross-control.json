@@ -1,0 +1,11 @@
+{
+  "approved_framework_imports": 285,
+  "current_class_and_protocol_in_actual_compiler_dependencies": true,
+  "exact_initializer_graph_matches": true,
+  "existing_actual_cross_object_source_and_full_dependencies_reverified": true,
+  "host_control": true,
+  "module_loaded": false,
+  "native_darwin_compilation": false,
+  "private_dependencies": 5,
+  "status": "passed-current-composed-SDK-reference-control"
+}

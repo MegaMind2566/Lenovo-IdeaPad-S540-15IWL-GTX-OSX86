@@ -11,6 +11,7 @@ from copy import copy
 import hashlib
 import json
 from pathlib import Path
+import re
 import struct
 import subprocess
 import sys
@@ -161,6 +162,46 @@ def sdk_kmod_layout(output,cc,flags,execute):
         dependency_sha256=native.dependencies(obj.with_suffix('.d'),source,output,output,output,cc))
 
 
+def power_reference_source(output,composed):
+    """Instantiate only the reviewed SDK macro against current class layout.
+
+    The shared Service declaration itself is unchanged. Its embedded Protocol
+    type lives in the composed Power.hpp and gained the genuine cancellation
+    coupling fields. A reference under ROOT would quote-include the historical
+    Protocol instead and attest a stale sizeof(Service). Keep the exact macro
+    and class declaration, relocate only that include, and bind both actual
+    composed headers in the compiler dependency inventory.
+    """
+    declaration_relative=power.CLASS_HEADER.relative_to(ROOT).as_posix()
+    protocol_relative='packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.hpp'
+    manifest=composer.verify_composition(composed)
+    declaration=composed/'project'/declaration_relative
+    protocol=composed/'project'/protocol_relative
+    for relative,path in ((declaration_relative,declaration),(protocol_relative,protocol)):
+        require(path.is_file() and not path.is_symlink() and
+            composer.sha(path)==manifest['project_files'][relative]['sha256'],
+            'Current Power SDK declaration differs from the exact composed source inventory')
+    require(declaration.read_bytes()==power.CLASS_HEADER.read_bytes(),
+            'The shared Power service declaration needs a separate explicit review')
+    authored=power.REFERENCE.read_text()
+    source=re.sub(r'/\*.*?\*/|//[^\n]*','',authored,flags=re.S)
+    require(re.findall(r'^\s*#include\s+"([^"\n]+)"\s*$',source,flags=re.M)==
+        ['../platform/S540NvidiaGspPowerService.hpp'],
+        'The independent Power reference must include only its reviewed shared declaration')
+    body=re.sub(r'^\s*#include[^\n]*$','',source,flags=re.M)
+    expected='namespace S540GspPowerKernel { OSDefineMetaClassAndStructors(S540NvidiaGspPowerService, IOService); }'
+    require(re.sub(r'\s+','',body)==re.sub(r'\s+','',expected),
+        'The independent Power reference must instantiate only the reviewed SDK macro')
+    path=output/'sdk-current-power-metaclass-reference.cpp'
+    require(not path.exists(),'Current Power SDK reference source must be fresh')
+    path.write_text(authored.replace('#include "../platform/S540NvidiaGspPowerService.hpp"',
+        '#include "'+str(declaration)+'"'))
+    return path,dict(authored_reference_source=str(power.REFERENCE),
+        authored_reference_source_sha256=composer.sha(power.REFERENCE),
+        class_declaration=str(declaration),class_declaration_sha256=composer.sha(declaration),
+        embedded_protocol_declaration=str(protocol),embedded_protocol_declaration_sha256=composer.sha(protocol))
+
+
 def sdk_references(output,composed,native_home,cc,cxx,sdk,project_rows,include,execute):
     flags,cpp=old.kernel_flags(sdk)
     cpp=[*cpp,'-fcheck-new']
@@ -195,8 +236,9 @@ def sdk_references(output,composed,native_home,cc,cxx,sdk,project_rows,include,e
             dependency_sha256=native.dependencies(obj.with_suffix('.d'),path,composed/'project',composed,sdk,cxx,
                 authored_reference=True))
     power_ref=output/'sdk-power-metaclass-reference.o'
+    power_source,power_source_bindings=power_reference_source(output,composed)
     execute([cxx,*flags,*cpp,*include,'-MD','-MF',power_ref.with_suffix('.d'),
-        '-c',power.REFERENCE,'-o',power_ref],'sdk-power-metaclasses')
+        '-c',power_source,'-o',power_ref],'sdk-power-metaclasses')
     power._review_reference(power.Object(power_ref).loader_graph())
     front_source=composed/'project'/FRONT/'tests/sdk_experimental_metaclass_reference.cpp'
     require(front_source.is_file(),'Current composed experimental metaclass SDK reference is missing')
@@ -219,11 +261,13 @@ def sdk_references(output,composed,native_home,cc,cxx,sdk,project_rows,include,e
     framework=imports-project_private
     require(all(n.startswith(framework_prefixes) for n in framework),'Experimental SDK metaclass imports escaped exact IOKit ancestry')
     approved.update(framework)
-    records['power-metaclass']=dict(source=str(power.REFERENCE),source_sha256=composer.sha(power.REFERENCE),
+    power_dependencies=native.dependencies(power_ref.with_suffix('.d'),power_source,composed/'project',composed,sdk,cxx)
+    require(all(path in power_dependencies for path in (power_source_bindings['class_declaration'],
+        power_source_bindings['embedded_protocol_declaration'])),
+        'Current Power SDK compiler dependencies omitted a composed class/layout header')
+    records['power-metaclass']=dict(source=str(power_source),source_sha256=composer.sha(power_source),
         object=power_ref.name,object_sha256=composer.sha(power_ref),imports=sorted(n[1:] for n in inherited),
-        private_project_dependencies=sorted(private),class_declaration_sha256=composer.sha(power.CLASS_HEADER),
-        dependency_sha256=native.dependencies(power_ref.with_suffix('.d'),power.REFERENCE,composed/'project',
-            composed,sdk,cxx,authored_reference=True,allowed_raw_sources=(power.CLASS_HEADER,)))
+        private_project_dependencies=sorted(private),**power_source_bindings,dependency_sha256=power_dependencies)
     records['experimental-metaclasses']=dict(source=str(front_source),source_sha256=composer.sha(front_source),
         object=front_ref.name,object_sha256=composer.sha(front_ref),imports=sorted(framework),
         private_project_dependencies=sorted(project_private),
