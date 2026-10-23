@@ -2,6 +2,8 @@
 
 Updated on **20 October 2026**. The working official EFI boots independently from the external Samsung 960 EVO. Native Wi-Fi and the hardware-name corrections are installed and user-confirmed. The separate 240 GB test EFI is not the installed official configuration.
 
+Hotkey status updated on **24 October 2026**: F4, F7 and F9 are user-confirmed working. **F8 camera disablement is NOT WORKING; further F8 work is paused at the user’s request.** The hardware inventory and other dated observations below retain their original scope.
+
 ## Current results
 
 | Component | Verified result | Limit or remaining scope |
@@ -15,12 +17,17 @@ Updated on **20 October 2026**. The working official EFI boots independently fro
 | Bluetooth | Intel USB `8087:0AAA`; IntelBluetoothFirmware 2.4.0 and BlueToolFixup 2.7.2 loaded; headphones, headset microphone and reconnect tested by the user | IntelBTPatcher remains intentionally disabled |
 | Audio | Realtek ALC257 through VoodooHDA 3.6.10; speakers, internal microphone, wired headphone output and microphone, automatic jack switching and F1–F3 tested | AppleALC remains disabled; equalisation is a separate refinement |
 | Webcam | Integrated UVC camera `13D3:56B2`; video recording with the internal microphone confirmed by the user | Enumeration alone is not the basis of the working result |
-| Keyboard and touchpad | PS/2 keyboard; ELAN0662 I2C touchpad and gestures work; F1–F3 and F11/F12 work with the non-NVIDIA EFI | The user's latest open group is F4–F10, including F6; its earlier successful toggle is historical. See [Function keys](../guides/function-keys.md) |
+| F8 camera disablement | NOT WORKING: the key is received and the firmware camera flag changes, but video capture continues even after closing and reopening Photo Booth | Further work suspended by request on 24 October 2026; no additional F8 tests or builds planned |
+| Keyboard and touchpad | PS/2 keyboard; ELAN0662 I2C gestures, F1–F3 and non-NVIDIA F11/F12 work; F4 microphone mute, F7 radio control and F9 screen lock are confirmed | F8 remains non-working and paused. Other retained observations are in [Function keys](../guides/function-keys.md) |
 | USB | USBToolBox 1.2.0 and the 9-port map are active; internal Bluetooth, webcam and fingerprint-device ports are type 255 | Both USB-A connectors and USB-C in both orientations previously negotiated 5 Gb/s; USB-A file access was confirmed with the tested devices/cables |
 | Internal NVMe | 512 GB detected; SMART Verified, TRIM Yes; IONVMeFamily 2.1.0 loaded in the 20 October report | This is detection/status evidence, not a sustained storage benchmark |
 | Battery and lid | Battery reporting and discharge confirmed; report shows Good health and 296 cycles; closing the lid sleeps and opening it resumes, confirmed by the user on 20 October | Long-stop drain, measured battery runtime and hibernation remain unmeasured |
 | SD reader | O2Micro PCI `1217:8621`; attempted native-driver trials did not expose readable media | **Paused**; no SD trial is integrated into the official EFI |
 | NVIDIA and HDMI | NVIDIA model naming is correct; prior development results are retained below | **Paused**; no NVIDIA acceleration is claimed. The earlier HDMI no-image result remains unresolved |
+
+## F8 result and decision — 24 October 2026
+
+The target reports `CameraState=0` and `LastCameraResult=7` after F8, while the webcam remains usable after reopening Photo Booth. This confirms the key/firmware path, not a working video block. The webcam itself still captures video correctly. App 0.1.3 corrects the misleading success popup; it does not implement camera disablement. The user has accepted F8 as non-working and requested that further work stop. F4, F7 and F9 retain their confirmed working status.
 
 ## Installed configuration and delivered cleanup
 

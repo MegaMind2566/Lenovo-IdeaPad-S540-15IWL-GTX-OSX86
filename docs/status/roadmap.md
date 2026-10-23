@@ -2,11 +2,14 @@
 
 Status updated on **October 20, 2026**. The official EFI on the external Samsung 960 EVO is the working Intel-based configuration. The separate 240 GB test EFI remains available; NVIDIA and SD-reader experiments are paused by request. The next focused hardware work is the remaining function-key actions.
 
+Hotkey update, **October 24, 2026**: F4, F7 and F9 are confirmed. **F8 camera disablement is non-working and paused at the user’s request.** This update does not resume other paused work.
+
 ## Current work order
 
 | Order | Work | Scope |
 |---|---|---|
-| Now | Remaining function keys | F1–F3 audio controls and F11/F12 brightness in the non-NVIDIA EFI are confirmed. The current open group is **F4–F10**, including F6 despite its earlier positive touchpad-toggle result. Address this group together and preserve application F1–F12 identities. See the [function-key guide](../guides/function-keys.md). |
+| Retain confirmed | Function-key actions | Preserve F1–F3, non-NVIDIA F11/F12, and user-confirmed F4 microphone mute, F7 radio control and F9 screen lock. Other retained observations remain in the [function-key guide](../guides/function-keys.md). |
+| Paused | F8 camera disablement | NOT WORKING: the firmware camera flag changes but video capture continues after reopening Photo Booth. The user accepts this limitation; no additional F8 tests or builds are planned unless explicitly resumed. |
 | Consolidated | Official EFI | Native Wi-Fi, hardware names, USB mapping, CPU/battery reporting and the existing audio stack are retained. The config removing the old NVMe-block entry has been delivered; a subsequent boot with that final cleanup has not yet been explicitly confirmed. |
 | Paused | NVIDIA implementation and target tests | v9 diagnostic startup and the complete-image idle-loader ABI have passed. Group the next original RM/transport/GSP work into one operational checkpoint after its admission gates; do not rerun completed milestones. |
 | Paused | O2Micro SD reader | Same card works in Windows; macOS reader operation remains unresolved. Native and older Apple-driver experiments are separate from the official EFI. The latest direct O2 match candidate has not been confirmed working. |
@@ -22,7 +25,7 @@ Status updated on **October 20, 2026**. The official EFI on the external Samsung
 | Wi-Fi | Native menu/network operation with AirportItlwm 2.4.0; itlwm disabled in the official config | Keep the exact working kext/config pair. Earlier HeliPort-only notes are historical. |
 | Audio, microphone and webcam | Internal camera and microphone verified together by recorded video; speaker/headphone playback, Bluetooth headset microphone and 3.5 mm headset output/input confirmed | Audio uses the existing VoodooHDA installation in `/Library/Extensions`; the EFI alone does not install it. Further equalisation is deferred. |
 | Bluetooth | Headphone playback, microphone, disconnection and reconnection confirmed | IntelBluetoothFirmware and BlueToolFixup retained; IntelBTPatcher remains disabled. A snapshot with no connected headset does not undo the functional result. |
-| Keyboard and touchpad | F1–F3 audio, F11/F12 brightness in the non-NVIDIA EFI and ELAN gestures confirmed; an earlier F6 touchpad-toggle result is retained as history | The current **F4–F10** group and ordinary Fn-row behavior are tracked together in the keyboard guide. |
+| Keyboard and touchpad | F1–F3 audio, non-NVIDIA F11/F12 brightness, ELAN gestures, F4 microphone mute, F7 radio control and F9 screen lock confirmed | F8 camera disablement is non-working and paused. Other retained observations remain in the keyboard guide. |
 | USB | Applied 9-port map; internal Bluetooth/camera/fingerprint connections classified internal. USB-C 5 Gb/s in both orientations and both tested USB-A connectors 5 Gb/s/file reads confirmed | External USB 2 coverage and sustained throughput/reliability are separate measurements. |
 | Internal PM981a | Runtime 512 GB NVMe, PCIe x4, SMART verified and TRIM active; Windows retained | Removing the obsolete config block is cleanup, not a claim that the previously available disk has just been repaired. |
 | CPU and battery | X86PlatformPlugin active, 12 GB DDR4-2400 correctly described, battery detected with 296 cycles and health Good in the retained report | Capacity/reporting does not establish measured autonomy; sustained cooling and fan RPM remain open. |
@@ -44,9 +47,9 @@ After a successful original adapter/GSP checkpoint, real GPU-command completion/
 
 ## Function-key completion
 
-Use the [existing keyboard mapping and evidence](../guides/function-keys.md), rather than assigning guessed scan codes or ACPI events. F1–F3 are working and complete, and F11/F12 brightness works in the non-NVIDIA EFI. The current open group is **F4–F10**; the earlier F6 touchpad-toggle result is historical evidence, not a reason to exclude F6 from this group. Ordinary Fn+F1–F12 must remain available to applications.
+Use the [existing keyboard mapping and evidence](../guides/function-keys.md), rather than assigning guessed scan codes or ACPI events. F1–F3 are working and complete, and F11/F12 brightness works in the non-NVIDIA EFI. F4, F7 and F9 have since been confirmed working with the companion. F8 is non-working and paused by request. The earlier F6 result remains historical evidence; this update requests no repeat test. Ordinary Fn+F1–F12 must remain available to applications.
 
-The retained session-event investigation recorded all twelve Fn identities; direct/Fn F5 produced identical complete session events, direct F9 sent Command-L and direct F10 sent Command-P, while direct F4/F7/F8 produced no retained session event. The later bounded driver collection did not establish event-log visibility, so its empty windows do not prove absent hardware events or justify an ACPI remap. The guide keeps the exact per-key status and unresolved shortcut/session refresh boundary. Further work should address the remaining actions as one keyboard block, without repeating the completed F1–F3 audio or F11/F12 brightness checks.
+The retained session-event investigation recorded all twelve Fn identities; direct/Fn F5 produced identical complete session events, direct F9 sent Command-L and direct F10 sent Command-P, while direct F4/F7/F8 produced no retained session event. The later bounded driver collection did not establish event-log visibility, so its empty windows do not prove absent hardware events or justify an ACPI remap. The guide keeps the exact per-key status and unresolved shortcut/session refresh boundary. These earlier diagnostic observations do not reopen F4/F7/F9 or the paused F8 investigation. Preserve the confirmed controls without repeating their completed checks.
 
 ## Retained refinements
 

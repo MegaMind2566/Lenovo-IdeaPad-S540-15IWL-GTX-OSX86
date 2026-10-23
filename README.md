@@ -2,7 +2,7 @@
 
 An OpenCore project for **macOS Tahoe 26** on the Lenovo IdeaPad S540-15IWL GTX. The working configuration boots from the external Samsung 960 EVO and uses Intel graphics. The official EFI now includes native-menu Intel Wi-Fi and corrected hardware names.
 
-**Status: October 20, 2026.** Webcam, internal microphone, Bluetooth headset audio and microphone, the 3.5 mm headset jack, and lid-close sleep/open-lid wake have been tested on the laptop. **F1–F3 work; F4–F10 are the current keyboard work; F11–F12 work with the non-NVIDIA EFI.** SD-reader work and operational NVIDIA development are paused.
+**Status: October 20, 2026.** Webcam, internal microphone, Bluetooth headset audio and microphone, the 3.5 mm headset jack, and lid-close sleep/open-lid wake have been tested on the laptop. **Hotkey update, October 24: F4 microphone mute, F7 Wi-Fi/Bluetooth control and F9 screen lock are user-confirmed working. F8 camera disablement is NOT WORKING and further work is paused by request.** F1–F3 and non-NVIDIA F11–F12 retain their working status. SD-reader work and operational NVIDIA development are paused.
 
 ## Hardware
 
@@ -33,7 +33,8 @@ An OpenCore project for **macOS Tahoe 26** on the Lenovo IdeaPad S540-15IWL GTX.
 | Bluetooth headset audio and microphone | Working | Playback, voice capture, disconnection and reconnection tested |
 | Webcam | Working | Video recording confirmed |
 | F1–F3 audio keys | Working | Confirmed again on October 20; no repeat test required |
-| F4–F10 icon actions | Open | Current keyboard integration group identified by the user; retain earlier observations as history |
+| F4, F7 and F9 icon actions | Working | Microphone mute, Wi-Fi/Bluetooth control and screen lock confirmed by the user with S540 Tasti |
+| F8 camera disablement | Not working / paused | The firmware flag changes but video capture continues, including after reopening Photo Booth; further F8 work is suspended by request |
 | F11/F12 brightness keys | Working in non-NVIDIA EFI | Keep the working configuration; NVIDIA-test brightness regression remains separate |
 | Ordinary Fn function row | Partially verified | Existing F1–F12 event evidence retained; shortcut/session state is tracked in the function-key guide |
 | Touchpad and gestures | Working | ELAN0662 gestures and daily operation confirmed; F6 remains within the current F4–F10 review group |
@@ -79,7 +80,7 @@ The existing native workflows already group the automatic checks: the idle-image
 
 ## Remaining work
 
-1. Complete the [F4–F10 icon-action group](docs/guides/function-keys.md), preserving the working F1–F3 and non-NVIDIA F11–F12 controls.
+1. Preserve the confirmed [function-key actions](docs/guides/function-keys.md), including F4, F7 and F9. F8 camera disablement is recorded as non-working and paused; no further F8 tests or builds are planned unless explicitly resumed.
 2. Keep SD-reader work and operational NVIDIA development paused until resumed explicitly.
 3. Treat battery runtime, long standby, sustained thermal behavior and storage endurance as unmeasured coverage, not as demonstrated faults requiring new patches.
 
