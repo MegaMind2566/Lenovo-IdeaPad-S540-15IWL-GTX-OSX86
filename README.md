@@ -39,6 +39,7 @@ An OpenCore project for **macOS Tahoe 26** on the Lenovo IdeaPad S540-15IWL GTX.
 | Ordinary Fn function row | Partially verified | Existing F1–F12 event evidence retained; shortcut/session state is tracked in the function-key guide |
 | Touchpad and gestures | Working | ELAN0662 gestures and daily operation confirmed; F6 remains within the current F4–F10 review group |
 | CPU power management and telemetry | Working | X86PlatformPlugin active; historical frequency, temperature and estimated package-power responses recorded |
+| Battery Low Power Mode | Verified CPU/package response | October 24 OFF–ON–ON–OFF test: estimated package power about 11.4 W with the mode on versus 34.4–36.5 W off; active frequency 2.4 GHz versus 3.89–4.00 GHz. Battery 1 / AC 0 retained. This is not a measured autonomy result; see [test scope and thermal limits](docs/status/battery-sleep.md#low-power-mode-under-cpu-load--24-october-2026). |
 | RAM and hardware names | Verified | 12 GB DDR4-2400; expandable memory status and CPU/GPU/panel labels corrected |
 | Battery and basic sleep/wake | Working | Battery and basic sleep/wake confirmed; user reports modest runtime and attributes it to an aged battery. No further autonomy test requested. |
 | USB-A and USB-C storage | Working | Tested connectors at 5 Gb/s; USB-C tested in both orientations; active nine-port map confirmed |

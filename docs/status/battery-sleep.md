@@ -16,6 +16,27 @@ Updated on **20 October 2026** for the working official EFI on the external Sams
 
 The lid result closes the ordinary close/open check. No extra lid collector, power patch or repeat cycle is requested. It does not establish overnight drain, prolonged sleep reliability, measured battery autonomy or hibernation. Full peripheral recovery is claimed only where separately confirmed by the user.
 
+## Low Power Mode under CPU load — 24 October 2026
+
+The user requested a direct effect check after `pmset` showed `lowpowermode=0` on battery and AC. The battery preference was enabled with `pmset -b lowpowermode 1`; AC remained at 0.
+
+The private report `S540-Risparmio.FE1EEI.zip` records macOS 26.7.1 (25G241), Intel Core i7-8565U, four physical cores and eight logical processors. One automatic OFF–ON–ON–OFF comparison used two `yes` workers per phase, 15 seconds without the artificial load for settling, 5 seconds of workload warmup and 15 one-second `powermetrics` samples per phase. The CPU sampler used `-a 0` to suppress additional average blocks.
+
+| Phase | Battery Low Power Mode | Mean estimated Intel package power | Mean active system frequency | Accepted samples |
+|---|---|---|---|---|
+| 1 | Off | 36.453 W | 4002.0 MHz | 15 power / 15 frequency |
+| 2 | On | 11.389 W | 2400.0 MHz | 15 power / 15 frequency |
+| 3 | On | 11.427 W | 2400.0 MHz | 15 power / 15 frequency |
+| 4 | Off | 34.429 W | 3892.3 MHz | 15 power / 15 frequency |
+
+All four raw streams reproduce the summary, their sampler stderr files are empty, and each phase's active profile matches the requested setting. Battery snapshots show discharge at every recorded boundary. The before/after power-preference snapshots are byte-identical: battery Low Power Mode was restored to 1, AC stayed at 0, and the other recorded preferences were preserved. The `caffeinate` termination message is the collector stopping its own temporary sleep-prevention process during cleanup.
+
+The OFF phases average 35.441 W and the ON phases 11.408 W: about **68% lower estimated package power in these workload windows**, with a repeatable active-frequency change toward 2.4 GHz. Returning to OFF restores the higher power/frequency response. This confirms a real CPU/package response to Low Power Mode on this installation.
+
+The scope is a short fixed-duration workload, not equal completed work. Intel package estimates include CPU cores, integrated graphics and system-agent logic; they are not total laptop watts, a calibrated external power measurement, measured battery autonomy or an energy-efficiency result. Reported frequency is during active execution. The result does not predict a 68% reduction in ordinary battery drain.
+
+Thermal pressure is Nominal throughout, but the detailed OFF streams contain `CPU LIMIT THERMAL` in 2/15 and 5/15 samples respectively, alongside other power/performance-limit flags. These flags are absent in both ON streams. The brief OFF averages include changes in boost and limiting; Nominal pressure and `pmset` limits of 100 do not establish an absence of throttling. CPU die temperature and fan speed were not collected by this test. No further stress test, EFI change or power-limit patch is requested from this result.
+
 ## User assessment — 24 October 2026
 
 The user reports modest battery runtime and attributes it to an aged battery. This is a user-reported explanation, not a new capacity comparison or a measured system-power result. No further autonomy test or macOS power-setting change is requested on that basis. The earlier Good-health/296-cycle inventory remains historical evidence and does not quantify present wear.

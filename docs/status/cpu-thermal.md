@@ -1,5 +1,11 @@
 # CPU and thermal observations
 
+## Low Power Mode result — 24 October 2026
+
+A user-requested battery OFF–ON–ON–OFF workload comparison now confirms a repeatable Low Power Mode response on the current installation. The two ON phases report approximately 11.4 W estimated Intel package power and 2.4 GHz active frequency; the two OFF phases report 34.4–36.5 W and 3.89–4.00 GHz. Each phase retains 15 power and frequency samples. The initial battery setting of 1 was restored; AC remains 0.
+
+The OFF phases contain detailed `CPU LIMIT THERMAL` and other performance-limit flags even though reported thermal pressure stays Nominal. Both ON phases lack those limit flags. This establishes neither temperature peaks nor the absence of throttling, and does not justify a new cooling or EFI patch. The [full protocol, four phase means and scope](battery-sleep.md#low-power-mode-under-cpu-load--24-october-2026) distinguish estimated package power from total laptop power, completed-work efficiency and measured runtime. The historical sensor sessions below retain their original scope.
+
 ## Current status: 20 October 2026
 
 The official Samsung EFI displays the correct Intel Core i7-8565U name. The current report retains four cores/eight logical processors and an active X86PlatformPlugin. The naming correction does not change CPU frequency, voltage or power limits. VirtualSMC, SMCProcessor and SMCBatteryManager remain in the working configuration.
