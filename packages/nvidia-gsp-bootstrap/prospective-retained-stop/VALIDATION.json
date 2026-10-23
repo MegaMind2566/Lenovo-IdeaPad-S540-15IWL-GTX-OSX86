@@ -1,0 +1,42 @@
+{
+  "actual_sdk_cross_translation_units": 4,
+  "checks": {
+    "plain": 407,
+    "sanitized": 407
+  },
+  "cpu_report": "build/retained-stop-controls-3/results.json",
+  "cpu_report_sha256": "e32f059b37d2887072e40f828ddfa177b51f2d52fd82eb44824a291b9ce505f9",
+  "fault_scenarios": 21,
+  "format": 1,
+  "hardware_executed": false,
+  "native_darwin_compilation": false,
+  "negative_controls": [
+    "false_physical_release_after_stop",
+    "missing_post_protocol_lock_observation",
+    "old_retention_early_return",
+    "service_first_failure_skips_other_producers"
+  ],
+  "output_source_sha256": {
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/services/S540NvidiaFirstTxnServices.cpp": "c67f799136b81f986f06008395b068c7ae7b702aab8ebd62844ccdced5a732b0",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp": "4c5e8b823f353e67298ee52afff80e40c8dc7cb2c40ef7c51d7727af924ad61d",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.hpp": "cbc4ade8db0ce2dbc19515f90d4f0ac24fb3e85ef82c68b766a83adaa72fc427"
+  },
+  "physical_release_authorized": false,
+  "pm_acknowledgement_authorized": false,
+  "production_candidate_allowed": false,
+  "sdk_cross_report": "build/retained-stop-sdk-1/results.json",
+  "sdk_cross_report_sha256": "d4c1e2e61f680be5b2a149cc90ce47d9fe5e44fa2d944d28a5a009017fe30c86",
+  "source_sha256": {
+    "BASE-SHA256.json": "771a0dbe0260369e585c36413c634800e1494c18e9f0931ce0911487c8cb6b74",
+    "S540NvidiaRetainedShutdown.c": "98639502f5fe54dd9c84c280df28dcc10700056f45bc5a1d4083549060715d29",
+    "S540NvidiaRetainedStop.h": "466a97671705eb34c634d2e665e976ff3e290d1f16e519694e0cf096e3188af1",
+    "SOURCE-CONTRACT.json": "6e2327dba28273e200e3c86c8b7bf09ddb42aad30d8d84a6c46fb6e6c8054efa",
+    "check.py": "4e2426606608930fe2f1f353a9150e5c419f3aac57bac8eb476a95c72d25eb24",
+    "owner-stop.cpp.inc": "870293a57c2fd61329ac64f6efef4ac5340ebb2e685f4c99dc6da8816c09774f",
+    "prepare.py": "233b6975cd87ea815defb1318f3fb7057a0b4398732fb359a50008a4cd11ffdb",
+    "services-seal.cpp.inc": "befc2d02cd9c4d7d529a758b5e3fe8dd14b0ae592e91c85e4eaba27365bf6439",
+    "tests/check_stop.cpp": "c3e49d5073bfffae28612231ebe296356de9a0ad95fcb782323b1a0bc12dffbe"
+  },
+  "status": "passed-actual-retained-stop-CPU-controls-and-four-SDK-cross-TUs",
+  "whole_dma_stop_proven": false
+}

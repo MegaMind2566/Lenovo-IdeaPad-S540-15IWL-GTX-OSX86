@@ -65,6 +65,27 @@ def section_bytes(image,name,segment='__TEXT'):
     require(len(found)==1,'One exact immutable image section is required: '+name)
     section=found[0]
     require(section['flags']&0xff==0,'An immutable image section has an unexpected loader type')
+    if image.kind==11:
+        position=32;segments=[];ordinal_base=0;owners=[]
+        wanted_ordinal=image.sections.index(section)+1
+        for _ in range(struct.unpack_from('<I',image.data,16)[0]):
+            command,size=struct.unpack_from('<II',image.data,position)
+            if command==0x19:
+                actual_name=image.data[position+8:position+24].split(b'\0',1)[0].decode('ascii')
+                maximum,initial=struct.unpack_from('<II',image.data,position+56)
+                count=struct.unpack_from('<I',image.data,position+64)[0]
+                if actual_name==segment:segments.append((maximum,initial))
+                if ordinal_base<wanted_ordinal<=ordinal_base+count:
+                    vmaddr,vmsize,fileoff,filesize=struct.unpack_from('<4Q',image.data,position+24)
+                    owners.append(actual_name)
+                    require(actual_name==segment and vmaddr<=section['address'] and
+                        section['address']+section['size']<=vmaddr+vmsize and fileoff<=section['offset'] and
+                        section['offset']+section['size']<=fileoff+filesize,
+                        'Actual immutable section is outside its owning read-only segment ranges')
+                ordinal_base+=count
+            position+=size
+        require(owners==[segment] and len(segments)==1 and not segments[0][0]&2 and not segments[0][1]&2 and segments[0][1]&1,
+                'Actual final immutable payload is inside a writable or ambiguous segment')
     return section,image.data[section['offset']:section['offset']+section['size']]
 
 
@@ -142,6 +163,7 @@ def sdk_kmod_layout(output,cc,flags,execute):
 
 def sdk_references(output,composed,native_home,cc,cxx,sdk,project_rows,include,execute):
     flags,cpp=old.kernel_flags(sdk)
+    cpp=[*cpp,'-fcheck-new']
     authored=[
         'packages/nvidia-darwin-services/tests/sdk_import_reference.cpp',
         'packages/nvidia-global-rm/tests/sdk_import_reference.cpp',
@@ -206,6 +228,23 @@ def sdk_references(output,composed,native_home,cc,cxx,sdk,project_rows,include,e
         object=front_ref.name,object_sha256=composer.sha(front_ref),imports=sorted(framework),
         private_project_dependencies=sorted(project_private),
         dependency_sha256=native.dependencies(front_ref.with_suffix('.d'),front_source,composed/'project',composed,sdk,cxx))
+    protocol_source=composed/'project'/FRONT/'tests/sdk_experimental_protocol_reference.c'
+    protocol_object=output/'sdk-experimental-protocol.o'
+    execute([cc,*flags,'-std=c11',*include,'-MD','-MF',protocol_object.with_suffix('.d'),
+        '-c',protocol_source,'-o',protocol_object],'sdk-experimental-protocol')
+    power.verify_no_initializers(protocol_object)
+    protocol_image=old.Image(protocol_object,1)
+    protocol_symbol=protocol_image.named('_s540ExperimentalProtocolOffsets')
+    protocol_section=protocol_image.sections[protocol_symbol['section']-1]
+    protocol_offset=protocol_section['offset']+protocol_symbol['value']-protocol_section['address']
+    offsets=list(struct.unpack_from('<13I',protocol_image.data,protocol_offset))
+    require(offsets[:2]==[144,80] and offsets[3:]==[104,8,16,32,64,96,128,72,8,56] and
+        offsets[2]>=256 and offsets[2]%8==0,
+        'Independent actual SDK wire/build-identity/native-profile offsets differ from the typed ABI')
+    records['experimental-protocol-layout']=dict(source=str(protocol_source),source_sha256=composer.sha(protocol_source),
+        object=protocol_object.name,object_sha256=composer.sha(protocol_object),offsets=offsets,
+        dependency_sha256=native.dependencies(protocol_object.with_suffix('.d'),protocol_source,
+            composed/'project',composed,sdk,cc))
     return approved,records,power_ref,front_ref
 
 
@@ -357,6 +396,9 @@ def link_verified_plan(args,value,verify_callback,*,companion_include_directorie
         require(set(linked_symbols['strong'])|set(linked_symbols['weak'])==definitions and
             linked_audit['unresolved_symbols']==input_audit['unresolved_symbols'],
             'The actual complete ld-r image lost/gained a definition or import')
+        require(set(linked_symbols['strong'])==set(input_audit['strong_definition_owners']) and
+            set(linked_symbols['weak'])==set(input_audit['weak_definition_owners'])-set(input_audit['strong_definition_owners']),
+            'The actual complete ld-r image changed strong/weak definition ownership')
         report['relocatable_image']=dict(path=linked.name,sha256=composer.sha(linked),bytes=linked.stat().st_size,
             subsections_via_symbols=True,unresolved_original_private=linked_audit['unresolved_original_private'])
         report['combined_metaclasses']=classes.verify(linked,power_ref,front_ref)

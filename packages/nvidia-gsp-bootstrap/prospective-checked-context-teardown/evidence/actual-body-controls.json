@@ -1,0 +1,157 @@
+{
+  "base_composition_sha256": "72b7d5a5d93504218e8a7953d79c90c1609e4580c55922deb2ec5dab13de24d8",
+  "compiler_sha256": "24cb665e0e2e74230c37efdf335c32564f4cc6acecc2f95bd07450140a778003",
+  "component": "context",
+  "endpoints": "explicit CPU fixtures; complete selected production bodies execute",
+  "format": 1,
+  "full_original_layout_proven": false,
+  "hardware_admission": false,
+  "kernel_execution": false,
+  "original_entry_admission": false,
+  "pm_acknowledgement_authorized": false,
+  "source_sha256": {
+    "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/composition.json": "72b7d5a5d93504218e8a7953d79c90c1609e4580c55922deb2ec5dab13de24d8",
+    "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c": "3823304a498b872ee3c8df62d4e7b6880fb7f8cbd44203662dd2099e213b5cc5",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-checked-context-teardown/S540NvidiaCheckedContextTeardown.h": "61b32d627941bfa454ee4a54945fba3fefc5b5c6a12509c3a848fafba02fceb0",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-checked-context-teardown/SOURCE-CONTRACT.json": "e0578b128cd7afc8420aec2afe7a3dffddd7e2b60a55d22a2ae748bb62ff3443",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-checked-context-teardown/check.py": "b3e7ce734ad17446a60500778d71f9042ed256791f9c23f6621500ba17ea231a",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-checked-context-teardown/prepare.py": "bd0c951052a0fb85a1256dc23318706c393a20fc2304a1f3055635a9339b4251",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-checked-context-teardown/tests/check_context.c": "3bf78b25b9dff6a59fa4a7e03be81a64ba08f1bdc13f0ebec4ac2ba0a6e012f2",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-dma-stop-closure/control_common.py": "b5eb2281307f6b2eb54a960464eb4ddfb0a681fd188724a5d359c77e594bf699"
+  },
+  "status": "passed-selected-production-context-body-controls",
+  "variants": {
+    "plain": {
+      "binary_sha256": "c002af46a3c7d92734e4ba608bfe3eeac7febc4bc301e3decdaf870b399e2426",
+      "checks": 54,
+      "command": [
+        "/workspace/scratch/9046a5958dfd/llvm-bin/clang",
+        "-std=c11",
+        "-O1",
+        "-g",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-Wl,--gc-sections",
+        "-Wno-unused-function",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/checked-context-controls-3",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/src",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-darwin-services/src",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-pm-revocation-closure",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-irq-callback-closure",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-dma-producer-closure",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/inc",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/inc/swref",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/sdk/nvidia/inc",
+        "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-checked-context-teardown/tests/check_context.c",
+        "-o",
+        "/workspace/scratch/9046a5958dfd/project/build/checked-context-controls-3/plain/control"
+      ],
+      "negative_controls": [
+        {
+          "binary_sha256": "215e1815854164bd260f8b9a2ea29f7f41cd91443e0a8ca2aaecdcb2ddf1ff3a",
+          "failures_detected": 6,
+          "label": "discard-disable-status"
+        },
+        {
+          "binary_sha256": "e6bcff57ee8707f3adcea284be390511cf7a1bb751d11251e65843f052e5f979",
+          "failures_detected": 10,
+          "label": "discard-shutdown-status"
+        }
+      ],
+      "observations": [
+        {
+          "checks": 54,
+          "failures": 0
+        }
+      ],
+      "status": "passed"
+    },
+    "sanitized": {
+      "binary_sha256": "87471810dd3f4ee7b6e14f14fa52e225818c1f554014d99068aadc0426a6d685",
+      "checks": 54,
+      "command": [
+        "/workspace/scratch/9046a5958dfd/llvm-bin/clang",
+        "-std=c11",
+        "-O1",
+        "-g",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-Wl,--gc-sections",
+        "-Wno-unused-function",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/checked-context-controls-3",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/src",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-darwin-services/src",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-pm-revocation-closure",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-irq-callback-closure",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-dma-producer-closure",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/inc",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/inc/swref",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/sdk/nvidia/inc",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-fno-omit-frame-pointer",
+        "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-checked-context-teardown/tests/check_context.c",
+        "-o",
+        "/workspace/scratch/9046a5958dfd/project/build/checked-context-controls-3/sanitized/control"
+      ],
+      "negative_controls": [
+        {
+          "binary_sha256": "824b6bc29b90fac2b242fcdec1b8833ec5b9e3954b01d3518661bc9b4d7937b2",
+          "failures_detected": 6,
+          "label": "discard-disable-status"
+        },
+        {
+          "binary_sha256": "8c1835f97a3d95a4c1a0ec74315404b188848ef19c9608f80abc06a2b1f2a873",
+          "failures_detected": 10,
+          "label": "discard-shutdown-status"
+        }
+      ],
+      "observations": [
+        {
+          "checks": 54,
+          "failures": 0
+        }
+      ],
+      "status": "passed"
+    }
+  },
+  "whole_dma_stop_proven": false
+}

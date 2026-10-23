@@ -1,0 +1,22 @@
+{
+  "format": 1,
+  "scope": "retained-experimental-stop-attempts",
+  "source_parent": "Exact frozen post-runtime-coordinator Bootstrap and inherited Services source hashes in BASE-SHA256.json",
+  "ordering": [
+    "genuine first-record original return, ExitReady and selected current-thread lock observation",
+    "real non-destructive original GSP shutdown protocol while clean OP record remains available",
+    "repeat actual original-lock observation before blocking CPU work",
+    "BeginClosing and independently attempt all timer, queue seal and queue stop endpoints",
+    "record seal attempt and checked original disable",
+    "repeat actual original-lock observation before IRQ join",
+    "checked IRQ and original shutdown attempts with per-stage real return values"
+  ],
+  "retention": "Every Context, Session, firmware allocation, queue owner, IOVA, PM lease, global owner and module text remains retained until reboot. No free/unmap, destructive-phase or release-receipt authority is added.",
+  "observations": "Nonblocking raw-guarded copies report first error, every attempted stage and distinct software/full IRQ drain outcomes. Missing or contended diagnostics do not authorize lifecycle operations.",
+  "production_candidate_allowed": false,
+  "whole_dma_stop_proven": false,
+  "physical_release_authorized": false,
+  "pm_acknowledgement_authorized": false,
+  "formal_stack_proof": false,
+  "kernel_execution": "not_tested"
+}

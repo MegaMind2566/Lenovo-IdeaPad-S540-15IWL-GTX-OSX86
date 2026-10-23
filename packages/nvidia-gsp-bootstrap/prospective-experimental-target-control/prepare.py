@@ -27,7 +27,8 @@ EXPORTS={DIRECTORY+'/S540ExperimentalTargetState.c':(
     's540ExperimentalModuleStartBackend','s540ExperimentalModuleStopBackend')}
 SOURCE_FILES=('experimental_ctl.c','tests/sdk_experimental_metaclass_reference.cpp',
     'tests/sdk_experimental_operations_reference.cpp','tests/sdk_experimental_protocol_reference.c',
-    'tests/check_state.c','check.py','SOURCE-CONTRACT.json')
+    'tests/check_state.c','check.py','check_sdk.py','check_backend.py','tests/check_backend.cpp.inc',
+    'tests/check_client.py','tests/check_client.c','SOURCE-CONTRACT.json')
 
 def transforms(values):
     if set(values)!=set(INPUTS): raise ValueError('Exact experimental frontend input inventory required')

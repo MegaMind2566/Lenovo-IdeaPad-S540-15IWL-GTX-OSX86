@@ -5,6 +5,7 @@
   "measurement": "freshly decoded current native Mach-O objects and actual compiler .su sidecars; complete command and .d dependency bindings",
   "final_selection": "actual final kernel text nlist aliases; ambiguous local owners retained conservatively; missing auxiliary captures explicitly unknown",
   "context_policy": "current receiver layouts are rechecked; unknown aliases and all unproven indirect edges remain barriers; no historical graph rewrites transferred",
+  "known_callback_prefixes": "actual dispatcher, work, timer, IRQ and deferred callback prefixes are added conservatively to separately measured callback bodies; cross-thread invoke caller remains a separate stack root",
   "framework_allowance_bytes": 2048,
   "unknown_allowance_bytes": 4096,
   "recursion_allowance_bytes": 1024,

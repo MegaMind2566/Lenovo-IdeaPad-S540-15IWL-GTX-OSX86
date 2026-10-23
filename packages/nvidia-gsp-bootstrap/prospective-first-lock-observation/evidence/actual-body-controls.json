@@ -1,0 +1,541 @@
+{
+  "base_composition_sha256": "72b7d5a5d93504218e8a7953d79c90c1609e4580c55922deb2ec5dab13de24d8",
+  "compiler_sha256": "24cb665e0e2e74230c37efdf335c32564f4cc6acecc2f95bd07450140a778003",
+  "component": "first-lock",
+  "endpoints": "explicit CPU fixtures; complete selected production bodies execute",
+  "format": 1,
+  "full_original_layout_proven": false,
+  "hardware_admission": false,
+  "kernel_execution": false,
+  "original_entry_admission": false,
+  "pm_acknowledgement_authorized": false,
+  "source_sha256": {
+    "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/composition.json": "72b7d5a5d93504218e8a7953d79c90c1609e4580c55922deb2ec5dab13de24d8",
+    "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/original/S540NvidiaGspFirstTransactionOriginal.c": "745606a08523de91ab8408d3e438a3ba7922f2f204f90a84ea2a879d8dedfa75",
+    "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-rm-lock-ownership/S540ProspectiveRmLockOwnership.c": "c585314473a465550aeeb1922dfc43c17d4f3be1fa52026044b1a8005fe157d5",
+    "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-rm-lock-ownership/S540ProspectiveRmLockOwnership.h": "f78536e385d6f1382ef726189140c9d6f26d886cc64f64e572056f6d836d9856",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-dma-stop-closure/control_common.py": "b5eb2281307f6b2eb54a960464eb4ddfb0a681fd188724a5d359c77e594bf699",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-first-lock-observation/SOURCE-CONTRACT.json": "020814f3ba53e3f180ac06c9249561ba805f6e246d033d0bd04aae13bc545cc6",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-first-lock-observation/check.py": "7e82a9a8e28f8daf581ff8917a85adc27bfa7999c6ea8f6a34a63f564c4e4ad8",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-first-lock-observation/locks-released.c.inc": "23e2111813edafa5cb7574f9a81cc0b068b4c96afc3ac70243f7888ed6134c32",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-first-lock-observation/prepare.py": "186a0a37e6dc8f5d7b6bf5122c60524be3ab951186dc24bb7127ba494ab1ab67",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-first-lock-observation/tests/check_locks.c": "1b1b29cb8d21434d044c7725216c46cfe4907e0c4e6c90c04eaeae57cef043c0"
+  },
+  "status": "passed-selected-production-first-lock-body-controls",
+  "variants": {
+    "plain": {
+      "binary_sha256": "884e50197bbb0cfce70d6275bae1b1ca32942fb3e4d7cc094d43ad32e9ad51f0",
+      "checks": 84,
+      "command": [
+        "/workspace/scratch/9046a5958dfd/llvm-bin/clang",
+        "-std=c11",
+        "-O1",
+        "-g",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-Wl,--gc-sections",
+        "-Wno-unused-function",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/first-lock-controls-3",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/src",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-darwin-services/src",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-pm-revocation-closure",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-irq-callback-closure",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-dma-producer-closure",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/inc",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/inc/swref",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/sdk/nvidia/inc",
+        "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-first-lock-observation/tests/check_locks.c",
+        "-o",
+        "/workspace/scratch/9046a5958dfd/project/build/first-lock-controls-3/plain/control"
+      ],
+      "negative_controls": [
+        {
+          "binary_sha256": "b7aa10688149296335a6088096ccd709841fc40c976e0137fe3e43f9831a07d3",
+          "failures_detected": 1,
+          "label": "ignore-allocation-owner"
+        }
+      ],
+      "observations": [
+        {
+          "checks": 4,
+          "failures": 0,
+          "scenario": 0
+        },
+        {
+          "checks": 4,
+          "failures": 0,
+          "scenario": 1
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 2
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 3
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 4
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 5
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 6
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 7
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 8
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 9
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 10
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 11
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 12
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 13
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 14
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 15
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 16
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 17
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 18
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 19
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 20
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 21
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 22
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 23
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 24
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 25
+        },
+        {
+          "checks": 3,
+          "failures": 0,
+          "scenario": 26
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 27
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 28
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 29
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 30
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 31
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 32
+        },
+        {
+          "checks": 1,
+          "failures": 0,
+          "scenario": 33
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 34
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 35
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 36
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 37
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 38
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 39
+        }
+      ],
+      "status": "passed"
+    },
+    "sanitized": {
+      "binary_sha256": "05c9429c0b0b0e1ecb897c264cdd9472468567c4dc594dfb76b8ddaab0e06230",
+      "checks": 84,
+      "command": [
+        "/workspace/scratch/9046a5958dfd/llvm-bin/clang",
+        "-std=c11",
+        "-O1",
+        "-g",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-Wl,--gc-sections",
+        "-Wno-unused-function",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/first-lock-controls-3",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/src",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-darwin-services/src",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-pm-revocation-closure",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-irq-callback-closure",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-dma-producer-closure",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/inc",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/inc/swref",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/sdk/nvidia/inc",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-fno-omit-frame-pointer",
+        "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-first-lock-observation/tests/check_locks.c",
+        "-o",
+        "/workspace/scratch/9046a5958dfd/project/build/first-lock-controls-3/sanitized/control"
+      ],
+      "negative_controls": [
+        {
+          "binary_sha256": "3541ef5fa234e5b4619d0260acdb5e53f9133c7b95f1efbd491b0ac0896ce73d",
+          "failures_detected": 1,
+          "label": "ignore-allocation-owner"
+        }
+      ],
+      "observations": [
+        {
+          "checks": 4,
+          "failures": 0,
+          "scenario": 0
+        },
+        {
+          "checks": 4,
+          "failures": 0,
+          "scenario": 1
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 2
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 3
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 4
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 5
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 6
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 7
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 8
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 9
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 10
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 11
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 12
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 13
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 14
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 15
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 16
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 17
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 18
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 19
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 20
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 21
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 22
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 23
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 24
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 25
+        },
+        {
+          "checks": 3,
+          "failures": 0,
+          "scenario": 26
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 27
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 28
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 29
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 30
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 31
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 32
+        },
+        {
+          "checks": 1,
+          "failures": 0,
+          "scenario": 33
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 34
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 35
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 36
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 37
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 38
+        },
+        {
+          "checks": 2,
+          "failures": 0,
+          "scenario": 39
+        }
+      ],
+      "status": "passed"
+    }
+  },
+  "whole_dma_stop_proven": false
+}

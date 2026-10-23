@@ -15,7 +15,7 @@
     "registration_graph_sha256": "9c2a5cd304dae5194f4d431ccdbaa745224dad263286581dd26fb9b22b24890d",
     "sdk_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164"
   },
-  "check_count": 13,
+  "check_count": 18,
   "checks": [
     "native-compiler-refuses-before-write-on-non-Intel-Apple-host",
     "native-linker-refuses-before-write-on-non-Intel-Apple-host",
@@ -24,10 +24,15 @@
     "duplicate-strong-owner",
     "final-unreviewed-public-import",
     "actual-two-experimental-SDK-registration-reference",
+    "actual-SDK-metaclass-allocation-null-branches-retained",
+    "actual-compiler-negative-control-detects-removed-new-null-check-policy",
+    "actual-SDK-request-identity-native-profile-C-offsets",
     "changed-registration-instruction",
     "self-reference-cannot-admit-unreviewed-class-name",
     "actual-pinned-SDK-kmod-offsets",
     "actual-immutable104B-profile-typed-endpoints",
+    "synthetic-final-container-rejects-writable-payload-segment",
+    "synthetic-final-container-rejects-false-readonly-section-membership",
     "native-profile-byte-drift",
     "native-profile-wrong-end-symbol"
   ],
@@ -40,12 +45,12 @@
   "native_darwin_compilation": false,
   "package_created": false,
   "production_candidate_allowed": false,
-  "raw_report_path": "build/experimental-image-controls-final-1/results.json",
-  "raw_report_sha256": "f1906dffe6cd9f3ebb7d196e8a3fbcd2ae3ac19b4ca4f65fa293d3d7b4d9a97c",
+  "raw_report_path": "build/experimental-image-controls-final-3/results.json",
+  "raw_report_sha256": "4bcca139ee05b30ddea02cdb236393e9b5c9213ad9f6b8144d68cc9a3c0db6da",
   "scope": "prospective-experimental-image",
   "source_sha256": {
-    "check.py": "3ba7661b6ade9ea1a57b22348d792a645755cc51e4de57f3c81b28678a5a8bc6",
-    "link_native.py": "693607b4b22549407b62ca79ec0ca726a7672519825d9221a2d58a30adf66232",
+    "check.py": "fbbb22880a629922f3007d724cc28f614ca76b36d4a1faa16d94188bd2b6745e",
+    "link_native.py": "ea76334e911db6c8c570d2ed81ed4a23f7ed865220c49bfafe52fed39423afce",
     "metaclasses.py": "022d48458da6c03f528a6f0ba7f1a35fcd1c7fff8b528add8c1d2fd0ccf563fe"
   },
   "status": "local-host-controls-passed-native-run-required"

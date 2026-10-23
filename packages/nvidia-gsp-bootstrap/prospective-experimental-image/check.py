@@ -48,6 +48,7 @@ def run(args):
     refuse('final-unreviewed-public-import',lambda:old.audit_symbols(
         {'live':row(imports=['UnreviewedOperation'])},set()))
     flags,cpp=old.kernel_flags(args.kernel_sdk.resolve(strict=True))
+    cpp=[*cpp,'-fcheck-new']
     cross=['-target','x86_64-apple-macos15',*flags[3:]]
     include=composer.include_flags(args.composition.resolve(strict=True))
     def execute(command,label):
@@ -61,6 +62,41 @@ def run(args):
     execute([args.cxx,*cross,*cpp,*include,'-c',source,'-o',reference],'sdk-registration')
     registration=link.classes.loader_graph(reference,reference)
     checks.append('actual-two-experimental-SDK-registration-reference')
+    decoder=args.cc.parent/'llvm-objdump'
+    decoded=execute([decoder,'--macho','--disassemble','--no-show-raw-insn',reference],'sdk-registration-decode').stdout
+    def null_branch(text,spelling):
+        function=text.split(spelling,1)[1].split('\n__',1)[0]
+        allocation=function.index('__ZN8OSObjectnwEm')
+        constructor=function.index('callq',allocation+len('__ZN8OSObjectnwEm'))
+        between=function[allocation:constructor]
+        return 'testq' in between and ('\tje\t' in between or '\tjz\t' in between)
+    for name in link.classes.CLASSES:
+        assert null_branch(decoded,'__ZNK'+str(len(name))+name+'9MetaClass5allocEv:')
+    power_reference=out/'actual-sdk-power-registration.o'
+    execute([args.cxx,*cross,*cpp,*include,'-c',link.power.REFERENCE,'-o',power_reference],'sdk-power-registration')
+    link.power._review_reference(link.power.Object(power_reference).loader_graph())
+    power_decoded=execute([decoder,'--macho','--disassemble','--no-show-raw-insn',power_reference],'sdk-power-registration-decode').stdout
+    assert null_branch(power_decoded,'__ZNK18S540GspPowerKernel25S540NvidiaGspPowerService9MetaClass5allocEv:')
+    checks.append('actual-SDK-metaclass-allocation-null-branches-retained')
+    unchecked=out/'missing-null-check-flag.o'
+    execute([args.cxx,*cross,*[v for v in cpp if v!='-fcheck-new'],*include,'-c',source,'-o',unchecked],
+        'sdk-registration-without-null-check-policy')
+    unchecked_decoded=execute([decoder,'--macho','--disassemble','--no-show-raw-insn',unchecked],
+        'sdk-registration-unchecked-decode').stdout
+    assert all(not null_branch(unchecked_decoded,'__ZNK'+str(len(name))+name+'9MetaClass5allocEv:') for name in link.classes.CLASSES)
+    checks.append('actual-compiler-negative-control-detects-removed-new-null-check-policy')
+    protocol_source=HERE.parent/'prospective-experimental-target-control/tests/sdk_experimental_protocol_reference.c'
+    protocol_object=out/'actual-sdk-protocol.o'
+    execute([args.cc,*cross,'-std=c11',*include,'-I',HERE.parent/'prospective-runtime-coordinator',
+        '-c',protocol_source,'-o',protocol_object],'sdk-protocol-layout')
+    protocol_image=old.Image(protocol_object,1)
+    symbol=protocol_image.named('_s540ExperimentalProtocolOffsets')
+    section=protocol_image.sections[symbol['section']-1]
+    offset=section['offset']+symbol['value']-section['address']
+    protocol_offsets=list(struct.unpack_from('<13I',protocol_image.data,offset))
+    assert protocol_offsets[:2]==[144,80] and protocol_offsets[3:]==[104,8,16,32,64,96,128,72,8,56]
+    assert protocol_offsets[2]>=256 and protocol_offsets[2]%8==0
+    checks.append('actual-SDK-request-identity-native-profile-C-offsets')
     image=old.Image(reference,1)
     initializer=next(s for s in image.symbols if s['name'].startswith('__GLOBAL__sub_I_'))
     text=image.sections[initializer['section']-1]
@@ -95,6 +131,46 @@ def run(args):
     link.verify_endpoint(old.Image(obj,1),'s540ExperimentalNativeProfileBegin',
         's540ExperimentalNativeProfileEnd','__s540_trial',profile)
     checks.append('actual-immutable104B-profile-typed-endpoints')
+    # Explicit parser-only final-container fixtures preserve the actual
+    # assembled payload. Their modified headers are never native link proof.
+    readonly=bytearray(obj.read_bytes());struct.pack_into('<I',readonly,12,11)
+    segment=32
+    assert struct.unpack_from('<I',readonly,segment)[0]==0x19
+    readonly[segment+8:segment+24]=b'__TEXT'+b'\0'*10
+    struct.pack_into('<II',readonly,segment+56,5,5)
+    container=out/'synthetic-final-profile-readonly.macho';container.write_bytes(readonly)
+    link.verify_endpoint(old.Image(container,11),'s540ExperimentalNativeProfileBegin',
+        's540ExperimentalNativeProfileEnd','__s540_trial',profile)
+    writable=bytearray(readonly);struct.pack_into('<II',writable,segment+56,7,7)
+    mutation=out/'synthetic-final-profile-writable.macho';mutation.write_bytes(writable)
+    refuse('synthetic-final-container-rejects-writable-payload-segment',lambda:link.verify_endpoint(
+        old.Image(mutation,11),'s540ExperimentalNativeProfileBegin','s540ExperimentalNativeProfileEnd','__s540_trial',profile))
+    disguised=bytearray(readonly)
+    count,length=struct.unpack_from('<II',disguised,16)
+    position=32
+    for _ in range(count):
+        command,size=struct.unpack_from('<II',disguised,position)
+        if command==0x19:
+            disguised[position+8:position+24]=b'__DATA'+b'\0'*10
+            struct.pack_into('<II',disguised,position+56,3,3)
+            fileoff=struct.unpack_from('<Q',disguised,position+40)[0]
+            struct.pack_into('<Q',disguised,position+40,fileoff+72)
+            for index in range(struct.unpack_from('<I',disguised,position+64)[0]):
+                section=position+72+80*index
+                for offset in (48,56):
+                    value=struct.unpack_from('<I',disguised,section+offset)[0]
+                    if value:struct.pack_into('<I',disguised,section+offset,value+72)
+        elif command==2:
+            for offset in (8,16):
+                value=struct.unpack_from('<I',disguised,position+offset)[0]
+                struct.pack_into('<I',disguised,position+offset,value+72)
+        position+=size
+    struct.pack_into('<II',disguised,16,count+1,length+72)
+    empty_text=struct.pack('<II16sQQQQIIII',0x19,72,b'__TEXT',0x1000,0,0,0,5,5,0,0)
+    disguised[32+length:32+length]=empty_text
+    mutation=out/'synthetic-final-profile-wrong-owning-segment.macho';mutation.write_bytes(disguised)
+    refuse('synthetic-final-container-rejects-false-readonly-section-membership',lambda:link.verify_endpoint(
+        old.Image(mutation,11),'s540ExperimentalNativeProfileBegin','s540ExperimentalNativeProfileEnd','__s540_trial',profile))
     bad=bytearray(profile);bad[8]^=1
     refuse('native-profile-byte-drift',lambda:link.verify_endpoint(old.Image(obj,1),
         's540ExperimentalNativeProfileBegin','s540ExperimentalNativeProfileEnd','__s540_trial',bytes(bad)))

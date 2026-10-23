@@ -1,0 +1,889 @@
+{
+  "base_composition_sha256": "72b7d5a5d93504218e8a7953d79c90c1609e4580c55922deb2ec5dab13de24d8",
+  "compiler_sha256": "24cb665e0e2e74230c37efdf335c32564f4cc6acecc2f95bd07450140a778003",
+  "component": "dma",
+  "endpoints": "explicit CPU fixtures; complete selected production bodies execute",
+  "format": 1,
+  "full_original_layout_proven": false,
+  "hardware_admission": false,
+  "kernel_execution": false,
+  "original_entry_admission": false,
+  "pm_acknowledgement_authorized": false,
+  "source_sha256": {
+    "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/composition.json": "72b7d5a5d93504218e8a7953d79c90c1609e4580c55922deb2ec5dab13de24d8",
+    "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c": "8f86f051b92dd9ce2818b0dc91cd5b9f189a42db1265fe4b4f4d76352958aa88",
+    "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c": "6d728dddb7ccd5ecb684ccfb11ed0b96f69d77dcb37e39dfdb4140e3234b3d0c",
+    "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/nvidia/src/kernel/gpu/bif/arch/maxwell/kernel_bif_gm107.c": "8adf51c33580a9cabff61756d29a5ad1b93c4379fa9f70cf7e1c02c747f0e67b",
+    "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/nvidia/src/kernel/gpu/bif/arch/turing/kernel_bif_tu102.c": "deb0b0aa06023fd73e233e6c727e2fb2a2574ed764b990239605ee18a910a289",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-dma-stop-closure/SOURCE-CONTRACT.json": "92d9e495b88307e0352733e04ba9fea60a4ce55161a6659d396a0dc05a88eb6a",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-dma-stop-closure/check.py": "fb63be0dd4442aad6f8acb7bfe7bc65d90eb4f6869792445af1ff54ecef1fa69",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-dma-stop-closure/control_common.py": "b5eb2281307f6b2eb54a960464eb4ddfb0a681fd188724a5d359c77e594bf699",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-dma-stop-closure/prepare.py": "187f4e5443bff8240c1d31ad15c753a7c9200b40de841fde74b013c1a19397dd",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-dma-stop-closure/stop-sysmem.c.inc": "538d1531ceebba063e59e8c4959ee5f81f6cdfc6d3e21b5eca365ab642c7de3a",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-dma-stop-closure/tests/check_dma.c": "71b72330352bf8bac68be1dd083969863869ae736c6ed26cca3f998c9e5c87dd",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-dma-stop-closure/tests/check_record.c": "f1a56a7591e2a68797bb2543e788acac5005fa100cfe867d52f6e2cdc82f9c7e",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-dma-stop-closure/transactions-complete.c.inc": "875e57ab9bffebc9790d6b59e37e168f764b4712feb76ea48a642d32e91cfc49"
+  },
+  "status": "passed-selected-production-dma-body-controls",
+  "variants": {
+    "plain": {
+      "binary_sha256": "d359e60d1249caa007181e9c79b3ac3c2f48bd56f2c3cd97fbfee2c8e051af99",
+      "checks": 792,
+      "command": [
+        "/workspace/scratch/9046a5958dfd/llvm-bin/clang",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c",
+        "-std=c11",
+        "-O1",
+        "-g",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-Wl,--gc-sections",
+        "-Wno-unused-function",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/dma-stop-controls-7",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/src",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-darwin-services/src",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-pm-revocation-closure",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-irq-callback-closure",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-dma-producer-closure",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/inc",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/inc/swref",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/sdk/nvidia/inc",
+        "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-dma-stop-closure/tests/check_dma.c",
+        "-o",
+        "/workspace/scratch/9046a5958dfd/project/build/dma-stop-controls-7/plain/control"
+      ],
+      "negative_controls": [
+        {
+          "binary_sha256": "aa67f11a4a7910624ca0d2136eb0d69351ffd0e4c670e379f668dba2eb0ffa00",
+          "failures_detected": 1,
+          "label": "accept-unobserved-bme"
+        },
+        {
+          "binary_sha256": "846bedb58903bde4441824be89215a0738cff3a34d1e2c97a4f22da8c7ed0fc5",
+          "failures_detected": 1,
+          "label": "ignore-cancellation-on-zero"
+        }
+      ],
+      "observations": [
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 0
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 1
+        },
+        {
+          "checks": 7,
+          "failures": 0,
+          "scenario": 2
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 3
+        },
+        {
+          "checks": 7,
+          "failures": 0,
+          "scenario": 4
+        },
+        {
+          "checks": 11,
+          "failures": 0,
+          "scenario": 5
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 6
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 7
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 8
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 9
+        },
+        {
+          "checks": 7,
+          "failures": 0,
+          "scenario": 10
+        },
+        {
+          "checks": 11,
+          "failures": 0,
+          "scenario": 11
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 12
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 13
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 14
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 15
+        },
+        {
+          "checks": 11,
+          "failures": 0,
+          "scenario": 16
+        },
+        {
+          "checks": 5,
+          "failures": 0,
+          "scenario": 17
+        },
+        {
+          "checks": 5,
+          "failures": 0,
+          "scenario": 18
+        },
+        {
+          "checks": 4,
+          "failures": 0,
+          "scenario": 19
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 20
+        },
+        {
+          "checks": 10,
+          "failures": 0,
+          "scenario": 21
+        },
+        {
+          "checks": 9,
+          "failures": 0,
+          "scenario": 22
+        },
+        {
+          "checks": 11,
+          "failures": 0,
+          "scenario": 23
+        },
+        {
+          "checks": 15,
+          "failures": 0,
+          "scenario": 24
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 25
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 26
+        },
+        {
+          "checks": 6,
+          "failures": 0,
+          "scenario": 27
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 28
+        },
+        {
+          "checks": 7,
+          "failures": 0,
+          "scenario": 29
+        },
+        {
+          "checks": 6,
+          "failures": 0,
+          "scenario": 30
+        },
+        {
+          "checks": 5,
+          "failures": 0,
+          "scenario": 31
+        },
+        {
+          "checks": 8,
+          "failures": 0,
+          "scenario": 32
+        },
+        {
+          "checks": 12,
+          "failures": 0,
+          "scenario": 33
+        },
+        {
+          "checks": 14,
+          "failures": 0,
+          "scenario": 34
+        },
+        {
+          "checks": 7,
+          "failures": 0,
+          "scenario": 35
+        }
+      ],
+      "record_controls": {
+        "binary_sha256": "d3506ca641451a0e4f2c2d84aa1241f2e6eefad3c898d081e414e9b3c0181861",
+        "checks": 419,
+        "command": [
+          "/workspace/scratch/9046a5958dfd/llvm-bin/clang",
+          "-std=c11",
+          "-O1",
+          "-g",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-Wno-unused-parameter",
+          "-ffunction-sections",
+          "-fdata-sections",
+          "-Wl,--gc-sections",
+          "-Wno-unused-function",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/dma-stop-controls-7",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/src",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-darwin-services/src",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-pm-revocation-closure",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-irq-callback-closure",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-dma-producer-closure",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/inc",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/inc/swref",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/sdk/nvidia/inc",
+          "/workspace/scratch/9046a5958dfd/project/build/dma-stop-controls-7/selected/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c",
+          "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-dma-stop-closure/tests/check_record.c",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c",
+          "-o",
+          "/workspace/scratch/9046a5958dfd/project/build/dma-stop-controls-7/plain/record-control"
+        ],
+        "negative_control": {
+          "binary_sha256": "eb7db29ae28652863dbe20c52019d79cae21e217b1aa3b55aac1a7d6be1544fc",
+          "failures_detected": 2
+        },
+        "observations": [
+          {
+            "checks": 21,
+            "failures": 0,
+            "scenario": 0,
+            "status": 0
+          },
+          {
+            "checks": 18,
+            "failures": 0,
+            "scenario": 1,
+            "status": 64
+          },
+          {
+            "checks": 19,
+            "failures": 0,
+            "scenario": 2,
+            "status": 101
+          },
+          {
+            "checks": 17,
+            "failures": 0,
+            "scenario": 3,
+            "status": 64
+          },
+          {
+            "checks": 16,
+            "failures": 0,
+            "scenario": 4,
+            "status": 64
+          },
+          {
+            "checks": 14,
+            "failures": 0,
+            "scenario": 5,
+            "status": 64
+          },
+          {
+            "checks": 20,
+            "failures": 0,
+            "scenario": 6,
+            "status": 23
+          },
+          {
+            "checks": 19,
+            "failures": 0,
+            "scenario": 7,
+            "status": 23
+          },
+          {
+            "checks": 20,
+            "failures": 0,
+            "scenario": 8,
+            "status": 23
+          },
+          {
+            "checks": 23,
+            "failures": 0,
+            "scenario": 9,
+            "status": 0
+          },
+          {
+            "checks": 19,
+            "failures": 0,
+            "scenario": 10,
+            "status": 23
+          },
+          {
+            "checks": 19,
+            "failures": 0,
+            "scenario": 11,
+            "status": 23
+          },
+          {
+            "checks": 19,
+            "failures": 0,
+            "scenario": 12,
+            "status": 23
+          },
+          {
+            "checks": 19,
+            "failures": 0,
+            "scenario": 13,
+            "status": 23
+          },
+          {
+            "checks": 20,
+            "failures": 0,
+            "scenario": 14,
+            "status": 0
+          },
+          {
+            "checks": 21,
+            "failures": 0,
+            "scenario": 15,
+            "status": 23
+          },
+          {
+            "checks": 18,
+            "failures": 0,
+            "scenario": 16,
+            "status": 64
+          },
+          {
+            "checks": 18,
+            "failures": 0,
+            "scenario": 17,
+            "status": 64
+          },
+          {
+            "checks": 21,
+            "failures": 0,
+            "scenario": 18,
+            "status": 23
+          },
+          {
+            "checks": 20,
+            "failures": 0,
+            "scenario": 19,
+            "status": 23
+          },
+          {
+            "checks": 18,
+            "failures": 0,
+            "scenario": 20,
+            "status": 64
+          },
+          {
+            "checks": 20,
+            "failures": 0,
+            "scenario": 21,
+            "status": 0
+          }
+        ]
+      },
+      "status": "passed"
+    },
+    "sanitized": {
+      "binary_sha256": "6e413a4647a9c283541b3303c0571958cd8e0c7dc7b0addf1a695e67ec4ac63a",
+      "checks": 792,
+      "command": [
+        "/workspace/scratch/9046a5958dfd/llvm-bin/clang",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c",
+        "-std=c11",
+        "-O1",
+        "-g",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-Wl,--gc-sections",
+        "-Wno-unused-function",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/dma-stop-controls-7",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/src",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-darwin-services/src",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-pm-revocation-closure",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-irq-callback-closure",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-dma-producer-closure",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/inc",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/inc/swref",
+        "-I",
+        "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/sdk/nvidia/inc",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-fno-omit-frame-pointer",
+        "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-dma-stop-closure/tests/check_dma.c",
+        "-o",
+        "/workspace/scratch/9046a5958dfd/project/build/dma-stop-controls-7/sanitized/control"
+      ],
+      "negative_controls": [
+        {
+          "binary_sha256": "3ce65ed8e36d57d104947282a98cd417a6771967d6c1625161f379679182f77b",
+          "failures_detected": 1,
+          "label": "accept-unobserved-bme"
+        },
+        {
+          "binary_sha256": "ca94af3584daaa8ae771f511e01b537ee7747ac215de74809ebb262330d6f40d",
+          "failures_detected": 1,
+          "label": "ignore-cancellation-on-zero"
+        }
+      ],
+      "observations": [
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 0
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 1
+        },
+        {
+          "checks": 7,
+          "failures": 0,
+          "scenario": 2
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 3
+        },
+        {
+          "checks": 7,
+          "failures": 0,
+          "scenario": 4
+        },
+        {
+          "checks": 11,
+          "failures": 0,
+          "scenario": 5
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 6
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 7
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 8
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 9
+        },
+        {
+          "checks": 7,
+          "failures": 0,
+          "scenario": 10
+        },
+        {
+          "checks": 11,
+          "failures": 0,
+          "scenario": 11
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 12
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 13
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 14
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 15
+        },
+        {
+          "checks": 11,
+          "failures": 0,
+          "scenario": 16
+        },
+        {
+          "checks": 5,
+          "failures": 0,
+          "scenario": 17
+        },
+        {
+          "checks": 5,
+          "failures": 0,
+          "scenario": 18
+        },
+        {
+          "checks": 4,
+          "failures": 0,
+          "scenario": 19
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 20
+        },
+        {
+          "checks": 10,
+          "failures": 0,
+          "scenario": 21
+        },
+        {
+          "checks": 9,
+          "failures": 0,
+          "scenario": 22
+        },
+        {
+          "checks": 11,
+          "failures": 0,
+          "scenario": 23
+        },
+        {
+          "checks": 15,
+          "failures": 0,
+          "scenario": 24
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 25
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 26
+        },
+        {
+          "checks": 6,
+          "failures": 0,
+          "scenario": 27
+        },
+        {
+          "checks": 13,
+          "failures": 0,
+          "scenario": 28
+        },
+        {
+          "checks": 7,
+          "failures": 0,
+          "scenario": 29
+        },
+        {
+          "checks": 6,
+          "failures": 0,
+          "scenario": 30
+        },
+        {
+          "checks": 5,
+          "failures": 0,
+          "scenario": 31
+        },
+        {
+          "checks": 8,
+          "failures": 0,
+          "scenario": 32
+        },
+        {
+          "checks": 12,
+          "failures": 0,
+          "scenario": 33
+        },
+        {
+          "checks": 14,
+          "failures": 0,
+          "scenario": 34
+        },
+        {
+          "checks": 7,
+          "failures": 0,
+          "scenario": 35
+        }
+      ],
+      "record_controls": {
+        "binary_sha256": "30e4241c73bd9f68be7f77404cd246a3b6a447ed2a4575114ef0768c14dc73ef",
+        "checks": 419,
+        "command": [
+          "/workspace/scratch/9046a5958dfd/llvm-bin/clang",
+          "-std=c11",
+          "-O1",
+          "-g",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-Wno-unused-parameter",
+          "-ffunction-sections",
+          "-fdata-sections",
+          "-Wl,--gc-sections",
+          "-Wno-unused-function",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/dma-stop-controls-7",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/src",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-darwin-services/src",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-pm-revocation-closure",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-irq-callback-closure",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/prospective-dma-producer-closure",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/inc",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/inc/swref",
+          "-I",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/source/src/common/sdk/nvidia/inc",
+          "-fsanitize=address,undefined",
+          "-fno-sanitize-recover=all",
+          "-fno-omit-frame-pointer",
+          "/workspace/scratch/9046a5958dfd/project/build/dma-stop-controls-7/selected/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c",
+          "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-dma-stop-closure/tests/check_record.c",
+          "/workspace/scratch/9046a5958dfd/project/build/inputs/shutdown/project/packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c",
+          "-o",
+          "/workspace/scratch/9046a5958dfd/project/build/dma-stop-controls-7/sanitized/record-control"
+        ],
+        "negative_control": {
+          "binary_sha256": "4f2089109275a83c6cb3a8e7949315a5ae4c3ddf190278668baaf58602094fc1",
+          "failures_detected": 2
+        },
+        "observations": [
+          {
+            "checks": 21,
+            "failures": 0,
+            "scenario": 0,
+            "status": 0
+          },
+          {
+            "checks": 18,
+            "failures": 0,
+            "scenario": 1,
+            "status": 64
+          },
+          {
+            "checks": 19,
+            "failures": 0,
+            "scenario": 2,
+            "status": 101
+          },
+          {
+            "checks": 17,
+            "failures": 0,
+            "scenario": 3,
+            "status": 64
+          },
+          {
+            "checks": 16,
+            "failures": 0,
+            "scenario": 4,
+            "status": 64
+          },
+          {
+            "checks": 14,
+            "failures": 0,
+            "scenario": 5,
+            "status": 64
+          },
+          {
+            "checks": 20,
+            "failures": 0,
+            "scenario": 6,
+            "status": 23
+          },
+          {
+            "checks": 19,
+            "failures": 0,
+            "scenario": 7,
+            "status": 23
+          },
+          {
+            "checks": 20,
+            "failures": 0,
+            "scenario": 8,
+            "status": 23
+          },
+          {
+            "checks": 23,
+            "failures": 0,
+            "scenario": 9,
+            "status": 0
+          },
+          {
+            "checks": 19,
+            "failures": 0,
+            "scenario": 10,
+            "status": 23
+          },
+          {
+            "checks": 19,
+            "failures": 0,
+            "scenario": 11,
+            "status": 23
+          },
+          {
+            "checks": 19,
+            "failures": 0,
+            "scenario": 12,
+            "status": 23
+          },
+          {
+            "checks": 19,
+            "failures": 0,
+            "scenario": 13,
+            "status": 23
+          },
+          {
+            "checks": 20,
+            "failures": 0,
+            "scenario": 14,
+            "status": 0
+          },
+          {
+            "checks": 21,
+            "failures": 0,
+            "scenario": 15,
+            "status": 23
+          },
+          {
+            "checks": 18,
+            "failures": 0,
+            "scenario": 16,
+            "status": 64
+          },
+          {
+            "checks": 18,
+            "failures": 0,
+            "scenario": 17,
+            "status": 64
+          },
+          {
+            "checks": 21,
+            "failures": 0,
+            "scenario": 18,
+            "status": 23
+          },
+          {
+            "checks": 20,
+            "failures": 0,
+            "scenario": 19,
+            "status": 23
+          },
+          {
+            "checks": 18,
+            "failures": 0,
+            "scenario": 20,
+            "status": 64
+          },
+          {
+            "checks": 20,
+            "failures": 0,
+            "scenario": 21,
+            "status": 0
+          }
+        ]
+      },
+      "status": "passed"
+    }
+  },
+  "whole_dma_stop_proven": false
+}

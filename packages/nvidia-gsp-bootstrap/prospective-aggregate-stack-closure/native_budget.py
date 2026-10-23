@@ -56,8 +56,28 @@ def derive(measurement, *, worker_capacity_bytes=POLICY_STACK_CAPACITY_BYTES,
     # Physical top-half and ordinary worker roots have independent stacks.
     # Deferred bottom halves are measured as ordinary work, not summed onto a
     # physical IRQ top-half chain. Framework/nesting remains an explicit reserve.
-    irq_known = known['interrupt_top']
-    worker_known = max(v for k, v in known.items() if k != 'interrupt_top')
+    physical_irq = lambda label: label in ('interrupt_top', 'interrupt_context_top', 'interrupt_mmu_fault') or \
+        label.startswith(('interrupt_backend_prefix_', 'interrupt_bound_top_'))
+    irq_known = max(v for k, v in known.items() if physical_irq(k))
+    worker_known = max(v for k, v in known.items() if not physical_irq(k))
+    def maximum(prefixes=(), labels=()):
+        return max((v for k, v in known.items() if k in labels or k.startswith(prefixes)), default=0)
+    # Cross-thread invoke waits on its caller's stack; it does not put the
+    # worker's RM chain on that caller. Registered callback prefixes, however,
+    # remain live while their separately measured indirect body executes.
+    # Add those KNOWN prefixes conservatively instead of spending an unknown
+    # allowance on bytes already measured. Possible overlap only overcounts.
+    joined = {
+        'dispatcher_callback': maximum(('worker_dispatch_prefix_',)) + maximum(('worker_owner_dispatch_',)),
+        'timer_callback': maximum(('callout_timer_prefix_',)) + maximum(labels=('recovery_timer', 'nano_timer')),
+        'work_callback': maximum(('callout_work_prefix_',)) + maximum(labels=('work_item_execute',)),
+        'deferred_bottom_callback': maximum(('deferred_bottom_prefix_',)) + maximum(labels=(
+            'interrupt_locked_bottom', 'interrupt_unlocked_bottom', 'context_locked_bottom', 'context_unlocked_bottom')),
+        'physical_irq_callback': maximum(('interrupt_backend_prefix_',)) + maximum(
+            ('interrupt_bound_top_',), ('interrupt_top', 'interrupt_context_top', 'interrupt_mmu_fault')),
+    }
+    worker_known = max(worker_known, *(v for k, v in joined.items() if k != 'physical_irq_callback'))
+    irq_known = max(irq_known, joined['physical_irq_callback'])
     allowance = sum(ALLOWANCES.values())
     worker_demand, irq_demand = worker_known + allowance, irq_known + allowance
     worker_required, irq_required = rounded(worker_demand), rounded(irq_demand)
@@ -68,6 +88,8 @@ def derive(measurement, *, worker_capacity_bytes=POLICY_STACK_CAPACITY_BYTES,
     return {'format': 1, 'status': 'fits-explicit-retained-experiment-stack-policy',
         'root_diagnostic_acyclic_bytes': known, 'unknown_barriers': barriers,
         'worker_known_acyclic_bytes': worker_known, 'irq_known_acyclic_bytes': irq_known,
+        'known_registered_callback_prefix_sums': joined,
+        'registered_callback_prefix_overlap_conservatively_overcounted': True,
         **ALLOWANCES, 'total_allowance_bytes': allowance,
         'worker_demand_with_allowances_bytes': worker_demand,
         'irq_demand_with_allowances_bytes': irq_demand,

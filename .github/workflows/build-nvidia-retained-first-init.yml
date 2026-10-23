@@ -111,8 +111,10 @@ jobs:
             --upstream build-src/nvidia-upstream --kernel-sdk build-src/MacKernelSDK \
             --cache "$RUNNER_TEMP/nvidia-idle-4939252-native" --output build/retained-first-init
           python3 -B builders/tests/test_nvidia_shutdown_successor.py
+          python3 -B builders/tests/test_nvidia_retained_trial.py --work build/retained-first-init
           python3 -B packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/tests/test_policy.py
           python3 -B packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/tests/test_workflow.py
+          python3 -B packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/tests/test_local_roots.py
           python3 - <<'PY'
           import ast
           from pathlib import Path
@@ -122,6 +124,22 @@ jobs:
               names += [str(p) for p in (Path('packages/nvidia-gsp-bootstrap')/directory).rglob('*.py')]
           for name in names:ast.parse(Path(name).read_text(),filename=name)
           PY
+          S540_CONTROL_CC="$(command -v clang)"
+          S540_CONTROL_CXX="$(command -v clang++)"
+          python3 -B packages/nvidia-gsp-bootstrap/prospective-pm-event-closure/check.py \
+            --base build/retained-first-init/inputs/shutdown \
+            --output build/retained-first-init/controls/pm-event \
+            --cc "$S540_CONTROL_CC" --cxx "$S540_CONTROL_CXX"
+          for S540_COMPONENT in dma-stop-closure first-lock-observation checked-context-teardown; do
+            python3 -B "packages/nvidia-gsp-bootstrap/prospective-$S540_COMPONENT/check.py" \
+              --base build/retained-first-init/inputs/shutdown \
+              --output "build/retained-first-init/controls/$S540_COMPONENT" --cc "$S540_CONTROL_CC"
+          done
+          python3 -B packages/nvidia-gsp-bootstrap/prospective-runtime-coordinator/check.py \
+            --base build/retained-first-init/inputs/shutdown \
+            --output build/retained-first-init/controls/runtime --host-control --cxx "$S540_CONTROL_CXX"
+          python3 -B packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/check.py \
+            --output build/retained-first-init/controls/target-state --cc "$S540_CONTROL_CC"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always() && steps.request.outputs.requested == 'true'
         with:

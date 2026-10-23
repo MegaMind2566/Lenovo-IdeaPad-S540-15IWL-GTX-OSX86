@@ -28,14 +28,35 @@ ROOT_SYMBOLS = {
     'adapter_initialize': '_s540Global_rm_init_adapter',
     'context_initialize_wrapper': '_s540GspContextInitializeAdapter',
     'interrupt_top': '_s540Global_rm_isr',
+    'interrupt_context_top': '_s540GspContextInterruptTop',
+    'interrupt_mmu_fault': '_s540Global_rm_gpu_handle_mmu_faults',
     'interrupt_locked_bottom': '_s540Global_rm_isr_bh',
     'interrupt_unlocked_bottom': '_s540Global_rm_isr_bh_unlocked',
+    'context_locked_bottom': '_s540GspContextLockedBottomHalf',
+    'context_unlocked_bottom': '_s540GspContextUnlockedBottomHalf',
     'recovery_timer': '_s540Global_rm_run_rc_callback',
     'nano_timer': '_s540Global_rm_run_nano_timer_callback',
+    'work_item_execute': '_s540Global_rm_execute_work_item',
     'gpu_enter_shutdown': '_s540Global_gpuEnterShutdown_IMPL',
     'adapter_disable': '_s540Global_rm_disable_adapter',
     'adapter_shutdown': '_s540Global_rm_shutdown_adapter',
 }
+CALLBACK_ROOTS = (
+    ('packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp',
+     'worker_owner_dispatch', '5Owner4Impl6actionE'),
+    ('packages/nvidia-gsp-bootstrap/src/S540NvidiaGspDispatcher.cpp',
+     'worker_dispatch_prefix', '10Dispatcher4Impl5entryE'),
+    ('packages/nvidia-darwin-services/src/S540NvidiaDarwinTimer.cpp',
+     'callout_timer_prefix', '13timerCallbackE'),
+    ('packages/nvidia-darwin-services/src/S540NvidiaDarwinWork.cpp',
+     'callout_work_prefix', '12workCallbackE'),
+    ('packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp',
+     'interrupt_backend_prefix', '9interruptE'),
+    ('packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp',
+     'deferred_bottom_prefix', '10bottomHalfE'),
+    ('packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp',
+     'interrupt_bound_top', '7Binding3topE'),
+)
 NATIVE_STATUSES = (
     'compiled-current-full-original-native-source-only',
     'compiled-current-project-native-source-only',
@@ -220,6 +241,27 @@ def select_final_graphs(graphs, final_path, bound):
         'final_symbol_filter_is_formal_reachability_proof': False}
 
 
+def selected_actual_roots(graphs, roots, local_roots):
+    """Resolve selected actual local entries without claiming external linkage."""
+    candidates = {name for g in graphs for n in g['nodes'] for name in n['symbols']}
+    analysis_graphs = deepcopy(graphs)
+    query_roots = dict(roots)
+    for label, (identity, name) in local_roots.items():
+        key = '__s540_diagnostic_local_root_' + hashlib.sha256(identity.encode()).hexdigest()
+        require(key not in candidates, 'Diagnostic local-root lookup key collides with actual code')
+        matches = [n for g in analysis_graphs for n in g['nodes'] if n['id'] == identity]
+        require(len(matches) == 1 and name in matches[0]['symbols'] and
+            name not in matches[0]['external_symbols'],
+            'Actual object-scoped local callback owner is absent/ambiguous or is not local')
+        matches[0]['external_symbols'].append(key)
+        query_roots[label] = key
+    result = closure.selected_roots(analysis_graphs, query_roots)
+    for label, (identity, name) in local_roots.items():
+        result['roots'][label].update(symbol=name, root_lookup='source-scoped-local-node-id',
+            source_scoped_local_node_id=identity, actual_machine_linkage_changed=False)
+    return result
+
+
 def measure_verified_plan(args, value, verify_callback, original_report_path,
                           project_report_path, *, profile_contract=None,
                           context_review_callback=None):
@@ -263,11 +305,29 @@ def measure_verified_plan(args, value, verify_callback, original_report_path,
         matches = sorted(n for n in candidates if part in n and 'S540' in n)
         for index, name in enumerate(matches):
             roots[label + '_' + str(index)] = name
+    composition = Path(args.composition).resolve(strict=True)
+    local_roots = {}
+    for relative, label, fragment in CALLBACK_ROOTS:
+        matches = {node['id']: (node, min(name for name in node['symbols'] if fragment in name))
+            for g in graphs if g['source'] == str(composition / 'project' / relative)
+            for node in g['nodes'] if any(fragment in name for name in node['symbols'])}
+        require(matches, 'The actual registered callback entry is absent: ' + relative + ': ' + label)
+        for index, (identity, (node, name)) in enumerate(sorted(matches.items())):
+            key = label + '_' + str(index)
+            if name in node['external_symbols']:
+                roots[key] = name
+            else:
+                local_roots[key] = (identity, name)
     require(any(k.startswith('experimental_owner_') for k in roots),
             'Actual experimental Owner entry is absent from measured code')
     require(any(k.startswith('privileged_target_request_') for k in roots),
             'Actual privileged user-client entry is absent from measured code')
-    result = closure.selected_roots(graphs, roots)
+    # The unchanged resolver accepts external-symbol root names. Its direct
+    # local edges already use exact object-scoped node IDs. Expose each chosen
+    # actual local callback to the ROOT LOOKUP ONLY under a collision-free
+    # diagnostic key in a private analysis copy. Do not alter persisted graphs,
+    # linkage facts, machine symbols, edges or barriers.
+    result = selected_actual_roots(graphs, roots, local_roots)
     require(all(row['definition_count'] == 1 for row in result['roots'].values()),
             'A selected actual execution root is missing or ambiguous')
     graph_path = output / 'current-object-graphs.json'

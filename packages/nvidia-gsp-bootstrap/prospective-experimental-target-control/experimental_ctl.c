@@ -47,8 +47,8 @@ static int targetIdentity(void) {
 }
 static int readText(const char *name,const char *expected) {
     char value[128]={0};size_t bytes=sizeof(value);
-    return sysctlbyname(name,value,&bytes,NULL,0)==0 && bytes>0 && bytes<=sizeof(value) &&
-        value[sizeof(value)-1]==0 && !strcmp(value,expected);
+    return sysctlbyname(name,value,&bytes,NULL,0)==0 && bytes==strlen(expected)+1 &&
+        bytes<=sizeof(value) && value[bytes-1]==0 && !strcmp(value,expected);
 }
 static int readStack(NvU64 *result) {
     NvU64 value=0;size_t bytes=sizeof(value);
@@ -69,6 +69,28 @@ static int identityMatches(const S540ExperimentalSnapshot *observed,NvU64 stack)
         stack>=S540_EXPERIMENTAL_REQUIRED_STACK && stack>=observed->nativeRequiredKernelStackBytes &&
         !observed->wholeDmaStopProven && !observed->pmAcknowledgementAuthorized && !observed->accelerationTest;
 }
+static void printStop(const S540ExperimentalStopObservation *s) {
+    const struct { const char *name;NvU32 value; } fields[]={
+        {"format",s->format},{"bytes",s->bytes},{"attempts",s->attempts},{"status",s->status},
+        {"first_error",s->firstError},{"snapshot_status",s->snapshotStatus},{"identity_status",s->identityStatus},
+        {"locks_status",s->locksStatus},{"protocol_status",s->protocolStatus},{"closing_status",s->closingStatus},
+        {"services_status",s->servicesStatus},{"seal_status",s->sealStatus},{"disable_status",s->disableStatus},
+        {"interrupt_status",s->interruptStatus},{"shutdown_status",s->shutdownStatus},{"requested",s->requested},
+        {"retained",s->retained},{"original_returned",s->originalReturned},{"original_exit_ready",s->originalExitReady},
+        {"locks_released",s->locksReleased},{"protocol_attempted",s->protocolAttempted},{"services_attempted",s->servicesAttempted},
+        {"interrupt_attempted",s->interruptAttempted},{"disable_attempted",s->disableAttempted},{"shutdown_attempted",s->shutdownAttempted},
+        {"services_drained",s->servicesDrained},{"interrupt_software_drained",s->interruptSoftwareDrained},
+        {"interrupt_fully_drained",s->interruptFullyDrained},{"cleanup_complete",s->cleanupComplete},
+        {"physical_release_authorized",s->physicalReleaseAuthorized},{"pm_acknowledgement_sent",s->pmAcknowledgementSent},
+        {"protocol_format",s->protocolFormat},{"protocol_bytes",s->protocolBytes},{"protocol_operation_status",s->protocolOperationStatus},
+        {"protocol_original_return_status",s->protocolOriginalReturnStatus},{"protocol_unlock_status",s->protocolUnlockStatus},
+        {"protocol_claimed",s->protocolClaimed},{"protocol_original_entered",s->protocolOriginalEntered},
+        {"protocol_original_returned",s->protocolOriginalReturned},{"protocol_completed",s->protocolCompleted}};
+    printf("\"retained_stop\":{\"generation\":%llu,\"protocol_generation\":%llu",
+        (unsigned long long)s->generation,(unsigned long long)s->protocolGeneration);
+    for (unsigned i=0;i<sizeof(fields)/sizeof(fields[0]);++i) printf(",\"%s\":%u",fields[i].name,fields[i].value);
+    printf("}");
+}
 static void printSnapshot(const S540ExperimentalSnapshot *s,kern_return_t requested,kern_return_t stopped,
     kern_return_t observation,int attempted) {
     printf("{\"format\":1,\"scope\":\"retained-first-initialization\",\"request_rpc_attempted\":%s,"
@@ -82,7 +104,7 @@ static void printSnapshot(const S540ExperimentalSnapshot *s,kern_return_t reques
         "\"stop_attempted\":%u,\"stop_returned\":%u,\"stop_status\":%u,\"cancellation_status\":%u,"
         "\"runtime_observation_status\":%u,\"stop_observation_status\":%u,\"power_revoked\":%u,"
         "\"cancellation_revoked\":%u,\"power_acknowledged\":%u,\"whole_dma_stop_proven\":false,"
-        "\"pm_acknowledgement_authorized\":false,\"acceleration_test\":false}\n",
+        "\"pm_acknowledgement_authorized\":false,\"acceleration_test\":false,",
         attempted?"true":"false",(unsigned)requested,(unsigned)stopped,(unsigned)observation,s->phase,s->lastStatus,
         (unsigned long long)s->generation,(unsigned long long)s->observedKernelStackBytes,s->requestConsumed,
         s->requestRunning,s->retainedUntilReboot,s->ownerAllocated,s->providerFound,s->preparationAttempted,
@@ -90,17 +112,22 @@ static void printSnapshot(const S540ExperimentalSnapshot *s,kern_return_t reques
         s->initializationStatus,s->originalEntryObserved,s->globalInitialized,s->adapterInitialized,s->firmwareLoaded,
         s->interruptInstalled,s->interruptArmed,s->stopAttempted,s->stopReturned,s->stopStatus,s->cancellationStatus,
         s->runtimeObservationStatus,s->stopObservationStatus,s->powerRevoked,s->cancellationRevoked,s->powerAcknowledged);
+    printStop(&s->retainedStop);printf("}\n");
 }
 int main(int argc,char **argv) {
     int run=argc==3 && !strcmp(argv[1],"--run-once") && !strcmp(argv[2],"--ack-retained-first-initialization");
     int target=argc==2 && !strcmp(argv[1],"--target");
-    if (!run && !target && !(argc==2 && !strcmp(argv[1],"--snapshot"))) {
-        fprintf(stderr,"Usage: experimental_ctl --target | --snapshot | --run-once --ack-retained-first-initialization\n");return 2;
+    int stop=argc==2 && !strcmp(argv[1],"--stop");
+    if (!run && !target && !stop && !(argc==2 && !strcmp(argv[1],"--snapshot"))) {
+        fprintf(stderr,"Usage: experimental_ctl --target | --snapshot | --stop | --run-once --ack-retained-first-initialization\n");return 2;
     }
     if (geteuid()!=0) { fprintf(stderr,"Administrator required.\n");return 2; }
     NvU64 stack=0;
     if (!readText("kern.osversion","25G241") || !readText("kern.osrelease","25.6.0") || !readStack(&stack)) {
         fprintf(stderr,"Target build/release or actual kern.stack_size could not be confirmed.\n");return 2;
+    }
+    if (stack<S540_EXPERIMENTAL_REQUIRED_STACK) {
+        fprintf(stderr,"Actual kern.stack_size is below this experiment's required minimum.\n");return 2;
     }
     if (target) return targetIdentity();
     io_service_t service=IOServiceGetMatchingService(kIOMainPortDefault,IOServiceMatching("S540ExperimentalTargetControl"));
@@ -133,8 +160,12 @@ int main(int argc,char **argv) {
         bytes=sizeof(output);
         stopped=IOConnectCallStructMethod(connection,S540_EXPERIMENTAL_SELECTOR_STOP,NULL,0,&output,&bytes);
         status=observe(connection,&observed);
+    } else if (stop) {
+        S540ExperimentalSnapshot output={0};size_t bytes=sizeof(output);
+        stopped=IOConnectCallStructMethod(connection,S540_EXPERIMENTAL_SELECTOR_STOP,NULL,0,&output,&bytes);
+        status=observe(connection,&observed);
     }
     printSnapshot(&observed,requested,stopped,status,run);
     IOServiceClose(connection);
-    return status==KERN_SUCCESS && (!run || requested==KERN_SUCCESS) ? 0:1;
+    return status==KERN_SUCCESS && (!run || requested==KERN_SUCCESS) && (!stop || stopped==KERN_SUCCESS) ? 0:1;
 }

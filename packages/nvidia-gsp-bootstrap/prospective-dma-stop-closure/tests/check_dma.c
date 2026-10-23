@@ -33,13 +33,32 @@ NV_STATUS s540FirstTxnIrqReadEnteredScope(const void *state, NvU32 role, NvU32 *
     (void)state; (void)role; (void)origin; return NV_ERR_INVALID_STATE;
 }
 static NV_STATUS configRead(OBJGPU *object, NvU32 address, NvU32 *out) {
+    S540GspCancellationCommitSnapshot commit = {0};
     expect(object == &gpu && address == NV_XVE_DEV_CTRL, "exact BME config read");
+    expect(s540GspCancellationCommitReadState(&nv, &commit) == NV_OK && commit.inFlight,
+        "real reservation across BME config read");
     ++configReads; *out = configReads == 1 ? configInitial : configObserved;
+    if ((scenario == 32 && configReads == 1) || (scenario == 34 && configReads == 2))
+        expect(s540GspCancellationRevoke(token) == NV_OK, "real event during accepted BME read");
     return configReads == 1 ? readFirst : readSecond;
 }
 static NV_STATUS configWrite(OBJGPU *object, NvU32 address, NvU32 value) {
+    S540GspCancellationCommitLease lower = 0;
+    S540GspCancellationCommitSnapshot commit = {0};
+    NV_STATUS status;
+    /* Endpoint fixture preserves the selected lower original producer's
+     * OP-only BME-enable reservation and exposes accidental nested commits. */
+    if (!stop) {
+        status = s540GspCancellationCommitEnterState(&nv, &lower);
+        if (status != NV_OK) return status;
+    }
     expect(object == &gpu && address == NV_XVE_DEV_CTRL, "exact BME config write");
-    ++configWrites; written = value; return writeStatus;
+    expect(s540GspCancellationCommitReadState(&nv, &commit) == NV_OK && commit.inFlight,
+        "real reservation across BME config write");
+    ++configWrites; written = value;
+    if (scenario == 33) expect(s540GspCancellationRevoke(token) == NV_OK, "real event during accepted BME write");
+    status = lower ? s540GspCancellationCommitLeaveState(&nv, lower) : NV_OK;
+    return writeStatus != NV_OK ? writeStatus : status;
 }
 #define GPU_BUS_CFG_RD32 configRead
 #define GPU_BUS_CFG_WR32 configWrite
@@ -78,7 +97,9 @@ int main(int argc, char **argv) {
     if (argc != 2) return 2;
     scenario = (NvU32)strtoul(argv[1], NULL, 10);
     gpu.nv = &nv; stop = NV_TRUE; configInitial = 0x84; configObserved = 0x80;
-    if (scenario < 16) {
+    expect(s540GspCancellationBind(&nv, &token) == NV_OK, "actual cancellation binding");
+    if (scenario != 19) expect(s540GspCancellationBegin(token) == NV_OK, "actual enrolled operation scope");
+    if (scenario < 16 || scenario >= 32) {
         switch (scenario) {
         case 0: break;
         case 1: stop = NV_FALSE; configInitial = 0x80; configObserved = 0x84; break;
@@ -96,19 +117,27 @@ int main(int argc, char **argv) {
         case 13: stop = NV_FALSE; configObserved = 0x84; break;
         case 14: configInitial = 0x80; break;
         case 15: stop = 2; break;
+        case 32: case 33: case 34: expected = NV_ERR_OPERATION_ABORTED; break;
+        case 35:
+            expect(s540GspCancellationRevoke(token) == NV_OK, "real BME cleanup revocation");
+            expect(s540GspCancellationBeginCleanupState(&nv) == NV_OK, "real BME cleanup phase");
+            now += 30000000001ULL; expected = NV_ERR_TIMEOUT; break;
+        default: return 2;
         }
         result = kbifStopSysMemRequests_GM107(&gpu, &bif, stop);
         expect(result == expected, "BME status truthful");
-        if (scenario == 2 || scenario == 4 || scenario == 10)
+        if (scenario == 35) expect(!configReads && !configWrites, "expired cleanup performs no BME endpoint");
+        else if (scenario == 2 || scenario == 4 || scenario == 10 || scenario == 32)
             expect(configWrites == 0 && configReads == 1, "failed initial read prevents store");
         else {
             expect(configWrites == 1, "single actual config store");
             expect(written == (stop ? (configInitial & ~4U) : (configInitial | 4U)), "only BME field modified");
-            expect(configReads == ((scenario == 5 || scenario == 11) ? 1U : 2U), "successful store gets actual readback");
+            expect(configReads == ((scenario == 5 || scenario == 11 || scenario == 33) ? 1U : 2U), "successful store gets actual readback or truthful revocation");
         }
+        S540GspCancellationCommitSnapshot commit = {0};
+        expect(s540GspCancellationCommitReadState(&nv, &commit) == NV_OK && !commit.inFlight,
+            "all returned BME endpoints retire reservations");
     } else {
-        expect(s540GspCancellationBind(&nv, &token) == NV_OK, "actual cancellation binding");
-        if (scenario != 19) expect(s540GspCancellationBegin(token) == NV_OK, "actual enrolled operation scope");
         switch (scenario) {
         case 16: break;
         case 17: expected = NV_ERR_INVALID_ARGUMENT; break;

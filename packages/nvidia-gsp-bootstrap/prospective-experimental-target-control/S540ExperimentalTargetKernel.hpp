@@ -22,13 +22,14 @@ public:
     void stop(IOService *provider) override;
     IOReturn newUserClient(task_t task, void *security, UInt32 type,
         OSDictionary *properties, IOUserClient **handler) override;
-    NV_STATUS runOnce(const S540ExperimentalRequest &);
+    NV_STATUS runOnce(const S540ExperimentalRequest &,NvBool *actualCallingClientOwnsRequest);
     NV_STATUS requestStop();
 };
 class S540ExperimentalTargetClient final : public IOUserClient {
     OSDeclareDefaultStructors(S540ExperimentalTargetClient);
     S540ExperimentalTargetControl *control = nullptr;
     bool counted = false;
+    NvBool requestOwned = NV_FALSE;
 public:
     bool initWithTask(task_t task, void *security, UInt32 type,
         OSDictionary *properties) override;

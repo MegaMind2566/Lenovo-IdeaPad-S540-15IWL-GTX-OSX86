@@ -29,6 +29,8 @@ DENIED = dict(original_entry_admission=False, production_candidate_allowed=False
               aggregate_stack_proven=False, whole_dma_stop_proven=False)
 OLD_KERNEL = 'packages/nvidia-gsp-bootstrap/prospective-loader/S540ProspectiveLoaderKernel.cpp'
 POWER = 'packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.cpp'
+GENERATED_ORIGINAL_SOURCE = ('const char NVRM_ID[] = "nvidia id: NVIDIA UNIX Open Kernel Module for x86_64 '
+    '615.78.08 Release Build (build@ci)";\nconst char *const pNVRM_ID = NVRM_ID + 11;\n')
 
 
 def require(value, message):
@@ -113,6 +115,8 @@ def bridge_flags(upstream, composed, compiler, value, include):
 def original_plan(upstream, composed, output, compiler, value, include):
     objects = output / 'original-objects'
     declared = composer.original.original_commands(upstream, objects, compiler)
+    require((objects / 'g_nvid_string.c').read_text() == GENERATED_ORIGINAL_SOURCE,
+            'The sole deterministic generated original identification source changed')
     require(len(declared) == 1100, 'The pinned complete make plan must contain 1100 units')
     extra = ['-mkernel', '-DKERNEL', '-D__KERNEL__', '-arch', 'x86_64',
         '-mmacosx-version-min=15.0', '-DNV_UNIX=1', '-D__NV_UNIX_VERSION_H__',
@@ -154,7 +158,7 @@ def project_plan(upstream, composed, output, cc, cxx, sdk, value, include):
         elif declared['kind'] == 'plain-c':
             compiler, selected = cc, [*flags, '-std=c11', *include]
         elif declared['kind'] == 'cpp':
-            compiler, selected = cxx, [*flags, *composer.execution.kernel_cpp_flags(cpp), *include]
+            compiler, selected = cxx, [*flags, *composer.execution.kernel_cpp_flags(cpp), '-fcheck-new', *include]
         else:
             raise ValueError('Unknown actual project source language kind')
         macros = declared.get('compile_definitions', {})
@@ -221,8 +225,7 @@ def compile_verified_plan(args, value, verify_callback, *, companion_include_dir
     for name in ('original-objects', 'project-objects'):
         (output / name).mkdir()
     generated = output / 'original-objects/g_nvid_string.c'
-    generated.write_text('const char NVRM_ID[] = "nvidia id: NVIDIA UNIX Open Kernel Module for x86_64 '
-        '615.78.08 Release Build (build@ci)";\nconst char *const pNVRM_ID = NVRM_ID + 11;\n')
+    generated.write_text(GENERATED_ORIGINAL_SOURCE)
     original_rows = original_plan(upstream, composed, output, cc, value, include)
     project_rows = project_plan(upstream, composed, output, cc, cxx, sdk, value, include)
     reports = {}
@@ -251,7 +254,7 @@ def compile_verified_plan(args, value, verify_callback, *, companion_include_dir
             command=command, cwd=str(cwd), dependency_sha256=dependencies(obj.with_suffix('.d'),source,cwd,composed,sdk,cc),
             stack_usage=composer.stack.capture_usage(source, obj, command, cwd=cwd, native_apple=True))
     try:
-        for label, plans in (('original', original_rows), ('project', project_rows)):
+        for label, plans in (('project', project_rows), ('original', original_rows)):
             filename = 'full-original-compilation.json' if label == 'original' else 'project-compilation.json'
             report = dict(summary, results=[], failures=[], status='running')
             reports[label] = report
@@ -309,7 +312,7 @@ def verify_native_reports(args, value, verify_callback):
     require(all(summary.get(k)==v for k,v in identity.items()) and summary.get('sdk')==sdk_record,
             'Native compiler/SDK execution identity changed')
     require(summary.get('builder_source_sha256') == helpers() and
-        all(composer.sha(Path(p))==h for p,h in summary['compiler_file_sha256'].items()),
+        summary.get('compiler_file_sha256') == {str(p):composer.sha(p) for p in (cc,cxx)},
         'A native compile helper/compiler changed')
     include = [*composer.include_flags(composed), *[flag for name in summary['companion_include_directories']
         for flag in ('-I',str(composed/'project'/composer.checked_relative(name)))]]

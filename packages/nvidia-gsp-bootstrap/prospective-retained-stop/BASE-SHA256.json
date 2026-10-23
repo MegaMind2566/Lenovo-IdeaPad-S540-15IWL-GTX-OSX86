@@ -1,0 +1,5 @@
+{
+  "packages/nvidia-gsp-bootstrap/prospective-first-transaction/services/S540NvidiaFirstTxnServices.cpp": "195ae1199cdf46b7cc3042ebf5d7c2eeb9572942682b4044922460da215d4007",
+  "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp": "05dec4e1c2748a7cfd17c0bf5fa1e210c5219cb10ce7bfb393c12ce17ab653d5",
+  "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.hpp": "9bd04889fad55f53170d99f90d5125936d6d3daf7ba5afb35adea9806dbcd2b2"
+}

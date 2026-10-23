@@ -1,0 +1,32 @@
+{
+  "format": 1,
+  "scope": "independent-source-review-of-PM-coupling-and-retained-stop-integration",
+  "status": "reviewed-no-critical-source-issue",
+  "reviewed_pm_prepare_sha256": "97b43388d35aee4179e9d7140dd29e4eb1ffcfb5c0f1843557049a0a04af30f6",
+  "reviewed_runtime_prepare_sha256": "8d77c157bc314dfa7616ee76e9d9b16da92e249b73a7fc7d2a25e6f5d951e52d",
+  "reviewed_stop_prepare_sha256": "233b6975cd87ea815defb1318f3fb7057a0b4398732fb359a50008a4cd11ffdb",
+  "reviewed_actual_stop_body_sha256": "870293a57c2fd61329ac64f6efef4ac5340ebb2e685f4c99dc6da8816c09774f",
+  "independently_replayed_outputs": {
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp": "4c5e8b823f353e67298ee52afff80e40c8dc7cb2c40ef7c51d7727af924ad61d",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.hpp": "cbc4ade8db0ce2dbc19515f90d4f0ac24fb3e85ef82c68b766a83adaa72fc427",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/services/S540NvidiaFirstTxnServices.cpp": "c67f799136b81f986f06008395b068c7ae7b702aab8ebd62844ccdced5a732b0"
+  },
+  "existing_controls_report_sha256": "e32f059b37d2887072e40f828ddfa177b51f2d52fd82eb44824a291b9ce505f9",
+  "source_findings": [
+    "The Power guard closes the real coupled cancellation before publishing the event or invoking a delayed hook.",
+    "The coupled generation prevents cancellation storage recycling until the same guard releases it.",
+    "The retained branch attempts shutdown instead of returning merely because storage is retained.",
+    "The non-destructive original shutdown protocol precedes first-transaction closing and seal.",
+    "Completed original return, exit-ready and actual current-master lock observations precede CPU joins.",
+    "Actual lock observations are repeated after the protocol and checked disable boundaries.",
+    "Independent CPU producer stops preserve the first actual failure while still attempting the remaining producers.",
+    "Snapshot copies use a separate nonblocking atomic guard; collision is explicit and diagnostics do not authorize release.",
+    "No final release, unmap, destructive-admission, ordinary unload or PM acknowledgement is granted."
+  ],
+  "frontend_precondition": "Concurrent cancellation callers must hold publication references; ordinary Owner stop/free follows their joined exclusion.",
+  "runtime_or_hardware_execution_proven_by_review": false,
+  "formal_stack_bound_proven": false,
+  "whole_dma_stop_proven": false,
+  "pm_acknowledgement_authorized": false,
+  "physical_reclamation_authorized": false
+}

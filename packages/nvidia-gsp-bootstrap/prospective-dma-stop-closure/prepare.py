@@ -21,7 +21,7 @@ PROJECT_UNITS = ()
 EXPORTS = {}
 COMPILE_DEFINITIONS = {}
 INCLUDE_DIRECTORIES = ('packages/nvidia-gsp-bootstrap/prospective-pm-revocation-closure',)
-SOURCE_FILES = ('check.py', 'control_common.py', 'tests/check_dma.c', 'tests/check_record.c', 'SOURCE-CONTRACT.json')
+SOURCE_FILES = ('check.py', 'check_sdk.py', 'control_common.py', 'tests/check_dma.c', 'tests/check_record.c', 'SOURCE-CONTRACT.json')
 sys.path.insert(0, str(ROOT / 'packages/nvidia-gsp-bootstrap/cancellation'))
 from prepare_wait_candidates import function_span
 
@@ -66,21 +66,10 @@ def transforms(values):
 
 def original_transforms(values):
     exact(values, ORIGINAL_INPUTS)
-    def bme(body):
-        body = once(body, '    NV_ASSERT_OK_OR_RETURN(GPU_BUS_CFG_RD32(pGpu, NV_XVE_DEV_CTRL, &regVal));',
-            '    NV_ASSERT_OK_OR_RETURN(GPU_BUS_CFG_RD32(pGpu, NV_XVE_DEV_CTRL, &regVal));\n'
-            '    if (regVal == ~(NvU32)0) return NV_ERR_GPU_IS_LOST;')
-        return once(body, '    NV_ASSERT_OK_OR_RETURN(GPU_BUS_CFG_WR32(pGpu, NV_XVE_DEV_CTRL, regVal));\n\n'
-            '    return NV_OK;',
-            '    NV_ASSERT_OK_OR_RETURN(GPU_BUS_CFG_WR32(pGpu, NV_XVE_DEV_CTRL, regVal));\n'
-            '    /* Config write acceptance is not its observed hardware effect.\n'
-            '     * This readback proves only the BME bit, never posted DMA drain. */\n'
-            '    NV_ASSERT_OK_OR_RETURN(GPU_BUS_CFG_RD32(pGpu, NV_XVE_DEV_CTRL, &regVal));\n'
-            '    if (regVal == ~(NvU32)0) return NV_ERR_GPU_IS_LOST;\n'
-            '    if (!!DRF_VAL(_XVE, _DEV_CTRL, _CMD_BUS_MASTER, regVal) == !!bStop)\n'
-            '        return NV_ERR_INVALID_STATE;\n'
-            '    return NV_OK;')
-    gm = modify(values[GM107], 'kbifStopSysMemRequests_GM107', bme)
+    gm = once(values[GM107], '#include "gpu/bif/kernel_bif.h"',
+        '#include "gpu/bif/kernel_bif.h"\n#include "nv.h"\n#include "S540NvidiaGspCommit.h"')
+    gm = modify(gm, 'kbifStopSysMemRequests_GM107',
+        lambda _: (HERE / 'stop-sysmem.c.inc').read_text().rstrip())
     tu = once(values[TU102], '#include "gpu/bif/kernel_bif.h"',
         '#include "gpu/bif/kernel_bif.h"\n#include "nv.h"\n#include "S540NvidiaGspCommit.h"')
     tu = modify(tu, 'kbifWaitForTransactionsComplete_TU102',

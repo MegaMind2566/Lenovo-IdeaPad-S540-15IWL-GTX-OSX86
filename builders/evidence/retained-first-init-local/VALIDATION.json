@@ -1,0 +1,23 @@
+{
+  "aggregate_stack_bound_proven": false,
+  "changed_original_translation_units_cross_compiled": 2,
+  "composition_sha256": "5b88f913b5ecb582aabeb3bd8fec2c3a920e5ce678b8c59dee139722f8a2598d",
+  "final_link_performed": false,
+  "format": 1,
+  "full_original_compilation_performed_by_this_control": false,
+  "gpu_initialization_proven": false,
+  "native_darwin_compilation": false,
+  "note": "Object hashes are a local cross-compilation receipt. Actual native compile/link/package reports are separate and mandatory.",
+  "portable_canonical_parent_sha256": "1392052eda0733713e345e938033a06c539669d4b443ba5c3104c70ae171e298",
+  "production_candidate_allowed": false,
+  "project_translation_units_cross_compiled": 66,
+  "reports_sha256": {
+    "changed-original-compilation.json": "24010b5c45c52ae5980c2cc844f63a537fb7df0f9b59d4c8134847d5e8c4cf43",
+    "project-compilation.json": "523173470d9c9e6a17321aa2a2f73686f14c60eea9c9f10349fed6f73d3b220c",
+    "source-archive-controls.json": "d7c8e4eabb4da8ac5802ba3949a3495413b65e72cbd7025bde5a5f153bbff9bd"
+  },
+  "source_replay_mutations_restored": true,
+  "source_replay_negative_controls_passed": 13,
+  "status": "passed-local-retained-first-init-preparation",
+  "target_lenovo_execution_performed": false
+}

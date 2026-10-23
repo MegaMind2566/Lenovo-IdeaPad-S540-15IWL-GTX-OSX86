@@ -1,0 +1,23 @@
+{
+  "code_sha256": {
+    ".github/workflows/build-nvidia-retained-first-init.yml": "482c094de74747446dc10dbcb4ed3dbd8f0b2c76af78e03b0d4a3f66d4fc4283",
+    "packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/README.md": "03b73cc5297528e2aa41d9826a55c1eb0f1c9e7f3c5252662348052789837d88",
+    "packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/SOURCE-CONTRACT.json": "4bac161e4ff53d6ba78670cef8cfaed6d1ff1ebaa925d26c19b0648954bb2b05",
+    "packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/check.py": "54f0c4a886b4cecfc1976c95fec2c663c2e1de6fa5e99c4e1752fd559fbcafd4",
+    "packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/collect_target_stack.py": "7f5a84e1c76f40a113e9dd08f2e84b4ac4d591e09e844dac6b26f5683472d5f6",
+    "packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/context_adapter.py": "2937bd4e70d5cc20ab1bd4acda86be44570daac603e0dba240fba2334cdc2ba8",
+    "packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/native_budget.py": "4818d9bf2af0a8f0acacd33abb787cb0753e699f3eb38a6a71234b84a00ac5b6",
+    "packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/tests/test_local_roots.py": "71a6c2ff69d92381812c1d2e2365f20022d03b9663440334180c6f0b989a1e43",
+    "packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/tests/test_policy.py": "dbedf3ee220c093cc99e36dbb1ead1d5f80702f49331bf154cade8228804e4f4",
+    "packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/tests/test_workflow.py": "b5e3217cc530787eeb3cc796a6fa9f2d6f354d237a43aa0828658a0404699b6e"
+  },
+  "controls": 47,
+  "evidence_path": "/workspace/scratch/9046a5958dfd/project/build/aggregate-stack-controls-final-1/results.json",
+  "evidence_sha256": "a0f1cd04f7693033582cd1ebb8aca44f25cf1a899981a404180abf0a86d93ce7",
+  "format": 1,
+  "kernel_stack_bound_proven": false,
+  "native_profile_created": false,
+  "status": "passed-local-stack-policy-and-workflow-controls-native-pending",
+  "synthetic_or_toy_fixture_scope_explicit": true,
+  "target_kernel_execution_performed": false
+}

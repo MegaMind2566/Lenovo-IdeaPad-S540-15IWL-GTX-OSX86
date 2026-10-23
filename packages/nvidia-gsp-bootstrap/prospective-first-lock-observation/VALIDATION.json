@@ -1,0 +1,41 @@
+{
+  "actual_body_controls": {
+    "path": "evidence/actual-body-controls.json",
+    "sha256": "bd0aa144b2f7a7b7afbd42326a29a2977bec6e96e2792a67b3067eb71e10eeb4",
+    "status": "passed-selected-production-first-lock-body-controls",
+    "variants": {
+      "plain": {
+        "checks": 84,
+        "negative_controls": 1,
+        "scenarios": 40
+      },
+      "sanitized": {
+        "checks": 84,
+        "negative_controls": 1,
+        "scenarios": 40
+      }
+    }
+  },
+  "format": 1,
+  "full_translation_unit_cross_compilation": {
+    "selected_objects": [
+      {
+        "object": "/workspace/scratch/9046a5958dfd/project/build/dma-context-sdk-4/objects/S540NvidiaGspFirstTransactionOriginal.o",
+        "object_sha256": "e2050cab8c8f60dfd8133bf09ef71cef56638d43646112dd61cc41c702126d82",
+        "source": "/workspace/scratch/9046a5958dfd/project/build/dma-context-sdk-4/project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/original/S540NvidiaGspFirstTransactionOriginal.c",
+        "source_sha256": "16f7bb9bff2e675c728d739d7aca80ccb18a557c8380840243fc2e7a79e5bbaa"
+      }
+    ],
+    "sha256": "4870d89c145ddbd4a778f9581d414e0ba2ab80f2648ba44f40366d8b3b9587a3",
+    "shared_evidence_repository_path": "packages/nvidia-gsp-bootstrap/prospective-dma-stop-closure/evidence/five-complete-tu-cross-compilation.json",
+    "status": "sdk-compiled-five-selected-complete-tus-cross-only"
+  },
+  "gpu_initialization_tested": false,
+  "native_compilation_performed": false,
+  "physical_reclamation_authorized": false,
+  "pm_acknowledgement_authorized": false,
+  "source_contract_sha256": "020814f3ba53e3f180ac06c9249561ba805f6e246d033d0bd04aae13bc545cc6",
+  "status": "locally-validated-source-successor-only",
+  "target_kernel_loaded": false,
+  "whole_dma_stop_proven": false
+}

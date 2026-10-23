@@ -91,6 +91,32 @@ class PolicyControls(unittest.TestCase):
         with self.assertRaises(ValueError):
             budget.verify_profile(fixture(), encoded, '3' * 64)
 
+    def test_known_dispatcher_prefix_cannot_hide_inside_unknown_allowance(self):
+        value = fixture(worker=8000, irq=100)
+        value['roots']['worker_owner_dispatch_0'] = deepcopy(value['roots']['context_initialize_wrapper'])
+        value['roots']['worker_dispatch_prefix_0'] = deepcopy(value['roots']['interrupt_top'])
+        value['roots']['worker_dispatch_prefix_0']['diagnostic_acyclic_frame_sum']['bytes'] = 300
+        with self.assertRaises(ValueError):
+            budget.derive(value)
+
+    def test_known_physical_irq_prefix_is_added_to_actual_wrapper(self):
+        value = fixture(worker=100, irq=7500)
+        value['roots']['interrupt_context_top'] = deepcopy(value['roots']['interrupt_top'])
+        value['roots']['interrupt_backend_prefix_0'] = deepcopy(value['roots']['interrupt_top'])
+        value['roots']['interrupt_backend_prefix_0']['diagnostic_acyclic_frame_sum']['bytes'] = 1000
+        with self.assertRaises(ValueError):
+            budget.derive(value)
+
+    def test_blocked_user_rpc_and_worker_are_separate_stacks(self):
+        value = fixture(worker=7500, irq=100)
+        value['roots']['privileged_target_request_0'] = deepcopy(value['roots']['context_initialize_wrapper'])
+        for label, size in [('worker_owner_dispatch_0', 4000), ('worker_dispatch_prefix_0', 256)]:
+            value['roots'][label] = deepcopy(value['roots']['interrupt_top'])
+            value['roots'][label]['diagnostic_acyclic_frame_sum']['bytes'] = size
+        result = budget.derive(value)
+        self.assertEqual(result['worker_known_acyclic_bytes'], 7500)
+        self.assertEqual(result['known_registered_callback_prefix_sums']['dispatcher_callback'], 4256)
+
 
 if __name__ == '__main__':
     unittest.main()

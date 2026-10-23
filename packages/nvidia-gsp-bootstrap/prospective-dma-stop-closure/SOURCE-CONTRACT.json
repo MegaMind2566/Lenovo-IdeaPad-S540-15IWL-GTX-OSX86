@@ -1,0 +1,35 @@
+{
+  "added_project_units": [],
+  "admission": {
+    "hardware_admission": false,
+    "kernel_stack_bound_proven": false,
+    "original_entry_admission": false,
+    "physical_reclamation_authorized": false,
+    "pm_acknowledgement_authorized": false,
+    "production_candidate_allowed": false,
+    "whole_dma_stop_proven": false
+  },
+  "base_composition_sha256": "72b7d5a5d93504218e8a7953d79c90c1609e4580c55922deb2ec5dab13de24d8",
+  "compile_definitions": {},
+  "component": "dma-stop-closure",
+  "format": 1,
+  "input_sha256": {
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c": "6d728dddb7ccd5ecb684ccfb11ed0b96f69d77dcb37e39dfdb4140e3234b3d0c",
+    "src/nvidia/src/kernel/gpu/bif/arch/maxwell/kernel_bif_gm107.c": "8adf51c33580a9cabff61756d29a5ad1b93c4379fa9f70cf7e1c02c747f0e67b",
+    "src/nvidia/src/kernel/gpu/bif/arch/turing/kernel_bif_tu102.c": "deb0b0aa06023fd73e233e6c727e2fb2a2574ed764b990239605ee18a910a289"
+  },
+  "new_project_exports": {},
+  "output_sha256": {
+    "project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c": "074354ac92fa4b5cd55d37c7cff4c557c2b132b91db1473420e0c33924198c5c",
+    "source/src/nvidia/src/kernel/gpu/bif/arch/maxwell/kernel_bif_gm107.c": "a7536726d59a6d472433ab10aa0d44cacf4c5fd785ff3d3e7fe37c522eeebe6c",
+    "source/src/nvidia/src/kernel/gpu/bif/arch/turing/kernel_bif_tu102.c": "f402c192884747e51695a3ffafeee17918df1d0e881d425e776edb059a46069f"
+  },
+  "production_sha256": {
+    "prepare.py": "187f4e5443bff8240c1d31ad15c753a7c9200b40de841fde74b013c1a19397dd",
+    "stop-sysmem.c.inc": "538d1531ceebba063e59e8c4959ee5f81f6cdfc6d3e21b5eca365ab642c7de3a",
+    "transactions-complete.c.inc": "875e57ab9bffebc9790d6b59e37e168f764b4712feb76ea48a642d32e91cfc49"
+  },
+  "shared_cpu_checker_repository_path": "packages/nvidia-gsp-bootstrap/prospective-dma-stop-closure/control_common.py",
+  "shared_cpu_checker_sha256": "b5eb2281307f6b2eb54a960464eb4ddfb0a681fd188724a5d359c77e594bf699",
+  "validation_scope": "See VALIDATION.json; actual CPU endpoint fixtures and full-TU cross compilation are separate from native/target execution"
+}

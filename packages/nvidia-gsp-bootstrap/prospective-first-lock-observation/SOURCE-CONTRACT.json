@@ -1,0 +1,30 @@
+{
+  "added_project_units": [],
+  "admission": {
+    "hardware_admission": false,
+    "kernel_stack_bound_proven": false,
+    "original_entry_admission": false,
+    "physical_reclamation_authorized": false,
+    "pm_acknowledgement_authorized": false,
+    "production_candidate_allowed": false,
+    "whole_dma_stop_proven": false
+  },
+  "base_composition_sha256": "72b7d5a5d93504218e8a7953d79c90c1609e4580c55922deb2ec5dab13de24d8",
+  "compile_definitions": {},
+  "component": "first-lock-observation",
+  "format": 1,
+  "input_sha256": {
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/original/S540NvidiaGspFirstTransactionOriginal.c": "745606a08523de91ab8408d3e438a3ba7922f2f204f90a84ea2a879d8dedfa75"
+  },
+  "new_project_exports": {},
+  "output_sha256": {
+    "project/packages/nvidia-gsp-bootstrap/prospective-first-transaction/original/S540NvidiaGspFirstTransactionOriginal.c": "16f7bb9bff2e675c728d739d7aca80ccb18a557c8380840243fc2e7a79e5bbaa"
+  },
+  "production_sha256": {
+    "locks-released.c.inc": "23e2111813edafa5cb7574f9a81cc0b068b4c96afc3ac70243f7888ed6134c32",
+    "prepare.py": "186a0a37e6dc8f5d7b6bf5122c60524be3ab951186dc24bb7127ba494ab1ab67"
+  },
+  "shared_cpu_checker_repository_path": "packages/nvidia-gsp-bootstrap/prospective-dma-stop-closure/control_common.py",
+  "shared_cpu_checker_sha256": "b5eb2281307f6b2eb54a960464eb4ddfb0a681fd188724a5d359c77e594bf699",
+  "validation_scope": "See VALIDATION.json; actual CPU endpoint fixtures and full-TU cross compilation are separate from native/target execution"
+}

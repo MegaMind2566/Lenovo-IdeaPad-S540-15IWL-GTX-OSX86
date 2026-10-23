@@ -11,7 +11,18 @@ RECEIVERS = (
      ('S540DarwinTimerAction action;', 'void *context;', 'timer->action(timer->context);')),
     ('packages/nvidia-darwin-services/src/S540NvidiaDarwinWork.cpp',
      ('S540DarwinWorkAction action;', 'void *context;', 'queue->action(queue->context, data);')),
+    ('packages/nvidia-gsp-bootstrap/src/S540NvidiaGspDispatcher.cpp',
+     ('self->action = action; self->context = context;',
+      'const NV_STATUS status = self->action(self->context, item.command);',
+      'kernel_thread_start(Impl::entry, self, &self->worker)')),
+    ('packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp',
+     ('impl_->dispatcher.start(Impl::action, impl_)', 'static NV_STATUS action(void *owner, NvU32 command)')),
+    ('packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp',
+     ('p->interrupt=contract;', 'p->bottomHalf.initialize(bottomHalf,p)',
+      'p->provider->registerInterrupt(0,p->owner,interrupt,p)',
+      'p->interrupt.top(p->interrupt.context,locked,unlocked)')),
 )
+IRQ_BINDING = 'packages/nvidia-gsp-bootstrap/prospective-irq-installation/S540NvidiaGspIrqInstallation.hpp'
 
 
 def require(value, reason):
@@ -38,10 +49,16 @@ def native_context_contract(args, value):
         text = path.read_text()
         require(all(token in text for token in tokens), 'Actual receiver/callback layout changed: ' + relative)
         bindings[str(path)] = expected
+    binding = composition / 'project' / IRQ_BINDING
+    require(sha(binding) == value['project_files'][IRQ_BINDING]['sha256'] and
+        'this,top,locked,unlocked,mask,ready,identity_.nv,selectMode,validate' in binding.read_text(),
+        'Actual retained typed interrupt-contract construction changed')
+    bindings[str(binding)] = sha(binding)
     contract = {'format': 1, 'scope': 'current-native-retained-experiment-context-review',
         'source_composition_sha256': sha(composition / 'composition.json'),
         'input_sha256': bindings, 'historical_graphs_transferred': False,
         'receiver_layout_reviewed_against_actual_current_source': True,
+        'known_registered_callback_prefixes_budgeted_separately': True,
         'indirect_receiver_target_sets_proven': False, 'context_edges_pruned': 0,
         'unknown_receiver_aliases_remain_barriers': True,
         'formal_stack_bound_proven': False}

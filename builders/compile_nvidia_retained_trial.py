@@ -24,7 +24,7 @@ def require(ok, message):
 
 
 def cross_command(command):
-    result, index = [command[0], '-target', 'x86_64-macos-none'], 1
+    result, index = [command[0], '-target', 'x86_64-apple-macos15.0'], 1
     while index < len(command):
         flag = command[index]
         if flag == '-arch':
@@ -104,6 +104,7 @@ def main():
             a.output / 'project-stack-usage-manifest.json')
         if a.changed_original:
             (a.output / 'original-objects').mkdir()
+            (a.output / 'original-objects/g_nvid_string.c').write_text(core.GENERATED_ORIGINAL_SOURCE)
             originals = core.original_plan(a.upstream, a.composition, a.output, a.cc, value, include)
             changed = {r['source'] for r in value['retained_trial']['changes'] if r['scope'] == 'source' and r['source'].endswith('.c')}
             chosen = [plan for plan in originals if plan['source'] in changed]

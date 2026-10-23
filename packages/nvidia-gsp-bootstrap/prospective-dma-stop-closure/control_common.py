@@ -65,6 +65,14 @@ def run(here, component, args):
     cancellation = args.cancellation_source.resolve(strict=True) if args.cancellation_source else (
         base / 'project/packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c')
     if component == 'dma': source_paths += [cancellation, here / 'tests/check_record.c']
+    pm_event = ROOT / 'packages/nvidia-gsp-bootstrap/prospective-pm-event-closure'
+    if component == 'dma' and args.cancellation_source:
+        source_paths.append(pm_event / 'S540NvidiaPowerCoupling.h')
+    contract_path = here / 'SOURCE-CONTRACT.json'
+    contract = json.loads(contract_path.read_text())
+    if contract['shared_cpu_checker_sha256'] != sha(Path(__file__)):
+        raise ValueError('Shared actual-body CPU checker differs from the selected module contract')
+    source_paths.append(contract_path)
     bindings = {str(path): sha(path) for path in source_paths}
     compiler_sha = sha(cc)
     output.mkdir(parents=True)
@@ -93,12 +101,12 @@ def run(here, component, args):
         mutations = [('ignore-allocation-owner', ' || view.allocationOwned', '', 26)]
     else:
         materialize_dma(module, selected, base, output)
-        cases = list(range(32))
+        cases = list(range(36))
         mutations = [('accept-unobserved-bme', '    if (!!DRF_VAL(_XVE, _DEV_CTRL, _CMD_BUS_MASTER, regVal) == !!bStop)',
             '    if (0)', 3), ('ignore-cancellation-on-zero', '        if (status != NV_OK) return status;\n        if (value == ~(NvU32)0)',
             '        if (0) return status;\n        if (value == ~(NvU32)0)', 20)]
     package = base / 'project/packages'
-    includes = [output, package / 'nvidia-gsp-bootstrap/src',
+    includes = [output, package / 'nvidia-gsp-bootstrap/src', package / 'nvidia-darwin-services/src',
         package / 'nvidia-gsp-bootstrap/prospective-first-transaction/record',
         package / 'nvidia-gsp-bootstrap/prospective-first-transaction/record/deps', package]
     includes += [package / 'nvidia-gsp-bootstrap/prospective-pm-revocation-closure',
@@ -106,7 +114,9 @@ def run(here, component, args):
         package / 'nvidia-gsp-bootstrap/prospective-dma-producer-closure',
         base / 'source/src/common/inc', base / 'source/src/common/inc/swref',
         base / 'source/src/common/sdk/nvidia/inc']
+    if component == 'dma' and args.cancellation_source: includes.append(pm_event)
     flags = ['-std=c11', '-O1', '-g', '-Wall', '-Wextra', '-Werror', '-Wno-unused-parameter',
+        '-ffunction-sections', '-fdata-sections', '-Wl,--gc-sections',
         '-Wno-unused-function', *[flag for directory in includes for flag in ('-I', str(directory))]]
     environment = dict(os.environ, ASAN_OPTIONS='detect_leaks=0:halt_on_error=1:abort_on_error=1',
         UBSAN_OPTIONS='halt_on_error=1:abort_on_error=1')

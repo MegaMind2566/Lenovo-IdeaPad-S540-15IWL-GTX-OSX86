@@ -27,6 +27,8 @@ NV_STATUS s540ExperimentalModuleEnter(S540ExperimentalState *state) {
         .initializationStatus=NV_ERR_NOT_READY,.cancellationStatus=NV_ERR_NOT_READY,
         .stopStatus=NV_ERR_NOT_READY,.runtimeObservationStatus=NV_ERR_NOT_READY,
         .stopObservationStatus=NV_ERR_NOT_READY};
+    state->snapshot.retainedStop.format=1;
+    state->snapshot.retainedStop.bytes=sizeof(state->snapshot.retainedStop);
     return NV_OK;
 }
 NV_STATUS s540ExperimentalServiceStart(S540ExperimentalState *state, NvU64 generation) {

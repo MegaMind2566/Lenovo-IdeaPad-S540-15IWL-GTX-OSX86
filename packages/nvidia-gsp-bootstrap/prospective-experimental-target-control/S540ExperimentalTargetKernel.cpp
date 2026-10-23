@@ -2,6 +2,7 @@
 #include "S540ExperimentalTargetKernel.hpp"
 #include "../prospective-loader/roots/S540NvidiaGspOriginalRoots.h"
 #include "S540ExperimentalRuntime.h"
+#include "S540NvidiaRetainedStop.h"
 #include <IOKit/IOLib.h>
 #include <IOKit/pci/IOPCIDevice.h>
 #include <libkern/c++/OSIterator.h>
@@ -13,13 +14,15 @@ IOLock *guard = nullptr;
 S540ExperimentalState state{};
 S540ExperimentalTargetControl *activeControl = nullptr;
 NvU32 services = 0, clients = 0, cancellationPublishers = 0;
+constexpr NvU32 maximumClients=16;
 bool busy = false, cancellationReady = false;
 bool privileged(task_t task) {
     return task && IOUserClient::clientHasPrivilege(task,kIOClientPrivilegeAdministrator) == kIOReturnSuccess;
 }
 bool callable() {
-    return state.snapshot.moduleEntryAccepted && state.snapshot.controlServiceStarted &&
-        !state.snapshot.stopRequested;
+    // Retained state remains inspectable and accepts another real STOP.
+    // RequestBegin alone enforces the one-shot/stop entry refusal.
+    return state.snapshot.moduleEntryAccepted && state.snapshot.controlServiceStarted;
 }
 IOReturn translate(NV_STATUS status) {
     if (status == NV_OK) return kIOReturnSuccess;
@@ -147,7 +150,7 @@ IOReturn S540ExperimentalTargetControl::newUserClient(task_t task,void *security
     if (!handler || type!=S540_EXPERIMENTAL_CONNECTION_TYPE) return kIOReturnBadArgument;
     if (!privileged(task)) return kIOReturnNotPrivileged;
     if (!guard) return kIOReturnNotReady;
-    IOLockLock(guard); bool allowed=callable() && !clients; IOLockUnlock(guard);
+    IOLockLock(guard); bool allowed=callable() && clients<maximumClients; IOLockUnlock(guard);
     if (!allowed) return kIOReturnNotReady;
     auto *client=new S540ExperimentalTargetClient;
     if (!client) return kIOReturnNoMemory;
@@ -160,6 +163,7 @@ void S540ExperimentalTargetControl::publishOwnerObservation() {
     if (!owner) return;
     const auto observed=owner->snapshot();
     const auto runtime=owner->runtimeSnapshot();
+    const auto stopped=owner->retainedStopSnapshot();
     IOLockLock(guard);
     state.snapshot.globalInitialized=observed.globalInitialized;
     state.snapshot.adapterInitialized=observed.adapterInitialized;
@@ -171,9 +175,31 @@ void S540ExperimentalTargetControl::publishOwnerObservation() {
     state.snapshot.powerAcknowledged=observed.powerAcknowledged;
     state.snapshot.runtimeObservationStatus=runtime.snapshotStatus;
     state.snapshot.originalEntryObserved=runtime.originalEntered;
+    state.snapshot.stopObservationStatus=stopped.snapshotStatus;
+    auto &wire=state.snapshot.retainedStop;
+    wire.format=1;wire.bytes=sizeof(wire);
+#define S540_COPY_STOP_FIELD(name) wire.name=stopped.name
+    S540_COPY_STOP_FIELD(attempts);
+    S540_COPY_STOP_FIELD(status);S540_COPY_STOP_FIELD(firstError);S540_COPY_STOP_FIELD(snapshotStatus);
+    S540_COPY_STOP_FIELD(identityStatus);S540_COPY_STOP_FIELD(locksStatus);S540_COPY_STOP_FIELD(protocolStatus);
+    S540_COPY_STOP_FIELD(closingStatus);S540_COPY_STOP_FIELD(servicesStatus);S540_COPY_STOP_FIELD(sealStatus);
+    S540_COPY_STOP_FIELD(disableStatus);S540_COPY_STOP_FIELD(interruptStatus);S540_COPY_STOP_FIELD(shutdownStatus);
+    S540_COPY_STOP_FIELD(generation);S540_COPY_STOP_FIELD(requested);S540_COPY_STOP_FIELD(retained);
+    S540_COPY_STOP_FIELD(originalReturned);S540_COPY_STOP_FIELD(originalExitReady);S540_COPY_STOP_FIELD(locksReleased);
+    S540_COPY_STOP_FIELD(protocolAttempted);S540_COPY_STOP_FIELD(servicesAttempted);S540_COPY_STOP_FIELD(interruptAttempted);
+    S540_COPY_STOP_FIELD(disableAttempted);S540_COPY_STOP_FIELD(shutdownAttempted);S540_COPY_STOP_FIELD(servicesDrained);
+    S540_COPY_STOP_FIELD(interruptSoftwareDrained);S540_COPY_STOP_FIELD(interruptFullyDrained);
+    S540_COPY_STOP_FIELD(cleanupComplete);S540_COPY_STOP_FIELD(physicalReleaseAuthorized);S540_COPY_STOP_FIELD(pmAcknowledgementSent);
+#undef S540_COPY_STOP_FIELD
+    wire.protocolFormat=stopped.protocol.format;wire.protocolBytes=stopped.protocol.bytes;
+    wire.protocolGeneration=stopped.protocol.generation;wire.protocolOperationStatus=stopped.protocol.operationStatus;
+    wire.protocolOriginalReturnStatus=stopped.protocol.originalReturnStatus;wire.protocolUnlockStatus=stopped.protocol.unlockStatus;
+    wire.protocolClaimed=stopped.protocol.claimed;wire.protocolOriginalEntered=stopped.protocol.originalEntered;
+    wire.protocolOriginalReturned=stopped.protocol.originalReturned;wire.protocolCompleted=stopped.protocol.protocolCompleted;
     IOLockUnlock(guard);
 }
-NV_STATUS S540ExperimentalTargetControl::runOnce(const S540ExperimentalRequest &request) {
+NV_STATUS S540ExperimentalTargetControl::runOnce(const S540ExperimentalRequest &request,NvBool *requestOwner) {
+    if (!requestOwner) return NV_ERR_INVALID_ARGUMENT;
     S540ExperimentalNativeProfile profile{};
     NV_STATUS status=s540RuntimeReadCompiledProfile(&profile);
     const auto *identity=s540ExperimentalGetBuildIdentity();
@@ -183,6 +209,7 @@ NV_STATUS S540ExperimentalTargetControl::runOnce(const S540ExperimentalRequest &
     status=s540ExperimentalRequestBegin(&state,NV_TRUE,&request,identity,profile.codeContractSha256,
         profile.workerStackBytes,profile.irqStackBytes);
     if (status!=NV_OK) { IOLockUnlock(guard); return status; }
+    *requestOwner=NV_TRUE;
     busy=true;
     // This real retain remains even when preparation fails. It is deliberately
     // independent of diagnostic snapshots and private Impl cleanup decisions.
@@ -268,7 +295,7 @@ NV_STATUS S540ExperimentalTargetControl::requestStop() {
 bool S540ExperimentalTargetClient::initWithTask(task_t task,void *security,UInt32 type,OSDictionary *properties) {
     if (type!=S540_EXPERIMENTAL_CONNECTION_TYPE || !privileged(task) || !guard ||
         !IOUserClient::initWithTask(task,security,type,properties)) return false;
-    IOLockLock(guard); bool allowed=callable() && !clients;
+    IOLockLock(guard); bool allowed=callable() && clients<maximumClients;
     if (allowed) { ++clients; counted=true; }
     IOLockUnlock(guard); return allowed;
 }
@@ -283,7 +310,9 @@ void S540ExperimentalTargetClient::free() {
     IOUserClient::free();
 }
 IOReturn S540ExperimentalTargetClient::clientClose() {
-    if (control) (void)control->requestStop();
+    bool owns=false;
+    if (guard) { IOLockLock(guard); owns=requestOwned!=NV_FALSE; IOLockUnlock(guard); }
+    if (control && owns) (void)control->requestStop();
     terminate(); return kIOReturnSuccess;
 }
 IOReturn S540ExperimentalTargetClient::externalMethod(uint32_t selector,IOExternalMethodArguments *arguments,
@@ -301,7 +330,7 @@ IOReturn S540ExperimentalTargetClient::externalMethod(uint32_t selector,IOExtern
         if (!arguments->structureInput || arguments->structureInputSize!=sizeof(S540ExperimentalRequest))
             return kIOReturnBadArgument;
         const auto request=*static_cast<const S540ExperimentalRequest *>(arguments->structureInput);
-        status=control->runOnce(request);
+        status=control->runOnce(request,&requestOwned);
     } else if (selector==S540_EXPERIMENTAL_SELECTOR_STOP) {
         if (arguments->structureInputSize) return kIOReturnBadArgument;
         status=control->requestStop();

@@ -1,0 +1,30 @@
+{
+  "added_project_units": [],
+  "admission": {
+    "hardware_admission": false,
+    "kernel_stack_bound_proven": false,
+    "original_entry_admission": false,
+    "physical_reclamation_authorized": false,
+    "pm_acknowledgement_authorized": false,
+    "production_candidate_allowed": false,
+    "whole_dma_stop_proven": false
+  },
+  "base_composition_sha256": "72b7d5a5d93504218e8a7953d79c90c1609e4580c55922deb2ec5dab13de24d8",
+  "compile_definitions": {},
+  "component": "checked-context-teardown",
+  "format": 1,
+  "input_sha256": {
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c": "3823304a498b872ee3c8df62d4e7b6880fb7f8cbd44203662dd2099e213b5cc5"
+  },
+  "new_project_exports": {},
+  "output_sha256": {
+    "project/packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c": "8038d6c7ffa7871f37bbb49ca0fd4295ffa80621dcf2dca6319f49b47e3495d2"
+  },
+  "production_sha256": {
+    "S540NvidiaCheckedContextTeardown.h": "61b32d627941bfa454ee4a54945fba3fefc5b5c6a12509c3a848fafba02fceb0",
+    "prepare.py": "bd0c951052a0fb85a1256dc23318706c393a20fc2304a1f3055635a9339b4251"
+  },
+  "shared_cpu_checker_repository_path": "packages/nvidia-gsp-bootstrap/prospective-dma-stop-closure/control_common.py",
+  "shared_cpu_checker_sha256": "b5eb2281307f6b2eb54a960464eb4ddfb0a681fd188724a5d359c77e594bf699",
+  "validation_scope": "See VALIDATION.json; actual CPU endpoint fixtures and full-TU cross compilation are separate from native/target execution"
+}
