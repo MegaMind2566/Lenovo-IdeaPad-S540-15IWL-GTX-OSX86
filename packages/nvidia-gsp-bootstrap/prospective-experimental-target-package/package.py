@@ -254,7 +254,7 @@ def verify_build(args,value,verify_callback,*,companion_include_directories=(),r
 def bundle_info():
     return dict(CFBundleIdentifier=image.BUNDLE_ID,CFBundleVersion='0.0.1',CFBundleExecutable=EXECUTABLE,
         CFBundleName='S540 retained first initialization',CFBundlePackageType='KEXT',OSBundleCompatibleVersion='0.0.1',
-        OSBundleLibraries=image.public.IDLE_LIBRARIES,S540ManualRetainedExperiment=True,
+        OSBundleLibraries=image.LIBRARIES,S540ManualRetainedExperiment=True,
         S540NormalUnloadAfterRequest=False,S540ProductionCandidate=False,S540AccelerationTest=False,
         IOKitPersonalities={'ManualRetainedControl':dict(CFBundleIdentifier=image.BUNDLE_ID,
             IOClass='S540ExperimentalTargetControl',IOProviderClass='IOResources',IOResourceMatch='IOKit',

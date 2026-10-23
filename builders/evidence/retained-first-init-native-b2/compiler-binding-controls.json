@@ -1,0 +1,23 @@
+{
+  "all_bound_digests_equal": true,
+  "all_noncompiler_sha_counts_equal": true,
+  "base_commit": "8ac8c854a69622c5871afbed8ab960f538e7f227",
+  "baseline_sha256": "54f0c4a886b4cecfc1976c95fec2c663c2e1de6fa5e99c4e1752fd559fbcafd4",
+  "changed_compiler_refused_at_final": true,
+  "changed_noncompiler_header_refused_immediately": true,
+  "compiler_row_deduplication_only": true,
+  "controls_passed": 5,
+  "controls_sha256": "fa1da2738a89f6fafb02832c08c85262e4223abcc7040d25811ca2604d39c2c2",
+  "final_compiler_sha_calls": 1,
+  "fixture_scope": "Real checked_rows loops over 1100+66 synthetic source/object records; unrelated Mach-O decode and stack captures are fixtures, not native compile evidence.",
+  "format": 1,
+  "native_or_target_execution": false,
+  "observation_limit": "A transient compiler mutation restored before final verification is no longer sampled by removed redundant row reads; no compiler execution occurs in these row visits.",
+  "observed_compiler_sha_calls_before_final": {
+    "baseline": 2332,
+    "candidate": 2
+  },
+  "scope": "isolated-compiler-binding-fallback",
+  "source_sha256": "05a8d731b03fa9197384e85650a7ad1b6100a8680bb02bc8c6d86f68401f7e2f",
+  "unchanged_final_full_hash_verification": true
+}

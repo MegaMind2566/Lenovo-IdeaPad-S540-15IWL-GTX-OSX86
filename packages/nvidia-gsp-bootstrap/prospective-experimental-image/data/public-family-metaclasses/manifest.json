@@ -1,0 +1,109 @@
+{
+  "architecture": "x86_64",
+  "exact_target_export_proof": false,
+  "format": 1,
+  "limitations": [
+    "Published Apple source and public symbol build settings establish a source profile, not the exports of target build 25G241.",
+    "Only IOFramebuffer::metaClass and IOACPIPlatformDevice::metaClass are derived; no other family symbols are authorized.",
+    "Actual target dependency availability, versions, and symbol binding remain unobserved until the target loader test."
+  ],
+  "platform": "MacOSX",
+  "scope": "two public family metaclass globals only",
+  "sources": [
+    {
+      "bytes": 521410,
+      "commit": "76285384ff0ce63965a21b8023bf6d7e447fcc19",
+      "file": "IOGraphics/IOGraphicsFamily/IOFramebuffer.cpp",
+      "repository": "apple-oss-distributions/IOGraphics",
+      "role": "implementation",
+      "sha256": "874459ff3a20f455d6e33753f29cbae0dcc050ef1955b88880c04bc4c366f92f",
+      "source_path": "IOGraphicsFamily/IOFramebuffer.cpp"
+    },
+    {
+      "bytes": 55943,
+      "commit": "76285384ff0ce63965a21b8023bf6d7e447fcc19",
+      "file": "IOGraphics/IOGraphicsFamily/IOKit/graphics/IOFramebuffer.h",
+      "repository": "apple-oss-distributions/IOGraphics",
+      "role": "header",
+      "sha256": "37ea230709a1654c95142c433ad08fb247a8231d76ece371926e123bceb96237",
+      "source_path": "IOGraphicsFamily/IOKit/graphics/IOFramebuffer.h"
+    },
+    {
+      "bytes": 133373,
+      "commit": "76285384ff0ce63965a21b8023bf6d7e447fcc19",
+      "file": "IOGraphics/IOGraphics.xcodeproj/project.pbxproj",
+      "repository": "apple-oss-distributions/IOGraphics",
+      "role": "project",
+      "sha256": "564f4263bd004e6196391b04f2b41979aead5f333d1678d0e86bff1b973d586e",
+      "source_path": "IOGraphics.xcodeproj/project.pbxproj"
+    },
+    {
+      "bytes": 3086,
+      "commit": "76285384ff0ce63965a21b8023bf6d7e447fcc19",
+      "file": "IOGraphics/Info-IOGraphicsFamily.plist",
+      "repository": "apple-oss-distributions/IOGraphics",
+      "role": "info",
+      "sha256": "6d9aee95656dfef6411b3dff75724b9c19bbd6ea6f477724f82193bfa3d0a33e",
+      "source_path": "Info-IOGraphicsFamily.plist"
+    },
+    {
+      "bytes": 20116,
+      "commit": "76285384ff0ce63965a21b8023bf6d7e447fcc19",
+      "file": "IOGraphics/APPLE_LICENSE",
+      "repository": "apple-oss-distributions/IOGraphics",
+      "role": "license",
+      "sha256": "4407579a41ee5062dd5451539a05b495e699c4f1c4965c8ad65c9bc3b38d9860",
+      "source_path": "APPLE_LICENSE"
+    },
+    {
+      "bytes": 21992,
+      "commit": "cc036fa50c532d2ef738cf2a9c13f3ff00fb5b1f",
+      "file": "IOACPIFamily/IOACPIPlatformDevice.cpp",
+      "repository": "apple-oss-distributions/IOACPIFamily",
+      "role": "implementation",
+      "sha256": "9382c246ba68c4e5ddc02660389ddf573a5c348b4c525ed54f9dee2ecd6d7761",
+      "source_path": "IOACPIPlatformDevice.cpp"
+    },
+    {
+      "bytes": 11125,
+      "commit": "cc036fa50c532d2ef738cf2a9c13f3ff00fb5b1f",
+      "file": "IOACPIFamily/IOACPIPlatformDevice.h",
+      "repository": "apple-oss-distributions/IOACPIFamily",
+      "role": "header",
+      "sha256": "f9023c67af45d1d7ba1dd8683cbd7659f9bad66eedaeef8d0c58f173d94d029f",
+      "source_path": "IOACPIPlatformDevice.h"
+    },
+    {
+      "bytes": 16913,
+      "commit": "cc036fa50c532d2ef738cf2a9c13f3ff00fb5b1f",
+      "file": "IOACPIFamily/IOACPIFamily.xcodeproj/project.pbxproj",
+      "repository": "apple-oss-distributions/IOACPIFamily",
+      "role": "project",
+      "sha256": "381910c49587d4cb41852d984e301808623b7829b90180ee4bd493f5d1ff0344",
+      "source_path": "IOACPIFamily.xcodeproj/project.pbxproj"
+    },
+    {
+      "bytes": 1301,
+      "commit": "cc036fa50c532d2ef738cf2a9c13f3ff00fb5b1f",
+      "file": "IOACPIFamily/Info-IOACPIFamily.plist",
+      "repository": "apple-oss-distributions/IOACPIFamily",
+      "role": "info",
+      "sha256": "aefc24c16308324cf359fbf7c91fe165183228b5c96075a2407b567bccdb4693",
+      "source_path": "Info-IOACPIFamily.plist"
+    },
+    {
+      "bytes": 85687,
+      "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+      "file": "xnu/OSMetaClass.h",
+      "repository": "apple-oss-distributions/xnu",
+      "role": "macro",
+      "sha256": "0b47cb07db5854013123fce2972592d63997c8a7bced80b7365bb04af4614647",
+      "source_path": "libkern/libkern/c++/OSMetaClass.h"
+    }
+  ],
+  "visibility_rule": {
+    "meaning": "Symbols without explicit private visibility are exported.",
+    "primary_documentation": "https://developer.apple.com/library/archive/documentation/DeveloperTools/Reference/XcodeBuildSettingRef/1-Build_Setting_Reference/build_setting_ref.html",
+    "setting": "GCC_SYMBOLS_PRIVATE_EXTERN=NO"
+  }
+}

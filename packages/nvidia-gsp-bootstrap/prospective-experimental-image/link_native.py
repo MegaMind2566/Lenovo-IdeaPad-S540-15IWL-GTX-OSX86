@@ -26,6 +26,8 @@ import nvidia_metaclass_initializers as power
 import nvidia_public_kpi_exports as public
 native=composer.load('s540_experimental_native_compile',HERE.parent/'prospective-native-target-preparation/compile_native.py')
 classes=composer.load('s540_experimental_metaclasses',HERE/'metaclasses.py')
+families=composer.load('s540_experimental_public_families',HERE/'public_families.py')
+LIBRARIES=families.LIBRARIES
 FRONT='packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/'
 RUNTIME=HERE.parent/'prospective-runtime-coordinator'
 DENIED=dict(native.DENIED,installable_bundle_created=False,target_kernel_admission_proven=False,
@@ -43,7 +45,8 @@ def write(path,value):
 
 
 def helper_hashes():
-    paths=[Path(__file__),HERE/'metaclasses.py',RUNTIME/'profile.py',
+    paths=[Path(__file__),HERE/'metaclasses.py',HERE/'public_families.py',RUNTIME/'profile.py',
+        *sorted(p for p in families.DATA.rglob('*') if p.is_file()),
         *[ROOT/'builders'/name for name in ('link_nvidia_first_transaction.py',
         'embed_nvidia_firmware.py','nvidia_metaclass_initializers.py',
         'nvidia_combined_metaclasses.py','nvidia_public_kpi_exports.py')],
@@ -295,7 +298,7 @@ def sdk_references(output,composed,native_home,cc,cxx,sdk,project_rows,include,e
 def verify_final_image(path,approved,loader_entries,profile_bytes,assets,layout):
     image=old.Image(path,11)
     audit=old.audit_symbols({path.name:image.externals()},set(approved))
-    exports=public.audit_imports(audit['public_imports'],public.IDLE_LIBRARIES)
+    exports=families.audit_imports(audit['public_imports'],LIBRARIES)
     require(old.verify_final_exports(image)==['kmod_info'],'Only module metadata may be exported')
     return dict(imports=audit['public_imports'],symbol_audit=audit,public_kpi=exports,
         roots=old.verify_roots(path,expected_type=11),

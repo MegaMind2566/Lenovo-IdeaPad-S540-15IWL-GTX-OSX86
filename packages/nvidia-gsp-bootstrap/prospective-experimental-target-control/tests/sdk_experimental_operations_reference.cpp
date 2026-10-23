@@ -3,6 +3,11 @@
 #include <IOKit/IOLib.h>
 #include <IOKit/pci/IOPCIDevice.h>
 #include <kern/task.h>
+// The real module-stop refusal checks both live metaclass instance counts.
+// Derive this const public SDK operation instead of approving a bare symbol.
+extern "C" unsigned int s540ExperimentalSdkInstanceCount(const OSMetaClass *meta) {
+    return meta->getInstanceCount();
+}
 // This reference names actual public virtual operations independently of the
 // frontend implementation. It supplies compiler/SDK bindings, not success.
 extern "C" bool s540ExperimentalSdkOperations(IOService *service,IOUserClient *client,

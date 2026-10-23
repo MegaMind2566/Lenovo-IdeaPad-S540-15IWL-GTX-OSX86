@@ -116,6 +116,10 @@ def helper_hashes(modules):
     stack_contract = ROOT / GSP / 'prospective-aggregate-stack-closure/SOURCE-CONTRACT.json'
     if stack_contract.exists():
         paths.add(previous.ordinary(stack_contract))
+    family_data = ROOT / GSP / 'prospective-experimental-image/data/public-family-metaclasses'
+    for path in family_data.rglob('*'):
+        if path.is_file():
+            paths.add(previous.ordinary(path))
     return {path.relative_to(ROOT).as_posix(): composer.sha(path) for path in sorted(paths)}
 
 

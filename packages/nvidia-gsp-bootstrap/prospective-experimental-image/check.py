@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 import platform
+import shutil
 import struct
 import subprocess
 import sys
@@ -47,6 +48,33 @@ def run(args):
         {'first':row(strong=['s540Real']),'second':row(strong=['s540Real'])},set()))
     refuse('final-unreviewed-public-import',lambda:old.audit_symbols(
         {'live':row(imports=['UnreviewedOperation'])},set()))
+    family_inventory=link.families.load_inventory()
+    family_symbols=sorted(family_inventory['owners'])
+    assert family_symbols==['_ZN13IOFramebuffer9metaClassE','_ZN20IOACPIPlatformDevice9metaClassE']
+    assert link.families.audit_imports(family_symbols)['matched_count']==2
+    checks.append('exact-two-source-defined-public-family-metaclasses')
+    refuse('historical-idle-export-profile-still-rejects-families',
+        lambda:link.public.audit_imports(family_symbols,link.public.IDLE_LIBRARIES))
+    for symbol,owner in family_inventory['owners'].items():
+        missing=dict(link.LIBRARIES);missing.pop(owner['bundle_id'])
+        refuse('family-provider-must-be-declared-'+owner['source_class'],
+            lambda:link.families.audit_imports([symbol],missing))
+        changed=dict(link.LIBRARIES);changed[owner['bundle_id']]='999.0.0'
+        refuse('family-source-compatibility-boundary-'+owner['source_class'],
+            lambda:link.families.audit_imports([symbol],changed))
+    refuse('no-family-prefix-or-unreviewed-operation-admission',lambda:link.families.audit_imports(
+        [*family_symbols,'_ZN13IOFramebuffer11UnreviewedEv']))
+    proof_copy=out/'changed-family-proof'
+    shutil.copytree(link.families.DATA,proof_copy)
+    for source_row in family_inventory['sources']:
+        path=proof_copy/source_row['file'];original=path.read_bytes()
+        path.write_bytes(original+b'\n')
+        refuse('changed-pinned-family-proof-'+source_row['file'],
+            lambda:link.families.audit_imports(family_symbols,inventory_dir=proof_copy))
+        path.write_bytes(original)
+    extra=proof_copy/'unreviewed.exports';extra.write_text('_Unreviewed\n')
+    refuse('unexpected-family-proof-source',lambda:link.families.load_inventory(proof_copy))
+    extra.unlink()
     flags,cpp=old.kernel_flags(args.kernel_sdk.resolve(strict=True))
     cpp=[*cpp,'-fcheck-new']
     cross=['-target','x86_64-apple-macos15',*flags[3:]]
@@ -57,6 +85,15 @@ def run(args):
         (out/(label+'.log')).write_text(result.stdout+result.stderr)
         if result.returncode:raise ValueError(label+' actual cross compiler failed: '+result.stderr[-4000:])
         return result
+    operation_source=HERE.parent/'prospective-experimental-target-control/tests/sdk_experimental_operations_reference.cpp'
+    operation_object=out/'actual-sdk-experimental-operations.o'
+    execute([args.cxx,*cross,*cpp,*include,'-c',operation_source,'-o',operation_object],
+        'sdk-experimental-operations')
+    operation_image=old.Image(operation_object,1)
+    assert '_ZNK11OSMetaClass16getInstanceCountEv' in operation_image.externals()['imports']
+    assert operation_image.code('_s540ExperimentalSdkInstanceCount')
+    assert link.public.audit_imports(['_ZNK11OSMetaClass16getInstanceCountEv'],link.LIBRARIES)['matched_count']==1
+    checks.append('real-SDK-const-instance-count-operation-and-public-libkern-export')
     source=HERE.parent/'prospective-experimental-target-control/tests/sdk_experimental_metaclass_reference.cpp'
     reference=out/'actual-sdk-experimental-registration.o'
     execute([args.cxx,*cross,*cpp,*include,'-c',source,'-o',reference],'sdk-registration')
@@ -182,8 +219,9 @@ def run(args):
         native_darwin_compilation=False,host_control=True,final_image_linked=False,module_loaded=False,
         gpu_access=False,original_entry_admission=False,production_candidate_allowed=False,
         source_sha256={str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in (Path(__file__),HERE/'link_native.py',HERE/'metaclasses.py',
-                      HERE.parent/'prospective-native-target-preparation/compile_native.py',source)})
+            for p in (Path(__file__),HERE/'link_native.py',HERE/'metaclasses.py',HERE/'public_families.py',
+                      *sorted(p for p in link.families.DATA.rglob('*') if p.is_file()),
+                      HERE.parent/'prospective-native-target-preparation/compile_native.py',source,operation_source)})
     (out/'results.json').write_text(json.dumps(report,sort_keys=True,indent=2)+'\n')
     return report
 

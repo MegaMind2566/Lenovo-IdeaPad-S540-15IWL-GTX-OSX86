@@ -188,7 +188,9 @@ def checked_rows(args, value, report_path, project, bound):
         require(command_operand(command, '-c', cwd) == source and
                 command_operand(command, '-o', cwd) == obj,
                 'Measured compiler operands do not identify the actual source/object')
-        bound.file(Path(command[0]).resolve(strict=True))
+        compiler = Path(command[0]).resolve(strict=True)
+        if str(compiler) not in bound.files:
+            bound.file(compiler)
         dep = bound.file(command_operand(command, '-MF', cwd))
         require(dep == obj.with_suffix('.d'), 'Actual object dependency sidecar is required')
         dependency_paths = read_dependencies(dep, cwd)
