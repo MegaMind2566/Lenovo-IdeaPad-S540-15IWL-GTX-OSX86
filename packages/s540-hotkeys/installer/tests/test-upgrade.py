@@ -114,7 +114,7 @@ def run_case(case):
         (base / "agent-active").touch()
         new = package / "assets/S540Tasti.app"
         shutil.copytree(app, new)
-        (new / "Contents/data").write_text("fixed app 0.1.1")
+        (new / "Contents/data").write_text("fixed app 0.1.2")
         (new / "Contents/MacOS").mkdir()
         binary = new / "Contents/MacOS/S540Tasti"
         binary.write_text("#!/bin/bash\nprintf '{}\\n'\n")
@@ -124,10 +124,21 @@ def run_case(case):
         manifest(kext, root / "kext.manifest")
         for name in ("app", "kext"):
             shutil.copy2(root / (name + ".manifest"), package / ("tools/upgrade-v1-" + name + ".manifest"))
+        shutil.copy2(root / "app.manifest", package / "tools/upgrade-v1.1-app.manifest")
+        original_v1 = case == "success_v1"
+        different_pin = package / ("tools/upgrade-v1.1-app.manifest" if original_v1 else "tools/upgrade-v1-app.manifest")
+        different_pin.write_text("other delivered app manifest\n")
         receipt = dict(Schema=1, OwnerUID=os.getuid(), KextPath=str(kext), AppPath=str(app), AgentPath=str(agent),
-                       BundleID="org.s540.HotkeysVPC", LaunchLabel="org.s540.Hotkeys", Version="0.1.0", State="ready",
+                       BundleID="org.s540.HotkeysVPC", LaunchLabel="org.s540.Hotkeys", Version="0.1.0" if original_v1 else "0.1.1", State="ready",
                        KextManifestSHA256=digest(root / "kext.manifest"), AppManifestSHA256=digest(root / "app.manifest"),
                        AgentSHA256=digest(agent))
+        prior = root / "upgrade-v1-PRIOR"
+        if not original_v1:
+            receipt.update(AppVersion="0.1.1", KextVersion="0.1.0")
+            prior.mkdir()
+            (prior / "data").write_text("original 0.1.0 backup")
+            manifest(prior, run / "prior.manifest")
+            receipt.update(UpgradeBackupPath=str(prior), UpgradeBackupTreeSHA256=digest(run / "prior.manifest"))
         receipt_path = root / "receipt.plist"
         receipt_path.write_bytes(plistlib.dumps(receipt))
         original_receipt, original_agent, original_kernel = receipt_path.read_bytes(), agent.read_bytes(), (kext / "Contents/data").read_bytes()
@@ -146,12 +157,14 @@ def run_case(case):
         altered.write_text(source)
         if case == "missing_kernel": shutil.rmtree(kext)
         if case == "tampered_app": (app / "Contents/data").write_text("unknown existing app")
+        if case == "tampered_prior": (prior / "data").write_text("unknown prior backup")
         script = "\n".join([
             "set -euo pipefail", ". " + shlex.quote(str(altered)),
             *[name + "=" + shlex.quote(str(value)) for name, value in dict(
                 S540_PACKAGE=package, S540_ROOT=root, S540_RECEIPT=receipt_path, S540_APP=app,
                 S540_APP_BIN=app / "Contents/MacOS/S540Tasti", S540_KEXT=kext, S540_AGENT=agent,
-                S540_RUN=run, S540_RUN_ID="FIXTURE", S540_V1_APP_MANIFEST_SHA256=receipt["AppManifestSHA256"],
+                S540_RUN=run, S540_RUN_ID="FIXTURE", S540_V1_APP_MANIFEST_SHA256=digest(package / "tools/upgrade-v1-app.manifest"),
+                S540_V11_APP_MANIFEST_SHA256=digest(package / "tools/upgrade-v1.1-app.manifest"),
                 S540_V1_KEXT_MANIFEST_SHA256=receipt["KextManifestSHA256"]).items()],
             's540_host() { :; }', 's540_new_run() { :; }', 's540_take_lock() { :; }',
             's540_protected() { [ -e "$1" ] && [ ! -L "$1" ]; }',
@@ -164,12 +177,20 @@ def run_case(case):
         details = result.stdout + result.stderr
         assert not (base / "KMUTIL_CALLED").exists(), details
         if case != "missing_kernel": assert (kext / "Contents/data").read_bytes() == original_kernel, details
-        if case == "success":
+        if case in ("success", "success_v1"):
             assert result.returncode == 0, details
-            assert (app / "Contents/data").read_text() == "fixed app 0.1.1", details
+            assert (app / "Contents/data").read_text() == "fixed app 0.1.2", details
             final = plistlib.loads(receipt_path.read_bytes())
-            assert final["AppVersion"] == "0.1.1" and final["KextVersion"] == "0.1.0", details
+            assert final["AppVersion"] == "0.1.2" and final["KextVersion"] == "0.1.0", details
             assert (Path(final["UpgradeBackupPath"]) / "S540Tasti.app/Contents/data").read_text() == "original app", details
+            if not original_v1:
+                assert final["PriorUpgradeBackupPath"] == str(prior), details
+                assert final["PriorUpgradeBackupTreeSHA256"] == receipt["UpgradeBackupTreeSHA256"], details
+                # Exercise complete backup-chain removal without the system restore path.
+                cleanup = subprocess.run(["/bin/bash", "-c", script.rsplit("s540_install", 1)[0] + "s540_remove_upgrade_backup\n"],
+                                         env=env, capture_output=True, text=True, timeout=30)
+                assert cleanup.returncode == 0, cleanup.stdout + cleanup.stderr
+                assert not prior.exists() and not Path(final["UpgradeBackupPath"]).exists(), details
         else:
             assert result.returncode != 0, details
             if case == "foreign_app":
@@ -185,5 +206,5 @@ def run_case(case):
 
 
 if __name__ == "__main__":
-    for scenario in ("success", "missing_kernel", "tampered_app", "bootstrap_fail", "receipt_fail", "interrupt_rename", "foreign_app"):
+    for scenario in ("success", "success_v1", "missing_kernel", "tampered_app", "tampered_prior", "bootstrap_fail", "receipt_fail", "interrupt_rename", "foreign_app"):
         run_case(scenario)

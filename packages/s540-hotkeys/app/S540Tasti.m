@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Numeric Lenovo hotkey events only. No audio capture or general keyboard logging.
 #import <Cocoa/Cocoa.h>
+#import <QuartzCore/QuartzCore.h>
 #import <CoreAudio/CoreAudio.h>
 #import <CoreWLAN/CoreWLAN.h>
 #import <IOBluetooth/IOBluetooth.h>
@@ -20,7 +21,7 @@
 #include <string.h>
 #include "HotkeyPolicy.h"
 
-static NSString *const AppVersion = @"0.1.1";
+static NSString *const AppVersion = @"0.1.2";
 static NSString *const DriverVersion = @"0.1.0";
 static NSString *const DriverClass = @"S540HotkeysVPC";
 static NSString *const DriverBundle = @"org.s540.HotkeysVPC";
@@ -154,22 +155,34 @@ static BOOL ReadMute(AudioDeviceID device, UInt32 *mute, BOOL *writable) {
         bytes != sizeof(*mute) || *mute > 1) return NO;
     *writable = settable; return YES;
 }
-static NSString *ToggleMicrophone(void) {
-    if (ActionsCancelled()) return @"Microfono: operazione annullata";
+typedef NS_ENUM(NSInteger, HKFeedbackOutcome) { HKFeedbackError, HKFeedbackConfirmed, HKFeedbackRequest };
+static NSDictionary *Feedback(HKFeedbackOutcome outcome, NSString *message, NSString *brief, NSString *symbol) {
+    return @{@"outcome":@(outcome), @"message":message, @"brief":brief, @"symbol":symbol};
+}
+static NSDictionary *LockFeedback(HKFeedbackOutcome outcome, NSString *message, NSString *brief, uint64_t epoch) {
+    NSMutableDictionary *feedback = [Feedback(outcome, message, brief, @"lock.fill") mutableCopy];
+    feedback[@"lock_epoch"] = @(epoch); // Authorization belongs to the original key, not the display time.
+    return feedback;
+}
+static NSDictionary *ToggleMicrophone(void) {
+    if (ActionsCancelled()) return Feedback(HKFeedbackError, @"Microfono: operazione annullata", @"Operazione annullata", @"mic.slash.fill");
     AudioDeviceID device = kAudioObjectUnknown, current = kAudioObjectUnknown;
     UInt32 before = 0; BOOL writable = NO;
     if (!ReadDefaultInput(&device) || !ReadMute(device, &before, &writable) || !writable)
-        return @"Microfono: controllo mute non disponibile";
-    if (!ReadDefaultInput(&current) || current != device) return @"Microfono: ingresso cambiato, ripremi F4";
+        return Feedback(HKFeedbackError, @"Microfono: controllo mute non disponibile", @"Mute microfono non disponibile", @"mic.slash.fill");
+    if (!ReadDefaultInput(&current) || current != device)
+        return Feedback(HKFeedbackError, @"Microfono: ingresso cambiato, ripremi F4", @"Ingresso microfono cambiato", @"mic.fill");
     AudioObjectPropertyAddress address = {kAudioDevicePropertyMute,
         kAudioDevicePropertyScopeInput, kAudioObjectPropertyElementMain};
     UInt32 desired = !before, actual = before;
-    if (ActionsCancelled()) return @"Microfono: operazione annullata";
+    if (ActionsCancelled()) return Feedback(HKFeedbackError, @"Microfono: operazione annullata", @"Operazione annullata", @"mic.slash.fill");
     if (AudioObjectSetPropertyData(device, &address, 0, NULL, sizeof(desired), &desired) != noErr ||
         !ReadMute(device, &actual, &writable) || actual != desired)
-        return @"Microfono: modifica non confermata";
-    if (!ReadDefaultInput(&current) || current != device) return @"Microfono: ingresso cambiato dopo F4";
-    return desired ? @"Microfono disattivato" : @"Microfono attivo";
+        return Feedback(HKFeedbackError, @"Microfono: modifica non confermata", @"Mute non confermato", @"mic.slash.fill");
+    if (!ReadDefaultInput(&current) || current != device)
+        return Feedback(HKFeedbackError, @"Microfono: ingresso cambiato dopo F4", @"Ingresso microfono cambiato", @"mic.fill");
+    return desired ? Feedback(HKFeedbackConfirmed, @"Microfono disattivato", @"Microfono disattivato", @"mic.slash.fill") :
+        Feedback(HKFeedbackConfirmed, @"Microfono attivo", @"Microfono attivo", @"mic.fill");
 }
 typedef void (*BluetoothSetter)(int);
 static BluetoothSetter BluetoothPowerSetter(void) {
@@ -235,15 +248,15 @@ static BOOL SaveRadios(HKRadioState state) {
     NSDictionary *snapshot = @{@"WiFi":@(state.wifi), @"Bluetooth":@(state.bluetooth)};
     return WritePrivateDictionary(snapshot, @"radio-snapshot.plist");
 }
-static NSString *ToggleRadios(void) {
-    if (ActionsCancelled()) return @"Radio: operazione annullata";
+static NSDictionary *ToggleRadios(void) {
+    if (ActionsCancelled()) return Feedback(HKFeedbackError, @"Radio: operazione annullata", @"Operazione annullata", @"airplane");
     CWInterface *interface = nil; HKRadioState before;
-    if (!ReadRadios(&interface, &before)) return @"Radio: Wi-Fi o Bluetooth non controllabile";
+    if (!ReadRadios(&interface, &before)) return Feedback(HKFeedbackError, @"Radio: Wi-Fi o Bluetooth non controllabile", @"Controllo radio non disponibile", @"airplane");
     BOOL hasSaved = NO; HKRadioState saved = LoadSavedRadios(&hasSaved);
     HKRadioState target = HKRadioTarget(before, hasSaved, saved);
     // Save the user's original mix before switching both radios off.
     if ((before.wifi || before.bluetooth) && !SaveRadios(before))
-        return @"Radio: impossibile salvare lo stato precedente, nessuna modifica";
+        return Feedback(HKFeedbackError, @"Radio: impossibile salvare lo stato precedente, nessuna modifica", @"Radio non modificate", @"airplane");
     BOOL btChanged = before.bluetooth != target.bluetooth;
     BOOL wifiChanged = before.wifi != target.wifi;
     BOOL uncertainBT = NO, uncertainWiFi = NO;
@@ -269,11 +282,13 @@ static NSString *ToggleRadios(void) {
             uncertainBT = !recovered || pending;
         }
         BOOL restored = !uncertainBT && !uncertainWiFi && ReadRadios(&afterInterface, &after) && HKRadioEqual(after, before);
-        if (!restored) return @"Radio: operazione non confermata, controlla Wi-Fi e Bluetooth";
-        return rollbackAttempted ? @"Radio: operazione interrotta, stato precedente ripristinato" : @"Radio: operazione interrotta, stato precedente confermato";
+        if (!restored) return Feedback(HKFeedbackError, @"Radio: operazione non confermata, controlla Wi-Fi e Bluetooth", @"Stato radio non confermato", @"airplane");
+        return Feedback(HKFeedbackError, rollbackAttempted ? @"Radio: operazione interrotta, stato precedente ripristinato" : @"Radio: operazione interrotta, stato precedente confermato",
+            @"Radio nello stato precedente", @"antenna.radiowaves.left.and.right");
     }
-    if (!target.wifi && !target.bluetooth) return @"Modalità aereo: Wi-Fi e Bluetooth spenti";
-    return target.wifi && target.bluetooth ? @"Wi-Fi e Bluetooth attivi" : target.wifi ? @"Wi-Fi attivo; Bluetooth spento" : @"Bluetooth attivo; Wi-Fi spento";
+    if (!target.wifi && !target.bluetooth) return Feedback(HKFeedbackConfirmed, @"Modalità aereo: Wi-Fi e Bluetooth spenti", @"Wi-Fi e Bluetooth spenti", @"airplane");
+    NSString *message = target.wifi && target.bluetooth ? @"Wi-Fi e Bluetooth attivi" : target.wifi ? @"Wi-Fi attivo; Bluetooth spento" : @"Bluetooth attivo; Wi-Fi spento";
+    return Feedback(HKFeedbackConfirmed, message, message, target.wifi ? @"wifi" : @"antenna.radiowaves.left.and.right");
 }
 static NSString *CameraStatus(NSDictionary *snapshot) {
     uint64_t result = 0; uint32_t state = UINT32_MAX;
@@ -286,6 +301,16 @@ static NSString *CameraStatus(NSDictionary *snapshot) {
     }
     return @"Webcam: modifica non confermata dal firmware";
 }
+static NSDictionary *CameraFeedback(NSDictionary *snapshot) {
+    uint64_t result = 0; uint32_t state = UINT32_MAX;
+    if (!Unsigned(snapshot[@"LastCameraResult"], &result) || !UInt32Bits(snapshot[@"CameraState"], &state))
+        return Feedback(HKFeedbackError, @"Webcam: stato non disponibile", @"Stato webcam non disponibile", @"camera.slash.fill");
+    if (result == 0 || result == 3) return nil; // Baseline or no new confirmed action.
+    if ((result == 2 || result == 7) && state <= 1)
+        return Feedback(HKFeedbackConfirmed, CameraStatus(snapshot), state ? @"Webcam attiva · firmware" : @"Webcam disattivata · firmware",
+            state ? @"camera.fill" : @"camera.slash.fill");
+    return Feedback(HKFeedbackError, CameraStatus(snapshot), result == 1 ? @"Comando webcam non supportato" : @"Webcam: modifica non confermata", @"camera.slash.fill");
+}
 static BOOL PostLockRequest(void) {
     if (!AXIsProcessTrusted()) return NO;
     CGEventRef down = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)12, true);
@@ -297,8 +322,19 @@ static BOOL PostLockRequest(void) {
     CFRelease(down); CFRelease(up); return YES;
 }
 
+@interface S540FeedbackPanel : NSPanel
+@end
+@implementation S540FeedbackPanel
+- (BOOL)canBecomeKeyWindow { return NO; }
+- (BOOL)canBecomeMainWindow { return NO; }
+@end
+
 @interface S540Delegate : NSObject <NSApplicationDelegate> {
     NSStatusItem *_item;
+    S540FeedbackPanel *_hudPanel;
+    NSImageView *_hudIcon;
+    NSTextField *_hudLabel;
+    uint64_t _hudToken;
     NSMenuItem *_driverItem, *_micItem, *_radioItem, *_cameraItem, *_lockItem;
     dispatch_queue_t _actions;
     dispatch_source_t _timer, _termSignal;
@@ -313,6 +349,9 @@ static BOOL PostLockRequest(void) {
     int _lockFD;
 }
 - (void)updateFeature:(NSString *)feature text:(NSString *)text;
+- (void)applyFeedback:(NSDictionary *)feedback feature:(NSString *)feature;
+- (void)showFeedback:(NSDictionary *)feedback;
+- (void)dismissFeedback;
 - (void)refreshLockTap;
 - (void)closeLockTap;
 - (CGEventRef)handleLockEvent:(CGEventRef)event type:(CGEventType)type;
@@ -339,6 +378,79 @@ static CGEventRef LockTapCallback(CGEventTapProxy proxy, CGEventType type, CGEve
         target.title = text;
         self->_item.button.toolTip = [NSString stringWithFormat:@"S540 Tasti — %@", text];
     });
+}
+- (void)dismissFeedback {
+    // Called on the main queue; invalidates timers belonging to older panels.
+    _hudToken++;
+    [_hudPanel orderOut:nil];
+}
+- (void)showFeedback:(NSDictionary *)feedback {
+    if (!feedback) return;
+    uint64_t epoch = atomic_load(&LifecycleEpoch);
+    BOOL lockRelated = feedback[@"lock_epoch"] != nil;
+    uint64_t preferenceEpoch = lockRelated ? [feedback[@"lock_epoch"] unsignedLongLongValue] : atomic_load(&LockPreferenceEpoch);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (ActionsCancelled() || atomic_load(&LifecycleEpoch) != epoch ||
+            atomic_load(&LockPreferenceEpoch) != preferenceEpoch || (lockRelated && !LockKeysEnabled())) return;
+        if (!self->_hudPanel) {
+            NSRect bounds = NSMakeRect(0, 0, 308, 86);
+            self->_hudPanel = [[S540FeedbackPanel alloc] initWithContentRect:bounds
+                styleMask:NSWindowStyleMaskBorderless | NSWindowStyleMaskNonactivatingPanel
+                backing:NSBackingStoreBuffered defer:NO];
+            self->_hudPanel.opaque = NO;
+            self->_hudPanel.backgroundColor = NSColor.clearColor;
+            self->_hudPanel.hasShadow = YES;
+            self->_hudPanel.hidesOnDeactivate = NO;
+            self->_hudPanel.ignoresMouseEvents = YES;
+            self->_hudPanel.level = NSStatusWindowLevel;
+            self->_hudPanel.collectionBehavior = NSWindowCollectionBehaviorCanJoinAllSpaces |
+                NSWindowCollectionBehaviorFullScreenAuxiliary | NSWindowCollectionBehaviorTransient |
+                NSWindowCollectionBehaviorIgnoresCycle;
+            NSVisualEffectView *surface = [[NSVisualEffectView alloc] initWithFrame:bounds];
+            surface.material = NSVisualEffectMaterialHUDWindow;
+            surface.blendingMode = NSVisualEffectBlendingModeBehindWindow;
+            surface.state = NSVisualEffectStateActive;
+            surface.maskImage = [NSImage imageWithSize:bounds.size flipped:NO drawingHandler:^BOOL(NSRect rect) {
+                [NSColor.whiteColor setFill];
+                [[NSBezierPath bezierPathWithRoundedRect:rect xRadius:18 yRadius:18] fill];
+                return YES;
+            }];
+            self->_hudIcon = [[NSImageView alloc] initWithFrame:NSMakeRect(20, 25, 36, 36)];
+            self->_hudIcon.imageScaling = NSImageScaleProportionallyUpOrDown;
+            self->_hudLabel = [NSTextField wrappingLabelWithString:@""];
+            self->_hudLabel.frame = NSMakeRect(72, 20, 216, 46);
+            self->_hudLabel.font = [NSFont systemFontOfSize:14 weight:NSFontWeightSemibold];
+            self->_hudLabel.maximumNumberOfLines = 2;
+            self->_hudLabel.selectable = NO;
+            [surface addSubview:self->_hudIcon];
+            [surface addSubview:self->_hudLabel];
+            self->_hudPanel.contentView = surface;
+        }
+        BOOL failed = [feedback[@"outcome"] integerValue] == HKFeedbackError;
+        NSString *symbol = failed ? @"exclamationmark.triangle.fill" : feedback[@"symbol"];
+        NSImage *icon = [NSImage imageWithSystemSymbolName:symbol accessibilityDescription:feedback[@"brief"]];
+        if (!icon) icon = [NSImage imageWithSystemSymbolName:@"keyboard" accessibilityDescription:@"Tasti rapidi"];
+        self->_hudIcon.image = [icon imageWithSymbolConfiguration:
+            [NSImageSymbolConfiguration configurationWithPointSize:30 weight:NSFontWeightMedium]];
+        self->_hudIcon.contentTintColor = failed ? NSColor.systemOrangeColor : NSColor.labelColor;
+        self->_hudLabel.stringValue = feedback[@"brief"];
+        self->_hudLabel.textColor = NSColor.labelColor;
+        NSScreen *screen = NSScreen.mainScreen ?: NSScreen.screens.firstObject;
+        if (!screen) return;
+        NSRect visible = screen.visibleFrame;
+        [self->_hudPanel setFrameOrigin:NSMakePoint(NSMidX(visible) - 154,
+            NSMinY(visible) + MAX(30, visible.size.height * 0.16))];
+        uint64_t token = ++self->_hudToken;
+        [self->_hudPanel orderFrontRegardless];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1400 * NSEC_PER_MSEC), dispatch_get_main_queue(), ^{
+            if (self->_hudToken == token) [self dismissFeedback];
+        });
+    });
+}
+- (void)applyFeedback:(NSDictionary *)feedback feature:(NSString *)feature {
+    if (!feedback) return;
+    [self updateFeature:feature text:feedback[@"message"]];
+    [self showFeedback:feedback];
 }
 - (void)pollDriver {
     if (_stopping || _suspended || ActionsCancelled()) return;
@@ -387,14 +499,25 @@ static CGEventRef LockTapCallback(CGEventTapProxy proxy, CGEventType type, CGEve
         if (ActionsCancelled()) return;
         if (events[index].seq <= previous) continue;
         uint64_t mask = events[index].mask, time = events[index].timeNs;
-        if ((mask & (UINT64_C(1) << 8)) && HKDebounce(time, &_lastF4, &_seenF4))
-            [self updateFeature:@"F4" text:HKEventFresh(NowNs(), time) ? ToggleMicrophone() : @"F4: evento scaduto, ripremi il tasto"];
+        if ((mask & (UINT64_C(1) << 8)) && HKDebounce(time, &_lastF4, &_seenF4)) {
+            if (HKEventFresh(NowNs(), time)) [self applyFeedback:ToggleMicrophone() feature:@"F4"];
+            else [self updateFeature:@"F4" text:@"F4: evento scaduto, ripremi il tasto"];
+        }
         if (ActionsCancelled()) return;
-        if ((mask & (UINT64_C(1) << 13)) && HKDebounce(time, &_lastF7, &_seenF7))
-            [self updateFeature:@"F7" text:HKEventFresh(NowNs(), time) ? ToggleRadios() : @"F7: evento scaduto, ripremi il tasto"];
+        if ((mask & (UINT64_C(1) << 13)) && HKDebounce(time, &_lastF7, &_seenF7)) {
+            if (HKEventFresh(NowNs(), time)) [self applyFeedback:ToggleRadios() feature:@"F7"];
+            else [self updateFeature:@"F7" text:@"F7: evento scaduto, ripremi il tasto"];
+        }
     }
     NSString *camera = CameraStatus(snapshot);
     if (![_featureStatus[@"F8"] isEqual:camera]) [self updateFeature:@"F8" text:camera];
+    // The snapshot owns only one final camera result. Show it once for the
+    // newest camera event, never once per old ring entry or baseline/poll.
+    uint64_t cameraTime = 0;
+    for (NSUInteger index = 0; index < ring.count; index++)
+        if (events[index].seq > previous && (events[index].mask & (UINT64_C(1) << 7)))
+            cameraTime = events[index].timeNs;
+    if (cameraTime && HKEventFresh(NowNs(), cameraTime)) [self showFeedback:CameraFeedback(snapshot)];
 }
 - (CGEventRef)handleLockEvent:(CGEventRef)event type:(CGEventType)type {
     if (type == kCGEventTapDisabledByTimeout || type == kCGEventTapDisabledByUserInput) {
@@ -425,8 +548,15 @@ static CGEventRef LockTapCallback(CGEventTapProxy proxy, CGEventType type, CGEve
             [self updateFeature:@"F9" text:@"F9 / ⌘+L: evento scaduto, ripremi il tasto"];
             return;
         }
-        BOOL sent = PostLockRequest();
-        [self updateFeature:@"F9" text:sent ? @"F9 / ⌘+L: richiesta blocco schermo inviata" : @"F9 / ⌘+L: consenti Accessibilità"];
+        [self showFeedback:LockFeedback(HKFeedbackRequest, @"Richiesta blocco schermo", @"Blocco schermo…", lockEpoch)];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 180 * NSEC_PER_MSEC), self->_actions, ^{
+            if (self->_stopping || self->_suspended || ActionsCancelled() || !LockKeysEnabled() ||
+                atomic_load(&LifecycleEpoch) != epoch || atomic_load(&LockPreferenceEpoch) != lockEpoch ||
+                !HKEventFresh(NowNs(), now)) return;
+            BOOL sent = PostLockRequest();
+            [self updateFeature:@"F9" text:sent ? @"F9 / ⌘+L: richiesta blocco schermo inviata" : @"F9 / ⌘+L: consenti Accessibilità"];
+            if (!sent) [self showFeedback:LockFeedback(HKFeedbackError, @"Consenti Accessibilità", @"Consenti Accessibilità per F9", lockEpoch)];
+        });
     });
     return NULL;
 }
@@ -475,6 +605,7 @@ static CGEventRef LockTapCallback(CGEventTapProxy proxy, CGEventType type, CGEve
     (void)sender;
     [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"EnableF9"];
     [self closeLockTap];
+    [self dismissFeedback];
     dispatch_async(_actions, ^{
         self->_seenF9 = false;
         [self updateFeature:@"F9" text:@"F9 / ⌘+L: disabilitato dal menu S540"];
@@ -486,6 +617,7 @@ static CGEventRef LockTapCallback(CGEventTapProxy proxy, CGEventType type, CGEve
     (void)notification;
     (void)atomic_fetch_add(&LifecycleEpoch, 1);
     atomic_store(&CancelActions, true);
+    [self dismissFeedback];
     dispatch_async(_actions, ^{ self->_suspended = YES; self->_baselineNeeded = YES; });
 }
 - (void)didWake:(NSNotification *)notification {
@@ -514,7 +646,21 @@ static CGEventRef LockTapCallback(CGEventTapProxy proxy, CGEventType type, CGEve
     _featureStatus = [@{@"Driver":@"Collegamento tasti Lenovo…", @"F4":@"F4: microfono pronto",
         @"F7":@"F7: Wi-Fi e Bluetooth pronti", @"F8":@"F8: webcam in attesa", @"F9":@"F9 / ⌘+L: abilitalo dal menu S540"} mutableCopy];
     _item = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
-    _item.button.title = @"S540";
+    NSString *menuIconPath = [[NSBundle mainBundle] pathForResource:@"MenuBarIconTemplate" ofType:@"png"];
+    NSImage *menuIcon = menuIconPath ? [[NSImage alloc] initWithContentsOfFile:menuIconPath] : nil;
+    if (menuIcon) {
+        NSString *retinaPath = [[NSBundle mainBundle] pathForResource:@"MenuBarIconTemplate@2x" ofType:@"png"];
+        NSData *retinaData = retinaPath ? [NSData dataWithContentsOfFile:retinaPath] : nil;
+        NSBitmapImageRep *retina = retinaData ? [NSBitmapImageRep imageRepWithData:retinaData] : nil;
+        if (retina) { retina.size = NSMakeSize(20, 18); [menuIcon addRepresentation:retina]; }
+    }
+    if (!menuIcon) menuIcon = [NSImage imageWithSystemSymbolName:@"keyboard" accessibilityDescription:@"S540 Tasti rapidi"];
+    menuIcon.size = NSMakeSize(20, 18);
+    menuIcon.template = YES;
+    _item.button.image = menuIcon;
+    _item.button.title = @"";
+    _item.button.accessibilityLabel = @"S540 Tasti rapidi";
+    _item.button.toolTip = @"S540 Tasti rapidi";
     NSMenu *menu = [[NSMenu alloc] initWithTitle:@"S540 Tasti"];
     NSArray *titles = @[_featureStatus[@"Driver"],_featureStatus[@"F4"],_featureStatus[@"F7"],_featureStatus[@"F8"],_featureStatus[@"F9"]];
     NSMutableArray *items = [NSMutableArray array];
@@ -547,6 +693,7 @@ static CGEventRef LockTapCallback(CGEventTapProxy proxy, CGEventType type, CGEve
     atomic_store(&CancelActions, true);
     if (_actions) dispatch_sync(_actions, ^{ self->_stopping = YES; if (self->_timer) dispatch_source_cancel(self->_timer); });
     [self closeLockTap];
+    [self dismissFeedback];
     if (_termSignal) dispatch_source_cancel(_termSignal);
     [[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver:self];
     if (_lockFD >= 0) { close(_lockFD); _lockFD = -1; }

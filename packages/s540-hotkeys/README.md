@@ -30,6 +30,13 @@ Read `LEGGIMI.txt` for the single installation and functional check.
 Host fixtures, native compilation, packaging, target loading and actual function
 are distinct milestones. Native CI does not load the driver or change host radios.
 
+On the target 81SW, driver 0.1.0 is loaded and publishes a ready snapshot with
+zero query failures. The supplied event ring contains F4 mask `0x0100` and F8
+mask `0x0080`; the camera command returned a successful firmware change and
+readback. An input master mute control is present. The user confirmed F7 and
+F9 working with app 0.1.1. These observations do not independently measure
+microphone silence or the camera image, and do not validate the new HUD.
+
 ## References
 
 - Linux `ideapad-laptop.c`, commit
@@ -46,6 +53,21 @@ are distinct milestones. Native CI does not load the driver or change host radio
 No complete YogaSMC/ReYogaSMC binary or EFI from another laptop is installed.
 The camera integration and radio state restoration require the final functional
 check on the intended laptop. Existing F1–F3, F5, F6 and F11/F12 are not remapped.
+
+## App feedback 0.1.2
+
+The app has a keyboard-and-shortcut icon and a matching template menu-bar icon.
+Brief nonactivating HUD panels show the result of F4/F7/F8/F9 actions without
+notification permissions, sound, or focus changes. Baseline reads, reconnects,
+and periodic status polling do not produce action feedback. Camera feedback
+reports firmware state, and screen-lock feedback reports a request rather than
+claiming independent verification of either physical result.
+
+The microphone action uses the input mute exposed by CoreAudio. In the installed
+VoodooHDA 3.6.10 implementation that control zeros the input mixer and restores
+its saved input gain when unmuted; the app does not maintain a second gain store.
+The guarded decoder from 0.1.1 and the original signed kernel 0.1.0 are retained.
+Owned app versions 0.1.0 and 0.1.1 can be upgraded without a driver reload.
 
 ## App correction 0.1.1
 

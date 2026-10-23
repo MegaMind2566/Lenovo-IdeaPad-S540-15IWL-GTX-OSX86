@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: MIT; original S540 Tasti artwork. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#137DAD"/>
+      <stop offset="0.48" stop-color="#1760AC"/>
+      <stop offset="1" stop-color="#172B67"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.12" cy="0.04" r="1">
+      <stop offset="0" stop-color="#61E2DA" stop-opacity="0.64"/>
+      <stop offset="0.62" stop-color="#30B9CD" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="keyboard" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#D9F0F7"/>
+    </linearGradient>
+    <linearGradient id="key" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#225D90"/>
+      <stop offset="1" stop-color="#1E467A"/>
+    </linearGradient>
+    <linearGradient id="bolt" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0" stop-color="#FFF6AC"/>
+      <stop offset="0.45" stop-color="#FFD45D"/>
+      <stop offset="1" stop-color="#F6AD35"/>
+    </linearGradient>
+    <filter id="shadow" x="-0.2" y="-0.2" width="1.4" height="1.6" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="17"/>
+    </filter>
+    <clipPath id="tileClip"><rect x="64" y="64" width="896" height="896" rx="202"/></clipPath>
+  </defs>
+  <rect x="64" y="64" width="896" height="896" rx="202" fill="url(#tile)"/>
+  <g clip-path="url(#tileClip)">
+    <rect x="64" y="64" width="896" height="896" fill="url(#glow)"/>
+    <path d="M65 330 C287 140 604 93 959 198" fill="none" stroke="#A6FAEF" stroke-opacity="0.09" stroke-width="80"/>
+  </g>
+  <rect x="67" y="67" width="890" height="890" rx="199" fill="none" stroke="#D0F7FF" stroke-opacity="0.22" stroke-width="4"/>
+
+  <!-- A restrained keyboard silhouette stays legible at small icon sizes. -->
+  <rect x="173" y="373" width="678" height="377" rx="80" fill="#071A43" opacity="0.30" filter="url(#shadow)"/>
+  <rect x="173" y="360" width="678" height="373" rx="79" fill="#A6D0E6"/>
+  <rect x="173" y="343" width="678" height="373" rx="79" fill="url(#keyboard)"/>
+  <rect x="181" y="351" width="662" height="357" rx="71" fill="none" stroke="#FFFFFF" stroke-opacity="0.72" stroke-width="5"/>
+
+  <g fill="url(#key)">
+    <rect x="225" y="396" width="86" height="75" rx="18"/>
+    <rect x="335" y="396" width="86" height="75" rx="18"/>
+    <rect x="445" y="396" width="86" height="75" rx="18"/>
+    <rect x="555" y="396" width="86" height="75" rx="18"/>
+    <rect x="665" y="396" width="132" height="75" rx="18"/>
+    <rect x="225" y="493" width="86" height="75" rx="18"/>
+    <rect x="335" y="493" width="86" height="75" rx="18"/>
+    <rect x="445" y="493" width="86" height="75" rx="18"/>
+    <rect x="555" y="493" width="86" height="75" rx="18"/>
+    <rect x="665" y="493" width="132" height="75" rx="18"/>
+    <rect x="225" y="590" width="86" height="73" rx="18"/>
+    <rect x="335" y="590" width="352" height="73" rx="18"/>
+    <rect x="711" y="590" width="86" height="73" rx="18"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-opacity="0.16" stroke-width="3">
+    <path d="M240 406 H296 M350 406 H406 M460 406 H516 M570 406 H626 M680 406 H782"/>
+    <path d="M240 503 H296 M350 503 H406 M460 503 H516 M570 503 H626 M680 503 H782"/>
+    <path d="M240 600 H296 M350 600 H672 M726 600 H782"/>
+  </g>
+
+  <!-- The shortcut flash is the shared motif of the app and menu-bar mark. -->
+  <path d="M701 213 L580 409 Q573 421 586 421 H674 L636 536 Q631 550 644 539 L810 348 Q819 336 805 336 H720 L755 229 Q761 210 742 210 H708 Q703 210 701 213Z" fill="#0C326C" stroke="#0C326C" stroke-width="35" stroke-linejoin="round" opacity="0.96"/>
+  <path d="M701 203 L580 399 Q573 411 586 411 H674 L636 526 Q631 540 644 529 L810 338 Q819 326 805 326 H720 L755 219 Q761 200 742 200 H708 Q703 200 701 203Z" fill="url(#bolt)" stroke="#FFF2AB" stroke-width="3" stroke-linejoin="round"/>
+</svg>

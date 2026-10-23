@@ -1,4 +1,4 @@
-# S540 Tasti 0.1.1 — companion contract
+# S540 Tasti 0.1.2 — companion contract
 
 Intel macOS 13 or later. This user-session companion uses the unchanged
 `S540HotkeysVPC` **0.1.0** driver. App 0.1.1 fixes the decoding of its unsigned
@@ -8,8 +8,8 @@ No developer tools are needed on the target machine.
 Install `/Applications/S540Tasti.app`; the package's `org.s540.Hotkeys`
 LaunchAgent starts it as the logged-in user. Bundle identifier:
 `org.s540.Hotkeys`; executable: `Contents/MacOS/S540Tasti`; LSUIElement.
-One instance per user is enforced by a private advisory lock. The menu-bar title
-is **S540**. The app waits for driver approval/restart and attaches when Ready.
+One instance per user is enforced by a private advisory lock. A template keyboard-and-shortcut icon identifies the app in the menu bar,
+including Retina and light/dark appearances. The app waits for driver approval/restart and attaches when Ready.
 
 | Key | Action and confirmation |
 | --- | --- |
@@ -123,8 +123,8 @@ clang -fobjc-arc -arch x86_64 -mmacosx-version-min=13.0 \
 
 The supplied Info.plist belongs in Contents and the binary in Contents/MacOS.
 The parent builder signs and validates the app; it reuses the previously built
-driver 0.1.0 unchanged. No additional assets or target-side compilation are
-needed.
+driver 0.1.0 unchanged. The three icon assets belong in Contents/Resources before signing. No
+target-side compilation is needed.
 
 `S540Tasti --self-test` checks pure policies, real signed CFNumberSInt32 fixtures
 for CFG and unknown CameraState, invalid types/ranges, driver-version separation,
@@ -163,3 +163,21 @@ Primary API references:
 - https://developer.apple.com/documentation/iobluetooth/iobluetoothhostcontroller/powerstate
 - https://github.com/toy/blueutil/blob/main/blueutil.m
 - https://support.apple.com/102650 (Control+Command+Q)
+
+## Action feedback 0.1.2
+
+A silent, nonactivating visual-effect panel shows a function symbol and concise
+result for new F4/F7/F8 actions. Errors show an amber warning. It ignores mouse
+events, never takes keyboard focus, and hides after 1.4 seconds. A new popup
+replaces the previous one; old timers cannot hide newer feedback. Startup,
+wake baselines, reconnects, gaps and ordinary driver polling do not show a HUD.
+F8 uses only the newest fresh camera event and the final firmware result, not
+one success claim for every retained ring entry.
+
+F9 shows a lock-request HUD, then submits Control+Command+Q after 180 ms. The
+delayed block rechecks event freshness, user preference and lifecycle epochs.
+Opt-out, sleep and quit invalidate pending requests and queued feedback. The
+panel is an app window and does not require macOS notification permission.
+
+Artwork source and a reproducible icon builder are included under design/ and
+tools/. Runtime assets are AppIcon.icns and two menu-bar template resolutions.

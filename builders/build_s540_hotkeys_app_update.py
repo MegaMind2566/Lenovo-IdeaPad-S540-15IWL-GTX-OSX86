@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build app 0.1.1 and package the exact previously signed kernel 0.1.0.
+"""Build app 0.1.2 and package the exact previously signed kernel 0.1.0.
 
 No kernel compiler, SDK download, driver loading or kernel dependency probe is
 invoked. The reused bundle and its original provenance are immutable inputs.
@@ -15,9 +15,11 @@ import platform
 import plistlib
 import shutil
 import stat
+import struct
 import subprocess
 import sys
 import zipfile
+import zlib
 
 BUILDER = Path(__file__).resolve()
 BASE_BUILDER = BUILDER.with_name("build_s540_hotkeys.py")
@@ -29,8 +31,8 @@ BuildError, require = base.BuildError, base.require
 file_hash, digest, write_json = base.file_hash, base.digest, base.write_json
 tree_hashes, copy_file, zip_tree = base.tree_hashes, base.copy_file, base.zip_tree
 
-PACKAGE = "S540-Tasti-v1.1"
-APP_VERSION = "0.1.1"
+PACKAGE = "S540-Tasti-v1.2"
+APP_VERSION = "0.1.2"
 KERNEL_VERSION = "0.1.0"
 KERNEL_SHA = "5e529274ecba7905e023e5b807de4dda2e14be51cbff45dcf84bceeb01b78fc4"
 KERNEL_ID = "org.s540.HotkeysVPC"
@@ -41,11 +43,80 @@ WORKFLOW = ".github/workflows/build-s540-hotkeys-app-update.yml"
 WRAPPERS = ("INSTALLA-TASTI.command", "RIPRISTINA-TASTI.command", "VERIFICA-TASTI.command")
 REQUIRED = (
     "app/S540Tasti.m", "app/HotkeyPolicy.h", "app/policy_tests.c", "app/Info.plist", "app/LICENSE",
+    "app/Resources/AppIcon.icns", "app/Resources/MenuBarIconTemplate.png", "app/Resources/MenuBarIconTemplate@2x.png",
+    "app/tools/build-icons.py",
     "kernel/S540HotkeysVPC.cpp", "kernel/S540HotkeysVPC.hpp", "kernel/ProtocolCore.hpp", "kernel/Info.plist", "kernel/LICENSE",
     *("installer/" + name for name in WRAPPERS), "installer/tools/s540-common.sh", "installer/tests/test-manifest.sh",
     "prebuilt/KERNEL-INPUT.json", "prebuilt/S540HotkeysVPC-0.1.0.zip",
     "LEGGIMI.txt", "README.md", "LICENSE", "licenses/NOTICES.txt", "licenses/GPL-2.0-YogaSMC.txt",
 )
+ICNS_PNG_SIZES = {"icp4": 16, "icp5": 32, "icp6": 64, "ic07": 128,
+                  "ic08": 256, "ic09": 512, "ic10": 1024,
+                  "ic11": 32, "ic12": 64, "ic13": 256, "ic14": 512}
+
+
+def verify_png(data: bytes, width: int, height: int) -> None:
+    """Validate committed RGBA8 PNGs without Pillow or a CI dependency install."""
+    require(data.startswith(b"\x89PNG\r\n\x1a\n") and len(data) <= 8 * 1024 * 1024, "Invalid PNG signature or encoded size")
+    offset, chunks, image_data = 8, [], bytearray()
+    while offset < len(data):
+        require(offset + 12 <= len(data), "Truncated PNG chunk")
+        length = struct.unpack_from(">I", data, offset)[0]
+        kind = data[offset + 4:offset + 8]
+        end = offset + 12 + length
+        require(end <= len(data), "PNG chunk exceeds file size")
+        payload = data[offset + 8:offset + 8 + length]
+        expected_crc = struct.unpack_from(">I", data, offset + 8 + length)[0]
+        require(zlib.crc32(kind + payload) & 0xFFFFFFFF == expected_crc, "PNG chunk CRC mismatch")
+        if not chunks:
+            require(kind == b"IHDR" and length == 13, "PNG must start with one IHDR")
+            actual = struct.unpack(">IIBBBBB", payload)
+            require(actual == (width, height, 8, 6, 0, 0, 0), "PNG must have the exact expected RGBA8 dimensions")
+        else:
+            require(kind != b"IHDR" and b"IEND" not in chunks, "Duplicate IHDR or data after IEND")
+        if kind == b"IDAT":
+            image_data.extend(payload)
+        if kind == b"IEND":
+            require(length == 0 and end == len(data), "PNG IEND must finish the file")
+        chunks.append(kind)
+        offset = end
+    require(chunks and chunks[-1] == b"IEND" and b"IDAT" in chunks, "PNG is missing image data or IEND")
+    raw_size = height * (1 + width * 4)
+    inflater = zlib.decompressobj()
+    pixels = inflater.decompress(bytes(image_data), raw_size + 1)
+    require(len(pixels) == raw_size and inflater.eof and not inflater.unused_data and not inflater.unconsumed_tail,
+            "PNG compressed image size or zlib stream is invalid")
+    require(all(pixels[row * (1 + width * 4)] <= 4 for row in range(height)), "PNG contains an invalid scanline filter")
+
+
+def verify_app_resources(source: Path, info: dict | None = None) -> dict:
+    if info is None:
+        info = plistlib.loads((source / "app/Info.plist").read_bytes())
+    require(info.get("CFBundleIconFile") == "AppIcon", "CFBundleIconFile must name the packaged AppIcon.icns")
+    resources = source / "app/Resources"
+    files = tree_hashes(resources)
+    require(set(files) == {"AppIcon.icns", "MenuBarIconTemplate.png", "MenuBarIconTemplate@2x.png"},
+            "The runtime app resources must contain exactly the three reviewed icon files")
+    verify_png((resources / "MenuBarIconTemplate.png").read_bytes(), 20, 18)
+    verify_png((resources / "MenuBarIconTemplate@2x.png").read_bytes(), 40, 36)
+    icon = (resources / "AppIcon.icns").read_bytes()
+    require(len(icon) >= 8 and icon[:4] == b"icns" and struct.unpack_from(">I", icon, 4)[0] == len(icon),
+            "Invalid ICNS header or container size")
+    offset, seen = 8, set()
+    while offset < len(icon):
+        require(offset + 8 <= len(icon), "Truncated ICNS chunk")
+        tag = icon[offset:offset + 4].decode("ascii")
+        length = struct.unpack_from(">I", icon, offset + 4)[0]
+        require(tag in ICNS_PNG_SIZES and tag not in seen and length >= 8 and offset + length <= len(icon),
+                "Unexpected, duplicate or truncated ICNS PNG chunk")
+        size = ICNS_PNG_SIZES[tag]
+        verify_png(icon[offset + 8:offset + length], size, size)
+        seen.add(tag)
+        offset += length
+    require(offset == len(icon) and seen == set(ICNS_PNG_SIZES), "ICNS must include all eleven standard and Retina PNG sizes")
+    require(any((source / "app/design").glob("*.svg")), "Missing reviewed SVG icon design source")
+    return {"files": files, "cf_bundle_icon_file": "AppIcon", "icns_png_sizes": ICNS_PNG_SIZES,
+            "menu_bar_sizes": {"MenuBarIconTemplate.png": [20, 18], "MenuBarIconTemplate@2x.png": [40, 36]}}
 
 
 def builder_hashes() -> dict[str, str]:
@@ -120,7 +191,8 @@ def validate_sources(source: Path) -> dict[str, str]:
     require(info.get("CFBundleIdentifier") == APP_ID and info.get("CFBundleExecutable") == APP_NAME and
             info.get("CFBundlePackageType") == "APPL" and info.get("CFBundleVersion") == APP_VERSION and
             info.get("CFBundleShortVersionString") == APP_VERSION and info.get("LSMinimumSystemVersion") == "13.0" and
-            info.get("LSUIElement") is True, "App must be version 0.1.1 for Intel macOS 13 or later")
+            info.get("LSUIElement") is True, "App must be version 0.1.2 for Intel macOS 13 or later")
+    verify_app_resources(source, info)
     verify_prebuilt(source)
     for script in sorted((source / "installer").rglob("*")):
         if script.is_file() and script.suffix in (".command", ".sh"):
@@ -200,6 +272,11 @@ def build(source: Path, output: Path, review: dict) -> Path:
             link.extend(["-framework", framework])
         runner.run(link, label="link-app-only")
         copy_file(source / "app/Info.plist", app / "Contents/Info.plist")
+        metadata["app_resources"] = verify_app_resources(source)
+        for relative in metadata["app_resources"]["files"]:
+            copy_file(source / "app/Resources" / relative, app / "Contents/Resources" / relative)
+        require(tree_hashes(app / "Contents/Resources") == metadata["app_resources"]["files"],
+                "App resources must be copied exactly before code signing")
         executable.chmod(0o755)
         require(runner.run(["xcrun", "lipo", "-archs", str(executable)], label="app-architecture") == "x86_64", "Wrong app architecture")
         base.macho_symbols(executable, 2)

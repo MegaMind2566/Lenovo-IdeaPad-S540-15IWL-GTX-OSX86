@@ -1,0 +1,7 @@
+D .
+D ./Contents
+D ./Contents/MacOS
+D ./Contents/_CodeSignature
+F 6686de10a28a2fe11b36cbb86dcbacc827cfc4ea116b4dabf1845e5aee629e9b  ./Contents/_CodeSignature/CodeResources
+F 7e79ec1a8c9536b1668584104453b99ce9793fb714e227cd1579d7628bc698d1  ./Contents/Info.plist
+F c8f8c237d31dc835e9f13dd3081b4ff3d226071b0b3bcfd52fce39419bcac7e2  ./Contents/MacOS/S540Tasti

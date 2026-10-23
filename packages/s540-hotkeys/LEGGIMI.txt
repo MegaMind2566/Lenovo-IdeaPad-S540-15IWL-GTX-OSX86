@@ -1,18 +1,28 @@
-S540 Tasti 0.1.1 — Lenovo IdeaPad S540-15IWL GTX / 81SW
+S540 Tasti 0.1.2 — Lenovo IdeaPad S540-15IWL GTX / 81SW
 
 INSTALLAZIONE / AGGIORNAMENTO
 1. Estrai tutto lo ZIP nella cartella Download.
 2. Nel Terminale esegui:
-   bash "$HOME/Downloads/S540-Tasti-v1.1/INSTALLA-TASTI.command"
+   bash "$HOME/Downloads/S540-Tasti-v1.2/INSTALLA-TASTI.command"
 3. Inserisci la password quando richiesta. Segui l'eventuale richiesta di
    autorizzazione di macOS e riavvia soltanto se l'installer lo richiede.
    L'app S540 partirà automaticamente nella tua sessione.
 
-Se la versione 0.1.0 è già installata e verificabile, il comando aggiorna
+Se la versione 0.1.0 o 0.1.1 è già installata e verificabile, il comando aggiorna
 soltanto l'app e la ricevuta. Conserva una copia dell'app precedente per il
 ripristino automatico in caso di errore e riusa il driver 0.1.0 già installato.
 
-CORREZIONE 0.1.1
+NOVITÀ 0.1.2
+Nuova icona dell'app dedicata ai tasti rapidi e icona coordinata nella barra
+dei menu. Ogni azione dei tasti gestiti dall'app mostra un breve popup con
+l'icona della funzione e il relativo esito, senza suoni né cambio di finestra.
+Non occorre autorizzare le notifiche di macOS.
+I popup non compaiono durante il collegamento iniziale o la lettura periodica
+del driver. In caso di errore indicano il problema senza confermare il cambio.
+Il controllo microfono usa il mute dell'ingresso; nel VoodooHDA installato
+questo azzera il livello e ripristina il guadagno precedente alla riattivazione.
+
+CORREZIONE GIÀ INCLUSA DALLA 0.1.1
 Il valore firmware a 32 bit era ricevuto da macOS come numero con segno.
 L'app precedente lo rifiutava come «stato non valido» e quindi non elaborava
 F4/F7/F8. La lettura è ora corretta soltanto per i campi firmware a 32 bit;
@@ -35,7 +45,7 @@ ora richiedono il blocco schermo. Fn+F9 non è più associato al blocco schermo.
 I permessi di questa scorciatoia non servono a F4/F7/F8.
 
 UNICO CONTROLLO FINALE
-Prova F4, F7, F8 e F9 nell'uso normale. Il menu S540 mostra l'esito.
+Prova F4, F7, F8 e F9 nell'uso normale. Il menu dell'app e i popup mostrano l'esito.
 Per F8 verifica anche l'immagine in un'app che utilizza la webcam: la conferma
 del firmware da sola non prova l'effetto visibile sul sensore. La compilazione
 e i controlli del pacchetto non sostituiscono questa prima prova sul portatile.

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: MIT; original S540 Tasti artwork. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" viewBox="0 0 20 18">
+  <defs>
+    <mask id="boltClearance">
+      <rect width="20" height="18" fill="white"/>
+      <path d="M15.8 0.7 L11.9 7.2 H15 L13.6 11.7 L19.6 4.3 H16.4 L17.8 0.7Z" fill="black" stroke="black" stroke-width="1.4" stroke-linejoin="round"/>
+    </mask>
+  </defs>
+  <g fill="none" stroke="#000000" stroke-width="1.35" mask="url(#boltClearance)">
+    <rect x="0.9" y="4.1" width="17.7" height="12.1" rx="2.1"/>
+  </g>
+  <g fill="#000000" mask="url(#boltClearance)">
+    <rect x="3" y="6.6" width="2.1" height="1.7" rx="0.4"/>
+    <rect x="6.6" y="6.6" width="2.1" height="1.7" rx="0.4"/>
+    <rect x="10.2" y="6.6" width="2.1" height="1.7" rx="0.4"/>
+    <rect x="13.8" y="6.6" width="2.1" height="1.7" rx="0.4"/>
+    <rect x="3" y="9.5" width="2.1" height="1.7" rx="0.4"/>
+    <rect x="6.6" y="9.5" width="2.1" height="1.7" rx="0.4"/>
+    <rect x="10.2" y="9.5" width="2.1" height="1.7" rx="0.4"/>
+    <rect x="13.8" y="9.5" width="2.1" height="1.7" rx="0.4"/>
+    <rect x="4.1" y="12.5" width="11.4" height="1.6" rx="0.6"/>
+  </g>
+  <path d="M15.8 0.7 L11.9 7.2 H15 L13.6 11.7 L19.6 4.3 H16.4 L17.8 0.7Z" fill="#000000" stroke="#000000" stroke-width="0.35" stroke-linejoin="round"/>
+</svg>

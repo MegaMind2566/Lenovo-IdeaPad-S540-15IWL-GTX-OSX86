@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   app-update:
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[native ci]')
+    if: github.event.repository.private == false && (github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[native ci]'))
     runs-on: macos-15-intel
     timeout-minutes: 10
     env:
@@ -41,9 +41,9 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: S540-Tasti-v1.1-app-update
+          name: S540-Tasti-v1.2-app-update
           path: |
             build/s540-hotkeys-app-update/*.zip
             build/s540-hotkeys-app-update/*.zip.sha256
           if-no-files-found: warn
-          retention-days: 30
+          retention-days: 1
