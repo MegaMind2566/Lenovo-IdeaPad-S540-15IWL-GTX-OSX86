@@ -12,6 +12,7 @@ Updated on **20 October 2026** for the working official EFI on the external Sams
 | Lid sleep and wake | Closing the lid sleeps; opening it resumes | User-confirmed ordinary use on 20 October |
 | Native Wi-Fi recovery | Working after restart/sleep | User confirmation; the current native driver is recorded in [Boot and network](../guides/boot-network.md) |
 | Bluetooth headset after sleep/wake | Headset reconnected; playback and the headset microphone work after waking | User-confirmed on 24 October 2026; automatic versus manual reconnection was not specified |
+| Internal audio after sleep/wake and Bluetooth disconnection | Playback returns to the built-in speakers; a recording with the selected internal microphone works | User-confirmed on 24 October 2026 in the same wake session; no additional sleep cycle or prolonged standby was tested |
 
 The lid result closes the ordinary close/open check. No extra lid collector, power patch or repeat cycle is requested. It does not establish overnight drain, prolonged sleep reliability, measured battery autonomy or hibernation. Full peripheral recovery is claimed only where separately confirmed by the user.
 

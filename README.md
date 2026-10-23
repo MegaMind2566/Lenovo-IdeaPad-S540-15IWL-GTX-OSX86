@@ -28,7 +28,7 @@ An OpenCore project for **macOS Tahoe 26** on the Lenovo IdeaPad S540-15IWL GTX.
 | Intel graphics and internal display | Working | Intel acceleration, Full HD display and corrected startup black-screen delay |
 | Brightness control | Working in official EFI | Works in the non-NVIDIA configuration; the separate NVIDIA-test regression remains deferred |
 | Native-menu Wi-Fi | Working | AirportItlwm 2.4.0, native menu/network selection; `itlwm` disabled; official Samsung EFI confirmed |
-| Internal speakers and microphone | Working | VoodooHDA 3.6.10; video recording tested both webcam and microphone |
+| Internal speakers and microphone | Working |VoodooHDA 3.6.10; video recording tested both webcam and microphone; built-in speakers and internal microphone also work after waking and disconnecting the Bluetooth headset (October 24) |
 | 3.5 mm headset output, microphone and switching | Working | Headphone playback, microphone input and speaker/headphone switching tested |
 | Bluetooth headset audio and microphone | Working | Playback and headset microphone also confirmed after reconnection following sleep/wake on October 24; automatic reconnection was not separately established |
 | Webcam | Working | Video recording confirmed |
