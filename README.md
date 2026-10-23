@@ -45,7 +45,7 @@ An OpenCore project for **macOS Tahoe 26** on the Lenovo IdeaPad S540-15IWL GTX.
 | USB-A and USB-C storage | Working | Tested connectors at 5 Gb/s; USB-C tested in both orientations; active nine-port map confirmed |
 | Internal NVMe detection | Working | 512 GB PM981a available; SMART verified and TRIM reported active |
 | SD reader | Unresolved / investigation resumed | O2Micro 1217:8621; direct matching candidate retained, but not confirmed on Tahoe or the current internal EFI. See [SD and fingerprint scope](docs/status/sd-fingerprint.md). |
-| Fingerprint reader | No macOS biometric integration | Goodix 27c6:55b4 enumerates on USB. The reviewed community driver is for Linux; native Touch ID requires Apple Secure Enclave integration. See [scope and dual-boot limits](docs/status/sd-fingerprint.md). |
+| Fingerprint reader | Not working / work stopped | Goodix 27c6:55b4 enumerates on USB, but macOS fingerprint authentication does not work. Further investigation stopped by user request on October 24. See [retained findings](docs/status/sd-fingerprint.md). |
 | HDMI | Not working | No display output established; NVIDIA-related investigation remains deferred |
 | USB-C video | Not verified | Video capability and routing not established |
 | NVIDIA diagnostics | Confirmed checkpoints | V9 kernel preparation and the complete-image idle-loader ABI passed; see the consolidated validation record |
@@ -82,7 +82,7 @@ The existing native workflows already group the automatic checks: the idle-image
 ## Remaining work
 
 1. Preserve the confirmed [function-key actions](docs/guides/function-keys.md), including F4, F7 and F9. F8 camera disablement is recorded as non-working and paused; no further F8 tests or builds are planned unless explicitly resumed.
-2. Complete the resumed [SD-reader investigation](docs/status/sd-fingerprint.md) against the current non-NVIDIA internal EFI. Fingerprint capture/matching development is distinct from native Touch ID and is not a ready EFI feature. Keep operational NVIDIA development paused.
+2. Complete the resumed [SD-reader investigation](docs/status/sd-fingerprint.md) using the **external non-NVIDIA test EFI only**. Fingerprint authentication is recorded as not working; further fingerprint work is stopped by request. Keep operational NVIDIA development paused.
 3. Treat battery runtime, long standby, sustained thermal behavior and storage endurance as unmeasured coverage, not as demonstrated faults requiring new patches.
 
 See the [Roadmap](docs/status/roadmap.md) for grouped acceptance criteria.

@@ -1,6 +1,6 @@
 # SD reader and fingerprint scope
 
-Updated on **24 October 2026**. SD and fingerprint work has been resumed by request before consolidating the **non-NVIDIA EFI**. NVIDIA, HDMI and the accepted non-working F8 camera toggle remain outside this work.
+Updated on **24 October 2026**. SD investigation is active before consolidating the **non-NVIDIA EFI**, with **all SD tests on the external EFI only**. The user has marked the fingerprint reader **NOT WORKING in macOS** and stopped further fingerprint work. NVIDIA, HDMI and the accepted non-working F8 camera toggle remain outside this work.
 
 ## O2Micro SD reader
 
@@ -16,13 +16,15 @@ The retained `S540-SD-O2-DIRETTO.zip` candidate changes only the kext personalit
 
 The x86_64 `__text` section of the reviewed BigSurSDXC, older NUCO2SDXC and supplied Sonoma CtlnaSDXC binaries is byte-identical: 55,746 bytes, SHA-256 `11b2fbe0068e69cb7efc772c6290323524bb7496d79e962e6728e069b54ca9d7`. Renaming or swapping those packages alone is not a new implementation.
 
-The direct candidate was prepared for the previous 240 GB test EFI. It contains no config.plist and assumes an already enabled matching kext entry and compatible properties. Those assumptions must be compared with the current internal EFI before preparing a delta; the old instructions are not the current installation procedure. No native compilation or repeat observer build is required merely to reuse the verified binary.
+The direct candidate was prepared for the previous 240 GB test EFI. It contains no config.plist and assumes an already enabled matching kext entry and compatible properties. Those assumptions must be compared with the current external test EFI before preparing a delta; the old instructions are not automatically the current test procedure. The earlier request for an internal EFI copy is superseded; SD trials must not modify the internal EFI. No native compilation or repeat observer build is required merely to reuse the verified binary.
 
 [HaC-Mini issue 1056](https://github.com/osy/HaC-Mini/issues/1056#issuecomment-1858981127) includes a report of the same physical ID working on Sonoma; [another report](https://github.com/osy/HaC-Mini/issues/1056#issuecomment-1859028063) limits success to cards up to 32 GB. Neither establishes Tahoe compatibility or complete SDXC support. The [Linux O2Micro driver](https://github.com/torvalds/linux/blob/5029bff09e79ad80883c5ee2828b8c4a263cf3dd/drivers/mmc/host/sdhci-pci-o2micro.c) contains SEABIRD1-specific initialization for this family. That is a reference for implementation review, not permission to copy unrelated device register writes into ACPI.
 
 The current outcome remains **no confirmed macOS SD reading**. Acceptance needs actual readable media after applying the exact candidate to the reviewed current configuration. A successful load or controller name alone does not close it.
 
 ## Goodix fingerprint reader
+
+**Status: NOT WORKING in macOS. Further fingerprint investigation stopped by user request on 24 October 2026.** The findings below are retained as the explanation of the limitation, not as an active development plan.
 
 The retained USB inventory identifies **Goodix 27c6:55b4**, bcdDevice `0100`, on internal **HS02**. USB enumeration already works. It does not establish image capture, enrollment, matching or login authentication.
 
@@ -32,8 +34,8 @@ There is real community support for the sensor on Linux: [libfprint-goodix55b4-m
 
 The driver's provisioning instructions overwrite the sensor's persistent pre-shared key and may replace firmware. The author documents loss of the current Windows pairing and instructs dual-boot users to disable the Windows fingerprint driver. This is a concrete incompatibility with silently including that provisioning in the existing dual-boot EFI setup. No provisioning command, firmware flash, biometric enrollment or authentication-policy change has been run.
 
-A macOS userspace capture/matcher port would be separate development with separate authentication and dual-boot requirements. It must not be described as already supported, native Touch ID, or a completed EFI feature. Fingerprint behavior under Windows and the working macOS password login remain separate from this investigation.
+A macOS userspace capture/matcher port would be separate development with separate authentication and dual-boot requirements; it is not part of the requested remaining work. No further fingerprint package, test, firmware change or login-policy integration is planned. Fingerprint behavior under Windows and the working macOS password login remain separate from this result.
 
 ## Consolidation boundary
 
-Retain the working internal rEFInd/OpenCore/Windows boot arrangement and the confirmed audio, keyboard, USB, sleep and Low Power Mode results. The requested EFI consolidation follows the SD target result and an explicit record of unsupported features. Do not insert experimental NVIDIA code, fingerprint provisioning, untested SD variants or private machine identifiers into the public stable package.
+Retain the working internal rEFInd/OpenCore/Windows boot arrangement and the confirmed audio, keyboard, USB, sleep and Low Power Mode results. Prepare and test the SD delta only on the reviewed external non-NVIDIA EFI. The requested EFI consolidation follows the SD target result, with fingerprint authentication explicitly recorded as not working. Do not insert experimental NVIDIA code, fingerprint provisioning, untested SD variants or private machine identifiers into the public stable package.
