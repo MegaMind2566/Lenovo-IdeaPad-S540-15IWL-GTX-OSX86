@@ -1,6 +1,6 @@
 {
   "format": 1,
   "scope": "s540-retained-first-initialization",
-  "batch_id": "s540-retained-prepare-observation-20261024-b4",
-  "source_commit": "5282573e6291697c0641b3e2bd459744b87c67c7"
+  "batch_id": "s540-retained-pci-classification-20261024-b5",
+  "source_commit": "809921cd6777a0f2d8710df331014d4058ea6d48"
 }
