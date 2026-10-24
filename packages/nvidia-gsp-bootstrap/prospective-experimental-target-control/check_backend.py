@@ -34,6 +34,11 @@ def run(args):
     output.mkdir(parents=True)
     source=HERE/'S540ExperimentalTargetKernel.cpp'
     template=HERE/'tests/check_backend.cpp.inc'
+    preparation=HERE.parent/'prospective-preparation-observation/S540PreparationObservation.h'
+    inputs=[source,template,Path(__file__),HERE/'S540ExperimentalTargetState.c',HERE/'S540ExperimentalTargetState.h',
+        HERE/'S540ExperimentalTargetProtocol.h',HERE.parent/'prospective-runtime-coordinator/S540ExperimentalRuntime.h',
+        HERE.parent/'prospective-retained-stop/S540NvidiaRetainedStop.h',preparation]
+    bindings={str(path.relative_to(ROOT)):sha(path) for path in inputs}
     raw=source.read_text();actual,names=bodies(raw)
     unit=template.read_text().replace('@ACTUAL_BODIES@',actual)
     generated=output/'actual-backend.cpp';generated.write_text(unit)
@@ -49,7 +54,7 @@ def run(args):
         base=['-O1','-g','-Wall','-Wextra','-Werror',*flags]
         execute([args.cc,*base,'-std=c11','-c',HERE/'S540ExperimentalTargetState.c','-o',obj],mode+'-state')
         execute([args.cxx,*base,'-std=c++17','-pthread','-I',HERE,'-I',HERE.parent/'prospective-runtime-coordinator',
-            '-I',HERE.parent/'prospective-retained-stop',generated,obj,'-o',binary],mode+'-backend')
+            '-I',HERE.parent/'prospective-retained-stop','-I',preparation.parent,generated,obj,'-o',binary],mode+'-backend')
         result=json.loads(execute([binary],mode+'-run').stdout)
         if result.get('status')!='passed' or result.get('failures')!=0:raise ValueError('Actual backend body control failed')
         results.append(dict(mode=mode,result=result))
@@ -57,24 +62,26 @@ def run(args):
         'readonly-close-always-stops':('if (control && owns) (void)control->requestStop();','if (control) (void)control->requestStop();'),
         'pending-stop-hidden':('bool pending=state.snapshot.stopRequested!=0;','bool pending=false;'),
         'publisher-join-omitted':('        closeCancellationPublication();','        /* missing publication join */'),
-        'owner-publication-outside-guard':('IOLockLock(guard); owner=created; state.snapshot.ownerAllocated=1; IOLockUnlock(guard);','owner=created; state.snapshot.ownerAllocated=1;')}
+        'owner-publication-outside-guard':('IOLockLock(guard); owner=created; state.snapshot.ownerAllocated=1; IOLockUnlock(guard);','owner=created; state.snapshot.ownerAllocated=1;'),
+        'preparation-observation-copy-omitted':('state.snapshot.preparation=observed.preparation;','state.snapshot.preparation={};')}
     killed=[]
     for name,(before,after) in mutations.items():
         if raw.count(before)!=1:raise ValueError('Current mutation anchor changed:'+name)
         changed,_=bodies(raw.replace(before,after));path=output/(name+'.cpp')
         path.write_text(template.read_text().replace('@ACTUAL_BODIES@',changed));binary=output/name
         execute([args.cxx,'-std=c++17','-O1','-pthread','-I',HERE,'-I',HERE.parent/'prospective-runtime-coordinator',
-            '-I',HERE.parent/'prospective-retained-stop',path,output/'plain-state.o','-o',binary],name+'-compile')
+            '-I',HERE.parent/'prospective-retained-stop','-I',preparation.parent,path,output/'plain-state.o','-o',binary],name+'-compile')
         result=execute([binary],name+'-run',allowed_failure=True)
         if result.returncode==0:raise ValueError('Actual backend controls accepted mutant:'+name)
         killed.append(dict(name=name,rejected=True))
-    inputs=[source,template,Path(__file__),HERE/'S540ExperimentalTargetState.c',HERE/'S540ExperimentalTargetState.h',
-        HERE/'S540ExperimentalTargetProtocol.h',HERE.parent/'prospective-runtime-coordinator/S540ExperimentalRuntime.h',
-        HERE.parent/'prospective-retained-stop/S540NvidiaRetainedStop.h']
+    if {str(path.relative_to(ROOT)):sha(path) for path in inputs}!=bindings:
+        raise ValueError('Actual backend source or shared observation contract changed during controls')
     report=dict(format=1,status='actual-backend-lifecycle-controls-passed',controls=results,mutants=killed,
-        extracted_function_names=names,source_sha256={str(p.relative_to(ROOT)):sha(p) for p in inputs},
+        extracted_function_names=names,source_sha256=bindings,
         generated_test_sha256=sha(generated),host_control=True,native_darwin_compilation=False,
-        fixture_instruments_owner_field_publication=True,kernel_execution='not_tested',gpu_access=False)
+        fixture_instruments_owner_field_publication=True,
+        preparation_observation_survives_fixture_private_cleanup=True,
+        kernel_execution='not_tested',gpu_access=False)
     (output/'results.json').write_text(json.dumps(report,sort_keys=True,indent=2)+'\n')
     return report
 

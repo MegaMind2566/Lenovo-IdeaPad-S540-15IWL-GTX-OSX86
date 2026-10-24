@@ -28,12 +28,14 @@ PROFILE_DIRECTORIES = {
     'first-lock-observation': 'prospective-first-lock-observation',
     'runtime-coordinator': 'prospective-runtime-coordinator',
     'retained-stop': 'prospective-retained-stop',
+    'preparation-observation': 'prospective-preparation-observation',
     'experimental-target-control': 'prospective-experimental-target-control',
 }
 PROFILE_DEPENDENCIES = {
     'runtime-coordinator': tuple(list(PROFILE_DIRECTORIES)[:4]),
     'retained-stop': ('runtime-coordinator',),
-    'experimental-target-control': tuple(list(PROFILE_DIRECTORIES)[:6]),
+    'preparation-observation': ('retained-stop',),
+    'experimental-target-control': tuple(list(PROFILE_DIRECTORIES)[:7]),
 }
 OLD_KERNEL = GSP + 'prospective-loader/S540ProspectiveLoaderKernel.cpp'
 OLD_STATE = GSP + 'prospective-loader/S540ProspectiveLoaderState.c'
@@ -154,7 +156,7 @@ def build_plan(base, before, names, modules, hashes):
     includes = list(before['shutdown_successor']['include_directories'])
     exports, original_exports, definitions, new_units, retired = {}, {}, {}, [], []
     initializers = set(previous.REVIEWED_INITIALIZERS)
-    gate_owners = {operational.BOOT: {'pm-event', 'runtime-coordinator', 'retained-stop'},
+    gate_owners = {operational.BOOT: {'pm-event', 'runtime-coordinator', 'retained-stop', 'preparation-observation'},
         operational.LIFECYCLE: {'runtime-coordinator'}, OLD_KMOD: {'experimental-target-control'},
         OLD_STATE: set(), OLD_KERNEL: set()}
     for name, module in modules.items():

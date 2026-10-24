@@ -130,10 +130,11 @@ def run(args):
     symbol=protocol_image.named('_s540ExperimentalProtocolOffsets')
     section=protocol_image.sections[symbol['section']-1]
     offset=section['offset']+symbol['value']-section['address']
-    protocol_offsets=list(struct.unpack_from('<13I',protocol_image.data,offset))
-    assert protocol_offsets[:2]==[144,80] and protocol_offsets[3:]==[104,8,16,32,64,96,128,72,8,56]
-    assert protocol_offsets[2]>=256 and protocol_offsets[2]%8==0
-    checks.append('actual-SDK-request-identity-native-profile-C-offsets')
+    protocol_offsets=list(struct.unpack_from('<21I',protocol_image.data,offset))
+    assert protocol_offsets[:2]==[144,80] and protocol_offsets[3:13]==[104,8,16,32,64,96,128,72,8,56]
+    assert protocol_offsets[13:16]==[2,104,56] and protocol_offsets[17:]==[48,20,24,40]
+    assert protocol_offsets[2]==568 and protocol_offsets[16]==464 and protocol_offsets[16]+104==protocol_offsets[2]
+    checks.append('actual-SDK-request-identity-native-profile-preparation-snapshot-v2-C-offsets')
     image=old.Image(reference,1)
     initializer=next(s for s in image.symbols if s['name'].startswith('__GLOBAL__sub_I_'))
     text=image.sections[initializer['section']-1]

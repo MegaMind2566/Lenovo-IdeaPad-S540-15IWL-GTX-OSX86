@@ -2,6 +2,9 @@
 #include "S540ExperimentalTargetState.h"
 _Static_assert(sizeof(S540ExperimentalRequest) == 144, "Fixed manual request ABI");
 _Static_assert(sizeof(S540ExperimentalBuildIdentity) == 80, "Fixed generated identity ABI");
+_Static_assert(sizeof(S540PreparationObservation) == 104, "Fixed preparation observation ABI");
+_Static_assert(sizeof(S540PreparationPowerObservation) == 56, "Fixed preparation PM observation ABI");
+_Static_assert(sizeof(S540ExperimentalSnapshot) == 568, "Fixed version2 snapshot ABI");
 static NvBool equal(const NvU8 *a, const NvU8 *b, NvU32 n) {
     NvU32 different = 0, i;
     for (i = 0; i < n; ++i) different |= a[i] ^ b[i];
@@ -13,7 +16,7 @@ static NvBool nonzero(const NvU8 *value, NvU32 n) {
     return bits != 0;
 }
 static NvBool valid(const S540ExperimentalState *state) {
-    return state && state->snapshot.format == S540_EXPERIMENTAL_PROTOCOL_VERSION &&
+    return state && state->snapshot.format == S540_EXPERIMENTAL_SNAPSHOT_VERSION &&
         state->snapshot.bytes == sizeof(state->snapshot) &&
         !state->snapshot.wholeDmaStopProven && !state->snapshot.pmAcknowledgementAuthorized &&
         !state->snapshot.accelerationTest;
@@ -21,7 +24,7 @@ static NvBool valid(const S540ExperimentalState *state) {
 NV_STATUS s540ExperimentalModuleEnter(S540ExperimentalState *state) {
     if (!state) return NV_ERR_INVALID_ARGUMENT;
     if (state->snapshot.format) return NV_ERR_STATE_IN_USE;
-    state->snapshot = (S540ExperimentalSnapshot){.format=1,.bytes=sizeof(state->snapshot),
+    state->snapshot = (S540ExperimentalSnapshot){.format=S540_EXPERIMENTAL_SNAPSHOT_VERSION,.bytes=sizeof(state->snapshot),
         .phase=S540_EXPERIMENTAL_MODULE_ENTERED,.lastStatus=NV_ERR_NOT_READY,
         .moduleEntryAccepted=1,.preparationStatus=NV_ERR_NOT_READY,
         .initializationStatus=NV_ERR_NOT_READY,.cancellationStatus=NV_ERR_NOT_READY,

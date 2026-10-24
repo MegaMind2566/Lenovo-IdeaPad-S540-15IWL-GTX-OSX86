@@ -284,9 +284,10 @@ def sdk_references(output,composed,native_home,cc,cxx,sdk,project_rows,include,e
     protocol_symbol=protocol_image.named('_s540ExperimentalProtocolOffsets')
     protocol_section=protocol_image.sections[protocol_symbol['section']-1]
     protocol_offset=protocol_section['offset']+protocol_symbol['value']-protocol_section['address']
-    offsets=list(struct.unpack_from('<13I',protocol_image.data,protocol_offset))
-    require(offsets[:2]==[144,80] and offsets[3:]==[104,8,16,32,64,96,128,72,8,56] and
-        offsets[2]>=256 and offsets[2]%8==0,
+    offsets=list(struct.unpack_from('<21I',protocol_image.data,protocol_offset))
+    require(offsets[:2]==[144,80] and offsets[3:13]==[104,8,16,32,64,96,128,72,8,56] and
+        offsets[13:16]==[2,104,56] and offsets[17:]==[48,20,24,40] and
+        offsets[2]==568 and offsets[16]==464 and offsets[16]+104==offsets[2],
         'Independent actual SDK wire/build-identity/native-profile offsets differ from the typed ABI')
     records['experimental-protocol-layout']=dict(source=str(protocol_source),source_sha256=composer.sha(protocol_source),
         object=protocol_object.name,object_sha256=composer.sha(protocol_object),offsets=offsets,
@@ -479,7 +480,8 @@ def link_verified_plan(args,value,verify_callback,*,companion_include_directorie
         final_args=copy(args);final_args.stack_output=output/'final-stack';final_args.final_image=final
         final_measurement=graph.measure_verified_plan(final_args,value,verify_callback,
             native_home/'full-original-compilation.json',native_home/'project-compilation.json',
-            profile_contract=profile_contract,context_review_callback=context_review_callback)
+            profile_contract=profile_contract,context_review_callback=context_review_callback,
+            preliminary_measurement=preliminary)
         report['final_measurement_json']=dict(path='final-stack/results.json',
             sha256=composer.sha(output/'final-stack/results.json'))
         report['final_native_stack_budget']=budget.verify_profile(final_measurement,profile_bytes,code_contract)

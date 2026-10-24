@@ -64,6 +64,7 @@ NATIVE_STATUSES = (
 GENERATED_SOURCE = 'generated/g_nvid_string.c'
 GENERATED_BYTES = (b'const char NVRM_ID[] = "nvidia id: NVIDIA UNIX Open Kernel Module for x86_64 '
     b'615.78.08 Release Build (build@ci)";\nconst char *const pNVRM_ID = NVRM_ID + 11;\n')
+_FRESH_MEASUREMENTS = {}
 
 
 def require(value, reason):
@@ -264,9 +265,81 @@ def selected_actual_roots(graphs, roots, local_roots):
     return result
 
 
+def checked_reuse_data(prior, graph_bytes, inputs, units, argv, profile_contract):
+    """Pure identity checks; these data checks alone authorize no native reuse."""
+    require(prior.get('status') == 'complete-current-native-stack-graph-measured' and
+            prior.get('complete_native_object_inventory') is True and
+            prior.get('final_image_selection') is None and
+            not prior.get('context_review', {}).get('refinements'),
+            'Only a complete unfiltered current preliminary graph may be reused')
+    require(prior.get('decoder_command') == argv and
+            prior.get('profile_contract') == profile_contract,
+            'Preliminary decoder command/profile contract changed')
+    require(hashlib.sha256(graph_bytes).hexdigest() == prior['graph_sha256'],
+            'Authenticated preliminary graph bytes changed')
+    graphs = json.loads(graph_bytes)
+    expected = dict(prior['input_sha256'])
+    require(expected.pop(prior['graph_path'], None) == prior['graph_sha256'] and expected == inputs,
+            'Preliminary and final complete measured input bindings differ')
+    require(isinstance(graphs, list) and len(graphs) == len(units) == prior['current_native_object_count'],
+            'Reused graph must contain every current object exactly once in order')
+    require(len({g['object'] for g in graphs}) == len(graphs), 'Duplicate reused object graph')
+    for graph, checked in zip(graphs, units):
+        unit = checked['unit']
+        require(all(graph.get(key) == expected for key, expected in (
+            ('object', str(checked['object'])), ('object_sha256', unit['object_sha256']),
+            ('source', unit['source']), ('source_sha256', unit['source_sha256']),
+            ('capture_sha256', inputs[str(checked['capture'])]))) and isinstance(graph.get('nodes'), list),
+            'Reused object/source/capture identity differs from the current checked unit')
+    return graphs
+
+
+def reuse_current_graphs(preliminary, units, bound, argv, profile_contract):
+    """Use only this module invocation's completed fresh measurement receipt."""
+    receipt = _FRESH_MEASUREMENTS.get(id(preliminary))
+    require(receipt is not None and receipt[0] is preliminary,
+            'Graph reuse requires this invocation\'s original fresh measurement object')
+    _, result_path, result_sha = receipt
+    inputs = dict(bound.files)
+    require(not any(p.is_symlink() for p in (result_path, *result_path.parents)),
+            'Preliminary result must be ordinary')
+    result_path = bound.file(result_path, result_sha)
+    prior = json.loads(result_path.read_text())
+    require(prior == preliminary, 'Original preliminary measurement object changed')
+    graph_path = Path(prior['graph_path'])
+    require(graph_path == result_path.parent / 'current-object-graphs.json',
+            'Preliminary graph escaped its authenticated measurement directory')
+    require(not any(p.is_symlink() for p in (graph_path, *graph_path.parents)),
+            'Preliminary graph must be ordinary')
+    graph_path = bound.file(graph_path, prior['graph_sha256'])
+    graphs = checked_reuse_data(prior, graph_path.read_bytes(), inputs,
+                               units, argv, profile_contract)
+    # Keep the fresh collector's object/data/capture observations. Only the
+    # deterministic decoder process and its graph reconstruction are reused.
+    for graph, checked in zip(graphs, units):
+        unit, obj, image = checked['unit'], checked['object'], checked['image']
+        require(stack.sha(obj) == unit['object_sha256'] and
+                hashlib.sha256(image.data).hexdigest() == unit['object_sha256'],
+                'Measured object changed before graph reuse')
+        require(stack.sha(checked['capture']) == graph['capture_sha256'],
+                'Measured capture changed before graph reuse')
+        texts = [section for section in image.sections if section.name == '__text']
+        require(len(texts) <= 1, 'Ambiguous executable text sections')
+        if texts and texts[0].size:
+            require(graph['nodes'], 'Executable object lacks authenticated graph owners')
+            require(stack.sha(obj) == unit['object_sha256'], 'Measured object changed during graph reuse')
+        else:
+            require(not graph['nodes'], 'Empty object acquired authenticated graph owners')
+    return graphs, dict(scope='same-invocation-verified-preliminary-object-graphs',
+        preliminary_result_path=str(result_path), preliminary_result_sha256=result_sha,
+        preliminary_graph_sha256=prior['graph_sha256'], objects=len(graphs),
+        decoder_processes_executed=0, original_per_row_checks_repeated=True,
+        final_image_selection_and_root_resolution_repeated=True)
+
+
 def measure_verified_plan(args, value, verify_callback, original_report_path,
                           project_report_path, *, profile_contract=None,
-                          context_review_callback=None):
+                          context_review_callback=None, preliminary_measurement=None):
     """Verify, decode and recheck every current measured source/object binding."""
     verify_source_plan(value, verify_callback)
     native = composer.load('s540_current_graph_native_authenticator',
@@ -287,8 +360,13 @@ def measure_verified_plan(args, value, verify_callback, original_report_path,
     units = original + project
     require(len({u['object'] for u in units}) == len(units), 'Original/project object inventories overlap')
     argv = [str(decoder), '--macho', '--disassemble', '--no-show-raw-insn', '--no-symbolic-operands']
-    with ThreadPoolExecutor(max_workers=4) as pool:
-        graphs = list(pool.map(lambda u: closure.fresh_graph(u, argv), units))
+    reuse = None
+    if preliminary_measurement is None:
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            graphs = list(pool.map(lambda u: closure.fresh_graph(u, argv), units))
+    else:
+        require(getattr(args, 'final_image', None), 'Graph reuse is reserved for actual final image measurement')
+        graphs, reuse = reuse_current_graphs(preliminary_measurement, units, bound, argv, profile_contract)
     context = context_review_callback(args, value, graphs) if context_review_callback else {
         'status': 'no-context-pruning-applied', 'refinements': [],
         'unknown_callback_receivers_remain_barriers': True}
@@ -344,9 +422,12 @@ def measure_verified_plan(args, value, verify_callback, original_report_path,
         graph_path=str(graph_path), graph_sha256=sha(graph_path),
         composition_sha256=sha(Path(args.composition) / 'composition.json'),
         input_sha256=bound.files, decoder_command=argv, profile_contract=profile_contract,
-        context_review=context, final_image_selection=final,
+        context_review=context, final_image_selection=final, decoder_reuse=reuse,
         actual_target_stack_bytes=None, irq_stack_capacity_observed=False,
         kernel_stack_bound_proven=False, aggregate_stack_proven=False,
         production_candidate_allowed=False, kernel_execution='not_tested')
     write(output / 'results.json', result)
+    if preliminary_measurement is None and final is None:
+        result_path = output / 'results.json'
+        _FRESH_MEASUREMENTS[id(result)] = (result, result_path, sha(result_path))
     return result

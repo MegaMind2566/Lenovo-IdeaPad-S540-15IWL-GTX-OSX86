@@ -111,11 +111,96 @@ kern_return_t IOServiceOpen(io_service_t service, task_port_t task, uint32_t typ
 kern_return_t IOServiceClose(io_connect_t connection) {
     expect(connection == 81, "same actual connection closed"); ++closes; return KERN_SUCCESS;
 }
+static void preparationSnapshot(S540ExperimentalSnapshot *out) {
+    if (scenario < 49 || scenario > 66 || scenario == 53 ||
+        ((scenario <= 52 || (scenario >= 63 && scenario <= 65)) && !requests)) return;
+    S540PreparationObservation *p = &out->preparation;
+    p->format = 1; p->bytes = sizeof(*p);
+    p->stage = S540_PREP_CONTEXT_CREATE; p->lastCompleted = S540_PREP_DMA_REMAP;
+    p->firstFailureStage = S540_PREP_CONTEXT_CREATE; p->firstFailureStatus = NV_ERR_NOT_SUPPORTED;
+    p->lastStatus = NV_ERR_NOT_SUPPORTED;
+    p->observedMask = S540_PREP_OBS_STAGE | S540_PREP_OBS_STATUS | S540_PREP_OBS_FIRST_FAILURE |
+        S540_PREP_OBS_HOST_FACTS | S540_PREP_OBS_DEVICE_FACTS | S540_PREP_OBS_POWER;
+    p->hostKnown = 0x7f; p->deviceObserved = S540_PREP_DEVICE_ALL; p->devicePredicates = S540_PREP_DEVICE_ALL;
+    p->power.format = 1; p->power.bytes = sizeof(p->power);
+    p->power.stage = p->power.lastCompleted = S540_PREP_POWER_COMPLETE;
+    p->power.observedMask = S540_PREP_PM_OBS_READY | S540_PREP_PM_OBS_DOMAIN |
+        S540_PREP_PM_OBS_ACTIVE | S540_PREP_PM_OBS_PROTOCOL;
+    p->power.flags = S540_PREP_PM_OBS_READY | S540_PREP_PM_OBS_DOMAIN | S540_PREP_PM_OBS_ACTIVE |
+        S540_PREP_PM_FLAG_ON_REQUESTED | S540_PREP_PM_FLAG_ON_SET | S540_PREP_PM_FLAG_ON_COMPLETED;
+    if (scenario <= 52) {
+        out->preparationAttempted = out->preparationReturned = 1;
+        out->preparationStatus = NV_ERR_NOT_SUPPORTED;
+        out->initializationAttempted = out->initializationReturned = 0;
+        out->adapterInitialized = out->globalInitialized = out->originalEntryObserved = 0;
+        out->ownerAllocated = out->providerFound = 1;
+        out->retainedStop.cleanupComplete = stops != 0;
+        if (stops) {
+            out->stopStatus = out->retainedStop.status = NV_OK;
+            out->retainedStop.retained = 0;
+        }
+        // The recorded failure is retained after the fake Owner's successful
+        // cleanup; cleanup cannot rewrite the historical preparation result.
+    }
+    if (scenario == 50) {
+        p->stage = p->firstFailureStage = S540_PREP_POWER_START; p->lastCompleted = S540_PREP_DISPATCH_PREPARE;
+        p->firstFailureStatus = p->lastStatus = out->preparationStatus = NV_ERR_TIMEOUT;
+        p->observedMask = S540_PREP_OBS_STAGE | S540_PREP_OBS_STATUS | S540_PREP_OBS_FIRST_FAILURE | S540_PREP_OBS_POWER;
+        p->hostKnown = p->deviceObserved = p->devicePredicates = 0;
+        p->power.stage = p->power.firstFailureStage = S540_PREP_POWER_WAIT_DOMAIN;
+        p->power.lastCompleted = S540_PREP_POWER_WAIT_READY; p->power.firstFailureStatus = NV_ERR_TIMEOUT;
+        p->power.rawIOReturn = p->power.firstFailureRawIOReturn = 0xe00002d8U;
+        p->power.rawIOReturnValid = p->power.firstFailureRawIOReturnValid = 1;
+        p->power.observedMask |= S540_PREP_PM_OBS_WAIT_RESULT | S540_PREP_PM_OBS_RAW_IOR;
+        p->power.flags = S540_PREP_PM_OBS_READY | S540_PREP_PM_OBS_ACTIVE | S540_PREP_PM_FLAG_ON_REQUESTED;
+        p->power.waitResult = 7; p->power.waitResultValid = 1;
+    }
+    if (scenario == 51) {
+        p->stage = p->firstFailureStage = S540_PREP_HOST_FACTS; p->lastCompleted = S540_PREP_PLATFORM_INITIALIZE;
+        p->hostKnown = 0x1f; p->hostMissing = 0x20;
+        p->observedMask &= ~S540_PREP_OBS_DEVICE_FACTS; p->deviceObserved = p->devicePredicates = 0;
+    }
+    if (scenario == 52) {
+        p->stage = p->firstFailureStage = S540_PREP_DEVICE_FACTS; p->lastCompleted = S540_PREP_HOST_FACTS;
+        p->devicePredicates &= ~S540_PREP_DEVICE_BARS;
+    }
+    if (scenario == 54) p->format = 2;
+    if (scenario == 55) --p->bytes;
+    if (scenario == 56) p->stage = p->firstFailureStage = 0xffffffffU;
+    if (scenario == 57) {
+        p->power.rawIOReturn = p->power.firstFailureRawIOReturn = 0;
+        p->power.rawIOReturnValid = p->power.firstFailureRawIOReturnValid = 0;
+    }
+    if (scenario == 58) {
+        p->stage = p->lastCompleted = S540_PREP_COMPLETE;
+        p->lastStatus = NV_OK; p->firstFailureStage = p->firstFailureStatus = 0;
+        p->observedMask &= ~S540_PREP_OBS_FIRST_FAILURE;
+    }
+    if (scenario == 59) {
+        p->observedMask &= ~(S540_PREP_OBS_HOST_FACTS | S540_PREP_OBS_DEVICE_FACTS);
+        p->hostKnown = 0x7f; p->hostMissing = 0; p->deviceObserved = p->devicePredicates = S540_PREP_DEVICE_ALL;
+    }
+    if (scenario == 60) p->power.format = 2;
+    if (scenario == 61) --p->power.bytes;
+    if (scenario == 62) p->deviceObserved = S540_PREP_DEVICE_PCI;
+    if (scenario == 64 || scenario == 65) {
+        p->stage = p->lastCompleted = S540_PREP_COMPLETE;
+        p->lastStatus = NV_OK; p->firstFailureStage = p->firstFailureStatus = 0;
+        p->observedMask &= ~S540_PREP_OBS_FIRST_FAILURE;
+    }
+    if (scenario == 66) {
+        p->stage = p->lastCompleted = p->firstFailureStage = p->firstFailureStatus = p->lastStatus = 0;
+        p->observedMask = S540_PREP_OBS_POWER;
+        p->power.observedMask = 0x80000000U;
+        p->power.stage = p->power.lastCompleted = S540_PREP_POWER_COMPLETE;
+        p->power.rawIOReturn = 0; p->power.rawIOReturnValid = 1;
+    }
+}
 static void snapshot(S540ExperimentalSnapshot *out) {
     const NvU8 source[32] = S540_EXPERIMENTAL_EXPECTED_SOURCE;
     const NvU8 policy[32] = S540_EXPERIMENTAL_EXPECTED_POLICY;
     const NvU8 native[32] = S540_EXPERIMENTAL_EXPECTED_NATIVE;
-    memset(out, 0, sizeof(*out)); out->format = 1; out->bytes = sizeof(*out);
+    memset(out, 0, sizeof(*out)); out->format = S540_EXPERIMENTAL_SNAPSHOT_VERSION; out->bytes = sizeof(*out);
     out->moduleEntryAccepted = out->controlServiceStarted = 1; out->generation = 99;
     out->nativeRequiredKernelStackBytes = out->nativeRequiredIrqStackBytes = 16384;
     memcpy(out->sourceSha256, source, 32); memcpy(out->policySha256, policy, 32);
@@ -129,7 +214,8 @@ static void snapshot(S540ExperimentalSnapshot *out) {
     out->retainedStop.format = 1; out->retainedStop.bytes = sizeof(out->retainedStop);
     out->retainedStop.attempts = stops; out->retainedStop.status = out->stopStatus;
     out->retainedStop.retained = requests != 0;
-    if (scenario == 12) out->format = 2;
+    preparationSnapshot(out);
+    if (scenario == 12) out->format = 1;
     if (scenario == 13) out->moduleEntryAccepted = 0;
     if (scenario == 14) out->controlServiceStarted = 0;
     if (scenario == 15) out->generation = 0;
@@ -153,6 +239,9 @@ kern_return_t IOConnectCallStructMethod(io_connect_t connection, uint32_t select
         expect(!input && !inputBytes, "snapshot has no request input");
         if ((scenario == 29 || scenario == 46) && observations == 2) return kIOReturnError;
         snapshot(output); if (scenario == 11) --*outputBytes;
+        if (scenario == 63 || (scenario == 65 && observations == 2))
+            --((S540ExperimentalSnapshot *)output)->bytes;
+        if (scenario == 64 && observations == 2) ((S540ExperimentalSnapshot *)output)->format = 1;
         return KERN_SUCCESS;
     }
     if (selector == S540_EXPERIMENTAL_SELECTOR_REQUEST) {
@@ -165,7 +254,7 @@ kern_return_t IOConnectCallStructMethod(io_connect_t connection, uint32_t select
             "actual generation, sysctl capacity and explicit manual acknowledgement");
         expect(request->sourceSha256[0] == 0x11 && request->policySha256[0] == 0x22 &&
             request->nativeCodeContractSha256[0] == 0x33, "packaged immutable image identity forwarded");
-        snapshot(output); return scenario == 1 ? kIOReturnError : KERN_SUCCESS;
+        snapshot(output); return scenario == 1 || (scenario >= 49 && scenario <= 52) ? kIOReturnError : KERN_SUCCESS;
     }
     expect(selector == S540_EXPERIMENTAL_SELECTOR_STOP && !input && !inputBytes, "only typed no-input STOP accepted");
     ++stops; stopOrder = sequence;
@@ -183,29 +272,35 @@ kern_return_t IOConnectCallStructMethod(io_connect_t connection, uint32_t select
 int main(int argc, char **argv) {
     if (argc != 2) return 2;
     scenario = (unsigned)strtoul(argv[1], NULL, 10);
-    if (scenario >= 49) return 2;
+    if (scenario >= 67) return 2;
     if (scenario == 10 || scenario == 47) stackBytes = 8192;
     if (scenario == 40) stackBytes = 32768;
     int target = (scenario >= 30 && scenario <= 38) || scenario == 47 || scenario == 48;
     int stopOnly = scenario >= 44 && scenario <= 46;
+    int readOnly = scenario == 3 || (scenario >= 53 && scenario <= 62) || scenario == 66;
     char *run[] = {"experimental_ctl", "--run-once", "--ack-retained-first-initialization"};
     char *readonly[] = {"experimental_ctl", "--snapshot"};
     char *targetArgs[] = {"experimental_ctl", "--target"};
     char *stopArgs[] = {"experimental_ctl", "--stop"};
     char *invalid[] = {"experimental_ctl", "--run-once"};
-    int actual = s540ActualClientMain(target ? 2 : (stopOnly || scenario == 3 || scenario == 43 ? 2 : 3),
-        target ? targetArgs : (stopOnly ? stopArgs : (scenario == 3 ? readonly : (scenario == 43 ? invalid : run))));
+    int actual = s540ActualClientMain(target ? 2 : (stopOnly || readOnly || scenario == 43 ? 2 : 3),
+        target ? targetArgs : (stopOnly ? stopArgs : (readOnly ? readonly : (scenario == 43 ? invalid : run))));
     int expected = 2;
     if (scenario == 0 || scenario == 2 || scenario == 3 || scenario == 4 || scenario == 5 || scenario == 40 || scenario == 44) expected = 0;
     if (scenario == 1 || scenario == 29 || scenario == 45 || scenario == 46) expected = 1;
+    if (scenario >= 49 && scenario <= 52) expected = 1;
+    if (scenario == 64 || scenario == 65) expected = 1;
+    if (readOnly) expected = 0;
     if (target) expected = scenario == 30 ? 0 : (scenario == 47 ? 2 : 1);
     expect(actual == expected, "actual client exit reflects the requested route and observed RPC status");
-    int ran = scenario == 0 || scenario == 1 || scenario == 2 || scenario == 4 || scenario == 5 || scenario == 29 || scenario == 40;
+    int ran = scenario == 0 || scenario == 1 || scenario == 2 || scenario == 4 || scenario == 5 || scenario == 29 || scenario == 40 ||
+        (scenario >= 49 && scenario <= 52) || scenario == 64 || scenario == 65;
     expect(requests == (unsigned)ran, "only explicit valid RUN invokes REQUEST");
     expect(stops == (unsigned)(ran || stopOnly), "RUN errors still STOP; readonly snapshot never STOPs");
     if (ran) expect(observations == 2 && closes == 1 && stopOrder > requestOrder,
         "same connection STOP then independent snapshot even after request error");
     if (stopOnly) expect(observations == 2 && closes == 1 && requests == 0, "STOP-only never issues initialization");
+    if (readOnly) expect(observations == 1 && closes == 1 && !requests && !stops, "diagnostic snapshot is read-only");
     if (target) {
         expect(!opens && !requests && !stops, "target preflight never opens control or initializes GPU");
         if (scenario == 47) expect(!enumCalls, "insufficient stack rejected before target enumeration");
@@ -215,7 +310,8 @@ int main(int argc, char **argv) {
     }
     if (scenario == 24 || scenario == 6 || scenario == 7 || scenario == 8 || scenario == 9 || scenario == 39 || scenario == 42 || scenario == 43)
         expect(!opens && !requests && !stops, "bad privilege/build/sysctl/CLI refuses before control open");
-    printf("{\"fixture_case\":%u,\"checks\":%u,\"failures\":%u,\"client_exit\":%d,\"requests\":%u,\"stops\":%u,\"observations\":%u}\n",
-        scenario, checks, failures, actual, requests, stops, observations);
+    printf("{\"fixture_case\":%u,\"checks\":%u,\"failures\":%u,\"client_exit\":%d,\"requests\":%u,\"stops\":%u,\"observations\":%u,\"expected_preparation_failure\":%u,\"expected_snapshot_bytes\":%u}\n",
+        scenario, checks, failures, actual, requests, stops, observations,
+        (unsigned)(scenario == 50 ? NV_ERR_TIMEOUT : NV_ERR_NOT_SUPPORTED), (unsigned)sizeof(S540ExperimentalSnapshot));
     return failures ? 1 : 0;
 }

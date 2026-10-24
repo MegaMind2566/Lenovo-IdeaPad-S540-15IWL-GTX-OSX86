@@ -9,6 +9,7 @@ import subprocess
 
 HERE = Path(__file__).resolve().parent
 FRONT = HERE.parent
+PREPARATION = FRONT.parent / 'prospective-preparation-observation'
 CF = r'''#ifndef S540_FAKE_CF_H
 #define S540_FAKE_CF_H
 #include <stdint.h>
@@ -92,11 +93,124 @@ def execute(command, log, environment, expected=0):
     return fixture, [row for row in lines if 'fixture_case' not in row]
 
 
+def check_diagnostics(case, fixture, row):
+    checks = 0
+    def check(value, message):
+        nonlocal checks
+        checks += 1
+        if not value: raise ValueError('Client diagnostic case %u: %s' % (case, message))
+    outer_valid = case not in (29, 46, 64, 65)
+    check(row['snapshot_valid'] is outer_valid, 'outer RPC validity was erased')
+    expected_format = 1 if case == 64 else (0 if case in (29, 46) else 2)
+    expected_bytes = 0 if case in (29, 46) else fixture['expected_snapshot_bytes'] - (case == 65)
+    check(row['snapshot_format'] == expected_format, 'snapshot version was not preserved')
+    check(row['snapshot_bytes'] == expected_bytes,
+        'snapshot byte size was not preserved')
+    p = row['preparation']
+    valid = outer_valid and case >= 49 and case not in (53, 54, 55)
+    check(p['valid'] is valid, 'unknown or malformed preparation was labeled valid')
+    if not valid or case == 66:
+        for key in ('stage_valid', 'last_completed_valid', 'last_status_valid', 'first_failure_observed',
+                    'first_failure_valid', 'host_facts_valid', 'device_facts_valid'):
+            check(p[key] is False, 'invalid preparation granted ' + key)
+        for fact in p['host_facts'].values():
+            check(fact == {'known': None, 'missing': None}, 'unknown host fact became a boolean')
+        for predicate in p['device_predicates'].values():
+            check(predicate == {'observed': False, 'satisfied': None}, 'unknown device predicate became satisfied')
+        if case == 66:
+            check(p['format'] == 1 and p['bytes'] == 104 and p['observed_mask'] == 32,
+                'unknown PM-mask fixture lost its independently valid preparation record')
+    else:
+        expected_stages = {50: (7, 'power-start'), 51: (9, 'host-facts'), 52: (10, 'device-facts'),
+            56: (0xffffffff, 'unknown'), 58: (31, 'complete')}
+        stage, label = expected_stages.get(case, (16, 'context-create'))
+        check(p['format'] == 1 and p['bytes'] == 104, 'preparation nested ABI changed')
+        check(p['stage'] == stage and p['stage_label'] == label, 'preparation stage or label changed')
+        check(p['stage_valid'] is (case != 56), 'unknown stage acquired valid semantics')
+        check(p['first_failure_observed'] is (case != 58), 'first-failure observation bit was erased')
+        check(p['first_failure_valid'] is (case not in (56, 58)), 'first-failure validity changed')
+        check(p['last_status_valid'] is True, 'observed preparation status was lost')
+        check(p['first_failure_status'] == (0 if case == 58 else fixture['expected_preparation_failure']),
+            'first failure status changed')
+        if case != 58:
+            check(p['first_failure_stage'] == stage and p['first_failure_stage_label'] == label,
+                'first failure stage changed')
+        if 49 <= case <= 52:
+            check(row['preparation_attempted'] == 1 and row['preparation_returned'] == 1 and
+                row['preparation_status'] == fixture['expected_preparation_failure'], 'prepare return facts changed')
+            check(row['retained_stop']['cleanup_complete'] == 1 and row['stop_status'] == 0,
+                'fixture did not reach the post-cleanup observation')
+            check(row['initialization_attempted'] == 0 and row['original_entry_observed'] == 0,
+                'prepare failure invented original entry')
+            check(row['retained_until_reboot'] == 1, 'cleanup diagnostics invented unload permission')
+        host_valid = case not in (50, 59)
+        device_valid = case not in (50, 51, 59)
+        check(p['host_facts_valid'] is host_valid and p['device_facts_valid'] is device_valid,
+            'host/device observation masks changed')
+        if case == 51:
+            check(p['host_known_mask'] == 0x1f and p['host_missing_mask'] == 0x20,
+                'host missing/known masks changed')
+            check(p['host_facts']['s0ix'] == {'known': False, 'missing': True}, 'missing S0ix fact was hidden')
+        if not host_valid:
+            for fact in p['host_facts'].values():
+                check(fact == {'known': None, 'missing': None}, 'unobserved nonzero host mask granted knowledge')
+        if not device_valid:
+            for predicate in p['device_predicates'].values():
+                check(predicate == {'observed': False, 'satisfied': None}, 'unobserved device bits granted predicates')
+        if case == 52:
+            check(p['device_observed_mask'] == 127 and p['device_predicates_mask'] == 123 and
+                p['device_predicates']['bars'] == {'observed': True, 'satisfied': False}, 'failed BAR predicate erased')
+        if case == 62:
+            check(p['device_observed_mask'] == 2 and p['device_predicates_mask'] == 127,
+                'partial device observation mask changed')
+            check(p['device_predicates']['pci'] == {'observed': True, 'satisfied': True} and
+                p['device_predicates']['bars'] == {'observed': False, 'satisfied': None},
+                'unobserved positive predicate bits acquired authority')
+        if case == 58:
+            check(p['last_status'] == 0 and p['first_failure_stage'] == 0,
+                'complete observation confused absence of failure with an observed failure')
+    power = p['power']
+    power_valid = valid and case not in (60, 61, 66)
+    check(power['valid'] is power_valid, 'invalid PM nested observation was labeled valid')
+    if not power_valid:
+        for key in ('stage_valid', 'last_completed_valid', 'first_failure_valid', 'raw_io_return_valid',
+                    'first_failure_raw_io_return_valid', 'wait_result_valid'):
+            check(power[key] is False, 'invalid PM observation granted ' + key)
+        for predicate in power['predicates'].values():
+            check(predicate == {'observed': False, 'value': None}, 'unknown PM predicate became a boolean')
+        check(all(value is None for value in power['protocol_flags'].values()), 'unknown PM flags became booleans')
+        if case == 66:
+            check(power['format'] == 1 and power['bytes'] == 56 and power['observed_mask'] == 0x80000000 and
+                power['raw_io_return'] == 0, 'unknown-only PM mask or zero raw return was erased')
+    elif case == 50:
+        check(power['stage'] == power['first_failure_stage'] == 10 and
+            power['stage_label'] == power['first_failure_stage_label'] == 'wait-domain', 'PM failure stage erased')
+        check(power['first_failure_valid'] is True and
+            power['first_failure_status'] == fixture['expected_preparation_failure'], 'PM first failure erased')
+        check(power['raw_io_return'] == power['first_failure_raw_io_return'] == 0xe00002d8 and
+            power['raw_io_return_valid'] is True and power['first_failure_raw_io_return_valid'] is True,
+            'raw PM IOReturn failure was erased')
+        check(power['wait_result'] == 7 and power['wait_result_valid'] is True, 'PM wait result erased')
+        check(power['predicates']['ready'] == {'observed': True, 'value': True} and
+            power['predicates']['domain'] == {'observed': True, 'value': False} and
+            power['predicates']['active'] == {'observed': True, 'value': True}, 'PM predicates changed')
+        check(power['protocol_flags']['on_requested'] is True and power['protocol_flags']['on_set'] is False,
+            'observed PM protocol flags changed')
+    else:
+        check(power['stage'] == 12 and power['stage_label'] == 'complete' and power['stage_valid'] is True,
+            'observed PM completion stage changed')
+        check(power['first_failure_valid'] is False and power['raw_io_return'] == 0 and
+            power['raw_io_return_valid'] is False and power['first_failure_raw_io_return_valid'] is False,
+            'zero/unobserved raw PM returns were treated as observed success')
+    return checks
+
+
 def run(args):
     output = args.output.resolve(); cc = args.cc.resolve(strict=True)
     if output.exists() or output.is_relative_to(FRONT): raise ValueError('Fresh isolated client controls output required')
     paths = [Path(__file__), HERE / 'check_client.c', FRONT / 'experimental_ctl.c',
-        FRONT / 'S540ExperimentalTargetProtocol.h', FRONT.parent.parent / 'nvidia-os-adapter/upstream/include/nvtypes.h',
+        FRONT / 'S540ExperimentalTargetProtocol.h', PREPARATION / 'S540PreparationObservation.h',
+        FRONT.parent.parent / 'nvidia-os-adapter/upstream/include/nvtypes.h',
         FRONT.parent.parent / 'nvidia-os-adapter/upstream/include/nvstatus.h']
     bindings = {str(path): sha(path) for path in paths}; compiler = sha(cc)
     output.mkdir(parents=True)
@@ -116,7 +230,8 @@ def run(args):
         for variant in args.variants:
             work = output / variant; work.mkdir()
             flags = ['-std=c11', '-O1', '-g', '-Wall', '-Wextra', '-Werror', '-Wno-unused-function',
-                '-Wno-unused-parameter', '-I', str(fake), '-I', str(FRONT)]
+                '-Wno-unused-parameter', '-Wno-misleading-indentation',
+                '-I', str(fake), '-I', str(FRONT), '-I', str(PREPARATION)]
             if variant == 'sanitized': flags += ['-fsanitize=address,undefined', '-fno-sanitize-recover=all', '-fno-omit-frame-pointer']
             binary = work / 'actual-client-fixture'
             command = [cc, *flags, HERE / 'check_client.c', '-o', binary]
@@ -124,20 +239,24 @@ def run(args):
             (work / 'compile.log').write_text(raw.stdout + raw.stderr)
             if raw.returncode: raise ValueError('Actual client fixture compilation failed: ' + raw.stderr[-7000:])
             rows = []
-            for case in range(49):
+            diagnostic_checks = 0
+            for case in range(67):
                 fixture, observations = execute([binary, case], work / ('case-%02d.log' % case), environment)
                 if fixture['failures']: raise ValueError('Actual client fixture assertions failed')
-                if case in (0, 1, 2, 3, 4, 5, 29, 40, 44, 45, 46):
+                if case in (0, 1, 2, 3, 4, 5, 29, 40, 44, 45, 46) or (case >= 49 and case != 63):
                     if len(observations) != 1: raise ValueError('Actual client JSON report missing')
                     row = observations[0]
-                    if row['request_rpc_attempted'] != (case not in (3,44,45,46)):
+                    if row['request_rpc_attempted'] != (case not in (3,44,45,46) and (case < 53 or case in (64,65))):
                         raise ValueError('Client JSON conflates run/snapshot/stop routes')
                     if case in (2,45) and row['stop_rpc_status'] != 0xe00002d5:
                         raise ValueError('Client JSON erased the actual STOP RPC failure')
                     if case in (29,46) and row['snapshot_rpc_status'] != 0xe00002bc:
                         raise ValueError('Client JSON erased the failed post-call observation')
-                    if case == 1 and row['request_rpc_status'] != 0xe00002bc:
+                    if case in (64,65) and row['snapshot_rpc_status'] != 0xe00002c2:
+                        raise ValueError('Client JSON accepted malformed post-call snapshot ABI')
+                    if (case == 1 or 49 <= case <= 52) and row['request_rpc_status'] != 0xe00002bc:
                         raise ValueError('Client JSON erased REQUEST RPC failure')
+                    diagnostic_checks += check_diagnostics(case, fixture, row)
                 rows.append(dict(**fixture, client_json=observations))
             negative = []
             original = (FRONT / 'experimental_ctl.c').read_text()
@@ -146,7 +265,9 @@ def run(args):
                  'stopped=IOConnectCallStructMethod(connection,S540_EXPERIMENTAL_SELECTOR_STOP,NULL,0,&output,&bytes);',
                  'stopped=KERN_SUCCESS;', 1),
                 ('ignore-native-code-identity', '!memcmp(observed->nativeCodeContractSha256,expectedNative,32)', '1', 18),
-                ('accept-duplicate-target', 'valid && matches==1 ? 0:1', 'matches>=1 ? 0:1', 32)):
+                ('accept-duplicate-target', 'valid && matches==1 ? 0:1', 'matches>=1 ? 0:1', 32),
+                ('accept-old-snapshot-version', 'out->format!=S540_EXPERIMENTAL_SNAPSHOT_VERSION', '0', 12),
+                ('accept-mismatched-snapshot-metadata-bytes', 'out->bytes!=sizeof(*out)', '0', 63)):
                 if before not in original: raise ValueError('Client negative control source anchor changed: ' + label)
                 mutant_source = work / (label + '.c'); mutant_source.write_text(original.replace(before, after, 1))
                 mutant = work / label
@@ -157,8 +278,31 @@ def run(args):
                 fixture, observations = execute([mutant, case], work / (label + '.log'), environment, expected=1)
                 if not fixture['failures']: raise ValueError('Actual client negative source mutation escaped')
                 negative.append(dict(label=label, failures_detected=fixture['failures'], binary_sha256=sha(mutant), source_sha256=sha(mutant_source)))
+            for label, before, after, case in (
+                ('accept-malformed-preparation-format', 'snapshotValid && p->format==1', 'snapshotValid && 1', 54),
+                ('zero-preparation-is-valid',
+                 'int valid=snapshotValid && p->format==1 && p->bytes==sizeof(*p) && (p->observedMask&knownMask)!=0;',
+                 'int valid=(snapshotValid && p->format==1 && p->bytes==sizeof(*p) && (p->observedMask&knownMask)!=0) || (snapshotValid && p->format==0);', 53),
+                ('zero-raw-pm-return-is-valid', 'powerValid && power->rawIOReturnValid==1', 'powerValid', 57),
+                ('unknown-only-pm-mask-is-valid', '(power->observedMask&powerKnownMask)!=0',
+                 '((void)powerKnownMask,power->observedMask!=0)', 66)):
+                if original.count(before) != 1: raise ValueError('Diagnostic negative control anchor changed: ' + label)
+                mutant_source = work / (label + '.c'); mutant_source.write_text(original.replace(before, after, 1))
+                mutant = work / label
+                mutant_command = [cc, *flags, '-DS540_CLIENT_SOURCE="' + str(mutant_source) + '"', HERE / 'check_client.c', '-o', mutant]
+                compiled = subprocess.run([str(value) for value in mutant_command], text=True, capture_output=True, timeout=180)
+                (work / (label + '-compile.log')).write_text(compiled.stdout + compiled.stderr)
+                if compiled.returncode: raise ValueError('Diagnostic negative control did not compile: ' + compiled.stderr[-3000:])
+                fixture, observations = execute([mutant, case], work / (label + '.log'), environment)
+                if fixture['failures'] or len(observations) != 1: raise ValueError('Diagnostic negative control did not reach reporting')
+                try: check_diagnostics(case, fixture, observations[0])
+                except ValueError as error: detected = str(error)
+                else: raise ValueError('Diagnostic source mutation escaped: ' + label)
+                negative.append(dict(label=label, diagnostic_assertion=detected,
+                    binary_sha256=sha(mutant), source_sha256=sha(mutant_source)))
             report['variants'][variant] = dict(status='passed', command=[str(value) for value in command],
-                binary_sha256=sha(binary), observations=rows, checks=sum(row['checks'] for row in rows), negative_controls=negative)
+                binary_sha256=sha(binary), observations=rows, checks=sum(row['checks'] for row in rows),
+                diagnostic_checks=diagnostic_checks, negative_controls=negative)
             write()
         if sha(cc) != compiler or any(sha(path) != expected for path, expected in bindings.items()):
             raise ValueError('Actual client source/helper/compiler changed during controls')

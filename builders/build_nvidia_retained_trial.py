@@ -31,7 +31,8 @@ def require(ok, message):
 def layout(work):
     return dict(canonical_parent=work / 'inputs/closed/compose-check-public',
         integrated_base=work / 'inputs/integrated', operational_base=work / 'inputs/operational',
-        base=work / 'inputs/shutdown', composition=work / 'inputs/retained',
+        base=work / 'inputs/shutdown', observation_base=work / 'inputs/preparation-observation-base',
+        composition=work / 'inputs/retained',
         native_compilation=work / 'native', image=work / 'image', package=work / 'package')
 
 
@@ -114,6 +115,10 @@ def prepare(args, paths):
                         tuple(operational.PROFILE_DIRECTORIES))
     shutdown.prepare(paths['canonical_parent'], paths['integrated_base'], paths['operational_base'],
                      paths['base'], tuple(shutdown.PROFILE_DIRECTORIES))
+    # Exact pre-observation source fixture for CPU controls, never native admission.
+    names = tuple(retained.PROFILE_DIRECTORIES)
+    retained.prepare(paths['canonical_parent'], paths['integrated_base'], paths['operational_base'],
+                     paths['base'], paths['observation_base'], names[:names.index('preparation-observation')])
     retained.prepare(paths['canonical_parent'], paths['integrated_base'], paths['operational_base'],
                      paths['base'], paths['composition'], tuple(retained.PROFILE_DIRECTORIES))
     return verify(paths)

@@ -165,6 +165,7 @@ void S540ExperimentalTargetControl::publishOwnerObservation() {
     const auto runtime=owner->runtimeSnapshot();
     const auto stopped=owner->retainedStopSnapshot();
     IOLockLock(guard);
+    state.snapshot.preparation=observed.preparation;
     state.snapshot.globalInitialized=observed.globalInitialized;
     state.snapshot.adapterInitialized=observed.adapterInitialized;
     state.snapshot.firmwareLoaded=observed.firmwareLoaded;

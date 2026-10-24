@@ -1,0 +1,56 @@
+{
+  "command": "python3 -B packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/tests/test_graph_reuse.py --evidence /workspace/scratch/9046a5958dfd/native-b3-evidence --output build/graph-reuse-b3-controls.json",
+  "decoder_provenance": "Final measurement explicitly records same-invocation reused decoded graphs and zero new decoder processes.",
+  "errors": 0,
+  "failures": 0,
+  "format": 1,
+  "historical_artifact": {
+    "id": 12540871723,
+    "zip_digest_verified_before_extraction_by": "root",
+    "zip_sha256": "8cc21076868ae156b3560990cd5761ff0e2f33439a118e7fea8eeca3c8647241"
+  },
+  "historical_native_data": {
+    "current_native_measurement_performed": false,
+    "final_graph_sha256": "e8d48632ca2e3b476902de4218ff06599d8f377924ad79cb8ea4d77d03711b97",
+    "final_image_sha256": "ad88fe2c953298413a27b0d0abf1976e11e15e1e7f47c685600a41dcaff4a102",
+    "historical_live_reuse_refused": true,
+    "native_validation_performed": false,
+    "objects": 1166,
+    "original_graph_sha256": "9d8f0953207c1ec2a0235c7905c9a2c260a4db75d7061b19cd01737667395eed",
+    "same_final_graph_as_actual_second_decode": true,
+    "same_roots_and_budget": true,
+    "selected_nodes": 24821,
+    "selected_objects": 1036,
+    "status": "passed-historical-native-data-only"
+  },
+  "host_control": true,
+  "host_tests": 17,
+  "independent_read_only_review": {
+    "preserved": [
+      "same-module original-result receipt",
+      "full input identity",
+      "per-row observations",
+      "context",
+      "final image filter",
+      "roots",
+      "budget",
+      "final unchanged/source replay"
+    ],
+    "result": "no blocker",
+    "reviewer": "pm_stop_recovery"
+  },
+  "limitations": [
+    "Synthetic helper receipts exist only inside isolated unit controls; no native verifier or host identity is mocked.",
+    "Historical B3 bytes validate graph/filter/root/budget equivalence, not current B4 native execution.",
+    "A genuine current native run must still produce the preliminary receipt before final graph reuse is permitted."
+  ],
+  "native_validation_performed": false,
+  "scope": "B4 same-invocation graph-reuse host and historical-B3 controls",
+  "skipped": 0,
+  "source_sha256": {
+    "packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/check.py": "da59d21bdb970cafe35960329362501f8751ebee60738b79a23d0d7ced519b9d",
+    "packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/tests/test_graph_reuse.py": "1d3d34dbd33e23f5c2030f8f8c9e4d1ff20826a3548410f8c2344722faec0fc5",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-image/link_native.py": "c2c8167aa253d3b23f25dce623ff69cb4cbc0aa6a326bb99fd0ea4b08771b0fe"
+  },
+  "status": "passed-graph-reuse-host-controls"
+}

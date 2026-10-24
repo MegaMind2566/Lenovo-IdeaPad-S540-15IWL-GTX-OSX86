@@ -1,0 +1,27 @@
+{
+  "cpu_report": "build/preparation-power-controls-3/results.json",
+  "cpu_report_sha256": "6c391039093c1aa76c438c981d80465fdddd0980e3946427b6532114bb5bbfc6",
+  "extra_hardware_queries": 0,
+  "fatal_sanitizer_checks": 131,
+  "format": 1,
+  "hardware_executed": false,
+  "native_darwin_compilation": false,
+  "negative_controls": [
+    "getter_repeats_domain_query",
+    "observation_lost_when_impl_freed",
+    "raw_ior_return_erased"
+  ],
+  "original_pm_calls_and_returns_compared": true,
+  "output_source_sha256": {
+    "packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.cpp": "178bf693cdecd8bc2d2a433d282ab87cf396a32b90f2d89f9e0641c075dade33",
+    "packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.hpp": "c5b8f87f12628272497e6c88497b7c85ad41be1bdd4c69244f2fb08560012979"
+  },
+  "plain_checks": 131,
+  "source_sha256": {
+    "S540PreparationObservation.h": "49316dd9cb94603e76c8727f1584401fb9d1d93fa9fac1f99c6704ce3e3cd907",
+    "check_power.py": "d5bb3b2b39d98f9aa7819a583ec7ca4ace5f35af5f89b1f3cc4e544ca439b2d0",
+    "power.py": "6561ddf182eb4e1da63c8c453f034467f26e3187067e827a2ecb42510d59daca",
+    "tests/check_power.cpp": "56011bc63be489c215a748a5235811680bf25235db7d33d96e0ac2987109711e"
+  },
+  "status": "passed-actual-old-new-PM-body-observation-controls"
+}

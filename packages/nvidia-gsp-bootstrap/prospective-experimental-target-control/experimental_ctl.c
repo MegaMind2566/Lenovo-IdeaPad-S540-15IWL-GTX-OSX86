@@ -58,7 +58,8 @@ static int readStack(NvU64 *result) {
 static kern_return_t observe(io_connect_t connection,S540ExperimentalSnapshot *out) {
     size_t bytes=sizeof(*out);memset(out,0,sizeof(*out));
     kern_return_t status=IOConnectCallStructMethod(connection,S540_EXPERIMENTAL_SELECTOR_SNAPSHOT,NULL,0,out,&bytes);
-    if (status==KERN_SUCCESS && (bytes!=sizeof(*out) || out->format!=1 || out->bytes!=sizeof(*out))) return kIOReturnBadArgument;
+    if (status==KERN_SUCCESS && (bytes!=sizeof(*out) || out->format!=S540_EXPERIMENTAL_SNAPSHOT_VERSION ||
+        out->bytes!=sizeof(*out))) return kIOReturnBadArgument;
     return status;
 }
 static int identityMatches(const S540ExperimentalSnapshot *observed,NvU64 stack) {
@@ -91,6 +92,109 @@ static void printStop(const S540ExperimentalStopObservation *s) {
     for (unsigned i=0;i<sizeof(fields)/sizeof(fields[0]);++i) printf(",\"%s\":%u",fields[i].name,fields[i].value);
     printf("}");
 }
+static const char *preparationStageLabel(NvU32 stage) {
+    static const char *const names[]={"unobserved","validate","verify-firmware","allocate-owner",
+        "snapshot-mutex","dispatcher-start","dispatch-prepare","power-start","platform-initialize",
+        "host-facts","device-facts","host-strings","host-initialize","transport-start","pci-segment",
+        "dma-remap","context-create","context-detacher","cancellation-bind","power-cancellation",
+        "power-revoke-check","platform-bind","rm-bind","rm-dma-remap","allocate-gsp","allocate-ucodes",
+        "copy-firmware","firmware-store","firmware-bind","timers-bind","final-power","complete"};
+    return stage<sizeof(names)/sizeof(names[0]) ? names[stage]:"unknown";
+}
+static const char *powerStageLabel(NvU32 stage) {
+    static const char *const names[]={"unobserved","join-attach","join-service-start","join-pm-init",
+        "join-register-driver","join-request-off","join-add-power-child","join-request-on-priv",
+        "join-mark-requested","wait-ready","wait-domain","wait-active","complete","final-status"};
+    return stage<sizeof(names)/sizeof(names[0]) ? names[stage]:"unknown";
+}
+static const char *jsonBool(int value) { return value ? "true":"false"; }
+static void printPreparation(const S540PreparationObservation *p,int snapshotValid) {
+    const NvU32 knownMask=S540_PREP_OBS_STAGE|S540_PREP_OBS_STATUS|S540_PREP_OBS_FIRST_FAILURE|
+        S540_PREP_OBS_HOST_FACTS|S540_PREP_OBS_DEVICE_FACTS|S540_PREP_OBS_POWER;
+    int valid=snapshotValid && p->format==1 && p->bytes==sizeof(*p) && (p->observedMask&knownMask)!=0;
+    int stageValid=valid && (p->observedMask&S540_PREP_OBS_STAGE) &&
+        p->stage>S540_PREP_UNOBSERVED && p->stage<=S540_PREP_COMPLETE;
+    int completedValid=valid && (p->observedMask&S540_PREP_OBS_STAGE) &&
+        p->lastCompleted>S540_PREP_UNOBSERVED && p->lastCompleted<=S540_PREP_COMPLETE;
+    int failureObserved=valid && (p->observedMask&S540_PREP_OBS_FIRST_FAILURE);
+    int failureValid=failureObserved && p->firstFailureStage>S540_PREP_UNOBSERVED &&
+        p->firstFailureStage<=S540_PREP_COMPLETE && p->firstFailureStatus!=NV_OK;
+    int hostValid=valid && (p->observedMask&S540_PREP_OBS_HOST_FACTS);
+    int deviceValid=valid && (p->observedMask&S540_PREP_OBS_DEVICE_FACTS);
+    printf("\"preparation\":{\"format\":%u,\"bytes\":%u,\"valid\":%s,\"observed_mask\":%u,"
+        "\"stage\":%u,\"stage_label\":\"%s\",\"stage_valid\":%s,"
+        "\"last_completed\":%u,\"last_completed_label\":\"%s\",\"last_completed_valid\":%s,"
+        "\"last_status\":%u,\"last_status_valid\":%s,\"first_failure_observed\":%s,"
+        "\"first_failure_stage\":%u,\"first_failure_stage_label\":\"%s\",\"first_failure_status\":%u,"
+        "\"first_failure_valid\":%s,\"host_facts_valid\":%s,\"host_known_mask\":%u,\"host_missing_mask\":%u,"
+        "\"device_facts_valid\":%s,\"device_observed_mask\":%u,\"device_predicates_mask\":%u,\"host_facts\":{",
+        p->format,p->bytes,jsonBool(valid),p->observedMask,p->stage,preparationStageLabel(p->stage),
+        jsonBool(stageValid),p->lastCompleted,preparationStageLabel(p->lastCompleted),jsonBool(completedValid),
+        p->lastStatus,jsonBool(valid && (p->observedMask&S540_PREP_OBS_STATUS)),jsonBool(failureObserved),
+        p->firstFailureStage,preparationStageLabel(p->firstFailureStage),p->firstFailureStatus,
+        jsonBool(failureValid),jsonBool(hostValid),p->hostKnown,p->hostMissing,jsonBool(deviceValid),
+        p->deviceObserved,p->devicePredicates);
+    const struct { const char *name;NvU32 bit; } hosts[]={
+        {"notebook",S540_PREP_HOST_NOTEBOOK},{"battery",S540_PREP_HOST_BATTERY},{"efi",S540_PREP_HOST_EFI},
+        {"vgpu_hypervisor",S540_PREP_HOST_VGPU_HYPERVISOR},{"nvswitch",S540_PREP_HOST_NVSWITCH},
+        {"s0ix",S540_PREP_HOST_S0IX},{"cpu",S540_PREP_HOST_CPU},{"os_version",S540_PREP_HOST_OS_VERSION}};
+    for (unsigned i=0;i<sizeof(hosts)/sizeof(hosts[0]);++i)
+        printf("%s\"%s\":{\"known\":%s,\"missing\":%s}",i?",":"",hosts[i].name,
+            hostValid?jsonBool(p->hostKnown&hosts[i].bit):"null",
+            hostValid?jsonBool(p->hostMissing&hosts[i].bit):"null");
+    printf("},\"device_predicates\":{");
+    const struct { const char *name;NvU32 bit; } devices[]={
+        {"segment",S540_PREP_DEVICE_SEGMENT},{"pci",S540_PREP_DEVICE_PCI},{"bars",S540_PREP_DEVICE_BARS},
+        {"d0",S540_PREP_DEVICE_D0},{"intel_console",S540_PREP_DEVICE_INTEL_CONSOLE},
+        {"nvidia_excluded",S540_PREP_DEVICE_NVIDIA_EXCLUDED},
+        {"no_coherent_gpu_memory",S540_PREP_DEVICE_NO_COHERENT_GPU_MEMORY}};
+    for (unsigned i=0;i<sizeof(devices)/sizeof(devices[0]);++i) {
+        int observed=deviceValid && (p->deviceObserved&devices[i].bit);
+        printf("%s\"%s\":{\"observed\":%s,\"satisfied\":%s}",i?",":"",devices[i].name,jsonBool(observed),
+            observed?jsonBool(p->devicePredicates&devices[i].bit):"null");
+    }
+    const S540PreparationPowerObservation *power=&p->power;
+    const NvU32 powerKnownMask=S540_PREP_PM_OBS_READY|S540_PREP_PM_OBS_DOMAIN|S540_PREP_PM_OBS_ACTIVE|
+        S540_PREP_PM_OBS_WAIT_RESULT|S540_PREP_PM_OBS_RAW_IOR|S540_PREP_PM_OBS_PROTOCOL;
+    int powerValid=valid && (p->observedMask&S540_PREP_OBS_POWER) && power->format==1 &&
+        power->bytes==sizeof(*power) && (power->observedMask&powerKnownMask)!=0;
+    int powerFailure=powerValid && power->firstFailureStage>S540_PREP_POWER_UNOBSERVED &&
+        power->firstFailureStage<=S540_PREP_POWER_FINAL_STATUS && power->firstFailureStatus!=NV_OK;
+    printf("},\"power\":{\"format\":%u,\"bytes\":%u,\"valid\":%s,\"observed_mask\":%u,\"flags\":%u,"
+        "\"stage\":%u,\"stage_label\":\"%s\",\"stage_valid\":%s,"
+        "\"last_completed\":%u,\"last_completed_label\":\"%s\",\"last_completed_valid\":%s,"
+        "\"first_failure_stage\":%u,\"first_failure_stage_label\":\"%s\",\"first_failure_status\":%u,"
+        "\"first_failure_valid\":%s,\"raw_io_return\":%u,\"raw_io_return_valid\":%s,"
+        "\"first_failure_raw_io_return\":%u,\"first_failure_raw_io_return_valid\":%s,"
+        "\"wait_result\":%u,\"wait_result_valid\":%s,\"predicates\":{",
+        power->format,power->bytes,jsonBool(powerValid),power->observedMask,power->flags,power->stage,
+        powerStageLabel(power->stage),jsonBool(powerValid && power->stage>S540_PREP_POWER_UNOBSERVED &&
+            power->stage<=S540_PREP_POWER_FINAL_STATUS),power->lastCompleted,powerStageLabel(power->lastCompleted),
+        jsonBool(powerValid && power->lastCompleted>S540_PREP_POWER_UNOBSERVED &&
+            power->lastCompleted<=S540_PREP_POWER_FINAL_STATUS),power->firstFailureStage,
+        powerStageLabel(power->firstFailureStage),power->firstFailureStatus,jsonBool(powerFailure),
+        power->rawIOReturn,jsonBool(powerValid && power->rawIOReturnValid==1),
+        power->firstFailureRawIOReturn,jsonBool(powerFailure && power->firstFailureRawIOReturnValid==1),
+        power->waitResult,jsonBool(powerValid && power->waitResultValid==1));
+    const struct { const char *name;NvU32 bit; } powerPredicates[]={
+        {"ready",S540_PREP_PM_OBS_READY},{"domain",S540_PREP_PM_OBS_DOMAIN},{"active",S540_PREP_PM_OBS_ACTIVE}};
+    for (unsigned i=0;i<sizeof(powerPredicates)/sizeof(powerPredicates[0]);++i) {
+        int observed=powerValid && (power->observedMask&powerPredicates[i].bit);
+        printf("%s\"%s\":{\"observed\":%s,\"value\":%s}",i?",":"",powerPredicates[i].name,
+            jsonBool(observed),observed?jsonBool(power->flags&powerPredicates[i].bit):"null");
+    }
+    printf("},\"protocol_flags\":{");
+    const struct { const char *name;NvU32 bit; } powerFlags[]={
+        {"on_requested",S540_PREP_PM_FLAG_ON_REQUESTED},{"on_set",S540_PREP_PM_FLAG_ON_SET},
+        {"on_completed",S540_PREP_PM_FLAG_ON_COMPLETED},{"revoked",S540_PREP_PM_FLAG_REVOKED},
+        {"ack_pending",S540_PREP_PM_FLAG_ACK_PENDING},{"ack_sent",S540_PREP_PM_FLAG_ACK_SENT},
+        {"stopped",S540_PREP_PM_FLAG_STOPPED}};
+    for (unsigned i=0;i<sizeof(powerFlags)/sizeof(powerFlags[0]);++i)
+        printf("%s\"%s\":%s",i?",":"",powerFlags[i].name,
+            powerValid && (power->observedMask&S540_PREP_PM_OBS_PROTOCOL) ?
+                jsonBool(power->flags&powerFlags[i].bit):"null");
+    printf("}}}");
+}
 static void printSnapshot(const S540ExperimentalSnapshot *s,kern_return_t requested,kern_return_t stopped,
     kern_return_t observation,int attempted) {
     printf("{\"format\":1,\"scope\":\"retained-first-initialization\",\"request_rpc_attempted\":%s,"
@@ -112,6 +216,9 @@ static void printSnapshot(const S540ExperimentalSnapshot *s,kern_return_t reques
         s->initializationStatus,s->originalEntryObserved,s->globalInitialized,s->adapterInitialized,s->firmwareLoaded,
         s->interruptInstalled,s->interruptArmed,s->stopAttempted,s->stopReturned,s->stopStatus,s->cancellationStatus,
         s->runtimeObservationStatus,s->stopObservationStatus,s->powerRevoked,s->cancellationRevoked,s->powerAcknowledged);
+    printf("\"snapshot_valid\":%s,\"snapshot_format\":%u,\"snapshot_bytes\":%u,",
+        jsonBool(observation==KERN_SUCCESS),s->format,s->bytes);
+    printPreparation(&s->preparation,observation==KERN_SUCCESS);printf(",");
     printStop(&s->retainedStop);printf("}\n");
 }
 int main(int argc,char **argv) {

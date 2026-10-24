@@ -1,0 +1,69 @@
+{
+  "B4_package_signed": false,
+  "B4_target_test_performed": false,
+  "composition_sha256": "0a12c91e0336f6ebc9e6956da181226f23df3af39ec5d8ac2fb4b7d7a3bf8c43",
+  "cross_compilation_receipt": "builders/evidence/retained-first-init-b4-local/cross-66-and-two-originals.json",
+  "extra_PM_requests_or_hardware_queries": 0,
+  "format": 1,
+  "native_compilation_performed": false,
+  "policy_sha256": "1dadd1153cab0de4dfa254f452d91b09b806f7a00db3716e3a5663fd19119ef6",
+  "profiles": [
+    "pm-event",
+    "dma-stop",
+    "checked-context",
+    "first-lock-observation",
+    "runtime-coordinator",
+    "retained-stop",
+    "preparation-observation",
+    "experimental-target-control"
+  ],
+  "project_translation_units": 66,
+  "receipts": {
+    "build/b4-actual-backend-clang-2/results.json": {
+      "sha256": "09d2d95660b5c9355db1513a1f1ef7d8be8a55f9b64296d42a6fe6fe77beeae8",
+      "status": "actual-backend-lifecycle-controls-passed"
+    },
+    "build/b4-actual-client-clang-3/results.json": {
+      "sha256": "b416daa1638178429569d2624b385586a1cad1639109b9f1012b20e005aaf967",
+      "status": "passed-actual-client-fake-api-controls"
+    },
+    "build/b4-actual-frontend-sdk-1/results.json": {
+      "sha256": "98ec93f2050b138f3612966d0f11fc3d4e96e220a148df2b75f37d991a079402",
+      "status": "actual-experimental-frontend-sdk-cross-compiled"
+    },
+    "build/b4-actual-image-controls-1/results.json": {
+      "sha256": "24ff6c8bfa4f78091ead8e7e1d5eecd0d4c4227be4b67449d3fedbe46d3e38ee",
+      "status": "passed-current-experimental-image-host-controls"
+    },
+    "build/b4-actual-state-clang-2/results.json": {
+      "sha256": "93220e8270b7c70703aacd9b99c2449f8d75946257e3dab6b3952bc40f85b7f7",
+      "status": "actual-c-state-controls-passed"
+    },
+    "build/b4-owner-prefix-controls/results.json": {
+      "sha256": "94e72d74902a9a81c5e3abdb04ac77bb22f1c2ce2c3e3e224026a5e9822a421b",
+      "status": "passed-preparation-observation-CPU-controls"
+    },
+    "build/b4-power-prefix-controls/results.json": {
+      "sha256": "45ddd045bd3a91e320f99780d9a73c3ccdca16fec1a8e5a2d820767b30f353a2",
+      "status": "passed-actual-old-new-PM-body-observation-controls"
+    },
+    "build/graph-reuse-b3-controls.json": {
+      "sha256": "ef1f2883c921ecd4a6821fca0f56b878e4e5dac8b61c77b6df65149751011839",
+      "status": "passed-graph-reuse-host-controls"
+    }
+  },
+  "runtime_prerequisites_relaxed": false,
+  "scope": "B4-preparation-observation-local-preflight",
+  "source_archive_control": {
+    "files_at_control_time": 6853,
+    "original_files": 4005,
+    "project_files": 214,
+    "sdk_source_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+    "sha256": "8fdb98f50179c5cf9bffb4168b5a510b8a739ed630ccceb49513f60e94fe2f5d"
+  },
+  "source_replay_negative_controls": 15,
+  "source_sha256": "bf03d237fd60eafc58eb0923a25f2190708b91342cb859d6df3969ead4b32533",
+  "stack_policy_controls": 15,
+  "syntax_files": 25,
+  "workflow_request_controls": 11
+}

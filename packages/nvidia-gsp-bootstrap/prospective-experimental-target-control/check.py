@@ -37,7 +37,8 @@ def main():
         mutants.append(dict(name=name,rejected=True))
     sources={str(path.relative_to(ROOT)):hashlib.sha256(path.read_bytes()).hexdigest() for path in [
         HERE/'S540ExperimentalTargetState.c',HERE/'S540ExperimentalTargetState.h',
-        HERE/'S540ExperimentalTargetProtocol.h',HERE/'tests/check_state.c',HERE/'check.py']}
+        HERE/'S540ExperimentalTargetProtocol.h',HERE/'tests/check_state.c',HERE/'check.py',
+        HERE.parent/'prospective-preparation-observation/S540PreparationObservation.h']}
     report=dict(format=1,status='actual-c-state-controls-passed',controls=rows,mutants=mutants,
         source_sha256=sources,kernel_execution='not_tested',gpu_access=False)
     (args.output/'results.json').write_text(json.dumps(report,sort_keys=True,indent=2)+'\n')

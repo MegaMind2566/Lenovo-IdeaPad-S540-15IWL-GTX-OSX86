@@ -115,6 +115,7 @@ jobs:
           python3 -B packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/tests/test_policy.py
           python3 -B packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/tests/test_workflow.py
           python3 -B packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/tests/test_local_roots.py
+          python3 -B packages/nvidia-gsp-bootstrap/prospective-aggregate-stack-closure/tests/test_graph_reuse.py
           python3 - <<'PY'
           import ast
           from pathlib import Path
@@ -126,6 +127,12 @@ jobs:
           PY
           S540_CONTROL_CC="$(command -v clang)"
           S540_CONTROL_CXX="$(command -v clang++)"
+          python3 -B packages/nvidia-gsp-bootstrap/prospective-preparation-observation/check.py \
+            --input-project build/retained-first-init/inputs/preparation-observation-base/project \
+            --output build/retained-first-init/controls/preparation-owner --cxx "$S540_CONTROL_CXX"
+          python3 -B packages/nvidia-gsp-bootstrap/prospective-preparation-observation/check_power.py \
+            --project build/retained-first-init/inputs/preparation-observation-base/project \
+            --output build/retained-first-init/controls/preparation-power --cxx "$S540_CONTROL_CXX"
           python3 -B packages/nvidia-gsp-bootstrap/prospective-pm-event-closure/check.py \
             --base build/retained-first-init/inputs/shutdown \
             --output build/retained-first-init/controls/pm-event \
@@ -140,6 +147,10 @@ jobs:
             --output build/retained-first-init/controls/runtime --host-control --cxx "$S540_CONTROL_CXX"
           python3 -B packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/check.py \
             --output build/retained-first-init/controls/target-state --cc "$S540_CONTROL_CC"
+          python3 -B packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/check_backend.py \
+            --output build/retained-first-init/controls/target-backend --cc "$S540_CONTROL_CC" --cxx "$S540_CONTROL_CXX"
+          python3 -B packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/tests/check_client.py \
+            --output build/retained-first-init/controls/target-client --cc "$S540_CONTROL_CC"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always() && steps.request.outputs.requested == 'true'
         with:
@@ -261,7 +272,7 @@ jobs:
         with:
           name: S540ExperimentalInitRetained-${{ needs.source-preflight.outputs.batch_id }}
           path: |
-            build/retained-first-init/package/S540ExperimentalInitRetained.zip
+            build/retained-first-init/package/S540ExperimentalInitRetained-B4.zip
             build/retained-first-init/package/packaging-attestation.json
           if-no-files-found: error
           retention-days: 3

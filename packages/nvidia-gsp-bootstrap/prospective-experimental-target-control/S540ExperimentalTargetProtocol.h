@@ -3,7 +3,9 @@
 #define S540_EXPERIMENTAL_TARGET_PROTOCOL_H
 #include "../../nvidia-os-adapter/upstream/include/nvtypes.h"
 #include "../../nvidia-os-adapter/upstream/include/nvstatus.h"
+#include "../prospective-preparation-observation/S540PreparationObservation.h"
 #define S540_EXPERIMENTAL_PROTOCOL_VERSION 1U
+#define S540_EXPERIMENTAL_SNAPSHOT_VERSION 2U
 #define S540_EXPERIMENTAL_CONNECTION_TYPE 0x53355452U
 #define S540_EXPERIMENTAL_SELECTOR_SNAPSHOT 0U
 #define S540_EXPERIMENTAL_SELECTOR_REQUEST 1U
@@ -44,7 +46,8 @@ typedef struct S540ExperimentalStopObservation {
     NV_STATUS protocolOperationStatus, protocolOriginalReturnStatus, protocolUnlockStatus;
     NvU32 protocolClaimed, protocolOriginalEntered, protocolOriginalReturned, protocolCompleted;
 } S540ExperimentalStopObservation;
-/* Fixed integer-only wire ABI. Unknown runtime/stop observations remain zero;
+/* Fixed integer-only wire ABI. Snapshot version2 appends preparation diagnostics;
+ * the request/identity ABI remains version1. Unknown observations remain zero;
  * their independent status fields say whether an observation was obtained.
  * No diagnostic field grants memory, PM or unload authority. */
 typedef struct S540ExperimentalSnapshot {
@@ -63,6 +66,7 @@ typedef struct S540ExperimentalSnapshot {
     NvU64 nativeRequiredKernelStackBytes, nativeRequiredIrqStackBytes;
     NvU8 sourceSha256[32], policySha256[32], nativeCodeContractSha256[32];
     S540ExperimentalStopObservation retainedStop;
+    S540PreparationObservation preparation;
 } S540ExperimentalSnapshot;
 #ifdef __cplusplus
 extern "C" {

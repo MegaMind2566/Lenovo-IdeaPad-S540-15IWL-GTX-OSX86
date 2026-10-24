@@ -30,7 +30,8 @@ def main():
             return
         raise AssertionError('Mutation was not refused: ' + label)
     for names in (('unknown',), ('pm-event', 'pm-event'), ('retained-stop',),
-                  ('experimental-target-control',), ('runtime-coordinator',)):
+                  ('experimental-target-control',), ('runtime-coordinator',), ('preparation-observation',),
+                  tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'preparation-observation')):
         refused('profile-selection-' + '-'.join(names), lambda names=names: retained.selected_profiles(names))
     def changed_manifest(label, mutate):
         modified = deepcopy(value)

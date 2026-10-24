@@ -1,0 +1,110 @@
+{
+  "acceleration_test": false,
+  "actual_link_performed": false,
+  "all_declared_project_exports_have_sole_exact_strong_owner": true,
+  "build_identity": {
+    "format": 1,
+    "generated_source": "packages/nvidia-gsp-bootstrap/prospective-retained-build-identity/S540ExperimentalBuildIdentity.c",
+    "policy_sha256": "1dadd1153cab0de4dfa254f452d91b09b806f7a00db3716e3a5663fd19119ef6",
+    "required_kernel_stack_bytes": 16384,
+    "source_identity_excludes_only_generated_identity_source": true,
+    "source_sha256": "bf03d237fd60eafc58eb0923a25f2190708b91342cb859d6df3969ead4b32533"
+  },
+  "builder_source_sha256": {
+    "/workspace/scratch/9046a5958dfd/project/builders/compile_nvidia_retained_trial.py": "650e8866cc27e4dec7a27f2c29f9692fef559ed2b1985eaa3e573e2554aea59e",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-native-target-preparation/compile_native.py": "e19c579419710addb9e39c3e0cb02b95746b4edda31232880eaaf4e80a08cab3"
+  },
+  "changed_original_sources": [
+    "src/nvidia/src/kernel/gpu/bif/arch/maxwell/kernel_bif_gm107.c",
+    "src/nvidia/src/kernel/gpu/bif/arch/turing/kernel_bif_tu102.c"
+  ],
+  "changed_original_translation_units": 2,
+  "codesign_performed": false,
+  "compiler_identity": {
+    "authoritative_darwin_execution": false,
+    "compilers": {
+      "cc": {
+        "path": "/workspace/scratch/9046a5958dfd/llvm-bin/clang",
+        "version": "Ubuntu clang version 18.1.3 (1ubuntu1)"
+      },
+      "cxx": {
+        "path": "/workspace/scratch/9046a5958dfd/llvm-bin/clang++",
+        "version": "Ubuntu clang version 18.1.3 (1ubuntu1)"
+      }
+    },
+    "host_control": true,
+    "host_system": "Linux"
+  },
+  "complete_project_inventory_record_sha256": "fedb531c8eb491bacaf1328dd2cf64ec261ca34ab2714d269e244ab363d7fb10",
+  "composition_sha256": "0a12c91e0336f6ebc9e6956da181226f23df3af39ec5d8ac2fb4b7d7a3bf8c43",
+  "exact_commands_full_dependency_and_object_bindings": "Recorded in the SHA256-bound project, changed-original and Power reports.",
+  "exact_source_plan_verified_before_and_after_compilation": true,
+  "format": 1,
+  "full_original_compilation": false,
+  "github_workflows_started": 0,
+  "gpu_initialization_proven": false,
+  "native_darwin_compilation": false,
+  "original_rm_executed": false,
+  "original_source_tree_sha256": "717a1a5520c69f72cf4f0ce9bba1e428b667848d632e0e14bcd3fcdfab91b122",
+  "power": {
+    "actual_power_object_sha256": "c5d66df9143a867c7310b4bc02f4be2f2f9fe6b5a587321ff70e5a28e88a02e4",
+    "actual_power_source": "packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.cpp",
+    "actual_power_source_sha256": "178bf693cdecd8bc2d2a433d282ab87cf396a32b90f2d89f9e0641c075dade33",
+    "current_sdk_layout": {
+      "PowerService": 296,
+      "PreparationPowerObservation": 56,
+      "Protocol": 120,
+      "Snapshot": 40
+    },
+    "exact_composed_declaration_bindings": {
+      "authored_reference_source": "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/tests/sdk_power_metaclass_reference.cpp",
+      "authored_reference_source_sha256": "3b7af79be023757e25d23510c7883243b93f8def8563d71d429a84ed61981d0a",
+      "class_declaration": "/workspace/scratch/9046a5958dfd/project/build/retained-b4-1/inputs/retained/project/packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPowerService.hpp",
+      "class_declaration_sha256": "57e12e03561fa290d80f0b92aff541dc70f2e3a073390a808d315baeb97b952a",
+      "embedded_protocol_declaration": "/workspace/scratch/9046a5958dfd/project/build/retained-b4-1/inputs/retained/project/packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.hpp",
+      "embedded_protocol_declaration_sha256": "c5b8f87f12628272497e6c88497b7c85ad41be1bdd4c69244f2fb08560012979"
+    },
+    "framework_import_count": 285,
+    "helper_sha256": {
+      "/workspace/scratch/9046a5958dfd/project/builders/compile_nvidia_retained_trial.py": "650e8866cc27e4dec7a27f2c29f9692fef559ed2b1985eaa3e573e2554aea59e",
+      "/workspace/scratch/9046a5958dfd/project/builders/nvidia_metaclass_initializers.py": "07570071ac3ca5a5bbb54c989ff9a39a2af071bb6a9b53c86acc1d8414e59a56",
+      "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-experimental-image/link_native.py": "cf22fd1b5a79d8b809a6f0ac64b5c8f813418baff783a5f99cca40f47d86f991"
+    },
+    "independent_reference_object_sha256": "5485e97e41e61706c38070dfa129c5a6f5261d1b0c06d878262060ffbfe3516f",
+    "private_project_import_count": 5,
+    "source_and_layout_headers_present_in_actual_compiler_dependencies": true,
+    "status": "matched-current-cross-Power-object-to-independent-SDK-metaclass-reference"
+  },
+  "project_translation_units": 66,
+  "raw_evidence_sha256": {
+    "build/b4-cross-66/changed-original-compilation.json": "803a7fd4ba850e6aa87fafe135789d11a867666f872a4fc3a8527d9527c80f80",
+    "build/b4-cross-66/project-compilation.json": "de07aae2fc8f711b9ab28b0e4e18cb665aabd595168f2359ea106d0923382133",
+    "build/b4-cross-66/project-stack-usage-manifest.json": "56bee24689f7fbafd2b6b3f80496228188f4b7cd247642801832d45ee439c9bf",
+    "build/b4-cross-power-2/results.json": "7b145e64fdca285d83ba90f6b39cc43583c22ec77ca192bee63b4fa66342e05c",
+    "build/b4-cross-power-2/sdk-current-power-layout-size.cpp": "873ff8da026309fb0cc741ce787a9937764c04074580558333d91d006280f239",
+    "build/b4-cross-power-2/sdk-current-power-layout-size.d": "33edbe1c43933f1a5115f7ab0435ce7b2009f1dcffd38203bd906720803c0afc",
+    "build/b4-cross-power-2/sdk-current-power-layout-size.o": "9ef82970d0d898a4ee511930c5b7f7875badb4c07d4243d90f92f99c4b48b4fc",
+    "build/b4-cross-power-2/sdk-current-power-metaclass-reference.cpp": "8db86fc0941551b3ef7bfa67bad10c3d605e52dbc211e80ebd997856e9223f93",
+    "build/b4-cross-power-2/sdk-current-power-metaclass-reference.d": "f9010af902d25a607380bda074bbfb77b88182272d5656342b77279909cf64b8",
+    "build/b4-cross-power-2/sdk-current-power-metaclass-reference.o": "5485e97e41e61706c38070dfa129c5a6f5261d1b0c06d878262060ffbfe3516f"
+  },
+  "scope": "local-Linux-Mach-O-cross-controls-only",
+  "sdk": {
+    "file_count": 1232,
+    "provided": true,
+    "reference_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+    "source": "clean pinned Git checkout and every tracked blob",
+    "tree_sha256": "50d4e3689ba17a2865ad707dc6ba70f4273a6b12fe8faa1ea15bb02f92ce0fc8",
+    "used_by_original_c_tus": false
+  },
+  "stack_usage": {
+    "aggregate_stack_proven": false,
+    "dynamic_function_count": 0,
+    "function_count": 1026,
+    "largest_static_frame_bytes": 1384,
+    "unit_count": 66
+  },
+  "status": "passed-b4-current-SDK-cross-project-delta-and-Power-metaclass-controls",
+  "system_security_changed": false,
+  "target_kernel_loading": false
+}

@@ -1,0 +1,61 @@
+{
+  "acceleration_test": false,
+  "actual_method_fragments": [
+    "Owner::prepareCommon",
+    "Impl::prepare",
+    "Impl::failed",
+    "Impl::read",
+    "Impl::observePreparationDispatchReturn",
+    "Owner::stop"
+  ],
+  "assertions": "assertions=129 cases=33",
+  "check_count": 14,
+  "checks": [
+    "changed-prerequisite-refused-packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp",
+    "changed-prerequisite-refused-packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.hpp",
+    "changed-prerequisite-refused-packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.cpp",
+    "changed-prerequisite-refused-packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.hpp",
+    "missing-or-extra-prerequisite-refused",
+    "missing-or-extra-prerequisite-refused",
+    "33-actual-body-fault-cases-identical-original-call-order-status-cleanup",
+    "first-preparation-failure-preserved-after-real-facade-stop-and-Impl-deletion",
+    "host85-missing-mask-and-device85-computed-predicates-preserved",
+    "failed-cleanup-return-kept-with-earlier-preparation-failure",
+    "early-collection-refusal-does-not-invent-observed-zero-facts",
+    "unexecuted-dispatch-preparation-refusal-survives-later-stop",
+    "actual-bodies-fatal-ASAN-UBSAN",
+    "actual-body-mutant-losing-first-failure-is-rejected"
+  ],
+  "cpu_report": "build/preparation-owner-controls-final/results.json",
+  "cpu_report_sha256": "94e72d74902a9a81c5e3abdb04ac77bb22f1c2ce2c3e3e224026a5e9822a421b",
+  "fault_case_count": 33,
+  "format": 1,
+  "gpu_access": false,
+  "hardware_admission": false,
+  "host_control": true,
+  "module_loaded": false,
+  "native_darwin_compilation": false,
+  "observed_behavior_sha256": "2de1f582fb07df835cab6b6a3212f8cac961f2dbf454e7b62835cb496b79113b",
+  "observed_header_bytes": 104,
+  "original_behavior_sha256": "2de1f582fb07df835cab6b6a3212f8cac961f2dbf454e7b62835cb496b79113b",
+  "original_entry_admission": false,
+  "production_candidate_allowed": false,
+  "sanitizer_scope": "Fatal ASAN/UBSAN; LeakSanitizer alone disabled because this host cannot inspect /proc under ptrace. Actual deletion counts are separately compared.",
+  "source_sha256": {
+    "packages/nvidia-gsp-bootstrap/prospective-preparation-observation/BASE-SHA256.json": "abb8d03a9b39ec4d73a4068b606c11ce58c75d11fb9420b0a4156f69a6eabcad",
+    "packages/nvidia-gsp-bootstrap/prospective-preparation-observation/S540PreparationObservation.h": "49316dd9cb94603e76c8727f1584401fb9d1d93fa9fac1f99c6704ce3e3cd907",
+    "packages/nvidia-gsp-bootstrap/prospective-preparation-observation/SOURCE-CONTRACT.json": "01f7c4425d0935c15e8209ad61ca9ce4e881b35897aaa4f105bde5316e25ad69",
+    "packages/nvidia-gsp-bootstrap/prospective-preparation-observation/check.py": "843638a1be174cb178af68ecf7c6904753d3f68c1fe76b7c08d83ace82e20c95",
+    "packages/nvidia-gsp-bootstrap/prospective-preparation-observation/owner-observation.cpp.inc": "c1bd4012875700d00142016ec29cbeda5db0d155080f3cda38dfc3d7b164c69e",
+    "packages/nvidia-gsp-bootstrap/prospective-preparation-observation/power.py": "6561ddf182eb4e1da63c8c453f034467f26e3187067e827a2ecb42510d59daca",
+    "packages/nvidia-gsp-bootstrap/prospective-preparation-observation/prepare.py": "73fbbd7649b970ed11865db536ad1ee993a89437a2675cec7a688fbbc3746588",
+    "packages/nvidia-gsp-bootstrap/prospective-preparation-observation/tests/check_owner.cpp.inc": "eeeca30c66774f244562c98d73972b6b013114d657f3d5d463ea17add39abc98"
+  },
+  "status": "passed-preparation-observation-CPU-controls",
+  "transformed_source_sha256": {
+    "packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.cpp": "178bf693cdecd8bc2d2a433d282ab87cf396a32b90f2d89f9e0641c075dade33",
+    "packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.hpp": "c5b8f87f12628272497e6c88497b7c85ad41be1bdd4c69244f2fb08560012979",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp": "5b0fc4d9d7f9ed2ad481553c0f9ebf56f4b576dfe4b37d57419c55526b0f90f6",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.hpp": "790690a874ecef1a0035a2a014225920962ed37ef3b00da6b44d25a1ed72d9bd"
+  }
+}

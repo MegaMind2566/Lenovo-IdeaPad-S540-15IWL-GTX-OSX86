@@ -1,5 +1,7 @@
 # S540: prova di prima inizializzazione con risorse trattenute
 
+La versione B4 è distribuita come `S540ExperimentalInitRetained-B4.zip`. Il report `controller.json` aggiunge la sezione `preparation`: stadio corrente, ultimo completato, primo errore e osservazioni disponibili su PM, fatti host e predicati del dispositivo. Questi dati vengono conservati prima della pulizia. I campi non osservati sono dichiarati indisponibili; un predicato non confermato non dimostra uno stato fisico contrario, per esempio D3.
+
 Questo pacchetto esegue una sola richiesta manuale di prima inizializzazione RM/GSP sul Lenovo IdeaPad S540 con GPU NVIDIA 10DE:1F91, subsystem 17AA:3806, revisione A1. Richiede Intel macOS build **25G241**, Darwin **25.6.0**, e la capacità reale letta da `kern.stack_size`. Il client confronta sorgenti, policy e contratto del codice nativo con il modulo effettivamente caricato.
 
 Estrai lo ZIP in una cartella temporanea nuova. Esegui `test-retained-first-initialization.sh` con `sudo`, l'hash di `packaging-attestation.json` pubblicato separatamente e `--ack-retained-first-initialization`. Usa una cartella nuova sul Desktop come `--output`. Il comando completo viene fornito insieme al pacchetto verificato.

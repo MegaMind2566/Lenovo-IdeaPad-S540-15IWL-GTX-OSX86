@@ -11,6 +11,7 @@
 #include "S540ExperimentalTargetState.h"
 #include "S540ExperimentalRuntime.h"
 #include "S540NvidiaRetainedStop.h"
+#include "S540PreparationObservation.h"
 static unsigned checks=0,failures=0;
 static void expect(bool value,const char *message) {
     ++checks;if(!value){++failures;std::fprintf(stderr,"FAILED:%s\n",message);}
@@ -46,10 +47,13 @@ static S540ExperimentalTargetControl *fixtureControl=nullptr;
 namespace S540NvidiaGspBootstrap {
 struct Images {const void *gsp,*ucodes;NvU64 gspBytes,ucodesBytes;};
 struct Snapshot {NvU32 globalInitialized=0,adapterInitialized=0,firmwareLoaded=0,interruptInstalled=0,
-    interruptArmed=0,powerRevoked=0,cancellationRevoked=0,powerAcknowledged=0;};
+    interruptArmed=0,powerRevoked=0,cancellationRevoked=0,powerAcknowledged=0;
+    S540PreparationObservation preparation{};};
 class Owner {
 public:
     unsigned prepares=0,initializations=0,originalCalls=0,stops=0,cancels=0;
+    S540PreparationObservation preparation{};
+    bool privateImplPresent=false;
     std::atomic<bool> revoked{false};
     NV_STATUS prepare(IOPCIDevice *,S540ExperimentalTargetControl *,const Images &);
     NV_STATUS experimentalInitialize(const S540ExperimentalRuntimeRequest &);
@@ -58,7 +62,9 @@ public:
         IOLockLock(guard);expect(cancellationPublishers==0,"noOwnerstopbeforepublisherjoin");IOLockUnlock(guard);
         ++stops;stopSequence.store(++sequence,std::memory_order_release);return NV_ERR_IN_USE;
     }
-    Snapshot snapshot()const{return {};}
+    Snapshot snapshot()const{
+        Snapshot value{};value.preparation=preparation;return value;
+    }
     S540ExperimentalRuntimeSnapshot runtimeSnapshot()const{
         S540ExperimentalRuntimeSnapshot value{};value.snapshotStatus=NV_OK;value.originalEntered=originalCalls!=0;return value;
     }
@@ -115,8 +121,49 @@ static IOPCIDevice *copyTarget(){static IOPCIDevice device;return &device;}
 
 @ACTUAL_BODIES@
 
+static S540PreparationObservation failedPreparation(unsigned selected){
+    S540PreparationObservation value{};
+    if(selected==7)return value; // An absent observation remains unavailable.
+    value.format=1;value.bytes=sizeof(value);
+    value.observedMask=S540_PREP_OBS_STAGE|S540_PREP_OBS_STATUS|S540_PREP_OBS_FIRST_FAILURE;
+    value.firstFailureStatus=value.lastStatus=NV_ERR_NOT_SUPPORTED;
+    if(selected==5){
+        value.stage=value.firstFailureStage=S540_PREP_POWER_START;
+        value.lastCompleted=S540_PREP_DISPATCH_PREPARE;
+        value.observedMask|=S540_PREP_OBS_POWER;
+        auto &power=value.power;power.format=1;power.bytes=sizeof(power);
+        power.stage=power.firstFailureStage=S540_PREP_POWER_JOIN_REGISTER_DRIVER;
+        power.lastCompleted=S540_PREP_POWER_JOIN_PM_INIT;
+        power.firstFailureStatus=NV_ERR_NOT_SUPPORTED;
+        power.rawIOReturn=power.firstFailureRawIOReturn=0xe00002c7U;
+        power.rawIOReturnValid=power.firstFailureRawIOReturnValid=1;
+        power.observedMask=S540_PREP_PM_OBS_RAW_IOR;
+    }else{
+        value.observedMask|=S540_PREP_OBS_HOST_FACTS;
+        value.hostKnown=selected==4?(S540_PREP_HOST_ALL&~S540_PREP_HOST_BATTERY):S540_PREP_HOST_ALL;
+        value.hostMissing=selected==4?S540_PREP_HOST_BATTERY:0;
+        if(selected==4){
+            value.stage=value.firstFailureStage=S540_PREP_HOST_FACTS;
+            value.lastCompleted=S540_PREP_PLATFORM_INITIALIZE;
+        }else{
+            value.stage=value.firstFailureStage=S540_PREP_DEVICE_FACTS;
+            value.lastCompleted=S540_PREP_HOST_FACTS;
+            value.observedMask|=S540_PREP_OBS_DEVICE_FACTS;
+            value.deviceObserved=S540_PREP_DEVICE_ALL;
+            value.devicePredicates=S540_PREP_DEVICE_ALL&~S540_PREP_DEVICE_D0;
+        }
+    }
+    return value;
+}
 NV_STATUS S540NvidiaGspBootstrap::Owner::prepare(IOPCIDevice *,S540ExperimentalTargetControl *,const Images &){
     ++prepares;
+    privateImplPresent=true;
+    if(mode>=4){
+        preparation=failedPreparation(mode);
+        // Explicit fake endpoint: the real frontend must use the facade's
+        // preserved record after the private owner state has been released.
+        privateImplPresent=false;return NV_ERR_NOT_SUPPORTED;
+    }
     if(mode==1)expect(fixtureControl->requestStop()==NV_ERR_BUSY_RETRY,"STOPduringpreparepublished");
     return NV_OK;
 }
@@ -200,6 +247,38 @@ int main(){
         reset(0);S540ExperimentalTargetControl control;fixtureControl=&control;failAllocation=true;
         expect(control.runOnce(request())==NV_ERR_NO_MEMORY&&!control.owner,"realallocationfailurebranch");
         expect(state.snapshot.requestConsumed&&state.snapshot.retainedUntilReboot&&control.permanentPin,"allocationfailuredoesnotinventunloadauthority");
+        expect(!state.snapshot.preparationAttempted&&!state.snapshot.preparation.observedMask,
+            "allocationfailuredoesnotinventpreparationobservation");
+    }
+    for(unsigned failureMode=4;failureMode<=7;++failureMode){
+        reset(failureMode);S540ExperimentalTargetControl control;fixtureControl=&control;
+        const auto expected=failedPreparation(failureMode);
+        expect(control.runOnce(request())==NV_ERR_NOT_SUPPORTED,"actualrunretainsfailedpreparationstatus");
+        expect(control.owner->prepares==1&&!control.owner->privateImplPresent&&
+            control.owner->initializations==0&&control.owner->originalCalls==0,"failedpreparecleanuphasnoinitialization");
+        expect(state.snapshot.preparationAttempted&&state.snapshot.preparationReturned&&
+            state.snapshot.preparationStatus==NV_ERR_NOT_SUPPORTED,"failedpreparationwiremilestonesremainseparate");
+        expect(!std::memcmp(&state.snapshot.preparation,&expected,sizeof(expected)),
+            "actualpublicationcopiesallpreparationfieldsafterprivatecleanup");
+        if(failureMode==7){
+            expect(!state.snapshot.preparation.observedMask&&state.snapshot.preparationStatus!=NV_OK,
+                "zeroedobservationisnotpreparationsuccess");
+        }else{
+            expect(state.snapshot.preparation.firstFailureStage==expected.firstFailureStage&&
+                state.snapshot.preparation.firstFailureStatus==NV_ERR_NOT_SUPPORTED,
+                "specificfirstfailurestageandstatuspublished");
+        }
+        const S540PreparationObservation cached=state.snapshot.preparation;
+        expect(control.requestStop()==NV_ERR_IN_USE,"failedpreparestillusesactualstopprotocol");
+        expect(state.snapshot.stopReturned&&state.snapshot.stopStatus==NV_ERR_IN_USE&&
+            state.snapshot.preparationStatus==NV_ERR_NOT_SUPPORTED,
+            "stopstatusdoesnotoverwritepreparationfailure");
+        expect(!std::memcmp(&state.snapshot.preparation,&cached,sizeof(cached)),
+            "preparationobservationpreservedthroughpostcleanupstoppublication");
+        expect(state.snapshot.retainedUntilReboot&&control.permanentPin&&
+            !state.snapshot.wholeDmaStopProven&&!state.snapshot.pmAcknowledgementAuthorized,
+            "diagnosticfailuredoesnotgrantunloadorcleanupauthority");
+        finish(control);
     }
     std::printf("{\"status\":\"%s\",\"checks\":%u,\"failures\":%u,\"actual_lifecycle_bodies\":true,\"kernel_execution\":\"not_tested\",\"gpu_access\":false}\n",failures?"failed":"passed",checks,failures);
     return failures?1:0;

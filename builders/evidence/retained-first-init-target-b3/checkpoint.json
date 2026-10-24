@@ -1,0 +1,33 @@
+{
+  "attestation_sha256": "7a33288026fb0a400293d91d4def6d958763f8704f16de9be5c8f2b89ccc4553",
+  "files": {
+    "controller.json": "ef6b96be72193e6819d43be5988df49b04e414229d63a30f4b0effc928f0a3c3",
+    "result.json": "6d7060200ea6b28010dc246ff959f90b82cddc6b92fbed59743af67270c96dc5"
+  },
+  "format": 1,
+  "limits": [
+    "The B3 wire report does not preserve the failed preparation substage or host/device predicate mask.",
+    "Stop success here does not establish retained RM/GSP/DMA shutdown or physical release.",
+    "Initialization status and unavailable runtime/retained-stop snapshots contain NOT_READY defaults, not original initialization returns.",
+    "No unique failing prerequisite can be derived from these two reports; no runtime gate is relaxed."
+  ],
+  "native_request_commit": "a04bcd492b904b7bfa34bea2700c1a83f4d43364",
+  "native_workflow_run_id": 40040416761,
+  "observed": {
+    "control_ready": true,
+    "controller_stop_returned": true,
+    "controller_stop_status": 0,
+    "external_loader_abi_observed": true,
+    "initialization_attempted": false,
+    "load_status": 0,
+    "original_entry_observed": false,
+    "preparation_status": 85,
+    "preparation_status_name": "NV_ERR_NOT_READY",
+    "request_consumed": true,
+    "retained_stop_attempts": 0,
+    "retained_until_reboot": true
+  },
+  "reported_date": "2026-10-24",
+  "scope": "actual-lenovo-retained-first-initialization-target-checkpoint",
+  "source_commit": "5b854bcdc5636a1b219d9cc51d39763281b300ae"
+}

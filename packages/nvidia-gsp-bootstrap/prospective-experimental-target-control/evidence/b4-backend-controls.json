@@ -1,0 +1,76 @@
+{
+  "controls": [
+    {
+      "mode": "plain",
+      "result": {
+        "actual_lifecycle_bodies": true,
+        "checks": 93,
+        "failures": 0,
+        "gpu_access": false,
+        "kernel_execution": "not_tested",
+        "status": "passed"
+      }
+    },
+    {
+      "mode": "fatal",
+      "result": {
+        "actual_lifecycle_bodies": true,
+        "checks": 93,
+        "failures": 0,
+        "gpu_access": false,
+        "kernel_execution": "not_tested",
+        "status": "passed"
+      }
+    }
+  ],
+  "extracted_function_names": [
+    "stopPending",
+    "closeCancellationPublication",
+    "S540ExperimentalTargetControl::publishOwnerObservation",
+    "S540ExperimentalTargetControl::runOnce",
+    "S540ExperimentalTargetControl::requestStop",
+    "S540ExperimentalTargetClient::clientClose"
+  ],
+  "fixture_instruments_owner_field_publication": true,
+  "format": 1,
+  "generated_test_sha256": "c374acf0a3fd12c4b9011e8434964c218ed8eae4f9d0fd1b2cf168e04533a61e",
+  "gpu_access": false,
+  "host_control": true,
+  "kernel_execution": "not_tested",
+  "mutants": [
+    {
+      "name": "readonly-close-always-stops",
+      "rejected": true
+    },
+    {
+      "name": "pending-stop-hidden",
+      "rejected": true
+    },
+    {
+      "name": "publisher-join-omitted",
+      "rejected": true
+    },
+    {
+      "name": "owner-publication-outside-guard",
+      "rejected": true
+    },
+    {
+      "name": "preparation-observation-copy-omitted",
+      "rejected": true
+    }
+  ],
+  "native_darwin_compilation": false,
+  "preparation_observation_survives_fixture_private_cleanup": true,
+  "source_sha256": {
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/S540ExperimentalTargetKernel.cpp": "9c457a4610d341a3bd49c501bbbfa62e2a6b60aaa89a9f0d72318e3bd4e360c1",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/S540ExperimentalTargetProtocol.h": "39ae7ca72b76ceff8efbd927af1a4148f6e3ee8cc6f34e693513067672434429",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/S540ExperimentalTargetState.c": "acf1759f04875020466dd2089f3d0ff0a83660564162f31856a098f2f3d7ca2e",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/S540ExperimentalTargetState.h": "a601ce5ee3796e3a4165028af84e7de1d18b52f742e05d76f06866644d7a460b",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/check_backend.py": "5219c1b4b9e601f06af272bb12e2f6e0226856856425bb766de112d873cf8ecc",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/tests/check_backend.cpp.inc": "0f761903a679c5209afafac5d99f7c85af201a6c3597862d75fb931dbc64d99d",
+    "packages/nvidia-gsp-bootstrap/prospective-preparation-observation/S540PreparationObservation.h": "49316dd9cb94603e76c8727f1584401fb9d1d93fa9fac1f99c6704ce3e3cd907",
+    "packages/nvidia-gsp-bootstrap/prospective-retained-stop/S540NvidiaRetainedStop.h": "466a97671705eb34c634d2e665e976ff3e290d1f16e519694e0cf096e3188af1",
+    "packages/nvidia-gsp-bootstrap/prospective-runtime-coordinator/S540ExperimentalRuntime.h": "013b5e9f2db1eb0a0002099dad19ebb0c9cfcc64f12e5807b28caad4a7a04a6b"
+  },
+  "status": "actual-backend-lifecycle-controls-passed"
+}

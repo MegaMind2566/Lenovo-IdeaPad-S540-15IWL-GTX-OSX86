@@ -1,0 +1,19 @@
+{
+  "format": 1,
+  "scope": "integer-only-observation-of-existing-preparation-and-PM-results",
+  "input_profile": "B3 post-retained-stop composed sources",
+  "hardware_access_added": false,
+  "readiness_predicates_changed": false,
+  "return_status_changed": false,
+  "cleanup_order_changed": false,
+  "pm_acknowledgement_authority_added": false,
+  "original_entry_admission": false,
+  "production_candidate_allowed": false,
+  "observation_format": 1,
+  "observation_bytes": 104,
+  "power_observation_bytes": 56,
+  "failure_preservation": "Capture first failing stage/status and existing local facts before failed()->stop(); existing Owner snapshot copy preserves them after Impl destruction.",
+  "validity": "Zero/unobserved fields are unavailable; observed masks and explicit raw-return validity are mandatory.",
+  "device_evidence": "Seven already-computed final readiness predicates copied from collectDeviceFacts output; no additional PCI, MMIO, DMA or ACPI access.",
+  "power_evidence": "Guarded metadata from existing PM calls/predicates and actual returned values; no readiness queries added."
+}
