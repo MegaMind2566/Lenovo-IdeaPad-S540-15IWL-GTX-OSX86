@@ -46,6 +46,23 @@ The user subsequently confirmed that the tested card is **8 GB, formatted FAT32,
 
 The reviewed driver stores the published clock-divisor property in an 8-bit field. Its initial divisor may be `0x200`, which is truncated to `0` in that property; publication also precedes the hardware-stable check. Therefore neither the reported zero nor the requested bus-voltage property is a physical measurement or a reason for a blind clock patch. Further work needs the first initialization error and its contemporaneous state before cleanup; another late matching/registry snapshot would repeat the current limitation. The raw report remains private. This result update changes documentation only; it does not modify either EFI or the retained NVIDIA trial, and starts no build or CI.
 
+### Initialization trace package and external references — 24 October 2026
+
+The user authorized one guided SD initialization trace on the existing external test setup. `S540-SD-Init-Trace-v1.zip` is a userspace diagnostic; no new kext, SSDT, config.plist, boot argument or NVIDIA setting is included. Archive SHA-256: `40cd3fc251c26ec0351c3fc0553ae82c2e3d4b4ed46aebfbca18814d12703501`.
+
+The program uses the reviewed 16-byte binary `debug.SDXC` protocol, preserving all 64 bits (including tuning) and temporarily ORing only trace bit `0x2`. Cleanup attempts restoration and verifies readback. Existing foreground traces are refused; an OS-managed background trace can hand off normally. Only its own ktrace child is signalled; no global reset/remove or other-process termination is issued. Abrupt uncatchable process termination is not a guaranteed restoration path.
+
+A removal must be confirmed both by the slot property and the matching card-absent trace event before reinsertion is requested. Missing/unknown logging, CLI, schema or permissions is inconclusive and cannot be treated as SD incompatibility. Only eight selected SD event fields are retained; command arguments, CID/CSD responses, kernel pointers and unrelated system events are excluded. Nonzero returns may be handled retries, so the recorded sequence still requires interpretation.
+
+Native [run 40085526902](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions/runs/40085526902) passed compilation, ad-hoc signature verification, 21 hardware-free checks and a real synthetic ktrace capture. Its actual NDJSON format passed the delivered parser using an explicitly translated fixture. These are tool-validation results, not a target SD result. Source parent: `bd5ffa067d32b5b05badab040461c0b96fcf53f0`; request: `fc68c6970d2df2bd603fbb81c927049a5b91a0c2`; helper source SHA-256: `3ffd9fba24b5e04578674426f0a6e11d36d37debb830284758cd94357d779563`. The first native attempt stopped on an undeclared probe API; the corrected source uses the documented ktrace CLI. It was not an unchanged-source retry. The user explicitly allowed this SD validation in parallel with the already active NVIDIA build as a one-off exception; no NVIDIA job or request was changed or cancelled.
+
+The user also supplied two upstream repositories:
+
+- [BA4RQZ/SSDT-O2SD-Fix, pinned DSL](https://github.com/BA4RQZ/SSDT-O2SD-Fix/blob/53b3bea4c4ab88e0a05504499bc46300e7d5d9e2/SSDT-O2SD.dsl) is a useful vendor-initialization reference for **8520/FUJIN2**. It is not a ready 8621 patch. [Linux v6.12's SEABIRD1 branch](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/mmc/host/sdhci-pci-o2micro.c) instead tests the PLL high byte, selects high PLL bits `1F340000` or `25100000`, uses tuning `55`, updates `F0` and `324`, and relocks write protection. Merely changing the SSDT path would retain the wrong sequence. The supplied DSL also lacks Darwin/device-ID admission and a chain to any existing firmware _INI; its author reports sleep/hotplug limitations. No AML or pmset workaround was applied.
+- [lucatek/Lenovo-Ideapad-S540-15IWL-Hackintosh](https://github.com/lucatek/Lenovo-Ideapad-S540-15IWL-Hackintosh) names the same 81SW laptop family, but its README specifies **Realtek RTS522A + Sinetek-rtsx** under Catalina/Clover. That working-reader claim does not establish support for this O2Micro controller. Its sleep configuration is not copied into the already working current setup.
+
+The next target evidence is the single guided trace from the unchanged external setup with the known 8 GB FAT32 card. SD reading remains unconfirmed until actual media and file access work.
+
 ## Goodix fingerprint reader
 
 **Status: NOT WORKING in macOS. Further fingerprint investigation stopped by user request on 24 October 2026.** The findings below are retained as the explanation of the limitation, not as an active development plan.
