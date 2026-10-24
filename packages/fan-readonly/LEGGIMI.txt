@@ -1,9 +1,15 @@
 S540 — dati firmware per il rilevamento delle ventole
 
-Estrai la cartella in Downloads ed esegui:
+STRUMENTO STORICO — indagine chiusa per v0.3.0, 24 ottobre 2026.
+Le ventole funzionano, come confermato dall'utente; il loro numero di giri
+non e rilevabile nella configurazione macOS attuale. Non occorrono
+ulteriori raccolte, allegati o test per questa release.
+
+Istruzioni conservate solo per un'eventuale riapertura esplicita:
+estrarre la cartella in Downloads ed eseguire:
   bash "$HOME/Downloads/S540-Ventole-ACPI-v1/RACCOGLI-ACPI.command"
 
-Allega lo ZIP S540-Ventole-ACPI.*.zip creato sulla Scrivania.
+Lo ZIP S540-Ventole-ACPI.*.zip viene creato sulla Scrivania.
 Non servono password, nuovi driver, strumenti sviluppatore o riavvii.
 
 La raccolta legge solo DSDT e SSDT gia esposte da macOS tramite IORegistry.

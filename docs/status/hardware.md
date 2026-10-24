@@ -28,13 +28,13 @@ Updated on **24 October 2026** for the current **internal non-NVIDIA EFI**, publ
 | NVIDIA acceleration | **Unavailable and disabled in this release** with -wegnoegpu; no experimental NVIDIA payloads included | Separate experimental research and historical checkpoints remain outside this EFI |
 | HDMI | **Not working**; no usable display output established | Physical routing/driver support remains unresolved |
 | USB-C video | **Unverified** | USB data operation does not establish display capability/routing |
-| Fan RPM telemetry | **Unavailable in the current configuration**: VirtualSMC and SMCProcessor 1.3.8 loaded; no SMCSuperIO/YogaSMC, no SMCSuperIO IORegistry service and no fan/RPM output in three native SMC samples | CPU readings were 58, 60 and 59 °C. Some unsupported-key messages were reported; a physical fan failure is not established and no driver/control change was made |
+| Fans | **Working — user-confirmed**; RPM telemetry is unavailable in the current macOS configuration | VirtualSMC and SMCProcessor 1.3.8 expose CPU temperatures but no fan RPM. Investigation is closed for this release by request; no driver/control change was made |
 
 ## Passive fan-telemetry check — 24 October 2026
 
 Before publication, the user supplied a native check on macOS 26.7.1 / 25G241 with the internal non-NVIDIA boot arguments retained. VirtualSMC 1.3.8 and SMCProcessor 1.3.8 were loaded. SMCSuperIO and YogaSMC were absent, and the SMCSuperIO IORegistry query was empty. Three working powermetrics SMC samples reported CPU temperatures of **58, 60 and 59 °C**, but no fan/RPM lines, with some invalid-key messages.
 
-The result is **fan RPM telemetry unavailable in this configuration**. It does not establish a stopped or failed physical fan, a measured fan speed of zero, or a fan-control implementation. No new driver, EC write or fan setting is included in this release.
+The passive result is **fan RPM telemetry unavailable in this configuration**; it is not a measured fan speed of zero. The user subsequently confirmed physical fan operation and accepted the status **fans working, RPM not readable by macOS**. Fan investigation is closed for this release, with no further firmware collection or laptop tests requested. No new driver, EC write or fan setting is included. The [historical investigation](../reference/s540-fan-sensors.md) retains the read-only findings and their limits.
 
 ## F8 result and decision — 24 October 2026
 

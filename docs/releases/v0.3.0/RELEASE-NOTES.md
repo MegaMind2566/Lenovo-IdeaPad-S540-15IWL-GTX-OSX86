@@ -39,7 +39,7 @@
 | NVIDIA acceleration | **Unavailable and disabled in this EFI**; separate experimental work remains outside the release |
 | HDMI | **Not working**; no usable output established |
 | USB-C video | **Unverified** |
-| Fan RPM telemetry | **Unavailable in the current configuration**; CPU temperatures are readable, but no RPM was exposed. Physical fan failure is not established |
+| Fans | **Working — user-confirmed**; RPM is not readable in the current macOS configuration. Investigation is closed for this release by request |
 
 ## Separate audio and hotkey installations
 

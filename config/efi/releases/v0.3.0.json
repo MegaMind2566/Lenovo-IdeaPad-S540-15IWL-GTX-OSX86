@@ -6,6 +6,6 @@
   "asset": "S540-Tahoe-EFI-v0.3.0.zip",
   "release_url": "https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.3.0",
   "scope": "Ongoing development snapshot: internal non-NVIDIA OpenCore 1.0.8 RELEASE, native Wi-Fi and direct-match SD. EFI/OC only; preserve native Windows/rEFInd route. Public identity placeholders need personalization. Audio and hotkeys use separate macOS companions. See release hardware table for working, non-working and unverified features.",
-  "size": 47092635,
-  "sha256": "66b5a2123c6b81ed0feb2330ad806e4ba315e8ba8bf6f9363e67f3e82d07f495"
+  "size": 47092619,
+  "sha256": "f5a9ad08cfa72e14569bc1040728c7480f7966a58a1adb9bf1e4ff84e303e46d"
 }

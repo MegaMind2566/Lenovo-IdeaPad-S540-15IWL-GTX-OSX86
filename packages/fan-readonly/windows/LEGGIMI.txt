@@ -1,12 +1,19 @@
 S540 — lettura DSDT per analisi ventole — Windows v1
 
-Avvia Windows direttamente da rEFInd / Windows Boot Manager. Estrai l'intera
-cartella S540-Ventole-DSDT-Windows-v1 in Downloads, poi in PowerShell esegui:
+STRUMENTO STORICO — indagine chiusa per v0.3.0, 24 ottobre 2026.
+Le ventole funzionano, come confermato dall'utente; il loro numero di giri
+non e rilevabile nella configurazione macOS attuale. Non occorrono
+ulteriori raccolte, allegati o test per questa release. La lettura firmware
+nativa con questo programma non e stata eseguita sul Lenovo.
+
+Istruzioni conservate solo per un'eventuale riapertura esplicita:
+avviare Windows direttamente da rEFInd / Windows Boot Manager. Estrarre
+l'intera cartella S540-Ventole-DSDT-Windows-v1 in Downloads ed eseguire:
 
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$env:USERPROFILE\Downloads\S540-Ventole-DSDT-Windows-v1\LEGGI-DSDT.ps1"
 
 Non occorre avviare PowerShell come amministratore. Se termina con RACCOLTA
-DSDT COMPLETATA, allega lo ZIP S540-Ventole-DSDT.*.zip creato sulla Scrivania.
+DSDT COMPLETATA, lo ZIP S540-Ventole-DSDT.*.zip e creato sulla Scrivania.
 La cartella con gli stessi dati viene conservata accanto allo ZIP.
 
 Il programma usa soltanto GetSystemFirmwareTable di Windows per leggere la
@@ -22,8 +29,9 @@ Un hash diverso da quello precedente viene segnalato, ma non blocca il report.
 
 Questa raccolta estrae soltanto la DSDT: l'API Windows restituisce solo la
 prima tabella quando ci sono piu SSDT con la stessa firma. Non dichiara quindi
-di aver estratto tutte le SSDT. La DSDT verra analizzata offline per cercare
-metodi di lettura RPM realmente presenti nel firmware del Lenovo.
+di aver estratto tutte le SSDT. L'analisi offline proposta per cercare metodi
+di lettura RPM nel firmware del Lenovo non e stata completata ne e prevista
+per questa release.
 
 Il comando -SelfTest verifica header, limiti, identificatore API e SHA256 con
 fixture artificiali, senza leggere firmware o creare report sulla Scrivania.

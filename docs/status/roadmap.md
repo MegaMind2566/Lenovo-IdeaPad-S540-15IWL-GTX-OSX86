@@ -17,7 +17,7 @@ Updated on **24 October 2026**. The current official **v0.3.0 non-NVIDIA** basel
 | Unavailable in this EFI | NVIDIA acceleration | NVIDIA stays disabled with -wegnoegpu. Experimental NVIDIA implementation and target evidence remain separate from this release |
 | Not working | HDMI output | No usable display output established |
 | Unverified | USB-C video | Data-link success does not establish display capability or GPU routing |
-| Observed limitation | Fan RPM telemetry | Passive native check completed before publication: CPU temperature readings work, but the current VirtualSMC/SMCProcessor stack exposes no fan RPM. No physical fan failure is established and no fan-control/driver change is included |
+| Working / accepted telemetry limitation | Fans | Physical operation is user-confirmed; RPM is not readable in the current macOS configuration. Investigation is closed for this release by request; no further firmware collection, laptop tests or fan-control/driver change is included |
 | Separate optional coverage | Long-duration behavior | Battery autonomy, overnight standby, sustained storage/cooling and hibernation remain beyond the established short tests |
 
 ## Confirmed baseline
@@ -38,7 +38,7 @@ Preserve confirmed functions and investigate a reported regression from its actu
 
 The [NVIDIA validation record](nvidia-validation.md) and package records retain source, native-build and target checkpoints. They have different scopes: compilation, a loaded image and a prepared device do not establish operational RM/GSP startup or graphics acceleration. NVIDIA experiments remain excluded from the official Intel release. This release neither resets those research checkpoints nor declares the project complete.
 
-F8 and fingerprint work stay paused/stopped unless the user explicitly resumes them. Do not introduce firmware provisioning, EC writes or unrelated driver changes as part of an ordinary EFI update.
+F8 and fingerprint work stay paused/stopped unless the user explicitly resumes them. Fan RPM investigation is closed for this release with working fans and unavailable macOS telemetry recorded separately. Do not introduce firmware provisioning, EC writes or unrelated driver changes as part of an ordinary EFI update.
 
 ## References
 
