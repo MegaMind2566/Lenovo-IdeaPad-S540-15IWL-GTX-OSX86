@@ -122,7 +122,8 @@ jobs:
           names=['builders/build_nvidia_retained_trial.py','builders/prepare_nvidia_retained_trial.py']
           for directory in ('prospective-native-target-preparation','prospective-experimental-image',
               'prospective-experimental-target-package','prospective-aggregate-stack-closure',
-              'prospective-pci-memory-bars','prospective-irq-source-selection'):
+              'prospective-pci-memory-bars','prospective-irq-source-selection',
+              'prospective-gsp-base-pages','prospective-unprotected-host-memory'):
               names += [str(p) for p in (Path('packages/nvidia-gsp-bootstrap')/directory).rglob('*.py')]
           for name in names:ast.parse(Path(name).read_text(),filename=name)
           PY
@@ -142,6 +143,17 @@ jobs:
             --input-project build/retained-first-init/inputs/irq-source-selection-base/project \
             --composed-project build/retained-first-init/inputs/retained/project \
             --output build/retained-first-init/controls/irq-source-selection --cxx "$S540_CONTROL_CXX" --host-control
+          python3 -B packages/nvidia-gsp-bootstrap/prospective-gsp-base-pages/check.py \
+            --input-source build/retained-first-init/inputs/gsp-memory-base/source \
+            --composed-source build/retained-first-init/inputs/retained/source \
+            --output build/retained-first-init/controls/gsp-base-pages --cc "$S540_CONTROL_CC" --host-control
+          python3 -B packages/nvidia-gsp-bootstrap/prospective-unprotected-host-memory/check.py \
+            --input-project build/retained-first-init/inputs/gsp-memory-base/project \
+            --composed-project build/retained-first-init/inputs/retained/project \
+            --output build/retained-first-init/controls/unprotected-host-memory --cxx "$S540_CONTROL_CXX" --host-control
+          python3 -B packages/nvidia-gsp-bootstrap/prospective-unprotected-host-memory/check_context.py \
+            --base build/retained-first-init/inputs/gsp-memory-base \
+            --output build/retained-first-init/controls/adapter-failure --cc "$S540_CONTROL_CC"
           python3 -B packages/nvidia-gsp-bootstrap/prospective-pm-event-closure/check.py \
             --base build/retained-first-init/inputs/shutdown \
             --output build/retained-first-init/controls/pm-event \
@@ -282,13 +294,13 @@ jobs:
         with:
           name: S540ExperimentalInitRetained-${{ needs.source-preflight.outputs.batch_id }}
           path: |
-            build/retained-first-init/package/S540ExperimentalInitRetained-B6.zip
+            build/retained-first-init/package/S540ExperimentalInitRetained-B7.zip
             build/retained-first-init/package/packaging-attestation.json
           if-no-files-found: error
-          retention-days: 3
+          retention-days: 1
           compression-level: 0
-      - name: Compress current native evidence for a strictly validated resume
-        if: always()
+      - name: Compress current native evidence for failure diagnosis
+        if: failure()
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -302,7 +314,7 @@ jobs:
                   for path in root.glob('*.json'):out.add(path,arcname=path.name)
           PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        if: always()
+        if: failure()
         with:
           name: S540-retained-current-native-evidence-${{ needs.source-preflight.outputs.batch_id }}
           path: build/S540-retained-current-native-evidence.tar.gz

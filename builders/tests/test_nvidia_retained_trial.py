@@ -29,12 +29,24 @@ def main():
             cases.append(label)
             return
         raise AssertionError('Mutation was not refused: ' + label)
+    profiles = tuple(retained.PROFILE_DIRECTORIES)
+    gsp_base = profiles[:profiles.index('gsp-base-pages') + 1]
+    unprotected = profiles[:profiles.index('unprotected-host-memory') + 1]
+    for names in (profiles, gsp_base, unprotected):
+        assert retained.selected_profiles(reversed(names)) == names
     for names in (('unknown',), ('pm-event', 'pm-event'), ('retained-stop',),
                   ('experimental-target-control',), ('runtime-coordinator',), ('preparation-observation',),
-                  ('pci-memory-bars',), ('irq-source-selection',),
+                  ('pci-memory-bars',), ('irq-source-selection',), ('gsp-base-pages',),
+                  ('unprotected-host-memory',),
                   tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'preparation-observation'),
                   tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'pci-memory-bars'),
-                  tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'irq-source-selection')):
+                  tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'irq-source-selection'),
+                  tuple(name for name in profiles if name != 'gsp-base-pages'),
+                  tuple(name for name in profiles if name != 'unprotected-host-memory'),
+                  # Omit the frontend so its prerequisites cannot mask a
+                  # missing direct dependency on either new memory profile.
+                  tuple(name for name in gsp_base if name != 'irq-source-selection'),
+                  tuple(name for name in unprotected if name != 'gsp-base-pages')):
         refused('profile-selection-' + '-'.join(names), lambda names=names: retained.selected_profiles(names))
     def changed_manifest(label, mutate):
         modified = deepcopy(value)
@@ -56,18 +68,28 @@ def main():
         'packages/nvidia-gsp-bootstrap/cancellation/prepare_wait_candidates.py'))
     # Rehash the changed file as an attacker could. The generic inventory now
     # agrees, but the exact independent source replay must still refuse it.
-    for relative in (retained.IDENTITY, retained.OLD_STATE, retained.PLATFORM, retained.DARWIN_DEVICE,
-                     retained.GSP + 'prospective-runtime-coordinator/S540ExperimentalRuntime.h'):
-        source = paths['composition'] / 'project' / relative
+    for scope, relative in (
+            ('project', retained.IDENTITY), ('project', retained.OLD_STATE),
+            ('project', retained.PLATFORM), ('project', retained.DARWIN_DEVICE),
+            ('project', retained.GSP + 'prospective-runtime-coordinator/S540ExperimentalRuntime.h'),
+            ('project', 'packages/nvidia-device-transport/src/S540NvidiaDeviceServices.cpp'),
+            ('project', retained.GSP + 'src/S540NvidiaGspContext.c'),
+            ('source', 'src/nvidia/src/kernel/gpu/gsp/message_queue_cpu.c')):
+        source = paths['composition'] / scope / relative
         saved = source.read_bytes()
         modified = deepcopy(value)
         altered = saved + b'\n/* unauthorized source replacement */\n'
-        source.write_bytes(altered)
-        modified['project_files'][relative]['sha256'] = hashlib.sha256(altered).hexdigest()
-        for row in modified['project_translation_units']:
-            if row['source'] == relative:
-                row['sha256'] = hashlib.sha256(altered).hexdigest()
+        source_sha = hashlib.sha256(altered).hexdigest()
+        inventory = 'project_files' if scope == 'project' else 'original_files'
+        modified[inventory][relative]['sha256'] = source_sha
+        if scope == 'project':
+            for row in modified['project_translation_units']:
+                if row['source'] == relative:
+                    row['sha256'] = source_sha
+        else:
+            modified['original_tree_sha256'] = composer.tree_sha(modified['original_files'])
         try:
+            source.write_bytes(altered)
             composer.write_json(manifest, modified)
             composer.verify_composition(paths['composition'])
             refused('rehash-source-and-manifest-' + Path(relative).name, lambda: build.verify(paths))

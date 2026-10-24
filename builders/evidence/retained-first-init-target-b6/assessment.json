@@ -1,0 +1,43 @@
+{
+  "GPU_initialization_confirmed": false,
+  "IRQ_selection": {
+    "installation_and_arm_reached": true,
+    "observed_messaged_sources": 1,
+    "observed_source_count": 2,
+    "observed_type": 65536,
+    "selected_source": 1
+  },
+  "benign_warning": "RM Access Sys Cap creation returns NOT_SUPPORTED without a capabilities root; _sysCreateOs explicitly logs and continues. Not a reason to fabricate capability files.",
+  "format": 1,
+  "global_RM_succeeded": true,
+  "initializer_status": 86,
+  "input_sha256": {
+    "controller.json": "94ac7f1bb01a4a4af13c3d1bd4ce6c1c1b83ecf49e14d5af438149e2041bcb47",
+    "kernel-sanitized.log": "63285a4a07c3ed5b9988d7043ded58c84956b1440a91bf01060467ae71246c7a",
+    "preapproval-result.json": "cee3315d91c83792cc2be7cba2867fd361e4085898b3b4e06c3197d763707293",
+    "result.json": "2fe4d81ae84b0506f13a6c1a9ff5d9ad3dbfaed7843f28d6f893ec1718bce161"
+  },
+  "kernel_virtual_addresses_redacted_in_public_excerpt": true,
+  "load_succeeded": true,
+  "log_failure": "GSP queue sysmem allocation refused; RmInitAdapter failed (0x22:0x56:954); mem_desc.c1348/message_queue_cpu.c279",
+  "new_native_build_started": false,
+  "original_kernel_log_sha256": "326781fccfdf787e814101bd4632ac93d681e10b6e8402e73c54b198708de096",
+  "original_public_adapter_wrapper_entered_and_returned": true,
+  "physical_release_authorized": false,
+  "plan": "Select queue-local 4KiB geometry before its first allocation; preserve strict general allocator; honor unprotected request only under privately observed native Intel model8e/no-TME/no-advertised-HV policy and ordinary owned wired zeroed buffer path.",
+  "preparation_succeeded": true,
+  "reboot_required": true,
+  "scope": "B6-physical-target-memory-request-diagnosis",
+  "source_derived_request_constraints": {
+    "CPU_cache": 0,
+    "CPU_noncontiguous": true,
+    "GPU_page_preference_bytes": 2097152,
+    "NUMA_node": -1,
+    "actual_target_page_count_observed": false,
+    "source_default_OS_page_count": 129,
+    "source_default_bytes": 528384,
+    "unencrypted": 1
+  },
+  "target_module_uuid": "055FB438-0881-37D0-9DD4-0A50D31FA1CC",
+  "whole_DMA_stop_proven": false
+}

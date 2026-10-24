@@ -1,0 +1,49 @@
+{
+  "format": 1,
+  "scope": "selected-Intel-ordinary-owned-host-memory-and-outer-failure-diagnostics",
+  "source_authority": "exact-two-B6-project-inputs",
+  "source_inputs": [
+    "packages/nvidia-device-transport/src/S540NvidiaDeviceServices.cpp",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c"
+  ],
+  "prerequisite": "prospective-gsp-base-pages chooses actual 4 KiB GSP queue geometry before allocation",
+  "unchanged_owned_zeroed_backend": {
+    "path": "packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp",
+    "sha256": "cbf46ffaea7f1f4131c4e3f4a9600478deb22e2f6cc4b2554b1b17f125b15810",
+    "contract": "ordinary IOBufferMemoryDescriptor owned wired storage; bzero before publishing; actual mapper and no-bounce validation preserved",
+    "CPU_execution_claimed": false
+  },
+  "observed_cpu_policy": {
+    "vendor": "GenuineIntel",
+    "family": 6,
+    "display_model": "0x8e",
+    "minimum_max_basic_leaf": 7,
+    "hypervisor": "CPUID.1:ECX[31] must be absent",
+    "TME": "CPUID.7.0:ECX[13] must be absent",
+    "capture": "private static native CPUID instruction; no caller-supplied observation, export or ambient test switch",
+    "trust_limit": "trusted physical target CPU observation; not cryptographic exclusion of a masking VMM or proof about all RAM",
+    "SGX": "SGX capability may exist; ordinary owned IOBuffer VM pages are not reserved EPC"
+  },
+  "memory_policy": {
+    "unencrypted_0": "existing allocation behavior preserved without CPUID probe",
+    "unencrypted_1": "only selected observed CPU profile may use the unchanged ordinary owned zeroed IOBuffer backend",
+    "unchanged_guards": ["ordinary live exact binding", "4 KiB page size", "maximum 8192 pages", "cache range 0..2", "NUMA node -1", "Boolean arguments", "valid outputs", "allocation record and token limits", "genuine DMA translation", "no bounce", "confidential-compute gates", "existing retention and stop receipt requirements"],
+    "forbidden": ["MSR access", "encryption setting change", "clearing unencrypted flag", "global huge-page admission", "new readiness authority", "new external symbols"]
+  },
+  "diagnostics": {
+    "allocation": "first valid unprotected request and at most sixteen subsequent allocation failures; scalar actual parameters, status and raw CPU observations, no pointers or IRQ logging",
+    "outer_failure": "only after original public wrapper returned a nonzero profile result; existing nv_printf reports actual snapshot status and available scalar first-failure/counters",
+    "authority": "observation only; unchanged failure status, quarantine and return guards"
+  },
+  "primary_sources": [
+    "https://github.com/torvalds/linux/blob/v6.12/arch/x86/include/asm/cpufeatures.h",
+    "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/iokit/Kernel/IOBufferMemoryDescriptor.cpp",
+    "pinned NVIDIA kernel-open/common/inc/nv-linux.h memory-encryption helpers",
+    "README.md selected i7-8565U physical target"
+  ],
+  "imported_function_span_sha256": "f8e0099f904b5e1a756e628985ef991c9a09475214f52a38c921ccc5df6de471",
+  "CPU_controls": "whole selected Services and Session bodies with only raw CPUID primitive replaced by explicit synthetic observations; fake OS resources, fatal ASAN/UBSAN, deliberate production mutants",
+  "native_and_target_evidence_required": true,
+  "GPU_initialization_claimed": false,
+  "whole_DMA_stop_claimed": false
+}

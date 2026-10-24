@@ -16,6 +16,36 @@ TEXT = WORKFLOW.read_text()
 BODY = textwrap.dedent(TEXT.split("python3 - <<'PY'\n", 1)[1].split('\n          PY', 1)[0])
 
 
+def job_steps(name):
+    """Read this workflow's step blocks without executing its shell bodies."""
+    match = re.search(r'^  ' + re.escape(name) + r':\n(.*?)(?=^  [\w-]+:\n|\Z)',
+                      TEXT, re.M | re.S)
+    if not match:
+        raise AssertionError('Required job is missing: ' + name)
+    return [block for block in re.split(r'(?=^      - )', match.group(1), flags=re.M)
+            if block.startswith('      - ')]
+
+
+def scalar(block, name, indent=8):
+    match = re.search(r'^' + ' ' * indent + re.escape(name) + r': ([^\n]+)$',
+                      block, re.M)
+    return match.group(1).strip() if match else None
+
+
+def condition(block):
+    value = scalar(block, 'if')
+    if value is None:
+        return None
+    if value.startswith('${{') and value.endswith('}}'):
+        value = value[3:-2].strip()
+    return value
+
+
+def artifact_steps(name):
+    return [block for block in job_steps(name)
+            if re.match(r'      - uses: actions/upload-artifact@', block)]
+
+
 class RequestControls(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -121,6 +151,49 @@ class RequestControls(unittest.TestCase):
         self.assertIn('cancel-in-progress: false', TEXT)
         self.assertNotIn('actions/cache', TEXT)
         self.assertNotIn('retention-days: 30', TEXT)
+
+    def test_only_reviewed_short_lived_artifacts_are_uploaded(self):
+        artifacts = {}
+        for job in ('source-preflight', 'native-link-and-package'):
+            for block in artifact_steps(job):
+                name = scalar(block, 'name', indent=10)
+                self.assertIsNotNone(name)
+                prefix = name.split('-${{', 1)[0]
+                self.assertNotIn(prefix, artifacts, 'Duplicate artifact storage')
+                artifacts[prefix] = block
+                self.assertEqual(scalar(block, 'retention-days', indent=10), '1',
+                                 'New artifact storage must expire after one day')
+        self.assertEqual(set(artifacts), {
+            'S540-retained-source-preflight',
+            'S540ExperimentalInitRetained',
+            'S540-retained-current-native-evidence',
+        })
+        # A failed/cancelled run must not publish a partial target package.
+        self.assertIn(condition(artifacts['S540ExperimentalInitRetained']),
+                      (None, 'success()'))
+        source = condition(artifacts['S540-retained-source-preflight'])
+        self.assertIsNotNone(source)
+        self.assertIn('always()', source)
+        self.assertIn("steps.request.outputs.requested == 'true'", source)
+
+    def test_large_native_archive_is_built_and_uploaded_only_on_failure(self):
+        steps = job_steps('native-link-and-package')
+        archive = 'build/S540-retained-current-native-evidence.tar.gz'
+        producers = [block for block in steps if 'tarfile.open(' in block and archive in block]
+        self.assertEqual(len(producers), 1, 'Exactly one raw native archive producer is reviewed')
+        self.assertEqual(condition(producers[0]), 'failure()',
+                         'Successful builds must skip raw native compression')
+        raw = [block for block in artifact_steps('native-link-and-package')
+               if scalar(block, 'path', indent=10) == archive]
+        self.assertEqual(len(raw), 1, 'Exactly one raw native archive upload is reviewed')
+        self.assertEqual(condition(raw[0]), 'failure()',
+                         'Successful builds must skip raw native archive storage')
+        delivery = [block for block in artifact_steps('native-link-and-package')
+                    if scalar(block, 'name', indent=10).startswith('S540ExperimentalInitRetained-')]
+        self.assertEqual(len(delivery), 1)
+        self.assertLess(steps.index(delivery[0]), steps.index(producers[0]),
+                        'Archive diagnosis must also cover a failed delivery upload')
+        self.assertLess(steps.index(producers[0]), steps.index(raw[0]))
 
 
 if __name__ == '__main__':

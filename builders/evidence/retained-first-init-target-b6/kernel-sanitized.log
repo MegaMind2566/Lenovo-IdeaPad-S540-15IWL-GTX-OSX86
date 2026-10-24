@@ -1,0 +1,17 @@
+Timestamp               Ty Process[PID:TID]
+2026-10-24 17:48:04.251 Df kernel[0:1e41] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: GPU 0000:02:00.0: RmInitAdapter
+2026-10-24 17:48:04.251 Df kernel[0:1e41] [  104.604520]: S540 NVIDIA RM: NVRM: _sysCreateOs: RM Access Sys Cap creation failed: 0x56
+2026-10-24 17:48:04.251 Df kernel[0:1e41] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: GPU 0000:02:00.0: RmSetupRegisters for 0x10de:0x1f91
+2026-10-24 17:48:04.251 Df kernel[0:1e41] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: GPU 0000:02:00.0: pci config info:
+2026-10-24 17:48:04.251 Df kernel[0:1e41] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: GPU 0000:02:00.0:    registers look  like: 0x93000000 0x1000000
+2026-10-24 17:48:04.251 Df kernel[0:1e41] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: GPU 0000:02:00.0:    fb        looks like: 0x7f80000000 0x10000000
+2026-10-24 17:48:04.251 Df kernel[0:1e41] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: GPU 0000:02:00.0: Successfully mapped framebuffer and registers
+2026-10-24 17:48:04.251 Df kernel[0:1e41] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: GPU 0000:02:00.0: final mappings:
+2026-10-24 17:48:04.251 Df kernel[0:1e41] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: GPU 0000:02:00.0:     regs: 0x93000000 0x1000000 0x<redacted-kernel-va>
+2026-10-24 17:48:04.252 Df kernel[0:1e41] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: GPU 0000:02:00.0: RmInitAdapter failed! (0x22:0x56:954)
+2026-10-24 17:48:04.252 Df kernel[0:1e41] [  104.617327]: S540 NVIDIA RM: NVRM: GPU0 s540Global_nvCheckOkFailedNoLog: Check failed: Call not supported [NV_ERR_NOT_SUPPORTED] (0x00000056) returned from _memdescAllocInternal(pMemDesc) @ mem_desc.c:1348
+2026-10-24 17:48:04.252 Df kernel[0:1e41] [  104.617333]: S540 NVIDIA RM: NVRM: GPU0 s540Global_nvAssertOkFailedNoLog: Assertion failed: Call not supported [NV_ERR_NOT_SUPPORTED] (0x00000056) returned from nvStatus @ message_queue_cpu.c:279
+2026-10-24 17:48:04.252 Df kernel[0:1e41] [  104.617346]: S540 NVIDIA RM: NVRM: GPU0 _kgspInitRpcInfrastructure: GspMsgQueueInit failed
+2026-10-24 17:48:04.252 Df kernel[0:1e41] [  104.617349]: S540 NVIDIA RM: NVRM: GPU0 s540Global_kgspConstructEngine_IMPL: init RPC infrastructure failed
+2026-10-24 17:48:04.252 Df kernel[0:1e41] [  104.617352]: S540 NVIDIA RM: NVRM: osInitNvMapping: *** Cannot attach gpu
+2026-10-24 17:48:04.252 Df kernel[0:1e41] [  104.617354]: S540 NVIDIA RM: NVRM: s540Global_RmInitAdapter: osInitNvMapping failed, bailing out of RmInitAdapter

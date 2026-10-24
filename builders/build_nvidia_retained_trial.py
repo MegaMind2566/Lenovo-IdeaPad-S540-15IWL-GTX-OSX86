@@ -33,6 +33,7 @@ def layout(work):
         integrated_base=work / 'inputs/integrated', operational_base=work / 'inputs/operational',
         base=work / 'inputs/shutdown', observation_base=work / 'inputs/preparation-observation-base',
         irq_source_base=work / 'inputs/irq-source-selection-base',
+        gsp_memory_base=work / 'inputs/gsp-memory-base',
         composition=work / 'inputs/retained',
         native_compilation=work / 'native', image=work / 'image', package=work / 'package')
 
@@ -122,6 +123,8 @@ def prepare(args, paths):
                      paths['base'], paths['observation_base'], names[:names.index('preparation-observation')])
     retained.prepare(paths['canonical_parent'], paths['integrated_base'], paths['operational_base'],
                      paths['base'], paths['irq_source_base'], names[:names.index('irq-source-selection')])
+    retained.prepare(paths['canonical_parent'], paths['integrated_base'], paths['operational_base'],
+                     paths['base'], paths['gsp_memory_base'], names[:names.index('gsp-base-pages')])
     retained.prepare(paths['canonical_parent'], paths['integrated_base'], paths['operational_base'],
                      paths['base'], paths['composition'], tuple(retained.PROFILE_DIRECTORIES))
     return verify(paths)

@@ -1,0 +1,94 @@
+{
+  "CPU_controls": {
+    "fatal_ASAN_UBSAN": true,
+    "leak_sanitizer_claimed": false,
+    "memory_cases": 71,
+    "memory_checks_per_mode": 1092,
+    "memory_mutants_rejected": 13,
+    "outer_failure_checks_per_mode": 115,
+    "outer_failure_mutants_rejected": 2,
+    "queue_cases": 23,
+    "queue_checks_per_mode": 18120,
+    "queue_mutants_rejected": 10,
+    "source_replay_negative_controls": 32,
+    "workflow_controls": 13
+  },
+  "GSP_or_GPU_initialization_confirmed": false,
+  "build_identity": {
+    "format": 1,
+    "generated_source": "packages/nvidia-gsp-bootstrap/prospective-retained-build-identity/S540ExperimentalBuildIdentity.c",
+    "policy_sha256": "1dadd1153cab0de4dfa254f452d91b09b806f7a00db3716e3a5663fd19119ef6",
+    "required_kernel_stack_bytes": 16384,
+    "source_identity_excludes_only_generated_identity_source": true,
+    "source_sha256": "22571210a29fa0e57bb4c7afcdc5921e5dd265d8dd48124e21161d2e063f599a"
+  },
+  "composition_sha256": "d2cf1b52be3901a0af68c1bc4b00b8517bb71543335f4dec46bcbc464c3d002c",
+  "cost_policy": {
+    "artifact_retention_days": 1,
+    "full_native_object_archive_uploaded_only_on_failure": true,
+    "native_requests_planned": 1,
+    "standard_public_macos_15_intel_only": true,
+    "successful_package_contains_corresponding_sources_and_native_reports": true
+  },
+  "cross_controls": {
+    "actual_pinned_SDK": true,
+    "frontend_SDK_units": 6,
+    "image_host_checks": 37,
+    "original_delta_sources": [
+      "src/nvidia/src/kernel/gpu/bif/arch/maxwell/kernel_bif_gm107.c",
+      "src/nvidia/src/kernel/gpu/bif/arch/turing/kernel_bif_tu102.c",
+      "src/nvidia/src/kernel/gpu/gsp/message_queue_cpu.c"
+    ],
+    "original_delta_units": 3,
+    "project_units": 66
+  },
+  "formal_stack_bound_proven": false,
+  "format": 1,
+  "native_Darwin_compilation": false,
+  "native_jobs_started_at_preflight": 0,
+  "production_source_sha256": {
+    "original/message_queue_cpu.c": "f49f69d80674a09f030dc2a5b032f92a32889c941aed4ff5226f169badc408f5",
+    "project/S540NvidiaDeviceServices.cpp": "ac1597cad02dd9b40673566ac07e99dfc4e4435a34fb80ee9cdedea743e18186",
+    "project/S540NvidiaGspContext.c": "5c3e6b6e963841e601b560916d229ce33d4bb2c3024a5a63f1c87a2737af2688"
+  },
+  "receipts": {
+    "frontend_sdk_cross": {
+      "sha256": "ee6eec1072292c1b6621a4a3524c4ba4aba7141ec11c8bdcf8c32e0c11d9e3c5",
+      "status": "actual-experimental-frontend-sdk-cross-compiled"
+    },
+    "host_memory": {
+      "sha256": "96253ef22e0e01c2d937d1239fa4043461b2516c07190d9a27d254d2f6aa84ba",
+      "status": "passed-complete-memory-services-and-session-CPU-controls"
+    },
+    "image_host_controls": {
+      "sha256": "6d699cfaec3ecfcc777aec4c9752dcf9271ff3522ae78e118cfeaeee9d4bb6cd",
+      "status": "passed-current-experimental-image-host-controls"
+    },
+    "original_delta_cross": {
+      "sha256": "d1b4633ad27ea2a477059177476e4b7797ede9a4b51d8530c7319fda5959bdc1",
+      "status": "compiled-retained-trial-original-delta-cross-only"
+    },
+    "outer_failure": {
+      "sha256": "93bafd6cd24c1a1fdaf15d288507b7d4b8124c55c5b7b77625f57df6f1c6e188",
+      "status": "passed-actual-context-diagnostic-controls"
+    },
+    "project_cross": {
+      "sha256": "4b770a661fc066990ac7deed82e15a453239f38df4b7913b1e567adf8ee08b93",
+      "status": "compiled-retained-trial-project-cross-only"
+    },
+    "queue": {
+      "sha256": "c48eab0b7e3edd7eb26dab70968c6e91a519ed98f33d45664aa12078efc52702",
+      "status": "passed-actual-GSP-base-page-queue-and-OS-allocation-controls"
+    },
+    "source_replay": {
+      "sha256": "c94568bad4f90e8a5733680f785dc17d97fb6c935ff6e7a1349bc779e231f005",
+      "status": "passed-actual-retained-source-replay-mutation-controls"
+    }
+  },
+  "scope": "B7-exact-source-local-preflight-before-one-native-request",
+  "source_base_commit": "8691d2e087003e82a4318e8446f42235af87863b",
+  "status": "passed",
+  "system_security_changed": false,
+  "target_B7_test_performed": false,
+  "whole_DMA_stop_proven": false
+}

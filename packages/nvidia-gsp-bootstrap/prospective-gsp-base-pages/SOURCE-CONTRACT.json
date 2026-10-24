@@ -1,0 +1,31 @@
+{
+  "format": 1,
+  "scope": "retained-GSP-shared-queue-real-base-pages",
+  "input_profile": "exact composed B6 message_queue_cpu.c",
+  "original_translation_units_changed": 1,
+  "project_translation_units_added": 0,
+  "general_allocator_changed": false,
+  "initial_GPU_descriptor_page_size": "RM_PAGE_SIZE (4096), before memdescTagAlloc",
+  "page_size_status_reinterpretation": false,
+  "huge_page_allocation_claimed": false,
+  "retry_same_failed_base_page_allocation": false,
+  "command_and_status_default_bytes_each": 262144,
+  "default_shared_bytes": 528384,
+  "default_shared_page_count": 129,
+  "default_page_table_bytes": 4096,
+  "preserved": [
+    "noncontiguous system-memory descriptor and cache attributes",
+    "unprotected-allocation request flag from confComputeForceUnprotAlloc",
+    "descriptor kernel-mode flag and allocation tag",
+    "queue sizing and page-table construction",
+    "memory mappings and original cleanup calls",
+    "cancellation and retained ownership paths"
+  ],
+  "CPU_control_scope": "Exact queue and page-size/original OS allocation bodies with explicit CPU-only resource endpoints; host unprotected-allocation admission is a separately modeled endpoint owned by another profile.",
+  "CPU_allocation_endpoint_ABI": "Actual nv.h nv_alloc_pages and nv_alias_pages parameter declarations are compiled into independent function-pointer compatibility assertions.",
+  "CPU_header_encryption_case": "Preserves original queue-header sizing only; it does not admit or implement confidential-compute hardware.",
+  "shared_parser_sha256": "f8e0099f904b5e1a756e628985ef991c9a09475214f52a38c921ccc5df6de471",
+  "native_Darwin_compilation_proven": false,
+  "GPU_execution_proven": false,
+  "physical_release_or_unload_authorized": false
+}
