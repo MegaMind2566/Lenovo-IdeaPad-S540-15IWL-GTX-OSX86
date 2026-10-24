@@ -1,6 +1,6 @@
 {
   "format": 1,
   "scope": "s540-retained-first-initialization",
-  "batch_id": "s540-retained-first-init-20261024-b3",
-  "source_commit": "5b854bcdc5636a1b219d9cc51d39763281b300ae"
+  "batch_id": "s540-retained-prepare-observation-20261024-b4",
+  "source_commit": "5282573e6291697c0641b3e2bd459744b87c67c7"
 }
