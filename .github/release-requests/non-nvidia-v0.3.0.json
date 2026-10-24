@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "version": "v0.3.0",
+  "batch": "efi-v0.3.0-20261024-publication",
+  "source_parent": "8691d2e087003e82a4318e8446f42235af87863b",
+  "files": {
+    "builders/build_non_nvidia_release.py": "860762f058a343ca83dd293bf7189de530b96e1f0cfd08872a0412515950bee8",
+    "builders/publish_non_nvidia_release.py": "1f61b9423b95f74851a9832fa62e34b92b68e2cb500c66936eb4db8603bcc745",
+    "tests/test_non_nvidia_publication.py": "910cd81bff053b2922ecc0c66cde7b0098d5a1953e8311c9168e2bc69e47f0f0",
+    ".github/workflows/publish-non-nvidia-efi.yml": "411a17af7851e7d11a1c3465d74a742263149cc84c386d770e1db13f4f644c5c",
+    "config/efi/releases/v0.3.0/config.plist": "1bb74df68623d72b37f669b70b5eb3b10c7b8f64642f46e9d145aed7bb9b9563",
+    "config/efi/releases/v0.3.0/sources.lock.json": "c705a9e4c3777e1dc6d66cb2d5d3eb921ea6fbe1cab5be59cec284b9b6c2d329",
+    "config/efi/releases/v0.3.0/payload-manifest.json": "69c04475a7abf7e0936ede09db7348cdd91303b76c3da94d630493dd398e5de3",
+    "config/efi/releases/v0.3.0/package-manifest.json": "1f27cba5b18288dfae38964fac89fd260b94dca058dc168991f221cbbc848c3e",
+    "config/efi/releases/v0.3.0/package.sha256": "c4ddc8169a7f59d1e7aa2e819b762047e1efda9a4c7f3839b9f00f1ec093731a",
+    "config/efi/releases/v0.3.0/companions.lock.json": "ca8f2d3949233ebf29ee0a7efecf6d00222509014d08e6c0fc0d735f9080a738",
+    "config/efi/releases/v0.3.0/refind.conf": "663de5faec841bb5ef145e7f5246f8a0e4d67493869300d5f02f42fca20a4a20",
+    "docs/releases/v0.3.0/RELEASE-NOTES.md": "52cce5a7b3b25c4f9160499e473ad767e7f65b2077b9ce2caadb71e93986ae77",
+    "docs/releases/v0.3.0/INSTALL.md": "9550fadd61b825e6d64a83f0805e692a693c59983f501cb257e52163ae5cff8b",
+    "docs/releases/v0.3.0/SOURCE-PROVENANCE.md": "3f1dc6b6c66c0c48abe6c671306417eab6942eaf7fba336609195b9292a005b2"
+  }
+}
