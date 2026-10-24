@@ -1,6 +1,6 @@
 # SD reader and fingerprint scope
 
-Updated on **24 October 2026**. SD investigation is active before consolidating the **non-NVIDIA EFI**, with **SD trials on the external EFI**. Following the user-confirmed card operation below, the user has authorized preparing its promotion into the official internal EFI; that update has not yet been applied. The user has marked the fingerprint reader **NOT WORKING in macOS** and stopped further fingerprint work. NVIDIA, HDMI and the accepted non-working F8 camera toggle remain outside this work.
+Updated on **24 October 2026**. SD card operation is now user-confirmed on the external direct-match setup. Preparation of its promotion into the **official internal non-NVIDIA EFI** is authorized and recorded below; installation and internal-boot SD verification remain pending. The user has marked the fingerprint reader **NOT WORKING in macOS** and stopped further fingerprint work. NVIDIA, HDMI and the accepted non-working F8 camera toggle remain outside this work.
 
 ## O2Micro SD reader
 
@@ -88,6 +88,14 @@ The user now reports that the SD card works, and immediately clarifies that this
 Exact active bundle/configuration identity still needs to be captured before promotion: the original alias-match and direct-match variants share the same executable and original UUID, so loaded-binary identity alone does not distinguish their Info.plist. The report establishes user-observed card operation; hotplug, post-sleep operation, write validation and transfer performance have not been newly established.
 
 The user has authorized preparing an update of the **official internal EFI** using this successful SD setup. This extends the earlier external-only trial scope for that specific promotion. No internal update has yet been applied. The current internal configuration and the actually working external SD bundle/settings must be compared before packaging; do not copy the external NVIDIA experiment or replace the current internal configuration with the older release. Preserve SMBIOS identity, rEFInd, Microsoft boot files and all unrelated settings. The S18R-disabled candidate is excluded from this promotion.
+
+### Verified inputs for internal SD promotion — 24 October 2026
+
+The newly supplied current internal and external EFI archives have now been compared. The working external archive confirms the **previous direct-match variant**: Info.plist SHA-256 `d3dc9a76442bddf030389ea527045070a8e08153edb6b926ce3d60ddc70f4ae2`, executable `dfb316e5e4ce745da6dbbb7470af1720e6719741e2a900aff3b3114e35060bd7`, and external config `bb51139e85f3ba102b551694fc51289291b444f0a09ef88ad69b3dc71d7f7a3e`. It contains neither the S18R-disabled executable nor its new UUID. The user-confirmed SD success is associated with these supplied external inputs; no new runtime report is implied by this archive audit.
+
+The current internal EFI uses OpenCore **1.0.8 RELEASE**, has no SD entry or SD device property, and retains the native-Windows/rEFInd route with ScanPolicy **769**. The personal update therefore adds only the byte-identical external BigSurSDXC bundle, its exact Kernel/Add entry and the exact SD `compatible` field at the already reviewed PCI path. Semantic comparison after removing those two config additions recovers the entire original internal config. SMBIOS, ACPI, NVRAM, graphics and all other existing settings are unchanged. OpenCore 1.0.8 ocvalidate reports no issues.
+
+A guarded installer and explicit restore command are packaged as `S540-SD-Interno-v1.zip` (SHA-256 `3b98fc7c96477c8c13122f358169439531edcc1560f9e80fb168ee734ec5eeea`), with a full verified EFI backup before writes. The installer compares all current non-SD files against that operation's backup before and after the change, so legitimate Windows BCD/log changes between operations are retained. Eight local mocked filesystem scenarios passed, including interrupted commit, partial restoration, unknown-state refusal and preservation of updated Windows BCD. These are simulated shell checks, not native Mac installation results. `-wegnoegpu` remains present, enabled NVIDIA kext entries remain zero and ACPI is identical, as explicitly requested. They do not replace the internal EFI with the external NVIDIA configuration. The personal config and Windows boot files remain private, and the existing public v0.2.0 release asset is not silently replaced. **Internal installation, reboot and SD operation on that internal boot remain pending target verification.**
 
 ## Goodix fingerprint reader
 
