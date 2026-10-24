@@ -5,7 +5,6 @@
 #import <IOKit/kext/KextManager.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <sys/sysctl.h>
-#include <sys/kdebug.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <fcntl.h>
@@ -544,9 +543,9 @@ int main(int argc, const char *argv[]) {
         if (argc == 3 && (!strcmp(argv[1], "--decode-fixture") || !strcmp(argv[1], "--parse-fixture")))
             return DecodeFixture([NSString stringWithUTF8String:argv[2]]);
         if (argc == 2 && !strcmp(argv[1], "--emit-probe")) {
-            int result = kdebug_trace(UINT32_C(0xfeff0010), 1, 2, 3, 4);
-            int printed = PrintReport(@{@"result":result == 0 ? @"PROBE_EMITTED" : @"REFUSED", @"synthetic":@YES, @"debugid":@"0xfeff0010"});
-            return result == 0 ? printed : 1;
+            execl("/usr/bin/ktrace", "ktrace", "emit", "0xfeff0010", "1", "2", "3", "4", (char *)NULL);
+            fprintf(stderr, "Impossibile avviare il probe sintetico tramite ktrace emit.\n");
+            return 127;
         }
         if (argc == 2 && !strcmp(argv[1], "--run")) return Run();
         fprintf(stderr, "Uso: sd_init_trace --self-test | --run | --decode-fixture FILE | --emit-probe\n");
