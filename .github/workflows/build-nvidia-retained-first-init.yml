@@ -121,7 +121,8 @@ jobs:
           from pathlib import Path
           names=['builders/build_nvidia_retained_trial.py','builders/prepare_nvidia_retained_trial.py']
           for directory in ('prospective-native-target-preparation','prospective-experimental-image',
-              'prospective-experimental-target-package','prospective-aggregate-stack-closure'):
+              'prospective-experimental-target-package','prospective-aggregate-stack-closure',
+              'prospective-pci-memory-bars'):
               names += [str(p) for p in (Path('packages/nvidia-gsp-bootstrap')/directory).rglob('*.py')]
           for name in names:ast.parse(Path(name).read_text(),filename=name)
           PY
@@ -133,6 +134,10 @@ jobs:
           python3 -B packages/nvidia-gsp-bootstrap/prospective-preparation-observation/check_power.py \
             --project build/retained-first-init/inputs/preparation-observation-base/project \
             --output build/retained-first-init/controls/preparation-power --cxx "$S540_CONTROL_CXX"
+          python3 -B packages/nvidia-gsp-bootstrap/prospective-pci-memory-bars/check.py \
+            --input-project build/retained-first-init/inputs/preparation-observation-base/project \
+            --composed-project build/retained-first-init/inputs/retained/project \
+            --output build/retained-first-init/controls/pci-memory-bars --cxx "$S540_CONTROL_CXX" --host-control
           python3 -B packages/nvidia-gsp-bootstrap/prospective-pm-event-closure/check.py \
             --base build/retained-first-init/inputs/shutdown \
             --output build/retained-first-init/controls/pm-event \
@@ -272,7 +277,7 @@ jobs:
         with:
           name: S540ExperimentalInitRetained-${{ needs.source-preflight.outputs.batch_id }}
           path: |
-            build/retained-first-init/package/S540ExperimentalInitRetained-B4.zip
+            build/retained-first-init/package/S540ExperimentalInitRetained-B5.zip
             build/retained-first-init/package/packaging-attestation.json
           if-no-files-found: error
           retention-days: 3

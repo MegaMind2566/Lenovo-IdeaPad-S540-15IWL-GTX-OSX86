@@ -29,13 +29,15 @@ PROFILE_DIRECTORIES = {
     'runtime-coordinator': 'prospective-runtime-coordinator',
     'retained-stop': 'prospective-retained-stop',
     'preparation-observation': 'prospective-preparation-observation',
+    'pci-memory-bars': 'prospective-pci-memory-bars',
     'experimental-target-control': 'prospective-experimental-target-control',
 }
 PROFILE_DEPENDENCIES = {
     'runtime-coordinator': tuple(list(PROFILE_DIRECTORIES)[:4]),
     'retained-stop': ('runtime-coordinator',),
     'preparation-observation': ('retained-stop',),
-    'experimental-target-control': tuple(list(PROFILE_DIRECTORIES)[:7]),
+    'pci-memory-bars': ('preparation-observation',),
+    'experimental-target-control': tuple(list(PROFILE_DIRECTORIES)[:8]),
 }
 OLD_KERNEL = GSP + 'prospective-loader/S540ProspectiveLoaderKernel.cpp'
 OLD_STATE = GSP + 'prospective-loader/S540ProspectiveLoaderState.c'
@@ -43,6 +45,7 @@ OLD_KMOD = GSP + 'prospective-loader/S540ProspectiveLoaderKmod.cpp'
 IDENTITY = GSP + 'prospective-retained-build-identity/S540ExperimentalBuildIdentity.c'
 PROTOCOL = GSP + 'prospective-experimental-target-control/S540ExperimentalTargetProtocol.h'
 POWER = GSP + 'platform/S540NvidiaGspPower.cpp'
+PLATFORM = GSP + 'platform/S540NvidiaGspPlatform.cpp'
 TARGET = GSP + 'prospective-experimental-target-control/S540ExperimentalTargetKernel.cpp'
 EXPERIMENTAL_POLICY = {
     'format': 1, 'scope': 'manual-once-per-boot-retained-first-initialization',
@@ -157,6 +160,7 @@ def build_plan(base, before, names, modules, hashes):
     exports, original_exports, definitions, new_units, retired = {}, {}, {}, [], []
     initializers = set(previous.REVIEWED_INITIALIZERS)
     gate_owners = {operational.BOOT: {'pm-event', 'runtime-coordinator', 'retained-stop', 'preparation-observation'},
+        PLATFORM: {'pci-memory-bars'},
         operational.LIFECYCLE: {'runtime-coordinator'}, OLD_KMOD: {'experimental-target-control'},
         OLD_STATE: set(), OLD_KERNEL: set()}
     for name, module in modules.items():

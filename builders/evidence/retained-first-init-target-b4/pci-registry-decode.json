@@ -1,0 +1,90 @@
+{
+  "assigned_addresses_hex": "1000028200000000000000930000000000000001140002c27f0000000000008000000000000000101c0002c27f00000000000090000000000000000224000281000000000030000000000000800000003000028200000000000008940000000000000800",
+  "assigned_resources": [
+    {
+      "address_hex": "0x93000000",
+      "length_bytes": 16777216,
+      "register": "0x10",
+      "space_code": 2
+    },
+    {
+      "address_hex": "0x7f80000000",
+      "length_bytes": 268435456,
+      "register": "0x14",
+      "space_code": 2
+    },
+    {
+      "address_hex": "0x7f90000000",
+      "length_bytes": 33554432,
+      "register": "0x1c",
+      "space_code": 2
+    },
+    {
+      "address_hex": "0x3000",
+      "length_bytes": 128,
+      "register": "0x24",
+      "space_code": 1
+    },
+    {
+      "address_hex": "0x94080000",
+      "length_bytes": 524288,
+      "register": "0x30",
+      "space_code": 2
+    }
+  ],
+  "b4_first_failure_stage": "device-facts",
+  "b4_first_failure_status": 85,
+  "format": 1,
+  "original_initialization_attempted": false,
+  "pcie_capabilities_property": 18,
+  "pcie_capability_version": 2,
+  "pcie_device_port_type": 1,
+  "primary_source_evidence": {
+    "commit": "4822b27a36e2de70e231ecf2bf3021384fab6ec2",
+    "device_port_type_definitions": {
+      "git_blob_sha1": "2ea0f4349ba883e5977cb3777d6de0eb6796cfdf",
+      "path": "IOKit/pci/IOPCIPrivate.h"
+    },
+    "registry_property_producer": {
+      "git_blob_sha1": "30ce4041f9ee10ede9d3dc559eae41f1e2984e84",
+      "path": "IOPCIBridge.cpp"
+    },
+    "repository": "apple-oss-distributions/IOPCIFamily"
+  },
+  "reg_hex": "0000020000000000000000000000000000000000100002020000000000000000000000000000000114000242000000000000000000000000000000101c0002420000000000000000000000000000000224000201000000000000000000000000800000003000020200000000000000000000000000000800",
+  "repeated_records": 2,
+  "scope": "readonly-target-registry-property-decode",
+  "serialized_memory_descriptors": [
+    {
+      "address_hex": "0x93000000",
+      "length_bytes": 16777216
+    },
+    {
+      "address_hex": "0x7f80000000",
+      "length_bytes": 268435456
+    },
+    {
+      "address_hex": "0x7f90000000",
+      "length_bytes": 33554432
+    },
+    {
+      "address_hex": "0x94080000",
+      "length_bytes": 524288
+    }
+  ],
+  "source_file_sha256": "7399f2c2a924d1cb8639397d73b78655388bf8d10ecd9212da4aa25cf5707438",
+  "source_limitations": [
+    "Registry assigned-addresses are not a live PCI configuration capture; memory space code is not evidence of raw BAR width bits.",
+    "Serialized memory descriptors omit tags and getPhysicalSegment span.",
+    "PCIe flags interpretation was checked against pinned Apple IOPCIFamily 4822b27a36e2de70e231ecf2bf3021384fab6ec2: IOPCIBridge.cpp copies configRead16(capability+2) into the observed property; IOPCIPrivate.h defines device/port types 0 and 1 as endpoints."
+  ],
+  "target": {
+    "bdf": "2:0:0",
+    "device": "1f91",
+    "revision": "a1",
+    "subsystem_device": "3806",
+    "subsystem_vendor": "17aa",
+    "vendor": "10de"
+  },
+  "unique_gpu_registry_ids": 1
+}

@@ -1,0 +1,41 @@
+{
+  "format": 1,
+  "scope": "GPU resource metadata decoded from the correct-EFI target IORegistry capture",
+  "source_capture_filename": "S540-PCI-NVIDIA-B4(1).txt",
+  "source_capture_sha256": "7399f2c2a924d1cb8639397d73b78655388bf8d10ecd9212da4aa25cf5707438",
+  "endpoint": {
+    "bus": 2,
+    "slot": 0,
+    "function": 0,
+    "vendor": "0x10de",
+    "device": "0x1f91",
+    "subsystem_vendor": "0x17aa",
+    "subsystem_device": "0x3806",
+    "class_code": "0x030000",
+    "revision": "0xa1"
+  },
+  "assigned_addresses_hex": "1000028200000000000000930000000000000001140002c27f0000000000008000000000000000101c0002c27f00000000000090000000000000000224000281000000000030000000000000800000003000028200000000000008940000000000000800",
+  "records": [
+    {"register": "0x10", "space": 2, "address": "0x93000000", "bytes": "0x01000000"},
+    {"register": "0x14", "space": 2, "address": "0x7f80000000", "bytes": "0x10000000"},
+    {"register": "0x1c", "space": 2, "address": "0x7f90000000", "bytes": "0x02000000"},
+    {"register": "0x24", "space": 1, "address": "0x3000", "bytes": "0x80"},
+    {"register": "0x30", "space": 2, "address": "0x94080000", "bytes": "0x80000"}
+  ],
+  "io_device_memory": [
+    {"address": "0x93000000", "bytes": "0x01000000"},
+    {"address": "0x7f80000000", "bytes": "0x10000000"},
+    {"address": "0x7f90000000", "bytes": "0x02000000"},
+    {"unserialized_io_submemory_descriptor": true},
+    {"address": "0x94080000", "bytes": "0x80000"}
+  ],
+  "pci_express_capabilities_property": 18,
+  "capability_offsets": {"PowerManagementCapability": 96, "MSICapability": 104, "PCIExpressCapability": 120},
+  "fixture_boundary_choices": [
+    "The capture contains resource addresses and lengths, not a raw PCI configuration-space dump.",
+    "BAR1/BAR3 are modeled with valid 64-bit memory encodings and nonzero high dwords consistent with the published addresses. Raw BAR low type/prefetch bits are not claimed as captured bytes.",
+    "A valid capability chain is modeled at the captured capability offsets. Capability next links, command/status bytes and unrelated register bits are fixture values.",
+    "The actual PCI Express capabilities property is 18 (0x12); the positive target fixture must not replace it with a generic type-zero value.",
+    "PM D0, a valid ACPI segment, ordinary context and console exclusion are explicit fixtures. They do not establish those predicates on new hardware."
+  ]
+}

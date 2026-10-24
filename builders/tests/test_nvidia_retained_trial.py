@@ -31,7 +31,9 @@ def main():
         raise AssertionError('Mutation was not refused: ' + label)
     for names in (('unknown',), ('pm-event', 'pm-event'), ('retained-stop',),
                   ('experimental-target-control',), ('runtime-coordinator',), ('preparation-observation',),
-                  tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'preparation-observation')):
+                  ('pci-memory-bars',),
+                  tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'preparation-observation'),
+                  tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'pci-memory-bars')):
         refused('profile-selection-' + '-'.join(names), lambda names=names: retained.selected_profiles(names))
     def changed_manifest(label, mutate):
         modified = deepcopy(value)
@@ -51,7 +53,7 @@ def main():
         'builders/build_nvidia_retained_trial.py'))
     # Rehash the changed file as an attacker could. The generic inventory now
     # agrees, but the exact independent source replay must still refuse it.
-    for relative in (retained.IDENTITY, retained.OLD_STATE):
+    for relative in (retained.IDENTITY, retained.OLD_STATE, retained.PLATFORM):
         source = paths['composition'] / 'project' / relative
         saved = source.read_bytes()
         modified = deepcopy(value)
