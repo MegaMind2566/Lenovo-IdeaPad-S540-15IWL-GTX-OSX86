@@ -63,6 +63,24 @@ The user also supplied two upstream repositories:
 
 The next target evidence is the single guided trace from the unchanged external setup with the known 8 GB FAT32 card. SD reading remains unconfirmed until actual media and file access work.
 
+### Target trace result and S18R-disabled candidate — 24 October 2026
+
+The supplied initialization report contains **369 selected events** and 222 ignored non-whitelisted events, with no unknown schema or input-limit condition. Original debug flags were zero and restoration readback was verified. The result remains `INCONCLUSIVE` for its removal/reinsertion control: no matching card-absent event/slot state was confirmed, and the reinsertion stage was not reached. A false final slot sample is not proof that the card was never physically removed. The collector's elapsed values are buffer-read times, not kernel event timestamps.
+
+The captured sequence is nevertheless useful: initial CMD55/ACMD41 completions succeed, then CMD11 completes, clock divisor 4 is recorded with Clock Control `0x407`, and ConfigureSDMedia returns `0xE00002BC`. In the reviewed binary, this matches the later 1.8 V switch path and its unsuccessful DAT-line check. DAT values were not retained, so the trace does not prove physical voltage or a specific electrical fault.
+
+Across the selected sequence, 47 wait operations report success and 41 report `0xE00002BC`: 38 follow CMD8 and three follow CMD55. Error Interrupt Status `0x0004` is Command End Bit Error, distinct from CRC or timeout. All 90 recorded command/data resets return zero. Four ConfigureSDMedia exits report the error; the final CMD8 has no captured completion, so no final ConfigureCard outcome can be assigned. Reported divisor zero remains compatible with a full requested divisor 512 truncated by the driver's published byte field.
+
+A targeted external-only candidate now avoids requesting the 1.8 V transition: **S18R is zeroed at both ACMD41 request/polling sites**, retaining HCS, XPC and the voltage-window argument. At x86_64 VM `0x98CF` and `0x9955`, each `41 0F 94 C0` becomes `45 31 C0 90` (`xor r8d,r8d; nop`). Independent disassembly review verified that R8 supplies ACMD41 bit 24. It is a protocol negotiation trial, not a forced electrical-voltage guarantee or a confirmed repair. `UHS Mode=false` would not avoid the earlier switch and is not used.
+
+`S540-SD-3V3-v1.zip` SHA-256: `c41899c40cd768f5ebeeb6c29428bcefb03cd959539dc97ecc704096fb6ff49f`. Candidate executable SHA-256: `6327de1f1d81d354821c5eb2acc546ac02cd6df724f1c09688189297abfd404f`. Runtime UUID: `857CC249-3CDC-5511-82DD-B38C034EB7E6`. The x86_64 LC_UUID is stamped separately so a passive loaded-driver report can distinguish this code from the original UUID `D2EAAA60-AF10-360F-B645-1592B9B3A804`.
+
+Exactly 24 file bytes differ: eight instruction bytes and 16 UUID metadata bytes. FAT layout, non-UUID load-command bytes, ARM slice and embedded signature blob are unchanged. The input already fails eight of 33 embedded CodeDirectory page hashes; the candidate fails those plus pages 0 and 9. Neither is presented as having a valid Apple signature, and no resigning or security-setting change was performed. The trial retains the existing OpenCore injection path; target admission and card reading still need the next boot.
+
+The package contains the candidate, exact direct-match baseline for rollback, manifest/checksums and a passive Bash-only collector that checks the new runtime UUID and selected slot/disk fields. All eight ZIP members and seven checksums, permissions, rollback bytes, changed-byte set, Mach-O structure and collector syntax passed independent review. The private raw report and driver binaries are not committed here; the [builder recipe](../../builders/build_sd_s18r_candidate.py) uses exact local input hashes. No native compilation or new GitHub workflow was needed for this fixed-byte package.
+
+Only replace BigSurSDXC in the **external** EFI, then shut down, remove/reinsert the card while off and boot externally with the known 8 GB FAT32 card inserted. Configuration, ACPI, internal EFI and the NVIDIA experiment remain unchanged. Acceptance is an actual SD disk and an existing readable file. **Target result for this candidate is pending.**
+
 ## Goodix fingerprint reader
 
 **Status: NOT WORKING in macOS. Further fingerprint investigation stopped by user request on 24 October 2026.** The findings below are retained as the explanation of the limitation, not as an active development plan.
