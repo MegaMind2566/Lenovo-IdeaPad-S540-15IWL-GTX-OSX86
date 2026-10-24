@@ -97,6 +97,14 @@ The current internal EFI uses OpenCore **1.0.8 RELEASE**, has no SD entry or SD 
 
 A guarded installer and explicit restore command are packaged as `S540-SD-Interno-v1.zip` (SHA-256 `3b98fc7c96477c8c13122f358169439531edcc1560f9e80fb168ee734ec5eeea`), with a full verified EFI backup before writes. The installer compares all current non-SD files against that operation's backup before and after the change, so legitimate Windows BCD/log changes between operations are retained. Eight local mocked filesystem scenarios passed, including interrupted commit, partial restoration, unknown-state refusal and preservation of updated Windows BCD. These are simulated shell checks, not native Mac installation results. `-wegnoegpu` remains present, enabled NVIDIA kext entries remain zero and ACPI is identical, as explicitly requested. They do not replace the internal EFI with the external NVIDIA configuration. The personal config and Windows boot files remain private, and the existing public v0.2.0 release asset is not silently replaced. **Internal installation, reboot and SD operation on that internal boot remain pending target verification.**
 
+### Internal installer size guard correction — 24 October 2026
+
+The first internal installer attempt stopped during target admission, before backup, staging or EFI-file changes. Its partition-size guard incorrectly used `diskutil info`'s `TotalSize`, reported as **313946112**, while the user-supplied partition table confirms `disk0s1.Size = 314572800`. This is an installer field-selection error, not an SD-driver failure or a changed GPT extent.
+
+`S540-SD-Interno-v1.1.zip` supersedes that installer (SHA-256 `a8799e7cf7c7f0e5aaf44a3ff201f6fc4ddca780ad8e78f69316eb84913f3c3d`). The corrected guard reads the partition-table size, checks whole/partition device identifiers, EFI content and the observed GPT partition GUID, and repeats those checks before committing. The whole-disk size check remains intact. Config, driver and command wrappers are byte-identical to v1; config staging uses `cp -X` to avoid propagating extended attributes into the ESP. NVIDIA stays inactive in the internal configuration.
+
+The corrected admission is covered by the actual **313946112 / 314572800** fixture, wrong partition size/device/content/GUID/root-device refusals and a changed-GUID refusal at the second read, alongside the prior install/restore/interruption cases. These are local simulated checks. **The corrected native installation, internal reboot and internal-boot SD result remain pending.**
+
 ## Goodix fingerprint reader
 
 **Status: NOT WORKING in macOS. Further fingerprint investigation stopped by user request on 24 October 2026.** The findings below are retained as the explanation of the limitation, not as an active development plan.
