@@ -105,6 +105,16 @@ The first internal installer attempt stopped during target admission, before bac
 
 The corrected admission is covered by the actual **313946112 / 314572800** fixture, wrong partition size/device/content/GUID/root-device refusals and a changed-GUID refusal at the second read, alongside the prior install/restore/interruption cases. These are local simulated checks. **The corrected native installation, internal reboot and internal-boot SD result remain pending.**
 
+### Native SD copy completed; exact metadata false alarm — 24 October 2026
+
+The v1.1 native run passed admission, full backup verification, the pre-commit unchanged-file comparison, both writes, the new config SHA-256 and the exact two-file SD bundle checks. Its final unchanged-file comparison then stopped. The explicit `COMMIT_STARTED` message and source ordering establish that the intended three files were already copied and verified; this is not an unchanged/refused installation.
+
+The user's complete recursive diff against the verified backup reports exactly three differences: the changed `OC/config.plist`, the added `OC/Kexts/BigSurSDXC.kext`, and the new macOS metadata companion **`OC/._config.plist`**. No other pre-existing file differs, including Microsoft, Boot and rEFInd. This identifies the final refusal as an over-strict metadata comparison, not an unexpected boot-file modification.
+
+`S540-SD-Interno-v1.2.zip` (SHA-256 `1f877fed2e1522b48665dcd0cb588627715c9d955dab3ff926e1890ca0ceefbe`) adds only the exact `./OC/._config.plist` exclusion to the non-SD comparison. All other metadata paths remain protected; config hashes, the two-file SD check and full backups remain strict. Config, driver and inactive-NVIDIA settings are byte-identical. Seven targeted filesystem checks verify allowed creation/change of this companion and restore direction, while changes to Boot, Microsoft and metadata at unrelated paths remain detected. These filter checks are local, not a new native installation.
+
+The current target already has the intended SD update. **Do not rerun its installation merely to clear the false alarm.** The next evidence is a cold boot from the internal EFI with the external disk disconnected and actual file access on the known SD card. Internal-boot SD operation remains pending; the S18R-disabled candidate is still not involved.
+
 ## Goodix fingerprint reader
 
 **Status: NOT WORKING in macOS. Further fingerprint investigation stopped by user request on 24 October 2026.** The findings below are retained as the explanation of the limitation, not as an active development plan.
