@@ -19,3 +19,11 @@ The earlier private DSDT had SHA-256 5139a06fd931e15c7655046d79e67a36d63cdd626fd
 The [collector](../../packages/fan-readonly/RACCOGLI-ACPI.command) performs no ACPI method execution or EC access. It excludes other ACPI tables, including MSDM, and deletes its temporary full registry property capture. A missing property is reported as inconclusive, not hardware incompatibility. Its Bash syntax and a mocked selection/privacy flow were checked locally; native export remains pending. The resulting firmware data remains private.
 
 Candidate fan fields/methods and the Game Zone GUID must be verified in the actual DSDT/SSDT before an isolated telemetry implementation is prepared. The v0.3.0 non-NVIDIA package and its six release assets are otherwise prepared and reviewed; publication is held for this requested investigation.
+
+## macOS export result and Windows fallback
+
+The supplied S540-Ventole-ACPI.nzl3FL report contains no firmware tables. It reports the DSDT property not exposed by IORegistry and zero exported SSDTs. This is inconclusive for sensor support, not evidence that the firmware has no fan methods. No EC access was attempted.
+
+The next [Windows collector](../../packages/fan-readonly/windows/LEGGI-DSDT.ps1) reads only DSDT via the documented GetSystemFirmwareTable ACPI provider. It verifies signature, length, checksum and SHA-256 before writing a fresh report. It does not request MSDM/SMBIOS, read EC registers or install drivers. The native API invocation on the Lenovo remains pending. PowerShell parser, eight pure helper checks and the C# declaration/reflection contract passed locally; those are not a Windows hardware result.
+
+The Windows API returns only the first table when multiple tables share a signature, so this tool does not claim to recover all SSDTs. DSDT will first be checked for EC fan objects and the Game Zone WMI GUID. [Microsoft API contract](https://learn.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getsystemfirmwaretable).

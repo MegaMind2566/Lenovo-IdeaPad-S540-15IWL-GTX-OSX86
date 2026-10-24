@@ -1,0 +1,33 @@
+S540 — lettura DSDT per analisi ventole — Windows v1
+
+Avvia Windows direttamente da rEFInd / Windows Boot Manager. Estrai l'intera
+cartella S540-Ventole-DSDT-Windows-v1 in Downloads, poi in PowerShell esegui:
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$env:USERPROFILE\Downloads\S540-Ventole-DSDT-Windows-v1\LEGGI-DSDT.ps1"
+
+Non occorre avviare PowerShell come amministratore. Se termina con RACCOLTA
+DSDT COMPLETATA, allega lo ZIP S540-Ventole-DSDT.*.zip creato sulla Scrivania.
+La cartella con gli stessi dati viene conservata accanto allo ZIP.
+
+Il programma usa soltanto GetSystemFirmwareTable di Windows per leggere la
+DSDT del firmware. Verifica firma, lunghezza e checksum ACPI, poi salva
+DSDT.aml e report.json in una nuova cartella. Non sovrascrive report esistenti.
+Il report riporta l'hash SHA256, i campi OEM dell'header e, se disponibili,
+produttore e modello del computer. Non raccoglie seriali, nome utente o nome
+computer e non richiede dump di altre tabelle ACPI.
+
+La lettura non installa driver, non invia comandi al controller EC e non
+modifica EFI, Windows Boot Manager, OpenCore, BIOS, NVRAM o velocita ventole.
+Un hash diverso da quello precedente viene segnalato, ma non blocca il report.
+
+Questa raccolta estrae soltanto la DSDT: l'API Windows restituisce solo la
+prima tabella quando ci sono piu SSDT con la stessa firma. Non dichiara quindi
+di aver estratto tutte le SSDT. La DSDT verra analizzata offline per cercare
+metodi di lettura RPM realmente presenti nel firmware del Lenovo.
+
+Il comando -SelfTest verifica header, limiti, identificatore API e SHA256 con
+fixture artificiali, senza leggere firmware o creare report sulla Scrivania.
+Non sostituisce una verifica delle API native sul Lenovo.
+
+Riferimento API Microsoft:
+https://learn.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getsystemfirmwaretable
