@@ -284,10 +284,12 @@ def sdk_references(output,composed,native_home,cc,cxx,sdk,project_rows,include,e
     protocol_symbol=protocol_image.named('_s540ExperimentalProtocolOffsets')
     protocol_section=protocol_image.sections[protocol_symbol['section']-1]
     protocol_offset=protocol_section['offset']+protocol_symbol['value']-protocol_section['address']
-    offsets=list(struct.unpack_from('<21I',protocol_image.data,protocol_offset))
+    offsets=list(struct.unpack_from('<29I',protocol_image.data,protocol_offset))
     require(offsets[:2]==[144,80] and offsets[3:13]==[104,8,16,32,64,96,128,72,8,56] and
-        offsets[13:16]==[2,104,56] and offsets[17:]==[48,20,24,40] and
-        offsets[2]==568 and offsets[16]==464 and offsets[16]+104==offsets[2],
+        offsets[13:16]==[3,104,56] and offsets[17:21]==[48,20,24,40] and
+        offsets[2]==776 and offsets[16]==464 and
+        offsets[21:]==[144,64,568,712,28,32,112,31] and
+        offsets[16]+104==offsets[23] and offsets[24]+64==offsets[2],
         'Independent actual SDK wire/build-identity/native-profile offsets differ from the typed ABI')
     records['experimental-protocol-layout']=dict(source=str(protocol_source),source_sha256=composer.sha(protocol_source),
         object=protocol_object.name,object_sha256=composer.sha(protocol_object),offsets=offsets,

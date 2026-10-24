@@ -1,0 +1,406 @@
+{
+  "GPU_initialization_proven": false,
+  "canonical_ancestor_profiles_changed": false,
+  "composition_sha256": "85a7632aa3aafd625c987b1820ce5c2d81dc99cccce41ed78480909b708bc2aa",
+  "cross_compilation_directory": "/workspace/scratch/9046a5958dfd/project/build/b6-final-cross-66",
+  "cross_compilation_native_darwin": false,
+  "cross_compilation_report_sha256": "7e4338cfcee6602464c910684256a55ef3d3ecc42e737a398cd376c4a8f38da2",
+  "cross_compilation_results": [
+    {
+      "object_sha256": "c0dde8ef5db93a6f150717c69a0d56e6494cf8329c4097f33a8278cfccf81f0a",
+      "source": "packages/nvidia-darwin-services/src/S540NvidiaDarwinCheck.cpp",
+      "source_sha256": "e107e33b951d9f3014add741f1e1c46b8cd18410512e3c16fe855a5768e87549"
+    },
+    {
+      "object_sha256": "f9dda8fce30f93a117eae547cb2cf42357d5578f2827a1e6c32bf4b648242044",
+      "source": "packages/nvidia-darwin-services/src/S540NvidiaDarwinPlatform.cpp",
+      "source_sha256": "1315a85cb5d068ea5c283c2d6bed900c78e1f91593367b257f107e082dc7132f"
+    },
+    {
+      "object_sha256": "49761a097a1862d72b6d85466cc6f156da6c7c1e4561f88479f39379fd00911f",
+      "source": "packages/nvidia-darwin-services/src/S540NvidiaDarwinProcess.cpp",
+      "source_sha256": "ea6ae4bbb4b0ba10f2f896063821187f929f9300846e29b011c696400d64e6c5"
+    },
+    {
+      "object_sha256": "18dff4571407031ba9431f8743d0bb2232e69166a12a89b7844cf217d71b275d",
+      "source": "packages/nvidia-darwin-services/src/S540NvidiaDarwinRuntime.cpp",
+      "source_sha256": "946bd3ac525b5f9c5cb520abb2ca21ed27eed6b744ae9c984babfe97c1b11abd"
+    },
+    {
+      "object_sha256": "d26dec232d863e895bba86d731b9137514eb62f343c68ed1db10067c96b0a05b",
+      "source": "packages/nvidia-darwin-services/src/S540NvidiaDarwinSync.cpp",
+      "source_sha256": "cb871b02e9de5c3d575911253101696ebed20b6caf86a348db58cc2b3e7e127b"
+    },
+    {
+      "object_sha256": "4a970af0ab1efb6a85d5e73d1a91414f741c8802914167ce6ff49830524f99a9",
+      "source": "packages/nvidia-darwin-services/src/S540NvidiaDarwinTimer.cpp",
+      "source_sha256": "01e4ab7446e4f9de10b948e8427fea6abc2de3751e08587f93404bab93572ec3"
+    },
+    {
+      "object_sha256": "2fb32a5eb5e5d605854a178c7c6abe1dc5feea6bf47147e3df56bfe9db8c2dab",
+      "source": "packages/nvidia-darwin-services/src/S540NvidiaDarwinUserCopy.cpp",
+      "source_sha256": "ae48eb76217c8f6d0264b92bc2761076293f592e706f725ff7c4246464f0dbdb"
+    },
+    {
+      "object_sha256": "a33b2ca060d54219b469dd99d5b3f1752b8da0c16f17245f1fb64097f287ea9f",
+      "source": "packages/nvidia-darwin-services/src/S540NvidiaDarwinWork.cpp",
+      "source_sha256": "1edc6a9612445bc991a29381bddc34d6d48019fab947f555b99a8914329de63b"
+    },
+    {
+      "object_sha256": "36438d8f84992a59b2a1ab887091333e1a4341f5bee5fde89480f5aa0e5d403d",
+      "source": "packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp",
+      "source_sha256": "cbf46ffaea7f1f4131c4e3f4a9600478deb22e2f6cc4b2554b1b17f125b15810"
+    },
+    {
+      "object_sha256": "42a841c36b357fe275d3bc47457e908441b6533c8e4a184e559729ef81963350",
+      "source": "packages/nvidia-device-transport/src/S540NvidiaDeviceCheck.cpp",
+      "source_sha256": "3258df83b0b3c1fe17d5c1ef35b78f05e7279bbbd324de499c61cbf1066b09ee"
+    },
+    {
+      "object_sha256": "3e48413ef924964303e2d9bc34e47335178a68c5bfd3383cbe75a46f7b334335",
+      "source": "packages/nvidia-device-transport/src/S540NvidiaDeviceServices.cpp",
+      "source_sha256": "392963aab766158890bdd056c1c295d0e9bdce06a0ad49c3c3553fcbc31ac528"
+    },
+    {
+      "object_sha256": "090a66f283206a3d6ed9dbf4146d9f18def99c3f3271c22bfb2af824e61d0b65",
+      "source": "packages/nvidia-device-transport/src/S540NvidiaDeviceTransport.cpp",
+      "source_sha256": "46f2a708536568fbef13fbd7fe9d42d18d78b1c4bdf45ef83be9ae10a2b2c218"
+    },
+    {
+      "object_sha256": "5559d4939578be2c64fe655d4a6c81e308f6aa222a201373a6afacd0c28b5fb0",
+      "source": "packages/nvidia-device-transport/src/S540NvidiaUnsupportedMemory.c",
+      "source_sha256": "0b7ed2f522d9b4fab7d2d2cc3b6328c1832c26994ae8799f5ff84647c35448ff"
+    },
+    {
+      "object_sha256": "5ef24c5e9e80ee8dcd67bf94c2264a0f87c6d1b3b79afd547714eed5b93cea5b",
+      "source": "packages/nvidia-firmware-assets/src/S540NvidiaFirmwareAssets.cpp",
+      "source_sha256": "9d0723f9e3fd8902dbbd85784a039d986d9b445aa423fd038770815f95b9c9ea"
+    },
+    {
+      "object_sha256": "7fdcaaa5107cd20c9574c25b5b13378a0d961d6fecceea8dee958200609f4353",
+      "source": "packages/nvidia-global-rm-crypto/src/S540NvidiaGlobalCrypto.c",
+      "source_sha256": "bb862943b85b6a5672f217a56033aa92ee734cd8e52558a602fe1cfbd00c59e4"
+    },
+    {
+      "object_sha256": "185ab5694c4cdcea20460dd0a4d162f6c08d4a189ed55f9f5273252ff2be77e1",
+      "source": "packages/nvidia-global-rm/src/S540NvidiaGlobalRmAcpi.c",
+      "source_sha256": "4bc3356ae2ec4ea30989d22b19d1b75b947ce8180f5504cf9f1f4ca1d2660a63"
+    },
+    {
+      "object_sha256": "e0535fff8d19e7cb0da62f8dbf2b16f188e084b29ceda1cc1e771c0fd458ce9f",
+      "source": "packages/nvidia-global-rm/src/S540NvidiaGlobalRmBuildProfile.c",
+      "source_sha256": "f6a36c491eac61ae447b63e16673276cb06686ab7414717dfe217f3a8c3d7dc1"
+    },
+    {
+      "object_sha256": "eaa3a915c8e782bb21a9a3c786b9bd5fd2b5d6595fd602627b20e2e6d7502c4f",
+      "source": "packages/nvidia-global-rm/src/S540NvidiaGlobalRmCentralPolicy.c",
+      "source_sha256": "5659a3f497c6d86a27ee5eefb03199b2b634b1d4237846ab05c3b4199612f9d5"
+    },
+    {
+      "object_sha256": "81bbd0e51560881835581fe081ca374ec9e7ae4243b9d27d361033f1ba191e31",
+      "source": "packages/nvidia-global-rm/src/S540NvidiaGlobalRmDiagnostics.c",
+      "source_sha256": "9ad9ce13a99b1332d7e9645fe3a1f767793084625670e0b7f4ee6d50f4418778"
+    },
+    {
+      "object_sha256": "5e9ae1b9a03eeb622889a6b40cbe282dcbca2e2eccfd753650a471e5320c8b36",
+      "source": "packages/nvidia-global-rm/src/S540NvidiaGlobalRmFeatureProfile.c",
+      "source_sha256": "25e967f5a9387d1c838efd6a5fb497754952e05e69df765fd30c72884e449667"
+    },
+    {
+      "object_sha256": "cbc68e1f843e39e4f8580e766242bf24637235bff636a978692a4624be246c1e",
+      "source": "packages/nvidia-global-rm/src/S540NvidiaGlobalRmFirmwareTables.c",
+      "source_sha256": "150d68d186967328a8317e6035904ae3713024d2b0f3627a98d2b960d7d1f7b9"
+    },
+    {
+      "object_sha256": "347dd1bb2427e86eb22f98901aff7b87c2a9dfccfb1a04278e260c2407f8ba67",
+      "source": "packages/nvidia-global-rm/src/S540NvidiaGlobalRmFirmwareTablesBackend.cpp",
+      "source_sha256": "8b96e8709589ebaa3505a829a75edda6cb9fa0ccdf560f76259e857f72afa174"
+    },
+    {
+      "object_sha256": "31618e97737af9f4cf4499ea9afa4f8974e6772454d5497db9e0bfb6a586bfb3",
+      "source": "packages/nvidia-global-rm/src/S540NvidiaGlobalRmFormat.cpp",
+      "source_sha256": "af9c218dd148fe4cfcaf2481910653324632588083fb74fda65cbadff4b97d36"
+    },
+    {
+      "object_sha256": "b73d5cc61e9a39556802738ab3da14fd4822b3dbd74529c0357324a71ebd7b57",
+      "source": "packages/nvidia-global-rm/src/S540NvidiaGlobalRmHost.cpp",
+      "source_sha256": "b67fce0e40cdcb456e8a665ec6c3d59561343fb4aeb975153fe411939ac71f6f"
+    },
+    {
+      "object_sha256": "ced0c926e79b5912e56e079a446dafef690c2be72bfb68270d656d1e16377ce1",
+      "source": "packages/nvidia-global-rm/src/S540NvidiaGlobalRmLifecycle.c",
+      "source_sha256": "cda8173f84b90fa3fdb41a961e68b2d2117c04cf2de550f161b86bf44d6264de"
+    },
+    {
+      "object_sha256": "0c2505a09feac306ab0472e86e031c9ee60b82ba0005ef0d347ca76aa51a44e5",
+      "source": "packages/nvidia-global-rm/src/S540NvidiaGlobalRmNvlink.c",
+      "source_sha256": "259c7df5b97c361a2f7c53f0b5b3a70f136a9d3cb35829e82609c6943cfef6ad"
+    },
+    {
+      "object_sha256": "c93937693cc03d94353c22535348182ce0724350fd97446987b59c21597f8ea0",
+      "source": "packages/nvidia-global-rm/src/S540NvidiaGlobalRmOs.c",
+      "source_sha256": "314bf0ee56bc234a949ede6d7729e18b81eef2583bec96f5c471143a315f0ced"
+    },
+    {
+      "object_sha256": "a761866b8816649db2bbb3daf560d1a5171b11c98626688226f97f0a33b0f4e3",
+      "source": "packages/nvidia-global-rm/src/S540NvidiaGlobalRmRegistry.c",
+      "source_sha256": "3e670a89d413ca1416097239aa09a906ff9eec9584d38085ee27da5a8760bb75"
+    },
+    {
+      "object_sha256": "fd0564e1b1c2b95648206c4ef8d26ba379362e71403c397696447206ca0ad376",
+      "source": "packages/nvidia-global-rm/src/S540NvidiaGlobalRmSystem.c",
+      "source_sha256": "4da3c2a2ee604ef8dbb6824ae5f44039d1c235357569784f9bb812f439f2591b"
+    },
+    {
+      "object_sha256": "209ba1abc6ad3770ba3d16f959e6149fb36f41bdeef0da9b67075bc802c412e3",
+      "source": "packages/nvidia-global-rm/src/S540NvidiaGlobalRmSystemBackend.cpp",
+      "source_sha256": "cf00e0e583a64f425a54bf1e51bf67d55f7be8a4ef4412fc999feebecc2f6e03"
+    },
+    {
+      "object_sha256": "b9cbf525595ffd5c2171f8b338005dd42020108dd6a4b37d4eb9903e6bab049e",
+      "source": "packages/nvidia-global-rm/src/S540NvidiaGlobalRmUserCopy.c",
+      "source_sha256": "b982f547be1302d96dae7a1f47bee35730f754ead2913c87a38b6b92f45b9d1f"
+    },
+    {
+      "object_sha256": "43685c59b3fbebbecdef36dce199cfe4854c9e4d021e6a8b62ec9b7d3d7eca15",
+      "source": "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c",
+      "source_sha256": "38f8b9d8075a7306c4c5a42181f80e924eda1cfb7e383d548e6ec27ebaf747d5"
+    },
+    {
+      "object_sha256": "7dd221d0a4d70c065e0720fa61468f3826a7ca49f9582c5a58f0ab04ba0db263",
+      "source": "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellationOriginal.c",
+      "source_sha256": "356e74acbbd31bf8a7d47c109818af9123c292704d45e54149485071c2f3388c"
+    },
+    {
+      "object_sha256": "560c0c9d6a7a20635d2fdb3e25f090a9c3e56a6cad52aba7e0a24a371f10df0c",
+      "source": "packages/nvidia-gsp-bootstrap/evidence/S540NvidiaGspOriginalEvidence.c",
+      "source_sha256": "5ca34c09b6f6699c90962b38dbac3fef63831ccc4e89fdfaea22d3c6e05c4a1b"
+    },
+    {
+      "object_sha256": "bb7ab1fbaec0ba253888cb22c8c034818a8230f7507199f7c9fd3ae41b0d237d",
+      "source": "packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPlatform.cpp",
+      "source_sha256": "d2d9585531c49587f66a58efa0edec6d392ae3ec235fa83e6dd254fdb8775380"
+    },
+    {
+      "object_sha256": "c5d66df9143a867c7310b4bc02f4be2f2f9fe6b5a587321ff70e5a28e88a02e4",
+      "source": "packages/nvidia-gsp-bootstrap/platform/S540NvidiaGspPower.cpp",
+      "source_sha256": "178bf693cdecd8bc2d2a433d282ab87cf396a32b90f2d89f9e0641c075dade33"
+    },
+    {
+      "object_sha256": "6f9448d1f565a3d935946f9d66d8aae0e9b40b83a89926403191f1902b3cb005",
+      "source": "packages/nvidia-gsp-bootstrap/platform/S540NvidiaPlatformParsers.cpp",
+      "source_sha256": "dc97de2a5946e348a6f486b1c716972bbb89aa77859de3a0136d361aca182287"
+    },
+    {
+      "object_sha256": "1f04524df630a8b3c1318bfe9aa19ada721ec23c86b1e283d0210b2884202e92",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-allocator-stack-closure/S540NvidiaAllocatorEpoch.c",
+      "source_sha256": "74571a67c3e0f47633331a9e7ab4c66bbd08782ec41803ad294bc236ad8a59ae"
+    },
+    {
+      "object_sha256": "c9980812009017c6c791159fe21309863d2c4c19329384e09e0d882b151ae1fb",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-control-state/S540NvidiaControlState.c",
+      "source_sha256": "7a03e5e0c3a5237cd09b7c3768604ee29bb8b5bf0b38504e373ac422dea77e0e"
+    },
+    {
+      "object_sha256": "d2ea109c11a704017993b67a13c00752fb0589516ee62dbe304fe1492b7cc4fc",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-event-owner-policy/S540NvidiaFirstTxnRcOriginal.c",
+      "source_sha256": "8e9894fed394faca05500196c20f74087998d5cfea20f8506dccd3a737bdd8e3"
+    },
+    {
+      "object_sha256": "f3c634c84ef5bdeb9e495abb74cb2faf6626006b36da37b96c9bf136c0f57a39",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/S540ExperimentalTargetKernel.cpp",
+      "source_sha256": "27d549ed299294c669c67575cae2a207df84cb0bf3c5474487191c2dd584769a"
+    },
+    {
+      "object_sha256": "a8c345abb96044c0d3a6c9d19df244b9e97d1739e51ff826d2d55cdb416962a7",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/S540ExperimentalTargetState.c",
+      "source_sha256": "0ba99fb02a224efd8c7db492f57c841d790c28e7e6a218e6034a585cac5c9f13"
+    },
+    {
+      "object_sha256": "e2050cab8c8f60dfd8133bf09ef71cef56638d43646112dd61cc41c702126d82",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-first-transaction/original/S540NvidiaGspFirstTransactionOriginal.c",
+      "source_sha256": "16f7bb9bff2e675c728d739d7aca80ccb18a557c8380840243fc2e7a79e5bbaa"
+    },
+    {
+      "object_sha256": "9377c9966884995f443310f17224cec305e589fe66c25d4e93b4651a70630e05",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c",
+      "source_sha256": "074354ac92fa4b5cd55d37c7cff4c557c2b132b91db1473420e0c33924198c5c"
+    },
+    {
+      "object_sha256": "e7b0d47f9479648076d6f2e19282676d6087f959611c951f1a4e084599509fcf",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-first-transaction/services/S540NvidiaFirstTxnServices.cpp",
+      "source_sha256": "c67f799136b81f986f06008395b068c7ae7b702aab8ebd62844ccdced5a732b0"
+    },
+    {
+      "object_sha256": "5546aa3d528e0416d29d789d8237db20052980473580b24f9f0b840b1e667286",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-irq-callback-closure/rc/S540NvidiaIrqOriginal.c",
+      "source_sha256": "287620b5a47040761865520c546e91cbe8ff5275bab772bab8a836d2cc65bb12"
+    },
+    {
+      "object_sha256": "21b8d8896eab5256cd49e54775682193c287dcf48f5d3eaa5ce7a853ee967103",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-live-platform-closure/S540ProspectiveLivePlatformClosure.c",
+      "source_sha256": "4472d6f2db83b199e8c45d9cb203fce41c80d3607c7bf130c2cc0421eb788aa9"
+    },
+    {
+      "object_sha256": "ba9cd6181dc1b35899bf4cda6ee25b5118ed2eb37c27bc9f40b0c6c91798a0fb",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-loader/S540ProspectiveLoaderKmod.cpp",
+      "source_sha256": "c02258f7573506cea8100873873c9e56498bae5d3954b20a5d87cbbd0a37e151"
+    },
+    {
+      "object_sha256": "1b0b06466d972b05ca43c640ccf0b290f90af2afe5131580d2c28035b6c75a90",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-loader/S540ProspectiveLoaderState.c",
+      "source_sha256": "f1d95ec85bf22f10108b0245e5a24156afb2a66fda557fe269c149a0335f8204"
+    },
+    {
+      "object_sha256": "ded51a7b64262c0950e3cbaa8c8115125622d7071d31cdb0942c5fa3108cfec0",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-loader/roots/S540NvidiaGspOriginalRoots.c",
+      "source_sha256": "3a0e7dc194656727ca86b0bd6ed46651ed26257806e7a87a682a30f9d9ba2a5d"
+    },
+    {
+      "object_sha256": "81fefcbb3fd7792be4c1572490c75afe831ae68cb90511dfffdf6df34fdca04c",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-mapping-closure/S540NvidiaMappingClosure.c",
+      "source_sha256": "bcd15fb0400d6d7ca1a2fe116d796e722523412a64bddd3c67111474bf02ff75"
+    },
+    {
+      "object_sha256": "b4a5a51158b9fb1853c2da9a3916541a600d606e48ebcbc87b4be0a3323e2af5",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-platform-closure/S540ProspectivePlatformClosure.c",
+      "source_sha256": "42a7c0e15df5e83ab776c6e26083e2b0eaf3db126a15f86fa8a8ce1f9d162d82"
+    },
+    {
+      "object_sha256": "29f340fdb3eb1a69b9b10533ae0c75b48a66f2c8764b1fb6b273a9b12c007bd1",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-retained-build-identity/S540ExperimentalBuildIdentity.c",
+      "source_sha256": "e4746deec07995a7230c1923353fa89fe3e46e13de3108d84975f4af00d0a535"
+    },
+    {
+      "object_sha256": "d13eaf9c5e0b61351efb1f0cde6c5d6826c320c1b65c4f53908df8a6d460c551",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-retained-stop/S540NvidiaRetainedShutdown.c",
+      "source_sha256": "98639502f5fe54dd9c84c280df28dcc10700056f45bc5a1d4083549060715d29"
+    },
+    {
+      "object_sha256": "52f473946c6686dec9c383f97fed23a3af93bd6e6c4b677183ebe8e3846cc676",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-rm-lock-ownership/S540ProspectiveRmLockOwnership.c",
+      "source_sha256": "c585314473a465550aeeb1922dfc43c17d4f3be1fa52026044b1a8005fe157d5"
+    },
+    {
+      "object_sha256": "f5ddd33edc9f1d1e1db25f960a32c7e7c66d28898f25f33587ad22111be208f3",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-runtime-coordinator/S540ExperimentalAssets.cpp",
+      "source_sha256": "ff4ab9460b6a483604d4bf63f1adac5476f26f86ba6c71e99a8b696d6923b40b"
+    },
+    {
+      "object_sha256": "3fc3cec84af47208a32444425d15bc0fee3f46f5183b01a786793e1e05098910",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-shutdown-protocol/S540NvidiaShutdownProtocol.c",
+      "source_sha256": "1ee064c0ea38e829274dd13cf25fb386719e6f922e3b25d6e03a5db2a59bc2ba"
+    },
+    {
+      "object_sha256": "92fec105179325c4dd4cbb2b51fe39be8701c421cb5751c27f8bdd5d6fe4a93f",
+      "source": "packages/nvidia-gsp-bootstrap/prospective-uvm-disabled/S540ProspectiveUvmDisabled.c",
+      "source_sha256": "3ef048057f1cab4b9098f4a24d622105719694f7906b9bcda505ed5fb58aa42b"
+    },
+    {
+      "object_sha256": "279f63fd696e313f1dfb558fc7032ecee90e0292481d9f2bfb942552bb636be7",
+      "source": "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspBootstrap.cpp",
+      "source_sha256": "b7e8693ca032c1a66d99513923ab705c51eec3a6064be1c2b46e1f334a6a7932"
+    },
+    {
+      "object_sha256": "80e0c93eba7abbef7b6914a46a38219bda2e122c782b0dacb55cf16aaf019498",
+      "source": "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c",
+      "source_sha256": "8038d6c7ffa7871f37bbb49ca0fd4295ffa80621dcf2dca6319f49b47e3495d2"
+    },
+    {
+      "object_sha256": "439ee009ecb7f9e63bd8644838a8e484e25b45ee4d8db34c8dcb9fbd950f3b7b",
+      "source": "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspDispatcher.cpp",
+      "source_sha256": "35b4d00126188a5f5a3c0107c0ece86b45910712ae23eaa6e275ec55da28f7b7"
+    },
+    {
+      "object_sha256": "7323c5f01d7207a0a550b67d795797d4a5c492d2a19e31924e43bd64c966389d",
+      "source": "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspFirmware.cpp",
+      "source_sha256": "3d4089d4c17d7b87e27e05952d10e3c940510e14fee014e2a59bd0dc015ada59"
+    },
+    {
+      "object_sha256": "8dacf4e4a95198ea5f5f6e362adc9efde3e09d636aa504613a0bb1ae4bc1ba72",
+      "source": "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspFirmwareOriginal.c",
+      "source_sha256": "ba6e5c49870087e07facee8f3dfbc1116a9a2472eb3f4d5e1d195d6e24a80f0b"
+    },
+    {
+      "object_sha256": "4c87964659fa72398f19a4aeeef7609fbcf742828b7e4c0fc1e0b5ef006958ef",
+      "source": "packages/nvidia-gsp-bootstrap/timers/S540NvidiaGspTimersOriginal.c",
+      "source_sha256": "d17ecb7d1fd1d5fbe5b7ca52f504f11abf8dedfdc71c6bef4243e30fafdfda7e"
+    },
+    {
+      "object_sha256": "59c6672d57e86951e77c9664721820e5e9572c4e792fe119fcdc6eab7d5c8d2a",
+      "source": "packages/nvidia-hardware-transport/firmware/S540NvidiaFirmware.cpp",
+      "source_sha256": "e7079d988f8fc3d582f5b55f0fd5d34ae5db6a643a964e2f08fef65d29f2a5e8"
+    },
+    {
+      "object_sha256": "a0e80e4322de83107ce34993e65bef32283f93188edbc75bdc5c51e038072ccc",
+      "source": "packages/nvidia-hardware-transport/src/S540NvidiaPci.cpp",
+      "source_sha256": "aa68554b9162f5a81c141514d0a8467f53527ec0774ecca048b6dbb900acc03e"
+    }
+  ],
+  "cross_compiler": {
+    "authoritative_darwin_execution": false,
+    "compilers": {
+      "cc": {
+        "path": "/workspace/scratch/9046a5958dfd/llvm-bin/clang",
+        "version": "Ubuntu clang version 18.1.3 (1ubuntu1)"
+      },
+      "cxx": {
+        "path": "/workspace/scratch/9046a5958dfd/llvm-bin/clang++",
+        "version": "Ubuntu clang version 18.1.3 (1ubuntu1)"
+      }
+    },
+    "host_control": true,
+    "host_system": "Linux"
+  },
+  "evidence_sha256": {
+    "builders/evidence/retained-first-init-b6-local/image-controls.json": "2a943df1be44c1ed5c0abaaedb5a1d36c2c873be27f2ec5c6e5a04366b25e0ab",
+    "builders/evidence/retained-first-init-b6-local/irq-source-controls.json": "ad900b1a9652169cdcc9764660c1433bb62b3d878a54e22567fb1a567e3e0620",
+    "builders/evidence/retained-first-init-b6-local/source-replay-controls.json": "4df6549a714cf3df471673491aba84bc1891df1a4da7d8575403295a5738a1de",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/evidence/b6-backend-controls.json": "8a4f7d9cf3b1b716a240005ddc0016c5efb2141b71cca775f4c3471f34a4713e",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/evidence/b6-client-controls.json": "ecb3bb6677a3384cf97a4a212bbb35d9f9baeb76ee2a7f9fc370ffc973b14a5b",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/evidence/b6-sdk-cross-compilation-controls.json": "8d05ff7e8b9ff1de974760c84c323938132a589ddb51a894920c06f4947e7b24",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/evidence/b6-state-controls.json": "24527d02c3968f648ec630a2a0e649f7e12b3e0eea49faa6edaf8ac994e4f935"
+  },
+  "format": 1,
+  "github_native_jobs_started": 0,
+  "historical_object_reuse_added": false,
+  "image_controls": 37,
+  "independent_review": "PASS: IRQ route authority, synchronized diagnostic publication, v3 consumer validity and explicit unavailable states",
+  "local_orchestration_correction": "Discarded an earlier cross result after intentional source-replay mutations overlapped it. Final source mutation tests completed/restored before the fresh final cross and SDK runs.",
+  "native_compilation_performed": false,
+  "physical_release_or_unload_authorized": false,
+  "project_translation_units": 66,
+  "scope": "B6-local-controls-before-one-native-validation",
+  "sdk": {
+    "file_count": 1232,
+    "provided": true,
+    "reference_commit": "3f750085caa17ec3a7880f11c11bf4f48cd6a164",
+    "source": "clean pinned Git checkout and every tracked blob",
+    "tree_sha256": "50d4e3689ba17a2865ad707dc6ba70f4273a6b12fe8faa1ea15bb02f92ce0fc8",
+    "used_by_original_c_tus": false
+  },
+  "selected_profiles": [
+    "pm-event",
+    "dma-stop",
+    "checked-context",
+    "first-lock-observation",
+    "runtime-coordinator",
+    "retained-stop",
+    "preparation-observation",
+    "pci-memory-bars",
+    "irq-source-selection",
+    "experimental-target-control"
+  ],
+  "source_identity": {
+    "format": 1,
+    "generated_source": "packages/nvidia-gsp-bootstrap/prospective-retained-build-identity/S540ExperimentalBuildIdentity.c",
+    "policy_sha256": "1dadd1153cab0de4dfa254f452d91b09b806f7a00db3716e3a5663fd19119ef6",
+    "required_kernel_stack_bytes": 16384,
+    "source_identity_excludes_only_generated_identity_source": true,
+    "source_sha256": "ad1835935ae2c9c672b2cf6ff0da6edb11b53afc3dbdf8de70092dc45126f05d"
+  },
+  "source_replay_mutation_controls": 23,
+  "status": "passed-local-controls-native-and-target-pending",
+  "system_security_or_EFI_changed": false,
+  "target_loader_executed": false
+}

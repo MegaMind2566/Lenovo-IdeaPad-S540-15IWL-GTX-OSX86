@@ -2,8 +2,8 @@
   "format": 1,
   "scope": "manual-once-per-boot-retained-first-initialization",
   "protocol_version": 1,
-  "snapshot_version": 2,
-  "snapshot_bytes": 568,
+  "snapshot_version": 3,
+  "snapshot_bytes": 776,
   "preparation_snapshot_offset": 464,
   "request_bytes": 144,
   "identity_bytes": 80,
@@ -20,7 +20,11 @@
   "cancellation_publishers_joined_before_owner_stop": true,
   "target_build": "25G241",
   "target_darwin_release": "25.6.0",
-  "target_pci": {"vendor_device": "1f9110de", "class_revision": "030000a1", "subsystem": "380617aa"},
+  "target_pci": {
+    "vendor_device": "1f9110de",
+    "class_revision": "030000a1",
+    "subsystem": "380617aa"
+  },
   "automatic_gpu_start_on_module_load": false,
   "normal_unload_after_request": false,
   "retains_facade_provider_module_until_reboot": true,
@@ -29,5 +33,13 @@
   "whole_dma_stop_proven": false,
   "formal_stack_capacity_proven": false,
   "pm_acknowledgement_authorized": false,
-  "acceleration_test": false
+  "acceleration_test": false,
+  "runtime_snapshot_offset": 568,
+  "irq_source_snapshot_offset": 712,
+  "runtime_observation_bytes": 144,
+  "irq_source_observation_bytes": 64,
+  "runtime_call_attempts_and_returns_observed_separately": true,
+  "runtime_original_entry_distinguishes_global_from_adapter": true,
+  "runtime_first_failed_stage_preserved": true,
+  "irq_source_selection_observational_only": true
 }

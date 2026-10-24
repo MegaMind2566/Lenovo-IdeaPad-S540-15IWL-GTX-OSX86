@@ -18,5 +18,6 @@
   "unknown_contributions_formally_bounded": false,
   "kernel_stack_bound_proven": false,
   "scheduler_completion_bound_proven": false,
-  "production_candidate_allowed": false
+  "production_candidate_allowed": false,
+  "irq_receiver_identity": "The actual current source registers the retained Platform owner at its uniquely selected message-signaled irqSource; callback receiver/target closure is unchanged. Source selection does not prune graph edges or prove indirect targets."
 }

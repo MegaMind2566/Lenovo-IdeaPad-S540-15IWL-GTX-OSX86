@@ -4,7 +4,9 @@ _Static_assert(sizeof(S540ExperimentalRequest) == 144, "Fixed manual request ABI
 _Static_assert(sizeof(S540ExperimentalBuildIdentity) == 80, "Fixed generated identity ABI");
 _Static_assert(sizeof(S540PreparationObservation) == 104, "Fixed preparation observation ABI");
 _Static_assert(sizeof(S540PreparationPowerObservation) == 56, "Fixed preparation PM observation ABI");
-_Static_assert(sizeof(S540ExperimentalSnapshot) == 568, "Fixed version2 snapshot ABI");
+_Static_assert(sizeof(S540ExperimentalRuntimeObservation) == 144, "Fixed runtime observation ABI");
+_Static_assert(sizeof(S540ExperimentalIrqSourceObservation) == 64, "Fixed IRQ source observation ABI");
+_Static_assert(sizeof(S540ExperimentalSnapshot) == 776, "Fixed version3 snapshot ABI");
 static NvBool equal(const NvU8 *a, const NvU8 *b, NvU32 n) {
     NvU32 different = 0, i;
     for (i = 0; i < n; ++i) different |= a[i] ^ b[i];
@@ -32,6 +34,11 @@ NV_STATUS s540ExperimentalModuleEnter(S540ExperimentalState *state) {
         .stopObservationStatus=NV_ERR_NOT_READY};
     state->snapshot.retainedStop.format=1;
     state->snapshot.retainedStop.bytes=sizeof(state->snapshot.retainedStop);
+    state->snapshot.runtime.format=1;
+    state->snapshot.runtime.bytes=sizeof(state->snapshot.runtime);
+    state->snapshot.runtime.snapshotStatus=NV_ERR_NOT_READY;
+    state->snapshot.irqSource.format=1;
+    state->snapshot.irqSource.bytes=sizeof(state->snapshot.irqSource);
     return NV_OK;
 }
 NV_STATUS s540ExperimentalServiceStart(S540ExperimentalState *state, NvU64 generation) {

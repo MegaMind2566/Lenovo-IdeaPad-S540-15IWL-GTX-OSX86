@@ -196,6 +196,49 @@ static void preparationSnapshot(S540ExperimentalSnapshot *out) {
         p->power.rawIOReturn = 0; p->power.rawIOReturnValid = 1;
     }
 }
+static void runtimeSnapshot(S540ExperimentalSnapshot *out) {
+    if(scenario<67)return;
+    S540ExperimentalRuntimeObservation *r=&out->runtime;
+    r->format=1;r->bytes=sizeof(*r);r->snapshotStatus=NV_OK;
+    r->stage=12;r->lastStage=r->firstFailureStage=9;r->firstStatus=NV_ERR_NOT_SUPPORTED;
+    r->attemptedMask=r->returnedMask=15;r->irqStatus=NV_ERR_NOT_SUPPORTED;r->originalStatus=NV_ERR_NOT_READY;
+    r->lifetimeRetained=r->cancellationBegun=r->ownerEpochBegun=1;
+    r->globalInitialized=r->globalOriginalReturned=r->originalEntered=1;
+    r->generation=17;r->observedHostStackBytes=r->requiredWorkerStackBytes=r->requiredIrqStackBytes=16384;
+    out->runtimeObservationStatus=NV_OK;
+    out->globalInitialized=out->originalEntryObserved=1;
+    out->adapterInitialized=out->firmwareLoaded=0;
+    out->initializationAttempted=out->initializationReturned=1;
+    out->initializationStatus=NV_ERR_NOT_SUPPORTED;
+    S540ExperimentalIrqSourceObservation *q=&out->irqSource;
+    q->format=1;q->bytes=sizeof(*q);q->sourceProbeAttempted=q->sourceProbeReturned=1;
+    q->sourceProbeStatus=NV_ERR_NOT_SUPPORTED;q->sourceCount=q->sourcesObserved=2;
+    q->inventoryValid=q->msiCapable=1;q->msiVectors=1;
+    if(scenario==68 || scenario==69){
+        r->stage=r->lastStage=11;r->firstFailureStage=r->firstStatus=0;
+        r->attemptedMask=r->returnedMask=S540_RUNTIME_CALL_ALL;r->irqStatus=r->originalStatus=NV_OK;
+        r->adapterAttempted=r->adapterInitialized=r->originalReturned=1;r->interruptInstalled=r->interruptArmed=1;
+        out->adapterInitialized=out->interruptInstalled=out->interruptArmed=1;out->initializationStatus=NV_OK;
+        q->sourceProbeStatus=NV_OK;q->messagedSources=q->selectedSourceValid=q->selectedTypeValid=1;
+        q->selectedSource=scenario==68?1:0;q->selectedInterruptType=0x10000;
+        if(scenario==69)q->sourceCount=q->sourcesObserved=1;
+    }
+    if(scenario==70){r->snapshotStatus=NV_ERR_NOT_READY;r->originalEntered=1;}
+    if(scenario==71){r->snapshotStatus=NV_ERR_IN_USE;r->originalEntered=1;}
+    if(scenario==72)r->format=2;
+    if(scenario==73)--r->bytes;
+    if(scenario==74)r->attemptedMask|=0x80000000U;
+    if(scenario==75)r->returnedMask|=S540_RUNTIME_CALL_ORIGINAL;
+    if(scenario==76)r->stage=0xffffffffU;
+    if(scenario==77){r->stage=r->lastStage=9;r->firstFailureStage=r->firstStatus=0;
+        r->returnedMask=7;r->irqStatus=NV_ERR_NOT_READY;}
+    if(scenario==78){r->firstStatus=r->irqStatus=NV_ERR_NOT_READY;}
+    if(scenario==79)q->format=2;
+    if(scenario==80)--q->bytes;
+    if(scenario==81){q->sourceProbeReturned=0;q->sourceProbeStatus=NV_OK;q->selectedSourceValid=q->selectedTypeValid=1;}
+    if(scenario==82 || scenario==86){q->sourceProbeStatus=NV_OK;q->selectedSourceValid=q->selectedTypeValid=1;
+        q->selectedSource=1;q->selectedInterruptType=scenario==86?0:0x10000;q->messagedSources=scenario==86?1:2;}
+}
 static void snapshot(S540ExperimentalSnapshot *out) {
     const NvU8 source[32] = S540_EXPERIMENTAL_EXPECTED_SOURCE;
     const NvU8 policy[32] = S540_EXPERIMENTAL_EXPECTED_POLICY;
@@ -215,7 +258,9 @@ static void snapshot(S540ExperimentalSnapshot *out) {
     out->retainedStop.attempts = stops; out->retainedStop.status = out->stopStatus;
     out->retainedStop.retained = requests != 0;
     preparationSnapshot(out);
+    runtimeSnapshot(out);
     if (scenario == 12) out->format = 1;
+    if (scenario == 83 || (scenario == 84 && observations==2)) out->format=2;
     if (scenario == 13) out->moduleEntryAccepted = 0;
     if (scenario == 14) out->controlServiceStarted = 0;
     if (scenario == 15) out->generation = 0;
@@ -238,7 +283,8 @@ kern_return_t IOConnectCallStructMethod(io_connect_t connection, uint32_t select
         ++observations;
         expect(!input && !inputBytes, "snapshot has no request input");
         if ((scenario == 29 || scenario == 46) && observations == 2) return kIOReturnError;
-        snapshot(output); if (scenario == 11) --*outputBytes;
+        snapshot(output); if(scenario==85 && observations==2)return kIOReturnError;
+        if (scenario == 11) --*outputBytes;
         if (scenario == 63 || (scenario == 65 && observations == 2))
             --((S540ExperimentalSnapshot *)output)->bytes;
         if (scenario == 64 && observations == 2) ((S540ExperimentalSnapshot *)output)->format = 1;
@@ -272,12 +318,13 @@ kern_return_t IOConnectCallStructMethod(io_connect_t connection, uint32_t select
 int main(int argc, char **argv) {
     if (argc != 2) return 2;
     scenario = (unsigned)strtoul(argv[1], NULL, 10);
-    if (scenario >= 67) return 2;
+    if (scenario >= 87) return 2;
     if (scenario == 10 || scenario == 47) stackBytes = 8192;
     if (scenario == 40) stackBytes = 32768;
     int target = (scenario >= 30 && scenario <= 38) || scenario == 47 || scenario == 48;
     int stopOnly = scenario >= 44 && scenario <= 46;
-    int readOnly = scenario == 3 || (scenario >= 53 && scenario <= 62) || scenario == 66;
+    int readOnly = scenario == 3 || (scenario >= 53 && scenario <= 62) || scenario == 66 ||
+        (scenario>=67 && scenario<=82) || scenario==86;
     char *run[] = {"experimental_ctl", "--run-once", "--ack-retained-first-initialization"};
     char *readonly[] = {"experimental_ctl", "--snapshot"};
     char *targetArgs[] = {"experimental_ctl", "--target"};
@@ -289,12 +336,12 @@ int main(int argc, char **argv) {
     if (scenario == 0 || scenario == 2 || scenario == 3 || scenario == 4 || scenario == 5 || scenario == 40 || scenario == 44) expected = 0;
     if (scenario == 1 || scenario == 29 || scenario == 45 || scenario == 46) expected = 1;
     if (scenario >= 49 && scenario <= 52) expected = 1;
-    if (scenario == 64 || scenario == 65) expected = 1;
+    if (scenario == 64 || scenario == 65 || scenario==84 || scenario==85) expected = 1;
     if (readOnly) expected = 0;
     if (target) expected = scenario == 30 ? 0 : (scenario == 47 ? 2 : 1);
     expect(actual == expected, "actual client exit reflects the requested route and observed RPC status");
     int ran = scenario == 0 || scenario == 1 || scenario == 2 || scenario == 4 || scenario == 5 || scenario == 29 || scenario == 40 ||
-        (scenario >= 49 && scenario <= 52) || scenario == 64 || scenario == 65;
+        (scenario >= 49 && scenario <= 52) || scenario == 64 || scenario == 65 || scenario==84 || scenario==85;
     expect(requests == (unsigned)ran, "only explicit valid RUN invokes REQUEST");
     expect(stops == (unsigned)(ran || stopOnly), "RUN errors still STOP; readonly snapshot never STOPs");
     if (ran) expect(observations == 2 && closes == 1 && stopOrder > requestOrder,

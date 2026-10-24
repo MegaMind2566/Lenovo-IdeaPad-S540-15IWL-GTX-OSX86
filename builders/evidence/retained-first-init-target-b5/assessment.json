@@ -1,0 +1,27 @@
+{
+  "adapter_initialized": false,
+  "apple_default_order": "legacy resolution then MSI appended; source zero is not a portable MSI identity",
+  "apple_primary_source_commit": "4822b27a36e2de70e231ecf2bf3021384fab6ec2",
+  "b5_attestation_sha256": "9defa8ce8306ffdf05eddfeb27c98771062827407594dbd19f49596b392d6579",
+  "b6_target_test_executed": false,
+  "device_predicates_mask": 127,
+  "diagnosis": "IRQ setup/selection is the leading candidate after transaction binding; current wire omits the runtime statuses and actual route. The target-specific wrong-index cause is not proved.",
+  "firmware_loaded": false,
+  "format": 1,
+  "global_initialized": true,
+  "initialization_status": 86,
+  "initialization_status_name": "NV_ERR_NOT_SUPPORTED",
+  "input_sha256": {
+    "controller.json": "a9134792b63d536764c7c0646d11e61cb7c11d6934452274dd508071fbd8ff77",
+    "result.json": "2003eca6b0108ea19838f67a40fef01d7f0a7ffd8557a834315fcbe523721d5b"
+  },
+  "interrupt_installation_observed": false,
+  "loader_status": 0,
+  "physical_release_authorized": false,
+  "preparation_status": 0,
+  "reboot_required": true,
+  "retained_stop_attempts": 1,
+  "retained_stop_original_wrapper_returned": false,
+  "scope": "B5-target-evidence-and-B6-investigation",
+  "transaction_bound": true
+}

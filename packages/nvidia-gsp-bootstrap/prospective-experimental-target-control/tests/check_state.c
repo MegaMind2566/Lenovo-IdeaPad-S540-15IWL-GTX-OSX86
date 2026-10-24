@@ -20,6 +20,11 @@ static void setup(S540ExperimentalState *state) {
     CHECK(sizeof(S540ExperimentalRequest)==144 && sizeof(S540ExperimentalBuildIdentity)==80);
     CHECK(sizeof(S540PreparationObservation)==104 && sizeof(S540PreparationPowerObservation)==56);
     CHECK(!state->snapshot.preparation.observedMask && !state->snapshot.preparation.firstFailureStatus);
+    CHECK(sizeof(S540ExperimentalSnapshot)==776 && sizeof(S540ExperimentalRuntimeObservation)==144 &&
+        sizeof(S540ExperimentalIrqSourceObservation)==64);
+    CHECK(state->snapshot.runtime.format==1 && state->snapshot.runtime.bytes==144 &&
+        state->snapshot.runtime.snapshotStatus==NV_ERR_NOT_READY && !state->snapshot.runtime.attemptedMask &&
+        !state->snapshot.runtime.returnedMask && !state->snapshot.irqSource.sourceProbeAttempted);
     CHECK(s540ExperimentalServiceStart(state,91)==NV_OK);
 }
 static NV_STATUS begin(S540ExperimentalState *state) {
@@ -67,6 +72,7 @@ int main(void) {
     setup(&state);state.snapshot.pmAcknowledgementAuthorized=1;CHECK(begin(&state)==NV_ERR_INVALID_STATE);
     setup(&state);state.snapshot.accelerationTest=1;CHECK(begin(&state)==NV_ERR_INVALID_STATE);
     setup(&state);state.snapshot.format=1;CHECK(begin(&state)==NV_ERR_INVALID_STATE);
+    setup(&state);state.snapshot.format=2;CHECK(begin(&state)==NV_ERR_INVALID_STATE);
     setup(&state);--state.snapshot.bytes;CHECK(begin(&state)==NV_ERR_INVALID_STATE);
     setup(&state);s540ExperimentalServiceGone(&state);CHECK(begin(&state)==NV_ERR_INVALID_STATE);
     setup(&state);CHECK(begin(&state)==NV_OK);s540ExperimentalRequestFinish(&state,NV_OK);

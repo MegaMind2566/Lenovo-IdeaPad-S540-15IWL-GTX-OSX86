@@ -195,6 +195,87 @@ static void printPreparation(const S540PreparationObservation *p,int snapshotVal
                 jsonBool(power->flags&powerFlags[i].bit):"null");
     printf("}}}");
 }
+static const char *runtimeStageLabel(NvU32 stage) {
+    static const char *const names[]={"unobserved","request","retained","cancel-operation","owner-epoch",
+        "global","global-ready","context","transaction","irq","original-adapter","returned","failed"};
+    return stage<sizeof(names)/sizeof(names[0]) ? names[stage]:"unknown";
+}
+static void printNullableUnsigned(NvU32 value,int valid) {
+    if (valid) printf("%u",value);else printf("null");
+}
+static void printRuntime(const S540ExperimentalRuntimeObservation *r,int snapshotValid) {
+    int masksValid=!(r->attemptedMask&~S540_RUNTIME_CALL_ALL) &&
+        !(r->returnedMask&~r->attemptedMask);
+    int valid=snapshotValid && r->format==1 && r->bytes==sizeof(*r) && r->snapshotStatus==NV_OK && masksValid &&
+        r->stage>=1 && r->stage<=12 && r->lastStage>=1 && r->lastStage<=11;
+    int stageValid=valid && r->stage>=1 && r->stage<=12;
+    int lastValid=valid && r->lastStage>=1 && r->lastStage<=11;
+    int firstFailure=valid && r->firstStatus!=NV_OK && r->firstFailureStage>=1 && r->firstFailureStage<=11;
+    printf("\"runtime\":{\"format\":%u,\"bytes\":%u,\"snapshot_status\":%u,\"valid\":%s,"
+        "\"stage\":%u,\"stage_label\":\"%s\",\"stage_valid\":%s,"
+        "\"last_stage\":%u,\"last_stage_label\":\"%s\",\"last_stage_valid\":%s,"
+        "\"first_status\":%u,\"first_failure_stage\":%u,\"first_failure_stage_label\":\"%s\","
+        "\"first_failure_valid\":%s,\"attempted_mask\":%u,\"returned_mask\":%u,\"calls\":{",
+        r->format,r->bytes,r->snapshotStatus,jsonBool(valid),r->stage,runtimeStageLabel(r->stage),jsonBool(stageValid),
+        r->lastStage,runtimeStageLabel(r->lastStage),jsonBool(lastValid),r->firstStatus,r->firstFailureStage,
+        runtimeStageLabel(r->firstFailureStage),jsonBool(firstFailure),r->attemptedMask,r->returnedMask);
+    const struct {const char *name;NvU32 bit;NV_STATUS status;} calls[]={
+        {"global",S540_RUNTIME_CALL_GLOBAL,r->globalStatus},{"context",S540_RUNTIME_CALL_CONTEXT,r->contextStatus},
+        {"bind",S540_RUNTIME_CALL_BIND,r->bindStatus},{"irq",S540_RUNTIME_CALL_IRQ,r->irqStatus},
+        {"original_adapter",S540_RUNTIME_CALL_ORIGINAL,r->originalStatus}};
+    for (unsigned i=0;i<sizeof(calls)/sizeof(calls[0]);++i) {
+        int attempted=valid && (r->attemptedMask&calls[i].bit);
+        int returned=valid && (r->returnedMask&calls[i].bit);
+        printf("%s\"%s\":{\"attempted\":%s,\"returned\":%s,\"status\":",i?",":"",calls[i].name,
+            valid?jsonBool(attempted):"null",valid?jsonBool(returned):"null");
+        printNullableUnsigned(calls[i].status,returned);printf("}");
+    }
+    printf("},\"facts\":{");
+    const struct {const char *name;NvU32 value;} facts[]={
+        {"lifetime_retained",r->lifetimeRetained},{"cancellation_begun",r->cancellationBegun},
+        {"owner_epoch_begun",r->ownerEpochBegun},{"global_initialized",r->globalInitialized},
+        {"global_original_returned",r->globalOriginalReturned},{"any_original_entry_observed",r->originalEntered},
+        {"adapter_attempted",r->adapterAttempted},{"adapter_initialized",r->adapterInitialized},
+        {"adapter_original_returned",r->originalReturned},{"interrupt_installed",r->interruptInstalled},
+        {"interrupt_armed",r->interruptArmed},{"cancellation_revoked",r->cancellationRevoked}};
+    for (unsigned i=0;i<sizeof(facts)/sizeof(facts[0]);++i)
+        printf("%s\"%s\":%s",i?",":"",facts[i].name,
+            valid && facts[i].value<=1?jsonBool(facts[i].value):"null");
+    printf("},\"global_original_status\":");
+    printNullableUnsigned(r->globalOriginalStatus,valid && r->globalOriginalReturned==1);
+    printf(",\"generation\":%llu,\"observed_host_stack_bytes\":%llu,\"required_worker_stack_bytes\":%llu,"
+        "\"required_irq_stack_bytes\":%llu}",(unsigned long long)r->generation,
+        (unsigned long long)r->observedHostStackBytes,(unsigned long long)r->requiredWorkerStackBytes,
+        (unsigned long long)r->requiredIrqStackBytes);
+}
+static void printIrqSource(const S540ExperimentalIrqSourceObservation *r,int snapshotValid) {
+    int valid=snapshotValid && r->format==1 && r->bytes==sizeof(*r) &&
+        r->sourceProbeAttempted==1 && r->sourceProbeReturned==1;
+    int selected=valid && r->sourceProbeStatus==NV_OK && r->selectedSourceValid==1 &&
+        r->selectedTypeValid==1 && r->sourceCount>0 && r->sourceCount<=32 &&
+        r->sourcesObserved==r->sourceCount && r->messagedSources==1 && r->selectedSource<r->sourceCount &&
+        (r->selectedInterruptType&0x00010000U)!=0 && /* Pinned IOPCIDevice.h PCI-message type bit. */
+        r->inventoryValid==1 && r->msiCapable==1 && r->msixCapable==0 && r->msiVectors==1;
+    printf("\"irq_source\":{\"format\":%u,\"bytes\":%u,\"valid\":%s,"
+        "\"probe_attempted\":%s,\"probe_returned\":%s,\"probe_status\":",
+        r->format,r->bytes,jsonBool(valid),
+        snapshotValid && r->format==1 && r->bytes==sizeof(*r) && r->sourceProbeAttempted<=1?
+            jsonBool(r->sourceProbeAttempted):"null",
+        snapshotValid && r->format==1 && r->bytes==sizeof(*r) && r->sourceProbeReturned<=1?
+            jsonBool(r->sourceProbeReturned):"null");
+    printNullableUnsigned(r->sourceProbeStatus,valid);
+    printf(",\"source_count\":");printNullableUnsigned(r->sourceCount,valid && r->sourceCount>0);
+    printf(",\"sources_observed\":");printNullableUnsigned(r->sourcesObserved,valid);
+    printf(",\"messaged_sources\":");printNullableUnsigned(r->messagedSources,valid);
+    printf(",\"selection_valid\":%s,\"selected_source\":",jsonBool(selected));
+    printNullableUnsigned(r->selectedSource,selected);
+    printf(",\"selected_interrupt_type\":");printNullableUnsigned(r->selectedInterruptType,selected);
+    printf(",\"inventory_valid\":%s,\"msi_capable\":%s,\"msix_capable\":%s,\"msi_vectors\":",
+        valid && r->inventoryValid<=1?jsonBool(r->inventoryValid):"null",
+        valid && r->inventoryValid==1 && r->msiCapable<=1?jsonBool(r->msiCapable):"null",
+        valid && r->inventoryValid==1 && r->msixCapable<=1?jsonBool(r->msixCapable):"null");
+    printNullableUnsigned(r->msiVectors,valid && r->inventoryValid==1);printf("}");
+}
 static void printSnapshot(const S540ExperimentalSnapshot *s,kern_return_t requested,kern_return_t stopped,
     kern_return_t observation,int attempted) {
     printf("{\"format\":1,\"scope\":\"retained-first-initialization\",\"request_rpc_attempted\":%s,"
@@ -219,7 +300,9 @@ static void printSnapshot(const S540ExperimentalSnapshot *s,kern_return_t reques
     printf("\"snapshot_valid\":%s,\"snapshot_format\":%u,\"snapshot_bytes\":%u,",
         jsonBool(observation==KERN_SUCCESS),s->format,s->bytes);
     printPreparation(&s->preparation,observation==KERN_SUCCESS);printf(",");
-    printStop(&s->retainedStop);printf("}\n");
+    printStop(&s->retainedStop);printf(",");
+    printRuntime(&s->runtime,observation==KERN_SUCCESS);printf(",");
+    printIrqSource(&s->irqSource,observation==KERN_SUCCESS);printf("}\n");
 }
 int main(int argc,char **argv) {
     int run=argc==3 && !strcmp(argv[1],"--run-once") && !strcmp(argv[2],"--ack-retained-first-initialization");

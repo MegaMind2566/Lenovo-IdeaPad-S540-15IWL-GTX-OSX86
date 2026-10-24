@@ -48,7 +48,8 @@ namespace S540NvidiaGspBootstrap {
 struct Images {const void *gsp,*ucodes;NvU64 gspBytes,ucodesBytes;};
 struct Snapshot {NvU32 globalInitialized=0,adapterInitialized=0,firmwareLoaded=0,interruptInstalled=0,
     interruptArmed=0,powerRevoked=0,cancellationRevoked=0,powerAcknowledged=0;
-    S540PreparationObservation preparation{};};
+    S540PreparationObservation preparation{};
+    S540ExperimentalIrqSourceObservation irqSourceObservation{};};
 class Owner {
 public:
     unsigned prepares=0,initializations=0,originalCalls=0,stops=0,cancels=0;
@@ -63,10 +64,41 @@ public:
         ++stops;stopSequence.store(++sequence,std::memory_order_release);return NV_ERR_IN_USE;
     }
     Snapshot snapshot()const{
-        Snapshot value{};value.preparation=preparation;return value;
+        Snapshot value{};value.preparation=preparation;
+        if(mode==8 && initializations){
+            value.globalInitialized=1;
+            auto &source=value.irqSourceObservation;
+            source.sourceProbeAttempted=source.sourceProbeReturned=1;source.sourceProbeStatus=NV_ERR_NOT_SUPPORTED;
+            source.sourceCount=2;source.sourcesObserved=2;source.messagedSources=0;
+            source.inventoryValid=source.msiCapable=1;source.msiVectors=1;
+        }
+        return value;
     }
+    // Explicit fake Owner endpoint with the actual profile-expanded runtime
+    // declaration. The original runtime producer is not executed in this fixture.
     S540ExperimentalRuntimeSnapshot runtimeSnapshot()const{
-        S540ExperimentalRuntimeSnapshot value{};value.snapshotStatus=NV_OK;value.originalEntered=originalCalls!=0;return value;
+        S540ExperimentalRuntimeSnapshot value{};value.format=1;value.bytes=sizeof(value);
+        value.snapshotStatus=initializations?NV_OK:NV_ERR_NOT_READY;
+        if(initializations){
+            value.stage=value.lastStage=11;value.attemptedMask=value.returnedMask=S540_RUNTIME_CALL_ALL;
+            value.lifetimeRetained=value.cancellationBegun=value.ownerEpochBegun=1;
+            value.globalInitialized=value.globalOriginalReturned=1;value.originalEntered=originalCalls!=0;
+            value.adapterAttempted=value.adapterInitialized=value.originalReturned=1;
+            value.interruptInstalled=value.interruptArmed=1;value.generation=17;
+            value.observedHostStackBytes=value.requiredWorkerStackBytes=value.requiredIrqStackBytes=16384;
+        }
+        if(mode==8 && initializations){
+            value.stage=12;value.lastStage=value.firstFailureStage=9;value.firstStatus=NV_ERR_NOT_SUPPORTED;
+            value.attemptedMask=value.returnedMask=15;value.irqStatus=NV_ERR_NOT_SUPPORTED;
+            value.originalStatus=NV_ERR_NOT_READY;
+            value.adapterAttempted=value.adapterInitialized=value.originalReturned=0;
+            value.interruptInstalled=value.interruptArmed=0;
+        }
+        if(mode==9){value={};value.format=1;value.bytes=sizeof(value);value.snapshotStatus=NV_ERR_NOT_READY;}
+        if(mode==10){value.snapshotStatus=NV_ERR_IN_USE;value.originalEntered=1;}
+        if(mode==11){value.format=2;value.originalEntered=1;}
+        if(mode==12){--value.bytes;value.originalEntered=1;}
+        return value;
     }
     S540RetainedStopSnapshot retainedStopSnapshot()const{
         S540RetainedStopSnapshot value{};value.format=1;value.bytes=sizeof(value);value.snapshotStatus=NV_OK;return value;
@@ -158,7 +190,7 @@ static S540PreparationObservation failedPreparation(unsigned selected){
 NV_STATUS S540NvidiaGspBootstrap::Owner::prepare(IOPCIDevice *,S540ExperimentalTargetControl *,const Images &){
     ++prepares;
     privateImplPresent=true;
-    if(mode>=4){
+    if(mode>=4 && mode<=7){
         preparation=failedPreparation(mode);
         // Explicit fake endpoint: the real frontend must use the facade's
         // preserved record after the private owner state has been released.
@@ -172,7 +204,7 @@ NV_STATUS S540NvidiaGspBootstrap::Owner::experimentalInitialize(const S540Experi
     if(mode==2)expect(fixtureControl->requestStop()==NV_ERR_BUSY_RETRY,"preparedtokenSTOPpublished");
     if(mode==3)while(!cancelEntered.load(std::memory_order_acquire))std::this_thread::yield();
     if(revoked.load(std::memory_order_acquire))return NV_ERR_OPERATION_ABORTED;
-    ++originalCalls;return NV_OK;
+    ++originalCalls;return mode==8 ? NV_STATUS(NV_ERR_NOT_SUPPORTED):NV_STATUS(NV_OK);
 }
 NV_STATUS S540NvidiaGspBootstrap::Owner::cancelExperimental(){
     ++cancels;revoked.store(true,std::memory_order_release);cancelEntered.store(true,std::memory_order_release);
@@ -278,6 +310,42 @@ int main(){
         expect(state.snapshot.retainedUntilReboot&&control.permanentPin&&
             !state.snapshot.wholeDmaStopProven&&!state.snapshot.pmAcknowledgementAuthorized,
             "diagnosticfailuredoesnotgrantunloadorcleanupauthority");
+        finish(control);
+    }
+    for(unsigned runtimeMode=8;runtimeMode<=12;++runtimeMode){
+        reset(runtimeMode);S540ExperimentalTargetControl control;fixtureControl=&control;
+        const NV_STATUS expected=runtimeMode==8?NV_STATUS(NV_ERR_NOT_SUPPORTED):NV_STATUS(NV_OK);
+        expect(control.runOnce(request())==expected,"runtimefixtureactualRUNstatus");
+        const auto &r=state.snapshot.runtime;
+        expect(r.format==1 && r.bytes==sizeof(r),"runtimewireexplicitformatandsize");
+        if(runtimeMode==8){
+            expect(r.snapshotStatus==NV_OK && r.stage==12 && r.lastStage==9 && r.firstFailureStage==9 &&
+                r.firstStatus==NV_ERR_NOT_SUPPORTED,"IRQfailurestageandfirststatussurviveFAILEDstage");
+            expect(r.attemptedMask==15 && r.returnedMask==15 && r.irqStatus==NV_ERR_NOT_SUPPORTED &&
+                r.originalStatus==NV_ERR_NOT_READY,"callattemptsandreturnedstatusesremainseparatefromsentinels");
+            expect(r.globalInitialized && r.globalOriginalReturned && r.originalEntered && !r.adapterAttempted &&
+                !r.adapterInitialized && !r.originalReturned,"globalentrydoesnotinventoriginaladapterentry");
+            expect(state.snapshot.globalInitialized && !state.snapshot.adapterInitialized &&
+                state.snapshot.initializationReturned && state.snapshot.initializationStatus==NV_ERR_NOT_SUPPORTED,
+                "globalandouterRPCreturnareseparatefromadapterinitialization");
+            const auto &route=state.snapshot.irqSource;
+            expect(route.format==1 && route.bytes==64 && route.sourceProbeAttempted && route.sourceProbeReturned &&
+                route.sourceProbeStatus==NV_ERR_NOT_SUPPORTED && route.sourceCount==2 && route.sourcesObserved==2 &&
+                !route.selectedSourceValid && route.inventoryValid && route.msiCapable && route.msiVectors==1,
+                "actualpublicationcopiesrefusedIRQprobeandhardwarecapabilitiesseparately");
+        }else{
+            const NV_STATUS unavailable=runtimeMode==9?NV_STATUS(NV_ERR_NOT_READY):
+                (runtimeMode==10?NV_STATUS(NV_ERR_IN_USE):NV_STATUS(NV_ERR_INVALID_DATA));
+            expect(r.snapshotStatus==unavailable && state.snapshot.runtimeObservationStatus==unavailable &&
+                !r.stage && !r.attemptedMask && !r.returnedMask && !r.originalEntered &&
+                !state.snapshot.originalEntryObserved,"unknownracedormalformedruntimecannotpublishstalefacts");
+        }
+        const auto cached=state.snapshot.runtime;
+        expect(control.requestStop()==NV_ERR_IN_USE && !std::memcmp(&cached,&state.snapshot.runtime,sizeof(cached)),
+            "realSTOPdoesnotoverwritefirstinitializationruntimeobservations");
+        expect(!state.snapshot.wholeDmaStopProven && !state.snapshot.pmAcknowledgementAuthorized &&
+            !state.snapshot.accelerationTest && state.snapshot.retainedUntilReboot,
+            "runtimeorrouteobservationsnevergrantreleaseauthority");
         finish(control);
     }
     std::printf("{\"status\":\"%s\",\"checks\":%u,\"failures\":%u,\"actual_lifecycle_bodies\":true,\"kernel_execution\":\"not_tested\",\"gpu_access\":false}\n",failures?"failed":"passed",checks,failures);

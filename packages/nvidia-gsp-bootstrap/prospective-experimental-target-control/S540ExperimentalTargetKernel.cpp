@@ -174,8 +174,40 @@ void S540ExperimentalTargetControl::publishOwnerObservation() {
     state.snapshot.powerRevoked=observed.powerRevoked;
     state.snapshot.cancellationRevoked=observed.cancellationRevoked;
     state.snapshot.powerAcknowledged=observed.powerAcknowledged;
-    state.snapshot.runtimeObservationStatus=runtime.snapshotStatus;
-    state.snapshot.originalEntryObserved=runtime.originalEntered;
+    auto &runtimeWire=state.snapshot.runtime;
+    runtimeWire={};runtimeWire.format=1;runtimeWire.bytes=sizeof(runtimeWire);
+    runtimeWire.snapshotStatus=runtime.snapshotStatus;
+    if (runtime.format==1 && runtime.bytes==sizeof(runtime) && runtime.snapshotStatus==NV_OK) {
+#define S540_COPY_RUNTIME_FIELD(name) runtimeWire.name=runtime.name
+        S540_COPY_RUNTIME_FIELD(stage);S540_COPY_RUNTIME_FIELD(lastStage);
+        S540_COPY_RUNTIME_FIELD(firstFailureStage);S540_COPY_RUNTIME_FIELD(firstStatus);
+        S540_COPY_RUNTIME_FIELD(attemptedMask);S540_COPY_RUNTIME_FIELD(returnedMask);
+        S540_COPY_RUNTIME_FIELD(globalStatus);S540_COPY_RUNTIME_FIELD(contextStatus);
+        S540_COPY_RUNTIME_FIELD(bindStatus);S540_COPY_RUNTIME_FIELD(irqStatus);S540_COPY_RUNTIME_FIELD(originalStatus);
+        S540_COPY_RUNTIME_FIELD(lifetimeRetained);S540_COPY_RUNTIME_FIELD(cancellationBegun);
+        S540_COPY_RUNTIME_FIELD(ownerEpochBegun);S540_COPY_RUNTIME_FIELD(globalInitialized);
+        S540_COPY_RUNTIME_FIELD(globalOriginalReturned);S540_COPY_RUNTIME_FIELD(globalOriginalStatus);
+        S540_COPY_RUNTIME_FIELD(originalEntered);S540_COPY_RUNTIME_FIELD(adapterAttempted);
+        S540_COPY_RUNTIME_FIELD(adapterInitialized);S540_COPY_RUNTIME_FIELD(originalReturned);
+        S540_COPY_RUNTIME_FIELD(interruptInstalled);S540_COPY_RUNTIME_FIELD(interruptArmed);
+        S540_COPY_RUNTIME_FIELD(cancellationRevoked);S540_COPY_RUNTIME_FIELD(generation);
+        S540_COPY_RUNTIME_FIELD(observedHostStackBytes);S540_COPY_RUNTIME_FIELD(requiredWorkerStackBytes);
+        S540_COPY_RUNTIME_FIELD(requiredIrqStackBytes);
+#undef S540_COPY_RUNTIME_FIELD
+    } else if (runtime.snapshotStatus==NV_OK) runtimeWire.snapshotStatus=NV_ERR_INVALID_DATA;
+    state.snapshot.runtimeObservationStatus=runtimeWire.snapshotStatus;
+    state.snapshot.originalEntryObserved=runtimeWire.originalEntered;
+    auto &sourceWire=state.snapshot.irqSource;
+    sourceWire={};sourceWire.format=1;sourceWire.bytes=sizeof(sourceWire);
+#define S540_COPY_IRQ_SOURCE_FIELD(name) sourceWire.name=observed.irqSourceObservation.name
+    S540_COPY_IRQ_SOURCE_FIELD(sourceProbeAttempted);S540_COPY_IRQ_SOURCE_FIELD(sourceProbeReturned);
+    S540_COPY_IRQ_SOURCE_FIELD(sourceProbeStatus);S540_COPY_IRQ_SOURCE_FIELD(sourceCount);
+    S540_COPY_IRQ_SOURCE_FIELD(sourcesObserved);S540_COPY_IRQ_SOURCE_FIELD(messagedSources);
+    S540_COPY_IRQ_SOURCE_FIELD(selectedSourceValid);S540_COPY_IRQ_SOURCE_FIELD(selectedSource);
+    S540_COPY_IRQ_SOURCE_FIELD(selectedInterruptType);S540_COPY_IRQ_SOURCE_FIELD(selectedTypeValid);
+    S540_COPY_IRQ_SOURCE_FIELD(inventoryValid);S540_COPY_IRQ_SOURCE_FIELD(msiCapable);
+    S540_COPY_IRQ_SOURCE_FIELD(msixCapable);S540_COPY_IRQ_SOURCE_FIELD(msiVectors);
+#undef S540_COPY_IRQ_SOURCE_FIELD
     state.snapshot.stopObservationStatus=stopped.snapshotStatus;
     auto &wire=state.snapshot.retainedStop;
     wire.format=1;wire.bytes=sizeof(wire);

@@ -12,4 +12,8 @@ const NvU32 s540ExperimentalProtocolOffsets[]={
     S540_EXPERIMENTAL_SNAPSHOT_VERSION,sizeof(S540PreparationObservation),sizeof(S540PreparationPowerObservation),
     offsetof(S540ExperimentalSnapshot,preparation),offsetof(S540PreparationObservation,power),
     offsetof(S540PreparationObservation,firstFailureStatus),offsetof(S540PreparationPowerObservation,rawIOReturn),
-    offsetof(S540PreparationPowerObservation,observedMask)};
+    offsetof(S540PreparationPowerObservation,observedMask),
+    sizeof(S540ExperimentalRuntimeObservation),sizeof(S540ExperimentalIrqSourceObservation),
+    offsetof(S540ExperimentalSnapshot,runtime),offsetof(S540ExperimentalSnapshot,irqSource),
+    offsetof(S540ExperimentalRuntimeObservation,attemptedMask),offsetof(S540ExperimentalRuntimeObservation,returnedMask),
+    offsetof(S540ExperimentalRuntimeObservation,generation),S540_RUNTIME_CALL_ALL};

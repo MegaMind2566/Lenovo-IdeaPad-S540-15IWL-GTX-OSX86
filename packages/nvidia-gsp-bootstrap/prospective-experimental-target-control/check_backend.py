@@ -35,8 +35,9 @@ def run(args):
     source=HERE/'S540ExperimentalTargetKernel.cpp'
     template=HERE/'tests/check_backend.cpp.inc'
     preparation=HERE.parent/'prospective-preparation-observation/S540PreparationObservation.h'
+    runtime=args.runtime_header.resolve(strict=True)
     inputs=[source,template,Path(__file__),HERE/'S540ExperimentalTargetState.c',HERE/'S540ExperimentalTargetState.h',
-        HERE/'S540ExperimentalTargetProtocol.h',HERE.parent/'prospective-runtime-coordinator/S540ExperimentalRuntime.h',
+        HERE/'S540ExperimentalTargetProtocol.h',runtime,
         HERE.parent/'prospective-retained-stop/S540NvidiaRetainedStop.h',preparation]
     bindings={str(path.relative_to(ROOT)):sha(path) for path in inputs}
     raw=source.read_text();actual,names=bodies(raw)
@@ -53,7 +54,7 @@ def run(args):
         obj=output/(mode+'-state.o');binary=output/mode
         base=['-O1','-g','-Wall','-Wextra','-Werror',*flags]
         execute([args.cc,*base,'-std=c11','-c',HERE/'S540ExperimentalTargetState.c','-o',obj],mode+'-state')
-        execute([args.cxx,*base,'-std=c++17','-pthread','-I',HERE,'-I',HERE.parent/'prospective-runtime-coordinator',
+        execute([args.cxx,*base,'-std=c++17','-pthread','-I',HERE,'-I',runtime.parent,
             '-I',HERE.parent/'prospective-retained-stop','-I',preparation.parent,generated,obj,'-o',binary],mode+'-backend')
         result=json.loads(execute([binary],mode+'-run').stdout)
         if result.get('status')!='passed' or result.get('failures')!=0:raise ValueError('Actual backend body control failed')
@@ -63,13 +64,17 @@ def run(args):
         'pending-stop-hidden':('bool pending=state.snapshot.stopRequested!=0;','bool pending=false;'),
         'publisher-join-omitted':('        closeCancellationPublication();','        /* missing publication join */'),
         'owner-publication-outside-guard':('IOLockLock(guard); owner=created; state.snapshot.ownerAllocated=1; IOLockUnlock(guard);','owner=created; state.snapshot.ownerAllocated=1;'),
-        'preparation-observation-copy-omitted':('state.snapshot.preparation=observed.preparation;','state.snapshot.preparation={};')}
+        'preparation-observation-copy-omitted':('state.snapshot.preparation=observed.preparation;','state.snapshot.preparation={};'),
+        'runtime-irq-status-copy-omitted':('S540_COPY_RUNTIME_FIELD(irqStatus);','runtimeWire.irqStatus=NV_OK;'),
+        'runtime-returned-mask-copy-omitted':('S540_COPY_RUNTIME_FIELD(returnedMask);','runtimeWire.returnedMask=0;'),
+        'raced-runtime-copy-accepted':('runtime.bytes==sizeof(runtime) && runtime.snapshotStatus==NV_OK','runtime.bytes==sizeof(runtime)'),
+        'irq-source-count-copy-omitted':('S540_COPY_IRQ_SOURCE_FIELD(sourceCount);','sourceWire.sourceCount=0;')}
     killed=[]
     for name,(before,after) in mutations.items():
         if raw.count(before)!=1:raise ValueError('Current mutation anchor changed:'+name)
         changed,_=bodies(raw.replace(before,after));path=output/(name+'.cpp')
         path.write_text(template.read_text().replace('@ACTUAL_BODIES@',changed));binary=output/name
-        execute([args.cxx,'-std=c++17','-O1','-pthread','-I',HERE,'-I',HERE.parent/'prospective-runtime-coordinator',
+        execute([args.cxx,'-std=c++17','-O1','-pthread','-I',HERE,'-I',runtime.parent,
             '-I',HERE.parent/'prospective-retained-stop','-I',preparation.parent,path,output/'plain-state.o','-o',binary],name+'-compile')
         result=execute([binary],name+'-run',allowed_failure=True)
         if result.returncode==0:raise ValueError('Actual backend controls accepted mutant:'+name)
@@ -81,13 +86,15 @@ def run(args):
         generated_test_sha256=sha(generated),host_control=True,native_darwin_compilation=False,
         fixture_instruments_owner_field_publication=True,
         preparation_observation_survives_fixture_private_cleanup=True,
+        runtime_fixture_uses_actual_profile_expanded_header=True,
+        runtime_producer_execution_is_fixture_not_original=True,
         kernel_execution='not_tested',gpu_access=False)
     (output/'results.json').write_text(json.dumps(report,sort_keys=True,indent=2)+'\n')
     return report
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    for name in ('cc','cxx','output'):p.add_argument('--'+name,type=Path,required=True)
+    for name in ('cc','cxx','output','runtime-header'):p.add_argument('--'+name,type=Path,required=True)
     print(json.dumps(run(p.parse_args()),sort_keys=True))
 
 if __name__=='__main__':main()

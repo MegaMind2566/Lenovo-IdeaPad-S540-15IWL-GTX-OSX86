@@ -5,7 +5,7 @@
 #include "../../nvidia-os-adapter/upstream/include/nvstatus.h"
 #include "../prospective-preparation-observation/S540PreparationObservation.h"
 #define S540_EXPERIMENTAL_PROTOCOL_VERSION 1U
-#define S540_EXPERIMENTAL_SNAPSHOT_VERSION 2U
+#define S540_EXPERIMENTAL_SNAPSHOT_VERSION 3U
 #define S540_EXPERIMENTAL_CONNECTION_TYPE 0x53355452U
 #define S540_EXPERIMENTAL_SELECTOR_SNAPSHOT 0U
 #define S540_EXPERIMENTAL_SELECTOR_REQUEST 1U
@@ -46,7 +46,35 @@ typedef struct S540ExperimentalStopObservation {
     NV_STATUS protocolOperationStatus, protocolOriginalReturnStatus, protocolUnlockStatus;
     NvU32 protocolClaimed, protocolOriginalEntered, protocolOriginalReturned, protocolCompleted;
 } S540ExperimentalStopObservation;
-/* Fixed integer-only wire ABI. Snapshot version2 appends preparation diagnostics;
+/* Returned bits make a genuine NV_ERR_NOT_READY distinguishable from a status
+ * slot that has never been filled. These bits report calls; they grant no
+ * execution, cleanup, PM or release authority. */
+#define S540_RUNTIME_CALL_GLOBAL 1U
+#define S540_RUNTIME_CALL_CONTEXT 2U
+#define S540_RUNTIME_CALL_BIND 4U
+#define S540_RUNTIME_CALL_IRQ 8U
+#define S540_RUNTIME_CALL_ORIGINAL 16U
+#define S540_RUNTIME_CALL_ALL 31U
+typedef struct S540ExperimentalRuntimeObservation {
+    NvU32 format, bytes, snapshotStatus;
+    NvU32 stage, lastStage, firstFailureStage, firstStatus;
+    NvU32 attemptedMask, returnedMask;
+    NV_STATUS globalStatus, contextStatus, bindStatus, irqStatus, originalStatus;
+    NvU32 lifetimeRetained, cancellationBegun, ownerEpochBegun;
+    NvU32 globalInitialized, globalOriginalReturned, globalOriginalStatus;
+    NvU32 originalEntered, adapterAttempted, adapterInitialized, originalReturned;
+    NvU32 interruptInstalled, interruptArmed, cancellationRevoked;
+    NvU64 generation, observedHostStackBytes, requiredWorkerStackBytes, requiredIrqStackBytes;
+} S540ExperimentalRuntimeObservation;
+typedef struct S540ExperimentalIrqSourceObservation {
+    NvU32 format, bytes;
+    NvU32 sourceProbeAttempted, sourceProbeReturned, sourceProbeStatus, sourceCount;
+    NvU32 sourcesObserved, messagedSources, selectedSourceValid, selectedSource;
+    NvU32 selectedInterruptType, selectedTypeValid;
+    NvU32 inventoryValid, msiCapable, msixCapable, msiVectors;
+} S540ExperimentalIrqSourceObservation;
+/* Fixed integer-only wire ABI. Snapshot version3 appends runtime and IRQ-route
+ * diagnostics after the existing preparation record at offset464;
  * the request/identity ABI remains version1. Unknown observations remain zero;
  * their independent status fields say whether an observation was obtained.
  * No diagnostic field grants memory, PM or unload authority. */
@@ -67,6 +95,8 @@ typedef struct S540ExperimentalSnapshot {
     NvU8 sourceSha256[32], policySha256[32], nativeCodeContractSha256[32];
     S540ExperimentalStopObservation retainedStop;
     S540PreparationObservation preparation;
+    S540ExperimentalRuntimeObservation runtime;
+    S540ExperimentalIrqSourceObservation irqSource;
 } S540ExperimentalSnapshot;
 #ifdef __cplusplus
 extern "C" {

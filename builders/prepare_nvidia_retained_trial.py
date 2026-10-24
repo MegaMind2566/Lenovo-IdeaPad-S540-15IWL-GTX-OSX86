@@ -30,6 +30,7 @@ PROFILE_DIRECTORIES = {
     'retained-stop': 'prospective-retained-stop',
     'preparation-observation': 'prospective-preparation-observation',
     'pci-memory-bars': 'prospective-pci-memory-bars',
+    'irq-source-selection': 'prospective-irq-source-selection',
     'experimental-target-control': 'prospective-experimental-target-control',
 }
 PROFILE_DEPENDENCIES = {
@@ -37,7 +38,8 @@ PROFILE_DEPENDENCIES = {
     'retained-stop': ('runtime-coordinator',),
     'preparation-observation': ('retained-stop',),
     'pci-memory-bars': ('preparation-observation',),
-    'experimental-target-control': tuple(list(PROFILE_DIRECTORIES)[:8]),
+    'irq-source-selection': ('pci-memory-bars',),
+    'experimental-target-control': tuple(list(PROFILE_DIRECTORIES)[:9]),
 }
 OLD_KERNEL = GSP + 'prospective-loader/S540ProspectiveLoaderKernel.cpp'
 OLD_STATE = GSP + 'prospective-loader/S540ProspectiveLoaderState.c'
@@ -46,6 +48,7 @@ IDENTITY = GSP + 'prospective-retained-build-identity/S540ExperimentalBuildIdent
 PROTOCOL = GSP + 'prospective-experimental-target-control/S540ExperimentalTargetProtocol.h'
 POWER = GSP + 'platform/S540NvidiaGspPower.cpp'
 PLATFORM = GSP + 'platform/S540NvidiaGspPlatform.cpp'
+DARWIN_DEVICE = 'packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp'
 TARGET = GSP + 'prospective-experimental-target-control/S540ExperimentalTargetKernel.cpp'
 EXPERIMENTAL_POLICY = {
     'format': 1, 'scope': 'manual-once-per-boot-retained-first-initialization',
@@ -102,6 +105,11 @@ def companion_paths(module):
 
 def helper_hashes(modules):
     paths = {Path(__file__), ROOT / 'builders/build_nvidia_retained_trial.py'}
+    if 'irq-source-selection' in modules:
+        shared = ROOT / GSP / 'cancellation/prepare_wait_candidates.py'
+        require(composer.sha(shared) == 'f8e0099f904b5e1a756e628985ef991c9a09475214f52a38c921ccc5df6de471',
+                'The reviewed shared function-span parser changed')
+        paths.add(previous.ordinary(shared))
     for module in modules.values():
         here = previous.ordinary(module.HERE)
         for path in [here / 'prepare.py', *sorted(here.glob('*.inc')),
@@ -159,8 +167,9 @@ def build_plan(base, before, names, modules, hashes):
     includes = list(before['shutdown_successor']['include_directories'])
     exports, original_exports, definitions, new_units, retired = {}, {}, {}, [], []
     initializers = set(previous.REVIEWED_INITIALIZERS)
-    gate_owners = {operational.BOOT: {'pm-event', 'runtime-coordinator', 'retained-stop', 'preparation-observation'},
+    gate_owners = {operational.BOOT: {'pm-event', 'runtime-coordinator', 'retained-stop', 'preparation-observation', 'irq-source-selection'},
         PLATFORM: {'pci-memory-bars'},
+        DARWIN_DEVICE: {'irq-source-selection'},
         operational.LIFECYCLE: {'runtime-coordinator'}, OLD_KMOD: {'experimental-target-control'},
         OLD_STATE: set(), OLD_KERNEL: set()}
     for name, module in modules.items():

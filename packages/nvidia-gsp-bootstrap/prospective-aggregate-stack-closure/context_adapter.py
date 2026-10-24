@@ -19,7 +19,7 @@ RECEIVERS = (
      ('impl_->dispatcher.start(Impl::action, impl_)', 'static NV_STATUS action(void *owner, NvU32 command)')),
     ('packages/nvidia-device-transport/src/S540NvidiaDarwinDevice.cpp',
      ('p->interrupt=contract;', 'p->bottomHalf.initialize(bottomHalf,p)',
-      'p->provider->registerInterrupt(0,p->owner,interrupt,p)',
+      'p->provider->registerInterrupt(static_cast<int>(p->irqSource),p->owner,interrupt,p)',
       'p->interrupt.top(p->interrupt.context,locked,unlocked)')),
 )
 IRQ_BINDING = 'packages/nvidia-gsp-bootstrap/prospective-irq-installation/S540NvidiaGspIrqInstallation.hpp'

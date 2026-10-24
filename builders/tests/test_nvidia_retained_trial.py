@@ -31,9 +31,10 @@ def main():
         raise AssertionError('Mutation was not refused: ' + label)
     for names in (('unknown',), ('pm-event', 'pm-event'), ('retained-stop',),
                   ('experimental-target-control',), ('runtime-coordinator',), ('preparation-observation',),
-                  ('pci-memory-bars',),
+                  ('pci-memory-bars',), ('irq-source-selection',),
                   tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'preparation-observation'),
-                  tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'pci-memory-bars')):
+                  tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'pci-memory-bars'),
+                  tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'irq-source-selection')):
         refused('profile-selection-' + '-'.join(names), lambda names=names: retained.selected_profiles(names))
     def changed_manifest(label, mutate):
         modified = deepcopy(value)
@@ -51,9 +52,12 @@ def main():
     changed_manifest('forged-source-identity', lambda v: v['retained_trial']['build_identity'].update(source_sha256='00'*32))
     changed_manifest('remove-transform-helper-binding', lambda v: v['retained_trial']['helper_source_sha256'].pop(
         'builders/build_nvidia_retained_trial.py'))
+    changed_manifest('remove-shared-function-parser-binding', lambda v: v['retained_trial']['helper_source_sha256'].pop(
+        'packages/nvidia-gsp-bootstrap/cancellation/prepare_wait_candidates.py'))
     # Rehash the changed file as an attacker could. The generic inventory now
     # agrees, but the exact independent source replay must still refuse it.
-    for relative in (retained.IDENTITY, retained.OLD_STATE, retained.PLATFORM):
+    for relative in (retained.IDENTITY, retained.OLD_STATE, retained.PLATFORM, retained.DARWIN_DEVICE,
+                     retained.GSP + 'prospective-runtime-coordinator/S540ExperimentalRuntime.h'):
         source = paths['composition'] / 'project' / relative
         saved = source.read_bytes()
         modified = deepcopy(value)

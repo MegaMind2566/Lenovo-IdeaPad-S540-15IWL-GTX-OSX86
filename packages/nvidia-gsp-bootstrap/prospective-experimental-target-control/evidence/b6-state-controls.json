@@ -1,0 +1,78 @@
+{
+  "controls": [
+    {
+      "command": [
+        "/workspace/scratch/9046a5958dfd/llvm-bin/clang",
+        "-std=c11",
+        "-O1",
+        "-g",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/S540ExperimentalTargetState.c",
+        "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/tests/check_state.c",
+        "-o",
+        "build/b6-frontend-state-1/plain"
+      ],
+      "mode": "plain",
+      "result": {
+        "checks": 270,
+        "failures": 0,
+        "gpu_access": false,
+        "kernel_execution": "not_tested",
+        "status": "passed"
+      }
+    },
+    {
+      "command": [
+        "/workspace/scratch/9046a5958dfd/llvm-bin/clang",
+        "-std=c11",
+        "-O1",
+        "-g",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/S540ExperimentalTargetState.c",
+        "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/tests/check_state.c",
+        "-o",
+        "build/b6-frontend-state-1/sanitized"
+      ],
+      "mode": "sanitized",
+      "result": {
+        "checks": 270,
+        "failures": 0,
+        "gpu_access": false,
+        "kernel_execution": "not_tested",
+        "status": "passed"
+      }
+    }
+  ],
+  "format": 1,
+  "gpu_access": false,
+  "kernel_execution": "not_tested",
+  "mutants": [
+    {
+      "name": "contract-comparison-removed",
+      "rejected": true
+    },
+    {
+      "name": "once-guard-removed",
+      "rejected": true
+    },
+    {
+      "name": "capacity-floor-removed",
+      "rejected": true
+    }
+  ],
+  "source_sha256": {
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/S540ExperimentalTargetProtocol.h": "3dbd84f5e91b8d140f95a85b27661fe5a2b18d93dec08e2ae53ddd780506c3b5",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/S540ExperimentalTargetState.c": "0ba99fb02a224efd8c7db492f57c841d790c28e7e6a218e6034a585cac5c9f13",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/S540ExperimentalTargetState.h": "a601ce5ee3796e3a4165028af84e7de1d18b52f742e05d76f06866644d7a460b",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/check.py": "d400da2059ff70373519c945a9b7098ac49e9c5517dd73f441d8351b9fc7553f",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/tests/check_state.c": "4fd8ecf0957f4dcfcf089031a81f46e553328e0ef3580edeb750ca6f4a4e6fea",
+    "packages/nvidia-gsp-bootstrap/prospective-preparation-observation/S540PreparationObservation.h": "49316dd9cb94603e76c8727f1584401fb9d1d93fa9fac1f99c6704ce3e3cd907"
+  },
+  "status": "actual-c-state-controls-passed"
+}

@@ -1,0 +1,45 @@
+{
+  "IRQ_source_reconfiguration_added": false,
+  "configureInterrupts_API_added": false,
+  "direct_PCI_MSI_writes": 0,
+  "format": 1,
+  "hardware_profile_unchanged": "valid complete PCI inventory, one MSI hardware vector, MSI capability present, MSI-X absent",
+  "input_profile": "exact retained B5 generated sources",
+  "maximum_source_count": 32,
+  "native_Darwin_compilation_proven_by_CPU_controls": false,
+  "primary_sources": {
+    "IOPCIBridge.cpp": "6157-6182 legacy then MSI resolution",
+    "IOPCIDevice.cpp": "1834-1863 lazy getProperty interrupt resolution",
+    "IOPCIMessagedInterruptController.cpp": "317-368 and549-561 append MSI after existing source entries",
+    "commit": "4822b27a36e2de70e231ecf2bf3021384fab6ec2",
+    "repository": "apple-oss-distributions/IOPCIFamily"
+  },
+  "revalidate_complete_source_route_before_arm": true,
+  "runtime_observations": {
+    "attempt_return_mask_bits": {
+      "IRQ": 3,
+      "adapter": 4,
+      "context": 1,
+      "global": 0,
+      "transaction_binding": 2
+    },
+    "firstFailureStage": "first failed actual stage before FAILED publication",
+    "lastStage": "last actual non-FAILED stage",
+    "route_fields": "ordinary-worker counts/values with explicit attempt, return, selected-source and selected-type validity; no authority"
+  },
+  "same_selected_source_for": [
+    "registerInterrupt",
+    "enableInterrupt",
+    "disableInterrupt",
+    "unregisterInterrupt",
+    "callback provider/source identity"
+  ],
+  "scope": "retained-single-MSI-OS-source-selection",
+  "selected_source_immutable_after_first_selection": true,
+  "source_count_is_not_hardware_MSI_vector_count": true,
+  "source_inventory": "Virtual getProperty resolves complete IOInterruptControllers/Specifiers arrays; same nonzero count at most32. Every getInterruptType must succeed; exactly one messaged source.",
+  "target_GPU_initialization_proven": false,
+  "target_actual_IRQ_source_observed": false,
+  "target_failure_cause_proven": false,
+  "whole_DMA_stop_or_normal_unload_authorized": false
+}

@@ -1,0 +1,94 @@
+{
+  "controls": [
+    {
+      "mode": "plain",
+      "result": {
+        "actual_lifecycle_bodies": true,
+        "checks": 142,
+        "failures": 0,
+        "gpu_access": false,
+        "kernel_execution": "not_tested",
+        "status": "passed"
+      }
+    },
+    {
+      "mode": "fatal",
+      "result": {
+        "actual_lifecycle_bodies": true,
+        "checks": 142,
+        "failures": 0,
+        "gpu_access": false,
+        "kernel_execution": "not_tested",
+        "status": "passed"
+      }
+    }
+  ],
+  "extracted_function_names": [
+    "stopPending",
+    "closeCancellationPublication",
+    "S540ExperimentalTargetControl::publishOwnerObservation",
+    "S540ExperimentalTargetControl::runOnce",
+    "S540ExperimentalTargetControl::requestStop",
+    "S540ExperimentalTargetClient::clientClose"
+  ],
+  "fixture_instruments_owner_field_publication": true,
+  "format": 1,
+  "generated_test_sha256": "5bd8e5e439ca4484084bb88d47d12631786c071a189a843dc071025a15640f68",
+  "gpu_access": false,
+  "host_control": true,
+  "kernel_execution": "not_tested",
+  "mutants": [
+    {
+      "name": "readonly-close-always-stops",
+      "rejected": true
+    },
+    {
+      "name": "pending-stop-hidden",
+      "rejected": true
+    },
+    {
+      "name": "publisher-join-omitted",
+      "rejected": true
+    },
+    {
+      "name": "owner-publication-outside-guard",
+      "rejected": true
+    },
+    {
+      "name": "preparation-observation-copy-omitted",
+      "rejected": true
+    },
+    {
+      "name": "runtime-irq-status-copy-omitted",
+      "rejected": true
+    },
+    {
+      "name": "runtime-returned-mask-copy-omitted",
+      "rejected": true
+    },
+    {
+      "name": "raced-runtime-copy-accepted",
+      "rejected": true
+    },
+    {
+      "name": "irq-source-count-copy-omitted",
+      "rejected": true
+    }
+  ],
+  "native_darwin_compilation": false,
+  "preparation_observation_survives_fixture_private_cleanup": true,
+  "runtime_fixture_uses_actual_profile_expanded_header": true,
+  "runtime_producer_execution_is_fixture_not_original": true,
+  "source_sha256": {
+    "build/retained-b6-1/inputs/retained/project/packages/nvidia-gsp-bootstrap/prospective-runtime-coordinator/S540ExperimentalRuntime.h": "801007d65389952484eb8552cddbeb4843d4f6a1f484ce5ed03fdc99252bb5a7",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/S540ExperimentalTargetKernel.cpp": "27d549ed299294c669c67575cae2a207df84cb0bf3c5474487191c2dd584769a",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/S540ExperimentalTargetProtocol.h": "3dbd84f5e91b8d140f95a85b27661fe5a2b18d93dec08e2ae53ddd780506c3b5",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/S540ExperimentalTargetState.c": "0ba99fb02a224efd8c7db492f57c841d790c28e7e6a218e6034a585cac5c9f13",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/S540ExperimentalTargetState.h": "a601ce5ee3796e3a4165028af84e7de1d18b52f742e05d76f06866644d7a460b",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/check_backend.py": "d83e31fae7f69a4567fef2c26368cc974b4cd0893162555c419b183dc1bdb126",
+    "packages/nvidia-gsp-bootstrap/prospective-experimental-target-control/tests/check_backend.cpp.inc": "08f3d85f3e45d9defb86881dab36992740946adc1ac3ecc546ac22f8bf9611ad",
+    "packages/nvidia-gsp-bootstrap/prospective-preparation-observation/S540PreparationObservation.h": "49316dd9cb94603e76c8727f1584401fb9d1d93fa9fac1f99c6704ce3e3cd907",
+    "packages/nvidia-gsp-bootstrap/prospective-retained-stop/S540NvidiaRetainedStop.h": "466a97671705eb34c634d2e665e976ff3e290d1f16e519694e0cf096e3188af1"
+  },
+  "status": "actual-backend-lifecycle-controls-passed"
+}

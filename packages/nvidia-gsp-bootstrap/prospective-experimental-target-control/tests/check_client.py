@@ -99,15 +99,15 @@ def check_diagnostics(case, fixture, row):
         nonlocal checks
         checks += 1
         if not value: raise ValueError('Client diagnostic case %u: %s' % (case, message))
-    outer_valid = case not in (29, 46, 64, 65)
+    outer_valid = case not in (29, 46, 64, 65, 84, 85)
     check(row['snapshot_valid'] is outer_valid, 'outer RPC validity was erased')
-    expected_format = 1 if case == 64 else (0 if case in (29, 46) else 2)
+    expected_format = 1 if case == 64 else (0 if case in (29, 46) else (2 if case == 84 else 3))
     expected_bytes = 0 if case in (29, 46) else fixture['expected_snapshot_bytes'] - (case == 65)
     check(row['snapshot_format'] == expected_format, 'snapshot version was not preserved')
     check(row['snapshot_bytes'] == expected_bytes,
         'snapshot byte size was not preserved')
     p = row['preparation']
-    valid = outer_valid and case >= 49 and case not in (53, 54, 55)
+    valid = outer_valid and 49 <= case <= 66 and case not in (53, 54, 55)
     check(p['valid'] is valid, 'unknown or malformed preparation was labeled valid')
     if not valid or case == 66:
         for key in ('stage_valid', 'last_completed_valid', 'last_status_valid', 'first_failure_observed',
@@ -205,6 +205,84 @@ def check_diagnostics(case, fixture, row):
     return checks
 
 
+def check_runtime_diagnostics(case, row):
+    checks = 0
+    def check(value, message):
+        nonlocal checks
+        checks += 1
+        if not value: raise ValueError('Client runtime diagnostic case %u: %s' % (case, message))
+    r = row['runtime']; q = row['irq_source']
+    outer = case not in (29, 46, 64, 65, 84, 85)
+    active = 67 <= case <= 86
+    valid = outer and active and case not in (70, 71, 72, 73, 74, 75, 76)
+    check(r['valid'] is valid, 'malformed, unavailable or raced runtime acquired validity')
+    if not valid:
+        check(all(call == {'attempted': None, 'returned': None, 'status': None}
+                  for call in r['calls'].values()), 'unknown runtime call became an observed status')
+        check(all(value is None for value in r['facts'].values()), 'unknown runtime fact became a boolean')
+        check(r['global_original_status'] is None and not r['first_failure_valid'],
+            'unknown runtime invented a global return or first failure')
+    else:
+        returned = 31 if case in (68, 69) else (7 if case == 77 else 15)
+        attempted = 31 if case in (68, 69) else 15
+        check(r['returned_mask'] == returned and r['attempted_mask'] == attempted,
+            'attempted and returned masks changed')
+        for name, bit in (('global', 1), ('context', 2), ('bind', 4), ('irq', 8), ('original_adapter', 16)):
+            call = r['calls'][name]
+            expected_status = (85 if case == 78 else 86) if name == 'irq' and case not in (68, 69, 77) else 0
+            check(call == {'attempted': bool(attempted & bit), 'returned': bool(returned & bit),
+                           'status': expected_status if returned & bit else None},
+                  'call %s conflates a status sentinel with a genuine return' % name)
+        check(r['facts']['global_initialized'] is True and r['facts']['global_original_returned'] is True and
+              r['global_original_status'] == 0 and r['facts']['any_original_entry_observed'] is True,
+              'successful original global call was lost')
+        adapter = case in (68, 69)
+        check(r['facts']['adapter_attempted'] is adapter and r['facts']['adapter_initialized'] is adapter and
+              r['facts']['adapter_original_returned'] is adapter,
+              'global entry was confused with adapter original entry')
+        failed = case not in (68, 69, 77)
+        check(r['first_failure_valid'] is failed, 'first failure validity changed')
+        if failed:
+            check(r['stage'] == 12 and r['stage_label'] == 'failed' and r['last_stage'] == 9 and
+                  r['last_stage_label'] == 'irq' and r['first_failure_stage'] == 9 and
+                  r['first_failure_stage_label'] == 'irq' and r['first_status'] == (85 if case == 78 else 86),
+                  'FAILED stage erased first failed operation or original return status')
+        if case == 77:
+            check(r['stage_label'] == 'irq' and r['calls']['irq']['status'] is None,
+                  'inflight status85 became a returned NV_ERR_NOT_READY')
+        check(r['generation'] == 17 and r['observed_host_stack_bytes'] == 16384 and
+              r['required_worker_stack_bytes'] == r['required_irq_stack_bytes'] == 16384,
+              'runtime generation or actual stack records changed')
+    route_valid = outer and active and case not in (79, 80, 81)
+    check(q['valid'] is route_valid, 'malformed or incomplete IRQ probe was labeled returned')
+    selected = route_valid and case in (68, 69)
+    check(q['selection_valid'] is selected, 'IRQ diagnostic accepted missing/ambiguous MSI selection')
+    if selected:
+        check(q['selected_source'] == (1 if case == 68 else 0) and q['selected_interrupt_type'] == 0x10000,
+              'selected source zero was confused with unknown or source1 was erased')
+    else:
+        check(q['selected_source'] is None and q['selected_interrupt_type'] is None,
+              'unknown/refused/ambiguous source acquired an index or type')
+    if route_valid:
+        check(q['probe_attempted'] is True and q['probe_returned'] is True and
+              q['probe_status'] == (0 if case in (68, 69, 82, 86) else 86), 'real IRQ probe return status changed')
+        check(q['source_count'] == (1 if case == 69 else 2) and
+              q['sources_observed'] == (1 if case == 69 else 2) and
+              q['messaged_sources'] == (1 if case in (68, 69, 86) else (2 if case == 82 else 0)),
+              'actual source/probe/MSI counts changed')
+        check(q['inventory_valid'] is True and q['msi_capable'] is True and q['msix_capable'] is False and
+              q['msi_vectors'] == 1, 'hardware MSI capability was confused with selected controller mode')
+    else:
+        check(q['probe_status'] is None and q['source_count'] is None and q['sources_observed'] is None and
+              q['messaged_sources'] is None and q['inventory_valid'] is None and q['msi_capable'] is None and
+              q['msix_capable'] is None and q['msi_vectors'] is None,
+              'unknown IRQ probe created success, source count or capability facts')
+        if case == 81:
+            check(q['probe_attempted'] is True and q['probe_returned'] is False,
+                  'an inflight probe was confused with unknown or returned')
+    return checks
+
+
 def run(args):
     output = args.output.resolve(); cc = args.cc.resolve(strict=True)
     if output.exists() or output.is_relative_to(FRONT): raise ValueError('Fresh isolated client controls output required')
@@ -240,23 +318,24 @@ def run(args):
             if raw.returncode: raise ValueError('Actual client fixture compilation failed: ' + raw.stderr[-7000:])
             rows = []
             diagnostic_checks = 0
-            for case in range(67):
+            for case in range(87):
                 fixture, observations = execute([binary, case], work / ('case-%02d.log' % case), environment)
                 if fixture['failures']: raise ValueError('Actual client fixture assertions failed')
-                if case in (0, 1, 2, 3, 4, 5, 29, 40, 44, 45, 46) or (case >= 49 and case != 63):
+                if case in (0, 1, 2, 3, 4, 5, 29, 40, 44, 45, 46) or (case >= 49 and case not in (63,83)):
                     if len(observations) != 1: raise ValueError('Actual client JSON report missing')
                     row = observations[0]
-                    if row['request_rpc_attempted'] != (case not in (3,44,45,46) and (case < 53 or case in (64,65))):
+                    if row['request_rpc_attempted'] != bool(fixture['requests']):
                         raise ValueError('Client JSON conflates run/snapshot/stop routes')
                     if case in (2,45) and row['stop_rpc_status'] != 0xe00002d5:
                         raise ValueError('Client JSON erased the actual STOP RPC failure')
-                    if case in (29,46) and row['snapshot_rpc_status'] != 0xe00002bc:
+                    if case in (29,46,85) and row['snapshot_rpc_status'] != 0xe00002bc:
                         raise ValueError('Client JSON erased the failed post-call observation')
-                    if case in (64,65) and row['snapshot_rpc_status'] != 0xe00002c2:
+                    if case in (64,65,84) and row['snapshot_rpc_status'] != 0xe00002c2:
                         raise ValueError('Client JSON accepted malformed post-call snapshot ABI')
                     if (case == 1 or 49 <= case <= 52) and row['request_rpc_status'] != 0xe00002bc:
                         raise ValueError('Client JSON erased REQUEST RPC failure')
                     diagnostic_checks += check_diagnostics(case, fixture, row)
+                    diagnostic_checks += check_runtime_diagnostics(case, row)
                 rows.append(dict(**fixture, client_json=observations))
             negative = []
             original = (FRONT / 'experimental_ctl.c').read_text()
@@ -285,7 +364,18 @@ def run(args):
                  'int valid=(snapshotValid && p->format==1 && p->bytes==sizeof(*p) && (p->observedMask&knownMask)!=0) || (snapshotValid && p->format==0);', 53),
                 ('zero-raw-pm-return-is-valid', 'powerValid && power->rawIOReturnValid==1', 'powerValid', 57),
                 ('unknown-only-pm-mask-is-valid', '(power->observedMask&powerKnownMask)!=0',
-                 '((void)powerKnownMask,power->observedMask!=0)', 66)):
+                 '((void)powerKnownMask,power->observedMask!=0)', 66),
+                ('raced-runtime-is-valid', 'r->snapshotStatus==NV_OK && masksValid',
+                 '((void)r->snapshotStatus,1) && masksValid', 71),
+                ('attempted-runtime-status-is-returned', 'int returned=valid && (r->returnedMask&calls[i].bit);',
+                 'int returned=valid && (r->attemptedMask&calls[i].bit);', 77),
+                ('zero-source-is-unknown', 'r->selectedSource<r->sourceCount &&',
+                 'r->selectedSource>0 && r->selectedSource<r->sourceCount &&', 69),
+                ('ambiguous-message-source-is-selected', 'r->messagedSources==1 &&',
+                 'r->messagedSources>0 &&', 82),
+                ('non-message-type-is-selected', '(r->selectedInterruptType&0x00010000U)!=0 &&',
+                 '', 86)):
+
                 if original.count(before) != 1: raise ValueError('Diagnostic negative control anchor changed: ' + label)
                 mutant_source = work / (label + '.c'); mutant_source.write_text(original.replace(before, after, 1))
                 mutant = work / label
@@ -295,7 +385,9 @@ def run(args):
                 if compiled.returncode: raise ValueError('Diagnostic negative control did not compile: ' + compiled.stderr[-3000:])
                 fixture, observations = execute([mutant, case], work / (label + '.log'), environment)
                 if fixture['failures'] or len(observations) != 1: raise ValueError('Diagnostic negative control did not reach reporting')
-                try: check_diagnostics(case, fixture, observations[0])
+                try:
+                    check_diagnostics(case, fixture, observations[0])
+                    check_runtime_diagnostics(case, observations[0])
                 except ValueError as error: detected = str(error)
                 else: raise ValueError('Diagnostic source mutation escaped: ' + label)
                 negative.append(dict(label=label, diagnostic_assertion=detected,
