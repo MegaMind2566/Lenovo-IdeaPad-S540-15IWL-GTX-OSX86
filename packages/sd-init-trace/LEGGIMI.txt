@@ -1,0 +1,28 @@
+S540 — TRACCIA INIZIALIZZAZIONE SD — v1
+
+1. Avvia macOS dalla EFI ESTERNA della prova attuale.
+2. Lascia inserita la scheda SD da 8 GB.
+3. Estrai lo ZIP in Download e avvia:
+   bash "$HOME/Downloads/S540-SD-Init-Trace-v1/ESEGUI-TEST-SD.command"
+4. Inserisci la password e segui le indicazioni nel Terminale:
+   togli la SD quando richiesto; reinseriscila soltanto quando richiesto.
+5. Allega lo ZIP S540-SD-Init creato sulla Scrivania.
+
+Il test non installa driver e non modifica EFI, ACPI, NVRAM o impostazioni
+NVIDIA. Attiva temporaneamente il bit di traccia interno del driver SD,
+conservando gli altri flag e i parametri di tuning; al termine tenta il
+ripristino e ne registra la verifica. Non riformatta e non scrive file sulla
+scheda. L'inserimento attiva il normale tentativo di inizializzazione del
+driver gia caricato.
+
+Prima di chiedere il reinserimento, il test deve verificare sia la rimozione
+nel driver sia il relativo evento nella traccia. Se il logger, il formato
+NDJSON o i permessi non sono utilizzabili, si ferma con esito inconclusivo:
+questo non significa che il lettore sia guasto o incompatibile.
+
+La raccolta conserva solo gli eventi SD selezionati e gli argomenti necessari.
+Non conserva risposte CID/CSD, contenuti della scheda, seriali o eventi generici
+di sistema. Un codice nonzero durante un tentativo non identifica da solo il
+guasto definitivo: il report va letto insieme alle successive operazioni.
+
+Il pacchetto e diagnostico e non dichiara risolto il lettore SD.

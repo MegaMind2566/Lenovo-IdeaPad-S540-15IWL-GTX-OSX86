@@ -17,3 +17,5 @@ current milestone.
 - Do not retry unchanged sources unless evidence shows the infrastructure problem has been resolved.
 - Preserve exact callback/export checks. Admit a compiler memory helper only for the reviewed source and actual compiler evidence; never weaken private symbol closure globally.
 - Report native compilation, successful packaging, target kernel loading and GPU initialization as separate milestones.
+
+- The separate SD userspace diagnostic uses `build-sd-init-trace.yml` and `.github/native-ci/sd-init-trace-request.json`. Prepare and review its exact sources on a non-main branch; the final main request changes only that SD request file and names the source-parent commit with bound SHA-256 values. Its message contains `[native ci] SD initialization trace`. Use one standard public `macos-15-intel` job after confirming no other native workflow is active. Never repurpose or modify the NVIDIA request files for SD validation.

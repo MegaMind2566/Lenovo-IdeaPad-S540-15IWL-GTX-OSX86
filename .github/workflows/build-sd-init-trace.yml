@@ -1,0 +1,39 @@
+name: Build S540 SD initialization trace
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/native-ci/sd-init-trace-request.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: s540-sd-init-trace-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: >-
+      github.event.repository.private == false &&
+      github.event_name == 'push' &&
+      contains(github.event.head_commit.message, '[native ci] SD initialization trace')
+    runs-on: macos-15-intel
+    timeout-minutes: 10
+    env:
+      GITHUB_REPOSITORY_VISIBILITY: ${{ github.event.repository.visibility }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - name: Bind exact source and validate native userspace diagnostic
+        run: python3 builders/build_sd_init_trace.py --output-dir build/sd-init-trace --request .github/native-ci/sd-init-trace-request.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: S540-SD-Init-Trace-native
+          path: build/sd-init-trace/
+          if-no-files-found: error
+          retention-days: 2
