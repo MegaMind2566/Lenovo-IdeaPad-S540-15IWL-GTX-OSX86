@@ -1,0 +1,24 @@
+{
+  "affected_code": "CPU control compiler path resolution; no target kernel code executed.",
+  "artifact_id": 12559143949,
+  "artifact_sha256": "cfbcd8c45217f4d5a9f8151ccbd7ea9c7e930e86e6ee67ab6177c43dd64b6363",
+  "baseline_compile_log_sha256": "64aa1661fb8915bacda78eed03a444ed48854d1de1b2e95ca4129e94244ae3a2",
+  "format": 1,
+  "kernel_platform_output_sha256": "d2d9585531c49587f66a58efa0edec6d392ae3ec235fa83e6dd254fdb8775380",
+  "native_job": {
+    "conclusion": "skipped",
+    "id": 120866564913,
+    "started": false
+  },
+  "observed_error": "Undefined C++ runtime references: operator new/delete, std::__throw_length_error and __gxx_personality_v0.",
+  "request_commit": "a5a6ba860eb6faf91038120ba6149ff048bb44a9",
+  "scope": "failed-Linux-preflight-CXX-driver-invocation",
+  "source_checker_before_fix_sha256": "36d1a30eb8c28a55c9730c75ac1bbcc403f24d1235560e183b02e9a27b159711",
+  "source_commit": "809921cd6777a0f2d8710df331014d4058ea6d48",
+  "source_job": {
+    "conclusion": "failure",
+    "id": 120866152763
+  },
+  "unchanged_sources_retry_permitted": false,
+  "workflow_run": 40091910707
+}

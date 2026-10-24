@@ -16,7 +16,8 @@ EXPORTS = {}
 INCLUDE_DIRECTORIES = ()
 COMPILE_DEFINITIONS = {}
 SOURCE_FILES = ('BASE-SHA256SUMS', 'SOURCE-CONTRACT.json', 'check.py',
-                'tests/check_platform.cpp.inc', 'tests/target-registry-fixture.json')
+                'tests/check_platform.cpp.inc', 'tests/target-registry-fixture.json',
+                'tests/test_driver_alias.py')
 
 
 def input_hashes():

@@ -1,0 +1,90 @@
+{
+  "actual_elf_binary_verified": true,
+  "checker_sha256": "d5cfaecad360b059af3adc05b3f3639872032393f7ebf727137e61ad13da46a1",
+  "combined_cases": 52,
+  "combined_checks": 2760,
+  "complete_checker_command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "-B",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-pci-memory-bars/check.py",
+    "--input-project",
+    "/workspace/scratch/9046a5958dfd/project/build/retained-b5-1/inputs/preparation-observation-base/project",
+    "--output",
+    "/workspace/scratch/9046a5958dfd/project/build/b5-driver-alias-fixed-1/complete-collector-controls",
+    "--cxx",
+    "/workspace/scratch/9046a5958dfd/project/../llvm-runtime/usr/bin/clang++-18",
+    "--host-control",
+    "--composed-project",
+    "/workspace/scratch/9046a5958dfd/project/build/retained-b5-1/inputs/retained/project",
+    "--registry-dump",
+    "/workspace/scratch/9046a5958dfd/upload/S540-PCI-NVIDIA-B4(1).txt"
+  ],
+  "complete_controls_report": "/workspace/scratch/9046a5958dfd/project/build/b5-driver-alias-fixed-1/complete-collector-controls/results.json",
+  "complete_controls_report_sha256": "3e0cfd5c3ce5553ca3ba9785e897f03cb5eac16544d0f4949e5ea8be53c03464",
+  "driver_mode_controls": [
+    {
+      "command": [
+        "/workspace/scratch/9046a5958dfd/llvm-runtime/usr/lib/llvm-18/bin/clang",
+        "-std=c++17",
+        "-O1",
+        "/workspace/scratch/9046a5958dfd/project/build/b5-driver-alias-fixed-1/driver-mode.cpp",
+        "-o",
+        "/workspace/scratch/9046a5958dfd/project/build/b5-driver-alias-fixed-1/resolved-C-driver"
+      ],
+      "compiler_resolved_sha256": "8ef402d453d1ba4902e4ee0f0f847f6cfa01400c95aa43c24e97818b9c0e3f45",
+      "expected_cpp_autolink": false,
+      "label": "resolved-C-driver",
+      "returncode": 1
+    },
+    {
+      "command": [
+        "/workspace/scratch/9046a5958dfd/project/../llvm-runtime/usr/bin/clang++-18",
+        "-std=c++17",
+        "-O1",
+        "/workspace/scratch/9046a5958dfd/project/build/b5-driver-alias-fixed-1/driver-mode.cpp",
+        "-o",
+        "/workspace/scratch/9046a5958dfd/project/build/b5-driver-alias-fixed-1/preserved-C++-alias"
+      ],
+      "compiler_resolved_sha256": "8ef402d453d1ba4902e4ee0f0f847f6cfa01400c95aa43c24e97818b9c0e3f45",
+      "expected_cpp_autolink": true,
+      "label": "preserved-C++-alias",
+      "returncode": 0
+    }
+  ],
+  "fake_failure_stub": false,
+  "fatal_asan_ubsan_checks": 2760,
+  "format": 1,
+  "github_workflows_started": 0,
+  "hardware_executed": false,
+  "invocation_path": "/workspace/scratch/9046a5958dfd/project/../llvm-runtime/usr/bin/clang++-18",
+  "mutants_killed": 6,
+  "native_darwin_compilation": false,
+  "original_rm_executed": false,
+  "regression_helper_sha256": "8bd58abf5696ab7e61c6d6e827a82075ebbfa7d7e32c0d12105f28431670a2c1",
+  "resolved_binary": "/workspace/scratch/9046a5958dfd/llvm-runtime/usr/lib/llvm-18/bin/clang",
+  "resolved_binary_sha256": "8ef402d453d1ba4902e4ee0f0f847f6cfa01400c95aa43c24e97818b9c0e3f45",
+  "sanitizer_policy": {
+    "address_and_undefined_fatal": true,
+    "leak_sanitizer_enabled": false,
+    "leak_sanitizer_reason": "This traced host cannot enumerate /proc tasks; LeakSanitizer is explicitly disabled, not reported as passed."
+  },
+  "source_sha256": "05752e373b157cb0316ef1aaa559214a672ed9afa46f6b3423dadd5b2095e1c8",
+  "status": "passed-real-LLVM-symlink-C++-driver-regression-and-full-collector-controls",
+  "target_regression_status_predicates": [
+    {
+      "predicates": 59,
+      "status": 85,
+      "variant": "baseline"
+    },
+    {
+      "predicates": 63,
+      "status": 85,
+      "variant": "io_only"
+    },
+    {
+      "predicates": 127,
+      "status": 0,
+      "variant": "combined"
+    }
+  ]
+}

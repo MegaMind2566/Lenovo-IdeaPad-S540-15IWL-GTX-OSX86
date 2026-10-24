@@ -108,7 +108,12 @@ def run(args):
     require(new_source.replace(prepare.AFTER,prepare.BEFORE).replace(prepare.ENDPOINT_AFTER,prepare.ENDPOINT_BEFORE)==old_source,
         'Combined profile contains a change beyond the two reviewed boundaries')
     resource.setrlimit(resource.RLIMIT_CORE,(0,0));output.mkdir(parents=True)
-    compiler=args.cxx.resolve(strict=True)
+    # Clang selects C++ standard-library linking from the invocation name.
+    # Resolving /usr/bin/clang++ to clang changes the driver mode even for a
+    # .cpp input. Authenticate the real file while preserving its C++ alias.
+    compiler=args.cxx.expanduser().absolute()
+    compiler_target=compiler.resolve(strict=True)
+    require(compiler_target.is_file() and os.access(compiler,os.X_OK),'Executable C++ compiler required')
     flags=['-std=c++17','-O1','-g','-Wall','-Wextra','-Werror']
     runs={};commands=[]
     def execute(label,function,mode,sanitize=False,must_fail=False):
@@ -159,7 +164,8 @@ def run(args):
         exact_source_refusal_controls=source_checks,intermediate_io_fix_is_not_full_target_success=True,
         target_regression_status_predicates=[dict(variant=name,status=runs[name]['cases'][0]['status'],predicates=runs[name]['cases'][0]['predicates']) for name in ('baseline','io_only','combined')],
         actual_target_dependency_call_trace_unchanged=True,all_endpoint_configuration_writes=0,
-        variants=runs,commands=commands,compiler_sha256=sha(compiler),
+        variants=runs,commands=commands,compiler_sha256=sha(compiler_target),
+        compiler_invocation_path=str(compiler),compiler_resolved_path=str(compiler_target),
         sanitizer_policy=dict(address_and_undefined_fatal=True,leak_sanitizer_enabled=False,
             leak_sanitizer_reason='This traced host cannot enumerate /proc tasks; LeakSanitizer is explicitly disabled, not reported as passed.'),
         native_darwin_compilation=False,whole_kernel_translation_unit_compiled=False,

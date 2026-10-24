@@ -1,0 +1,29 @@
+{
+  "format": 1,
+  "status": "reproduced-original-real-clang-C-driver-C++-stdlib-link-failure",
+  "checker_sha256": "36d1a30eb8c28a55c9730c75ac1bbcc403f24d1235560e183b02e9a27b159711",
+  "command": [
+    "python3",
+    "-B",
+    "/workspace/scratch/9046a5958dfd/project/packages/nvidia-gsp-bootstrap/prospective-pci-memory-bars/check.py",
+    "--input-project",
+    "/workspace/scratch/9046a5958dfd/project/build/retained-b5-1/inputs/preparation-observation-base/project",
+    "--composed-project",
+    "/workspace/scratch/9046a5958dfd/project/build/retained-b5-1/inputs/retained/project",
+    "--output",
+    "/workspace/scratch/9046a5958dfd/project/build/b5-driver-alias-before-1",
+    "--cxx",
+    "/workspace/scratch/9046a5958dfd/llvm-runtime/usr/bin/clang++-18",
+    "--host-control"
+  ],
+  "compiler_invocation": "/workspace/scratch/9046a5958dfd/llvm-runtime/usr/bin/clang++-18",
+  "compiler_actual_target": "/workspace/scratch/9046a5958dfd/llvm-runtime/usr/lib/llvm-18/bin/clang",
+  "compiler_actual_sha256": "8ef402d453d1ba4902e4ee0f0f847f6cfa01400c95aa43c24e97818b9c0e3f45",
+  "compiler_invocation_is_symlink": true,
+  "returncode": 1,
+  "baseline_compile_log_sha256": "9a4df8d59786ae962d719239f14058c26683783ee804c99b960e92f2da4b5845",
+  "failure_uses_real_LLVM_binary": true,
+  "fake_failure_stub": false,
+  "native_darwin_compilation": false,
+  "target_execution": false
+}
