@@ -16,11 +16,23 @@ The retained `S540-SD-O2-DIRETTO.zip` candidate changes only the kext personalit
 
 The x86_64 `__text` section of the reviewed BigSurSDXC, older NUCO2SDXC and supplied Sonoma CtlnaSDXC binaries is byte-identical: 55,746 bytes, SHA-256 `11b2fbe0068e69cb7efc772c6290323524bb7496d79e962e6728e069b54ca9d7`. Renaming or swapping those packages alone is not a new implementation.
 
-The direct candidate was prepared for the previous 240 GB test EFI. It contains no config.plist and assumes an already enabled matching kext entry and compatible properties. Those assumptions must be compared with the current external test EFI before preparing a delta; the old instructions are not automatically the current test procedure. The earlier request for an internal EFI copy is superseded; SD trials must not modify the internal EFI. No native compilation or repeat observer build is required merely to reuse the verified binary.
+The direct candidate was prepared for the previous 240 GB test EFI. It contains no config.plist and assumes an already enabled matching kext entry and compatible properties. Those assumptions have now been verified against the newly supplied external test EFI. Use the updated trial package below; the older 240 GB instructions are retained as provenance. The earlier request for an internal EFI copy is superseded; SD trials must not modify the internal EFI. No native compilation or repeat observer build is required merely to reuse the verified binary.
 
 [HaC-Mini issue 1056](https://github.com/osy/HaC-Mini/issues/1056#issuecomment-1858981127) includes a report of the same physical ID working on Sonoma; [another report](https://github.com/osy/HaC-Mini/issues/1056#issuecomment-1859028063) limits success to cards up to 32 GB. Neither establishes Tahoe compatibility or complete SDXC support. The [Linux O2Micro driver](https://github.com/torvalds/linux/blob/5029bff09e79ad80883c5ee2828b8c4a263cf3dd/drivers/mmc/host/sdhci-pci-o2micro.c) contains SEABIRD1-specific initialization for this family. That is a reference for implementation review, not permission to copy unrelated device register writes into ACPI.
 
 The current outcome remains **no confirmed macOS SD reading**. Acceptance needs actual readable media after applying the exact candidate to the reviewed current configuration. A successful load or controller name alone does not close it.
+
+### External SD-only trial prepared — 24 October 2026
+
+The supplied external EFI has now been compared with the retained candidate. It already enables BigSurSDXC 1.9.0 for Darwin 25 and its compatible-name list includes `pci1217,8621`. The existing driver executable and Info.plist exactly match the retained original and rollback inputs.
+
+The user explicitly requested preserving the existing external EFI, including its enabled NVIDIA PCI probe. **No config.plist, boot argument, ACPI setting, NVIDIA probe or bootloader change is included in this SD trial.** The earlier idea of converting this test EFI to the Intel-only baseline was cancelled before applying changes.
+
+`S540-SD-Test-Esterna-v1.zip` supplies only the direct-match SD kext, the exact original kext for rollback, instructions, checksums and an optional passive report collector. ZIP SHA-256: `4f757f4dab19b8341144845d94382f4e74aaf60c9d824362d35d6f06d40aaf13`. Its sole driver change is the already reviewed `IONameMatch` string. The executable is unchanged; no config.plist, EFI executable or SSDT is delivered.
+
+Independent review verified all eight archive files, seven checksum entries, permissions, the single byte/semantic substitution and rollback equality against the uploaded EFI. The collector passes Bash syntax checking and only reads runtime state into a Desktop report. No native compilation or CI was needed. These checks establish package integrity, not target card-reading success.
+
+The target trial is one normal boot from the external EFI with the known Windows-readable SD inserted, then opening an existing file and reporting card capacity. If media is absent, the optional passive collector records the loaded driver/controller/disk state from that same boot; it does not install drivers, reset NVRAM, format the card or change the NVIDIA experiment.
 
 ## Goodix fingerprint reader
 
@@ -38,4 +50,4 @@ A macOS userspace capture/matcher port would be separate development with separa
 
 ## Consolidation boundary
 
-Retain the working internal rEFInd/OpenCore/Windows boot arrangement and the confirmed audio, keyboard, USB, sleep and Low Power Mode results. Prepare and test the SD delta only on the reviewed external non-NVIDIA EFI. The requested EFI consolidation follows the SD target result, with fingerprint authentication explicitly recorded as not working. Do not insert experimental NVIDIA code, fingerprint provisioning, untested SD variants or private machine identifiers into the public stable package.
+Retain the working internal rEFInd/OpenCore/Windows boot arrangement and the confirmed audio, keyboard, USB, sleep and Low Power Mode results. Prepare and test the SD delta only on the reviewed external EFI, preserving its existing NVIDIA experiment as explicitly requested. The requested EFI consolidation follows the SD target result, with fingerprint authentication explicitly recorded as not working. Do not insert experimental NVIDIA code, fingerprint provisioning, untested SD variants or private machine identifiers into the public stable package.
