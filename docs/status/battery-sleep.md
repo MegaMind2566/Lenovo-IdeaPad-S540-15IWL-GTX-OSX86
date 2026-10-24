@@ -1,6 +1,6 @@
 # Battery and sleep status
 
-Updated on **20 October 2026** for the working official EFI on the external Samsung 960 EVO. This page records observations; it does not change power settings.
+Updated on **24 October 2026**. The current official non-NVIDIA EFI boots internally; dated observations below retain their original source/configuration scope. This page records results and does not change power settings.
 
 ## Verified results
 
@@ -15,6 +15,10 @@ Updated on **20 October 2026** for the working official EFI on the external Sams
 | Internal audio after sleep/wake and Bluetooth disconnection | Playback returns to the built-in speakers; a recording with the selected internal microphone works | User-confirmed on 24 October 2026 in the same wake session; no additional sleep cycle or prolonged standby was tested |
 
 The lid result closes the ordinary close/open check. No extra lid collector, power patch or repeat cycle is requested. It does not establish overnight drain, prolonged sleep reliability, measured battery autonomy or hibernation. Full peripheral recovery is claimed only where separately confirmed by the user.
+
+## Observed lid and idle cycles — 21 October 2026
+
+The retained pmset log records clamshell sleep from 13:28:43 to 14:28:46: **3,603 seconds**, followed by `PWRB XDCI/Lid Open` wake. Its counters show one sleep, one user wake and zero DarkWake. A later idle cycle runs from 14:38:31 to 14:40:02: **91 seconds**, again followed by user/lid wake with zero DarkWake in that session. These close the tested ordinary lid/idle behavior; they do not measure calibrated standby drain, overnight reliability or hibernation.
 
 ## Low Power Mode under CPU load — 24 October 2026
 
@@ -49,9 +53,9 @@ The earlier battery reading on AC was 100% and charged. After removing AC on 14 
 
 ## Configuration retained
 
-The collected settings include `hibernatemode=3`, a one-minute system sleep timer and different display-sleep timers on AC and battery. These settings are observations, not recommended replacements. No power preference, NVRAM value, EFI argument or driver was changed for the lid confirmation. The USB boot disk remains part of the working setup.
+The collected settings include `hibernatemode=3`, a one-minute system sleep timer and different display-sleep timers on AC and battery. These settings are observations, not recommended replacements. No power preference, NVRAM value, EFI argument or driver was changed for the lid confirmation. Those settings were captured during the earlier setup; the current official macOS boot is internal.
 
-SD and NVIDIA development are paused. The separate delivered removal of the residual NVMe block still awaits an explicit reboot confirmation and adds no battery or sleep claim. See [Hardware status](hardware.md).
+SD operation has since been user-confirmed from the internal non-NVIDIA EFI and is included in v0.3.0. NVIDIA remains disabled in that release; its experimental research is separate. Those later changes add no new autonomy, hibernation or prolonged-standby claim. See [Hardware status](hardware.md).
 
 ## Reference
 

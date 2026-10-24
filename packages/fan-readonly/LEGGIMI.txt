@@ -1,0 +1,17 @@
+S540 — dati firmware per il rilevamento delle ventole
+
+Estrai la cartella in Downloads ed esegui:
+  bash "$HOME/Downloads/S540-Ventole-ACPI-v1/RACCOGLI-ACPI.command"
+
+Allega lo ZIP S540-Ventole-ACPI.*.zip creato sulla Scrivania.
+Non servono password, nuovi driver, strumenti sviluppatore o riavvii.
+
+La raccolta legge solo DSDT e SSDT gia esposte da macOS tramite IORegistry.
+Non esegue metodi ACPI, non accede ai registri EC, non cambia velocita delle
+ventole, EFI, NVIDIA o macOS. Non include la tabella MSDM o il dump IORegistry
+completo. Il file temporaneo completo viene eliminato.
+
+I file .plist contengono i dati AML codificati come proprieta XML: servono
+all'analisi offline del firmware del tuo preciso modello. Non sono una patch.
+Se macOS non espone le tabelle, il report lo segnala senza dichiarare la
+ventola incompatibile e senza provare altri metodi automaticamente.

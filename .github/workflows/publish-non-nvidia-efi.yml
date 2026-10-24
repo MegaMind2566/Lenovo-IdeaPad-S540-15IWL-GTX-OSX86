@@ -1,0 +1,49 @@
+name: Publish non-NVIDIA EFI v0.3.0
+
+on:
+  push:
+    branches: ['release/non-nvidia-efi-v0.3.0']
+    paths:
+      - '.github/release-requests/non-nvidia-v0.3.0.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-non-nvidia-efi-v0.3.0
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: >-
+      github.repository == 'MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86' &&
+      github.event.repository.private == false &&
+      contains(github.event.head_commit.message, '[publish efi]')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Check publication refusal and draft-resume behavior locally
+        run: python3 tests/test_non_nvidia_publication.py
+      - name: Verify explicit publication request and source bindings
+        run: |
+          python3 - <<'PY'
+          from builders.publish_non_nvidia_release import validate_request
+          validate_request()
+          PY
+      - name: Assemble only the reviewed non-NVIDIA EFI
+        run: python3 builders/build_non_nvidia_release.py --download
+      - name: Recover unchanged reviewed audio and hotkey companions
+        run: python3 builders/publish_non_nvidia_release.py --prepare-assets
+      - name: Verify exact six-asset release set
+        run: python3 builders/publish_non_nvidia_release.py --check-only
+      - name: Upload draft, verify remote bytes and publish
+        run: python3 builders/publish_non_nvidia_release.py --publish

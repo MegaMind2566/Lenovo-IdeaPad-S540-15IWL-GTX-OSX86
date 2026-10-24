@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "version": "v0.3.0",
+  "repository": "MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86",
+  "base": {
+    "filename": "S540-Tahoe-EFI-v0.2.0.zip",
+    "url": "https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/download/v0.2.0/S540-Tahoe-EFI-v0.2.0.zip",
+    "size": 47102989,
+    "sha256": "659b1223c16b719a860c509571858b6685b0333b98c19222e480381fa601c039"
+  },
+  "opencore": {
+    "filename": "OpenCore-1.0.8-RELEASE.zip",
+    "url": "https://github.com/acidanthera/OpenCorePkg/releases/download/1.0.8/OpenCore-1.0.8-RELEASE.zip",
+    "size": 10544084,
+    "sha256": "2011e8b7216ecb2645d97ea710df965947edd406846e92050b9bc4190be6d27b"
+  },
+  "sd": {
+    "filename": "BigSurSDXC-v1.0.0.zip",
+    "url": "https://raw.githubusercontent.com/dortania/OpenCore-Legacy-Patcher/f1d67923c827be2deebb1172333e7f0afb340583/payloads/Kexts/Misc/BigSurSDXC-v1.0.0.zip",
+    "source_commit": "f1d67923c827be2deebb1172333e7f0afb340583",
+    "git_blob_sha": "9c2fb4ef46e68eaf72becf95790b9f89b66d70b1",
+    "size": 107439,
+    "sha256": "cae42ad863f5d4ae8a622ce1a9632f7268952fdeeb43306fe7f0d2be7275d3f8",
+    "original_info_sha256": "1f6e8b993238def56f1ae17843cd8f943af03f534ae976a1b7f5e566d2b90565",
+    "direct_info_sha256": "d3dc9a76442bddf030389ea527045070a8e08153edb6b926ce3d60ddc70f4ae2",
+    "unchanged_executable_sha256": "dfb316e5e4ce745da6dbbb7470af1720e6719741e2a900aff3b3114e35060bd7",
+    "recipe": "Replace the single Info.plist IONameMatch string pci14e4,16bc with pci1217,8621; executable unchanged; omit __MACOSX metadata."
+  },
+  "layout": "EFI/OC only; merge without replacing EFI/BOOT, EFI/Microsoft, EFI/refind or firmware entries",
+  "tested_private_config_sha256": "c3ca024b02f51c9a82ec85f833c65a3a669bdff1f539a0605f5edc6dbfe268dd",
+  "public_config_sha256": "1bb74df68623d72b37f669b70b5eb3b10c7b8f64642f46e9d145aed7bb9b9563"
+}

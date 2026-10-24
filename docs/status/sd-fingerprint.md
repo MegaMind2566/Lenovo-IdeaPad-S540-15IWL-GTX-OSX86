@@ -1,8 +1,16 @@
 # SD reader and fingerprint scope
 
-Updated on **24 October 2026**. SD card operation is now user-confirmed on the external direct-match setup. Preparation of its promotion into the **official internal non-NVIDIA EFI** is authorized and recorded below; installation and internal-boot SD verification remain pending. The user has marked the fingerprint reader **NOT WORKING in macOS** and stopped further fingerprint work. NVIDIA, HDMI and the accepted non-working F8 camera toggle remain outside this work.
+Updated on **24 October 2026**. SD operation is now **user-confirmed from the updated internal non-NVIDIA EFI** and included in v0.3.0. The working driver is the previous direct-match BigSurSDXC variant, not the S18R-disabled/3V3 candidate. The user has marked fingerprint authentication **NOT WORKING in macOS** and stopped that investigation. The project remains in development; NVIDIA research is separate from this release.
 
 ## O2Micro SD reader
+
+### Current internal EFI result — 24 October 2026
+
+After the SD-only internal update, the user initially reported no detection and later confirmed that the card now works, then requested publication of this non-NVIDIA EFI. This is a functional confirmation on the source laptop with the known **8 GB FAT32** card. The user also confirms insertion during an active macOS session, mounting/unmounting and continued availability after sleep. This is not a new timing/state trace and does not identify why the earlier result differed or guarantee every card, write-integrity or speed scenario.
+
+The included driver remains the original executable `dfb316e5e4ce745da6dbbb7470af1720e6719741e2a900aff3b3114e35060bd7`, with direct-match Info.plist `d3dc9a76442bddf030389ea527045070a8e08153edb6b926ce3d60ddc70f4ae2`. The internal config retains `-wegnoegpu`, no NVIDIA experiment is merged, and Windows/rEFInd files remain unchanged. v0.3.0 sanitizes the public identity and ships the OpenCore directory only.
+
+The earlier external trials, negative results, trace and guarded-installer history below are retained chronologically. Their pending/no-media statements describe those earlier stages and do not override this latest result. The separate 3V3 candidate is not validated by this success.
 
 The controller is PCI `1217:8621`, subsystem `17AA:3803`, revision 01. The same card works under Windows. A retained Tahoe report shows the older BigSurSDXC controller, slot and block-storage services active, with `IONameMatched=pci14e4,16bc`, but no readable SD media. A loaded kext is not a successful card-reading result.
 
@@ -16,7 +24,7 @@ The retained `S540-SD-O2-DIRETTO.zip` candidate changes only the kext personalit
 
 The x86_64 `__text` section of the reviewed BigSurSDXC, older NUCO2SDXC and supplied Sonoma CtlnaSDXC binaries is byte-identical: 55,746 bytes, SHA-256 `11b2fbe0068e69cb7efc772c6290323524bb7496d79e962e6728e069b54ca9d7`. Renaming or swapping those packages alone is not a new implementation.
 
-The direct candidate was prepared for the previous 240 GB test EFI. It contains no config.plist and assumes an already enabled matching kext entry and compatible properties. Those assumptions have now been verified against the newly supplied external test EFI. Use the updated trial package below; the older 240 GB instructions are retained as provenance. The earlier request for an internal EFI copy is superseded; SD trials must not modify the internal EFI. No native compilation or repeat observer build is required merely to reuse the verified binary.
+The direct candidate was prepared for the previous 240 GB test EFI. It contains no config.plist and assumes an already enabled matching kext entry and compatible properties. Those assumptions have now been verified against the newly supplied external test EFI. Use the updated trial package below; the older 240 GB instructions are retained as provenance. Those external-only trial instructions applied before the user later authorized internal promotion; the later internal update and current result are recorded on this page. No native compilation or repeat observer build is required merely to reuse the verified binary.
 
 [HaC-Mini issue 1056](https://github.com/osy/HaC-Mini/issues/1056#issuecomment-1858981127) includes a report of the same physical ID working on Sonoma; [another report](https://github.com/osy/HaC-Mini/issues/1056#issuecomment-1859028063) limits success to cards up to 32 GB. Neither establishes Tahoe compatibility or complete SDXC support. The [Linux O2Micro driver](https://github.com/torvalds/linux/blob/5029bff09e79ad80883c5ee2828b8c4a263cf3dd/drivers/mmc/host/sdhci-pci-o2micro.c) contains SEABIRD1-specific initialization for this family. That is a reference for implementation review, not permission to copy unrelated device register writes into ACPI.
 
@@ -131,4 +139,4 @@ A macOS userspace capture/matcher port would be separate development with separa
 
 ## Consolidation boundary
 
-Retain the working internal rEFInd/OpenCore/Windows boot arrangement and the confirmed audio, keyboard, USB, sleep and Low Power Mode results. Prepare and test the SD delta only on the reviewed external EFI, preserving its existing NVIDIA experiment as explicitly requested. The requested EFI consolidation follows the SD target result, with fingerprint authentication explicitly recorded as not working. Do not insert experimental NVIDIA code, fingerprint provisioning, untested SD variants or private machine identifiers into the public stable package.
+The user-confirmed current internal non-NVIDIA configuration is published as v0.3.0. Preserve its rEFInd/OpenCore/native-Windows separation, Intel display, audio, keyboard, USB, sleep and Low Power Mode results. Fingerprint authentication remains explicitly not working, with work stopped. The accepted non-working F8 camera toggle remains paused. Do not merge experimental NVIDIA code, fingerprint provisioning, unvalidated SD variants or private machine identifiers into the public release. Further SD reliability coverage is separate from the confirmed operation and is not requested automatically by missing measurements.

@@ -9,7 +9,8 @@ Start with the [project README](../README.md) for the current state and scope. D
 | [Hardware](status/hardware.md) | Hardware IDs and results observed on the laptop |
 | [Roadmap](status/roadmap.md) | Open work, priorities and acceptance criteria |
 | [NVIDIA validation](status/nvidia-validation.md) | Grouped checkpoints, separate native/target evidence and one future integrated target checkpoint |
-| [Battery and sleep](status/battery-sleep.md) | Battery evidence and confirmed lid-close stop/open-lid resume; long-duration coverage remains separate |
+| [Battery and sleep](status/battery-sleep.md) | Battery evidence, confirmed lid/idle sleep and selected peripheral recovery; long-duration coverage remains separate |
+| [SD and fingerprint](status/sd-fingerprint.md) | Working internal SD result, retained initialization history and non-working fingerprint authentication |
 | [CPU and thermals](status/cpu-thermal.md) | CPU response, incomplete load-temperature measurement and sensor follow-up |
 
 ## Current guides
@@ -54,19 +55,12 @@ Start with the [project README](../README.md) for the current state and scope. D
 
 Graphics experiments, Intel traces and Recovery log collectors are preserved in the [archive](../archive/README.md), together with their sources, asset locks and licenses. The [NVIDIA visibility helper](../packages/nvidia-visibility/README.md) is superseded for the reached milestone: its V1 automatic locator stopped at `Mounted`, and the subsequent manual path produced an active target PCI service.
 
-## Release preparation
+## Current release and continuing work
 
-[v0.2.0 release notes](releases/v0.2.0/RELEASE-NOTES.md), [installation](releases/v0.2.0/INSTALL.md) and [source provenance](releases/v0.2.0/SOURCE-PROVENANCE.md) describe the stable Intel-graphics EFI with native Wi-Fi. Public SMBIOS personalization and the separately installed audio driver are required. [v0.1.0](releases/v0.1.0.md) remains a historical snapshot.
+**[v0.3.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.3.0)** is the current internal non-NVIDIA baseline. The project remains in development. [Release notes](releases/v0.3.0/RELEASE-NOTES.md), [installation](releases/v0.3.0/INSTALL.md) and [provenance](releases/v0.3.0/SOURCE-PROVENANCE.md) explain the working and unsupported hardware, identity personalization and payload boundaries.
 
-## Current EFI and next hardware task
+The package contains **EFI/OC only**, with a rEFInd config example. Microsoft boot files, EFI/BOOT and the rEFInd executable are not redistributed. Audio and S540 Tasti are separately installed macOS companions; their ZIPs and checksums are available with the release. SD reading, session insertion, mount/unmount and availability after sleep are user-confirmed on the known 8 GB FAT32 card.
 
-- The official Samsung EFI has confirmed native-menu Wi-Fi, corrected hardware names, working video/audio capture, Bluetooth headset audio/microphone, wired headset audio/microphone and basic lid sleep/wake. F1–F3 work; F4–F10 are the current keyboard task; F11–F12 work in the non-NVIDIA EFI. SD-reader and operational NVIDIA development are paused.
-- The consolidated private config removes the residual NVMe block; the report already showed the internal SSD available. The exact final-config reboot is not yet explicitly confirmed. The supplied full EFI is packaged as v0.2.0 without driver upgrades; public preparation and static validation do not establish a new target boot. `config/efi/current` still identifies the historical v0.1.0 assembly; the latest recipe is versioned under `config/efi/releases/v0.2.0`.
-- [Stable EFI v0.2.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.2.0): complete package and checksum; [installation](releases/v0.2.0/INSTALL.md).
-- [EFI setup](../packages/efi/README.md): personalization and dependencies outside the EFI.
-- [Function-key diagnosis](../packages/function-keys/README.md): read-only device snapshots and F11/F12 observations for the function-key batch.
+F8 camera disablement and fingerprint authentication remain non-working with work paused/stopped. F6/F10 completion and external-display support retain their stated scope. Fan RPM telemetry is unavailable in the current configuration, while CPU temperature readings work; physical fan failure is not established. NVIDIA is disabled in the official EFI; its separate experimental records remain available and do not establish graphics acceleration. Missing extended measurements do not reopen confirmed checks automatically.
 
-- [Function-key events](../packages/function-key-events/README.md): a native, read-only observer for the complete direct/Fn row. It does not install mappings.
-- [Fn shortcut setup](../packages/function-keys-setup/README.md): a reversible change to the four proven macOS bindings and a targeted capture for the remaining icon keys.
-
-- [Driver scan-code collection](../packages/function-key-scancodes/README.md): bounded trace windows for the verified VoodooPS2Keyboard RELEASE binary, comparing physical icon keys with ordinary application shortcuts.
+The earlier [v0.2.0](releases/v0.2.0/RELEASE-NOTES.md), [v0.1.0](releases/v0.1.0.md), and `config/efi/current` are historical snapshots, not the new installation procedure. Feature guides retain their dated diagnostics and rollback information.

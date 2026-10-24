@@ -14,7 +14,7 @@ The complete row follows the keyboard legends: direct presses perform the icon a
 | F2 | Decrease volume | Working; reconfirmed October 20 | F2 |
 | F3 | Increase volume | Working; reconfirmed October 20 | F3 |
 | F4 | Mute microphone | Working; user-confirmed with S540 Tasti | F4 |
-| F5 | Reload the current browser page | Pending; direct and Fn inputs currently indistinguishable | F5 |
+| F5 | Reload the current browser page | Browser reload user-confirmed; the recorded direct/Fn inputs remain indistinguishable | F5 |
 | F6 | Toggle touchpad | Open in the current F4–F10 scope; earlier toggle confirmation retained as history | F6 |
 | F7 | Toggle Wi-Fi/Bluetooth | Working; user confirms radio off and restoration with S540 Tasti | F7 |
 | F8 | Disable/enable the built-in camera | NOT WORKING; firmware flag changes but video continues; further work paused by request | F8 |
@@ -50,7 +50,7 @@ The input device exposes a writable master mute control, enabling an F4 action o
 
 The [driver diagnostic](../../packages/function-key-scancodes/README.md) was prepared to compare VoodooPS2Keyboard traces for these keys and ordinary Command-L/Command-P. Its laptop report stopped after three empty F4/F5/Fn+F5 windows: trace visibility was not confirmed by the positive controls, and logging restoration is verified. No raw key identity can be inferred from this report. Further keyboard diagnostics are deferred. Distinct raw sequences can justify a narrow keyboard mapping; identical sequences cannot safely be separated by a global chord replacement. The driver's trace is not a complete PS/2 wire capture. If a key has no retained trace, both earlier driver handling and the verified Lenovo VPC path remain candidates requiring their own evidence.
 
-F5 can also be assigned to a browser's own Reload menu command through macOS [App Shortcuts](https://support.apple.com/guide/mac-help/mchlp2271/mac). This preserves the F5 key identity received by other applications and applies equally to direct F5 and Fn+F5 inside that browser. The exact localized menu title must be checked, and assigning its new equivalent can replace the existing Command-R equivalent. No browser override has been installed.
+The user subsequently accepted F5 browser reload as working. The retained input capture still does not distinguish direct F5 from Fn+F5; a general distinct-trigger remap is not established. F5 can also be assigned to a browser's own Reload menu command through macOS [App Shortcuts](https://support.apple.com/guide/mac-help/mchlp2271/mac). This preserves the F5 key identity received by other applications and applies equally to direct F5 and Fn+F5 inside that browser. The exact localized menu title must be checked, and assigning its new equivalent can replace the existing Command-R equivalent. No browser override has been installed.
 
 Observer 1.0 marked all trials interrupted while still recording the positive key identities above. It reused a tap across intentional disable/enable operations, allowing queued disable notifications to affect the next trial. Version 1.1 creates a fresh tap per window, records genuine interruption reasons, and supports a seven-trial targeted capture. Missing events in the initial interrupted windows do not establish a missing firmware event.
 
@@ -70,7 +70,7 @@ The event stream can establish distinct inputs for a mapping. A missing matching
 
 The original S540 tables contain a Lenovo `VPC2004` device and a generic VPC notification path. The [firmware hotkey reference](../reference/firmware-hotkeys.md) records the verified methods and separates protocol queries from state-changing commands. The original dumps remain private.
 
-F4 requires a writable Core Audio input-mute control and state verification; reducing input gain is not a substitute for mute. F5 reload must be owned by the browser or use a proven distinct input. F9 uses the normal lock-screen action after its trigger is distinguished from ordinary Command-L. F10 requires a working external display and an explicit choice of display mode, without consuming ordinary Command-P.
+The historical design below originally required a writable Core Audio input-mute control. The subsequently accepted S540 Tasti implementation instead sets the input level to zero and restores the previous level for F4; this is the current user-confirmed behavior, not a hardware privacy switch. F5 reload must be owned by the browser or use a proven distinct input. F9 uses the normal lock-screen action after its trigger is distinguished from ordinary Command-L. F10 requires a working external display and an explicit choice of display mode, without consuming ordinary Command-P.
 
 F7 must verify both Wi-Fi and Bluetooth power state before claiming airplane mode. The official EFI now uses the working native-menu Wi-Fi configuration; a service label or network-service enablement is still not evidence that the radio is off. F8 needs a confirmed camera power/privacy path; merely opening privacy settings or closing a camera application is not camera disablement.
 

@@ -1,45 +1,52 @@
 # Verified hardware and official EFI status
 
-Updated on **20 October 2026**. The working official EFI boots independently from the external Samsung 960 EVO. Native Wi-Fi and the hardware-name corrections are installed and user-confirmed. The separate 240 GB test EFI is not the installed official configuration.
-
-Hotkey status updated on **24 October 2026**: F4, F7 and F9 are user-confirmed working. **F8 camera disablement is NOT WORKING; further F8 work is paused at the user’s request.** The hardware inventory and other dated observations below retain their original scope.
+Updated on **24 October 2026** for the current **internal non-NVIDIA EFI**, published as v0.3.0. The source laptop now boots macOS internally alongside native Windows. SD operation is user-confirmed after the internal update. The project remains **in development**; the table separates working functions, accepted non-working features and unverified coverage.
 
 ## Current results
 
 | Component | Verified result | Limit or remaining scope |
 |---|---|---|
-| Platform | Lenovo IdeaPad S540-15IWL GTX, 81SW family; Intel Core i7-8565U, 4 cores / 8 threads | Private SMBIOS identity is preserved and excluded from the repository |
-| Board and firmware provenance | Original hardware report: Lenovo LNVNB161216, BIOS BWCN19WW dated 26 May 2021; OEM DSDT and 12 SSDTs analysed | Historical inventory, not a new firmware check |
-| CPU and power management | Correct CPU name; X86PlatformPlugin active; frequency and estimated package power respond to activity | Historical thermal measurements and their limits are in [CPU and thermal observations](cpu-thermal.md) |
-| Battery Low Power Mode | User-requested OFF–ON–ON–OFF test on 24 October confirms lower estimated package power (about 11.4 W versus 34.4–36.5 W) and active frequency (2.4 GHz versus 3.89–4.00 GHz) under the same artificial worker setup; restored to battery 1 / AC 0 | Short CPU/package response, not total laptop power, equal-work efficiency or measured autonomy. OFF samples include thermal/performance-limit flags; see [Battery and sleep](battery-sleep.md#low-power-mode-under-cpu-load--24-october-2026) |
-| RAM | 12 GB DDR4-2400: 8 GB and 4 GB modules, both reported OK; upgradeable shown as Yes | The model has soldered memory and one SO-DIMM slot |
-| Internal display and Intel graphics | BOE NV156FHM-N61 at 1920×1080; panel name corrected; IntelAccelerator and Metal 3 detected; brightness and F11/F12 work in the official EFI | Sustained graphics performance is not measured by the hardware report |
-| Native Wi-Fi | Intel Wireless-AC 9560; AirportItlwm 2.4.0 from laobamac source `738d4c6`; native macOS menu and Wi-Fi service working; itlwm disabled | User-confirmed reconnection and recovery after restart/sleep; AirDrop and Continuity are not claimed |
-| Bluetooth | Intel USB `8087:0AAA`; IntelBluetoothFirmware 2.4.0 and BlueToolFixup 2.7.2 loaded; headset playback and microphone also work after reconnection following sleep/wake, user-confirmed on 24 October 2026 | Automatic versus manual reconnection was not specified. IntelBTPatcher remains intentionally disabled |
-| Audio |Realtek ALC257 through VoodooHDA 3.6.10; speakers, internal microphone, wired headphone output and microphone, automatic jack switching and F1–F3 tested; built-in speaker playback and internal microphone recording also work after sleep/wake and Bluetooth-headset disconnection, confirmed on 24 October 2026 | AppleALC remains disabled; equalisation is a separate refinement |
-| Webcam | Integrated UVC camera `13D3:56B2`; video recording with the internal microphone confirmed by the user | Enumeration alone is not the basis of the working result |
-| F8 camera disablement | NOT WORKING: the key is received and the firmware camera flag changes, but video capture continues even after closing and reopening Photo Booth | Further work suspended by request on 24 October 2026; no additional F8 tests or builds planned |
-| Keyboard and touchpad | PS/2 keyboard; ELAN0662 I2C gestures, F1–F3 and non-NVIDIA F11/F12 work; F4 microphone mute, F7 radio control and F9 screen lock are confirmed | F8 remains non-working and paused. Other retained observations are in [Function keys](../guides/function-keys.md) |
-| USB | USBToolBox 1.2.0 and the 9-port map are active; internal Bluetooth, webcam and fingerprint-device ports are type 255 | Both USB-A connectors and USB-C in both orientations previously negotiated 5 Gb/s; USB-A file access was confirmed with the tested devices/cables No repeat USB test is requested; the user reconfirms the earlier checks. |
-| Internal NVMe | 512 GB detected; SMART Verified, TRIM Yes; IONVMeFamily 2.1.0 loaded in the 20 October report | This is detection/status evidence, not a sustained storage benchmark |
-| Battery and lid | Battery reporting and discharge confirmed; report shows Good health and 296 cycles; closing the lid sleeps and opening it resumes, confirmed by the user on 20 October | User reports modest runtime, attributed to an aged battery; no new capacity/power measurement or macOS energy fault established. No further autonomy test requested. |
-| SD reader | O2Micro PCI `1217:8621`; October 24 external direct-match trial attached to the physical ID and detected the inserted card, but published no SD media/disk | **Not working in this trial. External EFI only, preserving its existing NVIDIA experiment.** The user confirms an 8 GB FAT32 card readable under Windows. The failure precedes filesystem mounting; its exact initialization cause remains unestablished. [Evidence and scope](sd-fingerprint.md#external-direct-match-target-result--24-october-2026) |
-| Fingerprint reader | **NOT WORKING in macOS**: Goodix USB `27c6:55b4`, bcdDevice `0100`, enumerates on internal HS02, but fingerprint authentication is unavailable | Further fingerprint investigation stopped by user request on 24 October. The retained USB and Linux research do not establish macOS support; [details](sd-fingerprint.md) |
-| NVIDIA and HDMI | NVIDIA model naming is correct; prior development results are retained below | **Paused**; no NVIDIA acceleration is claimed. The earlier HDMI no-image result remains unresolved |
+| Platform | Lenovo IdeaPad S540-15IWL GTX (81SW); i7-8565U, 4 cores / 8 threads; 12 GB DDR4-2400 | Public SMBIOS identity is sanitized; private identity is preserved locally |
+| Board / firmware provenance | Lenovo LNVNB161216, BIOS BWCN19WW dated 26 May 2021; OEM ACPI retained | Historical inventory, not a new firmware check |
+| Internal boot | macOS APFS and Windows coexist on the internal 512 GB Samsung PM981a; current non-NVIDIA OpenCore boots internally | Windows starts natively through the existing rEFInd route; its files are preserved |
+| Intel graphics / panel | UHD 620 acceleration, Metal 3, BOE NV156FHM-N61 1920×1080; startup backlight corrected | Sustained graphics performance is not established by the inventory |
+| Brightness | Slider and direct F11/F12 work in the official non-NVIDIA EFI | The separate NVIDIA-test regression does not change this result |
+| Native Wi-Fi | Intel AC9560, tested AirportItlwm 2.4.0; native menu, connectivity and restart/sleep recovery confirmed | AirDrop and Continuity are not claimed |
+| Bluetooth | Intel USB 8087:0AAA; headset playback and microphone, disconnection and reconnection confirmed, including after sleep/wake | Automatic versus manual reconnection was not specified |
+| Audio | ALC257 through separately installed VoodooHDA 3.6.10; speakers, internal microphone, wired headphone output/input and switching work | Built-in speaker/microphone operation also confirmed after wake and Bluetooth disconnection; EFI alone does not install VoodooHDA |
+| Webcam video | Integrated UVC 13D3:56B2; recorded video confirmed | F8 privacy/power toggle is a separate non-working function |
+| Touchpad | ELAN0662 I2C input and gestures working | F6's earlier toggle confirmation remains historical; current full icon mapping is not closed |
+| Keyboard actions | F1–F3 audio and non-NVIDIA F11/F12 brightness work; F4 microphone input-level mute/restore, F7 Wi-Fi/Bluetooth and F9 lock confirmed with S540 Tasti 0.1.3 | F5 browser reload was user-confirmed; direct/Fn distinction remains separate. F6 mapping is not closed; F10 is deferred. See [Function keys](../guides/function-keys.md) |
+| F8 camera disablement | **NOT WORKING**: firmware flag changes but video capture continues, even after reopening Photo Booth | Further work paused by request; camera video itself works |
+| USB | Active nine-port map (six HS / three SS); both tested USB-A connectors and USB-C in both orientations negotiated 5 Gb/s; file access confirmed | Tested devices/cables only; link speed is not sustained storage throughput |
+| Internal NVMe | 512 GB detected, SMART verified, TRIM active | Not a sustained endurance/storage benchmark |
+| CPU / battery | X86PlatformPlugin active; CPU response, battery reporting and discharge confirmed | Modest runtime attributed by the user to an aged battery; no autonomy repair inferred |
+| Low Power Mode | Battery-on / AC-off setting retained; short OFF–ON–ON–OFF comparison shows about 11.4 W estimated package power and 2.4 GHz on versus 34.4–36.5 W and 3.89–4.00 GHz off | Not equal-work efficiency, whole-laptop power or measured autonomy; [test limits](battery-sleep.md#low-power-mode-under-cpu-load--24-october-2026) |
+| Lid and idle sleep | One 3,603-second clamshell sleep and one 91-second idle sleep resumed, with no recorded DarkWake in those cycles | Not overnight standby, hibernation or every peripheral's recovery |
+| **SD reader** | **Working on the source laptop from the updated internal non-NVIDIA EFI**, user-confirmed 24 October; O2Micro 1217:8621, previous direct-match BigSurSDXC 1.9.0, known 8 GB FAT32 card | Earlier negative result retained as history; insertion during an active session, mounting/unmounting and availability after sleep confirmed; writes, throughput and arbitrary capacities not newly validated. [Evidence](sd-fingerprint.md#current-internal-efi-result--24-october-2026) |
+| Fingerprint | **NOT WORKING in macOS**: Goodix 27c6:55b4 enumerates on internal HS02, but authentication is unavailable | Investigation stopped by request; [retained findings](sd-fingerprint.md) |
+| NVIDIA acceleration | **Unavailable and disabled in this release** with -wegnoegpu; no experimental NVIDIA payloads included | Separate experimental research and historical checkpoints remain outside this EFI |
+| HDMI | **Not working**; no usable display output established | Physical routing/driver support remains unresolved |
+| USB-C video | **Unverified** | USB data operation does not establish display capability/routing |
+| Fan RPM telemetry | **Unavailable in the current configuration**: VirtualSMC and SMCProcessor 1.3.8 loaded; no SMCSuperIO/YogaSMC, no SMCSuperIO IORegistry service and no fan/RPM output in three native SMC samples | CPU readings were 58, 60 and 59 °C. Some unsupported-key messages were reported; a physical fan failure is not established and no driver/control change was made |
+
+## Passive fan-telemetry check — 24 October 2026
+
+Before publication, the user supplied a native check on macOS 26.7.1 / 25G241 with the internal non-NVIDIA boot arguments retained. VirtualSMC 1.3.8 and SMCProcessor 1.3.8 were loaded. SMCSuperIO and YogaSMC were absent, and the SMCSuperIO IORegistry query was empty. Three working powermetrics SMC samples reported CPU temperatures of **58, 60 and 59 °C**, but no fan/RPM lines, with some invalid-key messages.
+
+The result is **fan RPM telemetry unavailable in this configuration**. It does not establish a stopped or failed physical fan, a measured fan speed of zero, or a fan-control implementation. No new driver, EC write or fan setting is included in this release.
 
 ## F8 result and decision — 24 October 2026
 
 The target reports `CameraState=0` and `LastCameraResult=7` after F8, while the webcam remains usable after reopening Photo Booth. This confirms the key/firmware path, not a working video block. The webcam itself still captures video correctly. App 0.1.3 corrects the misleading success popup; it does not implement camera disablement. The user has accepted F8 as non-working and requested that further work stop. F4, F7 and F9 retain their confirmed working status.
 
-## Installed configuration and delivered cleanup
+## Current internal configuration and public release
 
-| State | Result |
-|---|---|
-| Installed and confirmed | Native AirportItlwm Wi-Fi, CPU/GPU/panel names and RAM upgradeability on the official Samsung EFI |
-| Prepared and delivered | Removal of the residual `Kernel.Block` entry for `com.apple.iokit.IONVMeFamily`, with the remaining configuration preserved |
-| Confirmation still pending | The user has not yet explicitly confirmed rebooting with that latest cleanup config |
+The applied internal config preserves the Intel baseline, native Wi-Fi, USB, brightness, NVRAM and identity while adding only the reviewed SD entry/property and exact working SD bundle. OpenCore is **1.0.8 RELEASE**, NVIDIA remains disabled with `-wegnoegpu`, and `ScanPolicy=769` preserves the native Windows/rEFInd separation.
 
-The internal NVMe already appears in the runtime report. Removing the residual block is configuration consolidation; it is not evidence that storage was absent or newly repaired. No SD, NVIDIA, extra kext, framebuffer, device-ID or boot-argument changes are part of that cleanup.
+The SD installer copied and verified the config and driver before a final metadata comparison stopped. The user's recursive diff showed only the expected config/bundle changes and `OC/._config.plist`, leaving Windows, rEFInd and other pre-existing files unchanged. The user subsequently reported SD operation from the updated internal setup after an initial negative report. This later functional confirmation is the current result.
+
+The v0.3.0 public package contains **EFI/OC only** with sanitized identity values and a rEFInd config example. It does not redistribute Microsoft boot files, the existing fallback EFI executable or rEFInd itself. Audio and hotkeys remain separately installed macOS companions. [Installation](../releases/v0.3.0/INSTALL.md) explains the boundary.
 
 ## Evidence and limits
 
@@ -51,9 +58,9 @@ Historical USB results cover the tested enclosures and cables: the Samsung/Realt
 
 The original Windows hardware report and OEM ACPI collection identify the board, BIOS, codec and device paths. They remain provenance for the hardware inventory; they do not replace macOS runtime evidence. The [boot/network record](../guides/boot-network.md), [battery/sleep record](battery-sleep.md) and [CPU record](cpu-thermal.md) distinguish current results from older measurements. The [exact Lenovo model specification](https://psref.lenovo.com/syspool/Sys/PDF/IdeaPad/ideapad_S540_15IWL_GTX/ideapad_S540_15IWL_GTX_Spec.pdf) does not declare DisplayPort Alt Mode; working USB-C data is not proof of USB-C video.
 
-## Historical NVIDIA checkpoints — work paused
+## Historical NVIDIA checkpoints — separate experimental work
 
-The sections below retain the earlier development record unchanged. They concern the separate NVIDIA test configurations, not the installed official EFI. References to later implementation stages are historical plans; no new NVIDIA work, laptop test or acceleration result is requested or implied by this status update.
+The sections below retain the earlier development record unchanged. They concern separate NVIDIA test configurations, not the official non-NVIDIA EFI. These dated checkpoints do not establish graphics acceleration or redefine the state of newer experimental work. The release does not activate them or close the project.
 
 ## NVIDIA PCI visibility: October 15, 2026
 
