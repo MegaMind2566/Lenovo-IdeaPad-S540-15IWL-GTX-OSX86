@@ -1,6 +1,6 @@
 # SD reader and fingerprint scope
 
-Updated on **24 October 2026**. SD investigation is active before consolidating the **non-NVIDIA EFI**, with **all SD tests on the external EFI only**. The user has marked the fingerprint reader **NOT WORKING in macOS** and stopped further fingerprint work. NVIDIA, HDMI and the accepted non-working F8 camera toggle remain outside this work.
+Updated on **24 October 2026**. SD investigation is active before consolidating the **non-NVIDIA EFI**, with **SD trials on the external EFI**. Following the user-confirmed card operation below, the user has authorized preparing its promotion into the official internal EFI; that update has not yet been applied. The user has marked the fingerprint reader **NOT WORKING in macOS** and stopped further fingerprint work. NVIDIA, HDMI and the accepted non-working F8 camera toggle remain outside this work.
 
 ## O2Micro SD reader
 
@@ -20,7 +20,7 @@ The direct candidate was prepared for the previous 240 GB test EFI. It contains 
 
 [HaC-Mini issue 1056](https://github.com/osy/HaC-Mini/issues/1056#issuecomment-1858981127) includes a report of the same physical ID working on Sonoma; [another report](https://github.com/osy/HaC-Mini/issues/1056#issuecomment-1859028063) limits success to cards up to 32 GB. Neither establishes Tahoe compatibility or complete SDXC support. The [Linux O2Micro driver](https://github.com/torvalds/linux/blob/5029bff09e79ad80883c5ee2828b8c4a263cf3dd/drivers/mmc/host/sdhci-pci-o2micro.c) contains SEABIRD1-specific initialization for this family. That is a reference for implementation review, not permission to copy unrelated device register writes into ACPI.
 
-The current outcome remains **no confirmed macOS SD reading**. The reviewed external direct-match trial has now attached successfully but produced no SD media; see the target result below. Acceptance still requires actual readable media. A successful load or controller name alone does not close it.
+The earlier outcome was **no confirmed macOS SD reading**; the later user-confirmed result with the previous kext is recorded below. At that earlier stage, the reviewed external direct-match trial has now attached successfully but produced no SD media; see the target result below. Acceptance still requires actual readable media. A successful load or controller name alone does not close it.
 
 ### External SD-only trial prepared — 24 October 2026
 
@@ -61,7 +61,7 @@ The user also supplied two upstream repositories:
 - [BA4RQZ/SSDT-O2SD-Fix, pinned DSL](https://github.com/BA4RQZ/SSDT-O2SD-Fix/blob/53b3bea4c4ab88e0a05504499bc46300e7d5d9e2/SSDT-O2SD.dsl) is a useful vendor-initialization reference for **8520/FUJIN2**. It is not a ready 8621 patch. [Linux v6.12's SEABIRD1 branch](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/mmc/host/sdhci-pci-o2micro.c) instead tests the PLL high byte, selects high PLL bits `1F340000` or `25100000`, uses tuning `55`, updates `F0` and `324`, and relocks write protection. Merely changing the SSDT path would retain the wrong sequence. The supplied DSL also lacks Darwin/device-ID admission and a chain to any existing firmware _INI; its author reports sleep/hotplug limitations. No AML or pmset workaround was applied.
 - [lucatek/Lenovo-Ideapad-S540-15IWL-Hackintosh](https://github.com/lucatek/Lenovo-Ideapad-S540-15IWL-Hackintosh) names the same 81SW laptop family, but its README specifies **Realtek RTS522A + Sinetek-rtsx** under Catalina/Clover. That working-reader claim does not establish support for this O2Micro controller. Its sleep configuration is not copied into the already working current setup.
 
-The next target evidence is the single guided trace from the unchanged external setup with the known 8 GB FAT32 card. SD reading remains unconfirmed until actual media and file access work.
+The subsequent guided trace and later user-confirmed card operation are recorded below; this paragraph describes the state before those results.
 
 ### Target trace result and S18R-disabled candidate — 24 October 2026
 
@@ -80,6 +80,14 @@ Exactly 24 file bytes differ: eight instruction bytes and 16 UUID metadata bytes
 The package contains the candidate, exact direct-match baseline for rollback, manifest/checksums and a passive Bash-only collector that checks the new runtime UUID and selected slot/disk fields. All eight ZIP members and seven checksums, permissions, rollback bytes, changed-byte set, Mach-O structure and collector syntax passed independent review. The private raw report and driver binaries are not committed here; the [builder recipe](../../builders/build_sd_s18r_candidate.py) uses exact local input hashes. No native compilation or new GitHub workflow was needed for this fixed-byte package.
 
 Only replace BigSurSDXC in the **external** EFI, then shut down, remove/reinsert the card while off and boot externally with the known 8 GB FAT32 card inserted. Configuration, ACPI, internal EFI and the NVIDIA experiment remain unchanged. Acceptance is an actual SD disk and an existing readable file. **Target result for this candidate is pending.**
+
+### User-confirmed reading with previous kext — 24 October 2026
+
+The user now reports that the SD card works, and immediately clarifies that this result uses the **previous kext, not the S18R-disabled / 3V3 candidate**. This supersedes the earlier no-readable-media outcome for the user's current external setup. The successful report must not be attributed to the new 3V3 binary or used as validation of its voltage-negotiation change.
+
+Exact active bundle/configuration identity still needs to be captured before promotion: the original alias-match and direct-match variants share the same executable and original UUID, so loaded-binary identity alone does not distinguish their Info.plist. The report establishes user-observed card operation; hotplug, post-sleep operation, write validation and transfer performance have not been newly established.
+
+The user has authorized preparing an update of the **official internal EFI** using this successful SD setup. This extends the earlier external-only trial scope for that specific promotion. No internal update has yet been applied. The current internal configuration and the actually working external SD bundle/settings must be compared before packaging; do not copy the external NVIDIA experiment or replace the current internal configuration with the older release. Preserve SMBIOS identity, rEFInd, Microsoft boot files and all unrelated settings. The S18R-disabled candidate is excluded from this promotion.
 
 ## Goodix fingerprint reader
 
