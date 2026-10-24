@@ -20,7 +20,7 @@ The direct candidate was prepared for the previous 240 GB test EFI. It contains 
 
 [HaC-Mini issue 1056](https://github.com/osy/HaC-Mini/issues/1056#issuecomment-1858981127) includes a report of the same physical ID working on Sonoma; [another report](https://github.com/osy/HaC-Mini/issues/1056#issuecomment-1859028063) limits success to cards up to 32 GB. Neither establishes Tahoe compatibility or complete SDXC support. The [Linux O2Micro driver](https://github.com/torvalds/linux/blob/5029bff09e79ad80883c5ee2828b8c4a263cf3dd/drivers/mmc/host/sdhci-pci-o2micro.c) contains SEABIRD1-specific initialization for this family. That is a reference for implementation review, not permission to copy unrelated device register writes into ACPI.
 
-The current outcome remains **no confirmed macOS SD reading**. Acceptance needs actual readable media after applying the exact candidate to the reviewed current configuration. A successful load or controller name alone does not close it.
+The current outcome remains **no confirmed macOS SD reading**. The reviewed external direct-match trial has now attached successfully but produced no SD media; see the target result below. Acceptance still requires actual readable media. A successful load or controller name alone does not close it.
 
 ### External SD-only trial prepared — 24 October 2026
 
@@ -33,6 +33,16 @@ The user explicitly requested preserving the existing external EFI, including it
 Independent review verified all eight archive files, seven checksum entries, permissions, the single byte/semantic substitution and rollback equality against the uploaded EFI. The collector passes Bash syntax checking and only reads runtime state into a Desktop report. No native compilation or CI was needed. These checks establish package integrity, not target card-reading success.
 
 The target trial is one normal boot from the external EFI with the known Windows-readable SD inserted, then opening an existing file and reporting card capacity. If media is absent, the optional passive collector records the loaded driver/controller/disk state from that same boot; it does not install drivers, reset NVRAM, format the card or change the NVIDIA experiment.
+
+### External direct-match target result — 24 October 2026
+
+The supplied target report was collected on macOS 26.7.1 / 25G241. All five passive commands completed with exit 0. BigSurSDXC 1.9.0 is loaded, and the active controller has both `IONameMatch` and `IONameMatched` set to `pci1217,8621`. This verifies that the direct-match candidate actually attached; the outcome is not an untested-package assumption.
+
+The slot reports `Card Present=Yes`, bus voltage 3300, base frequency 50 and clock divisor 0. Its block-storage device and IOBlockStorageDriver exist, but no IOMedia child is published and diskutil lists no SD disk. Read/write operations and byte counts remain zero. **Result: the direct-match trial did not produce readable SD media.** The earlier Broadcom-match report reached the same media-publication limit; avoiding its vendor branch has not fixed card reading.
+
+These observations locate the failure before filesystem mounting, but do not identify a failing SD command, reset, interrupt or clock operation. The reported clock-divisor property alone does not prove an electrical clock fault. AppleSDXC 3.5.4 is also loaded, but this report does not show it claiming this controller or establish a driver conflict. No automatic AppleSDXC block, formatting, additional ID spoof or unrelated ACPI change is justified.
+
+The card's capacity/type is absent from the report. The published <=32 GB limitation remains a possible comparison boundary, not a demonstrated cause here. Further work must distinguish card initialization failure with specific evidence before another functional patch or repeated target round. The raw report remains private. This result update changes documentation only; it does not modify either EFI or the retained NVIDIA trial, and starts no build or CI.
 
 ## Goodix fingerprint reader
 

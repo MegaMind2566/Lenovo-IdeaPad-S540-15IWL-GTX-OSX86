@@ -44,7 +44,7 @@ An OpenCore project for **macOS Tahoe 26** on the Lenovo IdeaPad S540-15IWL GTX.
 | Battery and basic sleep/wake | Working | Battery and basic sleep/wake confirmed; user reports modest runtime and attributes it to an aged battery. No further autonomy test requested. |
 | USB-A and USB-C storage | Working | Tested connectors at 5 Gb/s; USB-C tested in both orientations; active nine-port map confirmed |
 | Internal NVMe detection | Working | 512 GB PM981a available; SMART verified and TRIM reported active |
-| SD reader | Unresolved / investigation resumed | O2Micro 1217:8621; SD-only direct-match/rollback package verified against the supplied external EFI, with its configuration and NVIDIA experiment preserved. Target reading on Tahoe remains unconfirmed. See [SD and fingerprint scope](docs/status/sd-fingerprint.md). |
+| SD reader | Not working in current trial / investigation active | October 24 external direct-match trial: O2Micro 1217:8621 attached and card presence detected, but no SD media/disk appeared. Existing EFI settings and NVIDIA experiment preserved. See [target evidence and limits](docs/status/sd-fingerprint.md#external-direct-match-target-result--24-october-2026). |
 | Fingerprint reader | Not working / work stopped | Goodix 27c6:55b4 enumerates on USB, but macOS fingerprint authentication does not work. Further investigation stopped by user request on October 24. See [retained findings](docs/status/sd-fingerprint.md). |
 | HDMI | Not working | No display output established; NVIDIA-related investigation remains deferred |
 | USB-C video | Not verified | Video capability and routing not established |
