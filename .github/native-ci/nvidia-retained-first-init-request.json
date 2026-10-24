@@ -1,6 +1,6 @@
 {
   "format": 1,
   "scope": "s540-retained-first-initialization",
-  "batch_id": "s540-retained-irq-source-selection-20261024-b6",
-  "source_commit": "118fa7a8d5cdd1294186cf6fd675620831563991"
+  "batch_id": "s540-retained-gsp-host-memory-20261024-b7",
+  "source_commit": "037ce5a2ba87de09993c03ba1257af704dc624e5"
 }
