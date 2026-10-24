@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "purpose": "sd-init-trace-userspace",
+  "batch": "20261024-sd-init-trace-v1",
+  "source_parent": "d3bfb598fc2fb86a6ac9bd99234b7dc2b87bd9fc",
+  "source_sha256": {
+    "packages/sd-init-trace/src/sd_init_trace.m": "a29c4db56711547d43cdc5be01f4e1e15fb37cacaf55a8122c857c7ecf5ea5e5",
+    "builders/build_sd_init_trace.py": "3a8c6b89e4363d9fdde8f9cf833278797ae5b85bf8a9349e9fe2453401f2787a",
+    ".github/workflows/build-sd-init-trace.yml": "50f5ee0e1742035b57ea647d7ceaef6aca6c6de5b985f3f074e81f43cc15ea41",
+    "packages/sd-init-trace/ESEGUI-TEST-SD.command": "687e9d52675623c91ca02b6ea3cafe31bad23524df8754bd051b324154839c01",
+    "packages/sd-init-trace/LEGGIMI.txt": "e21b76d450bc3d86b1c7f21c1735e3f5561ab7cb0f0f604d72119ab9907d7a07",
+    "packages/sd-init-trace/README.md": "014968df1f838c462191fb289f97cd7375168ad55fc761b736823586380057a8",
+    "packages/sd-init-trace/LICENSE": "7e2716c749276ebaa700ac81dcb45e2a9a0f2f19453062b904f76ad9f8286b6e"
+  },
+  "allow_concurrent_native_once": true,
+  "authorization_scope": "One-off user authorization for independent SD userspace validation while the existing NVIDIA build continues unchanged."
+}
