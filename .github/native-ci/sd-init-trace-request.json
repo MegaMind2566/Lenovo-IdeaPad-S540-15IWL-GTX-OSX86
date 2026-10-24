@@ -1,10 +1,10 @@
 {
   "schema": 1,
   "purpose": "sd-init-trace-userspace",
-  "batch": "20261024-sd-init-trace-v1",
-  "source_parent": "d3bfb598fc2fb86a6ac9bd99234b7dc2b87bd9fc",
+  "batch": "20261024-sd-init-trace-v1-r2",
+  "source_parent": "bd5ffa067d32b5b05badab040461c0b96fcf53f0",
   "source_sha256": {
-    "packages/sd-init-trace/src/sd_init_trace.m": "a29c4db56711547d43cdc5be01f4e1e15fb37cacaf55a8122c857c7ecf5ea5e5",
+    "packages/sd-init-trace/src/sd_init_trace.m": "3ffd9fba24b5e04578674426f0a6e11d36d37debb830284758cd94357d779563",
     "builders/build_sd_init_trace.py": "3a8c6b89e4363d9fdde8f9cf833278797ae5b85bf8a9349e9fe2453401f2787a",
     ".github/workflows/build-sd-init-trace.yml": "50f5ee0e1742035b57ea647d7ceaef6aca6c6de5b985f3f074e81f43cc15ea41",
     "packages/sd-init-trace/ESEGUI-TEST-SD.command": "687e9d52675623c91ca02b6ea3cafe31bad23524df8754bd051b324154839c01",
