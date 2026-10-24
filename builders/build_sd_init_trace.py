@@ -69,16 +69,24 @@ def native_probe(executable, out):
         # These bytes belong only to the ephemeral CI diagnostic. No Lenovo report is read here.
         schemas = []
         objects = []
+        non_json_lines = 0
+        missing_debugid_records = 0
         for line in stream.read_text(errors='replace').splitlines():
             try:
                 obj = json.loads(line)
             except ValueError:
+                if line.strip():
+                    non_json_lines += 1
                 continue
             if isinstance(obj, dict):
+                if "debugid" not in obj:
+                    missing_debugid_records += 1
                 schemas.append(sorted(obj))
                 objects.append(obj)
         result['schemas'] = schemas[:3]
         result['object_count'] = len(objects)
+        result['non_json_lines'] = non_json_lines
+        result['missing_debugid_records'] = missing_debugid_records
         result['stderr'] = errors.read_text(errors='replace')[:2000]
         def integer(value):
             if isinstance(value, bool):
@@ -111,7 +119,10 @@ def native_probe(executable, out):
                     translated[name] = 0
             fixture = out / 'native-format-translated-fixture.ndjson'
             fixture.write_text(json.dumps(translated) + '\n')
-            decoded = json.loads(run([str(executable), '--decode-fixture', str(fixture)]).stdout)
+            try:
+                decoded = json.loads(run([str(executable), '--decode-fixture', str(fixture)]).stdout)
+            except (subprocess.SubprocessError, ValueError) as exc:
+                raise RuntimeError('native-format parser execution failed') from exc
             result['native_format_parser'] = 'PASS' if decoded.get('result') == 'TRACE_CAPTURED' and len(decoded.get('events', [])) == 1 and decoded['events'][0]['fields'] == {'present': False} else 'FAIL'
             assert result['native_format_parser'] == 'PASS', 'native NDJSON format is not accepted by the delivered parser'
         else:
