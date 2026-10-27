@@ -50,7 +50,7 @@ An OpenCore project for **macOS Tahoe 26** on the **Lenovo IdeaPad S540-15IWL GT
 | Fingerprint authentication | **Not working — work stopped** | Goodix enumerates on USB, but macOS fingerprint authentication is unavailable; investigation stopped by request |
 | NVIDIA acceleration | **Unavailable in this release** | NVIDIA stays disabled with `-wegnoegpu`; experimental NVIDIA payloads are excluded and research remains separate |
 | HDMI | **Not working** | No usable display output established |
-| USB-C video | **Unverified** | Capability/routing and display operation not established |
+| USB-C video | **Not supported natively by the laptop** | Native video output through the built-in USB-C port is unavailable; USB data transfer works. This is a hardware limitation |
 | Fans | **Working — user-confirmed** | RPM telemetry is unavailable in the current macOS configuration; investigation is closed for this release and no fan-control change is included |
 
 Detailed observations are in [Hardware](docs/status/hardware.md), [Battery and sleep](docs/status/battery-sleep.md), [Function keys](docs/guides/function-keys.md), and [SD / fingerprint](docs/status/sd-fingerprint.md).
@@ -79,7 +79,7 @@ Copying the EFI does not install the complete audio or hotkey setup:
 
 This release preserves the usable Intel baseline while the repository continues to track separate research and limitations. NVIDIA source/native/target checkpoints are documented in the [validation record](docs/status/nvidia-validation.md); they must not be interpreted as graphics acceleration or merged into this EFI. Completed checkpoints remain recorded without requiring routine laptop reruns.
 
-The remaining hardware scope includes F6/F10 completion, unavailable HDMI, unverified USB-C video, and broader SD/reliability coverage if requested. Fans are user-confirmed working; unavailable macOS RPM telemetry is an accepted limitation and its investigation is closed for this release. F8 and fingerprint work remain paused/stopped as stated above. The [Roadmap](docs/status/roadmap.md) keeps these states distinct from the confirmed functions.
+The remaining hardware scope includes F6/F10 completion, unavailable HDMI, and broader SD/reliability coverage if requested. Native USB-C video is a laptop hardware limitation, not an EFI issue. Fans are user-confirmed working; unavailable macOS RPM telemetry is an accepted limitation and its investigation is closed for this release. F8 and fingerprint work remain paused/stopped as stated above. The [Roadmap](docs/status/roadmap.md) keeps these states distinct from the confirmed functions.
 
 ## Documentation and source layout
 
