@@ -1,6 +1,6 @@
 # Hardware roadmap
 
-Updated on **27 October 2026**. The current official **v0.3.0 non-NVIDIA** baseline boots macOS from the internal Samsung NVMe alongside Windows. Native Wi-Fi, Intel graphics, input, audio and the SD reader have functional confirmations. **The project remains in development.** A release milestone does not close unsupported hardware or separate research.
+Updated on **27 October 2026**. The current official **v0.3.0 non-NVIDIA** baseline boots macOS from the internal Samsung NVMe alongside Windows. Native Wi-Fi, Intel graphics, input, audio and the SD reader have functional confirmations. **Official EFI status: Stable — known limitations.** The classification covers the tested Lenovo IdeaPad S540-15IWL GTX (81SW) running macOS Tahoe **26.7.1 (25G241)** with Intel UHD 620 and NVIDIA disabled. It applies to the confirmed functions and tested sleep/wake cycles; prolonged standby and hibernation remain unverified and deferred. Future macOS updates require validation. **The project remains in development.** Unsupported hardware and separate NVIDIA research retain the scope recorded below.
 
 ## Current work and limits
 

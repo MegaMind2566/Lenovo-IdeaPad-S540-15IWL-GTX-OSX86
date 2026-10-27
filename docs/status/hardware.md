@@ -1,6 +1,6 @@
 # Verified hardware and official EFI status
 
-Updated on **27 October 2026** for the current **internal non-NVIDIA EFI**, published as v0.3.0. The source laptop now boots macOS internally alongside native Windows. SD operation is user-confirmed after the internal update. The project remains **in development**; the table separates working functions, accepted non-working features and unverified coverage.
+Updated on **27 October 2026** for the current **internal non-NVIDIA EFI**, published as v0.3.0. The source laptop now boots macOS internally alongside native Windows. SD operation is user-confirmed after the internal update. **Official EFI status: Stable — known limitations.** The classification covers the tested Lenovo IdeaPad S540-15IWL GTX (81SW) running macOS Tahoe **26.7.1 (25G241)** with Intel UHD 620 and NVIDIA disabled. It applies to the confirmed functions and tested sleep/wake cycles; prolonged standby and hibernation remain unverified and deferred. Future macOS updates require validation. The project remains **in development**; the table separates working functions, accepted non-working features and unverified coverage.
 
 ## Current results
 

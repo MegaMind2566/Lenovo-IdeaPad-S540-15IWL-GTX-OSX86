@@ -2,7 +2,9 @@
 
 An OpenCore project for **macOS Tahoe 26** on the **Lenovo IdeaPad S540-15IWL GTX (81SW)**. The current official configuration runs macOS and Windows on the internal Samsung NVMe, uses **Intel UHD 620**, and keeps **NVIDIA disabled**.
 
-**Project status: in development — 27 October 2026.** [v0.3.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.3.0) publishes the working non-NVIDIA baseline, including the newly user-confirmed SD reader. It is a tested milestone, not a completed project or a claim that every device works. NVIDIA research remains separate from this release.
+**Official EFI status: Stable — known limitations ([v0.3.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.3.0)).** The classification covers the tested Lenovo IdeaPad S540-15IWL GTX (81SW) running macOS Tahoe **26.7.1 (25G241)** with Intel UHD 620 and NVIDIA disabled. It applies to the confirmed functions and tested sleep/wake cycles; prolonged standby and hibernation remain unverified and deferred. Future macOS updates require validation.
+
+**Project status: in development — 27 October 2026.** The hardware table records the working functions, accepted limitations and deferred checks. NVIDIA research continues separately from the official non-NVIDIA release.
 
 ## Hardware
 
