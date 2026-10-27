@@ -33,6 +33,8 @@ PROFILE_DIRECTORIES = {
     'irq-source-selection': 'prospective-irq-source-selection',
     'gsp-base-pages': 'prospective-gsp-base-pages',
     'unprotected-host-memory': 'prospective-unprotected-host-memory',
+    'attach-failure-witness': 'prospective-attach-failure-witness',
+    'fresh-failure-counters': 'prospective-fresh-failure-counters',
     'experimental-target-control': 'prospective-experimental-target-control',
 }
 PROFILE_DEPENDENCIES = {
@@ -43,7 +45,9 @@ PROFILE_DEPENDENCIES = {
     'irq-source-selection': ('pci-memory-bars',),
     'gsp-base-pages': ('irq-source-selection',),
     'unprotected-host-memory': ('gsp-base-pages',),
-    'experimental-target-control': tuple(list(PROFILE_DIRECTORIES)[:11]),
+    'attach-failure-witness': ('unprotected-host-memory',),
+    'fresh-failure-counters': ('attach-failure-witness',),
+    'experimental-target-control': tuple(list(PROFILE_DIRECTORIES)[:13]),
 }
 OLD_KERNEL = GSP + 'prospective-loader/S540ProspectiveLoaderKernel.cpp'
 OLD_STATE = GSP + 'prospective-loader/S540ProspectiveLoaderState.c'

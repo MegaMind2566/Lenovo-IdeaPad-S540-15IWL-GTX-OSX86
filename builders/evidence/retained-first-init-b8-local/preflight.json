@@ -1,0 +1,91 @@
+{
+  "artifact_retention_days": 1,
+  "build_identity": {
+    "format": 1,
+    "generated_source": "packages/nvidia-gsp-bootstrap/prospective-retained-build-identity/S540ExperimentalBuildIdentity.c",
+    "policy_sha256": "1dadd1153cab0de4dfa254f452d91b09b806f7a00db3716e3a5663fd19119ef6",
+    "required_kernel_stack_bytes": 16384,
+    "source_identity_excludes_only_generated_identity_source": true,
+    "source_sha256": "334af2567f975554e67e6146cb7c9d813acacd9bb6d08d02316a9c9f97b4034b"
+  },
+  "composition_sha256": "1c4f2ab22d3e57f21f30aa40e8d0a52d11267b6b1ee444ffbba671081fadd7e7",
+  "controls": {
+    "LSAN_claimed": false,
+    "TSAN_claimed": false,
+    "allocation_cases": 1028,
+    "allocation_checks_per_mode": 9545,
+    "allocation_mutants": 12,
+    "allocator_thread_safety_claimed": false,
+    "concurrent_observer_writers": 8,
+    "fatal_ASAN_UBSAN": true,
+    "image_host_checks": 37,
+    "legacy_memory_checks_per_mode": 1092,
+    "original_cross_units": 5,
+    "postwrapper_cases": 29,
+    "postwrapper_checks_per_mode": 2492,
+    "postwrapper_mutants": 9,
+    "project_cross_units": 67,
+    "replay_negatives": 43,
+    "sdk_cross_units": 6,
+    "witness_cases": 36,
+    "witness_checks_per_mode": 808,
+    "witness_mutants": 11,
+    "workflow_cost_controls": 13
+  },
+  "formal_stack_bound_proven": false,
+  "format": 1,
+  "hardware_test_B8_performed": false,
+  "large_native_evidence_upload_only_on_failure": true,
+  "local_issues_corrected_before_native": [
+    "companion language descriptor uses supported plain-c",
+    "generic GPU observer uses real null-safe pOsGpuInfo field; Unix macro not assumed visible"
+  ],
+  "native_Darwin_compilation": false,
+  "native_jobs_started": 0,
+  "policy_changes": false,
+  "public_standard_runner_only": true,
+  "receipts": {
+    "allocation": {
+      "sha256": "f22bc953dab444ab87ea1dabe6671f3018c78c97fe2a19534ff8b860f860cadd",
+      "status": "passed-actual-kernel-branch-allocation-diagnostics-controls"
+    },
+    "image": {
+      "sha256": "bece67a5f4b13944adcacafb6fd457cafc0507ca93d3fa69cbff031279b15c4d",
+      "status": "passed-current-experimental-image-host-controls"
+    },
+    "legacy_memory": {
+      "sha256": "7e16ac7b03cb0ffa036c795e6aa931f9a42d81be4af89589ecfe5c880c5c3d52",
+      "status": "passed-complete-memory-services-and-session-CPU-controls"
+    },
+    "original_cross": {
+      "sha256": "2b3082e43ecd8e34032322f0bca4238d97959655ecd6061fe46c6124f6e0e9fa",
+      "status": "compiled-retained-trial-original-delta-cross-only"
+    },
+    "post_wrapper": {
+      "sha256": "81cf94e561bdd0a543f0212809521d4f377a14c543056d8d43a656205f8fe492",
+      "status": "passed-actual-post-wrapper-fresh-diagnostic-controls"
+    },
+    "project_cross": {
+      "sha256": "0f65111e4b7246436bee5e5419d906ca0683f0112c873bb61a1770b2e6ae3535",
+      "status": "compiled-retained-trial-project-cross-only"
+    },
+    "replay": {
+      "sha256": "0421dacb22913a1aebe05dc3b2bbfd60cdc3c3caf34b26a401553dc0853b60c5",
+      "status": "passed-actual-retained-source-replay-mutation-controls"
+    },
+    "sdk": {
+      "sha256": "8d36509549541f792c2b7852f1738a400353efff3b30221ba3d530a67af46f05",
+      "status": "actual-experimental-frontend-sdk-cross-compiled"
+    },
+    "witness": {
+      "sha256": "7bb02de7dba54170ef8ef3f68cb28bb246fda9a6ffcb373eacf7b45095eec1bc",
+      "status": "passed-actual-attach-constructor-and-private-witness-CPU-controls"
+    }
+  },
+  "scope": "B8-exact-source-local-preflight-before-one-native-request",
+  "source_base_commit": "d5ad2f91f9afa405742a126598e34b59e9bf9bf6",
+  "status": "passed",
+  "system_security_changed": false,
+  "target_wire_ABI_changed": false,
+  "whole_DMA_stop_proven": false
+}

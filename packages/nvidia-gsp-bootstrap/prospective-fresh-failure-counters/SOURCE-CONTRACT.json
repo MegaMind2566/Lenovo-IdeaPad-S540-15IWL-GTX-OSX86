@@ -1,0 +1,45 @@
+{
+  "actual_record_header_sha256": "03abb7266401256adcd2ffb2b63a32c962afd5d83b4fcf3f844d120818a07f25",
+  "counter_semantics": {
+    "allocation_statistics": "Separate atomic module-lifetime observations fed by actual supported-allocator attempt/failure sites; no ordinary AbiStatistics or live binding arrays read",
+    "cached_service_counters": "FirstTxn seal cache; may never have been sampled on failure",
+    "entry_rejections": "Atomic saturating module-lifetime count; invalid-state entries do not inspect request geometry",
+    "first_failure": "Single 0\u21921 reservation winner writes immutable stage/request/CPU scalar tuple then release-publishes2; getter acquire-loads state2 only",
+    "fresh_service_counters": "independent existing actual counter getters; no seal cache mutation",
+    "independent_sampling": "Counter values sampled independently; no coherent cross-counter invariant claimed"
+  },
+  "diagnostic_log_records_maximum": 7,
+  "first_failure_fields": [
+    "stage",
+    "status",
+    "pages",
+    "pageBytes",
+    "contiguous",
+    "cache",
+    "zeroed",
+    "unprotected",
+    "node",
+    "already_observed_CPUID_scalars"
+  ],
+  "format": 1,
+  "getter_guard": "Actual ordinary thread; pure FirstTxnGetSnapshot exact nv; actual current thread equals master; originalReturned and not originalInFlight",
+  "guard_or_status_relaxation": false,
+  "hardware_initialization_proven": false,
+  "logging_boundary": "after actual original wrapper returned with unchanged nonzero status",
+  "new_export": "s540DeviceReadAllocationDiagnostics",
+  "new_export_owner": "packages/nvidia-device-transport/src/S540NvidiaDeviceServices.cpp",
+  "new_wire_protocol": false,
+  "physical_release_authorized": false,
+  "production_inputs": [
+    "packages/nvidia-device-transport/src/S540NvidiaDeviceServices.cpp",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c"
+  ],
+  "scope": "exact-B7-post-wrapper-fresh-failure-diagnostics",
+  "unchanged_actual_dependencies": {
+    "packages/nvidia-device-transport/src/S540NvidiaDeviceTransport.cpp": "46f2a708536568fbef13fbd7fe9d42d18d78b1c4bdf45ef83be9ae10a2b2c218",
+    "packages/nvidia-device-transport/src/S540NvidiaDeviceTransport.hpp": "fa635ba3e00e416b72b81889367f238f04f99a626e61568bd790af8f1a852c69",
+    "packages/nvidia-device-transport/src/nv_device_services.h": "3a40ac7c798c8d636edafbb34eb2341ac295f25c47a1df860cc5ad377afc8e56"
+  },
+  "witness_header": "packages/nvidia-gsp-bootstrap/prospective-attach-failure-witness/S540AttachFailureWitness.h",
+  "witness_header_sha256": "a7b41b09c97ae0be23ab1d7e04303d5f4dbe47fe0077150f279c6b8306f1f2e3"
+}

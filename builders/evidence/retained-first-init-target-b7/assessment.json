@@ -1,0 +1,30 @@
+{
+  "GPU_or_GSP_initialization_confirmed": false,
+  "IRQ_selected_source": 1,
+  "IRQ_source_count": 2,
+  "adapter_status": 86,
+  "attestation_sha256": "244f1e432facd0123b580562516800c6224f059484fdc99a43dcb3c18098394f",
+  "diagnostic_counter_limit": "cached FirstTxn counters may be unsampled on sticky failure; memoryUnavailableEver also excludes supported nv_alloc_pages refusals",
+  "diagnostic_first_site": 2,
+  "diagnostic_site_meaning": "generic SITE_ROOT; not unique failing API",
+  "format": 1,
+  "global_RM_succeeded": true,
+  "input_sha256": {
+    "controller.json": "ec591339f1e046f3cf1a21054e82670c69bd27793938dbeee29cfc20167103fd",
+    "kernel-sanitized.log": "2955d81b6d1058b4c016e2f71a36e0e40514d77fd4e1ea3faefd9cb07130da97",
+    "result.json": "78dae7c506ced1b5c4240811a49475c2b37f2a5c6299905a1d516fb7cdedf95f"
+  },
+  "kernel_virtual_addresses_redacted": true,
+  "load_and_control_succeeded": true,
+  "memory_queue_allocation_confirmed": false,
+  "new_hardware_or_cleanup_admission": false,
+  "next_plan": "observe real attach/constructor stage and class with fixed scalar capture; print after wrapper returns; read fresh service and allocation counters separately; retain all original refusal and ownership behavior",
+  "original_adapter_entered_and_returned": true,
+  "original_kernel_log_sha256": "717629b6aa8da4b248b1123cf051e6a4420b949a463aff92b06699afdaaeba52",
+  "preparation_succeeded": true,
+  "reboot_required": true,
+  "scope": "B7-physical-target-attach-failure-diagnosis",
+  "source_lead": "retained gpuCreateObject returns failed or missing-engine status before original optional NOT_SUPPORTED normalization; actual class and constructor stage unobserved",
+  "unprotected_host_admission_confirmed": false,
+  "whole_DMA_stop_proven": false
+}

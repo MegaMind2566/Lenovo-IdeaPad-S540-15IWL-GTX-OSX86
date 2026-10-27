@@ -34,6 +34,8 @@ def layout(work):
         base=work / 'inputs/shutdown', observation_base=work / 'inputs/preparation-observation-base',
         irq_source_base=work / 'inputs/irq-source-selection-base',
         gsp_memory_base=work / 'inputs/gsp-memory-base',
+        failure_diagnostic_base=work / 'inputs/failure-diagnostic-base',
+        attach_witness_base=work / 'inputs/attach-witness-base',
         composition=work / 'inputs/retained',
         native_compilation=work / 'native', image=work / 'image', package=work / 'package')
 
@@ -125,6 +127,10 @@ def prepare(args, paths):
                      paths['base'], paths['irq_source_base'], names[:names.index('irq-source-selection')])
     retained.prepare(paths['canonical_parent'], paths['integrated_base'], paths['operational_base'],
                      paths['base'], paths['gsp_memory_base'], names[:names.index('gsp-base-pages')])
+    retained.prepare(paths['canonical_parent'], paths['integrated_base'], paths['operational_base'],
+                     paths['base'], paths['failure_diagnostic_base'], names[:names.index('attach-failure-witness')])
+    retained.prepare(paths['canonical_parent'], paths['integrated_base'], paths['operational_base'],
+                     paths['base'], paths['attach_witness_base'], names[:names.index('fresh-failure-counters')])
     retained.prepare(paths['canonical_parent'], paths['integrated_base'], paths['operational_base'],
                      paths['base'], paths['composition'], tuple(retained.PROFILE_DIRECTORIES))
     return verify(paths)

@@ -1,0 +1,50 @@
+{
+  "CPU_header_sha256": {
+    "packages/nvidia-darwin-services/src/S540NvidiaDarwinServices.h": "b2e71cc940a78e52b304345cdc7f54b955272df3f5683c51842121ff0761672b",
+    "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.h": "a63bb08341cefc34fab533a645d136ebbea92069f90ae50cbddadadeca6db048",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.h": "03abb7266401256adcd2ffb2b63a32c962afd5d83b4fcf3f844d120818a07f25",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/deps/Participants.h": "a7b44608bb7a13e4328ac0fdba8a476bde80fdcf5a11268a102d033c3295da5c",
+    "packages/nvidia-os-adapter/upstream/include/nvstatus.h": "e8267172a1f7a56420d612c6734b3554b9ff6a3d33fdda21b1371ff4ce4b8675",
+    "packages/nvidia-os-adapter/upstream/include/nvtypes.h": "da23dbc28805c390d62338dba5603eb12b2e94c8aaf873c1c42c1a5f10f26b79"
+  },
+  "GSP_mode_macro_source": {
+    "actual_macro": "#define IS_GSP_CLIENT(pGpu)                (RMCFG_FEATURE_GSP_CLIENT_RM && (pGpu)->isGspClient)",
+    "feature_macro": "#define RMCFG_FEATURE_GSP_CLIENT_RM               1  // GSP client RM",
+    "feature_path": "src/nvidia/generated/rmconfig.h",
+    "feature_sha256": "cf582b8d0e21a4acf4a290b27ac6a1d6dff43aa9d63f3d57923bb84accfda402",
+    "path": "src/nvidia/generated/g_gpu_nvoc.h",
+    "sha256": "8c11f9341181e06e22bde6f1722275d057796b0a7cd796f28fb2fba0058d8a9c"
+  },
+  "OS_identity_source": {
+    "actual_field": "OS_GPU_INFO *pOsGpuInfo;",
+    "actual_macro": "#define NV_GET_NV_STATE(pGpu) \\\n    (nv_state_t *)((pGpu) ? (pGpu)->pOsGpuInfo : NULL)",
+    "field_path": "src/nvidia/generated/g_gpu_nvoc.h",
+    "field_sha256": "8c11f9341181e06e22bde6f1722275d057796b0a7cd796f28fb2fba0058d8a9c",
+    "macro_path": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+    "macro_sha256": "02ce4b371e0a8dd26f62a320e88c8382dcf31a21b727503a66abcaea9eecf09b",
+    "no_unix_header_added_to_generic_gpu": true,
+    "observer_expression": "(pGpu ? pGpu->pOsGpuInfo : NULL)"
+  },
+  "capture_policy": {
+    "addresses_retained_or_logged": false,
+    "first_failure_not_overwritten": true,
+    "instance_is_actual_ordinal": true,
+    "master_and_exact_current_nv_only": true,
+    "missing_property_observed_only_when_original_read_occurs": true,
+    "no_admission_authority": true,
+    "no_deep_logging": true,
+    "no_error_normalization": true,
+    "no_original_cleanup_or_visibility_change": true,
+    "one_per_boot": true,
+    "pure_record_snapshot_queries_only": true,
+    "sticky_failure_capture_allowed": true,
+    "unavailable_before_real_wrapper_return": true
+  },
+  "final_native_and_target_validation_required": true,
+  "format": 1,
+  "original_input_sha256": {
+    "src/nvidia/src/kernel/gpu/gpu.c": "4e5d5f438acf9ca591f35d793009265afac0c21fc4818eabeff52271019ddc31",
+    "src/nvidia/src/kernel/gpu_mgr/gpu_mgr.c": "c79f1ffae36981b69ababec919ac75cd9d216f514ae7e823a1f0d78ef82d257c"
+  },
+  "scope": "private-scalar-first-attach-and-constructor-failure-witness"
+}

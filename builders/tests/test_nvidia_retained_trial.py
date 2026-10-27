@@ -32,21 +32,28 @@ def main():
     profiles = tuple(retained.PROFILE_DIRECTORIES)
     gsp_base = profiles[:profiles.index('gsp-base-pages') + 1]
     unprotected = profiles[:profiles.index('unprotected-host-memory') + 1]
-    for names in (profiles, gsp_base, unprotected):
+    attach_witness = profiles[:profiles.index('attach-failure-witness') + 1]
+    fresh_counters = profiles[:profiles.index('fresh-failure-counters') + 1]
+    for names in (profiles, gsp_base, unprotected, attach_witness, fresh_counters):
         assert retained.selected_profiles(reversed(names)) == names
     for names in (('unknown',), ('pm-event', 'pm-event'), ('retained-stop',),
                   ('experimental-target-control',), ('runtime-coordinator',), ('preparation-observation',),
                   ('pci-memory-bars',), ('irq-source-selection',), ('gsp-base-pages',),
-                  ('unprotected-host-memory',),
+                  ('unprotected-host-memory',), ('attach-failure-witness',),
+                  ('fresh-failure-counters',),
                   tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'preparation-observation'),
                   tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'pci-memory-bars'),
                   tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'irq-source-selection'),
                   tuple(name for name in profiles if name != 'gsp-base-pages'),
                   tuple(name for name in profiles if name != 'unprotected-host-memory'),
+                  tuple(name for name in profiles if name != 'attach-failure-witness'),
+                  tuple(name for name in profiles if name != 'fresh-failure-counters'),
                   # Omit the frontend so its prerequisites cannot mask a
-                  # missing direct dependency on either new memory profile.
+                  # missing direct dependency in the memory/diagnostic chain.
                   tuple(name for name in gsp_base if name != 'irq-source-selection'),
-                  tuple(name for name in unprotected if name != 'gsp-base-pages')):
+                  tuple(name for name in unprotected if name != 'gsp-base-pages'),
+                  tuple(name for name in attach_witness if name != 'unprotected-host-memory'),
+                  tuple(name for name in fresh_counters if name != 'attach-failure-witness')):
         refused('profile-selection-' + '-'.join(names), lambda names=names: retained.selected_profiles(names))
     def changed_manifest(label, mutate):
         modified = deepcopy(value)
@@ -66,6 +73,10 @@ def main():
         'builders/build_nvidia_retained_trial.py'))
     changed_manifest('remove-shared-function-parser-binding', lambda v: v['retained_trial']['helper_source_sha256'].pop(
         'packages/nvidia-gsp-bootstrap/cancellation/prepare_wait_candidates.py'))
+    for directory in ('prospective-attach-failure-witness', 'prospective-fresh-failure-counters'):
+        changed_manifest('remove-diagnostic-transform-binding-' + directory,
+            lambda v, directory=directory: v['retained_trial']['helper_source_sha256'].pop(
+                retained.GSP + directory + '/prepare.py'))
     # Rehash the changed file as an attacker could. The generic inventory now
     # agrees, but the exact independent source replay must still refuse it.
     for scope, relative in (
@@ -74,7 +85,10 @@ def main():
             ('project', retained.GSP + 'prospective-runtime-coordinator/S540ExperimentalRuntime.h'),
             ('project', 'packages/nvidia-device-transport/src/S540NvidiaDeviceServices.cpp'),
             ('project', retained.GSP + 'src/S540NvidiaGspContext.c'),
-            ('source', 'src/nvidia/src/kernel/gpu/gsp/message_queue_cpu.c')):
+            ('project', retained.GSP + 'prospective-attach-failure-witness/S540AttachFailureWitness.c'),
+            ('source', 'src/nvidia/src/kernel/gpu/gsp/message_queue_cpu.c'),
+            ('source', 'src/nvidia/src/kernel/gpu/gpu.c'),
+            ('source', 'src/nvidia/src/kernel/gpu_mgr/gpu_mgr.c')):
         source = paths['composition'] / scope / relative
         saved = source.read_bytes()
         modified = deepcopy(value)
