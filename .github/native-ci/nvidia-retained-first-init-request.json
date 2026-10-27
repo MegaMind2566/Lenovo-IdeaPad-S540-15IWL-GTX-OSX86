@@ -1,6 +1,6 @@
 {
   "format": 1,
   "scope": "s540-retained-first-initialization",
-  "batch_id": "s540-retained-attach-failure-witness-20261027-b8",
-  "source_commit": "c6533f025a4d521d907b93a725161347bb115f03"
+  "batch_id": "s540-retained-optional-nvlink-absence-20261027-b9",
+  "source_commit": "b9797d5aa58deb7ab8a62f78fbc81d9aab115088"
 }
