@@ -35,6 +35,8 @@ PROFILE_DIRECTORIES = {
     'unprotected-host-memory': 'prospective-unprotected-host-memory',
     'attach-failure-witness': 'prospective-attach-failure-witness',
     'fresh-failure-counters': 'prospective-fresh-failure-counters',
+    'optional-nvlink-absence': 'prospective-optional-nvlink-absence',
+    'unavailable-service-witness': 'prospective-unavailable-service-witness',
     'experimental-target-control': 'prospective-experimental-target-control',
 }
 PROFILE_DEPENDENCIES = {
@@ -47,7 +49,10 @@ PROFILE_DEPENDENCIES = {
     'unprotected-host-memory': ('gsp-base-pages',),
     'attach-failure-witness': ('unprotected-host-memory',),
     'fresh-failure-counters': ('attach-failure-witness',),
-    'experimental-target-control': tuple(list(PROFILE_DIRECTORIES)[:13]),
+    'optional-nvlink-absence': ('fresh-failure-counters',),
+    'unavailable-service-witness': ('optional-nvlink-absence',),
+    'experimental-target-control': tuple(PROFILE_DIRECTORIES)[
+        :tuple(PROFILE_DIRECTORIES).index('experimental-target-control')],
 }
 OLD_KERNEL = GSP + 'prospective-loader/S540ProspectiveLoaderKernel.cpp'
 OLD_STATE = GSP + 'prospective-loader/S540ProspectiveLoaderState.c'

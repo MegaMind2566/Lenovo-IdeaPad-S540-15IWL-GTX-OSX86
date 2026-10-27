@@ -1,0 +1,108 @@
+{
+  "B8_target_attestation_sha256": "bf5982cdfdf150441d8293e5d2f14b984eb46343e7057faf133463fdd92e7d81",
+  "artifact_retention_days": 1,
+  "build_identity": {
+    "format": 1,
+    "generated_source": "packages/nvidia-gsp-bootstrap/prospective-retained-build-identity/S540ExperimentalBuildIdentity.c",
+    "policy_sha256": "1dadd1153cab0de4dfa254f452d91b09b806f7a00db3716e3a5663fd19119ef6",
+    "required_kernel_stack_bytes": 16384,
+    "source_identity_excludes_only_generated_identity_source": true,
+    "source_sha256": "4e15e2403d2a83b7b614b75b74fcd3eedbd5d99d6bcbdfd06d5b18699e1b5d90"
+  },
+  "composition_sha256": "82db2de27673c14334f56a90d45542b4e1a77df4a0b593f1dab6828b1b05fb6f",
+  "controls": {
+    "LSAN_claimed": false,
+    "TSAN_claimed": false,
+    "altered_Windows_control_cases": 2,
+    "fatal_ASAN_UBSAN": true,
+    "image_host_checks": 37,
+    "optional_cases_per_mode": 78,
+    "optional_checks_per_mode": 1038,
+    "optional_mutants": 29,
+    "original_cross_units": 5,
+    "project_cross_units": 68,
+    "replay_negatives": 55,
+    "sdk_cross_units": 6,
+    "unavailable_cases_per_mode": 19,
+    "unavailable_checks_per_mode": 573,
+    "unavailable_concurrent_writers": 8,
+    "unavailable_mutants": 10,
+    "workflow_cost_controls": 13
+  },
+  "formal_stack_bound_proven": false,
+  "format": 1,
+  "hardware_test_B9_performed": false,
+  "large_native_evidence_upload_only_on_failure": true,
+  "local_review_corrections_before_native": [
+    "CancellationCheckCurrent side effects replaced by actual pure stable CancellationGetSnapshot.",
+    "Original global registry base read used directly, excluding unrelated NBSI fallback.",
+    "Final materialization independently verified to include the frozen78-case test/helper source hashes."
+  ],
+  "native_Darwin_compilation": false,
+  "native_jobs_started": 0,
+  "new_profiles": [
+    "optional-nvlink-absence",
+    "unavailable-service-witness"
+  ],
+  "policy_changes": false,
+  "public_standard_runner_only": true,
+  "receipts": {
+    "context": {
+      "sha256": "e939a6b5b2a53d1465775dc4125064c11de40163db3aced9360b7e691c8c6cff",
+      "status": "passed-actual-post-wrapper-fresh-diagnostic-controls"
+    },
+    "fresh": {
+      "sha256": "e288143771d603a2d434c162d96c6d1e17d5eed5cc251fb7bf16d8364ef3d4ad",
+      "status": "passed-actual-kernel-branch-allocation-diagnostics-controls"
+    },
+    "image": {
+      "sha256": "d1317ae463a8f303eab24be1360229f6bd03b105ed0b5de71dcd16ae2c279353",
+      "status": "passed-current-experimental-image-host-controls"
+    },
+    "legacy-memory": {
+      "sha256": "41e8512093bfdcaea435abca709c55ef1cc0f8536975f1a21090fbeccf9565cf",
+      "status": "passed-complete-memory-services-and-session-CPU-controls"
+    },
+    "optional": {
+      "sha256": "fe81050eea66a318f84cccf49d4f023105d84a5e56a6f196d5c4bbb855bfd0b5",
+      "status": "passed-actual-optional-child-record-and-diagnostic-CPU-controls"
+    },
+    "original_cross": {
+      "sha256": "dd8c9e440597c56eacf28885a8091a9c27f90dea5189405e1b5e32b120b228ac",
+      "status": "compiled-retained-trial-original-delta-cross-only"
+    },
+    "project_cross": {
+      "sha256": "10bca020b62bfa9859e9ba0d56cffb37a210ad0604f99797706a3d28dce20293",
+      "status": "compiled-retained-trial-project-cross-only"
+    },
+    "replay": {
+      "sha256": "fef037d6a4caec54481125aefa4ae6c1ad4ca8fad6676a7605827e9129f90871",
+      "status": "passed-actual-retained-source-replay-mutation-controls"
+    },
+    "sdk": {
+      "sha256": "196fa8aa52cd2e90adbce023c91744379dc7b3eae71a06b9659514c29ba6808b",
+      "status": "actual-experimental-frontend-sdk-cross-compiled"
+    },
+    "unavailable": {
+      "sha256": "62ccb29a24537f0a1fe8d11896c9d79a9115a745f499120bba40f5bb3b471e90",
+      "status": "passed-actual-unavailable-service-witness-controls"
+    },
+    "witness": {
+      "sha256": "44361db5ed8213e859e6ecebdaba342a3637838993109a2f700bdde8e224f024",
+      "status": "passed-actual-attach-constructor-and-private-witness-CPU-controls"
+    }
+  },
+  "reviewed_constraints": [
+    "Only KernelNvlink instance0 with NULL child slot can be omitted before allocation/publication.",
+    "The real compiled NVLink core must be uninitialized and original global NvLinkDisable must equal1.",
+    "Actual strong-record identity and stable live cancellation-producer state are read; no caller readiness flags or cached FirstTxn counter authorization.",
+    "Failed published children remain retained; no generic constructor status normalization or physical-release permit.",
+    "Unavailable diagnostics are independently sampled module-lifetime atomics, not causal-first-error or coherent per-operation counters."
+  ],
+  "scope": "B9-exact-source-local-preflight-before-one-native-request",
+  "source_base_commit": "33e49e2b620ee0e4307c8381dbf883bbaa7ba22e",
+  "status": "passed",
+  "system_security_changed": false,
+  "target_wire_ABI_changed": false,
+  "whole_DMA_stop_proven": false
+}

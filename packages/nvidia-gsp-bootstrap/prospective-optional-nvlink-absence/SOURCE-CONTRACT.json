@@ -1,0 +1,93 @@
+{
+  "B8_native_basis": {
+    "actual_getter_loads_original_context_offset": "0xb8",
+    "actual_library_getter_address": "0x70b0",
+    "actual_support_function_address": "0x214200",
+    "attestation_sha256": "bf5982cdfdf150441d8293e5d2f14b984eb46343e7057faf133463fdd92e7d81",
+    "compilation_macro_basis": "actual compiled support-function direct call; source Makefile and exact make-selected build profile both include INCLUDE_NVLINK_LIB",
+    "compiled_support_function_calls_actual_library_getter": true,
+    "native_full_command_report_in_success_zip": false,
+    "new_policy_uses_live_backend_predicate_not_historical_inference": true,
+    "signed_image_sha256": "aa7b694c87a3d16415ca16523e15b5d595bffc6e1dcffa201588863fc2a206a8",
+    "signed_image_uuid": "47F32271-A7C8-32D2-AE27-B6C861775FC2",
+    "target_inner_branch_traced": false,
+    "three_actual_native_owners": "nvlink_lib_is_initialized, nvlink_lib_initialize, nvlinkLibCtx -> original-objects/nvlink_lib_mgmt.o"
+  },
+  "CPU_header_sha256": {
+    "packages/nvidia-darwin-services/src/S540NvidiaDarwinServices.h": "b2e71cc940a78e52b304345cdc7f54b955272df3f5683c51842121ff0761672b",
+    "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.h": "a63bb08341cefc34fab533a645d136ebbea92069f90ae50cbddadadeca6db048",
+    "packages/nvidia-os-adapter/upstream/include/nvstatus.h": "e8267172a1f7a56420d612c6734b3554b9ff6a3d33fdda21b1371ff4ce4b8675",
+    "packages/nvidia-os-adapter/upstream/include/nvtypes.h": "da23dbc28805c390d62338dba5603eb12b2e94c8aaf873c1c42c1a5f10f26b79"
+  },
+  "composed_input_sha256": {
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c": "074354ac92fa4b5cd55d37c7cff4c557c2b132b91db1473420e0c33924198c5c",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.h": "03abb7266401256adcd2ffb2b63a32c962afd5d83b4fcf3f844d120818a07f25",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c": "8e0f3a862e4c28b1dade062aa20ceefad7298132b2310ff7252e8db9d6d2e47e"
+  },
+  "final_native_and_target_validation_required": true,
+  "format": 1,
+  "global_registry_base_contract": {
+    "actual_dispatch": "return RmReadRegistryDword(nv, regParmStr, Data);",
+    "actual_null_GPU_conversion": "nv_state_t *nv = NV_GET_NV_STATE(pGpu);",
+    "actual_null_identity_macro": "#define NV_GET_NV_STATE(pGpu) \\\n    (nv_state_t *)((pGpu) ? (pGpu)->pOsGpuInfo : NULL)",
+    "function": "osReadRegistryDwordBase",
+    "nbsi_fallback_used": false,
+    "null_OS_identity_macro_path": "src/nvidia/arch/nvalloc/unix/include/nv.h",
+    "path": "src/nvidia/arch/nvalloc/unix/src/os.c"
+  },
+  "global_registry_bridge_sha256": {
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRmRegistry.c": "3e670a89d413ca1416097239aa09a906ff9eec9584d38085ee27da5a8760bb75"
+  },
+  "original_binding_sha256": {
+    "src/common/nvlink/interface/nvlink.h": "31c41d9c0bf717da2740b9f1f95b9d75fbecc8327badea541a89f87d220ccd2c",
+    "src/common/nvlink/kernel/nvlink/nvlink_lib_mgmt.c": "6032396109f30e6ce9ec447dab6d306a5da43986004c2ce6920008fa6d7ae2a1",
+    "src/nvidia/Makefile": "fda820549e69a7e5d3a7d4f219d5035e673a4994565038c272399e9385e3b632",
+    "src/nvidia/arch/nvalloc/unix/include/nv-reg.h": "a8bff18c6dbeb7f19f5a5e5bbdd9a211329c7a989bb058ee1573395ffe36264f",
+    "src/nvidia/arch/nvalloc/unix/include/nv.h": "02ce4b371e0a8dd26f62a320e88c8382dcf31a21b727503a66abcaea9eecf09b",
+    "src/nvidia/arch/nvalloc/unix/src/os.c": "9e0907d3a54fd71ef6ff01966b6c443ea8f7711d00d151bd7ba1f5171268abd5",
+    "src/nvidia/generated/g_gpu_nvoc.h": "8c11f9341181e06e22bde6f1722275d057796b0a7cd796f28fb2fba0058d8a9c",
+    "src/nvidia/generated/g_kernel_nvlink_nvoc.h": "6aee69f620d23fc7869141617f9c35f3b0292e8b3e8302cc4b930b0f642621c1",
+    "src/nvidia/generated/g_os_nvoc.h": "3444dbac90e159e4a0bb1434738e595bc6fa5b77ecf5b55544de6a6eb96fc107",
+    "src/nvidia/generated/rmconfig.h": "cf582b8d0e21a4acf4a290b27ac6a1d6dff43aa9d63f3d57923bb84accfda402",
+    "src/nvidia/src/kernel/gpu/nvlink/kernel_nvlinkcorelib.c": "5a127e6901507d285cb9ddd453d925ed12c30f844e7ff0cf12d0a5c53829689f",
+    "src/nvidia/src/kernel/gpu/nvlink/kernel_nvlinkstate.c": "0b3cba10e92dc30f928cc6d8677971e27a8aca8e9a8e70a75d8b2129c3003b7d",
+    "src/nvidia/src/kernel/os/os_init.c": "e2753b180b3194d9cbdd27495381016433b5ae14b0f16a658bd7526c02a0a7f0"
+  },
+  "original_input_sha256": {
+    "src/nvidia/src/kernel/gpu/gpu.c": "c8739a7ab018531723445f1d603a9e049ed2fd9b458ef399cf74b0ab456e3865"
+  },
+  "ownership": {
+    "destructors_added": false,
+    "formal_stack_bound_claimed": false,
+    "hardware_admission_added": false,
+    "library_initializer_added": false,
+    "new_record_probes_pure": true,
+    "no_cached_FirstTxn_or_service_counters_as_authority": true,
+    "no_counter_mutations": true,
+    "parent_links_changed": false,
+    "post_wrapper_diagnostic_only": true,
+    "pre_allocation_and_publication_only": true,
+    "private_scalar_bytes": 32,
+    "published_child_failure_unchanged": true,
+    "record_owner_generation_once_per_boot_no_reset": true,
+    "small_real_cancellation_producer_snapshot_bytes": 64,
+    "wire_abi_changed": false
+  },
+  "predicates": {
+    "actual_class_macro": "#define __nvoc_class_id_KernelNvlink 0xce6818u",
+    "actual_library_macro_required": "-DINCLUDE_NVLINK_LIB",
+    "actual_nvlink_library_initialized": false,
+    "actual_registry_value": 1,
+    "exact_class_id": 13527064,
+    "exact_instance": 0,
+    "original_global_registry_key": "NvLinkDisable",
+    "original_global_registry_read": "osReadRegistryDwordBase(NULL, \"NvLinkDisable\", &disabled)",
+    "published_child_slot_must_be_null": true,
+    "registry_nbsi_fallback_permitted": false,
+    "selected_windows_feature_macro": "#define RMCFG_FEATURE_PLATFORM_WINDOWS            0  // Running on Windows"
+  },
+  "project_binding_sha256": {
+    "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c": "38f8b9d8075a7306c4c5a42181f80e924eda1cfb7e383d548e6ec27ebaf747d5"
+  },
+  "scope": "pre-publication-optional-NVLink-absence-from-real-library-and-registry"
+}

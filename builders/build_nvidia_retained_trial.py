@@ -36,6 +36,8 @@ def layout(work):
         gsp_memory_base=work / 'inputs/gsp-memory-base',
         failure_diagnostic_base=work / 'inputs/failure-diagnostic-base',
         attach_witness_base=work / 'inputs/attach-witness-base',
+        optional_nvlink_base=work / 'inputs/optional-nvlink-base',
+        unavailable_service_base=work / 'inputs/unavailable-service-base',
         composition=work / 'inputs/retained',
         native_compilation=work / 'native', image=work / 'image', package=work / 'package')
 
@@ -131,6 +133,10 @@ def prepare(args, paths):
                      paths['base'], paths['failure_diagnostic_base'], names[:names.index('attach-failure-witness')])
     retained.prepare(paths['canonical_parent'], paths['integrated_base'], paths['operational_base'],
                      paths['base'], paths['attach_witness_base'], names[:names.index('fresh-failure-counters')])
+    retained.prepare(paths['canonical_parent'], paths['integrated_base'], paths['operational_base'],
+                     paths['base'], paths['optional_nvlink_base'], names[:names.index('optional-nvlink-absence')])
+    retained.prepare(paths['canonical_parent'], paths['integrated_base'], paths['operational_base'],
+                     paths['base'], paths['unavailable_service_base'], names[:names.index('unavailable-service-witness')])
     retained.prepare(paths['canonical_parent'], paths['integrated_base'], paths['operational_base'],
                      paths['base'], paths['composition'], tuple(retained.PROFILE_DIRECTORIES))
     return verify(paths)

@@ -25,7 +25,7 @@ native=image.native
 FRONT='packages/nvidia-gsp-bootstrap/prospective-experimental-target-control'
 BUNDLE='S540ExperimentalInit.kext'
 EXECUTABLE='S540ExperimentalInit'
-ARCHIVE='S540ExperimentalInitRetained-B8.zip'
+ARCHIVE='S540ExperimentalInitRetained-B9.zip'
 
 def require(value,message):
     if not value: raise ValueError(message)

@@ -34,13 +34,19 @@ def main():
     unprotected = profiles[:profiles.index('unprotected-host-memory') + 1]
     attach_witness = profiles[:profiles.index('attach-failure-witness') + 1]
     fresh_counters = profiles[:profiles.index('fresh-failure-counters') + 1]
-    for names in (profiles, gsp_base, unprotected, attach_witness, fresh_counters):
+    optional_nvlink = profiles[:profiles.index('optional-nvlink-absence') + 1]
+    unavailable_witness = profiles[:profiles.index('unavailable-service-witness') + 1]
+    assert retained.PROFILE_DEPENDENCIES['experimental-target-control'] == profiles[
+        :profiles.index('experimental-target-control')]
+    for names in (profiles, gsp_base, unprotected, attach_witness, fresh_counters,
+                  optional_nvlink, unavailable_witness):
         assert retained.selected_profiles(reversed(names)) == names
     for names in (('unknown',), ('pm-event', 'pm-event'), ('retained-stop',),
                   ('experimental-target-control',), ('runtime-coordinator',), ('preparation-observation',),
                   ('pci-memory-bars',), ('irq-source-selection',), ('gsp-base-pages',),
                   ('unprotected-host-memory',), ('attach-failure-witness',),
                   ('fresh-failure-counters',),
+                  ('optional-nvlink-absence',), ('unavailable-service-witness',),
                   tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'preparation-observation'),
                   tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'pci-memory-bars'),
                   tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'irq-source-selection'),
@@ -48,12 +54,16 @@ def main():
                   tuple(name for name in profiles if name != 'unprotected-host-memory'),
                   tuple(name for name in profiles if name != 'attach-failure-witness'),
                   tuple(name for name in profiles if name != 'fresh-failure-counters'),
+                  tuple(name for name in profiles if name != 'optional-nvlink-absence'),
+                  tuple(name for name in profiles if name != 'unavailable-service-witness'),
                   # Omit the frontend so its prerequisites cannot mask a
                   # missing direct dependency in the memory/diagnostic chain.
                   tuple(name for name in gsp_base if name != 'irq-source-selection'),
                   tuple(name for name in unprotected if name != 'gsp-base-pages'),
                   tuple(name for name in attach_witness if name != 'unprotected-host-memory'),
-                  tuple(name for name in fresh_counters if name != 'attach-failure-witness')):
+                  tuple(name for name in fresh_counters if name != 'attach-failure-witness'),
+                  tuple(name for name in optional_nvlink if name != 'fresh-failure-counters'),
+                  tuple(name for name in unavailable_witness if name != 'optional-nvlink-absence')):
         refused('profile-selection-' + '-'.join(names), lambda names=names: retained.selected_profiles(names))
     def changed_manifest(label, mutate):
         modified = deepcopy(value)
@@ -73,7 +83,8 @@ def main():
         'builders/build_nvidia_retained_trial.py'))
     changed_manifest('remove-shared-function-parser-binding', lambda v: v['retained_trial']['helper_source_sha256'].pop(
         'packages/nvidia-gsp-bootstrap/cancellation/prepare_wait_candidates.py'))
-    for directory in ('prospective-attach-failure-witness', 'prospective-fresh-failure-counters'):
+    for directory in ('prospective-attach-failure-witness', 'prospective-fresh-failure-counters',
+                      'prospective-optional-nvlink-absence', 'prospective-unavailable-service-witness'):
         changed_manifest('remove-diagnostic-transform-binding-' + directory,
             lambda v, directory=directory: v['retained_trial']['helper_source_sha256'].pop(
                 retained.GSP + directory + '/prepare.py'))
@@ -86,6 +97,10 @@ def main():
             ('project', 'packages/nvidia-device-transport/src/S540NvidiaDeviceServices.cpp'),
             ('project', retained.GSP + 'src/S540NvidiaGspContext.c'),
             ('project', retained.GSP + 'prospective-attach-failure-witness/S540AttachFailureWitness.c'),
+            ('project', retained.GSP + 'prospective-optional-nvlink-absence/S540OptionalNvlinkAbsence.c'),
+            ('project', retained.GSP + 'prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c'),
+            ('project', retained.GSP + 'prospective-first-transaction/record/S540NvidiaGspFirstTransaction.h'),
+            ('project', 'packages/nvidia-global-rm/src/S540NvidiaGlobalRmHost.cpp'),
             ('source', 'src/nvidia/src/kernel/gpu/gsp/message_queue_cpu.c'),
             ('source', 'src/nvidia/src/kernel/gpu/gpu.c'),
             ('source', 'src/nvidia/src/kernel/gpu_mgr/gpu_mgr.c')):

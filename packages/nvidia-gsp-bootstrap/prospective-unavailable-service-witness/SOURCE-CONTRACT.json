@@ -1,0 +1,24 @@
+{
+  "actual_record_header_sha256": "1980c472e027e4195b5d716bbace4b205b3cf50c165406a270f7025274a2cf7c",
+  "counter_semantics": "independently sampled, saturating atomic32 module-lifetime observations; first reservation winner publishes immutable site/service tuple release2, getter acquire2",
+  "diagnostic_log_records_maximum": 2,
+  "external_site_ambiguity": "site0 reports external aggregate API; raw service0 still ambiguous",
+  "first_tuple_semantics": "First diagnostic reservation winner, not causal first RM error; read payload only after acquire state2",
+  "format": 1,
+  "getter_guard": "Actual ordinary sleepable thread, pure FirstTxn snapshot for exact bound nv, actual current thread equals master, originalReturned and not originalInFlight; failures preserve output",
+  "guard_or_status_relaxation": false,
+  "logging_boundary": "after actual wrapper return; two bounded scalar records maximum",
+  "new_export": "s540GlobalRmReadUnavailableDiagnostics",
+  "new_export_owner": "packages/nvidia-global-rm/src/S540NvidiaGlobalRmHost.cpp",
+  "new_wire_protocol": false,
+  "physical_release_authorized": false,
+  "private_snapshot_bytes": 72,
+  "production_inputs": [
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRmHost.cpp",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c"
+  ],
+  "production_reset_api": false,
+  "scope": "B9-private-post-return-unavailable-site-observations",
+  "site_count": 10,
+  "unchanged_aggregate_order": "original ObserveServiceRefusal, original atomic aggregate increment, original ObserveServiceRefusal, then additive diagnostics"
+}

@@ -1,0 +1,18 @@
+Timestamp               Ty Process[PID:TID]
+2026-10-27 23:20:58.171 Df kernel[0:2867] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: GPU 0000:02:00.0: RmInitAdapter
+2026-10-27 23:20:58.171 Df kernel[0:2867] [  301.367045]: S540 NVIDIA RM: NVRM: _sysCreateOs: RM Access Sys Cap creation failed: 0x56
+2026-10-27 23:20:58.171 Df kernel[0:2867] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: GPU 0000:02:00.0: RmSetupRegisters for 0x10de:0x1f91
+2026-10-27 23:20:58.171 Df kernel[0:2867] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: GPU 0000:02:00.0: pci config info:
+2026-10-27 23:20:58.171 Df kernel[0:2867] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: GPU 0000:02:00.0:    registers look  like: 0x93000000 0x1000000
+2026-10-27 23:20:58.171 Df kernel[0:2867] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: GPU 0000:02:00.0:    fb        looks like: 0x7f80000000 0x10000000
+2026-10-27 23:20:58.171 Df kernel[0:2867] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: GPU 0000:02:00.0: Successfully mapped framebuffer and registers
+2026-10-27 23:20:58.171 Df kernel[0:2867] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: GPU 0000:02:00.0: final mappings:
+2026-10-27 23:20:58.171 Df kernel[0:2867] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: GPU 0000:02:00.0:     regs: 0x93000000 0x1000000 0x<kernel-address-redacted>
+2026-10-27 23:20:58.172 Df kernel[0:2867] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: GPU 0000:02:00.0: RmInitAdapter failed! (0x22:0x56:954)
+2026-10-27 23:20:58.172 Df kernel[0:2867] [  301.379376]: S540 NVIDIA RM: NVRM: osInitNvMapping: *** Cannot attach gpu
+2026-10-27 23:20:58.172 Df kernel[0:2867] [  301.379378]: S540 NVIDIA RM: NVRM: s540Global_RmInitAdapter: osInitNvMapping failed, bailing out of RmInitAdapter
+2026-10-27 23:20:58.172 Df kernel[0:2867] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: S540 retained profile failure: profile=86 snapshot=available firstStatus=86 firstSite=2 phase=6 counters=cached hostUnavailable=0 invalidFrees=0 memoryUnavailableEver=0 violationsEver=0 cryptoUnavailable=0 cryptoMaskLow=0x0 cryptoMaskHigh=0x0 cryptoOverflow=0
+2026-10-27 23:20:58.172 Df kernel[0:2867] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: S540 fresh service counters: available=1 status=0 hostInitialized=1 hostUnavailable=2 invalidFrees=0 memoryUnavailableEver=0 violationsEver=0 cryptoUnavailable=0 cryptoMaskLow=0x0 cryptoMaskHigh=0x0 cryptoOverflow=0
+2026-10-27 23:20:58.172 Df kernel[0:2867] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: S540 allocation counters: available=1 status=0 scope=module-lifetime independentlySampled=1 observedMask=0x1 attempts=6 failures=0 entryRejections=0 largestRequestedPages=129 firstFailureState=0 firstFailureObserved=0
+2026-10-27 23:20:58.172 Df kernel[0:2867] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: S540 attach witness: available=1 status=0 complete=1 lastAttachStage=5 lastClassId=0xce6818 lastInstance=0 lastCtorStage=8 firstFailureValid=1
+2026-10-27 23:20:58.172 Df kernel[0:2867] (S540ExperimentalInit) S540 NVIDIA RM: NVRM: S540 first attach failure: stage=5 classId=0xce6818 instance=0 ctorStage=7 status=86 observedMask=0x2 missingObserved=0 missing=0 gspClientObserved=1 gspClient=1
