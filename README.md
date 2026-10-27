@@ -2,7 +2,7 @@
 
 An OpenCore project for **macOS Tahoe 26** on the **Lenovo IdeaPad S540-15IWL GTX (81SW)**. The current official configuration runs macOS and Windows on the internal Samsung NVMe, uses **Intel UHD 620**, and keeps **NVIDIA disabled**.
 
-**Project status: in development — 24 October 2026.** [v0.3.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.3.0) publishes the working non-NVIDIA baseline, including the newly user-confirmed SD reader. It is a tested milestone, not a completed project or a claim that every device works. NVIDIA research remains separate from this release.
+**Project status: in development — 27 October 2026.** [v0.3.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.3.0) publishes the working non-NVIDIA baseline, including the newly user-confirmed SD reader. It is a tested milestone, not a completed project or a claim that every device works. NVIDIA research remains separate from this release.
 
 ## Hardware
 
@@ -37,9 +37,9 @@ An OpenCore project for **macOS Tahoe 26** on the **Lenovo IdeaPad S540-15IWL GT
 | F1–F3 audio controls | Working | Speaker mute and volume controls |
 | F4, F7 and F9 actions | Working with companion | S540 Tasti provides microphone input-level mute/restore, Wi-Fi/Bluetooth control and screen lock; these are separately installed macOS components |
 | F5 browser reload | User-confirmed | Browser reload was accepted by the user; direct/Fn event distinction and a general remapping are separate questions |
-| F6 touchpad toggle | Partial / retained evidence | An earlier toggle worked; the current complete icon-key mapping is not closed and no new failure is claimed |
+| F6 touchpad toggle | **Working — user-confirmed** | Touchpad enable/disable reconfirmed on 27 October; no further F6 test is pending |
 | F8 camera disablement | **Not working — paused** | The firmware flag changes but video capture continues; further F8 work is paused by request |
-| F10 external-display action | **Unverified / deferred** | Requires a working external display and an established display-mode action |
+| F10 external-display action | **Pending — linked to HDMI** | Tracked together with HDMI output; a working external display and the intended display-mode action remain prerequisites |
 | CPU power management | Working | X86PlatformPlugin active; frequency and estimated package-power responses observed |
 | Battery Low Power Mode | CPU response verified | About 11.4 W estimated package power with the mode on versus 34.4–36.5 W off in the retained short CPU-load comparison; not a measured autonomy result |
 | Battery reporting | Working | Battery operation and discharge confirmed; the user attributes modest runtime to an aged battery |
@@ -79,7 +79,7 @@ Copying the EFI does not install the complete audio or hotkey setup:
 
 This release preserves the usable Intel baseline while the repository continues to track separate research and limitations. NVIDIA source/native/target checkpoints are documented in the [validation record](docs/status/nvidia-validation.md); they must not be interpreted as graphics acceleration or merged into this EFI. Completed checkpoints remain recorded without requiring routine laptop reruns.
 
-The remaining hardware scope includes F6/F10 completion, unavailable HDMI, and broader SD/reliability coverage if requested. Native USB-C video is a laptop hardware limitation, not an EFI issue. Fans are user-confirmed working; unavailable macOS RPM telemetry is an accepted limitation and its investigation is closed for this release. F8 and fingerprint work remain paused/stopped as stated above. The [Roadmap](docs/status/roadmap.md) keeps these states distinct from the confirmed functions.
+The remaining external-display work is HDMI output and the linked F10 display action. F6 and the SD reader are user-confirmed working, with no further retests requested for this milestone. The stated SD card/coverage limits remain evidence boundaries, not pending tasks. Prolonged sleep/overnight standby and hibernation remain unverified and deferred by request. Changing the displayed Mac model label is optional and is not a release requirement. Native USB-C video is a laptop hardware limitation, not an EFI issue. Fans are user-confirmed working; unavailable macOS RPM telemetry is an accepted limitation and its investigation is closed for this release. F8 and fingerprint work remain paused/stopped as stated above. The [Roadmap](docs/status/roadmap.md) keeps these states distinct from the confirmed functions.
 
 ## Documentation and source layout
 

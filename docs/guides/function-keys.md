@@ -1,6 +1,6 @@
 # Function keys and brightness
 
-Hotkey status updated **October 24, 2026**: **F4 microphone mute, F7 Wi-Fi/Bluetooth control and F9 screen lock are user-confirmed working. F8 camera disablement is NOT WORKING and further work is paused by request.** The earlier official-EFI observations retain working F1–F3 and non-NVIDIA F11/F12. F6 had an earlier confirmed touchpad-toggle result, but is included in the user's current F4–F10 completion scope; that earlier result does not close its current status or establish a new failure. The brightness slider also works with the official non-NVIDIA EFI and the BrightnessKeys companion driver. The separate NVIDIA-test brightness regression remains deferred; it is not a failure of this official EFI.
+Hotkey status updated **October 27, 2026**: **F4 microphone mute, F6 touchpad toggle, F7 Wi-Fi/Bluetooth control and F9 screen lock are user-confirmed working. F8 camera disablement is NOT WORKING and further work is paused by request.** The earlier official-EFI observations retain working F1–F3 and non-NVIDIA F11/F12. F6 touchpad enable/disable was reconfirmed on October 27 and is no longer a pending verification. The brightness slider also works with the official non-NVIDIA EFI and the BrightnessKeys companion driver. The separate NVIDIA-test brightness regression remains deferred; it is not a failure of this official EFI.
 
 The S540 Tasti companion provides the confirmed F4/F7/F9 actions. For F8, the firmware receives the event and changes its camera flag, but video capture continues, including after reopening Photo Booth. App 0.1.3 corrects the success message only. No further F8 diagnostics, patches or builds are planned unless the user explicitly resumes that work.
 
@@ -15,17 +15,17 @@ The complete row follows the keyboard legends: direct presses perform the icon a
 | F3 | Increase volume | Working; reconfirmed October 20 | F3 |
 | F4 | Mute microphone | Working; user-confirmed with S540 Tasti | F4 |
 | F5 | Reload the current browser page | Browser reload user-confirmed; the recorded direct/Fn inputs remain indistinguishable | F5 |
-| F6 | Toggle touchpad | Open in the current F4–F10 scope; earlier toggle confirmation retained as history | F6 |
+| F6 | Toggle touchpad | Working; user reconfirmed enable/disable on October 27 | F6 |
 | F7 | Toggle Wi-Fi/Bluetooth | Working; user confirms radio off and restoration with S540 Tasti | F7 |
 | F8 | Disable/enable the built-in camera | NOT WORKING; firmware flag changes but video continues; further work paused by request | F8 |
 | F9 | Lock screen | Working; direct F9 and ordinary Command-L both request screen lock, as explicitly accepted by the user | F9; no lock mapping |
-| F10 | Choose external display mode | Pending; trigger and working external-display prerequisite unresolved | F10 |
+| F10 | Choose external display mode | Pending together with HDMI output; working external display and intended mode action remain prerequisites | F10 |
 | F11 | Decrease brightness | Working with the official non-NVIDIA EFI | F11 |
 | F12 | Increase brightness | Working with the official non-NVIDIA EFI | F12 |
 
 ## Remaining verification scope
 
-F4, F7 and F9 are confirmed and are excluded from repeat diagnostics. **F8 is recorded as non-working and paused**, not as an active verification task. F10 remains deferred until a working external display is available. The full Fn row has already produced its expected key events; no new twelve-key capture or F6 test is requested by this status update.
+F4, F6, F7 and F9 are confirmed and are excluded from repeat diagnostics. **F8 is recorded as non-working and paused**, not as an active verification task. F10 is tracked together with HDMI output and remains pending until a working external display is available. The full Fn row has already produced its expected key events; no new twelve-key capture or F6 test is requested by this status update.
 
 Preserve the working F1–F3, F4, F7, F9, brightness slider and direct F11/F12 controls. No new collector or driver trace is needed merely to reconfirm those controls. A pending icon action is not implemented simply because its physical key emits an event: the target state must change as described below. If an action remains unavailable, retain its existing evidence and identify a distinct input path before changing a map.
 
@@ -124,7 +124,7 @@ Restart after restoration. If the current configuration was edited after install
 
 BrightnessKeys uses the existing Lilu dependency; it has no additional Tahoe beta boot argument. Both direct brightness directions are reported working on the laptop. The companion package and its rollback backup are retained while the remaining function keys are addressed.
 
-The recorded ordinary Fn function-key path and working audio and brightness controls remain the baseline. The earlier touchpad-toggle report is retained as history. F4/F7/F9 are now confirmed; F8 is non-working and paused.
+The recorded ordinary Fn function-key path and working audio and brightness controls remain the baseline. F6 touchpad toggle was reconfirmed on October 27. F4/F6/F7/F9 are confirmed; F8 is non-working and paused.
 
 ## FAT boot-volume metadata
 

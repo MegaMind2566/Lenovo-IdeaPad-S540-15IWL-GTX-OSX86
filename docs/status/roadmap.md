@@ -1,6 +1,6 @@
 # Hardware roadmap
 
-Updated on **24 October 2026**. The current official **v0.3.0 non-NVIDIA** baseline boots macOS from the internal Samsung NVMe alongside Windows. Native Wi-Fi, Intel graphics, input, audio and the SD reader have functional confirmations. **The project remains in development.** A release milestone does not close unsupported hardware or separate research.
+Updated on **27 October 2026**. The current official **v0.3.0 non-NVIDIA** baseline boots macOS from the internal Samsung NVMe alongside Windows. Native Wi-Fi, Intel graphics, input, audio and the SD reader have functional confirmations. **The project remains in development.** A release milestone does not close unsupported hardware or separate research.
 
 ## Current work and limits
 
@@ -8,17 +8,18 @@ Updated on **24 October 2026**. The current official **v0.3.0 non-NVIDIA** basel
 |---|---|---|
 | Preserve confirmed | Internal Intel-based boot and native Windows | Keep the working rEFInd/native-Windows route, OpenCore ScanPolicy 769 and private identity; update the OpenCore directory only |
 | Confirmed in this milestone | O2Micro SD reader | Working from the updated internal non-NVIDIA EFI with the known 8 GB FAT32 card; insertion during an active macOS session, mounting/unmounting and availability after sleep are user-confirmed |
-| Separate optional coverage | SD reliability and capacity | Throughput, broader card/SDXC classes and write/data-integrity validation have not been newly measured; missing coverage is not a request to repeat the confirmed checks |
+| Accepted working scope | SD reader coverage | SD operation is reconfirmed working; no further checks are requested for this milestone. Throughput, broader card/SDXC classes and write/data-integrity validation remain unmeasured evidence boundaries, not pending tasks |
 | Preserve confirmed | Audio, network, touchpad and keys | Keep internal/wired/Bluetooth audio, native Wi-Fi, gestures, F1–F5/F7/F9 and non-NVIDIA brightness; F4/F7/F9 require the matching S540 Tasti macOS companion |
-| Open / retained earlier result | F6 mapping | Earlier touchpad-toggle confirmation is retained; the current complete icon-key mapping is not closed and no new failure is claimed |
-| Deferred | F10 display action | Working external-display support and the intended mode action remain prerequisites |
+| Confirmed | F6 touchpad toggle | User reconfirmed touchpad enable/disable on 27 October; no further F6 test is pending |
 | Not working / paused | F8 camera disablement | Firmware changes do not stop video capture; the user accepted this limitation and paused further work |
 | Not working / work stopped | Fingerprint authentication | Goodix 27c6:55b4 enumerates on USB but macOS authentication is unavailable; investigation stopped by request |
 | Unavailable in this EFI | NVIDIA acceleration | NVIDIA stays disabled with -wegnoegpu. Experimental NVIDIA implementation and target evidence remain separate from this release |
-| Not working | HDMI output | No usable display output established |
-| Unverified | USB-C video | Data-link success does not establish display capability or GPU routing |
+| Open / linked work | HDMI output and F10 display action | HDMI has no usable output established; F10 is tracked in the same workstream and depends on a working external display and the intended mode action |
+| Native hardware limitation | USB-C video | The laptop does not provide native USB-C video output; USB data transfer works. This is not a pending EFI fix |
 | Working / accepted telemetry limitation | Fans | Physical operation is user-confirmed; RPM is not readable in the current macOS configuration. Investigation is closed for this release by request; no further firmware collection, laptop tests or fan-control/driver change is included |
-| Separate optional coverage | Long-duration behavior | Battery autonomy, overnight standby, sustained storage/cooling and hibernation remain beyond the established short tests |
+| Deferred by request | Prolonged sleep / standby and hibernation | Not verified; keep these checks suspended. Confirmed lid and idle sleep results remain valid |
+| Optional / not a release requirement | Displayed Mac model label | The cosmetic 13-inch label change is not a priority; no test or EFI change is requested |
+| Coverage boundary / not active work | Other long-duration behavior | Battery autonomy and sustained storage/cooling remain beyond the established short tests; no further tests are requested by this update |
 
 ## Confirmed baseline
 

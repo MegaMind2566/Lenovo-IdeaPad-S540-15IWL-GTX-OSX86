@@ -1,6 +1,6 @@
 # Verified hardware and official EFI status
 
-Updated on **24 October 2026** for the current **internal non-NVIDIA EFI**, published as v0.3.0. The source laptop now boots macOS internally alongside native Windows. SD operation is user-confirmed after the internal update. The project remains **in development**; the table separates working functions, accepted non-working features and unverified coverage.
+Updated on **27 October 2026** for the current **internal non-NVIDIA EFI**, published as v0.3.0. The source laptop now boots macOS internally alongside native Windows. SD operation is user-confirmed after the internal update. The project remains **in development**; the table separates working functions, accepted non-working features and unverified coverage.
 
 ## Current results
 
@@ -15,19 +15,19 @@ Updated on **24 October 2026** for the current **internal non-NVIDIA EFI**, publ
 | Bluetooth | Intel USB 8087:0AAA; headset playback and microphone, disconnection and reconnection confirmed, including after sleep/wake | Automatic versus manual reconnection was not specified |
 | Audio | ALC257 through separately installed VoodooHDA 3.6.10; speakers, internal microphone, wired headphone output/input and switching work | Built-in speaker/microphone operation also confirmed after wake and Bluetooth disconnection; EFI alone does not install VoodooHDA |
 | Webcam video | Integrated UVC 13D3:56B2; recorded video confirmed | F8 privacy/power toggle is a separate non-working function |
-| Touchpad | ELAN0662 I2C input and gestures working | F6's earlier toggle confirmation remains historical; current full icon mapping is not closed |
-| Keyboard actions | F1–F3 audio and non-NVIDIA F11/F12 brightness work; F4 microphone input-level mute/restore, F7 Wi-Fi/Bluetooth and F9 lock confirmed with S540 Tasti 0.1.3 | F5 browser reload was user-confirmed; direct/Fn distinction remains separate. F6 mapping is not closed; F10 is deferred. See [Function keys](../guides/function-keys.md) |
+| Touchpad | ELAN0662 I2C input and gestures working; F6 enable/disable is user-confirmed | F6 reconfirmed on 27 October; no further toggle test is pending |
+| Keyboard actions | F1–F3 audio and non-NVIDIA F11/F12 brightness work; F4 microphone input-level mute/restore, F7 Wi-Fi/Bluetooth and F9 lock confirmed with S540 Tasti 0.1.3 | F5 browser reload was user-confirmed; direct/Fn distinction remains separate. F6 touchpad toggle is reconfirmed working; F10 remains pending in the same workstream as HDMI. See [Function keys](../guides/function-keys.md) |
 | F8 camera disablement | **NOT WORKING**: firmware flag changes but video capture continues, even after reopening Photo Booth | Further work paused by request; camera video itself works |
 | USB | Active nine-port map (six HS / three SS); both tested USB-A connectors and USB-C in both orientations negotiated 5 Gb/s; file access confirmed | Tested devices/cables only; link speed is not sustained storage throughput |
 | Internal NVMe | 512 GB detected, SMART verified, TRIM active | Not a sustained endurance/storage benchmark |
 | CPU / battery | X86PlatformPlugin active; CPU response, battery reporting and discharge confirmed | Modest runtime attributed by the user to an aged battery; no autonomy repair inferred |
 | Low Power Mode | Battery-on / AC-off setting retained; short OFF–ON–ON–OFF comparison shows about 11.4 W estimated package power and 2.4 GHz on versus 34.4–36.5 W and 3.89–4.00 GHz off | Not equal-work efficiency, whole-laptop power or measured autonomy; [test limits](battery-sleep.md#low-power-mode-under-cpu-load--24-october-2026) |
-| Lid and idle sleep | One 3,603-second clamshell sleep and one 91-second idle sleep resumed, with no recorded DarkWake in those cycles | Not overnight standby, hibernation or every peripheral's recovery |
-| **SD reader** | **Working on the source laptop from the updated internal non-NVIDIA EFI**, user-confirmed 24 October; O2Micro 1217:8621, previous direct-match BigSurSDXC 1.9.0, known 8 GB FAT32 card | Earlier negative result retained as history; insertion during an active session, mounting/unmounting and availability after sleep confirmed; writes, throughput and arbitrary capacities not newly validated. [Evidence](sd-fingerprint.md#current-internal-efi-result--24-october-2026) |
+| Lid and idle sleep | One 3,603-second clamshell sleep and one 91-second idle sleep resumed, with no recorded DarkWake in those cycles | Prolonged sleep/overnight standby and hibernation remain unverified and deferred by request; not every peripheral's recovery was tested |
+| **SD reader** | **Working on the source laptop from the updated internal non-NVIDIA EFI**, user-confirmed 24 October; O2Micro 1217:8621, previous direct-match BigSurSDXC 1.9.0, known 8 GB FAT32 card | Earlier negative result retained as history; insertion during an active session, mounting/unmounting and availability after sleep confirmed; writes, throughput and arbitrary capacities not newly validated. Operation was reconfirmed on 27 October; no further SD checks are pending for this milestone. [Evidence](sd-fingerprint.md#current-internal-efi-result--24-october-2026) |
 | Fingerprint | **NOT WORKING in macOS**: Goodix 27c6:55b4 enumerates on internal HS02, but authentication is unavailable | Investigation stopped by request; [retained findings](sd-fingerprint.md) |
 | NVIDIA acceleration | **Unavailable and disabled in this release** with -wegnoegpu; no experimental NVIDIA payloads included | Separate experimental research and historical checkpoints remain outside this EFI |
-| HDMI | **Not working**; no usable display output established | Physical routing/driver support remains unresolved |
-| USB-C video | **Unverified** | USB data operation does not establish display capability/routing |
+| HDMI / F10 | **Open as one linked workstream**; HDMI has no usable display output established and F10 remains pending | Physical routing/driver support and the intended display-mode action remain unresolved |
+| USB-C video | **Not supported natively by the laptop** | Native USB-C video is a hardware limitation; USB data transfer works. No EFI video fix is pending for this port |
 | Fans | **Working — user-confirmed**; RPM telemetry is unavailable in the current macOS configuration | VirtualSMC and SMCProcessor 1.3.8 expose CPU temperatures but no fan RPM. Investigation is closed for this release by request; no driver/control change was made |
 
 ## Passive fan-telemetry check — 24 October 2026
