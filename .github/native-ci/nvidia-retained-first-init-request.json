@@ -1,6 +1,6 @@
 {
   "format": 1,
   "scope": "s540-retained-first-initialization",
-  "batch_id": "s540-retained-gsp-host-memory-20261024-b7",
-  "source_commit": "037ce5a2ba87de09993c03ba1257af704dc624e5"
+  "batch_id": "s540-retained-attach-failure-witness-20261027-b8",
+  "source_commit": "c6533f025a4d521d907b93a725161347bb115f03"
 }
