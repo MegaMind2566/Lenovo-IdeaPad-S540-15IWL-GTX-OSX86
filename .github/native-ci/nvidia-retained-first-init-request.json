@@ -1,6 +1,6 @@
 {
   "format": 1,
   "scope": "s540-retained-first-initialization",
-  "batch_id": "s540-retained-optional-nvlink-absence-20261027-b9",
-  "source_commit": "b9797d5aa58deb7ab8a62f78fbc81d9aab115088"
+  "batch_id": "s540-retained-pci-gsp-contracts-20261028-b10",
+  "source_commit": "8d1913ed49e3429c9a897e931b1d66439d970d32"
 }
