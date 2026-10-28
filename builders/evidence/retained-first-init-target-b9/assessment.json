@@ -1,0 +1,86 @@
+{
+  "GPU_or_GSP_initialization_confirmed": false,
+  "IRQ_selected_source": 1,
+  "IRQ_source_count": 2,
+  "VBIOS_extract_status": 81,
+  "VBIOS_extract_status_name": "NV_ERR_NO_MEMORY",
+  "VBIOS_missing_or_invalid_confirmed": false,
+  "adapter_status": 86,
+  "attach_witness": {
+    "available": true,
+    "complete": true,
+    "complete_meaning": "attach exit observed; not GPU initialization success",
+    "first_failure_valid": false,
+    "last_attach_stage": 7,
+    "last_class_id": "0x95a6f5",
+    "last_constructor_stage": 9
+  },
+  "attestation_sha256": "2131ed54135e30811b9bca676d6b033ca6aca825d1887ade760e9f40da8d87d9",
+  "device_allocation_observations": {
+    "attempts": 6,
+    "entry_rejections": 0,
+    "independently_sampled": true,
+    "largest_requested_pages": 129,
+    "limitation": "This observer concerns device-page allocations, not the separate Host allocator used for VBIOS extraction; zero failures do not establish future allocation success or callback quiescence.",
+    "recorded_failures": 0,
+    "scope": "module-lifetime"
+  },
+  "firmware_loaded": false,
+  "format": 1,
+  "fresh_service_counters": {
+    "crypto_unavailable": 0,
+    "host_unavailable": 15,
+    "independently_sampled": true,
+    "invalid_frees": 0,
+    "memory_unavailable_ever": 0,
+    "scope": "module-lifetime",
+    "violations_ever": 0
+  },
+  "global_RM_succeeded": true,
+  "input_sha256": {
+    "controller.json": "b897f01e855143e88b943e6f1c48547598915c049935673acdfbe972528bd4c8",
+    "kernel-sanitized.log": "314cec00136e0a966f191cd6d7a59f1d819acd4cb7f2909b3de862ed3f29ec11",
+    "result.json": "efd90c4b86c49b774b34a92da527f81bd92cdac7af890c59bc9bfc93b7a7766c"
+  },
+  "kernel_virtual_addresses_redacted": true,
+  "load_and_control_succeeded": true,
+  "new_hardware_or_cleanup_admission": false,
+  "next_plan": "Represent the explicitly disabled RM ACPI capability provider at the exact optional capability-discovery callsites before unsupported facade calls. Keep normal cache fallback states and all facade refusals intact; add bounded private producer/allocation-stage observations for residual failures.",
+  "observed_kernel_stack_bytes": 16384,
+  "optional_NVLink_absence": {
+    "absent": true,
+    "available": true,
+    "class_id": "0xce6818",
+    "instance": 0,
+    "status": 0
+  },
+  "original_adapter_entered_and_returned": true,
+  "original_kernel_log_sha256": "d6a9b7e12fb0b06a55221012cb5dcdf72ef6e76ddf39a6fc4aef28dc9fc109df",
+  "package_source_commit": "b9797d5aa58deb7ab8a62f78fbc81d9aab115088",
+  "physical_release_authorized": false,
+  "preparation_succeeded": true,
+  "reboot_required": true,
+  "scope": "B9-physical-target-optional-NVLink-absence-and-pre-GSP-VBIOS-allocation-failure",
+  "snapshot_bytes": 776,
+  "snapshot_format": 3,
+  "source_facts": [
+    "TU102 VBIOS extraction allocates KernelGspVbiosImg before the first PROM read; a NULL portMemAllocNonPaged result returns NV_ERR_NO_MEMORY.",
+    "The retained HostCaptureAllocation path returns an existing sticky first error before granting allocation identity.",
+    "RmInitAcpiMethods initializes optional DSM function support and caches DOD before kgspInitRm.",
+    "The selected no-RM-ACPI-events facade returns NV_ERR_NOT_SUPPORTED and records a fatal unavailable call for each reached unsupported method.",
+    "Twelve DSM capability GUID queries plus one DOD query can account for thirteen external refusals; B9 producer observations cannot prove that attribution.",
+    "The present PCI handle bridge exposes only the bound GPU. Missing bridge topology warnings are real, but the corresponding upstream initialization return is ignored on this path."
+  ],
+  "source_lead": "Expected optional ACPI capability queries may publish the first sticky service error, which then denies the later Host allocation and is surfaced as VBIOS NV_ERR_NO_MEMORY. An outer allocation-context refusal remains an alternative; the report alone does not distinguish them.",
+  "unavailable_sites": {
+    "external": 13,
+    "external_site_ambiguous": true,
+    "first_service": 0,
+    "first_site": 0,
+    "free_permit": 2,
+    "limitation": "Site zero does not identify its producer; service zero is shared by optional ACPI callbacks, the outer os_alloc_mem context guard, and other paths.",
+    "other_internal_sites": 0,
+    "total": 15
+  },
+  "whole_DMA_stop_proven": false
+}

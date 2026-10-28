@@ -38,6 +38,10 @@ def layout(work):
         attach_witness_base=work / 'inputs/attach-witness-base',
         optional_nvlink_base=work / 'inputs/optional-nvlink-base',
         unavailable_service_base=work / 'inputs/unavailable-service-base',
+        optional_acpi_base=work / 'inputs/optional-acpi-base',
+        host_allocation_base=work / 'inputs/host-allocation-base',
+        pci_topology_base=work / 'inputs/pci-topology-base',
+        gsp_boot_base=work / 'inputs/gsp-boot-base',
         composition=work / 'inputs/retained',
         native_compilation=work / 'native', image=work / 'image', package=work / 'package')
 
@@ -137,6 +141,14 @@ def prepare(args, paths):
                      paths['base'], paths['optional_nvlink_base'], names[:names.index('optional-nvlink-absence')])
     retained.prepare(paths['canonical_parent'], paths['integrated_base'], paths['operational_base'],
                      paths['base'], paths['unavailable_service_base'], names[:names.index('unavailable-service-witness')])
+    retained.prepare(paths['canonical_parent'], paths['integrated_base'], paths['operational_base'],
+                     paths['base'], paths['optional_acpi_base'], names[:names.index('optional-acpi-capability-absence')])
+    retained.prepare(paths['canonical_parent'], paths['integrated_base'], paths['operational_base'],
+                     paths['base'], paths['host_allocation_base'], names[:names.index('host-allocation-witness')])
+    retained.prepare(paths['canonical_parent'], paths['integrated_base'], paths['operational_base'],
+                     paths['base'], paths['pci_topology_base'], names[:names.index('pci-topology-facts')])
+    retained.prepare(paths['canonical_parent'], paths['integrated_base'], paths['operational_base'],
+                     paths['base'], paths['gsp_boot_base'], names[:names.index('gsp-boot-contracts')])
     retained.prepare(paths['canonical_parent'], paths['integrated_base'], paths['operational_base'],
                      paths['base'], paths['composition'], tuple(retained.PROFILE_DIRECTORIES))
     return verify(paths)

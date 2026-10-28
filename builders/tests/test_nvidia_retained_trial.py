@@ -36,10 +36,15 @@ def main():
     fresh_counters = profiles[:profiles.index('fresh-failure-counters') + 1]
     optional_nvlink = profiles[:profiles.index('optional-nvlink-absence') + 1]
     unavailable_witness = profiles[:profiles.index('unavailable-service-witness') + 1]
+    optional_acpi = profiles[:profiles.index('optional-acpi-capability-absence') + 1]
+    host_allocation = profiles[:profiles.index('host-allocation-witness') + 1]
+    pci_topology = profiles[:profiles.index('pci-topology-facts') + 1]
+    gsp_boot = profiles[:profiles.index('gsp-boot-contracts') + 1]
     assert retained.PROFILE_DEPENDENCIES['experimental-target-control'] == profiles[
         :profiles.index('experimental-target-control')]
     for names in (profiles, gsp_base, unprotected, attach_witness, fresh_counters,
-                  optional_nvlink, unavailable_witness):
+                  optional_nvlink, unavailable_witness, optional_acpi, host_allocation,
+                  pci_topology, gsp_boot):
         assert retained.selected_profiles(reversed(names)) == names
     for names in (('unknown',), ('pm-event', 'pm-event'), ('retained-stop',),
                   ('experimental-target-control',), ('runtime-coordinator',), ('preparation-observation',),
@@ -47,6 +52,8 @@ def main():
                   ('unprotected-host-memory',), ('attach-failure-witness',),
                   ('fresh-failure-counters',),
                   ('optional-nvlink-absence',), ('unavailable-service-witness',),
+                  ('optional-acpi-capability-absence',), ('host-allocation-witness',),
+                  ('pci-topology-facts',), ('gsp-boot-contracts',),
                   tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'preparation-observation'),
                   tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'pci-memory-bars'),
                   tuple(name for name in retained.PROFILE_DIRECTORIES if name != 'irq-source-selection'),
@@ -56,6 +63,10 @@ def main():
                   tuple(name for name in profiles if name != 'fresh-failure-counters'),
                   tuple(name for name in profiles if name != 'optional-nvlink-absence'),
                   tuple(name for name in profiles if name != 'unavailable-service-witness'),
+                  tuple(name for name in profiles if name != 'optional-acpi-capability-absence'),
+                  tuple(name for name in profiles if name != 'host-allocation-witness'),
+                  tuple(name for name in profiles if name != 'pci-topology-facts'),
+                  tuple(name for name in profiles if name != 'gsp-boot-contracts'),
                   # Omit the frontend so its prerequisites cannot mask a
                   # missing direct dependency in the memory/diagnostic chain.
                   tuple(name for name in gsp_base if name != 'irq-source-selection'),
@@ -63,7 +74,11 @@ def main():
                   tuple(name for name in attach_witness if name != 'unprotected-host-memory'),
                   tuple(name for name in fresh_counters if name != 'attach-failure-witness'),
                   tuple(name for name in optional_nvlink if name != 'fresh-failure-counters'),
-                  tuple(name for name in unavailable_witness if name != 'optional-nvlink-absence')):
+                  tuple(name for name in unavailable_witness if name != 'optional-nvlink-absence'),
+                  tuple(name for name in optional_acpi if name != 'unavailable-service-witness'),
+                  tuple(name for name in host_allocation if name != 'optional-acpi-capability-absence'),
+                  tuple(name for name in pci_topology if name != 'host-allocation-witness'),
+                  tuple(name for name in gsp_boot if name != 'pci-topology-facts')):
         refused('profile-selection-' + '-'.join(names), lambda names=names: retained.selected_profiles(names))
     def changed_manifest(label, mutate):
         modified = deepcopy(value)
@@ -84,7 +99,9 @@ def main():
     changed_manifest('remove-shared-function-parser-binding', lambda v: v['retained_trial']['helper_source_sha256'].pop(
         'packages/nvidia-gsp-bootstrap/cancellation/prepare_wait_candidates.py'))
     for directory in ('prospective-attach-failure-witness', 'prospective-fresh-failure-counters',
-                      'prospective-optional-nvlink-absence', 'prospective-unavailable-service-witness'):
+                      'prospective-optional-nvlink-absence', 'prospective-unavailable-service-witness',
+                      'prospective-optional-acpi-capability-absence', 'prospective-host-allocation-witness',
+                      'prospective-pci-topology-facts', 'prospective-gsp-boot-contracts'):
         changed_manifest('remove-diagnostic-transform-binding-' + directory,
             lambda v, directory=directory: v['retained_trial']['helper_source_sha256'].pop(
                 retained.GSP + directory + '/prepare.py'))
@@ -95,14 +112,31 @@ def main():
             ('project', retained.PLATFORM), ('project', retained.DARWIN_DEVICE),
             ('project', retained.GSP + 'prospective-runtime-coordinator/S540ExperimentalRuntime.h'),
             ('project', 'packages/nvidia-device-transport/src/S540NvidiaDeviceServices.cpp'),
+            ('project', 'packages/nvidia-device-transport/src/S540NvidiaDeviceTransport.cpp'),
+            ('project', 'packages/nvidia-device-transport/src/S540NvidiaDeviceTransport.hpp'),
             ('project', retained.GSP + 'src/S540NvidiaGspContext.c'),
             ('project', retained.GSP + 'prospective-attach-failure-witness/S540AttachFailureWitness.c'),
             ('project', retained.GSP + 'prospective-optional-nvlink-absence/S540OptionalNvlinkAbsence.c'),
+            ('project', retained.GSP + 'prospective-optional-acpi-capability-absence/S540OptionalAcpiAbsence.c'),
+            ('project', retained.GSP + 'prospective-optional-acpi-capability-absence/S540OptionalAcpiAbsence.h'),
+            ('project', retained.GSP + 'prospective-host-allocation-witness/S540HostAllocationDiagnostics.h'),
+            ('project', retained.GSP + 'prospective-pci-topology-facts/S540PciTopology.cpp'),
+            ('project', retained.GSP + 'prospective-pci-topology-facts/S540PciTopology.hpp'),
+            ('project', retained.GSP + 'prospective-pci-topology-facts/S540PciTopologyFacts.h'),
+            ('project', retained.GSP + 'prospective-pci-topology-facts/sdk_import_reference.cpp'),
             ('project', retained.GSP + 'prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c'),
             ('project', retained.GSP + 'prospective-first-transaction/record/S540NvidiaGspFirstTransaction.h'),
             ('project', 'packages/nvidia-global-rm/src/S540NvidiaGlobalRmHost.cpp'),
+            ('project', 'packages/nvidia-global-rm/src/S540NvidiaGlobalRmOs.c'),
+            ('project', 'packages/nvidia-global-rm/src/S540NvidiaGlobalRmAcpi.c'),
             ('source', 'src/nvidia/src/kernel/gpu/gsp/message_queue_cpu.c'),
+            ('source', 'src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c'),
             ('source', 'src/nvidia/src/kernel/gpu/gpu.c'),
+            ('source', 'src/nvidia/src/kernel/platform/acpi_common.c'),
+            ('source', 'src/nvidia/src/kernel/platform/chipset/chipset.c'),
+            ('source', 'src/nvidia/src/kernel/platform/chipset/chipset_pcie.c'),
+            ('source', 'src/nvidia/arch/nvalloc/unix/src/os.c'),
+            ('source', 'src/nvidia/arch/nvalloc/unix/src/osinit.c'),
             ('source', 'src/nvidia/src/kernel/gpu_mgr/gpu_mgr.c')):
         source = paths['composition'] / scope / relative
         saved = source.read_bytes()

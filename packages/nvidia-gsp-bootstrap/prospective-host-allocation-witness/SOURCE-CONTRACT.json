@@ -1,0 +1,22 @@
+{
+  "format": 1,
+  "scope": "private-host-allocation-and-refusal-producer-observations",
+  "actual_record_header_sha256": "1980c472e027e4195b5d716bbace4b205b3cf50c165406a270f7025274a2cf7c",
+  "private_diagnostic_bytes": 104,
+  "new_project_translation_units": 0,
+  "producer_subset_only": true,
+  "producer_ids": {"unknown": 0, "os_alloc_mem_context": 1, "acpi_d3cold": 2, "acpi_ddc": 3, "acpi_dod": 4, "acpi_dsm": 5, "acpi_powersource": 6, "acpi_mux": 7, "acpi_init_null": 8},
+  "allocation_failure_stages": {"ordinary_context": 1, "zero_bytes": 2, "single_size_limit": 3, "host_lifetime": 4, "initial_identity_capture": 5, "invalid_captured_identity": 6, "existing_CPU_failure_injection": 7, "allocator_capacity_or_total_limit": 8, "identity_recheck": 9, "actual_backing_allocation": 10},
+  "allocation_first_status": "Actual status supplied to existing allocationFailure before NULL; stage5 may expose a prior sticky capture refusal. No out-of-memory or physical-memory diagnosis is invented.",
+  "producers": "Each specific facade calls the unchanged aggregate API first, then bounded atomic producer observation; generic uninstrumented callers remain outside producer counts.",
+  "observation_semantics": {"module_lifetime": true, "independently_sampled_counters": true, "first_publisher_not_causal_first": true, "first_tuple_requires_release_published_state_2": true, "saturating_counters": true, "resets": false, "pointers": false, "deep_logs": false},
+  "reader": "Exact nv, ordinary master thread, actual original wrapper returned and no longer in flight. Failure preserves caller output. Reads fixed atomic and release-published immutable storage only.",
+  "original_policy_changes": false,
+  "original_refusal_order_changes": false,
+  "existing_B9_unavailable_observer_changes": false,
+  "host_snapshot_changes": false,
+  "wire_protocol_changes": false,
+  "cleanup_authority_changes": false,
+  "physical_release_authorized": false,
+  "host_controls": "Actual transformed whole Host, whole ACPI facade with explicit typed nv.h endpoint fixture, actual Os enum/MARK/os_alloc_mem body, actual inserted C logger. No physical device or Apple kernel execution. Linux link-level malloc interposition controls only the existing CPU allocation backend for stage10."
+}

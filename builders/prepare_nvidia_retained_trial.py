@@ -37,6 +37,10 @@ PROFILE_DIRECTORIES = {
     'fresh-failure-counters': 'prospective-fresh-failure-counters',
     'optional-nvlink-absence': 'prospective-optional-nvlink-absence',
     'unavailable-service-witness': 'prospective-unavailable-service-witness',
+    'optional-acpi-capability-absence': 'prospective-optional-acpi-capability-absence',
+    'host-allocation-witness': 'prospective-host-allocation-witness',
+    'pci-topology-facts': 'prospective-pci-topology-facts',
+    'gsp-boot-contracts': 'prospective-gsp-boot-contracts',
     'experimental-target-control': 'prospective-experimental-target-control',
 }
 PROFILE_DEPENDENCIES = {
@@ -51,6 +55,10 @@ PROFILE_DEPENDENCIES = {
     'fresh-failure-counters': ('attach-failure-witness',),
     'optional-nvlink-absence': ('fresh-failure-counters',),
     'unavailable-service-witness': ('optional-nvlink-absence',),
+    'optional-acpi-capability-absence': ('unavailable-service-witness',),
+    'host-allocation-witness': ('optional-acpi-capability-absence',),
+    'pci-topology-facts': ('host-allocation-witness',),
+    'gsp-boot-contracts': ('pci-topology-facts',),
     'experimental-target-control': tuple(PROFILE_DIRECTORIES)[
         :tuple(PROFILE_DIRECTORIES).index('experimental-target-control')],
 }
@@ -182,7 +190,7 @@ def build_plan(base, before, names, modules, hashes):
     initializers = set(previous.REVIEWED_INITIALIZERS)
     gate_owners = {operational.BOOT: {'pm-event', 'runtime-coordinator', 'retained-stop', 'preparation-observation', 'irq-source-selection'},
         PLATFORM: {'pci-memory-bars'},
-        DARWIN_DEVICE: {'irq-source-selection'},
+        DARWIN_DEVICE: {'irq-source-selection', 'pci-topology-facts'},
         operational.LIFECYCLE: {'runtime-coordinator'}, OLD_KMOD: {'experimental-target-control'},
         OLD_STATE: set(), OLD_KERNEL: set()}
     for name, module in modules.items():

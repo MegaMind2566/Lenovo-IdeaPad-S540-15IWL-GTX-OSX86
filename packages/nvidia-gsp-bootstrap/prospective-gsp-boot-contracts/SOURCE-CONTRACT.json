@@ -1,0 +1,72 @@
+{
+  "CPU_header_sha256": {
+    "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.h": "a63bb08341cefc34fab533a645d136ebbea92069f90ae50cbddadadeca6db048",
+    "packages/nvidia-os-adapter/upstream/include/nvstatus.h": "e8267172a1f7a56420d612c6734b3554b9ff6a3d33fdda21b1371ff4ce4b8675",
+    "packages/nvidia-os-adapter/upstream/include/nvtypes.h": "da23dbc28805c390d62338dba5603eb12b2e94c8aaf873c1c42c1a5f10f26b79"
+  },
+  "evidence_limits": {
+    "B9_GSP_boot_observed": false,
+    "B9_firmware_loaded": false,
+    "CPU_boundaries_must_be_disclosed": true,
+    "defects_identified_from_actual_source": true,
+    "incorrect_message_received_by_GSP_claimed": false
+  },
+  "final_native_and_target_validation_required": true,
+  "format": 1,
+  "memory_contract": {
+    "OS_request_relabeling_added": false,
+    "actual_base_page_bytes": 4096,
+    "address_space": "ADDR_SYSMEM",
+    "contiguity": "NV_MEMORY_NONCONTIGUOUS",
+    "existing_NV_ERR_NO_MEMORY_fallback_preserved": true,
+    "first_GPU_page_size": "RM_PAGE_SIZE",
+    "function": "kgspCreateRadix3_IMPL",
+    "huge_page_admission_added": false,
+    "original_Radix3_PDE_PTE_data_layout_unchanged": true,
+    "original_mapping_data_copy_cleanup_unchanged": true,
+    "sticky_allocation_refusal_erased": false,
+    "unprotected_flags_changed": false,
+    "unsupported_status_preserved": true
+  },
+  "original_binding_sha256": {
+    "src/common/sdk/nvidia/inc/nvstatuscodes.h": "4a9a39b51862d21cfa446414135386616a4a4914dd34dc83f98099295fea7b56",
+    "src/common/uproc/os/common/include/libos_init_args.h": "75174fb8b643fa28537acba0cf3d936f292e99a1590762ccd4936be093ae33a1",
+    "src/nvidia/arch/nvalloc/unix/src/os.c": "f02ca1e9b6d414791f0e47f8fa2756deaf7238af8d6476b41952e85f5c82272b",
+    "src/nvidia/inc/kernel/core/thread_state.h": "f53c235fb50f681d54e8bd90b39fffd044757156f8ee163af9d022faa87c1ca0",
+    "src/nvidia/inc/kernel/gpu/mem_mgr/mem_desc.h": "1aab4cdf60541e0e75fb9b7c20bbf98e395e41315fc1932ce6d2a93180532e80",
+    "src/nvidia/interface/nvrm_registry.h": "8de487f1f624a628d2c5efffc9d25de2669ac5764f7420cd09da6c53aab1556f",
+    "src/nvidia/src/kernel/core/thread_state.c": "a412e2070fa2bb49d56941415d07e6176dedd4776c817aa66e36f78d8d9e8f66",
+    "src/nvidia/src/kernel/gpu/mem_mgr/mem_desc.c": "ea2c53aafb5fcf1b6237a7ae46044cf0ed14a57da1eb3bc012dab2142b83d454"
+  },
+  "original_input_sha256": {
+    "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c": "449de7a01cd73fa0fd6506fdf21d87a0279dfc28410e5b18b74c0ce6c81c4024"
+  },
+  "ownership": {
+    "formal_stack_bound_claimed": false,
+    "hardware_admission_added": false,
+    "new_cleanup_release_authority": false,
+    "new_exports": 0,
+    "new_translation_units": 0,
+    "physical_release_claimed": false,
+    "whole_DMA_stop_claimed": false,
+    "wire_abi_changed": false
+  },
+  "prerequisite_profile": "prospective-pci-topology-facts",
+  "project_binding_sha256": {
+    "packages/nvidia-device-transport/src/S540NvidiaDeviceServices.cpp": "33d66941df0fc2b0d938142b1a16fda70d783d1d9367468bc673e406724bc04e",
+    "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c": "38f8b9d8075a7306c4c5a42181f80e924eda1cfb7e383d548e6ec27ebaf747d5",
+    "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellationOriginal.c": "356e74acbbd31bf8a7d47c109818af9123c292704d45e54149485071c2f3388c"
+  },
+  "retry_contract": {
+    "actual_original_default_maximum_attempts": 4,
+    "cancellation_producer_gates_changed": false,
+    "cancellation_result": "separate local const NV_STATUS cancelStatus",
+    "failed_poll_propagates_actual_status_before_done": true,
+    "function": "kgspInitRm_IMPL",
+    "healthy_poll_preserves_previous_boot_status": true,
+    "original_boot_attempt_and_eligibility_conditions_preserved": true,
+    "original_timeout_reset_condition_preserved": true,
+    "retry_count_changed": false
+  },
+  "scope": "actual-GSP-Radix3-base-page-request-and-status-preserving-cancellation-retry"
+}

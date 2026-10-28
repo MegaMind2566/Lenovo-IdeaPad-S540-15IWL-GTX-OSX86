@@ -216,6 +216,7 @@ def sdk_references(output,composed,native_home,cc,cxx,sdk,project_rows,include,e
         'packages/nvidia-gsp-bootstrap/platform/tests/sdk_power_reference.cpp',
         'packages/nvidia-gsp-bootstrap/tests/sdk_dispatcher_reference.cpp',
         'packages/nvidia-gsp-bootstrap/prospective-public-callback-closure/tests/sdk_import_reference.cpp',
+        'packages/nvidia-gsp-bootstrap/prospective-pci-topology-facts/sdk_import_reference.cpp',
         FRONT+'tests/sdk_experimental_operations_reference.cpp']
     approved={name[1:] for name in old.transport.ADAPTER_IMPORTS}
     records={}

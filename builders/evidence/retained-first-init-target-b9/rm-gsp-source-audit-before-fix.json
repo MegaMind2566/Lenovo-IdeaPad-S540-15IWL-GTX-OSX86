@@ -1,0 +1,60 @@
+{
+  "GSP_boot_or_message_transmission_observed_on_B9": false,
+  "additional_selected_backend_fact": "TheDarwintransportdoesnotprovidedirectMCFGmappings; theoriginalOSpropertyshouldreflectthatcapabilityanduse verifiedOSPCIconfigreads. ThisisnotaglobalclaimaboutphysicalmacOScapability.",
+  "client_date": "2026-10-28",
+  "confirmed_consistent": {
+    "OS_type": "OriginalHOST_OS_TYPE_UNIX, not a claimofLinuxidentity",
+    "boot_and_wire_headers": "Examined original sharedheaders/encoders unchanged; CPUVA,CPUPA,DMAaddressspaces remain distinct; GSPphysicalfields use actual AT_GPU memdescaddress",
+    "firmware": "615.78.08; TU117\u2192TU11Xfamily2; intended tu10x filenames with tu11x signaturesection",
+    "firmware_GSP_sha256": "0c6124c11d59900a05ab5461e5fc7087fc6687a1badead49a7eeca6ed13eeb3b",
+    "firmware_ucodes_sha256": "6027ab3736f733b5a06e6e61aaae957d1f990426a263849ebcfa8a49eeb4a5d0",
+    "native_NVLink_capability": "TU117 excluded from ENABLED true mask; defaultfalse. Generic TU102 candidate child list includes KernelNvlink but does not advertise physicalNVLink. B9keepschildNULL andregistrydisable1.",
+    "target_identity": "Actual10DE:1F91 /17AA:3806/revA1 provider data; no desktop identity replacement found"
+  },
+  "examined_composition_sha256": "108151187ce20ea12ca47b2fb3a5444f37d3e458a3e0876c6d32d90c95a876d9",
+  "format": 1,
+  "hardware_initialization_or_acceleration_proven": false,
+  "native_builds_started_for_B10": 0,
+  "next_work": "AddboundedactualPCIroot/ancestorreadonlytransport+validitybarriers, repairscalarreadfailurehandling, initialRadix34KiB andretrycancelstatus. Reprepare/review/testbeforeonepublicstandardIntel nativebuild.",
+  "primary_external_references": [
+    "https://download.nvidia.com/XFree86/Linux-x86_64/595.84/README/supportedchips.html",
+    "https://www.nvidia.com/it-it/geforce/graphics-cards/compare/"
+  ],
+  "rejected_inferences": [
+    "No evidence thatB9sent badparameterstotheGSP",
+    "No proofthat0x51meansmissingVBIOS orphysicalRAMexhaustion",
+    "No evidenceofhardwareNVLinkenabled",
+    "No proofthatPCIE_CONFIG_ACCESSIBLEbecametruebycomparingtwoFFFFFFFF; thathypothesiswaswithdrawn"
+  ],
+  "scope": "pre-fix-B10-RM-to-GSP-source-audit-requested-after-B9-target",
+  "source_proven_blockers": [
+    {
+      "area": "upstream_topology",
+      "finding": "MissingP2Pfallback sets addr.valid1 withzeroDBDF,NULLhandle,invalidIDs; SystemInfo directlyencodes UPSTREAM_ADDRESS_VALID. NoB9transmissionobserved."
+    },
+    {
+      "area": "FHB_topology",
+      "finding": "MissingFHBfallback setsvalid1 andinvalidIDsentinels,NULLhandle. FHB wirekeys lack validitybit; no consumerproofsupportsoptionalomission. Realverifiedbridge data isrequired beforeboot."
+    },
+    {
+      "area": "PCI_scalar_read_contract",
+      "finding": "OriginalosPciReadByte/Word/Dword ignore NV_STATUS and mayreturn uninitializedlocal whenDarwinpreservesoutputonfailure. Sentinelalonewouldnotprovefieldvalidity."
+    },
+    {
+      "area": "Radix3_geometry",
+      "finding": "InitialAT_GPU2MiB onNONCONTIGUOUSmemdesc reachesDarwin4KiB-onlyallocator as2MiB andisrefused86; fallbackacceptsonly81. Requestactual4KiBbeforeallocation."
+    },
+    {
+      "area": "GSP_retry_cancellation",
+      "finding": "Cancellationpoll overwritespreviousbootstatus withNV_OK and prevents originaltimeoutresetafterfailedboot. Use separatecancelStatus."
+    }
+  ],
+  "source_sha256": {
+    "src/nvidia/arch/nvalloc/unix/src/os.c": "9e0907d3a54fd71ef6ff01966b6c443ea8f7711d00d151bd7ba1f5171268abd5",
+    "src/nvidia/generated/g_gpu_nvoc.c": "1ac5687a07fb6c22eab9d314603d6750caf5fe317a92f973ba4a68cac161f823",
+    "src/nvidia/generated/g_kernel_nvlink_nvoc.c": "582efe59adacaa18d3ebc19c820a648ccc145ba6bcdb55f655cf35eadcd10e87",
+    "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c": "2d026d3f55bc10b972c072ad6d02a79117ac3338d24e3bf548eb4cd806b88a81",
+    "src/nvidia/src/kernel/platform/chipset/chipset.c": "91f9bb3b15dc30260ff84afa9990cb8200fe640b2b916a9b2d03a54ebfe656d8",
+    "src/nvidia/src/kernel/platform/chipset/chipset_pcie.c": "8cdef61abba6a4e8fa732cc666f1963db90508996f8c3adb5c7d629f109e9ef5"
+  }
+}

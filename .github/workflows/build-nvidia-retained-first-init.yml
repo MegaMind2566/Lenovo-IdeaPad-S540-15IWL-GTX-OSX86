@@ -125,7 +125,9 @@ jobs:
               'prospective-pci-memory-bars','prospective-irq-source-selection',
               'prospective-gsp-base-pages','prospective-unprotected-host-memory',
               'prospective-attach-failure-witness','prospective-fresh-failure-counters',
-              'prospective-optional-nvlink-absence','prospective-unavailable-service-witness'):
+              'prospective-optional-nvlink-absence','prospective-unavailable-service-witness',
+              'prospective-optional-acpi-capability-absence','prospective-host-allocation-witness',
+              'prospective-pci-topology-facts','prospective-gsp-boot-contracts'):
               names += [str(p) for p in (Path('packages/nvidia-gsp-bootstrap')/directory).rglob('*.py')]
           for name in names:ast.parse(Path(name).read_text(),filename=name)
           PY
@@ -143,7 +145,7 @@ jobs:
             --output build/retained-first-init/controls/pci-memory-bars --cxx "$S540_CONTROL_CXX" --host-control
           python3 -B packages/nvidia-gsp-bootstrap/prospective-irq-source-selection/check.py \
             --input-project build/retained-first-init/inputs/irq-source-selection-base/project \
-            --composed-project build/retained-first-init/inputs/retained/project \
+            --composed-project build/retained-first-init/inputs/pci-topology-base/project \
             --output build/retained-first-init/controls/irq-source-selection --cxx "$S540_CONTROL_CXX" --host-control
           python3 -B packages/nvidia-gsp-bootstrap/prospective-gsp-base-pages/check.py \
             --input-source build/retained-first-init/inputs/gsp-memory-base/source \
@@ -177,9 +179,33 @@ jobs:
             --output build/retained-first-init/controls/optional-nvlink --cc "$S540_CONTROL_CC" --host-control
           python3 -B packages/nvidia-gsp-bootstrap/prospective-unavailable-service-witness/check.py \
             --input-project build/retained-first-init/inputs/unavailable-service-base/project \
-            --composed-project build/retained-first-init/inputs/retained/project \
+            --composed-project build/retained-first-init/inputs/optional-acpi-base/project \
             --output build/retained-first-init/controls/unavailable-services \
             --cc "$S540_CONTROL_CC" --cxx "$S540_CONTROL_CXX" --host-control
+          python3 -B packages/nvidia-gsp-bootstrap/prospective-optional-acpi-capability-absence/check.py \
+            --input-source build/retained-first-init/inputs/optional-acpi-base/source \
+            --input-project build/retained-first-init/inputs/optional-acpi-base/project \
+            --composed-source build/retained-first-init/inputs/host-allocation-base/source \
+            --composed-project build/retained-first-init/inputs/host-allocation-base/project \
+            --output build/retained-first-init/controls/optional-acpi --cc "$S540_CONTROL_CC" --host-control
+          python3 -B packages/nvidia-gsp-bootstrap/prospective-host-allocation-witness/check.py \
+            --input-project build/retained-first-init/inputs/host-allocation-base/project \
+            --composed-project build/retained-first-init/inputs/pci-topology-base/project \
+            --output build/retained-first-init/controls/host-allocation \
+            --cc "$S540_CONTROL_CC" --cxx "$S540_CONTROL_CXX" --host-control
+          python3 -B packages/nvidia-gsp-bootstrap/prospective-pci-topology-facts/check.py \
+            --input-source build/retained-first-init/inputs/pci-topology-base/source \
+            --input-project build/retained-first-init/inputs/pci-topology-base/project \
+            --composed-source build/retained-first-init/inputs/gsp-boot-base/source \
+            --composed-project build/retained-first-init/inputs/gsp-boot-base/project \
+            --output build/retained-first-init/controls/pci-topology \
+            --cc "$S540_CONTROL_CC" --cxx "$S540_CONTROL_CXX" --kernel-sdk build-src/MacKernelSDK --host-control
+          python3 -B packages/nvidia-gsp-bootstrap/prospective-gsp-boot-contracts/check.py \
+            --input-source build/retained-first-init/inputs/gsp-boot-base/source \
+            --input-project build/retained-first-init/inputs/gsp-boot-base/project \
+            --composed-source build/retained-first-init/inputs/retained/source \
+            --composed-project build/retained-first-init/inputs/retained/project \
+            --output build/retained-first-init/controls/gsp-boot --cc "$S540_CONTROL_CC" --host-control
           python3 -B packages/nvidia-gsp-bootstrap/prospective-pm-event-closure/check.py \
             --base build/retained-first-init/inputs/shutdown \
             --output build/retained-first-init/controls/pm-event \
@@ -320,7 +346,7 @@ jobs:
         with:
           name: S540ExperimentalInitRetained-${{ needs.source-preflight.outputs.batch_id }}
           path: |
-            build/retained-first-init/package/S540ExperimentalInitRetained-B9.zip
+            build/retained-first-init/package/S540ExperimentalInitRetained-B10.zip
             build/retained-first-init/package/packaging-attestation.json
           if-no-files-found: error
           retention-days: 1

@@ -1,0 +1,109 @@
+{
+  "B9_target_basis": {
+    "GPU_firmware_initialization_succeeded": false,
+    "ROM_absence_proven": false,
+    "attach_first_failure_observed": false,
+    "attestation_sha256": "2131ed54135e30811b9bca676d6b033ca6aca825d1887ade760e9f40da8d87d9",
+    "external_producer_uniquely_identified": false,
+    "first_unavailable_service": 0,
+    "first_unavailable_site": 0,
+    "optional_nvlink_absence_observed": true,
+    "source_supported_candidate": "Optional ACPI discovery publishes service refusal before GSP preparation; sticky refusal prevents subsequent host allocation.",
+    "vbios_extraction_status": 81,
+    "vbios_status_name": "NV_ERR_NO_MEMORY"
+  },
+  "CPU_header_sha256": {
+    "packages/nvidia-darwin-services/src/S540NvidiaDarwinServices.h": "b2e71cc940a78e52b304345cdc7f54b955272df3f5683c51842121ff0761672b",
+    "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.h": "a63bb08341cefc34fab533a645d136ebbea92069f90ae50cbddadadeca6db048",
+    "packages/nvidia-os-adapter/upstream/include/nvstatus.h": "e8267172a1f7a56420d612c6734b3554b9ff6a3d33fdda21b1371ff4ce4b8675",
+    "packages/nvidia-os-adapter/upstream/include/nvtypes.h": "da23dbc28805c390d62338dba5603eb12b2e94c8aaf873c1c42c1a5f10f26b79"
+  },
+  "composed_input_sha256": {
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRmAcpi.c": "4bc3356ae2ec4ea30989d22b19d1b75b947ce8180f5504cf9f1f4ca1d2660a63",
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRmProfile.h": "42693feea2045a33dc4855d20fd024c3305360fd9e7bad5d0e82422f2be9da03",
+    "packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c": "4d5e67d2fb36606c018e0a0eeb66e0b3632e594a7c37fd8391c83bdb5fd76c4d"
+  },
+  "fallback_state": {
+    "hardware_ACPI_absence_claimed": false,
+    "new_AML_provider_calls": false,
+    "original_DOD_failure_and_MUX_guard_preserved": true,
+    "original_DSM_OVERRIDE_FAILED_SUCCESS_predicates_preserved": true,
+    "original_Tegra_filter_and_GPS_and_retry_paths_preserved": true,
+    "original_generic_callback_caps_feature_consumers_preserved": true,
+    "original_supported_function_cache_failure_handling_preserved": true
+  },
+  "final_native_and_target_validation_required": true,
+  "format": 1,
+  "original_binding_sha256": {
+    "src/nvidia/arch/nvalloc/unix/include/nv.h": "02ce4b371e0a8dd26f62a320e88c8382dcf31a21b727503a66abcaea9eecf09b",
+    "src/nvidia/arch/nvalloc/unix/src/os.c": "9e0907d3a54fd71ef6ff01966b6c443ea8f7711d00d151bd7ba1f5171268abd5",
+    "src/nvidia/arch/nvalloc/unix/src/osapi.c": "dd05f4bacfa9959e54a75ff0f8822a08fac5ff948fe4259084fa0cfa921f6ac2",
+    "src/nvidia/inc/kernel/gpu/gpu_acpi_data.h": "1303a8cbcc2b85d49405a11011ca2685d895e30775d7bac6608ac311ccf56315",
+    "src/nvidia/inc/kernel/platform/acpi_common.h": "caa3efa1da4416ca0a200299be381444b4e1e2652d1324f3312cae946582f2b2",
+    "src/nvidia/interface/nvacpitypes.h": "05d3023c8ea7dc41326f1324491880df70802d953faca19219f181d284a5e352",
+    "src/nvidia/src/kernel/gpu/gsp/arch/turing/kernel_gsp_vbios_tu102.c": "6c7e83954146704f6b189bc10bd12dc2a28fcbcd050f4b92c985f65b2c2cda9b",
+    "src/nvidia/src/kernel/gpu/gsp/kernel_gsp.c": "2d026d3f55bc10b972c072ad6d02a79117ac3338d24e3bf548eb4cd806b88a81",
+    "src/nvidia/src/libraries/nvport/memory/memory_unix_kernel_os.c": "c32de8ee6199767bb8c99dc529eec1c9aa73c2e6366634639a803ab79962372c"
+  },
+  "original_input_sha256": {
+    "src/nvidia/src/kernel/platform/acpi_common.c": "b382e8f0260c8d56be62b18e31d7a7f25e04e078bb29c4546c655c8f1ba1f94f"
+  },
+  "ownership": {
+    "all_six_ACPI_facades_unchanged": true,
+    "allocator_gates_unchanged": true,
+    "formal_stack_bound_claimed": false,
+    "hardware_admission_added": false,
+    "new_cleanup_release_authority": false,
+    "new_record_probes_added": false,
+    "new_record_probes_pure": true,
+    "no_cached_FirstTxn_or_service_counters_as_authority": true,
+    "no_record_or_service_counter_mutations": true,
+    "post_wrapper_diagnostic_only": true,
+    "private_scalar_bytes": 32,
+    "record_owner_generation_once_per_boot_no_reset": true,
+    "whole_DMA_stop_claimed": false,
+    "wire_abi_changed": false
+  },
+  "predicates": {
+    "actual_backend_acpi_events_enabled": 0,
+    "actual_disabled_method_provider_exact_hash_required": true,
+    "actual_profile_version": 2,
+    "actual_pure_cancellation_snapshot": "s540GspCancellationGetSnapshot",
+    "actual_strong_record_probes": [
+      "s540FirstTxnOptionalNvlinkActive",
+      "s540FirstTxnOptionalNvlinkReturned"
+    ],
+    "cached_record_or_service_counter_authority": false,
+    "dod_query_function": 0,
+    "dsm_function_indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "dsm_subfunction": 0,
+    "invalid_authority_profile_or_other_callers_keep_original_path": true,
+    "only_optional_initialization_callers": [
+      "_acpiDsmSupportedFuncCacheInit",
+      "_acpiCacheMethodData"
+    ],
+    "operation_status_remains": "NV_ERR_NOT_SUPPORTED",
+    "repeated_same_generation_queries": "idempotent; no added observation"
+  },
+  "project_binding_sha256": {
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRmAcpi.c": "4bc3356ae2ec4ea30989d22b19d1b75b947ce8180f5504cf9f1f4ca1d2660a63",
+    "packages/nvidia-global-rm/src/S540NvidiaGlobalRmProfile.h": "42693feea2045a33dc4855d20fd024c3305360fd9e7bad5d0e82422f2be9da03",
+    "packages/nvidia-gsp-bootstrap/cancellation/S540NvidiaGspCancellation.c": "38f8b9d8075a7306c4c5a42181f80e924eda1cfb7e383d548e6ec27ebaf747d5",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.c": "ec5f6ae9e5886ca4ec8feec5d024ea3898d63cce5249334c22d7dc426f962ab4",
+    "packages/nvidia-gsp-bootstrap/prospective-first-transaction/record/S540NvidiaGspFirstTransaction.h": "1980c472e027e4195b5d716bbace4b205b3cf50c165406a270f7025274a2cf7c"
+  },
+  "scope": "selected-disabled-optional-ACPI-capability-before-original-facade-call"
+}

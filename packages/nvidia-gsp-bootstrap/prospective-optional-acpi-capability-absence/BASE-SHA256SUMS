@@ -1,0 +1,4 @@
+4d5e67d2fb36606c018e0a0eeb66e0b3632e594a7c37fd8391c83bdb5fd76c4d  packages/nvidia-gsp-bootstrap/src/S540NvidiaGspContext.c
+4bc3356ae2ec4ea30989d22b19d1b75b947ce8180f5504cf9f1f4ca1d2660a63  packages/nvidia-global-rm/src/S540NvidiaGlobalRmAcpi.c
+42693feea2045a33dc4855d20fd024c3305360fd9e7bad5d0e82422f2be9da03  packages/nvidia-global-rm/src/S540NvidiaGlobalRmProfile.h
+b382e8f0260c8d56be62b18e31d7a7f25e04e078bb29c4546c655c8f1ba1f94f  src/nvidia/src/kernel/platform/acpi_common.c

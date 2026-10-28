@@ -1,0 +1,131 @@
+{
+  "CPU_controls": {
+    "Host": {
+      "cases": 28,
+      "checks_per_mode": 2758,
+      "mutants": 16
+    },
+    "PCI": {
+      "SDK_cross_units": 5,
+      "cases": 133,
+      "checks_per_mode": 768,
+      "mutants": 62
+    },
+    "boot": {
+      "cases": 40,
+      "checks_per_mode": 91557,
+      "mutants": 25
+    },
+    "optional_ACPI": {
+      "alternate_profile_checks_each": 54,
+      "cases": 70,
+      "checks_per_mode": 2337,
+      "mutants": 28
+    },
+    "plain_and_fatal_ASAN_UBSAN_passed": true
+  },
+  "GSP_transmission_observed_on_B9": false,
+  "RM_to_GSP_audit": {
+    "GPU_IDs_and_apertures_from_real_provider": true,
+    "PCI_root_and_ancestors_bounded_and_verified": true,
+    "Radix3_real_initial_GPU_page_bytes": 4096,
+    "SystemInfo_pre_post_encoding_guards": true,
+    "TU117_NVLink_enabled": false,
+    "actual_GPU_identity_and_DBDF_rechecked": true,
+    "actual_master_first_status_and_cancellation_checked": true,
+    "existing_deferred_retention_path_preserved": true,
+    "firmware_pair_unmodified": "615.78.08 / TU11X family with intended tu10x filenames",
+    "generic_NVLink_class_does_not_imply_hardware_support": true,
+    "non_GPU_bridge_writes_allowed": false,
+    "original_PCI_failure_no_longer_returns_uninitialized_value": true,
+    "retry_previous_status_preserved": true,
+    "unverified_topology_encoding_allowed": false
+  },
+  "actual_B10_Lenovo_test": false,
+  "actual_native_Darwin_compilation": false,
+  "base_commit": "b52af4bb471657469aa1bbd0919aab8715a7d543",
+  "changed_original_units": 11,
+  "composition_sha256": "8163513912ac50729bf7d180036225936f37801b2249082c4ffa41d0e1ac56da",
+  "expected_native_link_inputs": 1174,
+  "expected_native_primary_objects": 1170,
+  "final_native_link_and_measurement": false,
+  "formal_stack_bound_proven": false,
+  "format": 1,
+  "hardware_or_GSP_initialization_confirmed": false,
+  "mutations_restored": true,
+  "native_requests_started": 0,
+  "ordered_profiles": 20,
+  "physical_release_authorized": false,
+  "policy_sha256": "1dadd1153cab0de4dfa254f452d91b09b806f7a00db3716e3a5663fd19119ef6",
+  "project_units": 70,
+  "receipts": {
+    "changed_original_sdk_cross": {
+      "sha256": "2cddd6ca34e937d1a531a40406ec989db87a7cb0480d47995b764fdfaa9a3091",
+      "status": "compiled-retained-trial-original-delta-cross-only"
+    },
+    "gsp_boot": {
+      "sha256": "b8b8d534f8119f2165a2db9e781c7812edbc9f8a0a2145017972a3ab8a0731ce",
+      "status": "passed-actual-GSP-Radix3-and-retry-contract-controls"
+    },
+    "host_allocation": {
+      "sha256": "28a400102e3ba34487b1d233c5fac5a1ed554fb42787db85f9c1b3b644c9c9f6",
+      "status": "passed-actual-host-allocation-and-producer-controls"
+    },
+    "image_host_controls": {
+      "sha256": "14e0b984f5bfef665fbac28f58d8775f702bb79e3c414ddcf1accc49891a68e0",
+      "status": "passed-current-experimental-image-host-controls"
+    },
+    "independent_production_review": {
+      "sha256": "05f8b6590428bc3369fd72d061280b3cbdfe7ecc36a72f525aa6cae801dfcee4",
+      "status": "passed-independent-production-source-review"
+    },
+    "legacy_controls": {
+      "sha256": "ca552c454a19de6b8b0b7fc1768eaf1ae0417a5d23dfabcf90c5bba7f7450a78",
+      "status": "passed-final-20-profile-B10-legacy-CPU-integration-controls"
+    },
+    "optional_acpi": {
+      "sha256": "d5c73830a7609bf60232a5dff1edd8cf4265350617508a3e2c458d2964adb30c",
+      "status": "passed-actual-optional-ACPI-capability-and-record-CPU-controls"
+    },
+    "pci_topology": {
+      "sha256": "63517d3efb48442a44d2bcce083bdf76edb304d5d484a4367ba484e46365239f",
+      "status": "passed-actual-PCI-topology-facts-controls"
+    },
+    "project_sdk_cross": {
+      "sha256": "451390850672931b30e7474b68b370991c78e43da2a757ec066e29ddbfc47d38",
+      "status": "compiled-retained-trial-project-cross-only"
+    },
+    "sdk_references": {
+      "sha256": "4c353c0f7ba15deb5f671b1392bd3d5fea0a32cce1cef1f82c1e6e38368158d9",
+      "status": "actual-experimental-frontend-sdk-cross-compiled"
+    },
+    "source_replay": {
+      "sha256": "1090fb73ae3954c4aed4747c73aa72b6749931a2c933472edadf97d5b518ab66",
+      "status": "passed-actual-retained-source-replay-mutation-controls"
+    },
+    "workflow_controls": {
+      "sha256": "05cdac19ea15ae3c06249cfd632915b74ff89df6cb85c8bdd5d8c6b8baf9f6fa",
+      "status": "passed-final-B10-shared-pipeline-controls"
+    }
+  },
+  "scope": "verified-PCI-facts-and-GSP-boot-prerequisites",
+  "source_replay_negative_controls": 88,
+  "source_sha256": "796882bda1e19ceb6ff1df04488bdef8d8b27fadd01786bb2f1c527f438624fa",
+  "staged_format_review": {
+    "file": "packages/nvidia-gsp-bootstrap/prospective-pci-topology-facts/original_transforms.py",
+    "format": 1,
+    "meaning": "All three are necessary trailing bytes inside an exact multiline before-anchor copied from the pinned original source, not executable Python whitespace. No whitespace rule disabled and no source/helper byte changed. No other staged whitespace finding.",
+    "pinned_original_sha256": "8cdef61abba6a4e8fa732cc666f1963db90508996f8c3adb5c7d629f109e9ef5",
+    "reported_lines": [
+      92,
+      94,
+      104
+    ],
+    "status": "passed-staged-whitespace-review-with-exact-upstream-literal-data"
+  },
+  "status": "passed-local-retained-B10-prerequisites",
+  "whole_DMA_stop_proven": false,
+  "wire_snapshot_bytes": 776,
+  "wire_snapshot_format": 3,
+  "worker_and_IRQ_capacity_bytes": 16384
+}
