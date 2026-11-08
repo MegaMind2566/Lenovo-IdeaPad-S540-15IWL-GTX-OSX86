@@ -17,6 +17,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 
 | Guide | Purpose |
 |---|---|
+| [NullMoth 2.7.2 on the S540](../packages/nullmoth-s540/README.md) | Separate target profile: verified NVIDIA Metal execution, 1080p60 HDMI video, exact-match HDMI audio, restored brightness and one controlled sleep/wake cycle; not part of the official EFI |
 | [NVIDIA Resource Server and host services](../packages/nvidia-rm-services/README.md) | V9 confirmed: all 486 kernel startup checks, cleanup and 15 separate userspace firmware checks passed, with no warnings; completed checkpoint, no repeat requested |
 | [Native NVIDIA integration validation](../packages/nvidia-global-rm/NATIVE-INTEGRATION-VALIDATION.json) | Current Intel macOS compiler and CPU evidence, including original global lifecycle/fault controls; kernel and GPU execution remain unconfirmed |
 | [Original NVIDIA GSP integration](../packages/nvidia-gsp-bootstrap/README.md) | Development owner, transport and firmware preparation; original runtime remains gated, including cancellation and teardown within the macOS power deadline; no new laptop package |
@@ -39,7 +40,7 @@ Start with the [project README](../README.md) for the current state and scope. D
 | [USB mapping](guides/usb-mapping.md) | Mapped ports and outstanding tests |
 | [Independent SSD boot](guides/ssd-boot.md) | Confirmed manual EFI transfer and Samsung boot; automatic helper on hold |
 | [Boot disk maintenance](guides/boot-maintenance.md) | Separate maintenance procedure for the physical boot disk |
-| [Function keys](guides/function-keys.md) | Keyboard icon actions, ordinary Fn function keys and brightness rollback; the brightness-adjustment regression in the NVIDIA-test EFI is deferred; the non-NVIDIA EFI works normally |
+| [Function keys](guides/function-keys.md) | Keyboard icon actions and brightness; both the official EFI and final NullMoth HDMI profile have working brightness, while F10 display-mode behavior remains unverified |
 | [Bluetooth](guides/bluetooth.md) | The targeted patcher exclusion and its rollback |
 | [Previous microphone diagnostics](guides/microphone-diagnostics.md) | Collector for VoodooHDA 3.6.8 before the microphone fix; it rejects the 3.6.9 variant |
 
@@ -61,6 +62,6 @@ Graphics experiments, Intel traces and Recovery log collectors are preserved in 
 
 The package contains **EFI/OC only**, with a rEFInd config example. Microsoft boot files, EFI/BOOT and the rEFInd executable are not redistributed. Audio and S540 Tasti are separately installed macOS companions; their ZIPs and checksums are available with the release. SD reading, session insertion, mount/unmount and availability after sleep are user-confirmed on the known 8 GB FAT32 card.
 
-F6 touchpad toggle and the SD reader are user-confirmed working, with no further retests requested. HDMI output and F10 display action are one open workstream. F8 camera disablement and fingerprint authentication remain non-working with work paused/stopped. Prolonged standby and hibernation remain unverified and deferred by request. Fans are user-confirmed working, while their RPM is not readable in the current macOS configuration; this accepted limitation closes fan investigation for this release. CPU temperature readings work. NVIDIA is disabled in the official EFI; its separate experimental records remain available and do not establish graphics acceleration. Missing extended measurements do not reopen confirmed checks automatically.
+F6 touchpad toggle and the SD reader are user-confirmed working, with no further retests requested. HDMI video and audio now work in the separate NullMoth profile; F10 display-mode behavior remains unverified. F8 camera disablement and fingerprint authentication remain non-working with work paused/stopped. Prolonged standby and hibernation remain unverified and deferred by request. Fans are user-confirmed working, while their RPM is not readable in the current macOS configuration. CPU and NVIDIA temperatures work through their verified sensor paths. NVIDIA remains disabled in the official EFI; the NullMoth result is a separate target profile and does not alter v0.3.0. Missing extended measurements do not reopen confirmed checks automatically.
 
 The earlier [v0.2.0](releases/v0.2.0/RELEASE-NOTES.md), [v0.1.0](releases/v0.1.0.md), and `config/efi/current` are historical snapshots, not the new installation procedure. Feature guides retain their dated diagnostics and rollback information.

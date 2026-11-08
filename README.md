@@ -4,7 +4,7 @@ An OpenCore project for **macOS Tahoe 26** on the **Lenovo IdeaPad S540-15IWL GT
 
 **Official EFI status: Stable — known limitations ([v0.3.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.3.0)).** The classification covers the tested Lenovo IdeaPad S540-15IWL GTX (81SW) running macOS Tahoe **26.7.1 (25G241)** with Intel UHD 620 and NVIDIA disabled. It applies to the confirmed functions and tested sleep/wake cycles; prolonged standby and hibernation remain unverified and deferred. Future macOS updates require validation.
 
-**Project status: in development — 27 October 2026.** The hardware table records the working functions, accepted limitations and deferred checks. NVIDIA research continues separately from the official non-NVIDIA release.
+**Project status: in development — 8 November 2026.** The hardware table records the working functions, accepted limitations and deferred checks. NVIDIA research continues separately from the official non-NVIDIA release; the source laptop's experimental NullMoth 2.7.2 profile now has verified Metal execution, HDMI video/audio, brightness control and one controlled sleep/wake cycle.
 
 ## Hardware
 
@@ -29,7 +29,7 @@ An OpenCore project for **macOS Tahoe 26** on the **Lenovo IdeaPad S540-15IWL GT
 |---|---|---|
 | Internal macOS boot and desktop | Working | OpenCore/macOS boot from the internal NVMe; Windows retains its separate native boot path |
 | Intel graphics and internal display | Working | UHD 620 acceleration, Full HD panel and corrected startup black-screen delay |
-| Brightness slider and F11/F12 | Working | Confirmed with the non-NVIDIA EFI |
+| Brightness slider and F11/F12 | Working | Confirmed with the official non-NVIDIA EFI and reconfirmed with the experimental NullMoth HDMI profile after restoring `applbkl=1` |
 | Native-menu Wi-Fi | Working | Intel AC9560 with the tested AirportItlwm 2.4.0 variant; network selection and recovery after restart/sleep confirmed |
 | Speakers and internal microphone | Working | Separately installed VoodooHDA 3.6.10; playback and recording also confirmed after wake and Bluetooth-headset disconnection |
 | 3.5 mm headset output/input | Working | Playback, headset microphone and speaker/headphone switching confirmed |
@@ -41,21 +41,21 @@ An OpenCore project for **macOS Tahoe 26** on the **Lenovo IdeaPad S540-15IWL GT
 | F5 browser reload | User-confirmed | Browser reload was accepted by the user; direct/Fn event distinction and a general remapping are separate questions |
 | F6 touchpad toggle | **Working — user-confirmed** | Touchpad enable/disable reconfirmed on 27 October; no further F6 test is pending |
 | F8 camera disablement | **Not working — paused** | The firmware flag changes but video capture continues; further F8 work is paused by request |
-| F10 external-display action | **Pending — linked to HDMI** | Tracked together with HDMI output; a working external display and the intended display-mode action remain prerequisites |
+| F10 external-display action | **Pending** | HDMI output now works in the experimental NullMoth profile; the physical F10 display-mode action itself has not been separately confirmed |
 | CPU power management | Working | X86PlatformPlugin active; frequency and estimated package-power responses observed |
 | Battery Low Power Mode | CPU response verified | About 11.4 W estimated package power with the mode on versus 34.4–36.5 W off in the retained short CPU-load comparison; not a measured autonomy result |
 | Battery reporting | Working | Battery operation and discharge confirmed; the user attributes modest runtime to an aged battery |
-| Lid sleep/wake and idle sleep | Working in tested cycles | A 3,603-second lid sleep and a 91-second idle sleep resumed; no DarkWake recorded in those cycles |
+| Lid sleep/wake and idle sleep | Working in tested cycles | Official-profile cycles resumed; the experimental HDMI/audio profile also passed one scheduled 54-second sleep/wake with display, audio, brightness, Wi-Fi and Bluetooth recovery. Overnight standby and hibernation remain unverified |
 | USB-A / USB-C storage | Working | Tested connectors negotiated 5 Gb/s; USB-C tested in both orientations and file access confirmed |
 | Internal NVMe | Working | 512 GB detected, SMART verified and TRIM reported active |
 | **SD reader** | **Working on the source laptop** | User-confirmed from the updated internal non-NVIDIA EFI using the previous direct-match BigSurSDXC driver and the known 8 GB FAT32 card; insertion during an active session, mounting/unmounting and availability after sleep confirmed; writes, throughput and other card classes not newly validated |
 | Fingerprint authentication | **Not working — work stopped** | Goodix enumerates on USB, but macOS fingerprint authentication is unavailable; investigation stopped by request |
-| NVIDIA acceleration | **Unavailable in this release** | NVIDIA stays disabled with `-wegnoegpu`; experimental NVIDIA payloads are excluded and research remains separate |
-| HDMI | **Not working** | No usable display output established |
+| NVIDIA acceleration | **Unavailable in v0.3.0; working experimentally on the source laptop** | The release keeps `-wegnoegpu`. A separate NullMoth 2.7.2 profile verified NVIDIA Metal compute, offscreen rendering, Full HD rendering and cross-GPU presentation; it is not included in the release |
+| HDMI | **Working in the experimental NullMoth profile** | LG TV confirmed at 1920×1080 60 Hz with NVIDIA display audio. The official v0.3.0 Intel profile remains unchanged and does not provide this output |
 | USB-C video | **Not supported natively by the laptop** | Native video output through the built-in USB-C port is unavailable; USB data transfer works. This is a hardware limitation |
 | Fans | **Working — user-confirmed** | RPM telemetry is unavailable in the current macOS configuration; investigation is closed for this release and no fan-control change is included |
 
-Detailed observations are in [Hardware](docs/status/hardware.md), [Battery and sleep](docs/status/battery-sleep.md), [Function keys](docs/guides/function-keys.md), and [SD / fingerprint](docs/status/sd-fingerprint.md).
+Detailed observations are in [Hardware](docs/status/hardware.md), [NullMoth S540](packages/nullmoth-s540/README.md), [Battery and sleep](docs/status/battery-sleep.md), [Function keys](docs/guides/function-keys.md), and [SD / fingerprint](docs/status/sd-fingerprint.md).
 
 ## Official non-NVIDIA release
 
@@ -79,9 +79,9 @@ Copying the EFI does not install the complete audio or hotkey setup:
 
 ## Development continues
 
-This release preserves the usable Intel baseline while the repository continues to track separate research and limitations. NVIDIA source/native/target checkpoints are documented in the [validation record](docs/status/nvidia-validation.md); they must not be interpreted as graphics acceleration or merged into this EFI. Completed checkpoints remain recorded without requiring routine laptop reruns.
+This release preserves the usable Intel baseline while the repository continues to track separate research and limitations. The source laptop's separate [NullMoth profile](packages/nullmoth-s540/README.md) has now verified NVIDIA Metal execution, HDMI video/audio, brightness and a short sleep/wake cycle. It remains excluded from v0.3.0. The repository's independent source/native/target port checkpoints are documented in the [validation record](docs/status/nvidia-validation.md) and must not be conflated with the NullMoth result or merged into the official EFI.
 
-The remaining external-display work is HDMI output and the linked F10 display action. F6 and the SD reader are user-confirmed working, with no further retests requested for this milestone. The stated SD card/coverage limits remain evidence boundaries, not pending tasks. Prolonged sleep/overnight standby and hibernation remain unverified and deferred by request. Changing the displayed Mac model label is optional and is not a release requirement. Native USB-C video is a laptop hardware limitation, not an EFI issue. Fans are user-confirmed working; unavailable macOS RPM telemetry is an accepted limitation and its investigation is closed for this release. F8 and fingerprint work remain paused/stopped as stated above. The [Roadmap](docs/status/roadmap.md) keeps these states distinct from the confirmed functions.
+HDMI output is closed for the tested NullMoth profile; the F10 display-mode action is still unverified. F6 and the SD reader are user-confirmed working, with no further retests requested for this milestone. The stated SD card/coverage limits remain evidence boundaries, not pending tasks. A true cold boot with and without HDMI, overnight standby, hibernation and calibrated standby drain remain outside the current NullMoth evidence. Changing the displayed Mac model label is optional and is not a release requirement. Native USB-C video is a laptop hardware limitation, not an EFI issue. Fans are user-confirmed working; unavailable macOS RPM telemetry is an accepted limitation. F8 and fingerprint work remain paused/stopped as stated above. The [Roadmap](docs/status/roadmap.md) keeps these states distinct from the confirmed functions.
 
 ## Documentation and source layout
 

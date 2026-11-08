@@ -1,6 +1,9 @@
 # S540 fans — accepted status and historical RPM investigation
 
-Updated 24 October 2026. **Fans are working, as confirmed by the user; RPM telemetry is not readable in the current macOS configuration.** The user accepted this limitation and closed fan investigation for v0.3.0. No further DSDT collection, laptop tests or sensor-driver changes are requested for this release, and fan investigation no longer holds publication.
+Updated 7 November 2026. **Fans are working, but their RPM telemetry is not
+exposed by this S540 firmware through the interfaces tested below.** This means
+“unavailable”, not zero RPM. The final configuration must not publish fake fan
+keys or perform EC writes.
 
 The historical passive check exposed CPU temperatures through VirtualSMC/SMCProcessor 1.3.8, but no SMCSuperIO service or fan/RPM line. The three powermetrics SMC samples reported 58, 60 and 59 degrees C. This established unavailable telemetry; it did not measure zero RPM or diagnose a physical fan failure. The working internal non-NVIDIA EFI, audio and S540 Tasti were preserved. No EC scanning, fan-control writes or experimental sensor driver was applied.
 
@@ -19,6 +22,43 @@ The earlier private DSDT had SHA-256 5139a06fd931e15c7655046d79e67a36d63cdd626fd
 The retained [macOS collector](../../packages/fan-readonly/RACCOGLI-ACPI.command) performs no ACPI method execution or EC access. It excludes other ACPI tables, including MSDM, and deletes its temporary full registry property capture. A missing property is reported as inconclusive, not hardware incompatibility. Its Bash syntax and a mocked selection/privacy flow were checked locally.
 
 No model-specific RPM field, scaling or Game Zone interface was verified, and no telemetry implementation was added. The collectors remain historical tools; their presence is not a request to run them or a release prerequisite.
+
+## 7 November physical firmware and EC result
+
+OpenCore SysReport supplied a sanitized ACPI set (MSDM and SMBIOS excluded).
+The decompiled DSDT confirms `H_EC` at system-memory region `0xFEFF0400` and a
+working `TGPU` field. macOS exposes `SEN2` (`INT3403`) as “GPU Temperature”,
+whose `_TMP` method converts `H_EC.TGPU`. This path does not expose fan speed.
+
+The PTID strings mention “CPU Fan #1 Speed / RPM”, but the corresponding data
+methods return empty packages/buffers. No real `CFSP` definition exists in the
+machine tables; the only occurrences are unresolved declarations in a generic
+DPTF table. The Lenovo Game Zone and newer Lenovo WMI RPM GUIDs are absent, and
+the IdeaPad VPC fan command reports fan mode rather than tachometer speed.
+
+As a final read-only check, official SMCSuperIO 1.3.8 Generic EC was tested at
+the standard Intel reference offsets `0x71`, `0x73` and `0x75` as 16-bit fan
+counters. During simultaneous CPU and NVIDIA load the physical fan accelerated,
+CPU temperature reached about 74 degrees C and NVIDIA rose from 44 to 52 degrees
+C, while all three counters remained zero. The probe was then removed from the
+active configuration. These results reject the standard offsets for this
+firmware; they do not prove that the fan is stopped.
+
+## Accepted sensor implementation
+
+`S540Sensors.kext` publishes only the genuine NVIDIA temperature already
+reported dynamically by NVAccel. It reads
+`PerformanceStatistics/Temperature(C)` once per second and provides VirtualSMC
+key `TG0D`, which Stats 3.0.25 labels `GPU diode`. Physical A/B testing showed
+the IORegistry value, NVAccel value and SMC value tracking at 43–47 degrees C
+under the final profile. The plugin performs no fan control, EC access or GPU
+hardware write.
+
+IntelAccelerator provides utilization statistics but no independent Intel GPU
+temperature on this machine, and SMC key `TCGC` is absent. CPU/package/core
+temperatures remain available from SMCProcessor, but they must not be relabeled
+as an Intel GPU temperature. Likewise, no `F0Ac`/`F1Ac`/`F2Ac` RPM value is
+published in the final configuration.
 
 ## macOS export result and unexecuted Windows fallback
 

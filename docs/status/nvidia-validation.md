@@ -1,6 +1,6 @@
 # NVIDIA validation and combined checkpoints
 
-Status reviewed on **October 20, 2026**. NVIDIA implementation and further laptop tests are **paused by request** while the official Intel-based EFI and remaining function keys are consolidated. The confirmed results below are retained; this documentation update does not start a native build or a hardware test.
+Status reviewed on **November 8, 2026**. This page tracks the repository's independent NVIDIA source port, whose implementation and further laptop tests remain paused. It does not describe the third-party [NullMoth target profile](../../packages/nullmoth-s540/README.md), which separately achieved Metal execution and HDMI on the source laptop. That result does not complete or replace the RM/GSP milestones below. This documentation update does not start a native build or a hardware test.
 
 ## Current result
 
@@ -9,7 +9,7 @@ There are two completed target checkpoints with different scopes:
 - **v9 diagnostic baseline:** version `0.9.0`, format `9`, `resource_server_prepared`; **486 kernel startup checks**, complete cleanup and no warnings. The **15 firmware-file checks run in userspace** and do not demonstrate firmware execution.
 - **Complete-image idle loader ABI, October 20:** exact signed package loaded with status `0`, returned a valid idle snapshot and unloaded normally with status `0`. All 45 payload files were verified. The external loader ABI is observed; original-entry policy stayed closed, with original calls, provider preparations and PM registrations all zero.
 
-Original global/adapter RM, GSP startup, physical device DMA/interrupt execution and graphics acceleration have **not** been established by either checkpoint. The first operational package remains gated. The confirmed idle-loader unload does not prove teardown of a running original adapter.
+Original global/adapter RM, GSP startup, physical device DMA/interrupt execution and graphics acceleration have **not** been established by either repository checkpoint. The first operational package remains gated. The confirmed idle-loader unload does not prove teardown of a running original adapter. NullMoth's separate operational driver is evidence for that product on this target, not evidence that these source-port checkpoints executed the missing paths.
 
 Primary records: [target idle ABI result](../../packages/nvidia-gsp-bootstrap/prospective-complete-image-package/TARGET-IDLE-ABI-PASS-20261020.json), [native integration evidence](../../packages/nvidia-global-rm/NATIVE-INTEGRATION-VALIDATION.json), [v9 services scope](../../packages/nvidia-rm-services/README.md).
 

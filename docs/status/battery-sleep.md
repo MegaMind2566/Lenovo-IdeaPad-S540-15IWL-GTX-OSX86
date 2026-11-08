@@ -1,20 +1,28 @@
 # Battery and sleep status
 
-Updated on **24 October 2026**. The current official non-NVIDIA EFI boots internally; dated observations below retain their original source/configuration scope. This page records results and does not change power settings.
+Updated on **8 November 2026**. The official non-NVIDIA EFI and the separate NullMoth test profile have distinct dated observations below. This page records results and does not change power settings.
 
 ## Verified results
 
 | Area | Result | Evidence and limit |
 |---|---|---|
 | Battery reporting | Internal battery detected; switching from AC to Battery Power and discharging confirmed | User check on 14 October; the displayed 2 h 21 min was an OS estimate, not measured runtime |
-| Battery health | Good, 296 cycles | 20 October system report; no design-capacity comparison is used to calculate wear |
-| Full charge | 100%, fully charged; not charging; 60 W adapter connected | These readings are consistent with a full battery |
+| Battery health | Normal, 372 cycles; 4,629 mAh full-charge capacity | 8 November system report; no design-capacity comparison is used to calculate wear |
+| Full charge / adapter | Battery reporting active; 60 W adapter identified | These readings establish reporting, not calibrated autonomy |
 | Lid sleep and wake | Closing the lid sleeps; opening it resumes | User-confirmed ordinary use on 20 October |
 | Native Wi-Fi recovery | Working after restart/sleep | User confirmation; the current native driver is recorded in [Boot and network](../guides/boot-network.md) |
 | Bluetooth headset after sleep/wake | Headset reconnected; playback and the headset microphone work after waking | User-confirmed on 24 October 2026; automatic versus manual reconnection was not specified |
 | Internal audio after sleep/wake and Bluetooth disconnection | Playback returns to the built-in speakers; a recording with the selected internal microphone works | User-confirmed on 24 October 2026 in the same wake session; no additional sleep cycle or prolonged standby was tested |
+| NullMoth HDMI/audio sleep recovery | A scheduled RTC cycle slept for 54 seconds and resumed with the LG display, NVIDIA HDMI output/audio, internal audio devices, backlight service, Wi-Fi and Bluetooth present | Automated checks and post-wake Glass playback passed on 8 November; the user confirmed image and sound. One short cycle is not overnight or hibernation coverage |
 
 The lid result closes the ordinary close/open check. No extra lid collector, power patch or repeat cycle is requested. It does not establish overnight drain, prolonged sleep reliability, measured battery autonomy or hibernation. Full peripheral recovery is claimed only where separately confirmed by the user.
+
+The experimental NullMoth cycle used `pmset relative wake 45`, entered sleep at
+17:28:30 and recorded RTC wake at 17:29:24. NMXAudio, NVRMFB and VoodooHDA
+remained loaded. The connected LG TV, NVIDIA HDMI output, internal speakers and
+microphone, AppleBacklightDisplay, Wi-Fi and Bluetooth were present after wake;
+the NMXAudio engine had an active client during playback. This result belongs
+to the experimental profile and does not alter the official v0.3.0 payload.
 
 ## Observed lid and idle cycles — 21 October 2026
 
@@ -55,7 +63,7 @@ The earlier battery reading on AC was 100% and charged. After removing AC on 14 
 
 The collected settings include `hibernatemode=3`, a one-minute system sleep timer and different display-sleep timers on AC and battery. These settings are observations, not recommended replacements. No power preference, NVRAM value, EFI argument or driver was changed for the lid confirmation. Those settings were captured during the earlier setup; the current official macOS boot is internal.
 
-SD operation has since been user-confirmed from the internal non-NVIDIA EFI and is included in v0.3.0. NVIDIA remains disabled in that release; its experimental research is separate. Those later changes add no new autonomy, hibernation or prolonged-standby claim. See [Hardware status](hardware.md).
+SD operation has since been user-confirmed from the internal non-NVIDIA EFI and is included in v0.3.0. NVIDIA remains disabled in that release. The later [NullMoth HDMI/audio cycle](../../packages/nullmoth-s540/README.md) adds one short experimental sleep/wake observation, but no autonomy, hibernation or prolonged-standby claim. See [Hardware status](hardware.md).
 
 ## Reference
 

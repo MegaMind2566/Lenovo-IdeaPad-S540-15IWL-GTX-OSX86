@@ -1,6 +1,6 @@
 # Verified hardware and official EFI status
 
-Updated on **27 October 2026** for the current **internal non-NVIDIA EFI**, published as v0.3.0. The source laptop now boots macOS internally alongside native Windows. SD operation is user-confirmed after the internal update. **Official EFI status: Stable — known limitations.** The classification covers the tested Lenovo IdeaPad S540-15IWL GTX (81SW) running macOS Tahoe **26.7.1 (25G241)** with Intel UHD 620 and NVIDIA disabled. It applies to the confirmed functions and tested sleep/wake cycles; prolonged standby and hibernation remain unverified and deferred. Future macOS updates require validation. The project remains **in development**; the table separates working functions, accepted non-working features and unverified coverage.
+Updated on **8 November 2026**. The official **internal non-NVIDIA EFI**, published as v0.3.0, remains stable with known limitations. A separate target-specific NullMoth 2.7.2 profile now has verified NVIDIA Metal execution, HDMI video/audio, Intel-panel brightness and one controlled sleep/wake cycle. It is experimental and is not merged into v0.3.0. Both profiles were tested on the Lenovo IdeaPad S540-15IWL GTX (81SW) running macOS Tahoe **26.7.1 (25G241)**. Future macOS updates require validation; overnight standby and hibernation remain unverified.
 
 ## Current results
 
@@ -10,25 +10,52 @@ Updated on **27 October 2026** for the current **internal non-NVIDIA EFI**, publ
 | Board / firmware provenance | Lenovo LNVNB161216, BIOS BWCN19WW dated 26 May 2021; OEM ACPI retained | Historical inventory, not a new firmware check |
 | Internal boot | macOS APFS and Windows coexist on the internal 512 GB Samsung PM981a; current non-NVIDIA OpenCore boots internally | Windows starts natively through the existing rEFInd route; its files are preserved |
 | Intel graphics / panel | UHD 620 acceleration, Metal 3, BOE NV156FHM-N61 1920×1080; startup backlight corrected | Sustained graphics performance is not established by the inventory |
-| Brightness | Slider and direct F11/F12 work in the official non-NVIDIA EFI | The separate NVIDIA-test regression does not change this result |
+| Brightness | Slider and direct F11/F12 work in both the official EFI and the final NullMoth HDMI profile | The experimental regression was caused by omitting `applbkl=1`; restoring it fixed brightness without disabling HDMI |
 | Native Wi-Fi | Intel AC9560, tested AirportItlwm 2.4.0; native menu, connectivity and restart/sleep recovery confirmed | AirDrop and Continuity are not claimed |
 | Bluetooth | Intel USB 8087:0AAA; headset playback and microphone, disconnection and reconnection confirmed, including after sleep/wake | Automatic versus manual reconnection was not specified |
 | Audio | ALC257 through separately installed VoodooHDA 3.6.10; speakers, internal microphone, wired headphone output/input and switching work | Built-in speaker/microphone operation also confirmed after wake and Bluetooth disconnection; EFI alone does not install VoodooHDA |
 | Webcam video | Integrated UVC 13D3:56B2; recorded video confirmed | F8 privacy/power toggle is a separate non-working function |
 | Touchpad | ELAN0662 I2C input and gestures working; F6 enable/disable is user-confirmed | F6 reconfirmed on 27 October; no further toggle test is pending |
-| Keyboard actions | F1–F3 audio and non-NVIDIA F11/F12 brightness work; F4 microphone input-level mute/restore, F7 Wi-Fi/Bluetooth and F9 lock confirmed with S540 Tasti 0.1.3 | F5 browser reload was user-confirmed; direct/Fn distinction remains separate. F6 touchpad toggle is reconfirmed working; F10 remains pending in the same workstream as HDMI. See [Function keys](../guides/function-keys.md) |
+| Keyboard actions | F1–F3 audio and F11/F12 brightness work; F4 microphone input-level mute/restore, F7 Wi-Fi/Bluetooth and F9 lock confirmed with S540 Tasti 0.1.3 | F5 browser reload and F6 touchpad toggle are user-confirmed. HDMI now works experimentally; the F10 display-mode action itself remains unverified. See [Function keys](../guides/function-keys.md) |
 | F8 camera disablement | **NOT WORKING**: firmware flag changes but video capture continues, even after reopening Photo Booth | Further work paused by request; camera video itself works |
 | USB | Active nine-port map (six HS / three SS); both tested USB-A connectors and USB-C in both orientations negotiated 5 Gb/s; file access confirmed | Tested devices/cables only; link speed is not sustained storage throughput |
 | Internal NVMe | 512 GB detected, SMART verified, TRIM active | Not a sustained endurance/storage benchmark |
 | CPU / battery | X86PlatformPlugin active; CPU response, battery reporting and discharge confirmed | Modest runtime attributed by the user to an aged battery; no autonomy repair inferred |
 | Low Power Mode | Battery-on / AC-off setting retained; short OFF–ON–ON–OFF comparison shows about 11.4 W estimated package power and 2.4 GHz on versus 34.4–36.5 W and 3.89–4.00 GHz off | Not equal-work efficiency, whole-laptop power or measured autonomy; [test limits](battery-sleep.md#low-power-mode-under-cpu-load--24-october-2026) |
-| Lid and idle sleep | One 3,603-second clamshell sleep and one 91-second idle sleep resumed, with no recorded DarkWake in those cycles | Prolonged sleep/overnight standby and hibernation remain unverified and deferred by request; not every peripheral's recovery was tested |
+| Lid and idle sleep | Official-profile lid/idle cycles resumed; the NullMoth HDMI/audio profile passed one scheduled 54-second cycle with display, audio, backlight, Wi-Fi and Bluetooth recovery | Prolonged sleep, overnight drain and hibernation remain unverified; one short cycle is not long-duration qualification |
 | **SD reader** | **Working on the source laptop from the updated internal non-NVIDIA EFI**, user-confirmed 24 October; O2Micro 1217:8621, previous direct-match BigSurSDXC 1.9.0, known 8 GB FAT32 card | Earlier negative result retained as history; insertion during an active session, mounting/unmounting and availability after sleep confirmed; writes, throughput and arbitrary capacities not newly validated. Operation was reconfirmed on 27 October; no further SD checks are pending for this milestone. [Evidence](sd-fingerprint.md#current-internal-efi-result--24-october-2026) |
 | Fingerprint | **NOT WORKING in macOS**: Goodix 27c6:55b4 enumerates on internal HS02, but authentication is unavailable | Investigation stopped by request; [retained findings](sd-fingerprint.md) |
-| NVIDIA acceleration | **Unavailable and disabled in this release** with -wegnoegpu; no experimental NVIDIA payloads included | Separate experimental research and historical checkpoints remain outside this EFI |
-| HDMI / F10 | **Open as one linked workstream**; HDMI has no usable display output established and F10 remains pending | Physical routing/driver support and the intended display-mode action remain unresolved |
+| NVIDIA acceleration | **Unavailable and disabled in v0.3.0; working in the experimental NullMoth profile** | NullMoth 2.7.2 verified NVIDIA Metal compute, offscreen and Full HD rendering, cross-GPU presentation and sustained compute on the source laptop; it remains outside the official EFI |
+| HDMI / F10 | **HDMI video and audio working experimentally** through the NVIDIA-routed port; LG TV confirmed at 1920×1080 60 Hz and 48 kHz audio | F10 display-mode behavior remains unverified. The official v0.3.0 profile is unchanged and does not provide this NVIDIA output |
 | USB-C video | **Not supported natively by the laptop** | Native USB-C video is a hardware limitation; USB data transfer works. No EFI video fix is pending for this port |
-| Fans | **Working — user-confirmed**; RPM telemetry is unavailable in the current macOS configuration | VirtualSMC and SMCProcessor 1.3.8 expose CPU temperatures but no fan RPM. Investigation is closed for this release by request; no driver/control change was made |
+| Fans | **Working — user-confirmed**; RPM telemetry is unavailable | Standard Generic EC fan counters stayed zero while the physical fan accelerated, so no RPM key is published. CPU temperatures remain available; the final sensor plugin publishes only genuine NVAccel temperature and performs no EC or fan write |
+
+## Experimental NullMoth result — 7–8 November 2026
+
+The [target package record](../../packages/nullmoth-s540/README.md) preserves the
+guarded launchers, hashes and evidence boundaries. NVRM, NVAccel, NVRMFB and
+NVRMAGDC load for the GTX 1650 Max-Q, and Metal execution/rendering checks pass.
+
+HDMI initially remained headless because NVRMFB loaded without `nvfb=1`.
+`nvfb=1 nvfbheads=4 -nvkmsnosmooth` enabled the NVIDIA-routed output. Retaining
+`applbkl=1` keeps the internal Intel-panel brightness slider and F11/F12 active.
+The connected LG TV is online at 1920×1080 60 Hz.
+
+Tahoe did not attach display audio to NVIDIA HDA `10DE:10FA`. The accepted
+NMXAudio bundle changes only `Info.plist` to exact-match that device; the
+official executable remains byte-identical. Its executable SHA-256 is
+`77e19e244978ce64e4505c4701069edfe609379f91a9c76313b4a27ded4ab07a`,
+and the targeted plist SHA-256 is
+`ebff8ac2ea5b57f7d6ccbb764f56025213a22a4156df8dd3b8c9c9e64f126d4a`.
+It is installed through `/Library/Extensions` and the Auxiliary Kernel
+Collection, not OpenCore injection. HDMI playback was heard through the TV;
+VoodooHDA continued to expose internal speakers and microphone.
+
+One scheduled 54-second sleep/wake cycle retained the LG display, HDMI output
+and active NMXAudio playback, internal audio devices, AppleBacklightDisplay,
+Wi-Fi and Bluetooth. The user then confirmed the complete setup stable. This
+does not establish cold-boot permutations, overnight standby, hibernation or
+compatibility with another S540 revision.
 
 ## Passive fan-telemetry check — 24 October 2026
 
@@ -181,7 +208,13 @@ The strict 16-field `RmServices` kernel result and separate userspace `firmware_
 
 The v9 [verified build record](../../README.md#documentation-and-downloads) records source `c477895c45507139ec9ea8e7536d70d49088f333`, 485 passed native aggregate checks (258 CPU, 131 preparation and 96 services), the audited kernel import/link/signature checks and the verified 347-file archive. CI did not load the extension. The separate actual kernel result is 486 checks; the additional check over the 485 native aggregate is the kernel provider-arbitration check.
 
-## Deferred brightness regression after the v9 checkpoint
+## Resolved experimental brightness regression
 
-Brightness works normally when booting the non-NVIDIA EFI. The NVIDIA-test EFI has unavailable adjustment and a disabled system slider. In that configuration, Intel UHD 620 (`3EA5`) still exposes Metal 3 and the internal Full HD main display is online. Lilu 1.7.2, WhateverGreen 1.7.1 and BrightnessKeys 1.0.3 are loaded, `-igfxblr` is present and AppleBacklightDisplay is active. This establishes a difference between EFI configurations; the responsible setting or probe behavior has not been isolated. The working non-NVIDIA EFI is retained. Investigation is deferred by request, with no additional tests, packages or patches.
+Brightness continues to work in the official non-NVIDIA EFI. In the NullMoth
+HDMI A/B sequence, adjustment disappeared when `applbkl=1` was omitted even
+though Intel UHD 620, BrightnessKeys and AppleBacklightDisplay remained active.
+Restoring `applbkl=1` restored the slider and direct F11/F12 controls while the
+NVIDIA HDMI output remained active. The user confirmed both controls after
+restart. This resolution belongs to the experimental profile and does not
+modify the released v0.3.0 EFI.
 

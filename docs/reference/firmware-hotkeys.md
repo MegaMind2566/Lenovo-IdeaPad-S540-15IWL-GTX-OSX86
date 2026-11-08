@@ -6,13 +6,13 @@ The DSDT and twelve SSDTs were recovered from the previously supplied hardware b
 
 ## Current verification boundary
 
-Hotkey status updated **October 24, 2026**. The icon assignments remain those documented in the [function-key guide](../guides/function-keys.md); no new physical-key mapping is inferred from the firmware objects below.
+Hotkey status updated **November 8, 2026**. The icon assignments remain those documented in the [function-key guide](../guides/function-keys.md); no new physical-key mapping is inferred from the firmware objects below.
 
 | Input or action | Established result | Remaining boundary |
 |---|---|---|
 | Direct F1–F3 audio controls | Reconfirmed working on the official EFI | No repeat audio-key diagnostic required |
 | Direct F6 touchpad toggle | Earlier working user confirmation retained as history | Included in the user's current open F4–F10 completion scope; no new F6 test requested in this update |
-| Slider and direct F11/F12 brightness | Working on the official non-NVIDIA EFI | The separate NVIDIA-test regression is deferred |
+| Slider and direct F11/F12 brightness | Working on the official EFI and the final NullMoth HDMI profile | The experimental regression was resolved by restoring `applbkl=1` |
 | Ordinary Fn+F1–F12 | Expected press/release identities recorded | Application behavior after refreshing the four disabled macOS shortcut bindings remains to be confirmed |
 | F4, F7 and F9 | Microphone mute, Wi-Fi/Bluetooth control and screen lock user-confirmed working with S540 Tasti | Preserve the confirmed actions; no repeat diagnostic requested |
 | F8 camera disablement | NOT WORKING: firmware event and camera-state flag change are confirmed, but video continues after reopening Photo Booth | Further work paused by user request; no additional F8 tests or builds planned |

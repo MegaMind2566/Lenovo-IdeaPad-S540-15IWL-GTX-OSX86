@@ -7,6 +7,7 @@ checks run in GitHub. Builders and regression checks are kept separately.
 
 | Package | Purpose | Guide |
 | --- | --- | --- |
+| [nullmoth-s540](nullmoth-s540) | Target-specific NullMoth 2.7.2 execution receipts and guarded tools: Metal execution, NVIDIA-routed HDMI video/audio, restored Intel-panel brightness and one controlled sleep/wake cycle are confirmed on the source laptop. The official EFI and third-party payload remain separate. | [NullMoth S540](nullmoth-s540/README.md) |
 | [nvidia-global-rm](nvidia-global-rm) | Development: isolated complete original global RM, tracked host allocation and explicit platform facts; allocation-failure and operational callback closure remain gates. | [Global RM](nvidia-global-rm/README.md) |
 | [nvidia-darwin-services](nvidia-darwin-services) | Development: real Darwin synchronization, queues, timers, clocks, process and credential services for the complete RM profile. | [Darwin services](nvidia-darwin-services/README.md) |
 | [nvidia-device-transport](nvidia-device-transport) | Development: retained PCI, bounded MMIO, device-DMA ownership and real interrupt callback contracts. Physical adapter execution remains unconfirmed. | [Device transport](nvidia-device-transport/README.md) |

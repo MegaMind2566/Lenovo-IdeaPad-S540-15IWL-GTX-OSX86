@@ -222,7 +222,7 @@ This is a reproducible dependency inventory, not a Darwin profile, Mach-O kernel
 
 NVK supports the GTX 16xx generation in its documented Linux stack and requires Linux 6.6 or newer. Its Vulkan implementation cannot be treated as a plug-in for the NVIDIA resource manager or as a Metal implementation. The Nouveau and NVIDIA application interfaces require separate assessment before choosing a common path.
 
-Electrical power-off remains deferred until after the driver-port attempt, as requested. The optional `_OFF` SSDT stays disabled. HDMI and USB-C video work remain paused; this assessment does not resolve their physical GPU routing.
+Electrical power-off remains deferred until after the driver-port attempt, as requested. The optional `_OFF` SSDT stays disabled. This source-port assessment did not resolve video routing; the later, separate NullMoth target profile established that HDMI is NVIDIA-routed and made it functional. USB-C video remains a native hardware limitation. The third-party runtime result does not complete this repository's RM/GSP port.
 
 ## Primary sources
 

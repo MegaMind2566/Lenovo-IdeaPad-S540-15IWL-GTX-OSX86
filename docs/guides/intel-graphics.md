@@ -27,11 +27,12 @@ Tahoe and OpenCore now boot independently from the external Samsung 960 EVO afte
 
 Preserve a private copy of the exact current Samsung EFI before any future graphics change. Identify its live partition and mount point rather than assuming a permanent disk number or using the earlier public release. The archive includes machine-specific identity and configuration; keep it outside the repository.
 
-## HDMI investigation: October 14, 2026
+## Historical HDMI investigation: October 14, 2026
 
-External-display investigation is paused by request. The observations and next routing check below are retained for when this work resumes; no graphics or ACPI changes are scheduled for this stage.
+The observations below predate the successful NullMoth profile and are retained
+to explain why Intel connector patches were not applied.
 
-HDMI produces no image in the current configuration. The display report supplied after connecting the monitor was collected with:
+At the time, HDMI produced no image in the non-NVIDIA configuration. The display report supplied after connecting the monitor was collected with:
 
 ```bash
 system_profiler SPDisplaysDataType
@@ -43,7 +44,25 @@ The supplied private EFI uses the working Whiskey Lake identity and memory prope
 
 Lenovo's exact GTX model specification confirms HDMI 2.0 output capability but does not publish the GPU wiring. When this investigation resumes, check Windows with the same monitor, cable and selected HDMI input: open **Settings → System → Display → Advanced display**, select the external monitor and record its **Connected to** GPU. If the external display is absent there too, record that result rather than assigning the port to Intel or NVIDIA. The NVIDIA Control Panel's display-connection diagram is another source of routing evidence.
 
-Inspecting enumeration and routing precedes any bus-ID, connector-type, pipe or graphics-policy change. The working Intel configuration and disabled optional NVIDIA power-off SSDT are retained.
+Inspecting enumeration and routing preceded any bus-ID, connector-type, pipe or graphics-policy change. The working Intel configuration and disabled optional NVIDIA power-off SSDT were retained.
+
+## NVIDIA-routed HDMI result: November 8, 2026
+
+The experimental [NullMoth S540 profile](../../packages/nullmoth-s540/README.md)
+established that the physical HDMI output is served by the NVIDIA controller.
+NVRMFB was already loaded, but the earlier configuration was headless because
+`nvfb=1` was absent. Adding `nvfb=1 nvfbheads=4 -nvkmsnosmooth` produced a
+working LG TV at 1920×1080 60 Hz. No Intel framebuffer connector remap was
+needed.
+
+The internal panel remains on Intel UHD 620. Retaining `applbkl=1` restores its
+brightness slider and direct F11/F12 controls alongside active HDMI. HDMI audio
+uses an exact `10DE:10FA` NMXAudio match in the Auxiliary Kernel Collection;
+VoodooHDA continues to serve internal audio. One controlled 54-second sleep/wake
+cycle recovered both displays, HDMI audio and the backlight service.
+
+This result belongs to the experimental profile. The official v0.3.0 EFI still
+disables NVIDIA and therefore does not gain this HDMI path.
 
 ## USB-C video capability
 
@@ -51,10 +70,10 @@ No USB-C video test is currently available. The exact GTX model specification li
 
 ## Remaining checks
 
-1. Repeatable restart and shutdown with this same EFI, noting any panel delays.
-2. Desktop use and a Metal workload without freezes or artifacts.
-3. Panel recovery after sleep remains deferred. The brightness slider and direct F11/F12 work; remaining icon keys are tracked in the [roadmap](../status/roadmap.md#deferred-function-key-work).
-4. Video decoding and external displays as separate checks.
+1. True cold boots with and without HDMI attached remain separate coverage.
+2. Overnight standby, hibernation and calibrated sleep drain remain unverified.
+3. F10 display-mode behavior is still separate from working HDMI output.
+4. Video decoding remains a separate check.
 
 The first powermetrics sample, lasting about one second, reported a CPU temperature of 50 °C. Two subsequent idle samples, each lasting five seconds, report 45–46 °C, estimated Intel package power of 0.80–0.95 W, and a system average frequency of about 0.95–0.97 GHz. IORegistry confirms that X86PlatformPlugin is active. Package power includes the CPU, iGPU, and system agent, excluding NVIDIA. Fan RPM is unavailable, but a later report stated that the fan had been quiet for some time. Temperature under load and dGPU power consumption remain to be checked. `2Slices on: 100%` describes time spent in the state with two active slices; 100% at 300 MHz is a frequency ratio. Neither value demonstrates 100% GPU utilization.
 
