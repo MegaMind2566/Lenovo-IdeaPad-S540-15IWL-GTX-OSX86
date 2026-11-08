@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "release": {
+    "tag": "v0.4.0-nvidia-experimental.1",
+    "title": "v0.4.0 NVIDIA experimental — NullMoth 2.7.2 for Lenovo S540",
+    "package_name": "S540-NVIDIA-release-kit-v0.4.0-nvidia-experimental.1.zip",
+    "package_prefix": "S540-NVIDIA-release-kit-v0.4.0-nvidia-experimental.1",
+    "tested_macos_version": "26.7.1",
+    "tested_macos_build": "25G241",
+    "opencore_version": "1.0.8",
+    "nullmoth_version": "2.7.2"
+  },
+  "sources": {
+    "stable_efi": {
+      "url": "https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/download/v0.3.0/S540-Tahoe-EFI-v0.3.0.zip",
+      "filename": "S540-Tahoe-EFI-v0.3.0.zip",
+      "size": 47092619,
+      "sha256": "f5a9ad08cfa72e14569bc1040728c7480f7966a58a1adb9bf1e4ff84e303e46d",
+      "efi_root": "EFI"
+    },
+    "opencore": {
+      "url": "https://github.com/acidanthera/OpenCorePkg/releases/download/1.0.8/OpenCore-1.0.8-RELEASE.zip",
+      "filename": "OpenCore-1.0.8-RELEASE.zip",
+      "size": 10544084,
+      "sha256": "2011e8b7216ecb2645d97ea710df965947edd406846e92050b9bc4190be6d27b",
+      "bootx64": "X64/EFI/BOOT/BOOTx64.efi",
+      "opencore_efi": "X64/EFI/OC/OpenCore.efi",
+      "openruntime_efi": "X64/EFI/OC/Drivers/OpenRuntime.efi",
+      "ocvalidate": "Utilities/ocvalidate/ocvalidate"
+    },
+    "amfipass": {
+      "url": "https://github.com/bluppus20/AMFIPass/releases/download/1.4.1/AMFIPass-v1.4.1-RELEASE.zip",
+      "filename": "AMFIPass-v1.4.1-RELEASE.zip",
+      "size": 191154,
+      "sha256": "07b266145906db41f4b13a7938fbb173ea28888cc1fa65f84417f8820adc961e",
+      "bundle_root": "AMFIPass.kext"
+    },
+    "nullmoth_1401": {
+      "url": "https://github.com/nullmoth/nvidia-macos-driver/releases/download/v2.7.2/1401-Mac-2.7.2.zip",
+      "filename": "1401-Mac-2.7.2.zip",
+      "size": 2635537,
+      "sha256": "008e8bdb88920a17211f07c45b0df2601bdde2d9a41af3ebe393944b74947dfd",
+      "signature_url": "https://github.com/nullmoth/nvidia-macos-driver/releases/download/v2.7.2/1401-Mac-2.7.2.zip.sig",
+      "signature_filename": "1401-Mac-2.7.2.zip.sig",
+      "signature_size": 89,
+      "signature_sha256": "aa1cc71060113fddb3bba9985f5c2ed98e1768c2059d7ae0657ceb1f32142156",
+      "safe_tool": "1401.app/Contents/Resources/NullMothSafe.efi"
+    },
+    "nullmoth_driver": {
+      "url": "https://github.com/nullmoth/nvidia-macos-driver/releases/download/v2.7.2/nullmoth-nvidia-2.7.2.tar.gz",
+      "filename": "nullmoth-nvidia-2.7.2.tar.gz",
+      "size": 264616298,
+      "sha256": "928557fece27637b1184f5655833566e7d516b22708cc341b28d555055d8e50e",
+      "signature_url": "https://github.com/nullmoth/nvidia-macos-driver/releases/download/v2.7.2/nullmoth-nvidia-2.7.2.tar.gz.sig",
+      "signature_filename": "nullmoth-nvidia-2.7.2.tar.gz.sig",
+      "signature_size": 89,
+      "signature_sha256": "378e8d966777538ddb300bf65dea9fec23cfcc704c3843913ca9779a6630ac0f",
+      "package_root": "pkgroot"
+    }
+  },
+  "profile": {
+    "config_path": "profile/config.plist",
+    "config_sha256": "21ed23ba60cdd1be91f2ba224e77156ff8758e104117c87f6019ba7030a51e53",
+    "efi_manifest_path": "profile/efi-manifest.json",
+    "efi_manifest_sha256": "6fd9c2a5fcec6cf14b498245de823f0e85748cd7b19d926b9643909df775856f",
+    "sensors_path": "profile/S540Sensors.kext",
+    "sensors": {
+      "version": "1.0.0",
+      "info_sha256": "d092d52684ea384d15ff33ad8b7cce5fe52ae08e726f32ca036f3003e6421711",
+      "executable_sha256": "749c18c5cd1a29914b6536f67a599af840574677fa4865d5865c9282b33f0238",
+      "code_resources_sha256": "6686de10a28a2fe11b36cbb86dcbacc827cfc4ea116b4dabf1845e5aee629e9b"
+    },
+    "system_product_name": "MacBookPro16,2",
+    "boot_args": "-ibtcompatbeta revpatch=sbvmm,cpuname alcid=11 voodoo-layout-id=11 -igfxblr nvfb=1 nvaccel=1 nvfbheads=4 -nvkmsnosmooth amfi_get_out_of_my_way=0x1 amfi=0x80 ipc_control_port_options=0 nvrmsettle=10000 gfxrst=4 applbkl=1",
+    "scan_policy": 769,
+    "secure_boot_model": "Disabled",
+    "csr_active_config": "430a0000",
+    "active_acpi_tables": [
+      "SSDT-PLUG.aml",
+      "SSDT-EC-USBX.aml",
+      "SSDT-PNLF.aml",
+      "SSDT-RTC-ENABLE.aml",
+      "SSDT-XOSI.aml"
+    ],
+    "active_kernel_bundles": [
+      "Lilu.kext",
+      "VirtualSMC.kext",
+      "SMCProcessor.kext",
+      "SMCBatteryManager.kext",
+      "WhateverGreen.kext",
+      "RestrictEvents.kext",
+      "USBToolBox.kext",
+      "UTBMap.kext",
+      "VoodooI2C.kext/Contents/PlugIns/VoodooInput.kext",
+      "VoodooI2C.kext/Contents/PlugIns/VoodooI2CServices.kext",
+      "VoodooI2C.kext/Contents/PlugIns/VoodooGPIO.kext",
+      "VoodooI2C.kext",
+      "VoodooI2CHID.kext",
+      "VoodooPS2Controller.kext",
+      "VoodooPS2Controller.kext/Contents/PlugIns/VoodooPS2Keyboard.kext",
+      "IntelBluetoothFirmware.kext",
+      "BlueToolFixup.kext",
+      "BrightnessKeys.kext",
+      "AirportItlwm.kext",
+      "BigSurSDXC.kext",
+      "AMFIPass.kext",
+      "S540Sensors.kext"
+    ],
+    "nullmoth_patch": {
+      "nmxaudio_info_before_sha256": "91a524037ffeb43f7bf78c2b1d9c627d511c51f99e9019d7b7d668642d3c11af",
+      "nmxaudio_info_after_sha256": "ebff8ac2ea5b57f7d6ccbb764f56025213a22a4156df8dd3b8c9c9e64f126d4a",
+      "nmxaudio_executable_sha256": "77e19e244978ce64e4505c4701069edfe609379f91a9c76313b4a27ded4ab07a",
+      "nvrm_info_before_sha256": "b360e829f81ffa6f16952dc5b918bc04d394355a5dbe13fb8ff84978c1c515e8",
+      "nvrm_info_after_sha256": "0c3a082ee9dfbda926afa68de423cb478fb11a455a0e2e2c4dbfafb525016b25",
+      "nvrm_executable_sha256": "4aeb8a5ed67ecfc593ae95474de1a67fda1ea6afc6b741de0fdbfb64583577d9",
+      "nvrm_installed_executable_sha256": "a434d9c4df143044759b33abba8d012ef9fb499146cd7b63eadaacc5969c8db8",
+      "nvaccel_info_before_sha256": "70132cf57884caa4f161db9b40562102195a4bfc098c61a396f2d2058a0387c2",
+      "nvaccel_info_after_sha256": "aec627709eaf31c97d5f7f0d882fdcb0ca7987a5c2e8928e2f1b25ea4c1b815c",
+      "nvaccel_executable_sha256": "ace70c80c7007ddfed6b9518e77e6b618ec15d7d2aa70e81e065ec8ac9ca17ce",
+      "nvaccel26_executable_sha256": "ba056eb32d9a0aa9aad736da79ace069f2bdd826153c4275e7d0bd6f08c99b21",
+      "nvaccel_prepared_executable_sha256": "60c011d938eb58846ffa2081ed730b01f252a2dee292f8ef53f69fc333341940",
+      "nvaccel_installed_executable_sha256": "2293360ee50d917e1056f070bb7a6979adffb4dab3105d6a9b33c92b22219685",
+      "nvaccel15_installed_executable_sha256": "60c011d938eb58846ffa2081ed730b01f252a2dee292f8ef53f69fc333341940",
+      "nvaccel26_installed_executable_sha256": "2293360ee50d917e1056f070bb7a6979adffb4dab3105d6a9b33c92b22219685"
+    }
+  },
+  "device": {
+    "machine_type": "Lenovo IdeaPad S540-15IWL GTX",
+    "model": "81SW",
+    "nvidia_compatible": "pci10de,1f91",
+    "nvidia_subsystem_compatible": "pci17aa,3806",
+    "nvidia_primary_match": "0x1f9110de",
+    "nmx_audio_primary_match": "0x10fa10de",
+    "nmx_audio_class_match": "0x04030000&0xffff0000"
+  }
+}

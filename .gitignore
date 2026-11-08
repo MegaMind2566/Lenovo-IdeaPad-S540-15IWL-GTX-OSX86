@@ -8,3 +8,9 @@ errore-avvio.txt
 EFI/
 __pycache__/
 build/
+.DS_Store
+_backups/
+_candidates/
+_captures/
+_diagnostics/
+_external/

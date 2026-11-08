@@ -1,104 +1,201 @@
 # Lenovo IdeaPad S540-15IWL GTX — macOS Tahoe
 
-An OpenCore project for **macOS Tahoe 26** on the **Lenovo IdeaPad S540-15IWL GTX (81SW)**. The current official configuration runs macOS and Windows on the internal Samsung NVMe, uses **Intel UHD 620**, and keeps **NVIDIA disabled**.
+OpenCore project for **macOS Tahoe 26** on the **Lenovo IdeaPad S540-15IWL
+GTX (81SW)**. The repository now maintains two deliberately separate profiles:
+the stable Intel configuration and a machine-specific experimental NVIDIA
+configuration.
 
-**Official EFI status: Stable — known limitations ([v0.3.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.3.0)).** The classification covers the tested Lenovo IdeaPad S540-15IWL GTX (81SW) running macOS Tahoe **26.7.1 (25G241)** with Intel UHD 620 and NVIDIA disabled. It applies to the confirmed functions and tested sleep/wake cycles; prolonged standby and hibernation remain unverified and deferred. Future macOS updates require validation.
+## Release profiles
 
-**Project status: in development — 8 November 2026.** The hardware table records the working functions, accepted limitations and deferred checks. NVIDIA research continues separately from the official non-NVIDIA release; the source laptop's experimental NullMoth 2.7.2 profile now has verified Metal execution, HDMI video/audio, brightness control and one controlled sleep/wake cycle.
+| Profile | Status | Graphics path | Tested system | Intended use |
+|---|---|---|---|---|
+| [v0.3.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.3.0) | **Stable baseline** | Intel UHD 620; NVIDIA disabled | macOS 26.7.1, build 25G241 | Daily use and known-good recovery path |
+| [v0.4.0-nvidia-experimental.1](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.4.0-nvidia-experimental.1) | **Experimental prerelease** | Intel UHD 620 plus GTX 1650 Max-Q through NullMoth 2.7.2 | macOS 26.7.1, build 25G241, on the source 81SW only | NVIDIA Metal, HDMI video/audio and target-specific testing |
 
-## Hardware
+The experimental prerelease does **not** contain a redistributable NullMoth
+installation, upstream Apple driver binaries, a generated Auxiliary Kernel
+Collection or the laptop's private SMBIOS identity. Its project-built
+S540Sensors binary does include the disclosed MacKernelSDK `libkmod` Covered
+Code; the kit carries its APSL 2.0 source notice and all Lilu/VirtualSMC BSD
+notices. The kit downloads the remaining exact upstream inputs, verifies their
+pinned hashes and NullMoth signatures, then assembles and patches the
+machine-specific files locally on the user's Mac. Keep v0.3.0 available as the
+independent recovery profile.
+
+macOS **26.7.2 (25G332) has not been tested** with either the NullMoth,
+NMXAudio or VoodooHDA path. It changes subsystems used by this setup, including
+Kernel, IOKit, IOGPUFamily/GPU drivers and audio. Do not present 25G332 as a
+supported build until it has passed a fresh read-only audit, Kernel Collection
+inspection and functional qualification.
+
+## Tested hardware
 
 | Component | Model |
 |---|---|
 | Laptop | Lenovo IdeaPad S540-15IWL GTX, **81SW** |
 | CPU / memory | Intel Core i7-8565U / 12 GB DDR4-2400 |
-| Graphics | Intel UHD 620 / NVIDIA GTX 1650 Max-Q 4 GB |
-| Display | BOE NV156FHM-N61, 1920×1080 |
-| Audio | Realtek ALC257 |
+| Graphics | Intel UHD 620 / NVIDIA GTX 1650 Max-Q TU117, 4 GB |
+| Internal display | BOE NV156FHM-N61, 1920×1080 |
+| Audio | Realtek ALC257; NVIDIA HDA `10DE:10FA` for HDMI |
 | Wireless | Intel AC9560 Wi-Fi and Intel Bluetooth |
 | Touchpad | ELAN0662 I2C |
 | SD reader | O2Micro PCI `1217:8621`, subsystem `17AA:3803` |
 | Fingerprint reader | Goodix USB `27c6:55b4` |
 | Internal storage | Samsung PM981a 512 GB; Windows and macOS APFS coexist |
 
-## Working, not working and unverified hardware
+“Working” below means observed on this source laptop within the stated scope. It
+does not certify another hardware revision, every peripheral or every
+long-duration workload.
 
-“Working” refers to the observations stated below on the source laptop. It does not certify other hardware revisions, every card/peripheral or all long-duration workloads.
-
-| Feature | Status | Confirmed scope / limitation |
+| Feature | Status | Confirmed scope / boundary |
 |---|---|---|
-| Internal macOS boot and desktop | Working | OpenCore/macOS boot from the internal NVMe; Windows retains its separate native boot path |
-| Intel graphics and internal display | Working | UHD 620 acceleration, Full HD panel and corrected startup black-screen delay |
-| Brightness slider and F11/F12 | Working | Confirmed with the official non-NVIDIA EFI and reconfirmed with the experimental NullMoth HDMI profile after restoring `applbkl=1` |
-| Native-menu Wi-Fi | Working | Intel AC9560 with the tested AirportItlwm 2.4.0 variant; network selection and recovery after restart/sleep confirmed |
-| Speakers and internal microphone | Working | Separately installed VoodooHDA 3.6.10; playback and recording also confirmed after wake and Bluetooth-headset disconnection |
-| 3.5 mm headset output/input | Working | Playback, headset microphone and speaker/headphone switching confirmed |
-| Bluetooth headset audio/input | Working | Playback and microphone confirmed, including after reconnection following sleep/wake; automatic reconnection was not separately established |
-| Webcam video | Working | Video recording confirmed |
-| Touchpad and gestures | Working | ELAN0662 I2C operation and gestures confirmed |
-| F1–F3 audio controls | Working | Speaker mute and volume controls |
-| F4, F7 and F9 actions | Working with companion | S540 Tasti provides microphone input-level mute/restore, Wi-Fi/Bluetooth control and screen lock; these are separately installed macOS components |
-| F5 browser reload | User-confirmed | Browser reload was accepted by the user; direct/Fn event distinction and a general remapping are separate questions |
-| F6 touchpad toggle | **Working — user-confirmed** | Touchpad enable/disable reconfirmed on 27 October; no further F6 test is pending |
-| F8 camera disablement | **Not working — paused** | The firmware flag changes but video capture continues; further F8 work is paused by request |
-| F10 external-display action | **Pending** | HDMI output now works in the experimental NullMoth profile; the physical F10 display-mode action itself has not been separately confirmed |
-| CPU power management | Working | X86PlatformPlugin active; frequency and estimated package-power responses observed |
-| Battery Low Power Mode | CPU response verified | About 11.4 W estimated package power with the mode on versus 34.4–36.5 W off in the retained short CPU-load comparison; not a measured autonomy result |
-| Battery reporting | Working | Battery operation and discharge confirmed; the user attributes modest runtime to an aged battery |
-| Lid sleep/wake and idle sleep | Working in tested cycles | Official-profile cycles resumed; the experimental HDMI/audio profile also passed one scheduled 54-second sleep/wake with display, audio, brightness, Wi-Fi and Bluetooth recovery. Overnight standby and hibernation remain unverified |
-| USB-A / USB-C storage | Working | Tested connectors negotiated 5 Gb/s; USB-C tested in both orientations and file access confirmed |
-| Internal NVMe | Working | 512 GB detected, SMART verified and TRIM reported active |
-| **SD reader** | **Working on the source laptop** | User-confirmed from the updated internal non-NVIDIA EFI using the previous direct-match BigSurSDXC driver and the known 8 GB FAT32 card; insertion during an active session, mounting/unmounting and availability after sleep confirmed; writes, throughput and other card classes not newly validated |
-| Fingerprint authentication | **Not working — work stopped** | Goodix enumerates on USB, but macOS fingerprint authentication is unavailable; investigation stopped by request |
-| NVIDIA acceleration | **Unavailable in v0.3.0; working experimentally on the source laptop** | The release keeps `-wegnoegpu`. A separate NullMoth 2.7.2 profile verified NVIDIA Metal compute, offscreen rendering, Full HD rendering and cross-GPU presentation; it is not included in the release |
-| HDMI | **Working in the experimental NullMoth profile** | LG TV confirmed at 1920×1080 60 Hz with NVIDIA display audio. The official v0.3.0 Intel profile remains unchanged and does not provide this output |
-| USB-C video | **Not supported natively by the laptop** | Native video output through the built-in USB-C port is unavailable; USB data transfer works. This is a hardware limitation |
-| Fans | **Working — user-confirmed** | RPM telemetry is unavailable in the current macOS configuration; investigation is closed for this release and no fan-control change is included |
+| Internal macOS boot / Windows dual boot | **Working** | OpenCore boots macOS from the internal NVMe; Windows keeps its native rEFInd route |
+| Intel graphics / internal display | **Working** | UHD 620 acceleration, Full HD panel and corrected startup backlight |
+| NVIDIA acceleration | **Experimental, working on the source laptop** | NullMoth 2.7.2 exposes the GTX 1650 Max-Q as TU117 4 GB with Metal 3; verified compute, offscreen and Full HD rendering, 159/159 cross-GPU presentation frames, Core Image and a 72-second sustained compute run with 629,145,600 checked values |
+| Internal brightness | **Working in both profiles** | macOS slider and F11/F12; the experimental profile requires retained `applbkl=1` |
+| HDMI video | **Working in the experimental profile** | NVIDIA-routed output confirmed on an LG TV at 1920×1080 60 Hz; the v0.3.0 Intel profile does not provide it |
+| HDMI audio | **Working in the experimental profile** | NMXAudio 1.0.0, restricted to NVIDIA HDA `10DE:10FA`, exposes 8-channel HDMI/DP audio at 48 kHz; heard and user-confirmed |
+| Wi-Fi | **Working** | Intel AC9560 with AirportItlwm 2.4.0; native menu, restart and post-wake recovery confirmed |
+| Bluetooth headset | **Working** | Playback and microphone confirmed, including after post-wake reconnection; automatic reconnection was not separately established |
+| Speakers / internal microphone | **Working** | VoodooHDA 3.6.10 installed separately in macOS; playback and recording also confirmed after wake and Bluetooth disconnection |
+| 3.5 mm headset | **Working** | Output, headset microphone and speaker/headphone switching confirmed |
+| Webcam | **Working** | Video recording confirmed; F8 privacy switching is a separate non-working function |
+| Touchpad / gestures | **Working** | ELAN0662 I2C operation, gestures and F6 enable/disable confirmed |
+| Function keys | **Mostly working** | F1–F3, F5, F6, F11/F12 confirmed; F4/F7/F9 require S540 Tasti 0.1.3; F8 does not disable the camera; F10 display-mode action remains unverified |
+| CPU power / battery reporting | **Working** | X86PlatformPlugin, reporting and discharge confirmed; Low Power Mode showed a CPU/package-power response, not a measured autonomy result |
+| Sleep / wake | **Working in tested cycles** | Lid/idle cycles passed; the NVIDIA profile passed one controlled 54-second cycle with HDMI, audio, brightness, Wi-Fi and Bluetooth recovery |
+| USB-A / USB-C data | **Working** | Tested at 5 Gb/s; USB-C data works in both orientations |
+| Internal NVMe | **Working** | 512 GB detected, SMART verified and TRIM active |
+| SD reader | **Working within the tested scope** | BigSurSDXC 1.9.0 with the known 8 GB FAT32 card; live insertion, mount/unmount and post-wake availability confirmed |
+| CPU temperature | **Working** | VirtualSMC/SMCProcessor 1.3.8 telemetry confirmed |
+| NVIDIA temperature | **Working in the experimental profile** | S540Sensors 1.0.0 publishes the genuine NVAccel temperature as SMC key `TG0D` |
+| Fans | **Physically working** | The fans react to load; macOS RPM telemetry is unavailable and the project does not publish fake RPM keys or perform fan-control writes |
 
-Detailed observations are in [Hardware](docs/status/hardware.md), [NullMoth S540](packages/nullmoth-s540/README.md), [Battery and sleep](docs/status/battery-sleep.md), [Function keys](docs/guides/function-keys.md), and [SD / fingerprint](docs/status/sd-fingerprint.md).
+Detailed evidence remains in [hardware status](docs/status/hardware.md), the
+[NullMoth S540 record](packages/nullmoth-s540/README.md), [battery and
+sleep](docs/status/battery-sleep.md), [function keys](docs/guides/function-keys.md)
+and [SD / fingerprint](docs/status/sd-fingerprint.md).
 
-## Official non-NVIDIA release
+## Tested software stack
 
-**[Download v0.3.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.3.0)** and read [INSTALL.md](docs/releases/v0.3.0/INSTALL.md) before copying files.
+| Component | Tested version / placement |
+|---|---|
+| macOS | 26.7.1, build 25G241 |
+| OpenCore | 1.0.8 RELEASE |
+| NullMoth | 2.7.2; locally downloaded and signature/hash verified |
+| NMXAudio | 1.0.0, exact `10DE:10FA` match in `/Library/Extensions` and the Auxiliary Kernel Collection; **not** injected from the EFI |
+| VoodooHDA | 3.6.10 S540 variant, separately installed in macOS |
+| S540Sensors | 1.0.0, NVIDIA `TG0D` temperature only |
+| AirportItlwm | 2.4.0 tested variant |
+| BigSurSDXC | 1.9.0, direct O2Micro match |
+| VirtualSMC stack | 1.3.8 |
+| S540 Tasti | 0.1.3, separately installed app/driver pair |
 
-- The public payload contains **`EFI/OC` only**, with the active Intel configuration, native Wi-Fi, USB map, brightness support and the working direct-match SD bundle.
-- The package does **not** contain `EFI/BOOT`, Microsoft boot files or a rEFInd executable. It is **not a drop-in USB boot image**. The supplied rEFInd configuration is an example for a separately installed loader.
-- Existing internal dual-boot users update only the backed-up `EFI/OC` directory and preserve their existing Microsoft, fallback boot and rEFInd files and firmware entries. Windows starts natively through rEFInd; `ScanPolicy=769` keeps its boot entry out of the OpenCore picker.
-- OpenCore uses the **1.0.8 RELEASE** build. NVIDIA remains disabled and no NVIDIA experiment is merged into the official configuration.
-- Public SMBIOS identity fields are placeholders. Preserve your existing private identity or personalize them locally; never publish serials, MLB, ROM or SystemUUID.
+## Install the stable Intel profile
 
-[Release notes](docs/releases/v0.3.0/RELEASE-NOTES.md) and [source provenance](docs/releases/v0.3.0/SOURCE-PROVENANCE.md) separate the tested laptop result, public packaging checks and remaining work. Older [v0.2.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.2.0) and [v0.1.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.1.0) assets remain historical snapshots.
+Use [v0.3.0](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/tag/v0.3.0)
+and follow its [installation guide](docs/releases/v0.3.0/INSTALL.md). It is the
+known-good recovery route and intentionally retains `-wegnoegpu`.
 
-## macOS companions are separate
+The v0.3.0 payload contains `EFI/OC`, not a complete EFI partition. Preserve
+the existing `EFI/Microsoft`, `EFI/BOOT`, rEFInd files and firmware entries.
+Public SMBIOS fields are placeholders and must be personalized locally.
 
-Copying the EFI does not install the complete audio or hotkey setup:
+## Install the experimental NVIDIA profile
 
-- **Audio:** retain the working VoodooHDA **3.6.10 S540** installation in `/Library/Extensions`. Fresh installations need the separate [audio package](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/download/v0.3.0/S540-audio-Tahoe-3.6.10-v1.zip) and its approval/restart steps. See the release assets and [audio](docs/guides/tahoe-audio.md), [microphone](docs/guides/microphone-fix.md), and [volume](docs/guides/volume-control.md) guides. AppleALC is not the active audio path.
-- **Hotkeys:** the S540 Tasti **0.1.3** app and its matching installed hotkey driver provide F4/F7/F9. Retain the working installation and the permissions it requires, or use the matching [S540-Tasti-v1.3.zip](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/download/v0.3.0/S540-Tasti-v1.3.zip) companion asset. The accepted F9 mapping also uses Command-L for locking; see [Function keys](docs/guides/function-keys.md). F8 remains non-working despite the camera itself working.
-- **Low Power Mode:** the tested battery setting is enabled, with AC unchanged at off. This is a macOS preference, not a setting installed by an EFI copy.
+Start with the [v0.4.0 NVIDIA installation
+guide](docs/releases/v0.4.0-nvidia-experimental.1/INSTALL.md), then read the
+[security boundary](docs/releases/v0.4.0-nvidia-experimental.1/SECURITY.md) and
+[rollback procedure](docs/releases/v0.4.0-nvidia-experimental.1/ROLLBACK.md)
+before changing the active system.
 
-## Development continues
+The release asset is an **assembler kit**, not a preassembled EFI or a NullMoth
+mirror. On the Mac it:
 
-This release preserves the usable Intel baseline while the repository continues to track separate research and limitations. The source laptop's separate [NullMoth profile](packages/nullmoth-s540/README.md) has now verified NVIDIA Metal execution, HDMI video/audio, brightness and a short sleep/wake cycle. It remains excluded from v0.3.0. The repository's independent source/native/target port checkpoints are documented in the [validation record](docs/status/nvidia-validation.md) and must not be conflated with the NullMoth result or merged into the official EFI.
+1. downloads the pinned v0.3.0/OpenCore/AMFIPass/NullMoth upstream inputs;
+2. verifies exact sizes, SHA-256 values and the signed NullMoth archives;
+3. builds a sanitized S540 NVIDIA EFI locally;
+4. prepares the exact GTX 1650 Max-Q and NVIDIA HDA matches locally; and
+5. leaves installation behind an explicit administrator confirmation.
 
-HDMI output is closed for the tested NullMoth profile; the F10 display-mode action is still unverified. F6 and the SD reader are user-confirmed working, with no further retests requested for this milestone. The stated SD card/coverage limits remain evidence boundaries, not pending tasks. A true cold boot with and without HDMI, overnight standby, hibernation and calibrated standby drain remain outside the current NullMoth evidence. Changing the displayed Mac model label is optional and is not a release requirement. Native USB-C video is a laptop hardware limitation, not an EFI issue. Fans are user-confirmed working; unavailable macOS RPM telemetry is an accepted limitation. F8 and fingerprint work remain paused/stopped as stated above. The [Roadmap](docs/status/roadmap.md) keeps these states distinct from the confirmed functions.
+The EFI alone does not install NullMoth, NMXAudio, VoodooHDA or S540 Tasti.
+Never publish the generated local EFI, installed driver tree, Kernel
+Collections or private SMBIOS values as a substitute release asset.
+
+## Security boundary of the experimental profile
+
+The NVIDIA profile is intentionally less secure than the stable baseline. It
+uses `SecureBootModel=Disabled`, reduced SIP (`csr-active-config=0x0A43`) and
+boot arguments that relax AMFI/task-port enforcement for the experimental
+driver path. This materially expands the attack surface. Use only trusted
+software, do not expose this configuration as a general recommendation and
+return to v0.3.0 when NVIDIA/HDMI is not needed.
+
+The public configuration contains no real serial, MLB, SystemUUID or ROM. Keep
+those values private and preserve the source laptop's known-good identity only
+in its local copy.
+
+## Structural limits that an EFI cannot fix
+
+Only these two items are currently classified as structural limits:
+
+- **Native USB-C video:** this laptop does not route DisplayPort Alt Mode lanes
+  to its USB-C connector. USB-C data works, but no OpenCore, ACPI or kext change
+  can create the missing physical display path. A DisplayLink adapter is a
+  separate USB graphics device, not native USB-C video.
+- **Native Touch ID:** the Goodix `27c6:55b4` sensor is not paired with an Apple
+  Secure Enclave and cannot become Apple's authenticated Touch ID through an
+  EFI or kext. A future userspace biometric experiment would not be native Touch
+  ID and could disturb the fingerprint enrollment used by Windows.
+
+Do not broaden “will never work” beyond those hardware/security boundaries.
+The following are **unavailable, paused or not yet qualified**, not proven
+impossible:
+
+- F8 camera privacy switching and the still-unverified F10 display action;
+- fan RPM telemetry (the physical fans work) and sustained-load cooling data;
+- overnight standby, hibernation and calibrated standby drain;
+- SD writes, throughput and additional card types/capacities;
+- AirDrop/Continuity and an actual wireless-display streaming session;
+- automatic Bluetooth headset reconnection and broader peripheral combinations.
+
+## Separate macOS companions
+
+Copying either EFI does not install the complete audio or hotkey setup:
+
+- **Internal audio:** retain or install the [VoodooHDA 3.6.10 S540
+  package](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/download/v0.3.0/S540-audio-Tahoe-3.6.10-v1.zip).
+  AppleALC is not the active audio path.
+- **Hotkeys:** retain or install [S540 Tasti
+  0.1.3](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/releases/download/v0.3.0/S540-Tasti-v1.3.zip)
+  for F4/F7/F9 and grant its documented macOS permissions.
+- **HDMI audio:** the experimental local installer places the exact-match
+  NMXAudio bundle in `/Library/Extensions` and rebuilds the Auxiliary Kernel
+  Collection. It must not be duplicated in `EFI/OC/Kexts`.
 
 ## Documentation and source layout
 
-- [Documentation index](docs/README.md)
-- [Release v0.3.0 installation](docs/releases/v0.3.0/INSTALL.md), [release notes](docs/releases/v0.3.0/RELEASE-NOTES.md), [provenance](docs/releases/v0.3.0/SOURCE-PROVENANCE.md)
-- [Hardware status](docs/status/hardware.md) and [roadmap](docs/status/roadmap.md)
-- [Generated build artifacts](https://github.com/MegaMind2566/Lenovo-IdeaPad-S540-15IWL-GTX-OSX86/actions)
+- [v0.4.0 NVIDIA release notes](docs/releases/v0.4.0-nvidia-experimental.1/RELEASE-NOTES.md),
+  [installation](docs/releases/v0.4.0-nvidia-experimental.1/INSTALL.md),
+  [provenance](docs/releases/v0.4.0-nvidia-experimental.1/SOURCE-PROVENANCE.md),
+  [security](docs/releases/v0.4.0-nvidia-experimental.1/SECURITY.md) and
+  [rollback](docs/releases/v0.4.0-nvidia-experimental.1/ROLLBACK.md)
+- [v0.3.0 installation](docs/releases/v0.3.0/INSTALL.md), [release
+  notes](docs/releases/v0.3.0/RELEASE-NOTES.md) and [source
+  provenance](docs/releases/v0.3.0/SOURCE-PROVENANCE.md)
+- [Documentation index](docs/README.md), [hardware status](docs/status/hardware.md)
+  and [roadmap](docs/status/roadmap.md)
 
-**Code → Download ZIP downloads repository sources, not the assembled EFI or macOS installer.**
+**Code → Download ZIP downloads repository sources, not an assembled EFI or a
+macOS installer.**
 
 | Path | Purpose |
 |---|---|
 | [packages/](packages/) | Feature sources, launchers and runtime components |
-| [builders/](builders/) | Reproducible package assembly |
+| [builders/](builders/) | Reproducible release-kit assembly |
 | [tests/](tests/) | Validation and fixtures |
 | [config/](config/) | ACPI, versioned EFI profiles, asset locks and USB mapping |
-| [docs/](docs/README.md) | Setup, status, recovery, research and roadmap |
+| [docs/](docs/README.md) | Setup, evidence, recovery, research and roadmap |
 | [patches/](patches/) / [licenses/](licenses/) | Driver patches and dependency notices |
 | [.github/workflows/](.github/workflows/) | Build, validation and publication workflows |
 | [archive/](archive/README.md) | Superseded procedures and history |

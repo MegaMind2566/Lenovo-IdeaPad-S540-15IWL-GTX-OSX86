@@ -1,0 +1,39 @@
+S540Sensors third-party notices
+================================
+
+Apple Covered Code / MacKernelSDK
+---------------------------------
+
+S540Sensors statically links the c_start and c_stop kernel-module runtime from
+MacKernelSDK commit 3f750085caa17ec3a7880f11c11bf4f48cd6a164. This is Apple
+Covered Code. Its Source Code is available under the Apple Public Source
+License 2.0 at:
+
+Copyright (c) 2000 Apple Computer, Inc. All rights reserved.
+
+https://github.com/acidanthera/MacKernelSDK/tree/3f750085caa17ec3a7880f11c11bf4f48cd6a164/Library/kmod
+
+Exact source files:
+
+- c_start.c: https://github.com/acidanthera/MacKernelSDK/blob/3f750085caa17ec3a7880f11c11bf4f48cd6a164/Library/kmod/c_start.c
+  SHA-256: 2dffd2880dbe7f37df5d5cd6fb0573a603e462ef759105caf959b2cb1406fe96
+- c_stop.c: https://github.com/acidanthera/MacKernelSDK/blob/3f750085caa17ec3a7880f11c11bf4f48cd6a164/Library/kmod/c_stop.c
+  SHA-256: 061a10dba798abc95bf5438ca302d9fbf3a996c262f9d0cbe9eadc420472ba83
+
+The exact linked libkmod.a has SHA-256
+7a751671bbe96c9c7b5416078df600b768c00c0dc5178d8acd8f52539c7ccd4e.
+The complete APSL 2.0 text is distributed as MacKernelSDK-APSL-2.0.txt.
+
+Lilu headers
+------------
+
+S540Sensors compiles against Lilu header-only utilities from commit
+e4748cc081bf060302c7d3c44a643ce1d11b7e1d. The BSD 3-Clause license is
+distributed as Lilu-BSD-3-Clause.txt.
+
+VirtualSMC SDK headers
+----------------------
+
+S540Sensors compiles against VirtualSMCSDK headers from commit
+b15991dd87e36a102bf159ea56490e3126245590. The BSD 3-Clause license is
+distributed as VirtualSMC-BSD-3-Clause.txt.
